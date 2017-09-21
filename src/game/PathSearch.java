@@ -1,3 +1,4 @@
+package game;
 
 
 import util.*;
@@ -33,6 +34,7 @@ public class PathSearch extends Search <Tile> {
   
   
   public static float distance(Tile a, Tile b) {
+    if (a == null || b == null) return 1000000000;
     float dist = Nums.max(Nums.abs(a.x - b.x), Nums.abs(a.y - b.y));
     if (a.x != b.x && a.y != b.y) dist += 0.25f;
     return dist;

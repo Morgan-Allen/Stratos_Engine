@@ -1,3 +1,4 @@
+package game;
 
 
 import util.*;
@@ -7,11 +8,16 @@ import util.*;
 
 public class City {
   
+  
+  /**  Data fields and initialisation-
+    */
   int size;
   Tile grid[][];
   
   List <Building> buildings = new List();
   List <Walker  > walkers   = new List();
+  
+  Table <Object, AmountMap> demands = new Table();
   
   
   void performSetup(int size) {
@@ -25,6 +31,10 @@ public class City {
   }
   
   
+  
+  
+  /**  Tiles, blockage and paving:
+    */
   Tile tileAt(int x, int y) {
     try { return grid[x][y]; }
     catch (Exception e) { return null; }
@@ -43,6 +53,10 @@ public class City {
   }
   
   
+  
+  
+  /**  Active updates:
+    */
   void update() {
     for (Building b : buildings) b.update();
     for (Walker   w : walkers  ) w.update();
@@ -50,27 +64,6 @@ public class City {
 }
 
 
-
-
-class Tile {
-  
-  int x, y;
-  Fixture above;
-  boolean paved;
-  
-  //List <Walker> inside = new List();
-  protected Object flag;
-  
-  
-  public static void applyPaving(
-    City map, int x, int y, int w, int h, boolean is
-  ) {
-    for (Coord c : Visit.grid(x, y, w, h, 1)) {
-      Tile t = map.tileAt(c.x, c.y);
-      if (t != null) t.paved = is;
-    }
-  }
-}
 
 
 

@@ -1,3 +1,4 @@
+package game;
 
 
 import util.*;
@@ -32,4 +33,9 @@ public class Fixture {
     }
   }
   
+  
+  
+  public String toString() {
+    return type.name;
+  }
 }
