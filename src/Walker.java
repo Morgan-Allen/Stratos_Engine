@@ -117,6 +117,7 @@ public class Walker {
   
   void startRandomWalk() {
     I.say(this+" beginning random walk...");
+    
     assignPath(null, null);
     distWalked = 0;
     
@@ -134,7 +135,6 @@ public class Walker {
     
     Tile at = map.tileAt(x, y);
     PathSearch search = new PathSearch(map, this, at, home.entrance);
-    //search.verbosity = Search.SUPER_VERBOSE;
     search.doSearch();
     Tile path[] = search.fullPath(Tile.class);
     
