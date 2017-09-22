@@ -1,12 +1,12 @@
+
+
 package game;
-
-
 import util.*;
 import static util.TileConstants.*;
 
 
 
-public class Fixture {
+public class Fixture implements Session.Saveable {
   
   ObjectType type;
   
@@ -20,6 +20,34 @@ public class Fixture {
   Fixture(ObjectType type) {
     this.type = type;
   }
+  
+  
+  public Fixture(Session s) throws Exception {
+    s.cacheInstance(this);
+    
+    type   = (ObjectType) s.loadObject();
+    map    = (City) s.loadObject();
+    x      = s.loadInt();
+    y      = s.loadInt();
+    facing = s.loadInt();
+    
+    buildLevel = s.loadFloat();
+    complete   = s.loadBool();
+  }
+  
+  
+  public void saveState(Session s) throws Exception {
+    
+    s.saveObject(type);
+    s.saveObject(map);
+    s.saveInt(x);
+    s.saveInt(y);
+    s.saveInt(facing);
+    
+    s.saveFloat(buildLevel);
+    s.saveBool(complete);
+  }
+  
   
   
   void enterMap(City map, int x, int y) {
@@ -39,3 +67,10 @@ public class Fixture {
     return type.name;
   }
 }
+
+
+
+
+
+
+

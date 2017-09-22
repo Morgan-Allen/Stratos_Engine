@@ -9,17 +9,24 @@ public class Goods {
   
   
   
+  final static Index <Good> INDEX = new Index();
   private static List <Good> GOODS_LIST = new List();
   
-  static class Good {
+  static class Good extends Index.Entry implements Session.Saveable {
     
     String name;
-    int index;
     
-    Good(String name, int index) {
-      this.name = name;
-      this.index = index;
+    Good(String name, int ID) {
+      super(INDEX, "_"+ID);
       GOODS_LIST.add(this);
+    }
+    
+    public static Good loadConstant(Session s) throws Exception {
+      return INDEX.loadEntry(s.input());
+    }
+    
+    public void saveState(Session s) throws Exception {
+      INDEX.saveEntry(this, s.output());
     }
     
     public String toString() {
@@ -38,3 +45,6 @@ public class Goods {
     NO_GOODS [] = new Good[0];
   
 }
+
+
+

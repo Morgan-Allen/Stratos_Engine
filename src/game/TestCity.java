@@ -41,6 +41,16 @@ public class TestCity {
     quarry.inventory.add(2, CLAY   );
     market.inventory.add(3, POTTERY);
     
+    try {
+      Session.saveSession("test_save.tlt", map);
+      Session loaded = Session.loadSession("test_save.tlt", true);
+      map = (City) loaded.loaded()[0];
+    }
+    catch(Exception e) {
+      I.report(e);
+      return;
+    }
+    
     
     int graphic[][] = new int[map.size][map.size];
     boolean paused = false;

@@ -1,9 +1,31 @@
+
+
 package game;
+import util.*;
 
 
 
 
-public class ObjectType {
+public class ObjectType extends Index.Entry implements Session.Saveable {
+  
+  
+  final static Index <ObjectType> INDEX = new Index();
+  
+  
+  ObjectType(String ID) {
+    super(INDEX, ID);
+  }
+  
+  
+  public static ObjectType loadConstant(Session s) throws Exception {
+    return INDEX.loadEntry(s.input());
+  }
+  
+  
+  public void saveState(Session s) throws Exception {
+    INDEX.saveEntry(this, s.output());
+  }
+  
   
   
   String name;
@@ -33,3 +55,5 @@ public class ObjectType {
   String names[];
   
 }
+
+

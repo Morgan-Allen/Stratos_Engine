@@ -5,7 +5,7 @@ import util.*;
 
 
 
-public class Building extends Fixture {
+public class Building extends Fixture implements Session.Saveable {
   
   
   /**  Data fields and setup/initialisation-
@@ -27,6 +27,36 @@ public class Building extends Fixture {
   Building(ObjectType type) {
     super(type);
     this.ID = "#"+nextID++;
+  }
+  
+  
+  public Building(Session s) throws Exception {
+    super(s);
+    ID = s.loadString();
+    
+    entrance = Tile.loadTile(map, s);
+    walkerCountdown = s.loadInt();
+    s.loadObjects(walkers );
+    s.loadObjects(visitors);
+    
+    craftProgress = s.loadFloat();
+    s.loadTally(inventory);
+    s.loadTally(demands);
+  }
+  
+  
+  public void saveState(Session s) throws Exception {
+    super.saveState(s);
+    s.saveString(ID);
+    
+    Tile.saveTile(entrance, map, s);
+    s.saveInt(walkerCountdown);
+    s.saveObjects(walkers);
+    s.saveObjects(visitors);
+    
+    s.saveFloat(craftProgress);
+    s.saveTally(inventory);
+    s.saveTally(demands);
   }
   
   

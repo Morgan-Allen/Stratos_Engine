@@ -23,18 +23,18 @@ public class BuildingSet {
   
   
   final static ObjectType
-    PALACE     = new ObjectType(),
-    HOUSE      = new ObjectType(),
-    BALL_COURT = new ObjectType(),
+    PALACE     = new ObjectType("type_palace"    ),
+    HOUSE      = new ObjectType("type_house"     ),
+    BALL_COURT = new ObjectType("type_ball_court"),
     
-    QUARRY_PIT = new ObjectType(),
-    KILN       = new ObjectType(),
-    MARKET     = new ObjectType(),
-    WAREHOUSE  = new ObjectType(),
+    QUARRY_PIT = new ObjectType("type_quarry_pit"),
+    KILN       = new ObjectType("type_kiln"      ),
+    MARKET     = new ObjectType("type_market"    ),
+    WAREHOUSE  = new ObjectType("type_warehouse" ),
     
-    CITIZEN    = new ObjectType(),
-    NOBLE      = new ObjectType(),
-    WORKER     = new ObjectType()
+    CITIZEN    = new ObjectType("type_citizen"   ),
+    NOBLE      = new ObjectType("type_noble"     ),
+    WORKER     = new ObjectType("type_worker"    )
   ;
   static {
     CITIZEN.name = "Citizen";
