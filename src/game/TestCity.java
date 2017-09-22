@@ -54,9 +54,10 @@ public class TestCity {
     
     int graphic[][] = new int[map.size][map.size];
     boolean paused = false;
-    Coord   hover  = null ;
+    Coord   hover  = new Coord(-1, -1);
     boolean click  = false;
     Fixture above  = null ;
+    Series <Character> pressed = new Batch();
     
     while (true) {
       for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
@@ -71,14 +72,16 @@ public class TestCity {
         if (w.home != null) fill = w.home.type.tint;
         graphic[w.x][w.y] = fill;
       }
-      if (hover != null) try { graphic[hover.x][hover.y] = FILL_COLOR; }
+      try { graphic[hover.x][hover.y] = WHITE_COLOR; }
       catch (Exception e) {}
       
       I.present(graphic, "City Map", 400, 400);
       
-      hover = I.getDataCursor("City Map", false);
-      click = I.checkMouseClicked("City Map");
-      above = map.above(hover.x, hover.y);
+      
+      hover   = I.getDataCursor("City Map", false);
+      click   = I.checkMouseClicked("City Map");
+      above   = map.above(hover.x, hover.y);
+      pressed = I.getKeysPressed("City Map");
       
       if (above instanceof Building) {
         I.presentInfo(reportFor((Building) above), "City Map");
@@ -87,8 +90,23 @@ public class TestCity {
         paused = ! paused;
       }
       
-      if (! paused) map.update();
+      if (pressed.includes('s')) try {
+        I.say("\nWILL SAVE CURRENT MAP...");
+        Session.saveSession("test_save.tlt", map);
+      }
+      catch (Exception e) { I.report(e); }
       
+      if (pressed.includes('l')) try {
+        I.say("\nWILL LOAD SAVED MAP...");
+        Session s = Session.loadSession("test_save.tlt", true);
+        map = (City) s.loaded()[0];
+      }
+      catch (Exception e) { I.report(e); }
+      
+      
+      if (! paused) {
+        map.update();
+      }
       try { Thread.sleep(100); }
       catch (Exception e) {}
     }

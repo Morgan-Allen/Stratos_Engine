@@ -17,8 +17,9 @@ public class BuildingSet {
   final static int
     BLANK_COLOR  = colour(5, 5, 5),
     PAVE_COLOR   = colour(8, 8, 8),
-    FILL_COLOR   = colour(1, 1, 1),
-    WALKER_COLOR = colour(9, 9, 0)
+    WALKER_COLOR = colour(9, 9, 0),
+    
+    WHITE_COLOR  = colour(10, 10, 10)
   ;
   
   

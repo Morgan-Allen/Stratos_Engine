@@ -7,9 +7,7 @@ package util;
 
 import java.awt.*;
 import java.awt.image.*;
-
 import javax.swing.*;
-
 import java.awt.event.*;
 import java.io.*;
 import java.lang.reflect.Method;
@@ -279,7 +277,9 @@ public class I {
   
   
   
-  private static class Presentation extends JFrame implements MouseListener {
+  private static class Presentation extends JFrame implements
+    MouseListener, KeyListener
+  {
     
     final static long serialVersionUID = 0;
     
@@ -290,14 +290,16 @@ public class I {
     private float min, max;
     
     private boolean isClicked;
+    private Table <Character, Boolean> keysPressed = new Table();
     
     
     Presentation(String name, Object data, final int mode) {
       super(name);
+      
       this.data = data;
       this.addMouseListener(this);
-      
-      this.setLayout(null);
+      this.addKeyListener  (this);
+      this.setLayout       (null);
       
       this.pane = new JPanel() {
         final static long serialVersionUID = 0;
@@ -313,6 +315,9 @@ public class I {
       this.info = new JTextPane();
       this.info.setEditable(false);
       this.add(info);
+      
+      pane.addKeyListener(this);
+      info.addKeyListener(this);
     }
     
     
@@ -320,11 +325,17 @@ public class I {
       this.isClicked = true;
     }
     
+    public void keyTyped(KeyEvent e) {
+      keysPressed.put(e.getKeyChar(), true);
+    }
     
     public void mouseEntered (MouseEvent arg0) {}
     public void mouseExited  (MouseEvent arg0) {}
     public void mousePressed (MouseEvent arg0) {}
     public void mouseReleased(MouseEvent arg0) {}
+    
+    public void keyPressed (KeyEvent e) {}
+    public void keyReleased(KeyEvent e) {}
 
 
     private void paintGrey(Graphics g) {
@@ -425,6 +436,18 @@ public class I {
   public static void presentInfo(String text, String name) {
     Presentation window = windows.get(name);
     if (window != null) window.info.setText(text);
+  }
+  
+  
+  public static Series <Character> getKeysPressed(String name) {
+    Batch <Character> pressed = new Batch();
+    Presentation window = windows.get(name);
+    if (window == null) return pressed;
+    
+    for (Character c : window.keysPressed.keySet()) pressed.add(c);
+    window.keysPressed.clear();
+    
+    return pressed;
   }
   
   
