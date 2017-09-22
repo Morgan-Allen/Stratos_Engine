@@ -97,17 +97,33 @@ public class Building extends Fixture {
   /**  Handling goods and inventory:
     */
   Building findNearestOfType(ObjectType type, int maxDist) {
-    return findNearestDemanding(type, null, -1);
+    return findNearestDemanding(type, null, null, -1);
+  }
+  
+  
+  Building findNearestWithFeature(Goods.Good feature, int maxDist) {
+    return findNearestDemanding(null, feature, null, -1);
   }
   
   
   Building findNearestDemanding(
     ObjectType type, Goods.Good needed, int maxDist
   ) {
+    return findNearestDemanding(type, null, needed, maxDist);
+  }
+  
+  
+  Building findNearestDemanding(
+    ObjectType type, Goods.Good feature,
+    Goods.Good needed, int maxDist
+  ) {
     Pick <Building> pick = new Pick();
     
     for (Building b : map.buildings) {
       if (type != null && b.type != type) continue;
+      
+      boolean featured = Visit.arrayIncludes(b.type.features, feature);
+      if (feature != null && ! featured) continue;
       
       float dist = PathSearch.distance(entrance, b.entrance);
       if (maxDist > 0 && dist > maxDist) continue;

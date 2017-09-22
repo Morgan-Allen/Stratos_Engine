@@ -22,9 +22,10 @@ public class ObjectType {
   Goods.Good needed  [] = Goods.NO_GOODS;
   Goods.Good produced[] = Goods.NO_GOODS;
   Goods.Good consumed[] = Goods.NO_GOODS;
+  Goods.Good features[] = Goods.NO_GOODS;
+  
   int craftTime = 20, maxStock = 10;
   int maxDeliverRange = 100;
-  ObjectType legalStores[] = null;
   int consumeTime = 500;
   
   

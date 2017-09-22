@@ -36,9 +36,10 @@ public class HomeBuilding extends Building {
     for (Good cons : type.consumed) {
       if (inventory.valueFor(cons) >= type.maxStock) continue;
       
-      //Building tried = findNearestOfType(MARKET, 50);
-      //if (tried == null || tried.inventory.valueFor(cons) <= 0) continue;
-      //goes = tried;
+      Building tried = findNearestWithFeature(Goods.IS_MARKET, 50);
+      if (tried == null || tried.inventory.valueFor(cons) < 1) continue;
+      
+      goes = tried;
     }
     
     if (goes != null) {

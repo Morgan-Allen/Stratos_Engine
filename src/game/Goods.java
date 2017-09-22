@@ -29,10 +29,23 @@ public class Goods {
   
   
   final static Good
-    CLAY    = new Good("Clay"   , 0),
-    POTTERY = new Good("Pottery", 1),
+    CLAY      = new Good("Clay"   , 0),
+    POTTERY   = new Good("Pottery", 1),
+    
+    IS_MARKET = new Good("Is Market", 22),
     
     ALL_GOODS[] = (Good[]) GOODS_LIST.toArray(Good.class),
     NO_GOODS [] = new Good[0];
   
 }
+
+
+
+
+
+
+
+
+
+
+
