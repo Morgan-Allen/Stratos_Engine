@@ -17,7 +17,9 @@ public class Walker {
     JOB_WANDER   =  1,
     JOB_DELIVER  =  2,
     JOB_SHOPPING =  3,
-    JOB_VISITING =  4
+    JOB_VISITING =  4,
+    
+    MAX_WANDER_TIME = 20
   ;
   
   
@@ -28,9 +30,9 @@ public class Walker {
   
   Building home;
   Building inside;
-  int distWalked = 0, maxWalked = 20;
   
   int jobType = JOB_NONE;
+  int timeSpent, maxTime = 20;
   int dirs[] = new int[4];
   Tile path[] = null;
   int pathIndex = -1;
@@ -76,11 +78,22 @@ public class Walker {
     }
     
     if (path != null) {
-      pathIndex += 1;
-      if (pathIndex >= path.length) {
-        setInside(destination, true);
-        home.walkerEnters(this, destination);
+      if (Visit.last(path) != destination.entrance) {
+        pathToward(destination, jobType);
       }
+      
+      if (++pathIndex >= path.length) {
+        if (inside != destination) {
+          setInside(destination, true);
+        }
+        else if (++timeSpent <= maxTime) {
+          home.walkerVisits(this, destination);
+        }
+        else {
+          startReturnHome();
+        }
+      }
+      
       else {
         Tile ahead = path[pathIndex];
         x = ahead.x;
@@ -115,7 +128,7 @@ public class Walker {
       x = x + T_X[facing];
       y = y + T_Y[facing];
       
-      if (++distWalked >= maxWalked) {
+      if (++timeSpent >= maxTime) {
         startReturnHome();
       }
     }
@@ -133,11 +146,15 @@ public class Walker {
   
   
   void setInside(Building b, boolean yes) {
-    if (yes) {
+    if (b == null || home == null) return;
+    
+    if (yes && b != inside) {
       b.visitors.include(this);
       inside = b;
+      home.walkerEnters(this, inside);
     }
-    else {
+    if (b == inside && ! yes) {
+      home.walkerExits(this, inside);
       b.visitors.remove(this);
       inside = null;
     }
@@ -145,6 +162,7 @@ public class Walker {
   
   
   void pathToward(Building goes, int jobType) {
+    I.say(this+" going to "+goes);
     
     this.jobType = jobType;
     
@@ -173,7 +191,8 @@ public class Walker {
     
     this.jobType = JOB_WANDER;
     assignPath(null, null);
-    distWalked = 0;
+    timeSpent = 0;
+    maxTime = MAX_WANDER_TIME;
     
     Tile at = inside.entrance;
     x      = at.x;
@@ -184,8 +203,20 @@ public class Walker {
   }
   
   
+  void embarkOnVisit(Building goes, int maxTime) {
+    if (goes == null) return;
+    
+    I.say(this+" will visit "+goes+" for time "+maxTime);
+    
+    this.timeSpent = 0;
+    this.maxTime   = maxTime;
+    
+    pathToward(goes, JOB_VISITING);
+  }
+  
+  
   void startReturnHome() {
-    if (home == null || home.entrance == null) return;
+    if (home == null || home.entrance == null || inside == home) return;
     
     I.say(this+" will return home...");
     
@@ -211,7 +242,7 @@ public class Walker {
   void offloadGood(Goods.Good carried, Building store) {
     if (store == null || carried != this.carried) return;
     
-    I.say(this+" Depositing "+" "+carried+" at "+store);
+    I.say(this+" Depositing "+carried+" at "+store);
     
     store.inventory.add(carryAmount, carried);
     this.carried = null;

@@ -21,13 +21,13 @@ public class TestCity {
     Building palace = new HomeBuilding(PALACE    );
     Building house1 = new HomeBuilding(HOUSE     );
     Building house2 = new HomeBuilding(HOUSE     );
-    Building court  = new Building(BALL_COURT);
+    Building court  = new Building    (BALL_COURT);
     
     palace.enterMap(map, 3 , 3 );
     house1.enterMap(map, 9 , 6 );
     house2.enterMap(map, 12, 6 );
     court .enterMap(map, 9 , 9 );
-    
+
     Building quarry = new CraftBuilding(QUARRY_PIT);
     Building kiln1  = new CraftBuilding(KILN      );
     Building kiln2  = new CraftBuilding(KILN      );
@@ -38,7 +38,7 @@ public class TestCity {
     kiln2 .enterMap(map, 9 , 14);
     market.enterMap(map, 4 , 9 );
     
-    quarry.inventory.add(2, CLAY);
+    quarry.inventory.add(2, CLAY   );
     market.inventory.add(3, POTTERY);
     
     

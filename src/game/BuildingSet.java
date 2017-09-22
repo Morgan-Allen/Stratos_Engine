@@ -38,10 +38,8 @@ public class BuildingSet {
   ;
   static {
     CITIZEN.name = "Citizen";
-    
-    NOBLE.name = "Noble";
-
-    WORKER.name = "Worker";
+    NOBLE  .name = "Noble"  ;
+    WORKER .name = "Worker" ;
     
     PALACE.name = "Palace";
     PALACE.wide = 5;
@@ -61,6 +59,7 @@ public class BuildingSet {
     BALL_COURT.wide = 3;
     BALL_COURT.high = 3;
     BALL_COURT.tint = colour(3, 3, 7);
+    BALL_COURT.features = new Good[] { IS_AMENITY };
     
     QUARRY_PIT.name = "Quarry Pit";
     QUARRY_PIT.wide = 4;

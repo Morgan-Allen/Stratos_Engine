@@ -1,8 +1,8 @@
 
 
 package game;
-import game.Goods.Good;
-import util.Nums;
+import util.*;
+import static game.Goods.*;
 
 
 
@@ -31,8 +31,11 @@ public class HomeBuilding extends Building {
   
   
   void selectWalkerBehaviour(Walker walker) {
-    Building goes = null;
     
+    //  TODO:  Get more samples of nearby buildings...
+    //boolean watch = walker.type.name.equals("Noble");
+    
+    Building goes = null;
     for (Good cons : type.consumed) {
       if (inventory.valueFor(cons) >= type.maxStock) continue;
       
@@ -41,26 +44,34 @@ public class HomeBuilding extends Building {
       
       goes = tried;
     }
-    
     if (goes != null) {
       walker.pathToward(goes, Walker.JOB_SHOPPING);
+      return;
     }
-    else {
-      super.selectWalkerBehaviour(walker);
+    
+    goes = findNearestWithFeature(Goods.IS_AMENITY, 50);
+    if (goes != null && Rand.num() > 0.25f) {
+      walker.embarkOnVisit(goes, 25);
+      return;
     }
+    
+    super.selectWalkerBehaviour(walker);
   }
   
   
   void walkerEnters(Walker walker, Building enters) {
-    for (Good cons : type.consumed) {
-      float stock = enters.inventory.valueFor(cons);
-      
-      if (enters == this) {
-        walker.offloadGood(cons, this);
-      }
-      else if (stock > 0 && walker.jobType == Walker.JOB_SHOPPING) {
-        float taken = Nums.min(type.maxStock, stock / 2);
-        walker.beginDelivery(enters, this, Walker.JOB_SHOPPING, cons, taken);
+    
+    if (walker.jobType == Walker.JOB_SHOPPING) {
+      for (Good cons : type.consumed) {
+        float stock = enters.inventory.valueFor(cons);
+        
+        if (enters == this) {
+          walker.offloadGood(cons, this);
+        }
+        else if (stock > 0) {
+          float taken = Nums.min(type.maxStock, stock / 2);
+          walker.beginDelivery(enters, this, Walker.JOB_SHOPPING, cons, taken);
+        }
       }
     }
   }

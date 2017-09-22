@@ -94,6 +94,17 @@ public class Building extends Fixture {
   }
   
   
+  void walkerVisits(Walker walker, Building visits) {
+    return;
+  }
+  
+  
+  void walkerExits(Walker walker, Building enters) {
+    return;
+  }
+  
+  
+  
   /**  Handling goods and inventory:
     */
   Building findNearestOfType(ObjectType type, int maxDist) {
