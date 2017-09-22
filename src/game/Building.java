@@ -69,6 +69,12 @@ public class Building extends Fixture implements Session.Saveable {
     selectEntrance();
   }
   
+
+  void exitMap(City map) {
+    super.exitMap(map);
+    map.buildings.remove(this);
+  }
+  
   
   void selectEntrance() {
     for (Coord c : Visit.perimeter(x, y, type.wide, type.high)) {

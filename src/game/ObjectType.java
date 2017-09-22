@@ -29,11 +29,10 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   
   
   String name;
-  //Image sprite;
-  int tint;
+  int tint = BuildingSet.BLACK_COLOR;
   
-  int wide, high;
-  boolean mobile;
+  int wide = 1, high = 1;
+  boolean mobile = false;
   
   
   //  These are specific to buildings...

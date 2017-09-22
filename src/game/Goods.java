@@ -19,6 +19,7 @@ public class Goods {
     Good(String name, int ID) {
       super(INDEX, "_"+ID);
       GOODS_LIST.add(this);
+      this.name = name;
     }
     
     public static Good loadConstant(Session s) throws Exception {
@@ -33,6 +34,7 @@ public class Goods {
       return name;
     }
   }
+  
   
   final static Good
     CLAY       = new Good("Clay"      , 0 ),

@@ -19,7 +19,14 @@ public class BuildingSet {
     PAVE_COLOR   = colour(8, 8, 8),
     WALKER_COLOR = colour(9, 9, 0),
     
-    WHITE_COLOR  = colour(10, 10, 10)
+    WHITE_COLOR  = colour(10, 10, 10),
+    BLACK_COLOR  = colour(0 , 0 , 0 )
+  ;
+  
+  
+  final static ObjectType
+    MAIZE      = new ObjectType("type_maize"     ),
+    COTTON     = new ObjectType("type_cotton"    )
   ;
   
   
@@ -38,6 +45,10 @@ public class BuildingSet {
     WORKER     = new ObjectType("type_worker"    )
   ;
   static {
+    MAIZE .tint = WALKER_COLOR;
+    COTTON.tint = WHITE_COLOR ;
+    
+    
     CITIZEN.name = "Citizen";
     NOBLE  .name = "Noble"  ;
     WORKER .name = "Worker" ;

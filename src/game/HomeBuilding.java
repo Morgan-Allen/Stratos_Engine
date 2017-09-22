@@ -9,6 +9,9 @@ import static game.Goods.*;
 public class HomeBuilding extends Building {
   
   
+  /**  Data fields, construction and save/load methods-
+    */
+  
   HomeBuilding(ObjectType type) {
     super(type);
   }
@@ -24,6 +27,9 @@ public class HomeBuilding extends Building {
   }
   
   
+  
+  /**  Life-cycle, update and economic functions-
+    */
   void update() {
     super.update();
     advanceConsumption();
