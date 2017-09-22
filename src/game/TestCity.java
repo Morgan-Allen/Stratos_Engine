@@ -43,6 +43,10 @@ public class TestCity {
     
     
     int graphic[][] = new int[map.size][map.size];
+    boolean paused = false;
+    Coord   hover  = null ;
+    boolean click  = false;
+    Fixture above  = null ;
     
     while (true) {
       for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
@@ -57,14 +61,61 @@ public class TestCity {
         if (w.home != null) fill = w.home.type.tint;
         graphic[w.x][w.y] = fill;
       }
+      if (hover != null) try { graphic[hover.x][hover.y] = FILL_COLOR; }
+      catch (Exception e) {}
       
       I.present(graphic, "City Map", 400, 400);
       
-      map.update();
+      hover = I.getDataCursor("City Map", false);
+      click = I.checkMouseClicked("City Map");
+      above = map.above(hover.x, hover.y);
+      
+      if (above instanceof Building) {
+        I.presentInfo(reportFor((Building) above), "City Map");
+      }
+      if (click) {
+        paused = ! paused;
+      }
+      
+      if (! paused) map.update();
       
       try { Thread.sleep(100); }
       catch (Exception e) {}
     }
+  }
+  
+  
+  private static String reportFor(Building b) {
+    String report = ""+b.type.name+"\n";
+    
+    if (b.walkers.size() > 0) {
+      report += "\nWalkers:";
+      for (Walker w : b.walkers) {
+        report += "\n  "+w;
+      }
+    }
+    
+    if (b.visitors.size() > 0) {
+      report += "\nVisitors:";
+      for (Walker w : b.visitors) {
+        report += "\n  "+w;
+      }
+    }
+    
+    if (b.craftProgress > 0) {
+      report += "\nCraft progress:\n  "+b.craftProgress;
+    }
+    
+    if (b.inventory.size() > 0) {
+      report += "\nGoods:";
+      for (Good g : ALL_GOODS) {
+        float amount = b.inventory.valueFor(g);
+        if (amount <= 0) continue;
+        report += "\n  "+g+": "+amount;
+      }
+    }
+    
+    return report;
   }
   
   

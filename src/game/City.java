@@ -41,6 +41,12 @@ public class City {
   }
   
   
+  Fixture above(int x, int y) {
+    Tile under = tileAt(x, y);
+    return under == null ? null : under.above;
+  }
+  
+  
   boolean blocked(int x, int y) {
     Tile under = tileAt(x, y);
     return under == null ? true : (under.above != null);

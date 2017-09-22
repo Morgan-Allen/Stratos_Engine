@@ -284,6 +284,7 @@ public class I {
     final static long serialVersionUID = 0;
     
     private JPanel pane;
+    private JTextPane info;
     private Object data;
     private int dataWide, dataHigh;
     private float min, max;
@@ -296,15 +297,22 @@ public class I {
       this.data = data;
       this.addMouseListener(this);
       
-      JPanel panel = new JPanel() {
+      this.setLayout(null);
+      
+      this.pane = new JPanel() {
+        final static long serialVersionUID = 0;
+        
         public void paintComponent(Graphics g) {
           super.paintComponent(g);
           if (mode == MODE_GREY  ) paintGrey  (g);
           if (mode == MODE_COLOUR) paintColour(g);
         }
       };
-      this.add(panel);
-      this.pane = panel;
+      this.add(pane);
+      
+      this.info = new JTextPane();
+      this.info.setEditable(false);
+      this.add(info);
     }
     
     
@@ -394,14 +402,19 @@ public class I {
     Presentation window = windows.get(name);
     if (window == null) {
       window = new Presentation(name, vals, mode);
-      window.getContentPane().setPreferredSize(new Dimension(w, h));
+      
+      int hw = w / 2;
+      int ww = w + hw;
+      window.getContentPane().setPreferredSize(new Dimension(ww, h));
+      window.pane.setBounds(0, 0, w , h);
+      window.info.setBounds(w, 0, hw, h);
+      
       window.pack();
       window.setVisible(true);
       windows.put(name, window);
     }
     else {
       window.data = vals;
-      //window.getContentPane().setPreferredSize(new Dimension(w, h));
       window.pack();
       window.repaint();
     }
@@ -409,11 +422,17 @@ public class I {
   }
   
   
+  public static void presentInfo(String text, String name) {
+    Presentation window = windows.get(name);
+    if (window != null) window.info.setText(text);
+  }
+  
+  
   public static Coord getDataCursor(String windowName, boolean report) {
     final Presentation window = windows.get(windowName);
     if (window == null) return new Coord(0, 0);
     
-    final Container pane = window.getContentPane();
+    final Container pane = window.pane;
     final Point loc      = MouseInfo.getPointerInfo().getLocation();
     final Point corner   = pane.getLocationOnScreen();
 

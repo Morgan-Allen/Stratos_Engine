@@ -1,6 +1,6 @@
+
+
 package game;
-
-
 import util.*;
 import static util.TileConstants.*;
 
@@ -21,9 +21,11 @@ public class Walker {
     
     MAX_WANDER_TIME = 20
   ;
+  static int nextID = 0;
   
   
   ObjectType type;
+  String ID;
   
   City map;
   int x, y, facing = N;
@@ -44,6 +46,7 @@ public class Walker {
   
   Walker(ObjectType type) {
     this.type = type;
+    this.ID = "#"+nextID++;
   }
   
   
@@ -254,7 +257,7 @@ public class Walker {
   /**  Graphical, debug and interface methods-
     */
   public String toString() {
-    return type.name;
+    return type.name+" "+ID;
   }
 }
 

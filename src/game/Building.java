@@ -10,6 +10,10 @@ public class Building extends Fixture {
   
   /**  Data fields and setup/initialisation-
     */
+  static int nextID = 0;
+  
+  String ID;
+  
   Tile entrance;
   int walkerCountdown = 0;
   List <Walker> walkers  = new List();
@@ -22,6 +26,7 @@ public class Building extends Fixture {
   
   Building(ObjectType type) {
     super(type);
+    this.ID = "#"+nextID++;
   }
   
   
@@ -154,7 +159,7 @@ public class Building extends Fixture {
   /**  Graphical, debug and interface methods-
     */
   public String toString() {
-    return type.name;
+    return type.name+" "+ID;
   }
 }
 
