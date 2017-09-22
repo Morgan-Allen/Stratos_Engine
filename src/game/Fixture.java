@@ -19,6 +19,8 @@ public class Fixture implements Session.Saveable {
   float buildLevel;
   boolean complete;
   
+  List <Walker> focused = null;
+  
   
   Fixture(ObjectType type) {
     this.type = type;
@@ -36,6 +38,8 @@ public class Fixture implements Session.Saveable {
     
     buildLevel = s.loadFloat();
     complete   = s.loadBool();
+    
+    if (s.loadBool()) s.loadObjects(focused = new List());
   }
   
   
@@ -49,6 +53,9 @@ public class Fixture implements Session.Saveable {
     
     s.saveFloat(buildLevel);
     s.saveBool(complete);
+    
+    s.saveBool(focused != null);
+    if (focused != null) s.saveObjects(focused);
   }
   
   
@@ -80,6 +87,21 @@ public class Fixture implements Session.Saveable {
     */
   void updateGrowth() {
     return;
+  }
+  
+  
+  
+  /**  Handling focus for walker activities-
+    */
+  void setFocused(Walker w, boolean is) {
+    if (is) {
+      if (focused == null) focused = new List();
+      focused.include(w);
+    }
+    else {
+      focused.remove(w);
+      if (focused.size() == 0) focused = null;
+    }
   }
   
   
