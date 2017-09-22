@@ -2,6 +2,7 @@
 
 package game;
 import util.*;
+import static game.BuildingSet.*;
 
 
 
@@ -20,8 +21,8 @@ public class Building extends Fixture implements Session.Saveable {
   List <Walker> visitors = new List();
   
   float craftProgress;
-  Tally <Goods.Good> inventory = new Tally();
-  Tally <Goods.Good> demands   = new Tally();
+  Tally <Good> inventory = new Tally();
+  Tally <Good> demands   = new Tally();
   
   
   Building(ObjectType type) {
@@ -130,6 +131,11 @@ public class Building extends Fixture implements Session.Saveable {
   }
   
   
+  void walkerTargets(Walker walker, Fixture other) {
+    return;
+  }
+  
+  
   void walkerEnters(Walker walker, Building enters) {
     return;
   }
@@ -153,21 +159,21 @@ public class Building extends Fixture implements Session.Saveable {
   }
   
   
-  Building findNearestWithFeature(Goods.Good feature, int maxDist) {
+  Building findNearestWithFeature(Good feature, int maxDist) {
     return findNearestDemanding(null, feature, null, -1);
   }
   
   
   Building findNearestDemanding(
-    ObjectType type, Goods.Good needed, int maxDist
+    ObjectType type, Good needed, int maxDist
   ) {
     return findNearestDemanding(type, null, needed, maxDist);
   }
   
   
   Building findNearestDemanding(
-    ObjectType type, Goods.Good feature,
-    Goods.Good needed, int maxDist
+    ObjectType type, Good feature,
+    Good needed, int maxDist
   ) {
     Pick <Building> pick = new Pick();
     

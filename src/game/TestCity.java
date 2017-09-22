@@ -1,7 +1,6 @@
 
 
 package game;
-import static game.Goods.*;
 import static game.BuildingSet.*;
 import util.*;
 

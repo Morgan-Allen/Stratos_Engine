@@ -13,21 +13,36 @@ public class PathSearch extends Search <Tile> {
   Tile dest;
   Tile temp[] = new Tile[8];
   boolean getNear = false;
+  boolean paveOnly = true;
   
   
-  public PathSearch(City map, Walker moves, Tile init, Tile dest) {
+  public PathSearch(
+    City map, Walker moves, Tile init, Tile dest
+  ) {
     super(init, -1);
     this.map   = map  ;
     this.moves = moves;
     this.dest  = dest ;
-    getNear = ! canEnter(dest);
+    getNear    = ! canEnter(dest);
   }
   
   
-  public static Tile[] adjacent(Tile spot, Tile temp[], City map) {
+  public void setPaveOnly(boolean paveOnly) {
+    this.paveOnly = paveOnly;
+  }
+  
+  
+  public static Tile[] adjacent(
+    Tile spot, Tile temp[], City map, boolean paveOnly
+  ) {
     for (int dir : T_INDEX) {
       int x = spot.x + T_X[dir], y = spot.y + T_Y[dir];
-      if (map.paved(x, y)) temp[dir] = map.tileAt(x, y);
+      if (paveOnly) {
+        if (map.paved(x, y)) temp[dir] = map.tileAt(x, y);
+      }
+      else {
+        if (!map.blocked(x, y)) temp[dir] = map.tileAt(x, y);
+      }
     }
     return temp;
   }
@@ -42,12 +57,12 @@ public class PathSearch extends Search <Tile> {
   
   
   protected Tile[] adjacent(Tile spot) {
-    return adjacent(spot, temp, map);
+    return adjacent(spot, temp, map, paveOnly);
   }
   
   
   protected boolean endSearch(Tile best) {
-    if (getNear) return Visit.arrayIncludes(adjacent(best), dest);
+    if (getNear) return distance(best, dest) <= 1.5f;
     return best == dest;
   }
   

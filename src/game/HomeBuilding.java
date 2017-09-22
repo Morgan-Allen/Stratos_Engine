@@ -2,7 +2,7 @@
 
 package game;
 import util.*;
-import static game.Goods.*;
+import static game.BuildingSet.*;
 
 
 
@@ -55,19 +55,19 @@ public class HomeBuilding extends Building {
     for (Good cons : type.consumed) {
       if (inventory.valueFor(cons) >= type.maxStock) continue;
       
-      Building tried = findNearestWithFeature(Goods.IS_MARKET, 50);
+      Building tried = findNearestWithFeature(IS_MARKET, 50);
       if (tried == null || tried.inventory.valueFor(cons) < 1) continue;
       
       goes = tried;
     }
     if (goes != null) {
-      walker.pathToward(goes, Walker.JOB_SHOPPING);
+      walker.embarkOnVisit(goes, 0, Walker.JOB_SHOPPING);
       return;
     }
     
-    goes = findNearestWithFeature(Goods.IS_AMENITY, 50);
+    goes = findNearestWithFeature(IS_AMENITY, 50);
     if (goes != null && Rand.num() > 0.25f) {
-      walker.embarkOnVisit(goes, 25);
+      walker.embarkOnVisit(goes, 25, Walker.JOB_VISITING);
       return;
     }
     

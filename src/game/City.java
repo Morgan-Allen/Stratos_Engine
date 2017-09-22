@@ -87,7 +87,8 @@ public class City implements Session.Saveable {
   
   boolean blocked(int x, int y) {
     Tile under = tileAt(x, y);
-    return under == null ? true : (under.above != null);
+    if (under == null || under.above == null) return false;
+    return under.above.type.blocks;
   }
   
   

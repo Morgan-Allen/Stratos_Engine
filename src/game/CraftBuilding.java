@@ -1,7 +1,7 @@
 
 
 package game;
-import game.Goods.Good;
+import static game.BuildingSet.*;
 import util.*;
 
 
@@ -98,6 +98,13 @@ public class CraftBuilding extends Building {
   
   
   void walkerEnters(Walker walker, Building enters) {
+    
+    if (enters == this) for (Good need : type.needed) {
+      if (walker.carried == need) {
+        walker.offloadGood(need, this);
+      }
+    }
+    
     for (Good made : type.produced) {
       if (walker.carried == made) {
         walker.offloadGood(made, enters);

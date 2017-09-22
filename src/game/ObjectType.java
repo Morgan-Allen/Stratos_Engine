@@ -2,6 +2,7 @@
 
 package game;
 import util.*;
+import static game.BuildingSet.*;
 
 
 
@@ -32,6 +33,7 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   int tint = BuildingSet.BLACK_COLOR;
   
   int wide = 1, high = 1;
+  boolean blocks = true ;
   boolean mobile = false;
   
   
@@ -40,10 +42,10 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   int maxWalkers = 1;
   int walkerCountdown = 50;
   
-  Goods.Good needed  [] = Goods.NO_GOODS;
-  Goods.Good produced[] = Goods.NO_GOODS;
-  Goods.Good consumed[] = Goods.NO_GOODS;
-  Goods.Good features[] = Goods.NO_GOODS;
+  Good needed  [] = NO_GOODS;
+  Good produced[] = NO_GOODS;
+  Good consumed[] = NO_GOODS;
+  Good features[] = NO_GOODS;
   
   int craftTime = 20, maxStock = 10;
   int maxDeliverRange = 100;
@@ -53,6 +55,10 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   //  And these are specific to walkers...
   String names[];
   
+  
+  public String toString() {
+    return name;
+  }
 }
 
 

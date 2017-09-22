@@ -2,7 +2,7 @@
 
 package game;
 import util.*;
-import static game.Goods.*;
+import static game.BuildingSet.*;
 import static util.TileConstants.*;
 
 
@@ -13,12 +13,13 @@ public class Walker implements Session.Saveable {
   /**  Data fields and setup/initialisation-
     */
   final public static int
-    JOB_NONE     = -1,
-    JOB_RESTING  =  0,
-    JOB_WANDER   =  1,
-    JOB_DELIVER  =  2,
-    JOB_SHOPPING =  3,
-    JOB_VISITING =  4,
+    JOB_NONE      = -1,
+    JOB_RESTING   =  0,
+    JOB_WANDER    =  1,
+    JOB_DELIVER   =  2,
+    JOB_SHOPPING  =  3,
+    JOB_VISITING  =  4,
+    JOB_GATHERING =  5,
     
     MAX_WANDER_TIME = 20
   ;
@@ -40,7 +41,8 @@ public class Walker implements Session.Saveable {
   
   Tile path[] = null;
   int pathIndex = -1;
-  Building destination;
+  Fixture target;
+  Building visits;
   
   Good carried = null;
   float carryAmount = 0;
@@ -76,7 +78,8 @@ public class Walker implements Session.Saveable {
       for (int i = 0; i < PL; i++) path[i] = Tile.loadTile(map, s);
     }
     pathIndex = s.loadInt();
-    destination = (Building) s.loadObject();
+    target = (Fixture ) s.loadObject();
+    visits = (Building) s.loadObject();
     
     carried = (Good) s.loadObject();
     carryAmount = s.loadFloat();
@@ -104,7 +107,8 @@ public class Walker implements Session.Saveable {
       for (Tile t : path) Tile.saveTile(t, map, s);
     }
     s.saveInt(pathIndex);
-    s.saveObject(destination);
+    s.saveObject(target);
+    s.saveObject(visits);
     
     s.saveObject(carried);
     s.saveFloat(carryAmount);
@@ -142,16 +146,19 @@ public class Walker implements Session.Saveable {
     }
     
     if (path != null) {
-      if (Visit.last(path) != destination.entrance) {
-        pathToward(destination, jobType);
+      boolean visiting = visits != null;
+      
+      if (visiting && Visit.last(path) != visits.entrance) {
+        pathToward(visits, target, jobType);
       }
       
       if (++pathIndex >= path.length) {
-        if (inside != destination) {
-          setInside(destination, true);
+        if (visiting && inside != visits) {
+          setInside(visits, true);
         }
-        else if (++timeSpent <= maxTime) {
-          home.walkerVisits(this, destination);
+        else if (timeSpent++ <= maxTime) {
+          if (visiting) home.walkerVisits (this, visits);
+          else          home.walkerTargets(this, target);
         }
         else {
           startReturnHome();
@@ -202,14 +209,7 @@ public class Walker implements Session.Saveable {
   
   /**  Pathing and visitation utilities:
     */
-  void assignPath(Tile path[], Building destination) {
-    this.path        = path;
-    this.destination = destination;
-    this.pathIndex   = -1;
-  }
-  
-  
-  void setInside(Building b, boolean yes) {
+  private void setInside(Building b, boolean yes) {
     if (b == null || home == null) return;
     
     if (yes && b != inside) {
@@ -223,21 +223,38 @@ public class Walker implements Session.Saveable {
       inside = null;
     }
   }
+
+  
+  private void assignPath(Tile path[], Building visits, Fixture target) {
+    this.path      = path;
+    this.visits    = visits;
+    this.target    = target;
+    this.pathIndex = -1;
+  }
   
   
-  void pathToward(Building goes, int jobType) {
-    I.say(this+" going to "+goes);
+  private void pathToward(Building visits, Fixture target, int jobType) {
     
+    boolean visiting = visits != null;
     this.jobType = jobType;
+
+    I.say(this+" going to "+(visiting ? visits : target));
     
-    Tile at = (inside == null) ? map.tileAt(x, y) : inside.entrance;
-    PathSearch search = new PathSearch(map, this, at, goes.entrance);
+    Tile at    = (inside == null) ? map.tileAt(x, y) : inside.entrance;
+    Tile heads = null;
+    if (visiting) heads = visits.entrance;
+    else          heads = map.tileAt(target.x, target.y);
+    
+    PathSearch search = new PathSearch(map, this, at, heads);
+    search.setPaveOnly(visiting && map.paved(at.x, at.y));
+    
+    //search.verbosity = Search.SUPER_VERBOSE;
     search.doSearch();
     Tile path[] = search.fullPath(Tile.class);
     
     if (path != null) {
       I.say("  Path is: "+path.length+" tiles long...");
-      assignPath(path, goes);
+      assignPath(path, visits, target);
     }
     else {
       I.say("  Could not find path!");
@@ -254,7 +271,7 @@ public class Walker implements Session.Saveable {
     I.say(this+" beginning random walk...");
     
     this.jobType = JOB_WANDER;
-    assignPath(null, null);
+    assignPath(null, null, null);
     timeSpent = 0;
     maxTime = MAX_WANDER_TIME;
     
@@ -267,7 +284,7 @@ public class Walker implements Session.Saveable {
   }
   
   
-  void embarkOnVisit(Building goes, int maxTime) {
+  void embarkOnVisit(Building goes, int maxTime, int jobType) {
     if (goes == null) return;
     
     I.say(this+" will visit "+goes+" for time "+maxTime);
@@ -275,7 +292,19 @@ public class Walker implements Session.Saveable {
     this.timeSpent = 0;
     this.maxTime   = maxTime;
     
-    pathToward(goes, JOB_VISITING);
+    pathToward(goes, null, jobType);
+  }
+  
+  
+  void beginGathering(Fixture goes, int maxTime) {
+    if (goes == null) return;
+    
+    I.say(this+" will gather "+goes+" for time "+maxTime);
+    
+    this.timeSpent = 0;
+    this.maxTime   = maxTime;
+    
+    pathToward(null, goes, JOB_GATHERING);
   }
   
   
@@ -284,7 +313,7 @@ public class Walker implements Session.Saveable {
     
     I.say(this+" will return home...");
     
-    pathToward(home, JOB_RESTING);
+    pathToward(home, null, JOB_RESTING);
   }
   
   
@@ -299,7 +328,7 @@ public class Walker implements Session.Saveable {
     from.inventory.add(0 - amount, carried);
     this.carried     = carried;
     this.carryAmount = amount ;
-    pathToward(goes, jobType);
+    pathToward(goes, null, jobType);
   }
   
   
