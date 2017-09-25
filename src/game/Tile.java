@@ -26,7 +26,7 @@ public class Tile {
   }
   
   
-  static Tile loadTile(City map, Session s) throws Exception {
+  static Tile loadTile(CityMap map, Session s) throws Exception {
     int x = s.loadInt();
     if (x == -1) return null;
     int y = s.loadInt();
@@ -34,7 +34,7 @@ public class Tile {
   }
   
   
-  static void saveTile(Tile t, City map, Session s) throws Exception {
+  static void saveTile(Tile t, CityMap map, Session s) throws Exception {
     if (t == null) {
       s.saveInt(-1);
       return;
@@ -46,7 +46,7 @@ public class Tile {
   
   
   public static void applyPaving(
-    City map, int x, int y, int w, int h, boolean is
+    CityMap map, int x, int y, int w, int h, boolean is
   ) {
     for (Coord c : Visit.grid(x, y, w, h, 1)) {
       Tile t = map.tileAt(c.x, c.y);

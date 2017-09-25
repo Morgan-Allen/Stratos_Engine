@@ -64,14 +64,14 @@ public class Building extends Fixture implements Session.Saveable {
   
   /**  World entry and exit-
     */
-  void enterMap(City map, int x, int y) {
+  void enterMap(CityMap map, int x, int y) {
     super.enterMap(map, x, y);
     map.buildings.add(this);
     selectEntrance();
   }
   
 
-  void exitMap(City map) {
+  void exitMap(CityMap map) {
     super.exitMap(map);
     map.buildings.remove(this);
   }

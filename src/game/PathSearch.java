@@ -8,7 +8,7 @@ import static util.TileConstants.*;
 
 public class PathSearch extends Search <Tile> {
   
-  City map;
+  CityMap map;
   Walker moves;
   Tile dest;
   Tile temp[] = new Tile[8];
@@ -17,7 +17,7 @@ public class PathSearch extends Search <Tile> {
   
   
   public PathSearch(
-    City map, Walker moves, Tile init, Tile dest
+    CityMap map, Walker moves, Tile init, Tile dest
   ) {
     super(init, -1);
     this.map   = map  ;
@@ -33,7 +33,7 @@ public class PathSearch extends Search <Tile> {
   
   
   public static Tile[] adjacent(
-    Tile spot, Tile temp[], City map, boolean paveOnly
+    Tile spot, Tile temp[], CityMap map, boolean paveOnly
   ) {
     for (int dir : T_INDEX) {
       int x = spot.x + T_X[dir], y = spot.y + T_Y[dir];

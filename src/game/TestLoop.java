@@ -9,7 +9,7 @@ import util.*;
 public class TestLoop {
   
   
-  static void runGameLoop(City map) {
+  static void runGameLoop(CityMap map) {
     
     int graphic[][] = new int[map.size][map.size];
     boolean paused = false;
@@ -65,7 +65,7 @@ public class TestLoop {
       if (pressed.includes('l')) try {
         I.say("\nWILL LOAD SAVED MAP...");
         Session s = Session.loadSession("test_save.tlt", true);
-        map = (City) s.loaded()[0];
+        map = (CityMap) s.loaded()[0];
       }
       catch (Exception e) { I.report(e); }
       

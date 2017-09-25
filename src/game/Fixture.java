@@ -13,7 +13,7 @@ public class Fixture implements Session.Saveable {
     */
   ObjectType type;
   
-  City map;
+  CityMap map;
   int x, y, facing = N;
   
   float buildLevel;
@@ -31,7 +31,7 @@ public class Fixture implements Session.Saveable {
     s.cacheInstance(this);
     
     type   = (ObjectType) s.loadObject();
-    map    = (City) s.loadObject();
+    map    = (CityMap) s.loadObject();
     x      = s.loadInt();
     y      = s.loadInt();
     facing = s.loadInt();
@@ -62,7 +62,7 @@ public class Fixture implements Session.Saveable {
   
   /**  Entering and exiting the map-
     */
-  void enterMap(City map, int x, int y) {
+  void enterMap(CityMap map, int x, int y) {
     this.map = map;
     this.x   = x  ;
     this.y   = y  ;
@@ -74,7 +74,7 @@ public class Fixture implements Session.Saveable {
   }
   
   
-  void exitMap(City map) {
+  void exitMap(CityMap map) {
     for (Coord c : Visit.grid(x, y, type.wide, type.high, 1)) {
       Tile t = map.tileAt(c.x, c.y);
       t.above = null;

@@ -30,7 +30,7 @@ public class Walker implements Session.Saveable {
   ObjectType type;
   String ID;
   
-  City map;
+  CityMap map;
   int x, y, facing = N;
   
   Building home;
@@ -60,7 +60,7 @@ public class Walker implements Session.Saveable {
     type = (ObjectType) s.loadObject();
     ID   = s.loadString();
     
-    map    = (City) s.loadObject();
+    map    = (CityMap) s.loadObject();
     x      = s.loadInt();
     y      = s.loadInt();
     facing = s.loadInt();
@@ -118,7 +118,7 @@ public class Walker implements Session.Saveable {
   
   /**  World entry and exit-
     */
-  void enterMap(City map, int x, int y) {
+  void enterMap(CityMap map, int x, int y) {
     this.map = map;
     this.x   = x  ;
     this.y   = y  ;

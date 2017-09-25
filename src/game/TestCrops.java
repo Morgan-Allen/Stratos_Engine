@@ -9,11 +9,9 @@ import util.*;
 public class TestCrops extends TestLoop {
   
   
-  
-  
   public static void main(String args[]) {
     
-    City map = new City();
+    CityMap map = new CityMap();
     map.performSetup(20);
     
     GatherBuilding farm = new GatherBuilding(FARMER_HUT);

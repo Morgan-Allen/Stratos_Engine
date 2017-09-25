@@ -1,132 +1,63 @@
 
 
-
 package game;
-import static game.Terrains.*;
+import game.BuildingSet.*;
 import util.*;
-
 
 
 
 public class City implements Session.Saveable {
   
   
-  /**  Data fields and initialisation-
-    */
-  int size;
-  Tile grid[][];
-  int time = 0;
+  Tally <Good> demanded = new Tally();
+  Tally <Good> supplied = new Tally();
   
-  List <Building> buildings = new List();
-  List <Walker  > walkers   = new List();
-  
-  Table <Object, AmountMap> demands = new Table();
-  int growScanIndex = 0;
+  World world;
+  boolean active;
+  CityMap map;
   
   
-  City() {
-    return;
+  City(World world) {
+    this.world = world;
   }
   
   
   public City(Session s) throws Exception {
     s.cacheInstance(this);
     
-    performSetup(s.loadInt());
-    for (Coord c : Visit.grid(0, 0, size, size, 1)) {
-      grid[c.x][c.y].loadState(s);
-    }
-    time = s.loadInt();
+    s.loadTally(demanded);
+    s.loadTally(supplied);
     
-    s.loadObjects(buildings);
-    s.loadObjects(walkers  );
-    growScanIndex = s.loadInt();
+    world  = (World) s.loadObject();
+    active = s.loadBool();
+    map    = (CityMap) s.loadObject();
   }
   
   
   public void saveState(Session s) throws Exception {
     
-    s.saveInt(size);
-    for (Coord c : Visit.grid(0, 0, size, size, 1)) {
-      grid[c.x][c.y].saveState(s);
-    }
-    s.saveInt(time);
+    s.saveTally(demanded);
+    s.saveTally(supplied);
     
-    s.saveObjects(buildings);
-    s.saveObjects(walkers  );
-    s.saveInt(growScanIndex);
-  }
-  
-  
-  void performSetup(int size) {
-    this.size = size;
-    this.grid = new Tile[size][size];
-    for (Coord c : Visit.grid(0, 0, size, size, 1)) {
-      Tile t = grid[c.x][c.y] = new Tile();
-      t.x = c.x;
-      t.y = c.y;
-    }
+    s.saveObject(world);
+    s.saveBool(active);
+    s.saveObject(map);
   }
   
   
   
-  
-  /**  Tiles, blockage and paving:
-    */
-  Tile tileAt(int x, int y) {
-    try { return grid[x][y]; }
-    catch (Exception e) { return null; }
-  }
-  
-  
-  Fixture above(int x, int y) {
-    Tile under = tileAt(x, y);
-    return under == null ? null : under.above;
-  }
-  
-  
-  boolean blocked(int x, int y) {
-    Tile under = tileAt(x, y);
-    if (under == null || under.above == null) return false;
-    return under.above.type.blocks;
-  }
-  
-  
-  boolean paved(int x, int y) {
-    Tile under = tileAt(x, y);
-    return under == null ? false : under.paved;
-  }
-  
-  
-  
-  /**  Active updates:
-    */
-  void update() {
-    for (Building b : buildings) b.update();
-    for (Walker   w : walkers  ) w.update();
+  void updateFrom(CityMap map) {
     
-    time += 1;
-    updateGrowth();
+    
+    return;
   }
   
   
-  void updateGrowth() {
-    int totalTiles  = size * size;
-    int targetIndex = (totalTiles * (time % SCAN_PERIOD)) / SCAN_PERIOD;
-    if (targetIndex < growScanIndex) targetIndex = totalTiles;
-    
-    while (++growScanIndex < targetIndex) {
-      int x = growScanIndex / size, y = growScanIndex % size;
-      Fixture above = grid[x][y].above;
-      if (above != null) above.updateGrowth();
-    }
-    
-    if (targetIndex == totalTiles) {
-      growScanIndex = 0;
-    }
-  }
   
 }
+
+
+
 
 
 

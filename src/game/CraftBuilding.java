@@ -11,7 +11,6 @@ public class CraftBuilding extends Building {
   
   /**  Data fields, construction and save/load methods-
     */
-  
   CraftBuilding(ObjectType type) {
     super(type);
   }
@@ -30,7 +29,7 @@ public class CraftBuilding extends Building {
   
   /**  Life-cycle, update and economic functions-
     */
-  void enterMap(City map, int x, int y) {
+  void enterMap(CityMap map, int x, int y) {
     super.enterMap(map, x, y);
     this.updateDemands();
   }

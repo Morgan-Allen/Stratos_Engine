@@ -11,7 +11,7 @@ public class TestCity extends TestLoop {
   
   public static void main(String args[]) {
     
-    City map = new City();
+    CityMap map = new CityMap();
     map.performSetup(50);
     
     Tile.applyPaving(map, 3, 8, 12, 1 , true);
@@ -43,7 +43,7 @@ public class TestCity extends TestLoop {
     try {
       Session.saveSession("test_save.tlt", map);
       Session loaded = Session.loadSession("test_save.tlt", true);
-      map = (City) loaded.loaded()[0];
+      map = (CityMap) loaded.loaded()[0];
     }
     catch(Exception e) {
       I.report(e);
