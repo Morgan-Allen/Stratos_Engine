@@ -31,7 +31,7 @@ public class CraftBuilding extends Building {
     */
   void enterMap(CityMap map, int x, int y) {
     super.enterMap(map, x, y);
-    this.updateDemands();
+    updateDemands();
   }
   
   
@@ -42,9 +42,17 @@ public class CraftBuilding extends Building {
   }
   
   
+  
+  Good[] needed  () { return type.needed  ; }
+  Good[] produced() { return type.produced; }
+  
+  float stockNeeded(Good need) { return type.maxStock; }
+  float stockLimit (Good made) { return type.maxStock; }
+  
+  
   void updateDemands() {
-    for (Good need : type.needed) {
-      float gap = type.maxStock - inventory.valueFor(need);
+    for (Good need : needed()) {
+      float gap = stockNeeded(need) - inventory.valueFor(need);
       demands.set(need, gap);
     }
   }
@@ -54,25 +62,25 @@ public class CraftBuilding extends Building {
     if (craftProgress > 1) return;
     
     boolean anyRoom = false;
-    for (Good made : type.produced) {
-      if (inventory.valueFor(made) < type.maxStock) anyRoom = true;
+    for (Good made : produced()) {
+      if (inventory.valueFor(made) < stockLimit(made)) anyRoom = true;
     }
     if (! anyRoom) return;
     
-    for (Good need : type.needed) {
+    for (Good need : needed()) {
       if (inventory.valueFor(need) <= 0) return;
     }
     
     float prog = 1f / type.craftTime;
-    for (Good need : type.needed) {
+    for (Good need : needed()) {
       inventory.add(0 - prog, need);
     }
     
     craftProgress = Nums.min(craftProgress + prog, 1);
     if (craftProgress < 1) return;
     
-    for (Good made : type.produced) {
-      if (inventory.valueFor(made) >= type.maxStock) continue;
+    for (Good made : produced()) {
+      if (inventory.valueFor(made) >= stockLimit(made)) continue;
       inventory.add(1, made);
       
       I.say(this+" crafted 1 "+made);
@@ -83,7 +91,7 @@ public class CraftBuilding extends Building {
   
   
   void selectWalkerBehaviour(Walker walker) {
-    for (Good made : type.produced) {
+    for (Good made : produced()) {
       int goodAmount = (int) inventory.valueFor(made);
       if (goodAmount <= 0) return;
       
@@ -98,13 +106,13 @@ public class CraftBuilding extends Building {
   
   void walkerEnters(Walker walker, Building enters) {
     
-    if (enters == this) for (Good need : type.needed) {
+    if (enters == this) for (Good need : needed()) {
       if (walker.carried == need) {
         walker.offloadGood(need, this);
       }
     }
     
-    for (Good made : type.produced) {
+    for (Good made : produced()) {
       if (walker.carried == made) {
         walker.offloadGood(made, enters);
         walker.startReturnHome();
