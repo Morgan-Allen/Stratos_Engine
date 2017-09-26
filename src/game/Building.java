@@ -131,7 +131,7 @@ public class Building extends Fixture implements Session.Saveable {
   }
   
   
-  void walkerTargets(Walker walker, Fixture other) {
+  void walkerTargets(Walker walker, Tile other) {
     return;
   }
   
@@ -180,7 +180,7 @@ public class Building extends Fixture implements Session.Saveable {
     for (Building b : map.buildings) {
       if (type != null && b.type != type) continue;
       
-      boolean featured = Visit.arrayIncludes(b.type.features, feature);
+      boolean featured = b.type.hasFeature(feature);
       if (feature != null && ! featured) continue;
       
       float dist = PathSearch.distance(entrance, b.entrance);

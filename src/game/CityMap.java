@@ -22,6 +22,8 @@ public class CityMap implements Session.Saveable {
   List <Walker  > walkers   = new List();
   
   Table <Object, AmountMap> demands = new Table();
+  Table <City, Tile> transitPoints = new Table();
+  
   int growScanIndex = 0;
   
   

@@ -99,7 +99,7 @@ public class GatherBuilding extends CraftBuilding {
     
     Crop goes = pick.result();
     if (goes != null) {
-      walker.beginGathering(goes, 2);
+      walker.beginGathering(map.tileAt(goes.x, goes.y), 2);
       return true;
     }
     
@@ -107,10 +107,12 @@ public class GatherBuilding extends CraftBuilding {
   }
   
   
-  void walkerTargets(Walker walker, Fixture other) {
-    Crop crop = (Crop) other;
-    crop.buildLevel = 0;
+  void walkerTargets(Walker walker, Tile other) {
     
+    if (! (other.above instanceof Crop)) return;
+    Crop crop = (Crop) other.above;
+    
+    crop.buildLevel = 0;
     walker.carried      = (Good) crop.type;
     walker.carryAmount += CROP_YIELD / 100f;
     

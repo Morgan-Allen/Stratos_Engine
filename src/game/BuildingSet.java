@@ -26,25 +26,31 @@ public class BuildingSet {
   private static List <Good> GOODS_LIST = new List();
   static class Good extends ObjectType {
     
-    Good(String name, int ID) {
+    int price;
+    
+    Good(String name, int price, int ID) {
       super("good_"+ID);
       
       GOODS_LIST.add(this);
       this.name   = name ;
+      this.price  = price;
       this.blocks = false;
     }
   }
   final static Good
-    MAIZE      = new Good("Maize"     , 0 ),
-    COTTON     = new Good("Cotton"    , 1 ),
+    MAIZE      = new Good("Maize"       , 10, 0 ),
+    RAW_COTTON = new Good("Raw Cotton"  , 15, 1 ),
+    RUBBER     = new Good("Rubber"      , 25, 2 ),
     
-    CLAY       = new Good("Clay"      , 4 ),
-    POTTERY    = new Good("Pottery"   , 5 ),
+    CLAY       = new Good("Clay"        , 10, 4 ),
+    POTTERY    = new Good("Pottery"     , 50, 5 ),
+    COTTON     = new Good("Cotton"      , 75, 6 ),
     
-    IS_MARKET  = new Good("Is Market" , 22),
-    IS_AMENITY = new Good("Is Amenity", 23),
+    IS_MARKET  = new Good("Is Market"   , -1, 22),
+    IS_AMENITY = new Good("Is Amenity"  , -1, 23),
+    IS_TRADER  = new Good("Is Trader"   , -1, 24),
     
-    CROP_TYPES[] = { MAIZE, COTTON },
+    CROP_TYPES[] = { MAIZE, RAW_COTTON, RUBBER },
     ALL_GOODS [] = (Good[]) GOODS_LIST.toArray(Good.class),
     NO_GOODS  [] = new Good[0];
   
@@ -68,7 +74,7 @@ public class BuildingSet {
   
   static {
     MAIZE .tint = colour(9, 9, 1);
-    COTTON.tint = colour(9, 8, 9);
+    RAW_COTTON.tint = colour(9, 8, 9);
     
     CITIZEN.name = "Citizen";
     NOBLE  .name = "Noble"  ;
@@ -130,6 +136,7 @@ public class BuildingSet {
     PORTER_HOUSE.high = 3;
     PORTER_HOUSE.tint = colour(7, 3, 7);
     PORTER_HOUSE.walkerType = WORKER;
+    PORTER_HOUSE.features = new Good[] { IS_TRADER };
   }
 }
 

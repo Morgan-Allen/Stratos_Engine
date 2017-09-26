@@ -10,6 +10,8 @@ import static game.BuildingSet.*;
 public class ObjectType extends Index.Entry implements Session.Saveable {
   
   
+  /**  Indexing and save/load methods-
+    */
   final static Index <ObjectType> INDEX = new Index();
   
   
@@ -29,6 +31,8 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   
   
   
+  /**  Data fields and setup functions-
+    */
   String name;
   int tint = BuildingSet.BLACK_COLOR;
   
@@ -56,9 +60,23 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   String names[];
   
   
+  
+  /**  General query utilities-
+    */
+  boolean hasFeature(Good feature) {
+    return Visit.arrayIncludes(features, feature);
+  }
+  
+  
+  
+  /**  Rendering, debug and interface methods-
+    */
   public String toString() {
     return name;
   }
 }
+
+
+
 
 

@@ -25,7 +25,7 @@ public class TestCrops extends TestLoop {
       
       GatherBuilding.Crop crop;
       if (Rand.yes()) crop = new GatherBuilding.Crop(MAIZE );
-      else            crop = new GatherBuilding.Crop(COTTON);
+      else            crop = new GatherBuilding.Crop(RAW_COTTON);
       crop.enterMap(map, c.x, c.y);
       crop.buildLevel = 0.5f + Rand.num();
     }

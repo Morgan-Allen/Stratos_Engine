@@ -6,7 +6,7 @@ import util.*;
 
 
 
-public class City implements Session.Saveable {
+public class City implements Session.Saveable, Trader.Partner {
   
   
   /**  Data fields, construction and save/load methods-
@@ -16,8 +16,9 @@ public class City implements Session.Saveable {
   float mapX, mapY;
   Table <City, Integer> distances = new Table();
   
-  Tally <Good> stockLevels = new Tally();
-  Tally <Good> inventory   = new Tally();
+  int currentFunds = 0;
+  Tally <Good> demands   = new Tally();
+  Tally <Good> inventory = new Tally();
   
   boolean active;
   CityMap map;
@@ -39,7 +40,8 @@ public class City implements Session.Saveable {
       distances.put((City) s.loadObject(), s.loadInt());
     }
     
-    s.loadTally(stockLevels);
+    currentFunds = s.loadInt();
+    s.loadTally(demands);
     s.loadTally(inventory);
     
     active = s.loadBool();
@@ -59,7 +61,8 @@ public class City implements Session.Saveable {
       s.saveInt(distances.get(c));
     }
     
-    s.saveTally(stockLevels);
+    s.saveInt(currentFunds);
+    s.saveTally(demands);
     s.saveTally(inventory);
     
     s.saveBool(active);
@@ -68,7 +71,7 @@ public class City implements Session.Saveable {
   
   
   
-  /**  Supplemental setup methods-
+  /**  Supplemental setup methods for trade and geography-
     */
   static void setupRoute(City a, City b, int distance) {
     a.distances.put(b, distance);
@@ -80,6 +83,10 @@ public class City implements Session.Saveable {
     this.map    = map ;
     this.active = true;
   }
+  
+  
+  public Tally <Good> demands  () { return demands  ; }
+  public Tally <Good> inventory() { return inventory; }
   
   
   
