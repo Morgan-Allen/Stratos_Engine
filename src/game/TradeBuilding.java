@@ -8,7 +8,9 @@ import util.*;
 
 
 
-public class TradeBuilding extends CraftBuilding implements TradeWalker.Partner {
+public class TradeBuilding extends CraftBuilding
+  implements TradeWalker.Partner
+{
   
   
   /**  Data fields, setup and save/load methods-
@@ -70,6 +72,11 @@ public class TradeBuilding extends CraftBuilding implements TradeWalker.Partner 
   }
   
   
+  public City tradeOrigin() {
+    return map.city;
+  }
+  
+  
   
   /**  Selecting behaviour for walkers-
     */
@@ -98,30 +105,26 @@ public class TradeBuilding extends CraftBuilding implements TradeWalker.Partner 
       targets.add(tradePartner);
     }
     
-    
     for (TradeWalker.Partner t : targets) {
-      Tally <Good> cargo = new Tally();
+      Tally <Good> cargoAway = TradeWalker.configureCargo(this, t, false);
+      Tally <Good> cargoBack = TradeWalker.configureCargo(t, this, true );
+      
+      float distRating = TradeWalker.distanceRating(this, t);
       float rating = 0;
       
-      for (Good good : ALL_GOODS) {
-        
-        float amountO  = this.inventory ().valueFor(good);
-        float demandO  = this.tradeLevel().valueFor(good);
-        float surplus  = amountO - Nums.max(0, demandO);
-        float amountD  = t.inventory ().valueFor(good);
-        float demandD  = t.tradeLevel().valueFor(good);
-        float shortage = Nums.max(0, demandD) - amountD;
-        
-        if (surplus > 0 && shortage > 0) {
-          float size = Nums.min(surplus, shortage);
-          cargo.set(good, size);
-          rating += size;
+      if (cargoAway.size() > 0) {
+        for (Good good : cargoAway.keys()) {
+          rating += cargoAway.valueFor(good) / distRating;
         }
       }
-      
-      if (cargo.size() > 0) {
+      if (cargoBack.size() > 0) {
+        for (Good good : cargoBack.keys()) {
+          rating += cargoBack.valueFor(good) / distRating;
+        }
+      }
+      if (rating > 0) {
         Order order = new Order();
-        order.cargo  = cargo;
+        order.cargo  = cargoAway;
         order.goes   = t;
         order.rating = rating;
         orders.add(order);

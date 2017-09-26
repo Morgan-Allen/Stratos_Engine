@@ -14,6 +14,53 @@ public class TradeWalker extends Walker implements World.Journeys {
   static interface Partner {
     Tally <Good> tradeLevel();
     Tally <Good> inventory ();
+    City tradeOrigin();
+  }
+  
+  
+  static Tally <Good> configureCargo(
+    Partner from, Partner goes, boolean cityOnly
+  ) {
+    Tally <Good> cargo = new Tally();
+    
+    if (from == null || goes == null          ) return cargo;
+    if (cityOnly && goes.tradeOrigin() != goes) return cargo;
+    
+    for (Good good : ALL_GOODS) {
+      float amountO  = from.inventory ().valueFor(good);
+      float demandO  = from.tradeLevel().valueFor(good);
+      float amountD  = goes.inventory ().valueFor(good);
+      float demandD  = goes.tradeLevel().valueFor(good);
+      float surplus  = amountO - Nums.max(0, demandO);
+      float shortage = Nums.max(0, demandD) - amountD;
+      
+      if (surplus > 0 && shortage > 0) {
+        float size = Nums.min(surplus, shortage);
+        cargo.set(good, size);
+      }
+    }
+    
+    return cargo;
+  }
+  
+  
+  static float distanceRating(Partner from, Partner goes) {
+    
+    City fromC = from.tradeOrigin(), goesC = goes.tradeOrigin();
+    Integer distance = fromC.distances.get(goesC);
+    float distRating = distance == null ? 100 : (1 + distance);
+    
+    if (
+      from instanceof Building &&
+      goes instanceof Building &&
+      fromC == goesC
+    ) {
+      Building fromB = (Building) from, goesB = (Building) goes;
+      float mapDist = PathSearch.distance(fromB.entrance, goesB.entrance);
+      distRating += mapDist / Walker.MAX_WANDER_TIME;
+    }
+    
+    return distRating;
   }
   
   
@@ -75,32 +122,24 @@ public class TradeWalker extends Walker implements World.Journeys {
   
   /**  Behaviour scripting...
     */
-  void beginDelivery(Building from, Building goes, Tally <Good> cargo) {
-    if (from == null || goes == null || goes.entrance == null) return;
+  void beginDelivery(Building from, Building goes, Tally <Good> taken) {
+    if (goes == null || goes.entrance == null) return;
+    if (! (from instanceof Partner)) return;
     
-    this.cargo.clear();
-    for (Good g : cargo.keys()) {
-      float amount = cargo.valueFor(g);
-      from.inventory.add(0 - amount, g);
-      this.cargo.add(amount, g);
-    }
-    
+    cargo.clear();
+    takeOnGoods((Partner) from, taken, false);
     embarkOnVisit(goes, 0, JOB_TRADING);
   }
   
   
-  void beginTravel(Building from, City goes, Tally <Good> cargo) {
-    if (from == null || goes == null) return;
+  void beginTravel(Building from, City goes, Tally <Good> taken) {
+    if (goes == null || ! (from instanceof Partner)) return;
     
     Tile exits = findTransitPoint(map, goes);
     if (exits == null) return;
     
     this.cargo.clear();
-    for (Good g : cargo.keys()) {
-      float amount = cargo.valueFor(g);
-      from.inventory.add(0 - amount, g);
-      this.cargo.add(amount, g);
-    }
+    takeOnGoods((Partner) from, taken, false);
     profits    = 0;
     tradesWith = goes;
     
@@ -110,23 +149,22 @@ public class TradeWalker extends Walker implements World.Journeys {
   
   protected void onVisit(Building visits) {
     Partner partner = (Partner) I.cast(visits, Partner.class);
+    City homeCity = home.map.city;
 
     if (visits == home) {
-      offloadGoods(partner);
-      home.map.city.currentFunds += profits;
-      profits = 0;
+      offloadGoods(partner, false);
+      homeCity.currentFunds += profits;
+      profits    = 0;
+      tradesWith = null;
     }
     else {
-      offloadGoods(partner);
+      offloadGoods(partner, false);
     }
   }
   
   
-  void offloadGoods(Partner store) {
+  void offloadGoods(Partner store, boolean doPayment) {
     if (store == null) return;
-    
-    I.say("\n"+this+" depositing goods at "+store);
-    I.say("  Cargo: "+cargo);
     
     int totalValue = 0;
     for (Good g : cargo.keys()) {
@@ -135,8 +173,30 @@ public class TradeWalker extends Walker implements World.Journeys {
       totalValue += amount * g.price;
     }
     
-    profits += totalValue;
+    if (doPayment) profits += totalValue;
     cargo.clear();
+    
+    I.say("\n"+this+" depositing goods at "+store);
+    I.say("  Cargo: "+cargo);
+    I.say("  Value: "+totalValue);
+  }
+  
+  
+  void takeOnGoods(Partner store, Tally <Good> taken, boolean doPayment) {
+    if (store == null) return;
+    
+    int totalCost = 0;
+    
+    for (Good g : taken.keys()) {
+      float amount = taken.valueFor(g);
+      cargo.set(g, amount);
+      totalCost += amount * g.price;
+    }
+    if (doPayment) profits -= totalCost;
+    
+    I.say("\n"+this+" taking on goods from "+store);
+    I.say("  New cargo: "+cargo);
+    I.say("  Cost: "+totalCost+" Profit: "+profits);
   }
   
   
@@ -148,20 +208,25 @@ public class TradeWalker extends Walker implements World.Journeys {
   
   
   public void onArrival(City goes, World.Journey journey) {
-    City homeCity = home.map.city;
+    if (home.destroyed()) return;
     
+    City homeCity = home.map.city;
     if (goes == homeCity) {
       Tile entry = findTransitPoint(homeCity.map, tradesWith);
       enterMap(homeCity.map, entry.x, entry.y);
       startReturnHome();
     }
     else {
-      offloadGoods(tradesWith);
+      Tally <Good> taken = configureCargo(goes, (Partner) home, false);
+      offloadGoods(goes,        true);
+      takeOnGoods (goes, taken, true);
       tradesWith.world.beginJourney(tradesWith, homeCity, this);
     }
   }
   
 }
+
+
 
 
 

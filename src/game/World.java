@@ -87,6 +87,10 @@ public class World implements Session.Saveable {
     j.arriveTime = j.startTime + (distance * Walker.TRADE_DIST_TIME);
     for (Journeys g : going) j.going.add(g);
     journeys.add(j);
+
+    I.say("\nBeginning journey: "+j.from+" to "+j.goes);
+    I.say("  Embarked: "+j.going);
+    I.say("  Time: "+time+", arrival: "+j.arriveTime);
   }
   
   
@@ -102,11 +106,11 @@ public class World implements Session.Saveable {
     }
     
     for (Journey j : journeys) {
-      I.say("\nUpdating journey: "+j.from+" to "+j.goes);
-      I.say("  Embarked: "+j.going);
-      I.say("  Time: "+map.time+", arrives: "+j.arriveTime);
-      
-      if (map.time >= j.arriveTime) {
+      if (time >= j.arriveTime) {
+        I.say("\nCompleted journey: "+j.from+" to "+j.goes);
+        I.say("  Embarked: "+j.going);
+        I.say("  Time: "+time+", arrival: "+j.arriveTime);
+        
         journeys.remove(j);
         for (Journeys g : j.going) {
           g.onArrival(j.goes, j);

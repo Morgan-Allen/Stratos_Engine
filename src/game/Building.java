@@ -77,6 +77,11 @@ public class Building extends Fixture implements Session.Saveable {
   }
   
   
+  boolean destroyed() {
+    return buildLevel >= 0 && map == null;
+  }
+  
+  
   void selectEntrance() {
     for (Coord c : Visit.perimeter(x, y, type.wide, type.high)) {
       boolean outx = c.x == x - 1 || c.x == x + type.wide;

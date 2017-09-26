@@ -101,6 +101,11 @@ public class City implements Session.Saveable, TradeWalker.Partner {
   public Tally <Good> inventory () { return inventory ; }
   
   
+  public City tradeOrigin() {
+    return this;
+  }
+  
+  
   
   /**  Regular updates-
     */
