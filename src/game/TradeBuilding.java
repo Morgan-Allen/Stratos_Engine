@@ -107,10 +107,10 @@ public class TradeBuilding extends CraftBuilding implements TradeWalker.Partner 
         
         float amountO  = this.inventory ().valueFor(good);
         float demandO  = this.tradeLevel().valueFor(good);
-        float surplus  = amountO - demandO;
+        float surplus  = amountO - Nums.max(0, demandO);
         float amountD  = t.inventory ().valueFor(good);
         float demandD  = t.tradeLevel().valueFor(good);
-        float shortage = demandD - amountD;
+        float shortage = Nums.max(0, demandD) - amountD;
         
         if (surplus > 0 && shortage > 0) {
           float size = Nums.min(surplus, shortage);

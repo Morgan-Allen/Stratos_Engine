@@ -78,6 +78,7 @@ public class TradeWalker extends Walker implements World.Journeys {
   void beginDelivery(Building from, Building goes, Tally <Good> cargo) {
     if (from == null || goes == null || goes.entrance == null) return;
     
+    this.cargo.clear();
     for (Good g : cargo.keys()) {
       float amount = cargo.valueFor(g);
       from.inventory.add(0 - amount, g);
@@ -94,6 +95,7 @@ public class TradeWalker extends Walker implements World.Journeys {
     Tile exits = findTransitPoint(map, goes);
     if (exits == null) return;
     
+    this.cargo.clear();
     for (Good g : cargo.keys()) {
       float amount = cargo.valueFor(g);
       from.inventory.add(0 - amount, g);
