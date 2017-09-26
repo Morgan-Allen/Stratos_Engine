@@ -17,8 +17,8 @@ public class City implements Session.Saveable, Trader.Partner {
   Table <City, Integer> distances = new Table();
   
   int currentFunds = 0;
-  Tally <Good> demands   = new Tally();
-  Tally <Good> inventory = new Tally();
+  Tally <Good> stockLevel = new Tally();
+  Tally <Good> inventory  = new Tally();
   
   boolean active;
   CityMap map;
@@ -34,14 +34,14 @@ public class City implements Session.Saveable, Trader.Partner {
     
     world = (World) s.loadObject();
     
-    mapX  = s.loadFloat();
-    mapY  = s.loadFloat();
+    mapX = s.loadFloat();
+    mapY = s.loadFloat();
     for (int n = s.loadInt(); n-- > 0;) {
       distances.put((City) s.loadObject(), s.loadInt());
     }
     
     currentFunds = s.loadInt();
-    s.loadTally(demands);
+    s.loadTally(stockLevel);
     s.loadTally(inventory);
     
     active = s.loadBool();
@@ -62,7 +62,7 @@ public class City implements Session.Saveable, Trader.Partner {
     }
     
     s.saveInt(currentFunds);
-    s.saveTally(demands);
+    s.saveTally(stockLevel);
     s.saveTally(inventory);
     
     s.saveBool(active);
@@ -79,14 +79,20 @@ public class City implements Session.Saveable, Trader.Partner {
   }
   
   
+  void setWorldCoords(float mapX, float mapY) {
+    this.mapX = mapX;
+    this.mapY = mapY;
+  }
+  
+  
   void attachMap(CityMap map) {
     this.map    = map ;
     this.active = true;
   }
   
   
-  public Tally <Good> demands  () { return demands  ; }
-  public Tally <Good> inventory() { return inventory; }
+  public Tally <Good> stockLevel() { return stockLevel; }
+  public Tally <Good> inventory () { return inventory ; }
   
   
   
@@ -94,11 +100,13 @@ public class City implements Session.Saveable, Trader.Partner {
     */
   void updateFrom(CityMap map) {
     
-    
     return;
   }
   
 }
+
+
+
 
 
 

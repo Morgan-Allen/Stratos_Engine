@@ -11,9 +11,11 @@ import util.*;
 public class TradeBuilding extends CraftBuilding implements Trader.Partner {
   
   
-  Tally <Good> stockLevels = new Tally();
+  /**  Data fields, setup and save/load methods-
+    */
+  Tally <Good> stockLevel = new Tally();
   City tradePartner = null;
-  Good imports[] = NO_GOODS, exports[] = NO_GOODS;
+  Good needed[] = NO_GOODS, produced[] = NO_GOODS;
   
   
   public TradeBuilding(ObjectType type) {
@@ -23,48 +25,51 @@ public class TradeBuilding extends CraftBuilding implements Trader.Partner {
   
   public TradeBuilding(Session s) throws Exception {
     super(s);
-    s.loadTally(stockLevels);
+    s.loadTally(stockLevel);
     tradePartner = (City) s.loadObject();
   }
   
   
   public void saveState(Session s) throws Exception {
     super.saveState(s);
-    s.saveTally(stockLevels);
+    s.saveTally(stockLevel);
     s.saveObject(tradePartner);
   }
 
   
   
+  /**  Updating demands-
+    */
   void updateDemands() {
     
     Batch <Good> impB = new Batch(), expB = new Batch();
-    for (Good g : stockLevels.keys()) {
-      float level = stockLevels.valueFor(g);
+    for (Good g : stockLevel.keys()) {
+      float level = stockLevel.valueFor(g);
       if (level > 0) impB.add(g);
       if (level < 0) expB.add(g);
     }
-    imports = impB.toArray(Good.class);
-    exports = expB.toArray(Good.class);
+    produced = impB.toArray(Good.class);
+    needed   = expB.toArray(Good.class);
     
     super.updateDemands();
   }
   
   
+  public Tally <Good> stockLevel() { return stockLevel; }
+  public Tally <Good> inventory () { return inventory ; }
+  Good[] needed  () { return needed; }
+  Good[] produced() { return produced; }
+  float stockNeeded(Good need) { return 0 - stockLevel.valueFor(need); }
+  float stockLimit (Good made) { return     stockLevel.valueFor(made); }
   
   
   
-  public Tally <Good> demands  () { return demands  ; }
-  public Tally <Good> inventory() { return inventory; }
-  Good[] needed  () { return imports; }
-  Good[] produced() { return exports; }
-  float stockNeeded(Good imp) { return     stockLevels.valueFor(imp); }
-  float stockLimit (Good exp) { return 0 - stockLevels.valueFor(exp); }
-  
-  
+  /**  Selecting behaviour for walkers-
+    */
   void selectWalkerBehaviour(Walker walker) {
     Trader trader = (Trader) I.cast(walker, Trader.class);
     if (trader != null) selectTraderBehaviour(trader);
+    else super.selectWalkerBehaviour(walker);
   }
   
   
@@ -87,13 +92,12 @@ public class TradeBuilding extends CraftBuilding implements Trader.Partner {
       float rating = 0;
       
       for (Good good : ALL_GOODS) {
-        //
-        //  If you have a surplus, and they have a demand, do a delivery.
-        float amountO  = inventory.valueFor(good);
-        float demandO  = demands  .valueFor(good);
+        
+        float amountO  = inventory ().valueFor(good);
+        float demandO  = stockLevel().valueFor(good);
         float surplus  = amountO - demandO;
-        float amountD  = t.inventory().valueFor(good);
-        float demandD  = t.demands()  .valueFor(good);
+        float amountD  = t.inventory ().valueFor(good);
+        float demandD  = t.stockLevel().valueFor(good);
         float shortage = demandD - amountD;
         
         if (surplus > 0 && shortage > 0) {
@@ -101,6 +105,7 @@ public class TradeBuilding extends CraftBuilding implements Trader.Partner {
           cargo.set(good, size);
           rating += size;
         }
+        //*/
       }
       
       if (cargo.size() > 0) {

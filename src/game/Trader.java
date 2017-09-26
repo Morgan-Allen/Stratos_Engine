@@ -12,13 +12,31 @@ public class Trader extends Walker implements World.Journeys {
   /**  Interface code-
     */
   static interface Partner {
-    Tally <Good> demands  ();
-    Tally <Good> inventory();
+    Tally <Good> stockLevel();
+    Tally <Good> inventory ();
   }
   
   
   static Tile findTransitPoint(CityMap map, City with) {
-    return null;
+    
+    Pick <Tile> pick = new Pick();
+    Vec2D cityDir = new Vec2D(
+      with.mapX - map.city.mapX,
+      with.mapY - map.city.mapY
+    ).normalise(), temp = new Vec2D();
+    
+    for (Coord c : Visit.perimeter(1, 1, map.size - 2, map.size - 2)) {
+      if (map.blocked(c.x, c.y)) continue;
+      
+      temp.set(c.x - (map.size / 2), c.y - (map.size / 2)).normalise();
+      float rating = 1 + temp.dot(cityDir);
+      if (map.paved(c.x, c.y)) rating *= 2;
+      
+      Tile u = map.tileAt(c.x, c.y);
+      pick.compare(u, rating);
+    }
+    
+    return pick.result();
   }
   
   
