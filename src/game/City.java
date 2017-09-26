@@ -6,7 +6,7 @@ import util.*;
 
 
 
-public class City implements Session.Saveable, Trader.Partner {
+public class City implements Session.Saveable, TradeWalker.Partner {
   
   
   /**  Data fields, construction and save/load methods-

@@ -6,7 +6,7 @@ import util.*;
 
 
 
-public class Trader extends Walker implements World.Journeys {
+public class TradeWalker extends Walker implements World.Journeys {
   
   
   /**  Interface code-
@@ -49,12 +49,12 @@ public class Trader extends Walker implements World.Journeys {
   boolean offMap = false;
   
   
-  public Trader(ObjectType type) {
+  public TradeWalker(ObjectType type) {
     super(type);
   }
   
   
-  public Trader(Session s) throws Exception {
+  public TradeWalker(Session s) throws Exception {
     super(s);
     s.loadTally(cargo);
     tradesWith = (City) s.loadObject();

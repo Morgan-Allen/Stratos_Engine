@@ -25,21 +25,35 @@ public class TestWorld extends TestLoop {
     map.performSetup(10);
     map.attachCity(cityA);
     
-    cityB.stockLevel  .set(CLAY      , 100);
-    cityB.stockLevel  .set(RAW_COTTON, -50);
-    cityB.inventory.set(RAW_COTTON,  50);
+    /*
+    cityB.stockLevel.set(CLAY      , 100);
+    cityB.stockLevel.set(RAW_COTTON, -50);
+    cityB.inventory .set(RAW_COTTON,  50);
+    //*/
     
-    TradeBuilding post = new TradeBuilding(PORTER_HOUSE);
-    post.enterMap(map, 2, 2);
-    post.stockLevel.set(RAW_COTTON,  10);
-    post.stockLevel.set(CLAY      , -20);
-    post.inventory  .set(CLAY      ,  20);
-    post.tradePartner = cityB;
+    TradeBuilding post1 = (TradeBuilding) PORTER_HOUSE.generate();
+    post1.enterMap(map, 2, 2);
+    post1.stockLevel.set(RAW_COTTON,  10);
+    post1.stockLevel.set(CLAY      , -20);
+    post1.inventory .set(CLAY      ,  20);
+    post1.tradePartner = cityB;
+    
+    TradeBuilding post2 = (TradeBuilding) PORTER_HOUSE.generate();
+    post2.enterMap(map, 2, 2);
+    post2.stockLevel.set(RAW_COTTON, -10);
+    post2.stockLevel.set(CLAY      ,  20);
+    post2.inventory .set(RAW_COTTON,  10);
     Tile.applyPaving(map, 2, 1, 8, 1, true);
     
     runGameLoop(map);
   }
 }
+
+
+
+
+
+
 
 
 

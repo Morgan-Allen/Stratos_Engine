@@ -14,7 +14,7 @@ public class TestCrops extends TestLoop {
     CityMap map = new CityMap();
     map.performSetup(20);
     
-    GatherBuilding farm = new GatherBuilding(FARMER_HUT);
+    Building farm = (Building) FARMER_HUT.generate();
     farm.enterMap(map, 9, 9);
     Tile.applyPaving(map, 9, 8, 10, 1, true);
     
@@ -24,7 +24,7 @@ public class TestCrops extends TestLoop {
       if (map.paved  (c.x, c.y)) continue;
       
       GatherBuilding.Crop crop;
-      if (Rand.yes()) crop = new GatherBuilding.Crop(MAIZE );
+      if (Rand.yes()) crop = new GatherBuilding.Crop(MAIZE     );
       else            crop = new GatherBuilding.Crop(RAW_COTTON);
       crop.enterMap(map, c.x, c.y);
       crop.buildLevel = 0.5f + Rand.num();

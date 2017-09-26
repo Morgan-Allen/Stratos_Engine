@@ -8,7 +8,7 @@ import util.*;
 
 
 
-public class TradeBuilding extends CraftBuilding implements Trader.Partner {
+public class TradeBuilding extends CraftBuilding implements TradeWalker.Partner {
   
   
   /**  Data fields, setup and save/load methods-
@@ -67,27 +67,27 @@ public class TradeBuilding extends CraftBuilding implements Trader.Partner {
   /**  Selecting behaviour for walkers-
     */
   void selectWalkerBehaviour(Walker walker) {
-    Trader trader = (Trader) I.cast(walker, Trader.class);
+    TradeWalker trader = (TradeWalker) I.cast(walker, TradeWalker.class);
     if (trader != null) selectTraderBehaviour(trader);
     else super.selectWalkerBehaviour(walker);
   }
   
   
-  void selectTraderBehaviour(Trader trader) {
+  void selectTraderBehaviour(TradeWalker trader) {
     
-    class Order { Tally <Good> cargo; Trader.Partner goes; float rating; }
-    List <Trader.Partner> targets = new List();
-    List <Order> orders  = new List();
+    class Order { Tally <Good> cargo; TradeWalker.Partner goes; float rating; }
+    List <TradeWalker.Partner> targets = new List();
+    List <Order> orders = new List();
     
     for (Building b : map.buildings) {
       if (! b.type.hasFeature(IS_TRADER)) continue;
-      targets.add((Trader.Partner) b);
+      targets.add((TradeWalker.Partner) b);
     }
     if (tradePartner != null) {
       targets.add(tradePartner);
     }
     
-    for (Trader.Partner t : targets) {
+    for (TradeWalker.Partner t : targets) {
       Tally <Good> cargo = new Tally();
       float rating = 0;
       
@@ -105,7 +105,6 @@ public class TradeBuilding extends CraftBuilding implements Trader.Partner {
           cargo.set(good, size);
           rating += size;
         }
-        //*/
       }
       
       if (cargo.size() > 0) {

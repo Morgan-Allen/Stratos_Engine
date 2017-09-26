@@ -12,11 +12,24 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   
   /**  Indexing and save/load methods-
     */
+  final static int
+    IS_FIXTURE    = 0,
+    IS_GOOD       = 1,
+    IS_BUILDING   = 2,
+    IS_CRAFT_BLD  = 3,
+    IS_GATHER_BLD = 4,
+    IS_TRADE_BLD  = 5,
+    IS_HOME_BLD   = 6,
+    IS_WALKER     = 7,
+    IS_TRADE_WLK  = 8
+  ;
+  
   final static Index <ObjectType> INDEX = new Index();
   
   
-  ObjectType(String ID) {
+  ObjectType(String ID, int category) {
     super(INDEX, ID);
+    this.category = category;
   }
   
   
@@ -36,13 +49,14 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   String name;
   int tint = BuildingSet.BLACK_COLOR;
   
+  int category;
   int wide = 1, high = 1;
   boolean blocks = true ;
   boolean mobile = false;
   
   
   //  These are specific to buildings...
-  ObjectType walkerType = null;
+  ObjectType walkerTypes[] = NO_WALKERS;
   int maxWalkers = 1;
   int walkerCountdown = 50;
   
@@ -56,6 +70,11 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   int consumeTime = 500;
   
   
+  void setWalkerTypes(ObjectType... types) {
+    this.walkerTypes = types;
+  }
+  
+  
   //  And these are specific to walkers...
   String names[];
   
@@ -65,6 +84,20 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
     */
   boolean hasFeature(Good feature) {
     return Visit.arrayIncludes(features, feature);
+  }
+  
+  
+  Object generate() {
+    switch (category) {
+      case(IS_FIXTURE  ): return new Fixture(this);
+      case(IS_BUILDING ): return new Building(this);
+      case(IS_CRAFT_BLD): return new CraftBuilding(this);
+      case(IS_TRADE_BLD): return new TradeBuilding(this);
+      case(IS_HOME_BLD ): return new HomeBuilding(this);
+      case(IS_WALKER   ): return new Walker(this);
+      case(IS_TRADE_WLK): return new TradeWalker(this);
+    }
+    return null;
   }
   
   

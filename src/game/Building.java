@@ -101,8 +101,9 @@ public class Building extends Fixture implements Session.Saveable {
     
     if (--walkerCountdown <= 0) {
       
-      if (walkers.size() < type.maxWalkers && type.walkerType != null) {
-        Walker walker = new Walker(type.walkerType);
+      for (ObjectType typeW : type.walkerTypes) {
+        if (numWalkers(typeW) >= walkersNeeded(typeW)) continue;
+        Walker walker = (Walker) typeW.generate();
         walker.enterMap(map, x, y);
         walker.inside = this;
         walker.home   = this;
@@ -115,6 +116,18 @@ public class Building extends Fixture implements Session.Saveable {
       
       walkerCountdown = type.walkerCountdown;
     }
+  }
+  
+  
+  protected int numWalkers(ObjectType type) {
+    int sum = 0;
+    for (Walker w : walkers) if (w.type == type) sum++;
+    return sum;
+  }
+  
+  
+  protected int walkersNeeded(ObjectType type) {
+    return type.maxWalkers;
   }
   
   

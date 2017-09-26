@@ -8,7 +8,6 @@ import util.*;
 
 public class TestCity extends TestLoop {
   
-  
   public static void main(String args[]) {
     
     CityMap map = new CityMap();
@@ -17,20 +16,20 @@ public class TestCity extends TestLoop {
     Tile.applyPaving(map, 3, 8, 12, 1 , true);
     Tile.applyPaving(map, 8, 2, 1 , 16, true);
 
-    Building palace = new HomeBuilding(PALACE    );
-    Building house1 = new HomeBuilding(HOUSE     );
-    Building house2 = new HomeBuilding(HOUSE     );
-    Building court  = new Building    (BALL_COURT);
+    Building palace = (Building) PALACE    .generate();
+    Building house1 = (Building) HOUSE     .generate();
+    Building house2 = (Building) HOUSE     .generate();
+    Building court  = (Building) BALL_COURT.generate();
     
     palace.enterMap(map, 3 , 3 );
     house1.enterMap(map, 9 , 6 );
     house2.enterMap(map, 12, 6 );
     court .enterMap(map, 9 , 9 );
 
-    Building quarry = new CraftBuilding(QUARRY_PIT);
-    Building kiln1  = new CraftBuilding(KILN      );
-    Building kiln2  = new CraftBuilding(KILN      );
-    Building market = new CraftBuilding(MARKET    );
+    Building quarry = (Building) QUARRY_PIT.generate();
+    Building kiln1  = (Building) KILN      .generate();
+    Building kiln2  = (Building) KILN      .generate();
+    Building market = (Building) MARKET    .generate();
     
     quarry.enterMap(map, 4 , 15);
     kiln1 .enterMap(map, 9 , 17);
@@ -53,14 +52,5 @@ public class TestCity extends TestLoop {
     runGameLoop(map);
   }
   
-  
 }
-
-
-
-
-
-
-
-
 

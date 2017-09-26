@@ -14,7 +14,6 @@ public class TestLoop {
     int graphic[][] = new int[map.size][map.size];
     boolean paused = false;
     Coord   hover  = new Coord(-1, -1);
-    boolean click  = false;
     Fixture above  = null ;
     Series <Character> pressed = new Batch();
     
@@ -39,7 +38,6 @@ public class TestLoop {
       
       I.present(graphic, "City Map", 400, 400);
       hover   = I.getDataCursor("City Map", false);
-      click   = I.checkMouseClicked("City Map");
       pressed = I.getKeysPressed("City Map");
       above   = map.above(hover.x, hover.y);
       
