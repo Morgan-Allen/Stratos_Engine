@@ -7,9 +7,11 @@ import java.awt.Color;
 
 
 
-public class BuildingSet {
+public class GameConstants {
   
   
+  /**  Colour prototyping-
+    */
   private static int colour(int r, int g, int b) {
     return new Color(r / 10f, g / 10f, b / 10f).getRGB();
   }
@@ -23,7 +25,76 @@ public class BuildingSet {
     BLACK_COLOR  = colour(0 , 0 , 0 )
   ;
   
+  
+  
+  /**  Terrain-related constants-
+    */
+  final public static int
+    SCAN_PERIOD  = 200,
+    RIPEN_PERIOD = 1000,
+    CROP_YIELD   = 10  //  percent of 1 full item
+  ;
 
+  private static List <Terrain> TERRAINS_LIST = new List();
+  static class Terrain extends ObjectType {
+    
+    int terrainIndex = 0;
+    ObjectType fixtures[] = new ObjectType[0];
+    float      weights [] = new float     [0];
+    
+    Terrain(String name, int index) {
+      super("terrain_"+index, IS_TERRAIN);
+      this.name         = name ;
+      this.terrainIndex = index;
+      this.blocks       = false;
+      TERRAINS_LIST.add(this);
+    }
+    
+    void attachFixtures(Object... args) {
+      int hL = args.length / 2;
+      fixtures = new ObjectType[hL];
+      weights  = new float     [hL];
+      int i = 0;
+      while (i < hL) {
+        fixtures[i] = (ObjectType) args[i * 2];
+        weights [i] = (Float     ) args[(i * 2) + 1];
+        i++;
+      }
+    }
+  }
+  final static Terrain
+    MEADOW = new Terrain("Meadow", 0),
+    JUNGLE = new Terrain("Jungle", 1),
+    DESERT = new Terrain("Desert", 2),
+    LAKE   = new Terrain("Lake"  , 3),
+    ALL_TERRAINS[] = TERRAINS_LIST.toArray(Terrain.class)
+  ;
+  final static ObjectType
+    JUNGLE_TREE1 = new ObjectType("fixture_j_tree1", IS_FIXTURE),
+    DESERT_ROCK1 = new ObjectType("fixture_d_rock1", IS_FIXTURE),
+    DESERT_ROCK2 = new ObjectType("fixture_d_rock2", IS_FIXTURE)
+  ;
+  static {
+    JUNGLE.attachFixtures(JUNGLE_TREE1, 0.50f);
+    MEADOW.attachFixtures(JUNGLE_TREE1, 0.05f);
+    DESERT.attachFixtures(DESERT_ROCK1, 0.15f, DESERT_ROCK2, 0.20f);
+    
+    JUNGLE_TREE1.tint = colour(0, 3, 0);
+    DESERT_ROCK1.tint = colour(6, 4, 4);
+    DESERT_ROCK2.tint = colour(6, 4, 4);
+    JUNGLE      .tint = colour(1, 4, 1);
+    DESERT      .tint = colour(5, 4, 3);
+    MEADOW      .tint = colour(2, 5, 2);
+    LAKE        .tint = colour(0, 0, 3);
+    
+    DESERT_ROCK1.wide = DESERT_ROCK1.high = 2;
+    LAKE.blocks = true;
+  }
+  
+  
+  
+  /**  Economic constants-
+    */
   private static List <Good> GOODS_LIST = new List();
   static class Good extends ObjectType {
     
@@ -55,7 +126,15 @@ public class BuildingSet {
     ALL_GOODS [] = (Good[]) GOODS_LIST.toArray(Good.class),
     NO_GOODS  [] = new Good[0];
   
+  static {
+    MAIZE     .tint = colour(9, 9, 1);
+    RAW_COTTON.tint = colour(9, 8, 9);
+  }
   
+  
+  
+  /**  Infrastructure types-
+    */
   final static ObjectType
     PALACE       = new ObjectType("type_palace"      , IS_HOME_BLD  ),
     HOUSE        = new ObjectType("type_house"       , IS_HOME_BLD  ),
@@ -76,12 +155,7 @@ public class BuildingSet {
     
     NO_WALKERS[] = new ObjectType[0]
   ;
-  
-  
   static {
-    MAIZE .tint = colour(9, 9, 1);
-    RAW_COTTON.tint = colour(9, 8, 9);
-    
     CITIZEN .name = "Citizen" ;
     NOBLE   .name = "Noble"   ;
     WORKER  .name = "Worker"  ;

@@ -2,7 +2,7 @@
 
 package game;
 import util.*;
-import static game.BuildingSet.*;
+import static game.GameConstants.*;
 
 
 

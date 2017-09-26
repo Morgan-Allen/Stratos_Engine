@@ -1,23 +1,21 @@
 
 
 package game;
-import static game.BuildingSet.*;
+import static game.GameConstants.*;
 import util.*;
 
 
 
-public class TestCrops extends TestLoop {
+public class TestTerrain extends TestLoop {
   
   
   public static void main(String args[]) {
     
-    CityMap map = new CityMap();
-    map.performSetup(20);
+    CityMap map = CityMapGenerator.generateTerrain(20, DESERT, MEADOW, JUNGLE);
     
     Building farm = (Building) FARMER_HUT.generate();
     farm.enterMap(map, 9, 9);
     Tile.applyPaving(map, 9, 8, 10, 1, true);
-    
     
     for (Coord c : Visit.grid(6, 6, 8, 8, 1)) {
       if (map.blocked(c.x, c.y)) continue;
@@ -30,14 +28,9 @@ public class TestCrops extends TestLoop {
       crop.buildLevel = 0.5f + Rand.num();
     }
     
+    CityMapGenerator.populateFixtures(map);
+    
     runGameLoop(map);
   }
   
 }
-
-
-
-
-
-
-

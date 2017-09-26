@@ -1,7 +1,7 @@
 
 
 package game;
-import static game.BuildingSet.*;
+import static game.GameConstants.*;
 import util.*;
 
 
@@ -23,8 +23,9 @@ public class TestLoop {
       for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
         int fill = BLANK_COLOR;
         Tile at = map.tileAt(c.x, c.y);
-        if      (at.above != null) fill = at.above.type.tint;
-        else if (at.paved        ) fill = PAVE_COLOR;
+        if      (at.above != null  ) fill = at.above.type.tint;
+        else if (at.paved          ) fill = PAVE_COLOR;
+        else if (at.terrain != null) fill = at.terrain.tint;
         graphic[c.x][c.y] = fill;
       }
       for (Walker w : map.walkers) if (w.inside == null) {
@@ -80,8 +81,10 @@ public class TestLoop {
   
   private static String baseReport(CityMap map, boolean paused) {
     String report = "";
-    report += "Funding: "+map.city.currentFunds;
-    report += "\n";
+    if (map.city != null) {
+      report += "Funding: "+map.city.currentFunds;
+      report += "\n";
+    }
     report += "Paused: "+paused;
     return report;
   }

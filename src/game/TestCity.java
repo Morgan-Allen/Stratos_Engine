@@ -1,7 +1,7 @@
 
 
 package game;
-import static game.BuildingSet.*;
+import static game.GameConstants.*;
 import util.*;
 
 

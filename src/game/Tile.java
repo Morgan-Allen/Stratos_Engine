@@ -1,6 +1,7 @@
 
 
 package game;
+import static game.GameConstants.*;
 import util.*;
 
 
@@ -8,6 +9,8 @@ import util.*;
 public class Tile {
   
   int x, y;
+  
+  Terrain terrain;
   Fixture above;
   boolean paved;
   
@@ -15,12 +18,15 @@ public class Tile {
   
   
   void loadState(Session s) throws Exception {
-    above = (Fixture) s.loadObject();
-    paved = s.loadBool();
+    int terrID = s.loadInt();
+    terrain = terrID == -1 ? null : ALL_TERRAINS[terrID];
+    above   = (Fixture) s.loadObject();
+    paved   = s.loadBool();
   }
   
   
   void saveState(Session s) throws Exception {
+    s.saveInt(terrain == null ? -1 : terrain.terrainIndex);
     s.saveObject(above);
     s.saveBool(paved);
   }

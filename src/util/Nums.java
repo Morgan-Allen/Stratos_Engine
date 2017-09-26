@@ -68,6 +68,11 @@ public final class Nums {
   }
   
   
+  public static float log(float num, float exp) {
+    return (float) (Math.log(num) / Math.log(exp));
+  }
+  
+  
   public static float sqrt(float f) {
     return (float) Math.sqrt(f);
   }
