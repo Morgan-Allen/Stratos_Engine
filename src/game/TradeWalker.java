@@ -185,11 +185,13 @@ public class TradeWalker extends Walker implements World.Journeys {
   void takeOnGoods(Partner store, Tally <Good> taken, boolean doPayment) {
     if (store == null) return;
     
+    cargo.clear();
     int totalCost = 0;
     
     for (Good g : taken.keys()) {
       float amount = taken.valueFor(g);
       cargo.set(g, amount);
+      store.inventory().add(0 - amount, g);
       totalCost += amount * g.price;
     }
     if (doPayment) profits -= totalCost;

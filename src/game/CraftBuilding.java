@@ -11,6 +11,9 @@ public class CraftBuilding extends Building {
   
   /**  Data fields, construction and save/load methods-
     */
+  boolean stalled = false;
+  
+  
   CraftBuilding(ObjectType type) {
     super(type);
   }
@@ -18,11 +21,13 @@ public class CraftBuilding extends Building {
   
   public CraftBuilding(Session s) throws Exception {
     super(s);
+    stalled = s.loadBool();
   }
   
   
   public void saveState(Session s) throws Exception {
     super.saveState(s);
+    s.saveBool(stalled);
   }
   
   
@@ -61,36 +66,43 @@ public class CraftBuilding extends Building {
   void advanceProduction() {
     if (craftProgress > 1) return;
     
-    boolean anyRoom = false;
+    boolean anyRoom = false, allMaterials = true;
+    
     for (Good made : produced()) {
       if (inventory.valueFor(made) < stockLimit(made)) anyRoom = true;
     }
-    if (! anyRoom) return;
-    
     for (Good need : needed()) {
-      if (inventory.valueFor(need) <= 0) return;
+      if (inventory.valueFor(need) <= 0) allMaterials = false;
     }
     
-    float prog = 1f / type.craftTime;
-    for (Good need : needed()) {
-      inventory.add(0 - prog, need);
-    }
+    stalled = (! allMaterials) || (! anyRoom);
     
-    craftProgress = Nums.min(craftProgress + prog, 1);
-    if (craftProgress < 1) return;
-    
-    for (Good made : produced()) {
-      if (inventory.valueFor(made) >= stockLimit(made)) continue;
-      inventory.add(1, made);
+    if (! stalled) {
+      float prog = 1f / type.craftTime;
       
-      I.say(this+" crafted 1 "+made);
+      for (Good need : needed()) {
+        inventory.add(0 - prog, need);
+      }
+      craftProgress = Nums.min(craftProgress + prog, 1);
+      
+      if (craftProgress >= 1) {
+        for (Good made : produced()) {
+          if (inventory.valueFor(made) >= stockLimit(made)) continue;
+          inventory.add(1, made);
+          
+          I.say(this+" crafted 1 "+made);
+        }
+        craftProgress = 0;
+      }
     }
-    
-    craftProgress = 0;
   }
   
   
   void selectWalkerBehaviour(Walker walker) {
+    
+    class Order { Building goes; Good good; float amount; }
+    Pick <Order> pick = new Pick();
+    
     for (Good made : produced()) {
       int amount = (int) inventory.valueFor(made);
       if (amount <= 0) continue;
@@ -101,7 +113,20 @@ public class CraftBuilding extends Building {
       amount = Nums.min(amount, 10                                   );
       amount = Nums.min(amount, 2 + (int) goes.demands.valueFor(made));
       
-      walker.beginDelivery(this, goes, Walker.JOB_DELIVER, made, amount);
+      float distFactor = 10 + PathSearch.distance(entrance, goes.entrance);
+      Order o = new Order();
+      o.goes   = goes  ;
+      o.good   = made  ;
+      o.amount = amount;
+      pick.compare(o, amount / distFactor);
+    }
+    
+    if (! pick.empty()) {
+      Order o = pick.result();
+      walker.beginDelivery(this, o.goes, Walker.JOB_DELIVER, o.good, o.amount);
+    }
+    else {
+      walker.startRandomWalk();
     }
   }
   

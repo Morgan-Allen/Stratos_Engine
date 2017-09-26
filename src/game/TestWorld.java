@@ -49,23 +49,23 @@ public class TestWorld extends TestLoop {
     post1.inventory .set(COTTON ,  20);
     post1.inventory .set(POTTERY,  20);
     
-    /*
     TradeBuilding post2 = (TradeBuilding) PORTER_HOUSE.generate();
     post2.enterMap(map, 5, 6);
     post2.ID = "(Gets Clay)";
     post2.tradeLevel.set(RAW_COTTON, -10);
     post2.tradeLevel.set(CLAY      ,  20);
     post2.inventory .set(RAW_COTTON,  10);
-    //*/
-    //*
+    
     Building kiln = (Building) KILN.generate();
     kiln.enterMap(map, 2, 3);
     
     Building weaver = (Building) WEAVER.generate();
     weaver.enterMap(map, 5, 3);
-    //*/
     
     runGameLoop(map);
   }
 }
+
+
+
 
