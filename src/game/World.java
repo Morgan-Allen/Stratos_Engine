@@ -20,14 +20,15 @@ public class World implements Session.Saveable {
   }
   
   static interface Journeys {
-    void onArrival(City goes);
+    void onArrival(City goes, Journey journey);
   }
   
   
   
   /**  Data fields, setup and save/load methods-
     */
-  List <City   > cities   = new List();
+  int time = 0;
+  List <City> cities = new List();
   List <Journey> journeys = new List();
   
   
@@ -39,6 +40,7 @@ public class World implements Session.Saveable {
   public World(Session s) throws Exception {
     s.cacheInstance(this);
     
+    time = s.loadInt();
     s.loadObjects(cities);
     
     for (int n = s.loadInt(); n-- > 0;) {
@@ -55,6 +57,7 @@ public class World implements Session.Saveable {
   
   public void saveState(Session s) throws Exception {
     
+    s.saveInt(time);
     s.saveObjects(cities);
     
     s.saveInt(journeys.size());
@@ -71,7 +74,7 @@ public class World implements Session.Saveable {
   
   /**  Registering and updating journeys:
     */
-  void beginJourney(City from, City goes) {
+  void beginJourney(City from, City goes, Journeys... going) {
     if (from == null || goes == null) return;
     
     Integer distance = from.distances.get(goes);
@@ -80,8 +83,9 @@ public class World implements Session.Saveable {
     Journey j = new Journey();
     j.from       = from;
     j.goes       = goes;
-    j.startTime  = from.map.time;
+    j.startTime  = time;
     j.arriveTime = j.startTime + (distance * Walker.TRADE_DIST_TIME);
+    for (Journeys g : going) j.going.add(g);
     journeys.add(j);
   }
   
@@ -90,22 +94,28 @@ public class World implements Session.Saveable {
   /**  Regular updates-
     */
   void updateFrom(CityMap map) {
+    
+    this.time = map.time;
+    
     for (City city : cities) {
       city.updateFrom(map);
     }
+    
     for (Journey j : journeys) {
+      I.say("\nUpdating journey: "+j.from+" to "+j.goes);
+      I.say("  Embarked: "+j.going);
+      I.say("  Time: "+map.time+", arrives: "+j.arriveTime);
+      
       if (map.time >= j.arriveTime) {
         journeys.remove(j);
         for (Journeys g : j.going) {
-          g.onArrival(j.goes);
+          g.onArrival(j.goes, j);
         }
       }
     }
   }
   
 }
-
-
 
 
 

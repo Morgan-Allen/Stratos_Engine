@@ -64,6 +64,7 @@ public class BuildingSet {
     FARMER_HUT   = new ObjectType("type_farmer_hut"  , IS_GATHER_BLD),
     QUARRY_PIT   = new ObjectType("type_quarry_pit"  , IS_GATHER_BLD),
     KILN         = new ObjectType("type_kiln"        , IS_CRAFT_BLD ),
+    WEAVER       = new ObjectType("type_weaver"      , IS_CRAFT_BLD ),
     MARKET       = new ObjectType("type_market"      , IS_CRAFT_BLD ),
     PORTER_HOUSE = new ObjectType("type_porter_house", IS_TRADE_BLD ),
     
@@ -130,6 +131,15 @@ public class BuildingSet {
     KILN.produced = new Good[] { POTTERY };
     KILN.craftTime *= 2;
     
+    WEAVER.name = "Weaver";
+    WEAVER.wide = 2;
+    WEAVER.high = 2;
+    WEAVER.tint = colour(7, 3, 7);
+    WEAVER.setWalkerTypes(WORKER);
+    WEAVER.needed   = new Good[] { RAW_COTTON };
+    WEAVER.produced = new Good[] { COTTON };
+    WEAVER.craftTime *= 2;
+    
     MARKET.name = "Marketplace";
     MARKET.wide = 4;
     MARKET.high = 4;
@@ -141,7 +151,7 @@ public class BuildingSet {
     PORTER_HOUSE.name = "Warehouse";
     PORTER_HOUSE.wide = 3;
     PORTER_HOUSE.high = 3;
-    PORTER_HOUSE.tint = colour(7, 3, 7);
+    PORTER_HOUSE.tint = colour(8, 4, 8);
     PORTER_HOUSE.setWalkerTypes(PORTERS, WORKER);
     PORTER_HOUSE.features = new Good[] { IS_TRADER };
   }

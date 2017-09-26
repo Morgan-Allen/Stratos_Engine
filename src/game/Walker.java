@@ -129,11 +129,18 @@ public class Walker implements Session.Saveable {
   
   
   void exitMap() {
-    if (home != null) home.walkers.remove(this);
     if (inside != null) setInside(inside, false);
     map.walkers.remove(this);
+    map    = null;
+    visits = null;
+    target = null;
+    path   = null;
+  }
+  
+  
+  void setDestroyed() {
+    if (home != null) home.walkers.remove(this);
     home = null;
-    map  = null;
   }
   
   
@@ -148,8 +155,10 @@ public class Walker implements Session.Saveable {
     }
     
     if (path != null) {
-      boolean visiting = visits != null;
+      boolean visiting  = visits != null;
+      boolean targeting = target != null;
       
+      //  TODO:  You should also re-route if the path is blocked!
       if (visiting && Visit.last(path) != visits.entrance) {
         pathToward(visits, target, jobType);
       }
@@ -163,7 +172,7 @@ public class Walker implements Session.Saveable {
             onVisit(visits);
             home.walkerVisits(this, visits);
           }
-          else {
+          if (targeting) {
             onTarget(target);
             home.walkerTargets(this, target);
           }

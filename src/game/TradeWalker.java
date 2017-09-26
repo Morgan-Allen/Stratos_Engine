@@ -108,32 +108,13 @@ public class TradeWalker extends Walker implements World.Journeys {
   }
   
   
-  protected void onTarget(Tile target) {
-    if (target == null || tradesWith == null) return;
-    tradesWith.world.beginJourney(home.map.city, tradesWith);
-    exitMap();
-  }
-  
-  
-  public void onArrival(City goes) {
-    City homeCity = home.map.city;
-    if (goes == homeCity) {
-      Tile entry = findTransitPoint(homeCity.map, tradesWith);
-      enterMap(homeCity.map, entry.x, entry.y);
-      startReturnHome();
-    }
-    else {
-      offloadGoods(tradesWith);
-      tradesWith.world.beginJourney(tradesWith, homeCity);
-    }
-  }
-  
-  
   protected void onVisit(Building visits) {
     Partner partner = (Partner) I.cast(visits, Partner.class);
-    
+
     if (visits == home) {
       offloadGoods(partner);
+      home.map.city.currentFunds += profits;
+      profits = 0;
     }
     else {
       offloadGoods(partner);
@@ -158,7 +139,30 @@ public class TradeWalker extends Walker implements World.Journeys {
     cargo.clear();
   }
   
+  
+  protected void onTarget(Tile target) {
+    if (target == null || tradesWith == null) return;
+    tradesWith.world.beginJourney(home.map.city, tradesWith, this);
+    exitMap();
+  }
+  
+  
+  public void onArrival(City goes, World.Journey journey) {
+    City homeCity = home.map.city;
+    
+    if (goes == homeCity) {
+      Tile entry = findTransitPoint(homeCity.map, tradesWith);
+      enterMap(homeCity.map, entry.x, entry.y);
+      startReturnHome();
+    }
+    else {
+      offloadGoods(tradesWith);
+      tradesWith.world.beginJourney(tradesWith, homeCity, this);
+    }
+  }
+  
 }
+
 
 
 

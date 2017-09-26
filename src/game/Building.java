@@ -107,7 +107,8 @@ public class Building extends Fixture implements Session.Saveable {
         walker.enterMap(map, x, y);
         walker.inside = this;
         walker.home   = this;
-        walkers.add(walker);
+        walkers .add(walker);
+        visitors.add(walker);
       }
       
       for (Walker walker : walkers) {

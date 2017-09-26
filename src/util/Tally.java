@@ -45,6 +45,11 @@ public class Tally <K> {
   }
   
   
+  public boolean empty() {
+    return store.isEmpty();
+  }
+  
+  
   public Iterable <K> keys() {
     return store.keySet();
   }

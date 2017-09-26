@@ -46,7 +46,7 @@ public class TestLoop {
         I.presentInfo(reportFor((Building) above), "City Map");
       }
       else {
-        I.presentInfo("Paused: "+paused, "City Map");
+        I.presentInfo(baseReport(map, paused), "City Map");
       }
       
       if (pressed.includes('p')) {
@@ -64,6 +64,7 @@ public class TestLoop {
         I.say("\nWILL LOAD SAVED MAP...");
         Session s = Session.loadSession("test_save.tlt", true);
         map = (CityMap) s.loaded()[0];
+        if (map == null) throw new Exception("No map loaded!");
       }
       catch (Exception e) { I.report(e); }
       
@@ -74,6 +75,15 @@ public class TestLoop {
       try { Thread.sleep(100); }
       catch (Exception e) {}
     }
+  }
+  
+  
+  private static String baseReport(CityMap map, boolean paused) {
+    String report = "";
+    report += "Funding: "+map.city.currentFunds;
+    report += "\n";
+    report += "Paused: "+paused;
+    return report;
   }
   
   
