@@ -12,7 +12,7 @@ public class TradeWalker extends Walker implements World.Journeys {
   /**  Interface code-
     */
   static interface Partner {
-    Tally <Good> stockLevel();
+    Tally <Good> tradeLevel();
     Tally <Good> inventory ();
   }
   
@@ -84,7 +84,7 @@ public class TradeWalker extends Walker implements World.Journeys {
       this.cargo.add(amount, g);
     }
     
-    pathToward(goes, null, JOB_DELIVER);
+    embarkOnVisit(goes, 0, JOB_TRADING);
   }
   
   
@@ -99,10 +99,10 @@ public class TradeWalker extends Walker implements World.Journeys {
       from.inventory.add(0 - amount, g);
       this.cargo.add(amount, g);
     }
+    profits    = 0;
+    tradesWith = goes;
     
-    profits = 0;
-    this.tradesWith = goes;
-    pathToward(null, exits, JOB_TRADING);
+    embarkOnTarget(exits, 0, JOB_TRADING);
   }
   
   
@@ -141,6 +141,9 @@ public class TradeWalker extends Walker implements World.Journeys {
   
   void offloadGoods(Partner store) {
     if (store == null) return;
+    
+    I.say("\n"+this+" depositing goods at "+store);
+    I.say("  Cargo: "+cargo);
     
     int totalValue = 0;
     for (Good g : cargo.keys()) {

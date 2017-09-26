@@ -142,7 +142,7 @@ public class BuildingSet {
     PORTER_HOUSE.wide = 3;
     PORTER_HOUSE.high = 3;
     PORTER_HOUSE.tint = colour(7, 3, 7);
-    PORTER_HOUSE.setWalkerTypes(WORKER, PORTERS);
+    PORTER_HOUSE.setWalkerTypes(PORTERS, WORKER);
     PORTER_HOUSE.features = new Good[] { IS_TRADER };
   }
 }

@@ -92,14 +92,16 @@ public class CraftBuilding extends Building {
   
   void selectWalkerBehaviour(Walker walker) {
     for (Good made : produced()) {
-      int goodAmount = (int) inventory.valueFor(made);
-      if (goodAmount <= 0) return;
+      int amount = (int) inventory.valueFor(made);
+      if (amount <= 0) continue;
       
       Building goes = findNearestDemanding(null, made, type.maxDeliverRange);
-      if (goes == null) return;
+      if (goes == null) continue;
       
-      goodAmount = Nums.min(goodAmount, 10);
-      walker.beginDelivery(this, goes, Walker.JOB_DELIVER, made, goodAmount);
+      amount = Nums.min(amount, 10                                   );
+      amount = Nums.min(amount, 2 + (int) goes.demands.valueFor(made));
+      
+      walker.beginDelivery(this, goes, Walker.JOB_DELIVER, made, amount);
     }
   }
   

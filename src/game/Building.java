@@ -189,9 +189,13 @@ public class Building extends Fixture implements Session.Saveable {
     Good needed, int maxDist
   ) {
     Pick <Building> pick = new Pick();
+    boolean trades = this.type.isTradeBuilding();
     
     for (Building b : map.buildings) {
       if (type != null && b.type != type) continue;
+      
+      boolean otherTrades = b.type.isTradeBuilding();
+      if (trades && otherTrades) continue;
       
       boolean featured = b.type.hasFeature(feature);
       if (feature != null && ! featured) continue;
@@ -202,6 +206,7 @@ public class Building extends Fixture implements Session.Saveable {
       float rating = 1;
       if (needed != null) rating *= b.demands.valueFor(needed);
       if (rating <= 0) continue;
+      if (otherTrades) rating /= 2;
       
       pick.compare(b, rating - dist);
     }

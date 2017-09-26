@@ -13,7 +13,7 @@ public class TradeBuilding extends CraftBuilding implements TradeWalker.Partner 
   
   /**  Data fields, setup and save/load methods-
     */
-  Tally <Good> stockLevel = new Tally();
+  Tally <Good> tradeLevel = new Tally();
   City tradePartner = null;
   Good needed[] = NO_GOODS, produced[] = NO_GOODS;
   
@@ -25,14 +25,14 @@ public class TradeBuilding extends CraftBuilding implements TradeWalker.Partner 
   
   public TradeBuilding(Session s) throws Exception {
     super(s);
-    s.loadTally(stockLevel);
+    s.loadTally(tradeLevel);
     tradePartner = (City) s.loadObject();
   }
   
   
   public void saveState(Session s) throws Exception {
     super.saveState(s);
-    s.saveTally(stockLevel);
+    s.saveTally(tradeLevel);
     s.saveObject(tradePartner);
   }
 
@@ -43,10 +43,10 @@ public class TradeBuilding extends CraftBuilding implements TradeWalker.Partner 
   void updateDemands() {
     
     Batch <Good> impB = new Batch(), expB = new Batch();
-    for (Good g : stockLevel.keys()) {
-      float level = stockLevel.valueFor(g);
-      if (level > 0) impB.add(g);
-      if (level < 0) expB.add(g);
+    for (Good g : tradeLevel.keys()) {
+      float level = tradeLevel.valueFor(g);
+      if (level != 0) impB.add(g);
+      if (level != 0) expB.add(g);
     }
     produced = impB.toArray(Good.class);
     needed   = expB.toArray(Good.class);
@@ -55,12 +55,19 @@ public class TradeBuilding extends CraftBuilding implements TradeWalker.Partner 
   }
   
   
-  public Tally <Good> stockLevel() { return stockLevel; }
+  public Tally <Good> tradeLevel() { return tradeLevel; }
   public Tally <Good> inventory () { return inventory ; }
-  Good[] needed  () { return needed; }
+  
+  Good[] needed  () { return needed  ; }
   Good[] produced() { return produced; }
-  float stockNeeded(Good need) { return 0 - stockLevel.valueFor(need); }
-  float stockLimit (Good made) { return     stockLevel.valueFor(made); }
+  
+  float stockNeeded(Good need) { return Nums.abs(tradeLevel.valueFor(need)); }
+  float stockLimit (Good made) { return Nums.abs(tradeLevel.valueFor(made)); }
+  
+  
+  void advanceProduction() {
+    return;
+  }
   
   
   
@@ -68,8 +75,12 @@ public class TradeBuilding extends CraftBuilding implements TradeWalker.Partner 
     */
   void selectWalkerBehaviour(Walker walker) {
     TradeWalker trader = (TradeWalker) I.cast(walker, TradeWalker.class);
-    if (trader != null) selectTraderBehaviour(trader);
-    else super.selectWalkerBehaviour(walker);
+    if (trader != null) {
+      selectTraderBehaviour(trader);
+    }
+    else {
+      super.selectWalkerBehaviour(walker);
+    }
   }
   
   
@@ -80,12 +91,13 @@ public class TradeBuilding extends CraftBuilding implements TradeWalker.Partner 
     List <Order> orders = new List();
     
     for (Building b : map.buildings) {
-      if (! b.type.hasFeature(IS_TRADER)) continue;
+      if (b == this || ! (b instanceof TradeWalker.Partner)) continue;
       targets.add((TradeWalker.Partner) b);
     }
     if (tradePartner != null) {
       targets.add(tradePartner);
     }
+    
     
     for (TradeWalker.Partner t : targets) {
       Tally <Good> cargo = new Tally();
@@ -93,11 +105,11 @@ public class TradeBuilding extends CraftBuilding implements TradeWalker.Partner 
       
       for (Good good : ALL_GOODS) {
         
-        float amountO  = inventory ().valueFor(good);
-        float demandO  = stockLevel().valueFor(good);
+        float amountO  = this.inventory ().valueFor(good);
+        float demandO  = this.tradeLevel().valueFor(good);
         float surplus  = amountO - demandO;
         float amountD  = t.inventory ().valueFor(good);
-        float demandD  = t.stockLevel().valueFor(good);
+        float demandD  = t.tradeLevel().valueFor(good);
         float shortage = demandD - amountD;
         
         if (surplus > 0 && shortage > 0) {
@@ -123,6 +135,11 @@ public class TradeBuilding extends CraftBuilding implements TradeWalker.Partner 
     
     if (! pick.empty()) {
       Order o = pick.result();
+      
+      I.say("\n"+this+" assigning delivery to "+trader);
+      I.say("  Cargo is: "+o.cargo);
+      I.say("  Destination is: "+o.goes);
+      
       if (o.goes instanceof City) {
         City goes = (City) o.goes;
         trader.beginTravel(this, goes, o.cargo);

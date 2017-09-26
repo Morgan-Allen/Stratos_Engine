@@ -217,7 +217,7 @@ public class Walker implements Session.Saveable {
   
   /**  Pathing and visitation utilities:
     */
-  protected void setInside(Building b, boolean yes) {
+  private void setInside(Building b, boolean yes) {
     if (b == null || home == null) return;
     
     if (yes && b != inside) {
@@ -233,7 +233,7 @@ public class Walker implements Session.Saveable {
   }
 
   
-  protected void assignPath(Tile path[], Building visits, Tile target) {
+  private void assignPath(Tile path[], Building visits, Tile target) {
     this.path      = path;
     this.visits    = visits;
     this.target    = target;
@@ -241,7 +241,7 @@ public class Walker implements Session.Saveable {
   }
   
   
-  protected void pathToward(Building visits, Tile target, int jobType) {
+  private void pathToward(Building visits, Tile target, int jobType) {
     
     boolean visiting = visits != null;
     this.jobType = jobType;
@@ -312,7 +312,7 @@ public class Walker implements Session.Saveable {
   }
   
   
-  void beginGathering(Tile goes, int maxTime) {
+  void embarkOnTarget(Tile goes, int maxTime, int jobType) {
     if (goes == null) return;
     
     I.say(this+" will gather "+goes+" for time "+maxTime);
@@ -320,7 +320,7 @@ public class Walker implements Session.Saveable {
     this.timeSpent = 0;
     this.maxTime   = maxTime;
     
-    pathToward(null, goes, JOB_GATHERING);
+    pathToward(null, goes, jobType);
   }
   
   
@@ -328,6 +328,9 @@ public class Walker implements Session.Saveable {
     if (home == null || home.entrance == null || inside == home) return;
     
     I.say(this+" will return home...");
+    
+    this.timeSpent = 0;
+    this.maxTime   = 0;
     
     pathToward(home, null, JOB_RESTING);
   }

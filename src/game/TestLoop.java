@@ -78,7 +78,7 @@ public class TestLoop {
   
   
   private static String reportFor(Building b) {
-    String report = ""+b.type.name+"\n";
+    String report = ""+b+"\n";
     
     if (b.walkers.size() > 0) {
       report += "\nWalkers:";

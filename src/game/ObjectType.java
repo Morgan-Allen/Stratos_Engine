@@ -87,6 +87,11 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   }
   
   
+  boolean isTradeBuilding() {
+    return category == IS_TRADE_BLD;
+  }
+  
+  
   Object generate() {
     switch (category) {
       case(IS_FIXTURE  ): return new Fixture(this);

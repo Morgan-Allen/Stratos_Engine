@@ -15,6 +15,9 @@ public class TestWorld extends TestLoop {
     City    cityB = new City(world);
     CityMap map   = new CityMap();
     
+    cityA.name = "Xochimilco";
+    cityB.name = "Tlacopan"  ;
+    
     cityA.map = map;
     world.cities.add(cityA);
     world.cities.add(cityB);
@@ -32,18 +35,24 @@ public class TestWorld extends TestLoop {
     //*/
     
     TradeBuilding post1 = (TradeBuilding) PORTER_HOUSE.generate();
-    post1.enterMap(map, 2, 2);
-    post1.stockLevel.set(RAW_COTTON,  10);
-    post1.stockLevel.set(CLAY      , -20);
+    post1.enterMap(map, 1, 6);
+    post1.ID = "(Gets Cotton)";
+    post1.tradeLevel.set(RAW_COTTON,  10);
+    post1.tradeLevel.set(CLAY      , -20);
     post1.inventory .set(CLAY      ,  20);
     post1.tradePartner = cityB;
     
     TradeBuilding post2 = (TradeBuilding) PORTER_HOUSE.generate();
-    post2.enterMap(map, 2, 2);
-    post2.stockLevel.set(RAW_COTTON, -10);
-    post2.stockLevel.set(CLAY      ,  20);
+    post2.enterMap(map, 5, 6);
+    post2.ID = "(Gets Clay)";
+    post2.tradeLevel.set(RAW_COTTON, -10);
+    post2.tradeLevel.set(CLAY      ,  20);
     post2.inventory .set(RAW_COTTON,  10);
-    Tile.applyPaving(map, 2, 1, 8, 1, true);
+    Tile.applyPaving(map, 1, 5, 8, 1, true);
+    
+    Building kiln = (Building) KILN.generate();
+    kiln.enterMap(map, 2, 3);
+    
     
     runGameLoop(map);
   }

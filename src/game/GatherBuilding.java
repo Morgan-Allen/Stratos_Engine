@@ -99,7 +99,8 @@ public class GatherBuilding extends CraftBuilding {
     
     Crop goes = pick.result();
     if (goes != null) {
-      walker.beginGathering(map.tileAt(goes.x, goes.y), 2);
+      Tile under = map.tileAt(goes.x, goes.y);
+      walker.embarkOnTarget(under, 2, Walker.JOB_GATHERING);
       return true;
     }
     

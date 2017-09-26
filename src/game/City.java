@@ -11,13 +11,15 @@ public class City implements Session.Saveable, TradeWalker.Partner {
   
   /**  Data fields, construction and save/load methods-
     */
+  String name;
+  
   World world;
   
   float mapX, mapY;
   Table <City, Integer> distances = new Table();
   
   int currentFunds = 0;
-  Tally <Good> stockLevel = new Tally();
+  Tally <Good> tradeLevel = new Tally();
   Tally <Good> inventory  = new Tally();
   
   boolean active;
@@ -32,6 +34,8 @@ public class City implements Session.Saveable, TradeWalker.Partner {
   public City(Session s) throws Exception {
     s.cacheInstance(this);
     
+    name = s.loadString();
+    
     world = (World) s.loadObject();
     
     mapX = s.loadFloat();
@@ -41,7 +45,7 @@ public class City implements Session.Saveable, TradeWalker.Partner {
     }
     
     currentFunds = s.loadInt();
-    s.loadTally(stockLevel);
+    s.loadTally(tradeLevel);
     s.loadTally(inventory);
     
     active = s.loadBool();
@@ -50,6 +54,8 @@ public class City implements Session.Saveable, TradeWalker.Partner {
   
   
   public void saveState(Session s) throws Exception {
+    
+    s.saveString(name);
     
     s.saveObject(world);
     
@@ -62,7 +68,7 @@ public class City implements Session.Saveable, TradeWalker.Partner {
     }
     
     s.saveInt(currentFunds);
-    s.saveTally(stockLevel);
+    s.saveTally(tradeLevel);
     s.saveTally(inventory);
     
     s.saveBool(active);
@@ -91,7 +97,7 @@ public class City implements Session.Saveable, TradeWalker.Partner {
   }
   
   
-  public Tally <Good> stockLevel() { return stockLevel; }
+  public Tally <Good> tradeLevel() { return tradeLevel; }
   public Tally <Good> inventory () { return inventory ; }
   
   
@@ -103,6 +109,13 @@ public class City implements Session.Saveable, TradeWalker.Partner {
     return;
   }
   
+  
+  
+  /**  Graphical, debug and interface methods-
+    */
+  public String toString() {
+    return name;
+  }
 }
 
 

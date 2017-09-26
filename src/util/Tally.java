@@ -80,5 +80,11 @@ public class Tally <K> {
   public int size() {
     return store.size();
   }
+  
+  
+  
+  public String toString() {
+    return store.toString();
+  }
 }
 
