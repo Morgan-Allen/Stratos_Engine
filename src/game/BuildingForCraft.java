@@ -6,7 +6,7 @@ import util.*;
 
 
 
-public class CraftBuilding extends Building {
+public class BuildingForCraft extends Building {
   
   
   /**  Data fields, construction and save/load methods-
@@ -14,12 +14,12 @@ public class CraftBuilding extends Building {
   boolean stalled = false;
   
   
-  CraftBuilding(ObjectType type) {
+  BuildingForCraft(ObjectType type) {
     super(type);
   }
   
   
-  public CraftBuilding(Session s) throws Exception {
+  public BuildingForCraft(Session s) throws Exception {
     super(s);
     stalled = s.loadBool();
   }

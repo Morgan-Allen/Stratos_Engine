@@ -5,6 +5,8 @@ import util.*;
 import static game.ObjectType.*;
 import java.awt.Color;
 
+import game.GameConstants.Good;
+
 
 
 public class GameConstants {
@@ -229,7 +231,20 @@ public class GameConstants {
     PORTER_HOUSE.setWalkerTypes(PORTERS, WORKER);
     PORTER_HOUSE.features = new Good[] { IS_TRADER };
   }
+  
+  
+  
+  /**  Commonly used interfaces-
+    */
+  static interface Trader {
+    Tally <Good> tradeLevel();
+    Tally <Good> inventory ();
+    City tradeOrigin();
+  }
 }
+
+
+
 
 
 

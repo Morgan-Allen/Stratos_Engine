@@ -2,24 +2,159 @@
 
 package game;
 import static game.GameConstants.*;
+import static game.CityMap.*;
 import util.*;
 
 
 
-public class TradeWalker extends Walker implements World.Journeys {
+public class WalkerForTrade extends Walker implements World.Journeys {
   
   
-  /**  Interface code-
+  
+  /**  Data fields, construction and save/load methods-
     */
-  static interface Partner {
-    Tally <Good> tradeLevel();
-    Tally <Good> inventory ();
-    City tradeOrigin();
+  Tally <Good> cargo = new Tally();
+  float profits;
+  City tradesWith;
+  boolean offMap = false;
+  
+  
+  public WalkerForTrade(ObjectType type) {
+    super(type);
   }
   
   
+  public WalkerForTrade(Session s) throws Exception {
+    super(s);
+    s.loadTally(cargo);
+    tradesWith = (City) s.loadObject();
+    profits    = s.loadFloat();
+    offMap     = s.loadBool();
+  }
+  
+  
+  public void saveState(Session s) throws Exception {
+    super.saveState(s);
+    s.saveTally(cargo);
+    s.saveObject(tradesWith);
+    s.saveFloat(profits);
+    s.saveBool(offMap);
+  }
+  
+  
+  
+  /**  Behaviour scripting...
+    */
+  void beginDelivery(Building from, Building goes, Tally <Good> taken) {
+    if (goes == null || goes.entrance == null) return;
+    if (! (from instanceof Trader)) return;
+    
+    cargo.clear();
+    takeOnGoods((Trader) from, taken, false);
+    embarkOnVisit(goes, 0, JOB_TRADING);
+  }
+  
+  
+  void beginTravel(Building from, City goes, Tally <Good> taken) {
+    if (goes == null || ! (from instanceof Trader)) return;
+    
+    Tile exits = findTransitPoint(map, goes);
+    if (exits == null) return;
+    
+    this.cargo.clear();
+    takeOnGoods((Trader) from, taken, false);
+    profits    = 0;
+    tradesWith = goes;
+    
+    embarkOnTarget(exits, 0, JOB_TRADING);
+  }
+  
+  
+  protected void onVisit(Building visits) {
+    Trader partner = (Trader) I.cast(visits, Trader.class);
+    City homeCity = home.map.city;
+
+    if (visits == home) {
+      offloadGoods(partner, false);
+      homeCity.currentFunds += profits;
+      profits    = 0;
+      tradesWith = null;
+    }
+    else {
+      offloadGoods(partner, false);
+    }
+  }
+  
+  
+  void offloadGoods(Trader store, boolean doPayment) {
+    if (store == null) return;
+    
+    int totalValue = 0;
+    for (Good g : cargo.keys()) {
+      float amount = cargo.valueFor(g);
+      store.inventory().add(amount, g);
+      totalValue += amount * g.price;
+    }
+    
+    if (doPayment) profits += totalValue;
+    cargo.clear();
+    
+    I.say("\n"+this+" depositing goods at "+store);
+    I.say("  Cargo: "+cargo);
+    I.say("  Value: "+totalValue);
+  }
+  
+  
+  void takeOnGoods(Trader store, Tally <Good> taken, boolean doPayment) {
+    if (store == null) return;
+    
+    cargo.clear();
+    int totalCost = 0;
+    
+    for (Good g : taken.keys()) {
+      float amount = taken.valueFor(g);
+      cargo.set(g, amount);
+      store.inventory().add(0 - amount, g);
+      totalCost += amount * g.price;
+    }
+    if (doPayment) profits -= totalCost;
+    
+    I.say("\n"+this+" taking on goods from "+store);
+    I.say("  New cargo: "+cargo);
+    I.say("  Cost: "+totalCost+" Profit: "+profits);
+  }
+  
+  
+  protected void onTarget(Tile target) {
+    if (target == null || tradesWith == null) return;
+    tradesWith.world.beginJourney(home.map.city, tradesWith, this);
+    exitMap();
+  }
+  
+  
+  public void onArrival(City goes, World.Journey journey) {
+    if (home.destroyed()) return;
+    
+    City homeCity = home.map.city;
+    if (goes == homeCity) {
+      Tile entry = findTransitPoint(homeCity.map, tradesWith);
+      enterMap(homeCity.map, entry.x, entry.y);
+      startReturnHome();
+    }
+    else {
+      Tally <Good> taken = configureCargo(goes, (Trader) home, false);
+      offloadGoods(goes,        true);
+      takeOnGoods (goes, taken, true);
+      tradesWith.world.beginJourney(tradesWith, homeCity, this);
+    }
+  }
+  
+  
+  
+  /**  Public Utility methods-
+    */
   static Tally <Good> configureCargo(
-    Partner from, Partner goes, boolean cityOnly
+    Trader from, Trader goes, boolean cityOnly
   ) {
     Tally <Good> cargo = new Tally();
     
@@ -44,7 +179,7 @@ public class TradeWalker extends Walker implements World.Journeys {
   }
   
   
-  static float distanceRating(Partner from, Partner goes) {
+  static float distanceRating(Trader from, Trader goes) {
     
     City fromC = from.tradeOrigin(), goesC = goes.tradeOrigin();
     Integer distance = fromC.distances.get(goesC);
@@ -85,147 +220,6 @@ public class TradeWalker extends Walker implements World.Journeys {
     
     return pick.result();
   }
-  
-  
-  
-  /**  Data fields, construction and save/load methods-
-    */
-  Tally <Good> cargo = new Tally();
-  float profits;
-  City tradesWith;
-  boolean offMap = false;
-  
-  
-  public TradeWalker(ObjectType type) {
-    super(type);
-  }
-  
-  
-  public TradeWalker(Session s) throws Exception {
-    super(s);
-    s.loadTally(cargo);
-    tradesWith = (City) s.loadObject();
-    profits    = s.loadFloat();
-    offMap     = s.loadBool();
-  }
-  
-  
-  public void saveState(Session s) throws Exception {
-    super.saveState(s);
-    s.saveTally(cargo);
-    s.saveObject(tradesWith);
-    s.saveFloat(profits);
-    s.saveBool(offMap);
-  }
-  
-  
-  
-  /**  Behaviour scripting...
-    */
-  void beginDelivery(Building from, Building goes, Tally <Good> taken) {
-    if (goes == null || goes.entrance == null) return;
-    if (! (from instanceof Partner)) return;
-    
-    cargo.clear();
-    takeOnGoods((Partner) from, taken, false);
-    embarkOnVisit(goes, 0, JOB_TRADING);
-  }
-  
-  
-  void beginTravel(Building from, City goes, Tally <Good> taken) {
-    if (goes == null || ! (from instanceof Partner)) return;
-    
-    Tile exits = findTransitPoint(map, goes);
-    if (exits == null) return;
-    
-    this.cargo.clear();
-    takeOnGoods((Partner) from, taken, false);
-    profits    = 0;
-    tradesWith = goes;
-    
-    embarkOnTarget(exits, 0, JOB_TRADING);
-  }
-  
-  
-  protected void onVisit(Building visits) {
-    Partner partner = (Partner) I.cast(visits, Partner.class);
-    City homeCity = home.map.city;
-
-    if (visits == home) {
-      offloadGoods(partner, false);
-      homeCity.currentFunds += profits;
-      profits    = 0;
-      tradesWith = null;
-    }
-    else {
-      offloadGoods(partner, false);
-    }
-  }
-  
-  
-  void offloadGoods(Partner store, boolean doPayment) {
-    if (store == null) return;
-    
-    int totalValue = 0;
-    for (Good g : cargo.keys()) {
-      float amount = cargo.valueFor(g);
-      store.inventory().add(amount, g);
-      totalValue += amount * g.price;
-    }
-    
-    if (doPayment) profits += totalValue;
-    cargo.clear();
-    
-    I.say("\n"+this+" depositing goods at "+store);
-    I.say("  Cargo: "+cargo);
-    I.say("  Value: "+totalValue);
-  }
-  
-  
-  void takeOnGoods(Partner store, Tally <Good> taken, boolean doPayment) {
-    if (store == null) return;
-    
-    cargo.clear();
-    int totalCost = 0;
-    
-    for (Good g : taken.keys()) {
-      float amount = taken.valueFor(g);
-      cargo.set(g, amount);
-      store.inventory().add(0 - amount, g);
-      totalCost += amount * g.price;
-    }
-    if (doPayment) profits -= totalCost;
-    
-    I.say("\n"+this+" taking on goods from "+store);
-    I.say("  New cargo: "+cargo);
-    I.say("  Cost: "+totalCost+" Profit: "+profits);
-  }
-  
-  
-  protected void onTarget(Tile target) {
-    if (target == null || tradesWith == null) return;
-    tradesWith.world.beginJourney(home.map.city, tradesWith, this);
-    exitMap();
-  }
-  
-  
-  public void onArrival(City goes, World.Journey journey) {
-    if (home.destroyed()) return;
-    
-    City homeCity = home.map.city;
-    if (goes == homeCity) {
-      Tile entry = findTransitPoint(homeCity.map, tradesWith);
-      enterMap(homeCity.map, entry.x, entry.y);
-      startReturnHome();
-    }
-    else {
-      Tally <Good> taken = configureCargo(goes, (Partner) home, false);
-      offloadGoods(goes,        true);
-      takeOnGoods (goes, taken, true);
-      tradesWith.world.beginJourney(tradesWith, homeCity, this);
-    }
-  }
-  
 }
 
 

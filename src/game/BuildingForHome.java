@@ -6,18 +6,18 @@ import static game.GameConstants.*;
 
 
 
-public class HomeBuilding extends Building {
+public class BuildingForHome extends Building {
   
   
   /**  Data fields, construction and save/load methods-
     */
   
-  HomeBuilding(ObjectType type) {
+  BuildingForHome(ObjectType type) {
     super(type);
   }
   
   
-  public HomeBuilding(Session s) throws Exception {
+  public BuildingForHome(Session s) throws Exception {
     super(s);
   }
   

@@ -34,7 +34,7 @@ public class TestWorld extends TestLoop {
     cityB.inventory .set(RAW_COTTON,  50);
     cityB.inventory .set(CLAY      ,  50);
     
-    TradeBuilding post1 = (TradeBuilding) PORTER_HOUSE.generate();
+    BuildingForTrade post1 = (BuildingForTrade) PORTER_HOUSE.generate();
     post1.enterMap(map, 1, 6);
     post1.ID = "(Gets Cotton)";
     post1.tradeLevel.set(RAW_COTTON,  20);
@@ -44,12 +44,12 @@ public class TestWorld extends TestLoop {
     post1.inventory .set(CLAY      ,  20);
     post1.inventory .set(RAW_COTTON,  20);
     post1.tradePartner = cityB;
-    Tile.applyPaving(map, 1, 5, 8, 1, true);
+    CityMap.applyPaving(map, 1, 5, 8, 1, true);
     
     post1.inventory .set(COTTON ,  20);
     post1.inventory .set(POTTERY,  20);
     
-    TradeBuilding post2 = (TradeBuilding) PORTER_HOUSE.generate();
+    BuildingForTrade post2 = (BuildingForTrade) PORTER_HOUSE.generate();
     post2.enterMap(map, 5, 6);
     post2.ID = "(Gets Clay)";
     post2.tradeLevel.set(RAW_COTTON, -10);

@@ -15,15 +15,15 @@ public class TestTerrain extends TestLoop {
     
     Building farm = (Building) FARMER_HUT.generate();
     farm.enterMap(map, 9, 9);
-    Tile.applyPaving(map, 9, 8, 10, 1, true);
+    CityMap.applyPaving(map, 9, 8, 10, 1, true);
     
     for (Coord c : Visit.grid(6, 6, 8, 8, 1)) {
       if (map.blocked(c.x, c.y)) continue;
       if (map.paved  (c.x, c.y)) continue;
       
-      GatherBuilding.Crop crop;
-      if (Rand.yes()) crop = new GatherBuilding.Crop(MAIZE     );
-      else            crop = new GatherBuilding.Crop(RAW_COTTON);
+      BuildingForGather.Crop crop;
+      if (Rand.yes()) crop = new BuildingForGather.Crop(MAIZE     );
+      else            crop = new BuildingForGather.Crop(RAW_COTTON);
       crop.enterMap(map, c.x, c.y);
       crop.buildLevel = 0.5f + Rand.num();
     }

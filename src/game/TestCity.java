@@ -13,8 +13,8 @@ public class TestCity extends TestLoop {
     CityMap map = new CityMap();
     map.performSetup(50);
     
-    Tile.applyPaving(map, 3, 8, 12, 1 , true);
-    Tile.applyPaving(map, 8, 2, 1 , 16, true);
+    CityMap.applyPaving(map, 3, 8, 12, 1 , true);
+    CityMap.applyPaving(map, 8, 2, 1 , 16, true);
 
     Building palace = (Building) PALACE    .generate();
     Building house1 = (Building) HOUSE     .generate();

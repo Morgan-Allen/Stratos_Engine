@@ -2,6 +2,7 @@
 
 package game;
 import static game.GameConstants.*;
+import static game.CityMap.*;
 import util.*;
 
 

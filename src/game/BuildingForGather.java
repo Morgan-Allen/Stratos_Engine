@@ -2,22 +2,23 @@
 
 package game;
 import static game.GameConstants.*;
+import static game.CityMap.*;
 import util.*;
 
 
 
 
-public class GatherBuilding extends CraftBuilding {
+public class BuildingForGather extends BuildingForCraft {
   
   
   /**  Data fields, construction and save/load methods-
     */
-  public GatherBuilding(ObjectType type) {
+  public BuildingForGather(ObjectType type) {
     super(type);
   }
   
   
-  public GatherBuilding(Session s) throws Exception {
+  public BuildingForGather(Session s) throws Exception {
     super(s);
   }
   

@@ -2,15 +2,11 @@
 
 package game;
 import static game.GameConstants.*;
-
-import game.GameConstants.Good;
 import util.*;
 
 
 
-public class TradeBuilding extends CraftBuilding
-  implements TradeWalker.Partner
-{
+public class BuildingForTrade extends BuildingForCraft implements Trader {
   
   
   /**  Data fields, setup and save/load methods-
@@ -20,12 +16,12 @@ public class TradeBuilding extends CraftBuilding
   Good needed[] = NO_GOODS, produced[] = NO_GOODS;
   
   
-  public TradeBuilding(ObjectType type) {
+  public BuildingForTrade(ObjectType type) {
     super(type);
   }
   
   
-  public TradeBuilding(Session s) throws Exception {
+  public BuildingForTrade(Session s) throws Exception {
     super(s);
     s.loadTally(tradeLevel);
     tradePartner = (City) s.loadObject();
@@ -81,8 +77,8 @@ public class TradeBuilding extends CraftBuilding
   /**  Selecting behaviour for walkers-
     */
   void selectWalkerBehaviour(Walker walker) {
-    TradeWalker trader = (TradeWalker) I.cast(walker, TradeWalker.class);
-    if (trader != null) {
+    if (walker.type.category == ObjectType.IS_TRADE_WLK) {
+      WalkerForTrade trader = (WalkerForTrade) walker;
       selectTraderBehaviour(trader);
     }
     else {
@@ -91,25 +87,25 @@ public class TradeBuilding extends CraftBuilding
   }
   
   
-  void selectTraderBehaviour(TradeWalker trader) {
+  void selectTraderBehaviour(WalkerForTrade trader) {
     
-    class Order { Tally <Good> cargo; TradeWalker.Partner goes; float rating; }
-    List <TradeWalker.Partner> targets = new List();
+    class Order { Tally <Good> cargo; Trader goes; float rating; }
+    List <Trader> targets = new List();
     List <Order> orders = new List();
     
     for (Building b : map.buildings) {
-      if (b == this || ! (b instanceof TradeWalker.Partner)) continue;
-      targets.add((TradeWalker.Partner) b);
+      if (b == this || ! (b instanceof Trader)) continue;
+      targets.add((Trader) b);
     }
     if (tradePartner != null) {
       targets.add(tradePartner);
     }
     
-    for (TradeWalker.Partner t : targets) {
-      Tally <Good> cargoAway = TradeWalker.configureCargo(this, t, false);
-      Tally <Good> cargoBack = TradeWalker.configureCargo(t, this, true );
+    for (Trader t : targets) {
+      Tally <Good> cargoAway = WalkerForTrade.configureCargo(this, t, false);
+      Tally <Good> cargoBack = WalkerForTrade.configureCargo(t, this, true );
       
-      float distRating = TradeWalker.distanceRating(this, t);
+      float distRating = WalkerForTrade.distanceRating(this, t);
       float rating = 0;
       
       if (cargoAway.size() > 0) {

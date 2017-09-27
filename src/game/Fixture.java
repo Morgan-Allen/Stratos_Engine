@@ -68,7 +68,7 @@ public class Fixture implements Session.Saveable {
     this.y   = y  ;
     
     for (Coord c : Visit.grid(x, y, type.wide, type.high, 1)) {
-      Tile t = map.tileAt(c.x, c.y);
+      CityMap.Tile t = map.tileAt(c.x, c.y);
       t.above = this;
     }
   }
@@ -76,7 +76,7 @@ public class Fixture implements Session.Saveable {
   
   void exitMap(CityMap map) {
     for (Coord c : Visit.grid(x, y, type.wide, type.high, 1)) {
-      Tile t = map.tileAt(c.x, c.y);
+      CityMap.Tile t = map.tileAt(c.x, c.y);
       t.above = null;
     }
   }
