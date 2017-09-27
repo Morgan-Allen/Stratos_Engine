@@ -24,7 +24,12 @@ public class Walker implements Session.Saveable {
     JOB_GATHERING =  6,
     
     MAX_WANDER_TIME = 20,
-    TRADE_DIST_TIME = 50
+    TRADE_DIST_TIME = 50,
+    
+    STATE_OKAY   = 1,
+    STATE_SLEEP  = 2,
+    STATE_DEAD   = 3,
+    STATE_DECOMP = 4
   ;
   static int nextID = 0;
   int dirs[] = new int[4];
@@ -36,19 +41,29 @@ public class Walker implements Session.Saveable {
   CityMap map;
   int x, y, facing = N;
   
-  Building home;
+  Building  work;
+  Building  home;
+  Formation formation;
+  
   Building inside;
-  int jobType = JOB_NONE;
-  int timeSpent = 0;
-  int maxTime = 20;
+  int jobType   = JOB_NONE;
+  int timeSpent = 0 ;
+  int maxTime   = 20;
   
   Tile path[] = null;
   int pathIndex = -1;
-  Tile target;
+  Tile     target;
   Building visits;
   
   Good carried = null;
   float carryAmount = 0;
+  
+  float injury ;
+  float hunger ;
+  float fatigue;
+  float stress ;
+  int state = STATE_OKAY;
+  
   
   
   Walker(ObjectType type) {
@@ -68,7 +83,10 @@ public class Walker implements Session.Saveable {
     y      = s.loadInt();
     facing = s.loadInt();
     
-    home      = (Building) s.loadObject();
+    work      = (Building ) s.loadObject();
+    home      = (Building ) s.loadObject();
+    formation = (Formation) s.loadObject();
+    
     inside    = (Building) s.loadObject();
     jobType   = s.loadInt();
     timeSpent = s.loadInt();
@@ -81,11 +99,17 @@ public class Walker implements Session.Saveable {
       for (int i = 0; i < PL; i++) path[i] = Tile.loadTile(map, s);
     }
     pathIndex = s.loadInt();
-    target = Tile.loadTile(map, s);
-    visits = (Building) s.loadObject();
+    target    = Tile.loadTile(map, s);
+    visits    = (Building) s.loadObject();
     
-    carried = (Good) s.loadObject();
+    carried     = (Good) s.loadObject();
     carryAmount = s.loadFloat();
+    
+    injury  = s.loadFloat();
+    hunger  = s.loadFloat();
+    fatigue = s.loadFloat();
+    stress  = s.loadFloat();
+    state   = s.loadInt();
   }
   
   
@@ -98,11 +122,14 @@ public class Walker implements Session.Saveable {
     s.saveInt(y);
     s.saveInt(facing);
     
+    s.saveObject(work);
     s.saveObject(home);
+    s.saveObject(formation);
+    
     s.saveObject(inside);
-    s.saveInt(jobType);
+    s.saveInt(jobType  );
     s.saveInt(timeSpent);
-    s.saveInt(maxTime);
+    s.saveInt(maxTime  );
     
     if (path == null) s.saveInt(-1);
     else {
@@ -115,6 +142,12 @@ public class Walker implements Session.Saveable {
     
     s.saveObject(carried);
     s.saveFloat(carryAmount);
+    
+    s.saveFloat(injury );
+    s.saveFloat(hunger );
+    s.saveFloat(fatigue);
+    s.saveFloat(stress );
+    s.saveInt  (state  );
   }
   
   
@@ -291,25 +324,6 @@ public class Walker implements Session.Saveable {
   
   /**  Miscellaneous behaviour triggers:
     */
-  void startRandomWalk() {
-    if (inside == null || inside.entrance == null) return;
-    
-    I.say(this+" beginning random walk...");
-    
-    this.jobType = JOB_WANDER;
-    assignPath(null, null, null);
-    timeSpent = 0;
-    maxTime = MAX_WANDER_TIME;
-    
-    Tile at = inside.entrance;
-    x      = at.x;
-    y      = at.y;
-    facing = T_ADJACENT[Rand.index(4)];
-    
-    if (inside != null) setInside(inside, false);
-  }
-  
-  
   void embarkOnVisit(Building goes, int maxTime, int jobType) {
     if (goes == null) return;
     
@@ -346,6 +360,25 @@ public class Walker implements Session.Saveable {
   }
   
   
+  void startRandomWalk() {
+    if (inside == null || inside.entrance == null) return;
+    
+    I.say(this+" beginning random walk...");
+    
+    this.jobType = JOB_WANDER;
+    assignPath(null, null, null);
+    timeSpent = 0;
+    maxTime = MAX_WANDER_TIME;
+    
+    Tile at = inside.entrance;
+    x      = at.x;
+    y      = at.y;
+    facing = T_ADJACENT[Rand.index(4)];
+    
+    if (inside != null) setInside(inside, false);
+  }
+  
+  
   void beginDelivery(
     Building from, Building goes, int jobType,
     Good carried, float amount
@@ -373,6 +406,26 @@ public class Walker implements Session.Saveable {
   }
   
   
+  void performAttack(Walker other) {
+    if (type.attackScore <= 0) return;
+    
+    int damage = Rand.index(type.attackScore + other.type.defendScore) + 1;
+    damage -= other.type.defendScore;
+    
+    other.injury += damage;
+    other.checkHealthState();
+  }
+  
+  
+  void checkHealthState() {
+    if (injury + hunger > type.maxHealth && state != STATE_DEAD) {
+      state   = STATE_DEAD;
+      jobType = JOB_NONE  ;
+      assignPath(null, null, null);
+    }
+  }
+  
+  
   
   /**  Graphical, debug and interface methods-
     */
@@ -380,6 +433,12 @@ public class Walker implements Session.Saveable {
     return type.name+" "+ID;
   }
 }
+
+
+
+
+
+
 
 
 

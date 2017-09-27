@@ -60,6 +60,7 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   ObjectType walkerTypes[] = NO_WALKERS;
   int maxWalkers = 1;
   int walkerCountdown = 50;
+  int maxVisitors = 4;
   
   Good needed  [] = NO_GOODS;
   Good produced[] = NO_GOODS;
@@ -77,6 +78,10 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   
   
   //  And these are specific to walkers...
+  int attackScore = 2 ;
+  int defendScore = 2 ;
+  int maxHealth   = 5 ;
+  
   String names[];
   
   
