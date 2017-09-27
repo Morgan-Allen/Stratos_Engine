@@ -3,8 +3,7 @@
 
 package game;
 import static game.GameConstants.*;
-
-import game.GameConstants.Terrain;
+import static util.TileConstants.*;
 import util.*;
 
 
@@ -163,6 +162,33 @@ public class CityMap implements Session.Saveable {
   }
   
   
+  public static Tile[] adjacent(
+    Tile spot, Tile temp[], CityMap map, boolean paveOnly
+  ) {
+    for (int dir : T_INDEX) {
+      int x = spot.x + T_X[dir], y = spot.y + T_Y[dir];
+      if (paveOnly) {
+        if (map.paved(x, y)) temp[dir] = map.tileAt(x, y);
+      }
+      else {
+        if (!map.blocked(x, y)) temp[dir] = map.tileAt(x, y);
+      }
+    }
+    return temp;
+  }
+  
+  
+  public static float distance(Tile a, Tile b) {
+    if (a == null || b == null) return 1000000000;
+    float dist = Nums.max(Nums.abs(a.x - b.x), Nums.abs(a.y - b.y));
+    if (a.x != b.x && a.y != b.y) dist += 0.25f;
+    return dist;
+  }
+  
+  
+  
+  /**  Other utility methods-
+    */
   public static void applyPaving(
     CityMap map, int x, int y, int w, int h, boolean is
   ) {

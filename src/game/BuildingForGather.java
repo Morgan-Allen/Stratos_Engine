@@ -8,7 +8,7 @@ import util.*;
 
 
 
-public class BuildingForGather extends BuildingForCraft {
+public class BuildingForGather extends BuildingForDelivery {
   
   
   /**  Data fields, construction and save/load methods-
@@ -91,8 +91,8 @@ public class BuildingForGather extends BuildingForCraft {
         Crop crop = (Crop) t.above;
         if (crop.buildLevel < 1 || crop.type != cropType) continue;
         
-        float distW = PathSearch.distance(atW, t);
-        float distB = PathSearch.distance(atB, t);
+        float distW = CityMap.distance(atW, t);
+        float distB = CityMap.distance(atB, t);
         pick.compare(crop, 0 - (distW + distB));
       }
     }

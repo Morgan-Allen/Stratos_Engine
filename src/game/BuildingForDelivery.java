@@ -6,7 +6,7 @@ import util.*;
 
 
 
-public class BuildingForCraft extends Building {
+public class BuildingForDelivery extends Building {
   
   
   /**  Data fields, construction and save/load methods-
@@ -14,12 +14,12 @@ public class BuildingForCraft extends Building {
   boolean stalled = false;
   
   
-  BuildingForCraft(ObjectType type) {
+  BuildingForDelivery(ObjectType type) {
     super(type);
   }
   
   
-  public BuildingForCraft(Session s) throws Exception {
+  public BuildingForDelivery(Session s) throws Exception {
     super(s);
     stalled = s.loadBool();
   }
@@ -113,7 +113,7 @@ public class BuildingForCraft extends Building {
       amount = Nums.min(amount, 10                                   );
       amount = Nums.min(amount, 2 + (int) goes.demands.valueFor(made));
       
-      float distFactor = 10 + PathSearch.distance(entrance, goes.entrance);
+      float distFactor = 10 + CityMap.distance(entrance, goes.entrance);
       Order o = new Order();
       o.goes   = goes  ;
       o.good   = made  ;

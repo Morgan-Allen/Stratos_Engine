@@ -33,32 +33,8 @@ public class PathSearch extends Search <Tile> {
   }
   
   
-  public static Tile[] adjacent(
-    Tile spot, Tile temp[], CityMap map, boolean paveOnly
-  ) {
-    for (int dir : T_INDEX) {
-      int x = spot.x + T_X[dir], y = spot.y + T_Y[dir];
-      if (paveOnly) {
-        if (map.paved(x, y)) temp[dir] = map.tileAt(x, y);
-      }
-      else {
-        if (!map.blocked(x, y)) temp[dir] = map.tileAt(x, y);
-      }
-    }
-    return temp;
-  }
-  
-  
-  public static float distance(Tile a, Tile b) {
-    if (a == null || b == null) return 1000000000;
-    float dist = Nums.max(Nums.abs(a.x - b.x), Nums.abs(a.y - b.y));
-    if (a.x != b.x && a.y != b.y) dist += 0.25f;
-    return dist;
-  }
-  
-  
   protected Tile[] adjacent(Tile spot) {
-    return adjacent(spot, temp, map, paveOnly);
+    return CityMap.adjacent(spot, temp, map, paveOnly);
   }
   
   

@@ -6,7 +6,7 @@ import util.*;
 
 
 
-public class BuildingForTrade extends BuildingForCraft implements Trader {
+public class BuildingForTrade extends BuildingForDelivery implements Trader {
   
   
   /**  Data fields, setup and save/load methods-

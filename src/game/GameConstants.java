@@ -5,8 +5,6 @@ import util.*;
 import static game.ObjectType.*;
 import java.awt.Color;
 
-import game.GameConstants.Good;
-
 
 
 public class GameConstants {
@@ -138,16 +136,15 @@ public class GameConstants {
   /**  Infrastructure types-
     */
   final static ObjectType
-    PALACE       = new ObjectType("type_palace"      , IS_HOME_BLD  ),
-    HOUSE        = new ObjectType("type_house"       , IS_HOME_BLD  ),
-    BALL_COURT   = new ObjectType("type_ball_court"  , IS_BUILDING  ),
-    
-    FARMER_HUT   = new ObjectType("type_farmer_hut"  , IS_GATHER_BLD),
-    QUARRY_PIT   = new ObjectType("type_quarry_pit"  , IS_GATHER_BLD),
-    KILN         = new ObjectType("type_kiln"        , IS_CRAFT_BLD ),
-    WEAVER       = new ObjectType("type_weaver"      , IS_CRAFT_BLD ),
-    MARKET       = new ObjectType("type_market"      , IS_CRAFT_BLD ),
-    PORTER_HOUSE = new ObjectType("type_porter_house", IS_TRADE_BLD ),
+    PALACE       = new ObjectType("type_palace"      , IS_HOME_BLD   ),
+    HOUSE        = new ObjectType("type_house"       , IS_HOME_BLD   ),
+    BALL_COURT   = new ObjectType("type_ball_court"  , IS_BUILDING   ),
+    FARMER_HUT   = new ObjectType("type_farmer_hut"  , IS_GATHER_BLD ),
+    QUARRY_PIT   = new ObjectType("type_quarry_pit"  , IS_GATHER_BLD ),
+    KILN         = new ObjectType("type_kiln"        , IS_DELIVER_BLD),
+    WEAVER       = new ObjectType("type_weaver"      , IS_DELIVER_BLD),
+    MARKET       = new ObjectType("type_market"      , IS_DELIVER_BLD),
+    PORTER_HOUSE = new ObjectType("type_porter_house", IS_TRADE_BLD  ),
     
     CITIZEN      = new ObjectType("type_citizen"     , IS_WALKER    ),
     NOBLE        = new ObjectType("type_noble"       , IS_WALKER    ),

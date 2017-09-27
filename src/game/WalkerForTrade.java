@@ -191,7 +191,7 @@ public class WalkerForTrade extends Walker implements World.Journeys {
       fromC == goesC
     ) {
       Building fromB = (Building) from, goesB = (Building) goes;
-      float mapDist = PathSearch.distance(fromB.entrance, goesB.entrance);
+      float mapDist = CityMap.distance(fromB.entrance, goesB.entrance);
       distRating += mapDist / Walker.MAX_WANDER_TIME;
     }
     

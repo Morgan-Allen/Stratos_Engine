@@ -172,7 +172,7 @@ public class Building extends Fixture implements Session.Saveable {
   
   
   
-  /**  Handling goods and inventory:
+  /**  Utility methods for finding points of supply/demand:
     */
   Building findNearestOfType(ObjectType type, int maxDist) {
     return findNearestDemanding(type, null, null, -1);
@@ -207,7 +207,7 @@ public class Building extends Fixture implements Session.Saveable {
       boolean featured = b.type.hasFeature(feature);
       if (feature != null && ! featured) continue;
       
-      float dist = PathSearch.distance(entrance, b.entrance);
+      float dist = CityMap.distance(entrance, b.entrance);
       if (maxDist > 0 && dist > maxDist) continue;
       
       float rating = 1;
