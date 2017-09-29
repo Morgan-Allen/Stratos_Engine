@@ -21,9 +21,9 @@ public class TestTerrain extends TestLoop {
       if (map.blocked(c.x, c.y)) continue;
       if (map.paved  (c.x, c.y)) continue;
       
-      BuildingForGather.Crop crop;
-      if (Rand.yes()) crop = new BuildingForGather.Crop(MAIZE     );
-      else            crop = new BuildingForGather.Crop(RAW_COTTON);
+      Fixture crop;
+      if (Rand.yes()) crop = new Fixture(MAIZE     );
+      else            crop = new Fixture(RAW_COTTON);
       crop.enterMap(map, c.x, c.y);
       crop.buildLevel = 0.5f + Rand.num();
     }

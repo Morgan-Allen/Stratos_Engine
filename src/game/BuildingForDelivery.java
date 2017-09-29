@@ -101,7 +101,7 @@ public class BuildingForDelivery extends Building {
   public void selectWalkerBehaviour(Walker walker) {
     
     if (walker.inside != this) {
-      walker.startReturnHome();
+      walker.returnTo(this);
       return;
     }
     
@@ -131,26 +131,19 @@ public class BuildingForDelivery extends Building {
       walker.beginDelivery(this, o.goes, Walker.JOB_DELIVER, o.good, o.amount);
     }
     else {
-      walker.startRandomWalk();
+      walker.embarkOnVisit(this, -1, Walker.JOB_CRAFTING, this);
     }
   }
   
   
   public void walkerEnters(Walker walker, Building enters) {
-    
     if (enters == this) for (Good need : needed()) {
-      if (walker.carried == need) {
-        walker.offloadGood(need, this);
-      }
+      walker.offloadGood(need, this);
     }
-    
-    for (Good made : produced()) {
-      if (walker.carried == made) {
-        walker.offloadGood(made, enters);
-        walker.startReturnHome();
-        return;
-      }
+    else for (Good made : produced()) {
+      walker.offloadGood(made, enters);
     }
+    walker.returnTo(this);
   }
 }
 

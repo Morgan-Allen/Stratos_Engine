@@ -90,7 +90,7 @@ public class BuildingForTrade extends BuildingForDelivery implements Trader {
   void selectTraderBehaviour(WalkerForTrade trader) {
     
     if (trader.inside != this) {
-      trader.startReturnHome();
+      trader.returnTo(this);
       return;
     }
     

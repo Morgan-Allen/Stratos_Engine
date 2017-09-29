@@ -132,6 +132,9 @@ public class GameConstants {
   static {
     MAIZE     .tint = colour(9, 9, 1);
     RAW_COTTON.tint = colour(9, 8, 9);
+    RUBBER    .tint = colour(2, 2, 2);
+    
+    for (Good g : CROP_TYPES) g.growRate = 1f;
   }
   
   
@@ -139,11 +142,13 @@ public class GameConstants {
   /**  Infrastructure types-
     */
   final static ObjectType
+    NO_WALKERS[] = new ObjectType[0],
+    
     PALACE       = new ObjectType("type_palace"      , IS_HOME_BLD   ),
     HOUSE        = new ObjectType("type_house"       , IS_HOME_BLD   ),
     BALL_COURT   = new ObjectType("type_ball_court"  , IS_BUILDING   ),
     FARMER_HUT   = new ObjectType("type_farmer_hut"  , IS_GATHER_BLD ),
-    QUARRY_PIT   = new ObjectType("type_quarry_pit"  , IS_GATHER_BLD ),
+    QUARRY_PIT   = new ObjectType("type_quarry_pit"  , IS_DELIVER_BLD),
     KILN         = new ObjectType("type_kiln"        , IS_DELIVER_BLD),
     WEAVER       = new ObjectType("type_weaver"      , IS_DELIVER_BLD),
     MARKET       = new ObjectType("type_market"      , IS_DELIVER_BLD),
@@ -155,9 +160,7 @@ public class GameConstants {
     WORKER       = new ObjectType("type_worker"      , IS_WALKER    ),
     MERCHANT     = new ObjectType("type_merchant"    , IS_WALKER    ),
     PORTERS      = new ObjectType("type_porters"     , IS_TRADE_WLK ),
-    SOLDIER      = new ObjectType("type_soldier"     , IS_WALKER    ),
-    
-    NO_WALKERS[] = new ObjectType[0]
+    SOLDIER      = new ObjectType("type_soldier"     , IS_WALKER    )
   ;
   static {
     CITIZEN .name = "Citizen" ;

@@ -2,6 +2,7 @@
 
 package game;
 import util.*;
+import static game.GameConstants.*;
 import static util.TileConstants.*;
 
 
@@ -86,7 +87,10 @@ public class Fixture implements Session.Saveable {
   /**  Regular updates-
     */
   void updateGrowth() {
-    return;
+    if (type.growRate > 0) {
+      buildLevel += SCAN_PERIOD * type.growRate / RIPEN_PERIOD;
+      if (buildLevel >= 1) buildLevel = 1;
+    }
   }
   
   

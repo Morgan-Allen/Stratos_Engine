@@ -211,7 +211,7 @@ public class Building extends Fixture implements Session.Saveable, Employer {
       if (rating <= 0) continue;
       if (otherTrades) rating /= 2;
       
-      pick.compare(b, rating - dist);
+      pick.compare(b, rating * 10 / (10 + dist));
     }
     
     return pick.result();

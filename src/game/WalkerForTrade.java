@@ -133,13 +133,14 @@ public class WalkerForTrade extends Walker implements Journeys {
   
   
   public void onArrival(City goes, World.Journey journey) {
-    if (home.destroyed()) return;
+    Building base = (Building) I.cast(job.origin, Building.class);
+    if (base == null || base.destroyed()) return;
     
     City homeCity = home.map.city;
     if (goes == homeCity) {
       Tile entry = findTransitPoint(homeCity.map, tradesWith);
       enterMap(homeCity.map, entry.x, entry.y);
-      startReturnHome();
+      returnTo(base);
     }
     else {
       Tally <Good> taken = configureCargo(goes, (Trader) home, false);

@@ -49,31 +49,35 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   /**  Data fields and setup functions-
     */
   String name;
-  int tint = GameConstants.BLACK_COLOR;
+  int tint = BLACK_COLOR;
   
   int category;
   int wide = 1, high = 1;
   boolean blocks = true ;
   boolean mobile = false;
+  float growRate = 0;
   
   
   //  These are specific to buildings...
   ObjectType walkerTypes[] = NO_WALKERS;
-  int maxWalkers = 1;
-  int walkerCountdown = 50;
+  int maxWalkers  = 1;
   int maxVisitors = 4;
+  int walkerCountdown = 50;
   
   Good needed  [] = NO_GOODS;
   Good produced[] = NO_GOODS;
   Good consumed[] = NO_GOODS;
   Good features[] = NO_GOODS;
   
-  int craftTime = 20, maxStock = 10;
+  int gatherRange     = 4  ;
+  int craftTime       = 20 ;
+  int maxStock        = 10 ;
   int maxDeliverRange = 100;
-  int consumeTime = 500;
+  int consumeTime     = 500;
   
   int maxRecruits = 16;
-  int numRanks = 4, numFile = 4;
+  int numRanks    = 4 ;
+  int numFile     = 4 ;
   
   
   void setWalkerTypes(ObjectType... types) {

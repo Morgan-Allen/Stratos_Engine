@@ -31,34 +31,8 @@ public class BuildingForGather extends BuildingForDelivery {
   
   /**  Life-cycle, update and economic functions-
     */
-  public static class Crop extends Fixture {
-    
-    
-    public Crop(ObjectType type) {
-      super(type);
-    }
-    
-    
-    public Crop(Session s) throws Exception {
-      super(s);
-    }
-    
-    
-    public void saveState(Session s) throws Exception {
-      super.saveState(s);
-    }
-
-
-    void updateGrowth() {
-      buildLevel += SCAN_PERIOD * 1f / RIPEN_PERIOD;
-      if (buildLevel >= 1) buildLevel = 1;
-      //I.say("Updating growth at "+x+" "+y+": "+buildLevel);
-    }
-    
-  }
-  
-  
   void advanceProduction() {
+    super.advanceProduction();
     return;
   }
   
@@ -66,10 +40,10 @@ public class BuildingForGather extends BuildingForDelivery {
   public void selectWalkerBehaviour(Walker walker) {
     
     Box2D box = new Box2D(x, y, type.wide, type.high);
-    int range = 4;
+    int range = type.gatherRange;
     box.expandBy(range);
     
-    for (Good cropType : CROP_TYPES) {
+    for (Good cropType : type.produced) {
       if (pickNextCrop(walker, cropType, box)) return;
     }
     
@@ -81,12 +55,12 @@ public class BuildingForGather extends BuildingForDelivery {
     
     Tile atW = map.tileAt(walker.x, walker.y);
     Tile atB = map.tileAt(this  .x, this  .y);
-    Pick <Crop> pick = new Pick();
+    Pick <Fixture> pick = new Pick();
 
     for (Coord c : Visit.grid(box)) {
       Tile t = map.tileAt(c.x, c.y);
-      if (t != null && t.above instanceof Crop) {
-        Crop crop = (Crop) t.above;
+      if (t != null && t.above instanceof Fixture) {
+        Fixture crop = (Fixture) t.above;
         if (crop.buildLevel < 1 || crop.type != cropType) continue;
         
         float distW = CityMap.distance(atW, t);
@@ -95,7 +69,7 @@ public class BuildingForGather extends BuildingForDelivery {
       }
     }
     
-    Crop goes = pick.result();
+    Fixture goes = pick.result();
     if (goes != null) {
       Tile under = map.tileAt(goes.x, goes.y);
       walker.embarkOnTarget(under, 2, Walker.JOB_GATHERING, this);
@@ -107,9 +81,10 @@ public class BuildingForGather extends BuildingForDelivery {
   
   
   public void walkerTargets(Walker walker, Tile other) {
+    if (other == null || other.above == null) return;
     
-    if (! (other.above instanceof Crop)) return;
-    Crop crop = (Crop) other.above;
+    Fixture crop = other.above;
+    if (! (crop.type instanceof Good)) return;
     
     crop.buildLevel = 0;
     walker.carried      = (Good) crop.type;
@@ -118,20 +93,21 @@ public class BuildingForGather extends BuildingForDelivery {
     I.say(walker+" harvested "+walker.carryAmount+" of "+crop.type);
     
     if (walker.carryAmount >= 2) {
-      walker.startReturnHome();
+      walker.returnTo(this);
     }
     else {
       Box2D area = new Box2D(walker.x, walker.y, 1, 1);
       area.expandBy(2);
+      if (! pickNextCrop(walker, walker.carried, area)) {
+        walker.returnTo(this);
+      }
     }
   }
   
   
   public void walkerEnters(Walker walker, Building enters) {
     if (enters == this) for (Good made : type.produced) {
-      if (walker.carried == made) {
-        walker.offloadGood(made, this);
-      }
+      walker.offloadGood(made, this);
     }
     super.walkerEnters(walker, enters);
   }

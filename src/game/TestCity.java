@@ -15,7 +15,7 @@ public class TestCity extends TestLoop {
     
     CityMap.applyPaving(map, 3, 8, 12, 1 , true);
     CityMap.applyPaving(map, 8, 2, 1 , 16, true);
-
+    
     Building palace = (Building) PALACE    .generate();
     Building house1 = (Building) HOUSE     .generate();
     Building house2 = (Building) HOUSE     .generate();
@@ -25,7 +25,7 @@ public class TestCity extends TestLoop {
     house1.enterMap(map, 9 , 6 );
     house2.enterMap(map, 12, 6 );
     court .enterMap(map, 9 , 9 );
-
+    
     Building quarry = (Building) QUARRY_PIT.generate();
     Building kiln1  = (Building) KILN      .generate();
     Building kiln2  = (Building) KILN      .generate();
