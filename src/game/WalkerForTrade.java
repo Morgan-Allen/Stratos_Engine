@@ -7,7 +7,7 @@ import util.*;
 
 
 
-public class WalkerForTrade extends Walker implements World.Journeys {
+public class WalkerForTrade extends Walker implements Journeys {
   
   
   
@@ -51,7 +51,7 @@ public class WalkerForTrade extends Walker implements World.Journeys {
     
     cargo.clear();
     takeOnGoods((Trader) from, taken, false);
-    embarkOnVisit(goes, 0, JOB_TRADING);
+    embarkOnVisit(goes, 0, JOB_TRADING, from);
   }
   
   
@@ -66,7 +66,7 @@ public class WalkerForTrade extends Walker implements World.Journeys {
     profits    = 0;
     tradesWith = goes;
     
-    embarkOnTarget(exits, 0, JOB_TRADING);
+    embarkOnTarget(exits, 0, JOB_TRADING, from);
   }
   
   

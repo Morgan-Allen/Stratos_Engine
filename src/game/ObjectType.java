@@ -21,8 +21,9 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
     IS_GATHER_BLD  = 5,
     IS_TRADE_BLD   = 6,
     IS_HOME_BLD    = 7,
-    IS_WALKER      = 8,
-    IS_TRADE_WLK   = 9
+    IS_ARMY_BLD    = 8,
+    IS_WALKER      = 9,
+    IS_TRADE_WLK   = 10
   ;
   
   final static Index <ObjectType> INDEX = new Index();
@@ -71,6 +72,9 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   int maxDeliverRange = 100;
   int consumeTime = 500;
   
+  int maxRecruits = 16;
+  int numRanks = 4, numFile = 4;
+  
   
   void setWalkerTypes(ObjectType... types) {
     this.walkerTypes = types;
@@ -106,6 +110,7 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
       case(IS_GATHER_BLD ): return new BuildingForGather(this);
       case(IS_TRADE_BLD  ): return new BuildingForTrade(this);
       case(IS_HOME_BLD   ): return new BuildingForHome(this);
+      case(IS_ARMY_BLD   ): return new BuildingForMilitary(this);
       case(IS_WALKER     ): return new Walker(this);
       case(IS_TRADE_WLK  ): return new WalkerForTrade(this);
     }

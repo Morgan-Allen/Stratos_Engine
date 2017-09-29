@@ -58,14 +58,12 @@ public class BuildingForGather extends BuildingForDelivery {
   }
   
   
-  
-  
-  
   void advanceProduction() {
+    return;
   }
   
   
-  void selectWalkerBehaviour(Walker walker) {
+  public void selectWalkerBehaviour(Walker walker) {
     
     Box2D box = new Box2D(x, y, type.wide, type.high);
     int range = 4;
@@ -100,7 +98,7 @@ public class BuildingForGather extends BuildingForDelivery {
     Crop goes = pick.result();
     if (goes != null) {
       Tile under = map.tileAt(goes.x, goes.y);
-      walker.embarkOnTarget(under, 2, Walker.JOB_GATHERING);
+      walker.embarkOnTarget(under, 2, Walker.JOB_GATHERING, this);
       return true;
     }
     
@@ -108,7 +106,7 @@ public class BuildingForGather extends BuildingForDelivery {
   }
   
   
-  void walkerTargets(Walker walker, Tile other) {
+  public void walkerTargets(Walker walker, Tile other) {
     
     if (! (other.above instanceof Crop)) return;
     Crop crop = (Crop) other.above;
@@ -129,7 +127,7 @@ public class BuildingForGather extends BuildingForDelivery {
   }
   
   
-  void walkerEnters(Walker walker, Building enters) {
+  public void walkerEnters(Walker walker, Building enters) {
     if (enters == this) for (Good made : type.produced) {
       if (walker.carried == made) {
         walker.offloadGood(made, this);

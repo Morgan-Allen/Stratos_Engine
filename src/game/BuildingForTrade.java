@@ -76,7 +76,7 @@ public class BuildingForTrade extends BuildingForDelivery implements Trader {
   
   /**  Selecting behaviour for walkers-
     */
-  void selectWalkerBehaviour(Walker walker) {
+  public void selectWalkerBehaviour(Walker walker) {
     if (walker.type.category == ObjectType.IS_TRADE_WLK) {
       WalkerForTrade trader = (WalkerForTrade) walker;
       selectTraderBehaviour(trader);
@@ -88,6 +88,11 @@ public class BuildingForTrade extends BuildingForDelivery implements Trader {
   
   
   void selectTraderBehaviour(WalkerForTrade trader) {
+    
+    if (trader.inside != this) {
+      trader.startReturnHome();
+      return;
+    }
     
     class Order { Tally <Good> cargo; Trader goes; float rating; }
     List <Trader> targets = new List();

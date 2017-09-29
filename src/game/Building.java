@@ -7,7 +7,7 @@ import util.*;
 
 
 
-public class Building extends Fixture implements Session.Saveable {
+public class Building extends Fixture implements Session.Saveable, Employer {
   
   
   /**  Data fields and setup/initialisation-
@@ -117,10 +117,6 @@ public class Building extends Fixture implements Session.Saveable {
         visitors.add(walker);
       }
       
-      for (Walker walker : walkers) {
-        if (walker.inside == this) selectWalkerBehaviour(walker);
-      }
-      
       walkerCountdown = type.walkerCountdown;
     }
   }
@@ -141,32 +137,32 @@ public class Building extends Fixture implements Session.Saveable {
   
   /**  Customising walker behaviour:
     */
-  void selectWalkerBehaviour(Walker walker) {
+  public void selectWalkerBehaviour(Walker walker) {
     walker.startRandomWalk();
   }
   
   
-  void walkerPasses(Walker walker, Building other) {
+  public void walkerPasses(Walker walker, Building other) {
     return;
   }
   
   
-  void walkerTargets(Walker walker, Tile other) {
+  public void walkerTargets(Walker walker, Tile other) {
     return;
   }
   
   
-  void walkerEnters(Walker walker, Building enters) {
+  public void walkerEnters(Walker walker, Building enters) {
     return;
   }
   
   
-  void walkerVisits(Walker walker, Building visits) {
+  public void walkerVisits(Walker walker, Building visits) {
     return;
   }
   
   
-  void walkerExits(Walker walker, Building enters) {
+  public void walkerExits(Walker walker, Building enters) {
     return;
   }
   

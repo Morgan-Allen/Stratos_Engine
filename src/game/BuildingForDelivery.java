@@ -98,7 +98,12 @@ public class BuildingForDelivery extends Building {
   }
   
   
-  void selectWalkerBehaviour(Walker walker) {
+  public void selectWalkerBehaviour(Walker walker) {
+    
+    if (walker.inside != this) {
+      walker.startReturnHome();
+      return;
+    }
     
     class Order { Building goes; Good good; float amount; }
     Pick <Order> pick = new Pick();
@@ -131,7 +136,7 @@ public class BuildingForDelivery extends Building {
   }
   
   
-  void walkerEnters(Walker walker, Building enters) {
+  public void walkerEnters(Walker walker, Building enters) {
     
     if (enters == this) for (Good need : needed()) {
       if (walker.carried == need) {

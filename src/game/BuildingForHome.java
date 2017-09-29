@@ -11,7 +11,6 @@ public class BuildingForHome extends Building {
   
   /**  Data fields, construction and save/load methods-
     */
-  
   BuildingForHome(ObjectType type) {
     super(type);
   }
@@ -46,10 +45,9 @@ public class BuildingForHome extends Building {
   }
   
   
-  void selectWalkerBehaviour(Walker walker) {
-    
+  public void selectWalkerBehaviour(Walker walker) {
+    //
     //  TODO:  Get more samples of nearby buildings...
-    //boolean watch = walker.type.name.equals("Noble");
     
     Building goes = null;
     for (Good cons : type.consumed) {
@@ -61,13 +59,13 @@ public class BuildingForHome extends Building {
       goes = tried;
     }
     if (goes != null) {
-      walker.embarkOnVisit(goes, 0, Walker.JOB_SHOPPING);
+      walker.embarkOnVisit(goes, 0, Walker.JOB_SHOPPING, this);
       return;
     }
     
     goes = findNearestWithFeature(IS_AMENITY, 50);
     if (goes != null && Rand.num() > 0.25f) {
-      walker.embarkOnVisit(goes, 25, Walker.JOB_VISITING);
+      walker.embarkOnVisit(goes, 25, Walker.JOB_VISITING, this);
       return;
     }
     
@@ -75,9 +73,9 @@ public class BuildingForHome extends Building {
   }
   
   
-  void walkerEnters(Walker walker, Building enters) {
+  public void walkerEnters(Walker walker, Building enters) {
     
-    if (walker.jobType == Walker.JOB_SHOPPING) {
+    if (walker.jobType() == Walker.JOB_SHOPPING) {
       for (Good cons : type.consumed) {
         float stock = enters.inventory.valueFor(cons);
         
@@ -91,6 +89,8 @@ public class BuildingForHome extends Building {
       }
     }
   }
+  
+  
 }
 
 

@@ -1,6 +1,7 @@
 
 
 package game;
+import static game.GameConstants.*;
 import util.*;
 
 
@@ -18,11 +19,6 @@ public class World implements Session.Saveable {
     int arriveTime;
     Batch <Journeys> going = new Batch();
   }
-  
-  static interface Journeys {
-    void onArrival(City goes, Journey journey);
-  }
-  
   
   
   /**  Data fields, setup and save/load methods-

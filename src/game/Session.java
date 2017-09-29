@@ -186,7 +186,7 @@ public final class Session {
     Object loadMethod = null;
     try {
       loadMethod = loadClass.getConstructor(Session.class);
-      final Constructor c = (Constructor) loadMethod;
+      //final Constructor c = (Constructor) loadMethod;
     }
     catch (NoSuchMethodException e) {}
     if (loadMethod == null) try {

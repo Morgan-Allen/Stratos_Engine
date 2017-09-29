@@ -1,13 +1,7 @@
 
 
 package game;
-import static game.CityMap.*;
 import util.*;
-
-
-
-//  NOTE:  The common barracks structure would actually train the entire
-//  male adult populace.  Standing professional soldiers would be a minority.
 
 
 
@@ -52,14 +46,45 @@ public class BuildingForMilitary extends BuildingForDelivery {
   }
   
   
+  
   /**  Regular updates and active service-
     */
+  boolean eligible(Walker walker) {
+    return walker.formation == null;
+  }
+  
+  
+  public void selectWalkerBehaviour(Walker walker) {
+    Pick <Walker> pick = new Pick();
+    
+    for (Building b : map.buildings) {
+      for (Walker w : b.walkers) {
+        if (eligible(w) && w.inside == b) {
+          float dist = CityMap.distance(b.entrance, entrance);
+          float rating = 10 / (10 + dist);
+          pick.compare(w, rating);
+        }
+      }
+    }
+    
+    Walker drafts = pick.result();
+    if (drafts != null) {
+      walker.embarkOnVisit(drafts.inside, 2, Walker.JOB_VISITING, this);
+    }
+    else {
+      super.selectWalkerBehaviour(walker);
+    }
+  }
+  
+  
+  public void walkerExits(Walker walker, Building enters) {
+    for (Walker w : enters.visitors) if (eligible(w)) {
+      w.formation = this.formation;
+    }
+  }
   
   
 }
-
-
-
 
 
 

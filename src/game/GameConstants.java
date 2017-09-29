@@ -5,6 +5,9 @@ import util.*;
 import static game.ObjectType.*;
 import java.awt.Color;
 
+import game.CityMap.Tile;
+import game.World.Journey;
+
 
 
 public class GameConstants {
@@ -145,12 +148,14 @@ public class GameConstants {
     WEAVER       = new ObjectType("type_weaver"      , IS_DELIVER_BLD),
     MARKET       = new ObjectType("type_market"      , IS_DELIVER_BLD),
     PORTER_HOUSE = new ObjectType("type_porter_house", IS_TRADE_BLD  ),
+    GARRISON     = new ObjectType("type_garrison"    , IS_ARMY_BLD   ),
     
     CITIZEN      = new ObjectType("type_citizen"     , IS_WALKER    ),
     NOBLE        = new ObjectType("type_noble"       , IS_WALKER    ),
     WORKER       = new ObjectType("type_worker"      , IS_WALKER    ),
     MERCHANT     = new ObjectType("type_merchant"    , IS_WALKER    ),
     PORTERS      = new ObjectType("type_porters"     , IS_TRADE_WLK ),
+    SOLDIER      = new ObjectType("type_soldier"     , IS_WALKER    ),
     
     NO_WALKERS[] = new ObjectType[0]
   ;
@@ -160,6 +165,7 @@ public class GameConstants {
     WORKER  .name = "Worker"  ;
     MERCHANT.name = "Merchant";
     PORTERS .name = "Porters" ;
+    SOLDIER .name = "Soldier" ;
     
     PALACE.name = "Palace";
     PALACE.wide = 5;
@@ -227,6 +233,13 @@ public class GameConstants {
     PORTER_HOUSE.tint = colour(8, 4, 8);
     PORTER_HOUSE.setWalkerTypes(PORTERS, WORKER);
     PORTER_HOUSE.features = new Good[] { IS_TRADER };
+    
+    GARRISON.name = "Garrison";
+    GARRISON.wide = 6;
+    GARRISON.high = 6;
+    GARRISON.tint = colour(8, 8, 8);
+    GARRISON.setWalkerTypes(SOLDIER);
+    GARRISON.maxWalkers = 4;
   }
   
   
@@ -238,7 +251,27 @@ public class GameConstants {
     Tally <Good> inventory ();
     City tradeOrigin();
   }
+  
+  static interface Journeys {
+    void onArrival(City goes, Journey journey);
+  }
+  
+  static interface Employer {
+    void selectWalkerBehaviour(Walker walker);
+    void walkerPasses (Walker walker, Building other );
+    void walkerTargets(Walker walker, Tile     other );
+    void walkerEnters (Walker walker, Building enters);
+    void walkerVisits (Walker walker, Building visits);
+    void walkerExits  (Walker walker, Building enters);
+  }
+  
+  
 }
+
+
+
+
+
 
 
 
