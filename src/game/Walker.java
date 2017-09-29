@@ -264,10 +264,10 @@ public class Walker implements Session.Saveable {
     if (formation != null && formation.active) {
       formation.selectWalkerBehaviour(this);
     }
-    else if (work != null) {
+    if (job == null && work != null) {
       work.selectWalkerBehaviour(this);
     }
-    else if (home != null) {
+    if (job == null && home != null) {
       home.selectWalkerBehaviour(this);
     }
     if (job == null) {
@@ -439,8 +439,6 @@ public class Walker implements Session.Saveable {
   //  TODO:  Consider moving this out to a separate class.
   
   void startRandomWalk() {
-    if (inside == null || inside.entrance == null) return;
-    
     if (reports()) I.say(this+" beginning random walk...");
     
     Task j = this.job = new Task();
@@ -448,18 +446,20 @@ public class Walker implements Session.Saveable {
     j.timeSpent = 0;
     j.maxTime   = MAX_WANDER_TIME;
     
-    Tile at = inside.entrance;
-    x      = at.x;
-    y      = at.y;
+    if (inside != null && inside.entrance != null) {
+      Tile at = inside.entrance;
+      x = at.x;
+      y = at.y;
+      setInside(inside, false);
+    }
     facing = T_ADJACENT[Rand.index(4)];
-    
-    if (inside != null) setInside(inside, false);
   }
   
   
   void updateRandomWalk() {
     if (inside != null) setInside(inside, false);
     
+    boolean prefPave = map.paved(x, y);
     int nx, ny, numDirs = 0;
     int backDir = (facing + 4) % 8;
     
@@ -467,7 +467,8 @@ public class Walker implements Session.Saveable {
       if (dir == backDir) continue;
       nx = x + T_X[dir];
       ny = y + T_Y[dir];
-      if (! map.paved(nx, ny)) continue;
+      if (prefPave && ! map.paved(nx, ny)) continue;
+      if (map.blocked(nx, ny)) continue;
       dirs[numDirs] = dir;
       numDirs++;
     }

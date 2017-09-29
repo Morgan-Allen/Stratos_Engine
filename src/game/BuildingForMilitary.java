@@ -79,18 +79,21 @@ public class BuildingForMilitary extends BuildingForDelivery {
     
     Walker drafts = pick.result();
     if (drafts != null) {
-      I.say("\nWILL DRAFT: "+drafts);
+      //I.say("\nWILL DRAFT: "+drafts);
       walker.embarkOnVisit(drafts.home, 2, Walker.JOB.VISITING, this);
     }
     else {
       formation.selectWalkerBehaviour(walker);
+    }
+    if (walker.job == null) {
+      super.selectWalkerBehaviour(walker);
     }
   }
   
   
   public void walkerVisits(Walker walker, Building other) {
     for (Walker w : other.resident) if (eligible(w)) {
-      I.say("\nDRAFTING: "+w);
+      //I.say("\nDRAFTING: "+w);
       w.formation = this.formation;
       recruits.include(w);
     }
