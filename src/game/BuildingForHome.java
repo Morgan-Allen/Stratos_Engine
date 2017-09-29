@@ -59,13 +59,13 @@ public class BuildingForHome extends Building {
       goes = tried;
     }
     if (goes != null) {
-      walker.embarkOnVisit(goes, 0, Walker.JOB_SHOPPING, this);
+      walker.embarkOnVisit(goes, 0, Walker.JOB.SHOPPING, this);
       return;
     }
     
     goes = findNearestWithFeature(IS_AMENITY, 50);
     if (goes != null && Rand.num() > 0.25f) {
-      walker.embarkOnVisit(goes, 25, Walker.JOB_VISITING, this);
+      walker.embarkOnVisit(goes, 25, Walker.JOB.VISITING, this);
       return;
     }
     
@@ -75,7 +75,7 @@ public class BuildingForHome extends Building {
   
   public void walkerEnters(Walker walker, Building enters) {
     
-    if (walker.jobType() == Walker.JOB_SHOPPING) {
+    if (walker.jobType() == Walker.JOB.SHOPPING) {
       for (Good cons : type.consumed) {
         float stock = enters.inventory.valueFor(cons);
         
@@ -84,7 +84,7 @@ public class BuildingForHome extends Building {
         }
         else if (stock > 0) {
           float taken = Nums.min(type.maxStock, stock / 2);
-          walker.beginDelivery(enters, this, Walker.JOB_SHOPPING, cons, taken);
+          walker.beginDelivery(enters, this, Walker.JOB.SHOPPING, cons, taken);
         }
       }
     }

@@ -72,7 +72,7 @@ public class BuildingForGather extends BuildingForDelivery {
     Fixture goes = pick.result();
     if (goes != null) {
       Tile under = map.tileAt(goes.x, goes.y);
-      walker.embarkOnTarget(under, 2, Walker.JOB_GATHERING, this);
+      walker.embarkOnTarget(under, 2, Walker.JOB.GATHERING, this);
       return true;
     }
     

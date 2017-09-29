@@ -1,9 +1,9 @@
 
 
 package game;
+import util.*;
 import static game.GameConstants.*;
 import static game.CityMap.*;
-import util.*;
 import static util.TileConstants.*;
 
 
@@ -13,18 +13,20 @@ public class Walker implements Session.Saveable {
   
   /**  Data fields and setup/initialisation-
     */
+  public static enum JOB {
+    NONE     ,
+    RESTING  ,
+    WANDER   ,
+    DELIVER  ,
+    SHOPPING ,
+    TRADING  ,
+    VISITING ,
+    GATHERING,
+    CRAFTING ,
+    HUNTING  ,
+    MILITARY
+  };
   final public static int
-    JOB_NONE      = -1,
-    JOB_RESTING   =  0,
-    JOB_WANDER    =  1,
-    JOB_DELIVER   =  2,
-    JOB_SHOPPING  =  3,
-    JOB_TRADING   =  4,
-    JOB_VISITING  =  5,
-    JOB_GATHERING =  6,
-    JOB_CRAFTING  =  7,
-    JOB_HUNTING   =  8,
-    JOB_MILITARY  =  9,
     
     MAX_WANDER_TIME = 20,
     AVG_VISIT_TIME  = 20,
@@ -50,19 +52,20 @@ public class Walker implements Session.Saveable {
   Formation formation;
   Building  inside;
   
-  static class Job {
+  static class Task {
     Employer origin;
     
-    int jobType   = JOB_NONE;
+    JOB type      = JOB.NONE;
     int timeSpent = 0 ;
     int maxTime   = 20;
     
     Tile path[] = null;
     int pathIndex = -1;
+    
     Tile     target;
     Building visits;
   }
-  Job job;
+  Task job;
   
   Good carried = null;
   float carryAmount = 0;
@@ -98,9 +101,9 @@ public class Walker implements Session.Saveable {
     inside    = (Building ) s.loadObject();
     
     if (s.loadBool()) {
-      Job j = this.job = new Job();
+      Task j = this.job = new Task();
       j.origin    = (Employer) s.loadObject();
-      j.jobType   = s.loadInt();
+      j.type      = JOB.values()[s.loadInt()];
       j.timeSpent = s.loadInt();
       j.maxTime   = s.loadInt();
       
@@ -144,9 +147,9 @@ public class Walker implements Session.Saveable {
     s.saveBool(job != null);
     if (job != null) {
       s.saveObject(job.origin);
-      s.saveInt(job.jobType  );
+      s.saveInt(job.type.ordinal());
       s.saveInt(job.timeSpent);
-      s.saveInt(job.maxTime  );
+      s.saveInt(job.maxTime);
       
       if (job.path == null) s.saveInt(-1);
       else {
@@ -203,7 +206,7 @@ public class Walker implements Session.Saveable {
     */
   void update() {
     
-    if (jobType() == JOB_WANDER) {
+    if (jobType() == JOB.WANDER) {
       updateRandomWalk();
     }
     else if (job != null) {
@@ -263,9 +266,9 @@ public class Walker implements Session.Saveable {
   }
   
   
-  public int jobType() {
-    if (job == null) return JOB_NONE;
-    return job.jobType;
+  public JOB jobType() {
+    if (job == null) return JOB.NONE;
+    return job.type;
   }
   
   
@@ -273,27 +276,28 @@ public class Walker implements Session.Saveable {
   /**  Pathing and visitation utilities:
     */
   private void setInside(Building b, boolean yes) {
-    if (b == null || home == null) return;
+    if (b == null) return;
+    Employer j = job == null ? null : job.origin;
     
     if (yes && b != inside) {
       b.visitors.include(this);
       inside = b;
-      home.walkerEnters(this, inside);
+      if (j != null) j.walkerEnters(this, inside);
     }
     if (b == inside && ! yes) {
-      home.walkerExits(this, inside);
+      if (j != null) j.walkerExits(this, inside);
       b.visitors.remove(this);
       inside = null;
     }
   }
   
   
-  private void beginJob(
-    Employer origin, Building visits, Tile target, int jobType, int maxTime
+  private void beginTask(
+    Employer origin, Building visits, Tile target, JOB jobType, int maxTime
   ) {
-    Job j = this.job = new Job();
+    Task j = this.job = new Task();
     j.origin    = origin ;
-    j.jobType   = jobType;
+    j.type      = jobType;
     j.timeSpent = 0      ;
     j.maxTime   = maxTime;
     j.visits    = visits ;
@@ -312,7 +316,7 @@ public class Walker implements Session.Saveable {
   }
   
   
-  private Tile[] updatePathing(Job j) {
+  private Tile[] updatePathing(Task j) {
     boolean visiting = j.visits != null;
     I.say(this+" pathing toward "+(visiting ? j.visits : j.target));
     
@@ -341,29 +345,29 @@ public class Walker implements Session.Saveable {
   
   /**  Miscellaneous behaviour triggers:
     */
-  void embarkOnVisit(Building goes, int maxTime, int jobType, Employer e) {
+  void embarkOnVisit(Building goes, int maxTime, JOB jobType, Employer e) {
     if (goes == null) return;
     I.say(this+" will visit "+goes+" for time "+maxTime);
-    beginJob(e, goes, null, jobType, maxTime);
+    beginTask(e, goes, null, jobType, maxTime);
   }
   
   
-  void embarkOnTarget(Tile goes, int maxTime, int jobType, Employer e) {
+  void embarkOnTarget(Tile goes, int maxTime, JOB jobType, Employer e) {
     if (goes == null) return;
     I.say(this+" will target "+goes+" for time "+maxTime);
-    beginJob(e, null, goes, jobType, maxTime);
+    beginTask(e, null, goes, jobType, maxTime);
   }
   
   
   void returnTo(Building origin) {
     if (origin == null || origin.entrance == null || inside == origin) return;
     I.say(this+" will return home...");
-    beginJob(origin, origin, null, JOB_RESTING, 0);
+    beginTask(origin, origin, null, JOB.RESTING, 0);
   }
   
   
   void beginDelivery(
-    Building from, Building goes, int jobType,
+    Building from, Building goes, JOB jobType,
     Good carried, float amount
   ) {
     if (from == null || goes == null || goes.entrance == null) return;
@@ -374,7 +378,7 @@ public class Walker implements Session.Saveable {
     from.inventory.add(0 - amount, carried);
     this.carried     = carried;
     this.carryAmount = amount ;
-    beginJob(from, goes, null, jobType, 0);
+    beginTask(from, goes, null, jobType, 0);
   }
   
   
@@ -417,8 +421,8 @@ public class Walker implements Session.Saveable {
     if (inside == null || inside.entrance == null) return;
     
     I.say(this+" beginning random walk...");
-    Job j = this.job = new Job();
-    j.jobType   = JOB_WANDER;
+    Task j = this.job = new Task();
+    j.type      = JOB.WANDER;
     j.timeSpent = 0;
     j.maxTime   = MAX_WANDER_TIME;
     
@@ -470,10 +474,6 @@ public class Walker implements Session.Saveable {
     return type.name+" "+ID;
   }
 }
-
-
-
-
 
 
 

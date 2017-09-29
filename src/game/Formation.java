@@ -82,7 +82,7 @@ public class Formation implements
     Tile stands = standLocation(w);
     if (stands == null) return;
     
-    w.embarkOnTarget(stands, 0, Walker.JOB_MILITARY, this);
+    w.embarkOnTarget(stands, 0, Walker.JOB.MILITARY, this);
   }
   
   

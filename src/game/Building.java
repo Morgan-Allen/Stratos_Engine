@@ -100,13 +100,10 @@ public class Building extends Fixture implements Session.Saveable, Employer {
   /**  Regular updates:
     */
   void update() {
-    
     if (entrance == null || map.blocked(entrance.x, entrance.y)) {
       selectEntrance();
     }
-    
     if (--walkerCountdown <= 0) {
-      
       for (ObjectType typeW : type.walkerTypes) {
         if (numWalkers(typeW) >= walkersNeeded(typeW)) continue;
         Walker walker = (Walker) typeW.generate();
@@ -116,7 +113,6 @@ public class Building extends Fixture implements Session.Saveable, Employer {
         walkers .add(walker);
         visitors.add(walker);
       }
-      
       walkerCountdown = type.walkerCountdown;
     }
   }

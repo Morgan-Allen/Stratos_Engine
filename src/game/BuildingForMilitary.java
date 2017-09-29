@@ -69,7 +69,7 @@ public class BuildingForMilitary extends BuildingForDelivery {
     
     Walker drafts = pick.result();
     if (drafts != null) {
-      walker.embarkOnVisit(drafts.inside, 2, Walker.JOB_VISITING, this);
+      walker.embarkOnVisit(drafts.inside, 2, Walker.JOB.VISITING, this);
     }
     else {
       super.selectWalkerBehaviour(walker);
@@ -77,8 +77,8 @@ public class BuildingForMilitary extends BuildingForDelivery {
   }
   
   
-  public void walkerExits(Walker walker, Building enters) {
-    for (Walker w : enters.visitors) if (eligible(w)) {
+  public void walkerVisits(Walker walker, Building other) {
+    for (Walker w : other.visitors) if (eligible(w)) {
       w.formation = this.formation;
     }
   }

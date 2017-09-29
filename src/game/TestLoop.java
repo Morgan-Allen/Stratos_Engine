@@ -91,19 +91,20 @@ public class TestLoop {
   
   
   private static String reportFor(Building b) {
+    
     String report = ""+b+"\n";
     
     if (b.walkers.size() > 0) {
       report += "\nWalkers:";
       for (Walker w : b.walkers) {
-        report += "\n  "+w;
+        report += "\n  "+w+" ("+w.jobType()+")";
       }
     }
     
     if (b.visitors.size() > 0) {
       report += "\nVisitors:";
       for (Walker w : b.visitors) {
-        report += "\n  "+w;
+        report += "\n  "+w+" ("+w.jobType()+")";
       }
     }
     

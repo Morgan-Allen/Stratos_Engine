@@ -51,7 +51,7 @@ public class WalkerForTrade extends Walker implements Journeys {
     
     cargo.clear();
     takeOnGoods((Trader) from, taken, false);
-    embarkOnVisit(goes, 0, JOB_TRADING, from);
+    embarkOnVisit(goes, 0, JOB.TRADING, from);
   }
   
   
@@ -66,7 +66,7 @@ public class WalkerForTrade extends Walker implements Journeys {
     profits    = 0;
     tradesWith = goes;
     
-    embarkOnTarget(exits, 0, JOB_TRADING, from);
+    embarkOnTarget(exits, 0, JOB.TRADING, from);
   }
   
   

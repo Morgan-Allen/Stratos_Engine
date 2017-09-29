@@ -1,6 +1,7 @@
 
 
 package game;
+import static game.Walker.*;
 import static game.GameConstants.*;
 import util.*;
 
@@ -128,10 +129,10 @@ public class BuildingForDelivery extends Building {
     
     if (! pick.empty()) {
       Order o = pick.result();
-      walker.beginDelivery(this, o.goes, Walker.JOB_DELIVER, o.good, o.amount);
+      walker.beginDelivery(this, o.goes, JOB.DELIVER, o.good, o.amount);
     }
     else {
-      walker.embarkOnVisit(this, -1, Walker.JOB_CRAFTING, this);
+      walker.embarkOnVisit(this, -1, JOB.CRAFTING, this);
     }
   }
   
