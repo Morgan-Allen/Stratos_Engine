@@ -15,6 +15,7 @@ public class Walker implements Session.Saveable {
     */
   public static enum JOB {
     NONE     ,
+    RETURNING,
     RESTING  ,
     WANDER   ,
     DELIVER  ,
@@ -196,7 +197,7 @@ public class Walker implements Session.Saveable {
   
   
   void setDestroyed() {
-    if (home != null) home.walkers.remove(this);
+    if (home != null) home.resident.remove(this);
     home = null;
   }
   
@@ -205,6 +206,10 @@ public class Walker implements Session.Saveable {
   /**  Regular updates-
     */
   void update() {
+    
+    if (reports()) {
+      I.add("");
+    }
     
     if (jobType() == JOB.WANDER) {
       updateRandomWalk();
@@ -222,13 +227,15 @@ public class Walker implements Session.Saveable {
         if (visiting && inside != job.visits) {
           setInside(job.visits, true);
         }
-        else if (job.timeSpent++ <= job.maxTime) {
+        if (job.timeSpent++ <= job.maxTime) {
           if (visiting) {
             onVisit(job.visits);
+            job.visits.visitedBy(this);
             job.origin.walkerVisits(this, job.visits);
           }
           if (targeting) {
             onTarget(job.target);
+            //  TODO:  Set targeting for the fixture in question!
             job.origin.walkerTargets(this, job.target);
           }
         }
@@ -251,6 +258,9 @@ public class Walker implements Session.Saveable {
   
   
   void beginNextBehaviour() {
+    
+    job = null;
+    
     if (formation != null && formation.active) {
       formation.selectWalkerBehaviour(this);
     }
@@ -262,6 +272,14 @@ public class Walker implements Session.Saveable {
     }
     if (job == null) {
       startRandomWalk();
+    }
+    
+    if (reports()) {
+      I.say("\n"+this+" BEGAN NEW BEHAVIOUR: "+jobType()+", TIME: "+map.time);
+      if (job != null) {
+        if (job.visits != null) I.say("  VISITING:  "+job.visits);
+        if (job.target != null) I.say("  TARGETING: "+job.target);
+      }
     }
   }
   
@@ -307,10 +325,10 @@ public class Walker implements Session.Saveable {
     j.path = updatePathing(j);
     
     if (j.path != null) {
-      I.say("  Path is: "+j.path.length+" tiles long...");
+      if (reports()) I.say("  Path is: "+j.path.length+" tiles long...");
     }
     else {
-      I.say("  Could not find path!");
+      if (reports()) I.say("  Could not find path!");
       this.job = null;
     }
   }
@@ -318,7 +336,10 @@ public class Walker implements Session.Saveable {
   
   private Tile[] updatePathing(Task j) {
     boolean visiting = j.visits != null;
-    I.say(this+" pathing toward "+(visiting ? j.visits : j.target));
+    
+    if (reports()) {
+      I.say(this+" pathing toward "+(visiting ? j.visits : j.target));
+    }
     
     Tile at    = (inside == null) ? map.tileAt(x, y) : inside.entrance;
     Tile heads = null;
@@ -347,22 +368,22 @@ public class Walker implements Session.Saveable {
     */
   void embarkOnVisit(Building goes, int maxTime, JOB jobType, Employer e) {
     if (goes == null) return;
-    I.say(this+" will visit "+goes+" for time "+maxTime);
+    if (reports()) I.say(this+" will visit "+goes+" for time "+maxTime);
     beginTask(e, goes, null, jobType, maxTime);
   }
   
   
   void embarkOnTarget(Tile goes, int maxTime, JOB jobType, Employer e) {
     if (goes == null) return;
-    I.say(this+" will target "+goes+" for time "+maxTime);
+    if (reports()) I.say(this+" will target "+goes+" for time "+maxTime);
     beginTask(e, null, goes, jobType, maxTime);
   }
   
   
   void returnTo(Building origin) {
     if (origin == null || origin.entrance == null || inside == origin) return;
-    I.say(this+" will return home...");
-    beginTask(origin, origin, null, JOB.RESTING, 0);
+    if (reports()) I.say(this+" will return to "+origin);
+    beginTask(origin, origin, null, JOB.RETURNING, 0);
   }
   
   
@@ -373,7 +394,7 @@ public class Walker implements Session.Saveable {
     if (from == null || goes == null || goes.entrance == null) return;
     if (from != inside) return;
     
-    I.say(this+" will deliver "+amount+" "+carried+" to "+goes);
+    if (reports()) I.say(this+" will deliver "+amount+" "+carried+" to "+goes);
     
     from.inventory.add(0 - amount, carried);
     this.carried     = carried;
@@ -385,7 +406,7 @@ public class Walker implements Session.Saveable {
   void offloadGood(Good carried, Building store) {
     if (store == null || carried != this.carried) return;
     
-    I.say(this+" Depositing "+carried+" at "+store);
+    if (reports()) I.say(this+" Depositing "+carried+" at "+store);
     
     store.inventory.add(carryAmount, carried);
     this.carried = null;
@@ -420,7 +441,8 @@ public class Walker implements Session.Saveable {
   void startRandomWalk() {
     if (inside == null || inside.entrance == null) return;
     
-    I.say(this+" beginning random walk...");
+    if (reports()) I.say(this+" beginning random walk...");
+    
     Task j = this.job = new Task();
     j.type      = JOB.WANDER;
     j.timeSpent = 0;
@@ -470,6 +492,12 @@ public class Walker implements Session.Saveable {
   
   /**  Graphical, debug and interface methods-
     */
+  protected boolean reports() {
+    if (I.talkAbout == null) return false;
+    return I.talkAbout == home || I.talkAbout == work;
+  }
+  
+  
   public String toString() {
     return type.name+" "+ID;
   }

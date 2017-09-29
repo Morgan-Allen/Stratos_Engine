@@ -17,7 +17,6 @@ public class TestLoop {
     Fixture above  = null ;
     Series <Character> pressed = new Batch();
     
-    
     while (true) {
       
       for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
@@ -45,9 +44,11 @@ public class TestLoop {
       
       if (above instanceof Building) {
         I.presentInfo(reportFor((Building) above), "City Map");
+        I.talkAbout = above;
       }
       else {
         I.presentInfo(baseReport(map, paused), "City Map");
+        I.talkAbout = null;
       }
       
       if (pressed.includes('p')) {
@@ -94,9 +95,9 @@ public class TestLoop {
     
     String report = ""+b+"\n";
     
-    if (b.walkers.size() > 0) {
+    if (b.resident.size() > 0) {
       report += "\nWalkers:";
-      for (Walker w : b.walkers) {
+      for (Walker w : b.resident) {
         report += "\n  "+w+" ("+w.jobType()+")";
       }
     }

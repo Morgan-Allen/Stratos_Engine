@@ -10,7 +10,7 @@ public class BuildingForMilitary extends BuildingForDelivery {
   
   /**  Data fields, setup and save/load methods-
     */
-  List <Walker> enlisted = new List();
+  List <Walker> recruits = new List();
   Formation formation = null;
   
   
@@ -21,14 +21,14 @@ public class BuildingForMilitary extends BuildingForDelivery {
   
   public BuildingForMilitary(Session s) throws Exception {
     super(s);
-    s.loadObjects(enlisted);
+    s.loadObjects(recruits);
     formation = (Formation) s.loadObject();
   }
   
   
   public void saveState(Session s) throws Exception {
     super.saveState(s);
-    s.saveObjects(enlisted);
+    s.saveObjects(recruits);
     s.saveObject(formation);
   }
   
@@ -50,36 +50,49 @@ public class BuildingForMilitary extends BuildingForDelivery {
   /**  Regular updates and active service-
     */
   boolean eligible(Walker walker) {
+    if (resident.includes(walker)) return false;
     return walker.formation == null;
+  }
+  
+  
+  protected Walker addWalker(ObjectType type) {
+    Walker w = super.addWalker(type);
+    recruits.include(w);
+    return w;
   }
   
   
   public void selectWalkerBehaviour(Walker walker) {
     Pick <Walker> pick = new Pick();
     
-    for (Building b : map.buildings) {
-      for (Walker w : b.walkers) {
-        if (eligible(w) && w.inside == b) {
-          float dist = CityMap.distance(b.entrance, entrance);
-          float rating = 10 / (10 + dist);
-          pick.compare(w, rating);
+    if (recruits.size() < type.maxRecruits) {
+      for (Building b : map.buildings) {
+        for (Walker w : b.resident) {
+          if (eligible(w)) {
+            float dist = CityMap.distance(b.entrance, entrance);
+            float rating = 10 / (10 + dist);
+            pick.compare(w, rating);
+          }
         }
       }
     }
     
     Walker drafts = pick.result();
     if (drafts != null) {
-      walker.embarkOnVisit(drafts.inside, 2, Walker.JOB.VISITING, this);
+      I.say("\nWILL DRAFT: "+drafts);
+      walker.embarkOnVisit(drafts.home, 2, Walker.JOB.VISITING, this);
     }
     else {
-      super.selectWalkerBehaviour(walker);
+      formation.selectWalkerBehaviour(walker);
     }
   }
   
   
   public void walkerVisits(Walker walker, Building other) {
-    for (Walker w : other.visitors) if (eligible(w)) {
+    for (Walker w : other.resident) if (eligible(w)) {
+      I.say("\nDRAFTING: "+w);
       w.formation = this.formation;
+      recruits.include(w);
     }
   }
   

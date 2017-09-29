@@ -18,14 +18,13 @@ public class TestMilitary extends TestLoop {
     
     BuildingForMilitary fort = (BuildingForMilitary) GARRISON.generate();
     fort.enterMap(map, 20, 20);
+    fort.formation.beginSecuring(map.tileAt(30, 40), TileConstants.E);
     
     for (int n = 8; n-- > 0;) {
       Building house = (Building) HOUSE.generate();
       house.enterMap(map, 10 + (n * 3), 17);
     }
     CityMap.applyPaving(map, 10, 19, 40, 1, true);
-    
-    fort.formation.beginSecuring(map.tileAt(30, 40), TileConstants.E);
     
     runGameLoop(map);
   }

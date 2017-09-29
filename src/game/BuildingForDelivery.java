@@ -2,6 +2,9 @@
 
 package game;
 import static game.Walker.*;
+
+import game.Walker.JOB;
+
 import static game.GameConstants.*;
 import util.*;
 
@@ -138,13 +141,15 @@ public class BuildingForDelivery extends Building {
   
   
   public void walkerEnters(Walker walker, Building enters) {
-    if (enters == this) for (Good need : needed()) {
-      walker.offloadGood(need, this);
+    if (walker.jobType() == JOB.DELIVER) {
+      if (enters == this) for (Good need : needed()) {
+        walker.offloadGood(need, this);
+      }
+      else for (Good made : produced()) {
+        walker.offloadGood(made, enters);
+      }
+      walker.returnTo(this);
     }
-    else for (Good made : produced()) {
-      walker.offloadGood(made, enters);
-    }
-    walker.returnTo(this);
   }
 }
 

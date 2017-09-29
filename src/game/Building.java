@@ -18,7 +18,7 @@ public class Building extends Fixture implements Session.Saveable, Employer {
   
   Tile entrance;
   int walkerCountdown = 0;
-  List <Walker> walkers  = new List();
+  List <Walker> resident = new List();
   List <Walker> visitors = new List();
   
   float craftProgress;
@@ -38,7 +38,7 @@ public class Building extends Fixture implements Session.Saveable, Employer {
     
     entrance = Tile.loadTile(map, s);
     walkerCountdown = s.loadInt();
-    s.loadObjects(walkers );
+    s.loadObjects(resident );
     s.loadObjects(visitors);
     
     craftProgress = s.loadFloat();
@@ -53,7 +53,7 @@ public class Building extends Fixture implements Session.Saveable, Employer {
     
     Tile.saveTile(entrance, map, s);
     s.saveInt(walkerCountdown);
-    s.saveObjects(walkers);
+    s.saveObjects(resident);
     s.saveObjects(visitors);
     
     s.saveFloat(craftProgress);
@@ -106,12 +106,7 @@ public class Building extends Fixture implements Session.Saveable, Employer {
     if (--walkerCountdown <= 0) {
       for (ObjectType typeW : type.walkerTypes) {
         if (numWalkers(typeW) >= walkersNeeded(typeW)) continue;
-        Walker walker = (Walker) typeW.generate();
-        walker.enterMap(map, x, y);
-        walker.inside = this;
-        walker.home   = this;
-        walkers .add(walker);
-        visitors.add(walker);
+        addWalker(typeW);
       }
       walkerCountdown = type.walkerCountdown;
     }
@@ -120,7 +115,7 @@ public class Building extends Fixture implements Session.Saveable, Employer {
   
   protected int numWalkers(ObjectType type) {
     int sum = 0;
-    for (Walker w : walkers) if (w.type == type) sum++;
+    for (Walker w : resident) if (w.type == type) sum++;
     return sum;
   }
   
@@ -130,11 +125,23 @@ public class Building extends Fixture implements Session.Saveable, Employer {
   }
   
   
+  protected Walker addWalker(ObjectType type) {
+    Walker walker = (Walker) type.generate();
+    walker.enterMap(map, x, y);
+    walker.inside = this;
+    walker.home   = this;
+    resident.add(walker);
+    visitors.add(walker);
+    //  TODO:  You need to start distinguishing between home and work...
+    return walker;
+  }
+  
+  
   
   /**  Customising walker behaviour:
     */
   public void selectWalkerBehaviour(Walker walker) {
-    walker.startRandomWalk();
+    walker.returnTo(this);
   }
   
   
@@ -159,6 +166,11 @@ public class Building extends Fixture implements Session.Saveable, Employer {
   
   
   public void walkerExits(Walker walker, Building enters) {
+    return;
+  }
+  
+  
+  public void visitedBy(Walker walker) {
     return;
   }
   

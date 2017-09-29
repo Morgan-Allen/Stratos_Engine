@@ -81,8 +81,7 @@ public class Formation implements
   public void selectWalkerBehaviour(Walker w) {
     Tile stands = standLocation(w);
     if (stands == null) return;
-    
-    w.embarkOnTarget(stands, 0, Walker.JOB.MILITARY, this);
+    w.embarkOnTarget(stands, 10, Walker.JOB.MILITARY, this);
   }
   
   
@@ -119,7 +118,7 @@ public class Formation implements
     Tile c = this.securedPoint;
     if (c == null) return null;
     
-    int index = garrison.enlisted.indexOf(member);
+    int index = garrison.recruits.indexOf(member);
     if (index == -1) return null;
     
     int ranks = garrison.type.numRanks;

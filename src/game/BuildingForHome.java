@@ -59,17 +59,33 @@ public class BuildingForHome extends Building {
       goes = tried;
     }
     if (goes != null) {
-      walker.embarkOnVisit(goes, 0, Walker.JOB.SHOPPING, this);
+      walker.embarkOnVisit(goes, 5, Walker.JOB.SHOPPING, this);
       return;
     }
     
+    
+    Pick <Building> pick = new Pick();
+    //  TODO:  Compare all nearby amenities!
+
+    pick.compare(this, 1.0f * Rand.num());
     goes = findNearestWithFeature(IS_AMENITY, 50);
-    if (goes != null && Rand.num() > 0.25f) {
-      walker.embarkOnVisit(goes, 25, Walker.JOB.VISITING, this);
-      return;
+    if (goes != null) {
+      pick.compare(goes, 1.0f * Rand.num());
     }
+    goes = pick.result();
     
-    super.selectWalkerBehaviour(walker);
+    if (goes != this && goes != null) {
+      walker.embarkOnVisit(goes, 25, Walker.JOB.VISITING, this);
+    }
+    else if (goes == this && Rand.yes()) {
+      walker.embarkOnVisit(this, 10, Walker.JOB.RESTING, this);
+    }
+    else if (goes == this) {
+      walker.startRandomWalk();
+    }
+    else {
+      super.selectWalkerBehaviour(walker);
+    }
   }
   
   
