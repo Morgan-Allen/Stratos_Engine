@@ -87,7 +87,6 @@ public class BuildingForMilitary extends BuildingForDelivery {
   
   public void walkerVisits(Walker walker, Building other) {
     for (Walker w : other.resident) if (eligible(w)) {
-      w.formation = this.formation;
       formation.toggleRecruit(w, true);
     }
   }

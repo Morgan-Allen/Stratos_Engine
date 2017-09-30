@@ -44,9 +44,8 @@ public class City implements Session.Saveable, Trader {
     name = s.loadString();
     
     world = (World) s.loadObject();
-    
-    mapX = s.loadFloat();
-    mapY = s.loadFloat();
+    mapX  = s.loadFloat();
+    mapY  = s.loadFloat();
     for (int n = s.loadInt(); n-- > 0;) {
       distances.put((City) s.loadObject(), s.loadInt());
     }
@@ -55,8 +54,9 @@ public class City implements Session.Saveable, Trader {
     s.loadTally(tradeLevel);
     s.loadTally(inventory);
     for (int n = s.loadInt(); n-- > 0;) {
+      City     c = (City) s.loadObject();
       RELATION r = RELATION.values()[s.loadInt()];
-      relations.put((City) s.loadObject(), r);
+      relations.put(c, r);
     }
     
     active = s.loadBool();
@@ -69,7 +69,6 @@ public class City implements Session.Saveable, Trader {
     s.saveString(name);
     
     s.saveObject(world);
-    
     s.saveFloat(mapX);
     s.saveFloat(mapY);
     s.saveInt(distances.size());
@@ -81,6 +80,7 @@ public class City implements Session.Saveable, Trader {
     s.saveInt(currentFunds);
     s.saveTally(tradeLevel);
     s.saveTally(inventory);
+    s.saveInt(relations.size());
     for (City c : relations.keySet()) {
       s.saveObject(c);
       s.saveInt(relations.get(c).ordinal());
@@ -97,6 +97,12 @@ public class City implements Session.Saveable, Trader {
   static void setupRoute(City a, City b, int distance) {
     a.distances.put(b, distance);
     b.distances.put(a, distance);
+  }
+  
+  
+  static void setRelations(City a, City b, RELATION r) {
+    a.relations.put(b, r);
+    b.relations.put(a, r);
   }
   
   

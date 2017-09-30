@@ -121,7 +121,7 @@ public class Building extends Fixture implements Session.Saveable, Employer {
   
   
   protected int walkersNeeded(ObjectType type) {
-    return type.maxWalkers;
+    return this.type.maxWalkers;
   }
   
   

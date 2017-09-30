@@ -60,6 +60,8 @@ public class Formation implements
     */
   void toggleRecruit(Walker s, boolean is) {
     this.recruits.toggleMember(s, is);
+    if (is) s.formation = this;
+    else    s.formation = null;
   }
   
   
@@ -77,6 +79,16 @@ public class Formation implements
   }
   
   
+  boolean formationReady() {
+    if ((! active) || securedPoint == null) return false;
+    
+    for (Walker w : recruits) {
+      if (standLocation(w) != w.at) return false;
+    }
+    return true;
+  }
+  
+  
   
   /**  Organising walkers-
     */
@@ -84,7 +96,7 @@ public class Formation implements
     
     Walker target = w.inCombat() ? null : findTarget(w);
     if (target != null) {
-      w.beginAttack(target, JOB.MILITARY, this);
+      w.beginAttack(target, JOB.COMBAT, this);
       return;
     }
     
@@ -100,18 +112,21 @@ public class Formation implements
     
     Walker target = w.inCombat() ? null : findTarget(w);
     if (target != null) {
-      w.beginAttack(target, JOB.MILITARY, this);
+      w.beginAttack(target, JOB.COMBAT, this);
       return;
     }
   }
   
   
-  public void walkerPasses(Walker walker, Building other) {
+  public void walkerTargets(Walker walker, Target other) {
+    if (walker.inCombat()) {
+      walker.performAttack((Walker) other);
+    }
     return;
   }
   
   
-  public void walkerTargets(Walker walker, Target other) {
+  public void walkerPasses(Walker walker, Building other) {
     return;
   }
   
@@ -158,7 +173,7 @@ public class Formation implements
     if (CA == null) CA = map.city;
     if (CB == null) CB = map.city;
     if (CA == CB) return false;
-    City.RELATION r = CA.relations.get(b);
+    City.RELATION r = CA.relations.get(CB);
     if (r == City.RELATION.ENEMY) return true;
     return false;
   }
@@ -168,7 +183,7 @@ public class Formation implements
     Pick <Walker> pick = new Pick();
     
     //  TODO:  Allow for targeting of anything noticed by other members of the
-    //  team!
+    //  team?
     float seeBonus = type.numFile;
     
     for (Walker w : map.walkers) if (hostile(w, member)) {
@@ -200,9 +215,8 @@ public class Formation implements
   
   /**  Off-map invasions or relief operations:
     */
-  //  TODO:  You will also need to some basic tactical AI- what to attack, and
-  //  when to retreat.
-  
+  //  TODO:  You will also need to add some basic tactical AI- what to attack,
+  //  and when to retreat.
   
   public void onArrival(City goes, World.Journey journey) {
     if (goes.map == null) {

@@ -3,7 +3,6 @@
 package game;
 import static game.GameConstants.*;
 import util.*;
-import java.lang.reflect.*;
 
 
 
@@ -17,13 +16,13 @@ public class TestLoop {
   static Series <Character> pressed = new Batch();
   
   
-  static void runGameLoop(CityMap map, int numUpdates) {
+  static CityMap runGameLoop(CityMap map, int numUpdates) {
     
     if (graphic == null || graphic.length != map.size) {
       graphic = new int[map.size][map.size];
     }
     
-    while (numUpdates == -1 || numUpdates-- > 0) {
+    while (true) {
       
       for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
         int fill = BLANK_COLOR;
@@ -79,10 +78,13 @@ public class TestLoop {
       
       if (! paused) {
         map.update();
+        if (numUpdates > 0 && --numUpdates == 0) break;
       }
       try { Thread.sleep(100); }
       catch (Exception e) {}
     }
+    
+    return map;
   }
   
   
@@ -114,6 +116,17 @@ public class TestLoop {
         report += "\n  "+w+" ("+w.jobType()+")";
       }
     }
+    
+    BuildingForMilitary MB = (BuildingForMilitary) I.cast(
+      b, BuildingForMilitary.class
+    );
+    if (MB != null && MB.formation.recruits.size() > 0) {
+      report += "\nRecruits:";
+      for (Walker w : MB.formation.recruits) {
+        report += "\n  "+w;
+      }
+    }
+    
     
     if (b.craftProgress > 0) {
       report += "\nCraft progress:\n  "+b.craftProgress;

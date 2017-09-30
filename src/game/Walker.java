@@ -67,7 +67,7 @@ public class Walker extends Fixture implements Session.Saveable {
   }
   Task job;
   
-  Good carried = null;
+  Good  carried = null;
   float carryAmount = 0;
   
   float injury ;
@@ -199,6 +199,12 @@ public class Walker extends Fixture implements Session.Saveable {
   }
   
   
+  void assignHomeCity(City city) {
+    this.homeCity = city;
+    this.guest    = true;
+  }
+  
+  
   
   /**  Regular updates-
     */
@@ -212,7 +218,7 @@ public class Walker extends Fixture implements Session.Saveable {
       boolean combat    = inCombat();
       Tile    pathEnd   = (Tile) Visit.last(job.path);
       float   distance  = CityMap.distance(at, pathEnd);
-      float   minRange  = Nums.max(0.1f, combat ? 0 : type.attackRange);
+      float   minRange  = Nums.max(0.1f, combat ? type.attackRange : 0);
       //
       //  If you're close enough to start the behaviour, act accordingly:
       if (distance <= minRange) {
@@ -238,7 +244,8 @@ public class Walker extends Fixture implements Session.Saveable {
       //
       //  Otherwise, close along the path:
       else {
-        Tile ahead = job.path[++job.pathIndex];
+        job.pathIndex = Nums.clamp(job.pathIndex + 1, job.path.length);
+        Tile ahead = job.path[job.pathIndex];
         this.at = ahead;
         if (inside != null) setInside(inside, false);
       }
@@ -480,6 +487,7 @@ public class Walker extends Fixture implements Session.Saveable {
   
   void checkHealthState() {
     if (injury + hunger > type.maxHealth && state != STATE_DEAD) {
+      I.say("\n"+this+" HAS BEEN KILLED!");
       state = STATE_DEAD;
       job   = null;
       exitMap();
@@ -558,7 +566,8 @@ public class Walker extends Fixture implements Session.Saveable {
   
   
   public String toString() {
-    return type.name+" "+ID;
+    String from = homeCity == null ? "" : " ("+homeCity.name+")";
+    return type.name+" "+ID+from;
   }
 }
 

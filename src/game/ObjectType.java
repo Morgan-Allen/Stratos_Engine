@@ -90,7 +90,7 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   int defendScore =  2 ;
   int maxHealth   =  5 ;
   int sightRange  =  6 ;
-  int attackRange = -1 ;
+  int attackRange =  1 ;
   
   String names[];
   

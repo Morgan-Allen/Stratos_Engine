@@ -5,7 +5,7 @@ import static game.GameConstants.*;
 
 
 
-public class TestWorld extends TestLoop {
+public class TestTrading extends TestLoop {
   
   
   public static void main(String args[]) {
