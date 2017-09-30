@@ -68,13 +68,27 @@ public class World implements Session.Saveable {
   
   
   
+  /**  Managing cities:
+    */
+  void addCity(City c) {
+    this.cities.add(c);
+  }
+  
+  
+  City cityNamed(String n) {
+    for (City c : cities) if (c.name.equals(n)) return c;
+    return null;
+  }
+  
+  
+  
   /**  Registering and updating journeys:
     */
-  void beginJourney(City from, City goes, Journeys... going) {
-    if (from == null || goes == null) return;
+  Journey beginJourney(City from, City goes, Journeys... going) {
+    if (from == null || goes == null) return null;
     
     Integer distance = from.distances.get(goes);
-    if (distance == null) return;
+    if (distance == null) return null;
     
     Journey j = new Journey();
     j.from       = from;
@@ -87,6 +101,17 @@ public class World implements Session.Saveable {
     I.say("\nBeginning journey: "+j.from+" to "+j.goes);
     I.say("  Embarked: "+j.going);
     I.say("  Time: "+time+", arrival: "+j.arriveTime);
+    
+    return j;
+  }
+  
+  
+  boolean completeJourney(Journey j) {
+    journeys.remove(j);
+    for (Journeys g : j.going) {
+      g.onArrival(j.goes, j);
+    }
+    return true;
   }
   
   
@@ -106,11 +131,7 @@ public class World implements Session.Saveable {
         I.say("\nCompleted journey: "+j.from+" to "+j.goes);
         I.say("  Embarked: "+j.going);
         I.say("  Time: "+time+", arrival: "+j.arriveTime);
-        
-        journeys.remove(j);
-        for (Journeys g : j.going) {
-          g.onArrival(j.goes, j);
-        }
+        completeJourney(j);
       }
     }
   }

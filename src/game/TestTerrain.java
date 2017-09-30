@@ -30,7 +30,7 @@ public class TestTerrain extends TestLoop {
     
     CityMapGenerator.populateFixtures(map);
     
-    runGameLoop(map);
+    runGameLoop(map, -1);
   }
   
 }

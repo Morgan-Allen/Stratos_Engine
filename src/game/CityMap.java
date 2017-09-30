@@ -77,6 +77,7 @@ public class CityMap implements Session.Saveable {
   
   void attachCity(City city) {
     this.city = city;
+    city.map  = this;
   }
   
   

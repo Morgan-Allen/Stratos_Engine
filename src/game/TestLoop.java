@@ -3,21 +3,31 @@
 package game;
 import static game.GameConstants.*;
 import util.*;
+import java.lang.reflect.*;
 
 
 
 public class TestLoop {
   
+
+  static int graphic[][] = null;
+  static boolean paused = false;
+  static Coord   hover  = new Coord(-1, -1);
+  static Fixture above  = null;
+  static Series <Character> pressed = new Batch();
   
-  static void runGameLoop(CityMap map) {
+  
+  static void runGameLoop(CityMap map, int numUpdates) {
     
-    int graphic[][] = new int[map.size][map.size];
-    boolean paused = false;
-    Coord   hover  = new Coord(-1, -1);
-    Fixture above  = null ;
-    Series <Character> pressed = new Batch();
+    if (graphic == null || graphic.length != map.size) {
+      graphic = new int[map.size][map.size];
+    }
+    paused  = false;
+    hover   = new Coord(-1, -1);
+    above   = null;
+    pressed = new Batch();
     
-    while (true) {
+    while (numUpdates == -1 || numUpdates-- > 0) {
       
       for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
         int fill = BLANK_COLOR;

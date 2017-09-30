@@ -245,7 +245,7 @@ public class GameConstants {
     GARRISON.high = 6;
     GARRISON.tint = colour(8, 8, 8);
     GARRISON.setWalkerTypes(SOLDIER);
-    GARRISON.maxWalkers = 4;
+    GARRISON.maxWalkers = 2;
   }
   
   
@@ -277,9 +277,26 @@ public class GameConstants {
   }
   
   
+  
+  /**  Default geography:
+    */
+  static World setupDefaultWorld() {
+    World world = new World();
+    City  cityA = new City(world);
+    City  cityB = new City(world);
+    
+    cityA.name = "Xochimilco";
+    cityB.name = "Tlacopan"  ;
+    cityA.setWorldCoords(1, 1);
+    cityB.setWorldCoords(3, 3);
+    City.setupRoute(cityA, cityB, 2);
+    
+    world.addCity(cityA);
+    world.addCity(cityB);
+    return world;
+  }
+  
 }
-
-
 
 
 

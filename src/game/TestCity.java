@@ -49,7 +49,7 @@ public class TestCity extends TestLoop {
       return;
     }
     
-    runGameLoop(map);
+    runGameLoop(map, -1);
   }
   
 }

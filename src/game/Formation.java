@@ -14,12 +14,9 @@ public class Formation implements
   
   /**  Data fields, setup and save/load methods-
     */
-  //City belongs;
-  //List <Walker> soldiers = new List();
-  
+  ObjectType type;
+  List <Walker> recruits = new List();
   CityMap map;
-  BuildingForMilitary garrison;
-  
   boolean active = false;
   Tile securedPoint;
   int  facing;
@@ -27,19 +24,17 @@ public class Formation implements
   
   
   
-  Formation() {
-    return;
+  Formation(ObjectType type) {
+    this.type = type;
   }
   
   
   public Formation(Session s) throws Exception {
     s.cacheInstance(this);
     
-    //s.loadObjects(soldiers);
-    //belongs = (City) s.loadObject();
-    
+    type = (ObjectType) s.loadObject();
+    s.loadObjects(recruits);
     map          = (CityMap) s.loadObject();
-    garrison     = (BuildingForMilitary) s.loadObject();
     active       = s.loadBool();
     securedPoint = loadTile(map, s);
     facing       = s.loadInt();
@@ -49,11 +44,9 @@ public class Formation implements
   
   public void saveState(Session s) throws Exception {
     
-    //s.saveObjects(soldiers);
-    //s.saveObject(belongs);
-    
+    s.saveObject(type);
+    s.saveObjects(recruits);
     s.saveObject(map);
-    s.saveObject(garrison);
     s.saveBool(active);
     saveTile(securedPoint, map, s);
     s.saveInt(facing);
@@ -64,6 +57,10 @@ public class Formation implements
   
   /**  Issuing specific marching orders-
     */
+  void toggleRecruit(Walker s, boolean is) {
+  }
+  
+  
   void beginSecuring(Tile point, int facing) {
     this.securedPoint = point ;
     this.facing       = facing;
@@ -130,14 +127,13 @@ public class Formation implements
     Tile c = this.securedPoint;
     if (c == null) return null;
     
-    int index = garrison.recruits.indexOf(member);
+    int index = recruits.indexOf(member);
     if (index == -1) return null;
     
-    int ranks = garrison.type.numRanks;
-    int file  = garrison.type.numFile ;
-    
-    int x = index % file;
-    int y = index / file;
+    int ranks = type.numRanks;
+    int file  = type.numFile ;
+    int x     = index % file ;
+    int y     = index / file ;
     x += c.x - (file  / 2);
     y += c.y + (ranks / 2);
     
@@ -158,6 +154,9 @@ public class Formation implements
   
   Walker findTarget(Walker member) {
     Pick <Walker> pick = new Pick();
+    
+    //  TODO:  Allow for targeting of anything noticed by other members of the
+    //  team!
     
     for (Walker w : map.walkers) if (hostile(w, member)) {
       float dist  = CityMap.distance(member.at, w.at);

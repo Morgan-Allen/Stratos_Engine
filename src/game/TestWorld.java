@@ -10,20 +10,11 @@ public class TestWorld extends TestLoop {
   
   public static void main(String args[]) {
     
-    World   world = new World();
-    City    cityA = new City(world);
-    City    cityB = new City(world);
+    World   world = GameConstants.setupDefaultWorld();
+    City    cityA = world.cityNamed("Tlacopan"  );
+    City    cityB = world.cityNamed("Xochimilco");
     CityMap map   = new CityMap();
     
-    cityA.name = "Xochimilco";
-    cityB.name = "Tlacopan"  ;
-    world.cities.add(cityA);
-    world.cities.add(cityB);
-    cityA.setWorldCoords(1, 1);
-    cityB.setWorldCoords(3, 3);
-    City.setupRoute(cityA, cityB, 2);
-
-    cityA.map = map;
     map.performSetup(10);
     map.attachCity(cityA);
     
@@ -62,7 +53,7 @@ public class TestWorld extends TestLoop {
     Building weaver = (Building) WEAVER.generate();
     weaver.enterMap(map, 5, 3);
     
-    runGameLoop(map);
+    runGameLoop(map, -1);
   }
 }
 
