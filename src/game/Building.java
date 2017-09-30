@@ -145,6 +145,11 @@ public class Building extends Fixture implements Session.Saveable, Employer {
   }
   
   
+  public void walkerUpdates(Walker w) {
+    return;
+  }
+  
+  
   public void walkerPasses(Walker walker, Building other) {
     return;
   }

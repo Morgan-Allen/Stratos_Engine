@@ -24,8 +24,9 @@ public class Walker extends Fixture implements Session.Saveable {
     VISITING ,
     GATHERING,
     CRAFTING ,
+    MILITARY ,
     HUNTING  ,
-    MILITARY
+    COMBAT
   };
   final public static int
     
@@ -103,7 +104,9 @@ public class Walker extends Fixture implements Session.Saveable {
       j.maxTime   = s.loadInt();
       
       int PL = s.loadInt();
-      if (PL == -1) j.path = null;
+      if (PL == -1) {
+        j.path = null;
+      }
       else {
         j.path = new Tile[PL];
         for (int i = 0; i < PL; i++) j.path[i] = loadTile(map, s);
@@ -189,7 +192,9 @@ public class Walker extends Fixture implements Session.Saveable {
   
   
   void setDestroyed() {
-    if (home != null) home.resident.remove(this);
+    if (formation != null) formation.toggleRecruit(this, false);
+    if (home      != null) home.resident.remove(this);
+    if (work      != null) work.resident.remove(this);
     home = null;
   }
   
@@ -198,7 +203,8 @@ public class Walker extends Fixture implements Session.Saveable {
   /**  Regular updates-
     */
   void update() {
-    
+    //  TODO:  Don't allow another job to be assigned while this one is in
+    //  the middle of an update!
     if (job != null && checkAndUpdatePathing(job)) {
       
       boolean visiting  = job.visits != null;
@@ -207,7 +213,8 @@ public class Walker extends Fixture implements Session.Saveable {
       Tile    pathEnd   = (Tile) Visit.last(job.path);
       float   distance  = CityMap.distance(at, pathEnd);
       float   minRange  = Nums.max(0.1f, combat ? 0 : type.attackRange);
-      
+      //
+      //  If you're close enough to start the behaviour, act accordingly:
       if (distance <= minRange) {
         if (visiting && inside != job.visits) {
           setInside(job.visits, true);
@@ -228,6 +235,8 @@ public class Walker extends Fixture implements Session.Saveable {
           beginNextBehaviour();
         }
       }
+      //
+      //  Otherwise, close along the path:
       else {
         Tile ahead = job.path[++job.pathIndex];
         this.at = ahead;
@@ -237,6 +246,15 @@ public class Walker extends Fixture implements Session.Saveable {
     else {
       beginNextBehaviour();
     }
+    //
+    //  Finally, allow the current employer to monitor the walker-
+    boolean originOK = job != null && job.origin != null;
+    if (originOK) {
+      job.origin.walkerUpdates(this);
+    }
+    //
+    //  And update your current health-
+    checkHealthState();
   }
   
   
@@ -274,8 +292,7 @@ public class Walker extends Fixture implements Session.Saveable {
   
   
   public boolean inCombat() {
-    JOB type = jobType();
-    return type == JOB.MILITARY || type == JOB.HUNTING;
+    return jobType() == JOB.COMBAT;
   }
   
   
@@ -310,7 +327,7 @@ public class Walker extends Fixture implements Session.Saveable {
     j.visits    = visits ;
     j.target    = target ;
     
-    if (j.maxTime == -1) j.maxTime = AVG_VISIT_TIME;
+    if (maxTime == -1) j.maxTime = AVG_VISIT_TIME;
     j.path = updatePathing(j);
     
     if (j.path != null) {
@@ -324,7 +341,6 @@ public class Walker extends Fixture implements Session.Saveable {
   
   
   private boolean checkAndUpdatePathing(Task j) {
-    
     if (checkPathing(j)) return true;
     
     job.path = updatePathing(job);
@@ -354,6 +370,7 @@ public class Walker extends Fixture implements Session.Saveable {
     Tile t = null;
     if (t == null && j.visits != null) t = j.visits.entrance;
     if (t == null && j.target != null) t = j.target.at();
+    if (t == null && j.path   != null) t = (Tile) Visit.last(j.path);
     return t;
   }
   
@@ -465,6 +482,8 @@ public class Walker extends Fixture implements Session.Saveable {
     if (injury + hunger > type.maxHealth && state != STATE_DEAD) {
       state = STATE_DEAD;
       job   = null;
+      exitMap();
+      setDestroyed();
     }
   }
   
@@ -486,7 +505,7 @@ public class Walker extends Fixture implements Session.Saveable {
     Task j = this.job = new Task();
     j.type      = JOB.WANDER;
     j.timeSpent = 0;
-    j.maxTime   = MAX_WANDER_TIME;
+    j.maxTime   = 0;
     j.path      = extractRandomWalk();
   }
   

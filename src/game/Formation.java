@@ -2,6 +2,7 @@
 
 package game;
 import util.*;
+import static game.Walker.*;
 import static game.GameConstants.*;
 import static game.CityMap.*;
 
@@ -58,6 +59,7 @@ public class Formation implements
   /**  Issuing specific marching orders-
     */
   void toggleRecruit(Walker s, boolean is) {
+    this.recruits.toggleMember(s, is);
   }
   
   
@@ -80,15 +82,25 @@ public class Formation implements
     */
   public void selectWalkerBehaviour(Walker w) {
     
-    Walker target = findTarget(w);
+    Walker target = w.inCombat() ? null : findTarget(w);
     if (target != null) {
-      w.beginAttack(target, Walker.JOB.MILITARY, this);
+      w.beginAttack(target, JOB.MILITARY, this);
       return;
     }
     
     Tile stands = standLocation(w);
     if (stands != null) {
-      w.embarkOnTarget(stands, 10, Walker.JOB.MILITARY, this);
+      w.embarkOnTarget(stands, 10, JOB.MILITARY, this);
+      return;
+    }
+  }
+  
+  
+  public void walkerUpdates(Walker w) {
+    
+    Walker target = w.inCombat() ? null : findTarget(w);
+    if (target != null) {
+      w.beginAttack(target, JOB.MILITARY, this);
       return;
     }
   }
@@ -157,11 +169,15 @@ public class Formation implements
     
     //  TODO:  Allow for targeting of anything noticed by other members of the
     //  team!
+    float seeBonus = type.numFile;
     
     for (Walker w : map.walkers) if (hostile(w, member)) {
-      float dist  = CityMap.distance(member.at, w.at);
-      float range = member.type.sightRange;
-      if (dist < range + 1) pick.compare(w, 0 - dist);
+      float distW = CityMap.distance(member.at, w.at);
+      float distF = CityMap.distance(w.at, securedPoint);
+      float range = member.type.sightRange + seeBonus;
+      if (distF > range + 1) continue;
+      if (distW > range + 1) continue;
+      pick.compare(w, 0 - distW);
     }
     
     return pick.result();
@@ -174,6 +190,9 @@ public class Formation implements
   void beginSecuring(City city) {
     this.securedCity = city;
     this.active      = true;
+    
+    //  Tile exits = WalkerForTrade.findTransitPoint(map, city);
+    //  etc...
   }
   
   
@@ -181,12 +200,33 @@ public class Formation implements
   
   /**  Off-map invasions or relief operations:
     */
+  //  TODO:  You will also need to some basic tactical AI- what to attack, and
+  //  when to retreat.
+  
+  
   public void onArrival(City goes, World.Journey journey) {
-    
+    if (goes.map == null) {
+      
+    }
+    else {
+      this.map = goes.map;
+      Tile entry = WalkerForTrade.findTransitPoint(map, journey.from);
+      for (Walker w : recruits) {
+        w.enterMap(map, entry.x, entry.y);
+      }
+    }
   }
   
   
   
 }
+
+
+
+
+
+
+
+
 
 

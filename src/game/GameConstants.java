@@ -269,6 +269,7 @@ public class GameConstants {
   
   static interface Employer {
     void selectWalkerBehaviour(Walker walker);
+    void walkerUpdates(Walker walker);
     void walkerPasses (Walker walker, Building other );
     void walkerTargets(Walker walker, Target   other );
     void walkerEnters (Walker walker, Building enters);

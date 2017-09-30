@@ -22,10 +22,6 @@ public class TestLoop {
     if (graphic == null || graphic.length != map.size) {
       graphic = new int[map.size][map.size];
     }
-    paused  = false;
-    hover   = new Coord(-1, -1);
-    above   = null;
-    pressed = new Batch();
     
     while (numUpdates == -1 || numUpdates-- > 0) {
       

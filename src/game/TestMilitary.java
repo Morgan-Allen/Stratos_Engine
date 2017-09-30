@@ -23,7 +23,7 @@ public class TestMilitary extends TestLoop {
     fort.enterMap(map, 20, 20);
     fort.formation.beginSecuring(map.tileAt(30, 40), TileConstants.E);
     
-    for (int n = 8; n-- > 0;) {
+    for (int n = 4; n-- > 0;) {
       Building house = (Building) HOUSE.generate();
       house.enterMap(map, 10 + (n * 3), 17);
     }
@@ -31,26 +31,33 @@ public class TestMilitary extends TestLoop {
     
     
     Formation enemies = new Formation(GARRISON);
-    
-    for (int n = 4; n-- > 0;) {
+    for (int n = 8; n-- > 0;) {
       Walker fights = (Walker) ((n == 0) ? SOLDIER : CITIZEN).generate();
       enemies.toggleRecruit(fights, true);
     }
+    boolean invaded = false;
+    
+    //  TODO:  For now, just have the formation update itself.  Yeah, okay.
     
     while (true) {
       runGameLoop(map, 10);
       
-      if (fort.formation.recruits.size() >= 8) {
+      
+      /*
+      if (fort.formation.recruits.size() >= 8 && ! invaded) {
         World.Journey j = world.beginJourney(cityB, cityA, enemies);
         world.completeJourney(j);
         enemies.beginSecuring(fort.formation.securedPoint, TileConstants.W);
+        invaded = true;
       }
+      //*/
     }
   }
   
   
   
 }
+
 
 
 
