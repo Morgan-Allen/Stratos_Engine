@@ -86,9 +86,11 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   
   
   //  And these are specific to walkers...
-  int attackScore = 2 ;
-  int defendScore = 2 ;
-  int maxHealth   = 5 ;
+  int attackScore =  2 ;
+  int defendScore =  2 ;
+  int maxHealth   =  5 ;
+  int sightRange  =  6 ;
+  int attackRange = -1 ;
   
   String names[];
   

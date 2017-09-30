@@ -30,7 +30,7 @@ public class TestLoop {
       for (Walker w : map.walkers) if (w.inside == null) {
         int fill = WALKER_COLOR;
         if (w.home != null) fill = w.home.type.tint;
-        graphic[w.x][w.y] = fill;
+        graphic[w.at.x][w.at.y] = fill;
       }
       try { graphic[hover.x][hover.y] = WHITE_COLOR; }
       catch (Exception e) {}

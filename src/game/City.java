@@ -11,16 +11,23 @@ public class City implements Session.Saveable, Trader {
   
   /**  Data fields, construction and save/load methods-
     */
+  public static enum RELATION {
+    ENEMY ,
+    VASSAL,
+    ALLY  ,
+    LORD  ,
+  };
+  
   String name;
   
   World world;
-  
   float mapX, mapY;
   Table <City, Integer> distances = new Table();
   
   int currentFunds = 0;
   Tally <Good> tradeLevel = new Tally();
   Tally <Good> inventory  = new Tally();
+  Table <City, RELATION> relations = new Table();
   
   boolean active;
   CityMap map;
@@ -47,6 +54,10 @@ public class City implements Session.Saveable, Trader {
     currentFunds = s.loadInt();
     s.loadTally(tradeLevel);
     s.loadTally(inventory);
+    for (int n = s.loadInt(); n-- > 0;) {
+      RELATION r = RELATION.values()[s.loadInt()];
+      relations.put((City) s.loadObject(), r);
+    }
     
     active = s.loadBool();
     map    = (CityMap) s.loadObject();
@@ -70,6 +81,10 @@ public class City implements Session.Saveable, Trader {
     s.saveInt(currentFunds);
     s.saveTally(tradeLevel);
     s.saveTally(inventory);
+    for (City c : relations.keySet()) {
+      s.saveObject(c);
+      s.saveInt(relations.get(c).ordinal());
+    }
     
     s.saveBool(active);
     s.saveObject(map);

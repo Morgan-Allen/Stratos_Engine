@@ -7,7 +7,7 @@ import static util.TileConstants.*;
 
 
 
-public class Fixture implements Session.Saveable {
+public class Fixture implements Session.Saveable, Target {
   
   
   /**  Data fields, construction and save/load methods-
@@ -15,7 +15,8 @@ public class Fixture implements Session.Saveable {
   ObjectType type;
   
   CityMap map;
-  int x, y, facing = N;
+  CityMap.Tile at;
+  int facing = N;
   
   float buildLevel;
   boolean complete;
@@ -33,8 +34,7 @@ public class Fixture implements Session.Saveable {
     
     type   = (ObjectType) s.loadObject();
     map    = (CityMap) s.loadObject();
-    x      = s.loadInt();
-    y      = s.loadInt();
+    at     = CityMap.loadTile(map, s);
     facing = s.loadInt();
     
     buildLevel = s.loadFloat();
@@ -48,8 +48,7 @@ public class Fixture implements Session.Saveable {
     
     s.saveObject(type);
     s.saveObject(map);
-    s.saveInt(x);
-    s.saveInt(y);
+    CityMap.saveTile(at, map, s);
     s.saveInt(facing);
     
     s.saveFloat(buildLevel);
@@ -60,13 +59,17 @@ public class Fixture implements Session.Saveable {
   }
   
   
+  public CityMap.Tile at() {
+    return at;
+  }
+  
+  
   
   /**  Entering and exiting the map-
     */
   void enterMap(CityMap map, int x, int y) {
     this.map = map;
-    this.x   = x  ;
-    this.y   = y  ;
+    this.at  = map.tileAt(x, y);
     
     for (Coord c : Visit.grid(x, y, type.wide, type.high, 1)) {
       CityMap.Tile t = map.tileAt(c.x, c.y);
@@ -76,10 +79,12 @@ public class Fixture implements Session.Saveable {
   
   
   void exitMap(CityMap map) {
-    for (Coord c : Visit.grid(x, y, type.wide, type.high, 1)) {
+    for (Coord c : Visit.grid(at.x, at.y, type.wide, type.high, 1)) {
       CityMap.Tile t = map.tileAt(c.x, c.y);
       t.above = null;
     }
+    this.map = null;
+    this.at  = null;
   }
   
   
@@ -97,6 +102,11 @@ public class Fixture implements Session.Saveable {
   
   /**  Handling focus for walker activities-
     */
+  public void targetedBy(Walker w) {
+    return;
+  }
+  
+  
   void setFocused(Walker w, boolean is) {
     if (is) {
       if (focused == null) focused = new List();

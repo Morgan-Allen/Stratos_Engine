@@ -125,7 +125,7 @@ public class WalkerForTrade extends Walker implements Journeys {
   }
   
   
-  protected void onTarget(Tile target) {
+  protected void onTarget(Target target) {
     if (target == null || tradesWith == null) return;
     tradesWith.world.beginJourney(home.map.city, tradesWith, this);
     exitMap();

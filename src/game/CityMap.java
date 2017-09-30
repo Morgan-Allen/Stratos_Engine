@@ -112,7 +112,7 @@ public class CityMap implements Session.Saveable {
   }
   
   
-  public static class Tile {
+  public static class Tile implements Target {
   
     int x, y;
     
@@ -138,27 +138,37 @@ public class CityMap implements Session.Saveable {
     }
     
     
-    static Tile loadTile(CityMap map, Session s) throws Exception {
-      int x = s.loadInt();
-      if (x == -1) return null;
-      int y = s.loadInt();
-      return map.tileAt(x, y);
+    public CityMap.Tile at() {
+      return this;
     }
     
     
-    static void saveTile(Tile t, CityMap map, Session s) throws Exception {
-      if (t == null) {
-        s.saveInt(-1);
-        return;
-      }
-      s.saveInt(t.x);
-      s.saveInt(t.y);
+    public void targetedBy(Walker w) {
+      return;
     }
     
     
     public String toString() {
       return "T"+x+"|"+y;
     }
+  }
+  
+  
+  static Tile loadTile(CityMap map, Session s) throws Exception {
+    int x = s.loadInt();
+    if (x == -1) return null;
+    int y = s.loadInt();
+    return map.tileAt(x, y);
+  }
+  
+  
+  static void saveTile(Tile t, CityMap map, Session s) throws Exception {
+    if (t == null) {
+      s.saveInt(-1);
+      return;
+    }
+    s.saveInt(t.x);
+    s.saveInt(t.y);
   }
   
   

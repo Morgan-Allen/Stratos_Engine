@@ -1,9 +1,9 @@
 
 
 package game;
+import util.*;
 import static game.GameConstants.*;
 import static game.CityMap.*;
-import util.*;
 
 
 
@@ -11,15 +11,16 @@ public class Formation implements
   Session.Saveable, Journeys, TileConstants, Employer
 {
   
+  
   /**  Data fields, setup and save/load methods-
     */
+  //City belongs;
   //List <Walker> soldiers = new List();
   
   CityMap map;
   BuildingForMilitary garrison;
   
   boolean active = false;
-  City belongs;
   Tile securedPoint;
   int  facing;
   City securedCity;
@@ -35,11 +36,12 @@ public class Formation implements
     s.cacheInstance(this);
     
     //s.loadObjects(soldiers);
+    //belongs = (City) s.loadObject();
+    
     map          = (CityMap) s.loadObject();
     garrison     = (BuildingForMilitary) s.loadObject();
     active       = s.loadBool();
-    belongs      = (City) s.loadObject(); 
-    securedPoint = Tile.loadTile(map, s);
+    securedPoint = loadTile(map, s);
     facing       = s.loadInt();
     securedCity  = (City) s.loadObject();
   }
@@ -48,11 +50,12 @@ public class Formation implements
   public void saveState(Session s) throws Exception {
     
     //s.saveObjects(soldiers);
+    //s.saveObject(belongs);
+    
     s.saveObject(map);
     s.saveObject(garrison);
     s.saveBool(active);
-    s.saveObject(belongs);
-    Tile.saveTile(securedPoint, map, s);
+    saveTile(securedPoint, map, s);
     s.saveInt(facing);
     s.saveObject(securedCity);
   }
@@ -79,9 +82,18 @@ public class Formation implements
   /**  Organising walkers-
     */
   public void selectWalkerBehaviour(Walker w) {
+    
+    Walker target = findTarget(w);
+    if (target != null) {
+      w.beginAttack(target, Walker.JOB.MILITARY, this);
+      return;
+    }
+    
     Tile stands = standLocation(w);
-    if (stands == null) return;
-    w.embarkOnTarget(stands, 10, Walker.JOB.MILITARY, this);
+    if (stands != null) {
+      w.embarkOnTarget(stands, 10, Walker.JOB.MILITARY, this);
+      return;
+    }
   }
   
   
@@ -90,7 +102,7 @@ public class Formation implements
   }
   
   
-  public void walkerTargets(Walker walker, Tile other) {
+  public void walkerTargets(Walker walker, Target other) {
     return;
   }
   
@@ -130,6 +142,30 @@ public class Formation implements
     y += c.y + (ranks / 2);
     
     return map.tileAt(x, y);
+  }
+  
+  
+  boolean hostile(Walker a, Walker b) {
+    City CA = a.homeCity, CB = b.homeCity;
+    if (CA == null) CA = map.city;
+    if (CB == null) CB = map.city;
+    if (CA == CB) return false;
+    City.RELATION r = CA.relations.get(b);
+    if (r == City.RELATION.ENEMY) return true;
+    return false;
+  }
+  
+  
+  Walker findTarget(Walker member) {
+    Pick <Walker> pick = new Pick();
+    
+    for (Walker w : map.walkers) if (hostile(w, member)) {
+      float dist  = CityMap.distance(member.at, w.at);
+      float range = member.type.sightRange;
+      if (dist < range + 1) pick.compare(w, 0 - dist);
+    }
+    
+    return pick.result();
   }
   
 

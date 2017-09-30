@@ -2,9 +2,6 @@
 
 package game;
 import static game.Walker.*;
-
-import game.Walker.JOB;
-
 import static game.GameConstants.*;
 import util.*;
 

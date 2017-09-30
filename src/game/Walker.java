@@ -8,7 +8,7 @@ import static util.TileConstants.*;
 
 
 
-public class Walker implements Session.Saveable {
+public class Walker extends Fixture implements Session.Saveable {
   
   
   /**  Data fields and setup/initialisation-
@@ -42,16 +42,14 @@ public class Walker implements Session.Saveable {
   int dirs[] = new int[4];
   
   
-  ObjectType type;
   String ID;
-  
-  CityMap map;
-  int x, y, facing = N;
   
   Building  work;
   Building  home;
+  City      homeCity;
   Formation formation;
   Building  inside;
+  boolean   guest;
   
   static class Task {
     Employer origin;
@@ -63,7 +61,7 @@ public class Walker implements Session.Saveable {
     Tile path[] = null;
     int pathIndex = -1;
     
-    Tile     target;
+    Target   target;
     Building visits;
   }
   Task job;
@@ -80,26 +78,22 @@ public class Walker implements Session.Saveable {
   
   
   Walker(ObjectType type) {
-    this.type = type;
+    super(type);
     this.ID = "#"+nextID++;
   }
   
   
   public Walker(Session s) throws Exception {
-    s.cacheInstance(this);
+    super(s);
     
-    type = (ObjectType) s.loadObject();
-    ID   = s.loadString();
-    
-    map    = (CityMap) s.loadObject();
-    x      = s.loadInt();
-    y      = s.loadInt();
-    facing = s.loadInt();
+    ID = s.loadString();
     
     work      = (Building ) s.loadObject();
     home      = (Building ) s.loadObject();
+    homeCity  = (City     ) s.loadObject();
     formation = (Formation) s.loadObject();
     inside    = (Building ) s.loadObject();
+    guest     = s.loadBool();
     
     if (s.loadBool()) {
       Task j = this.job = new Task();
@@ -112,10 +106,10 @@ public class Walker implements Session.Saveable {
       if (PL == -1) j.path = null;
       else {
         j.path = new Tile[PL];
-        for (int i = 0; i < PL; i++) j.path[i] = Tile.loadTile(map, s);
+        for (int i = 0; i < PL; i++) j.path[i] = loadTile(map, s);
       }
       j.pathIndex = s.loadInt();
-      j.target    = Tile.loadTile(map, s);
+      j.target    = (Target  ) s.loadObject();
       j.visits    = (Building) s.loadObject();
     }
     else job = null;
@@ -132,18 +126,16 @@ public class Walker implements Session.Saveable {
   
   
   public void saveState(Session s) throws Exception {
-    s.saveObject(type);
-    s.saveString(ID);
+    super.saveState(s);
     
-    s.saveObject(map);
-    s.saveInt(x);
-    s.saveInt(y);
-    s.saveInt(facing);
+    s.saveString(ID);
     
     s.saveObject(work     );
     s.saveObject(home     );
+    s.saveObject(homeCity );
     s.saveObject(formation);
     s.saveObject(inside   );
+    s.saveBool  (guest    );
     
     s.saveBool(job != null);
     if (job != null) {
@@ -155,10 +147,10 @@ public class Walker implements Session.Saveable {
       if (job.path == null) s.saveInt(-1);
       else {
         s.saveInt(job.path.length);
-        for (Tile t : job.path) Tile.saveTile(t, map, s);
+        for (Tile t : job.path) saveTile(t, map, s);
       }
       s.saveInt(job.pathIndex);
-      Tile.saveTile(job.target, map, s);
+      s.saveObject(job.target);
       s.saveObject(job.visits);
     }
     
@@ -178,8 +170,7 @@ public class Walker implements Session.Saveable {
     */
   void enterMap(CityMap map, int x, int y) {
     this.map = map;
-    this.x   = x  ;
-    this.y   = y  ;
+    this.at  = map.tileAt(x, y);
     map.walkers.add(this);
   }
   
@@ -188,6 +179,7 @@ public class Walker implements Session.Saveable {
     if (inside != null) setInside(inside, false);
     map.walkers.remove(this);
     map = null;
+    at  = null;
     if (job != null) {
       job.visits = null;
       job.target = null;
@@ -207,23 +199,16 @@ public class Walker implements Session.Saveable {
     */
   void update() {
     
-    if (reports()) {
-      I.add("");
-    }
-    
-    if (jobType() == JOB.WANDER) {
-      updateRandomWalk();
-    }
-    else if (job != null) {
+    if (job != null && checkAndUpdatePathing(job)) {
+      
       boolean visiting  = job.visits != null;
       boolean targeting = job.target != null;
+      boolean combat    = inCombat();
+      Tile    pathEnd   = (Tile) Visit.last(job.path);
+      float   distance  = CityMap.distance(at, pathEnd);
+      float   minRange  = Nums.max(0.1f, combat ? 0 : type.attackRange);
       
-      //  TODO:  You should also re-route if the path is blocked!
-      if (visiting && Visit.last(job.path) != job.visits.entrance) {
-        updatePathing(job);
-      }
-      
-      if (job != null && ++job.pathIndex >= job.path.length) {
+      if (distance <= minRange) {
         if (visiting && inside != job.visits) {
           setInside(job.visits, true);
         }
@@ -235,7 +220,7 @@ public class Walker implements Session.Saveable {
           }
           if (targeting) {
             onTarget(job.target);
-            //  TODO:  Set targeting for the fixture in question!
+            job.target.targetedBy(this);
             job.origin.walkerTargets(this, job.target);
           }
         }
@@ -243,11 +228,9 @@ public class Walker implements Session.Saveable {
           beginNextBehaviour();
         }
       }
-      
       else {
-        Tile ahead = job.path[job.pathIndex];
-        x = ahead.x;
-        y = ahead.y;
+        Tile ahead = job.path[++job.pathIndex];
+        this.at = ahead;
         if (inside != null) setInside(inside, false);
       }
     }
@@ -290,6 +273,12 @@ public class Walker implements Session.Saveable {
   }
   
   
+  public boolean inCombat() {
+    JOB type = jobType();
+    return type == JOB.MILITARY || type == JOB.HUNTING;
+  }
+  
+  
   
   /**  Pathing and visitation utilities:
     */
@@ -311,7 +300,7 @@ public class Walker implements Session.Saveable {
   
   
   private void beginTask(
-    Employer origin, Building visits, Tile target, JOB jobType, int maxTime
+    Employer origin, Building visits, Target target, JOB jobType, int maxTime
   ) {
     Task j = this.job = new Task();
     j.origin    = origin ;
@@ -334,6 +323,41 @@ public class Walker implements Session.Saveable {
   }
   
   
+  private boolean checkAndUpdatePathing(Task j) {
+    
+    if (checkPathing(j)) return true;
+    
+    job.path = updatePathing(job);
+    if (job.path != null) return true;
+    
+    job = null;
+    return false;
+  }
+  
+  
+  private boolean checkPathing(Task j) {
+    if (j == null || j.path == null        ) return false;
+    if (Visit.last(j.path) != pathTarget(j)) return false;
+    
+    for (int i = 0; i < type.sightRange; i++) {
+      if (i >= j.path.length) break;
+      Tile t = j.path[i];
+      if (map.blocked(t.x, t.y)) return false;
+    }
+    
+    return true;
+  }
+  
+  
+  private Tile pathTarget(Task j) {
+    if (j == null) return null;
+    Tile t = null;
+    if (t == null && j.visits != null) t = j.visits.entrance;
+    if (t == null && j.target != null) t = j.target.at();
+    return t;
+  }
+  
+  
   private Tile[] updatePathing(Task j) {
     boolean visiting = j.visits != null;
     
@@ -341,13 +365,13 @@ public class Walker implements Session.Saveable {
       I.say(this+" pathing toward "+(visiting ? j.visits : j.target));
     }
     
-    Tile at    = (inside == null) ? map.tileAt(x, y) : inside.entrance;
-    Tile heads = null;
-    if (visiting) heads = j.visits.entrance;
-    else          heads = j.target;
+    Tile from  = (inside == null) ? this.at : inside.entrance;
+    Tile heads = pathTarget(j);
     
-    PathSearch search = new PathSearch(map, this, at, heads);
-    search.setPaveOnly(visiting && map.paved(at.x, at.y));
+    if (from == null || heads == null) return null;
+    
+    PathSearch search = new PathSearch(map, this, from, heads);
+    search.setPaveOnly(visiting && map.paved(from.x, from.y));
     search.doSearch();
     return search.fullPath(Tile.class);
   }
@@ -358,7 +382,7 @@ public class Walker implements Session.Saveable {
   }
   
   
-  protected void onTarget(Tile target) {
+  protected void onTarget(Target target) {
     return;
   }
   
@@ -373,7 +397,7 @@ public class Walker implements Session.Saveable {
   }
   
   
-  void embarkOnTarget(Tile goes, int maxTime, JOB jobType, Employer e) {
+  void embarkOnTarget(Target goes, int maxTime, JOB jobType, Employer e) {
     if (goes == null) return;
     if (reports()) I.say(this+" will target "+goes+" for time "+maxTime);
     beginTask(e, null, goes, jobType, maxTime);
@@ -414,6 +438,18 @@ public class Walker implements Session.Saveable {
   }
   
   
+  
+  /**  Combat and survival-related code:
+    */
+  void beginAttack(Walker target, JOB jobType, Employer e) {
+    if (target == null) return;
+    
+    if (reports()) I.say(this+" will attack "+target);
+    
+    beginTask(e, null, target, jobType, 0);
+  }
+  
+  
   void performAttack(Walker other) {
     if (type.attackScore <= 0) return;
     
@@ -436,57 +472,60 @@ public class Walker implements Session.Saveable {
   
   /**  Wandering code:
     */
-  //  TODO:  Consider moving this out to a separate class.
+  //  TODO:  Consider moving this out to a separate class?
   
   void startRandomWalk() {
     if (reports()) I.say(this+" beginning random walk...");
+    
+    if (inside != null && inside.entrance != null) {
+      this.at = inside.entrance;
+      setInside(inside, false);
+    }
+    facing = T_ADJACENT[Rand.index(4)];
     
     Task j = this.job = new Task();
     j.type      = JOB.WANDER;
     j.timeSpent = 0;
     j.maxTime   = MAX_WANDER_TIME;
-    
-    if (inside != null && inside.entrance != null) {
-      Tile at = inside.entrance;
-      x = at.x;
-      y = at.y;
-      setInside(inside, false);
-    }
-    facing = T_ADJACENT[Rand.index(4)];
+    j.path      = extractRandomWalk();
   }
   
   
-  void updateRandomWalk() {
-    if (inside != null) setInside(inside, false);
+  Tile[] extractRandomWalk() {
+    Batch <Tile> walk = new Batch();
+    Tile next = this.at;
     
-    boolean prefPave = map.paved(x, y);
-    int nx, ny, numDirs = 0;
-    int backDir = (facing + 4) % 8;
+    while (walk.size() < MAX_WANDER_TIME) {
+      boolean prefPave = map.paved(next.x, next.y);
+      int nx, ny, numDirs = 0;
+      int backDir = (facing + 4) % 8;
+      
+      for (int dir : T_ADJACENT) {
+        if (dir == backDir) continue;
+        nx = next.x + T_X[dir];
+        ny = next.y + T_Y[dir];
+        if (prefPave && ! map.paved(nx, ny)) continue;
+        if (map.blocked(nx, ny)) continue;
+        dirs[numDirs] = dir;
+        numDirs++;
+      }
+      if (numDirs == 0) {
+        facing = backDir;
+      }
+      else if (numDirs > 1) {
+        facing = dirs[Rand.index(numDirs)];
+      }
+      else {
+        facing = dirs[0];
+      }
+      next = map.tileAt(
+        next.x + T_X[facing],
+        next.y + T_Y[facing]
+      );
+      walk.add(next);
+    }
     
-    for (int dir : T_ADJACENT) {
-      if (dir == backDir) continue;
-      nx = x + T_X[dir];
-      ny = y + T_Y[dir];
-      if (prefPave && ! map.paved(nx, ny)) continue;
-      if (map.blocked(nx, ny)) continue;
-      dirs[numDirs] = dir;
-      numDirs++;
-    }
-    if (numDirs == 0) {
-      facing = backDir;
-    }
-    else if (numDirs > 1) {
-      facing = dirs[Rand.index(numDirs)];
-    }
-    else {
-      facing = dirs[0];
-    }
-    x = x + T_X[facing];
-    y = y + T_Y[facing];
-    
-    if (++job.timeSpent >= job.maxTime) {
-      beginNextBehaviour();
-    }
+    return walk.toArray(Tile.class);
   }
   
   

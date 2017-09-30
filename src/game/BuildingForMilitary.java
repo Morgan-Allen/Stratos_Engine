@@ -40,9 +40,8 @@ public class BuildingForMilitary extends BuildingForDelivery {
     super.enterMap(map, x, y);
     
     formation = new Formation();
-    formation.garrison = this    ;
-    formation.map      = map     ;
-    formation.belongs  = map.city;
+    formation.garrison = this;
+    formation.map      = map ;
   }
   
   

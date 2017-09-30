@@ -155,12 +155,12 @@ public class GameConstants {
     PORTER_HOUSE = new ObjectType("type_porter_house", IS_TRADE_BLD  ),
     GARRISON     = new ObjectType("type_garrison"    , IS_ARMY_BLD   ),
     
-    CITIZEN      = new ObjectType("type_citizen"     , IS_WALKER    ),
-    NOBLE        = new ObjectType("type_noble"       , IS_WALKER    ),
-    WORKER       = new ObjectType("type_worker"      , IS_WALKER    ),
-    MERCHANT     = new ObjectType("type_merchant"    , IS_WALKER    ),
-    PORTERS      = new ObjectType("type_porters"     , IS_TRADE_WLK ),
-    SOLDIER      = new ObjectType("type_soldier"     , IS_WALKER    )
+    CITIZEN      = new ObjectType("type_citizen"     , IS_WALKER     ),
+    NOBLE        = new ObjectType("type_noble"       , IS_WALKER     ),
+    WORKER       = new ObjectType("type_worker"      , IS_WALKER     ),
+    MERCHANT     = new ObjectType("type_merchant"    , IS_WALKER     ),
+    PORTERS      = new ObjectType("type_porters"     , IS_TRADE_WLK  ),
+    SOLDIER      = new ObjectType("type_soldier"     , IS_WALKER     )
   ;
   static {
     CITIZEN .name = "Citizen" ;
@@ -169,6 +169,9 @@ public class GameConstants {
     MERCHANT.name = "Merchant";
     PORTERS .name = "Porters" ;
     SOLDIER .name = "Soldier" ;
+    
+    SOLDIER.attackScore = 5;
+    SOLDIER.defendScore = 4;
     
     PALACE.name = "Palace";
     PALACE.wide = 5;
@@ -249,6 +252,11 @@ public class GameConstants {
   
   /**  Commonly used interfaces-
     */
+  static interface Target {
+    Tile at();
+    void targetedBy(Walker w);
+  }
+  
   static interface Trader {
     Tally <Good> tradeLevel();
     Tally <Good> inventory ();
@@ -262,7 +270,7 @@ public class GameConstants {
   static interface Employer {
     void selectWalkerBehaviour(Walker walker);
     void walkerPasses (Walker walker, Building other );
-    void walkerTargets(Walker walker, Tile     other );
+    void walkerTargets(Walker walker, Target   other );
     void walkerEnters (Walker walker, Building enters);
     void walkerVisits (Walker walker, Building visits);
     void walkerExits  (Walker walker, Building enters);

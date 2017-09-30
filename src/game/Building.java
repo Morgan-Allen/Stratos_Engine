@@ -36,9 +36,9 @@ public class Building extends Fixture implements Session.Saveable, Employer {
     super(s);
     ID = s.loadString();
     
-    entrance = Tile.loadTile(map, s);
+    entrance = loadTile(map, s);
     walkerCountdown = s.loadInt();
-    s.loadObjects(resident );
+    s.loadObjects(resident);
     s.loadObjects(visitors);
     
     craftProgress = s.loadFloat();
@@ -51,7 +51,7 @@ public class Building extends Fixture implements Session.Saveable, Employer {
     super.saveState(s);
     s.saveString(ID);
     
-    Tile.saveTile(entrance, map, s);
+    saveTile(entrance, map, s);
     s.saveInt(walkerCountdown);
     s.saveObjects(resident);
     s.saveObjects(visitors);
@@ -84,9 +84,9 @@ public class Building extends Fixture implements Session.Saveable, Employer {
   
   
   void selectEntrance() {
-    for (Coord c : Visit.perimeter(x, y, type.wide, type.high)) {
-      boolean outx = c.x == x - 1 || c.x == x + type.wide;
-      boolean outy = c.y == y - 1 || c.y == y + type.high;
+    for (Coord c : Visit.perimeter(at.x, at.y, type.wide, type.high)) {
+      boolean outx = c.x == at.x - 1 || c.x == at.x + type.wide;
+      boolean outy = c.y == at.y - 1 || c.y == at.y + type.high;
       if (outx && outy         ) continue;
       if (map.blocked(c.x, c.y)) continue;
       if (! map.paved(c.x, c.y)) continue;
@@ -127,7 +127,7 @@ public class Building extends Fixture implements Session.Saveable, Employer {
   
   protected Walker addWalker(ObjectType type) {
     Walker walker = (Walker) type.generate();
-    walker.enterMap(map, x, y);
+    walker.enterMap(map, at.x, at.y);
     walker.inside = this;
     walker.home   = this;
     resident.add(walker);
@@ -150,7 +150,7 @@ public class Building extends Fixture implements Session.Saveable, Employer {
   }
   
   
-  public void walkerTargets(Walker walker, Tile other) {
+  public void walkerTargets(Walker walker, Target other) {
     return;
   }
   
