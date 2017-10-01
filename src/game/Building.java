@@ -70,6 +70,11 @@ public class Building extends Fixture implements Session.Saveable, Employer {
     map.buildings.add(this);
     selectEntrance();
     updateDemands();
+    
+    for (Good g : type.builtFrom) {
+      int need = type.materialNeed(g);
+      materials.set(g, need * buildLevel);
+    }
   }
   
 
@@ -139,12 +144,11 @@ public class Building extends Fixture implements Session.Saveable, Employer {
     */
   void updateDemands() {
     demands.clear();
-    
-    for (int i = 0; i < type.builtFrom.length; i++) {
-      Good  mat  = type.builtFrom  [i];
-      int   need = type.builtAmount[i];
-      float has  = materials.valueFor(mat);
-      demands.add(need - has, mat);
+
+    for (Good g : type.builtFrom) {
+      int   need = type.materialNeed(g);
+      float has  = materials.valueFor(g);
+      demands.add(need - has, g);
     }
   }
   

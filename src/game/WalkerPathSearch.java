@@ -6,7 +6,7 @@ import util.*;
 
 
 
-public class PathSearch extends Search <Tile> {
+public class WalkerPathSearch extends Search <Tile> {
   
   CityMap map;
   Walker moves;
@@ -16,7 +16,7 @@ public class PathSearch extends Search <Tile> {
   boolean paveOnly = true;
   
   
-  public PathSearch(
+  public WalkerPathSearch(
     CityMap map, Walker moves, Tile init, Tile dest
   ) {
     super(init, -1);

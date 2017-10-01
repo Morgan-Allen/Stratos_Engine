@@ -17,16 +17,17 @@ public class Walker extends Fixture implements Session.Saveable {
     NONE     ,
     RETURNING,
     RESTING  ,
-    WANDER   ,
+    WANDERING,
     DELIVER  ,
     SHOPPING ,
     TRADING  ,
     VISITING ,
     GATHERING,
     CRAFTING ,
+    BUILDING ,
     MILITARY ,
     HUNTING  ,
-    COMBAT
+    COMBAT   ,
   };
   final public static int
     
@@ -413,7 +414,7 @@ public class Walker extends Fixture implements Session.Saveable {
     if (from == null || heads == null) return null;
     heads.setFocused(this, true);
     
-    PathSearch search = new PathSearch(map, this, from, heads);
+    WalkerPathSearch search = new WalkerPathSearch(map, this, from, heads);
     search.setPaveOnly(visiting && map.paved(from.x, from.y));
     search.doSearch();
     return search.fullPath(Tile.class);
@@ -539,7 +540,7 @@ public class Walker extends Fixture implements Session.Saveable {
     facing = T_ADJACENT[Rand.index(4)];
     
     Task j = this.job = new Task();
-    j.type      = JOB.WANDER;
+    j.type      = JOB.WANDERING;
     j.timeSpent = 0;
     j.maxTime   = 0;
     j.path      = extractRandomWalk();

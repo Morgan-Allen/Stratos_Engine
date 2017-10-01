@@ -6,7 +6,7 @@ import static game.GameConstants.*;
 
 
 
-public class TestUpkeep extends TestLoop {
+public class TestUpkeep extends Test {
   
   
   public static void main(String args[]) {
@@ -30,8 +30,7 @@ public class TestUpkeep extends TestLoop {
     
     BuildingForHome home = (BuildingForHome) HOUSE.generate();
     home.enterMap(map, 6, 6, 0);
-    
-    
+    CityMap.applyPaving(map, 2, 5, 20, 1, true);
     
     
     boolean upkeepOkay = false;
@@ -45,6 +44,7 @@ public class TestUpkeep extends TestLoop {
           if (b.buildLevel < 1) allBuilt = false;
         }
         
+        upkeepOkay = allBuilt;
         
         if (upkeepOkay) {
           I.say("\nUPKEEP TEST CONCLUDED SUCCESSFULLY!");

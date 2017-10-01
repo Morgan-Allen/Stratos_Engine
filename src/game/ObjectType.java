@@ -50,7 +50,7 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
     switch (category) {
       case(IS_FIXTURE    ): return new Fixture(this);
       case(IS_BUILDING   ): return new Building           (this);
-      case(IS_DELIVER_BLD): return new BuildingForDelivery(this);
+      case(IS_DELIVER_BLD): return new BuildingForCrafts(this);
       case(IS_GATHER_BLD ): return new BuildingForGather  (this);
       case(IS_TRADE_BLD  ): return new BuildingForTrade   (this);
       case(IS_HOME_BLD   ): return new BuildingForHome    (this);
@@ -93,8 +93,9 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   
   /**  Building-specific data fields and setup methods-
     */
-  Good    builtFrom  [] = BASIC_BUILT;
-  Integer builtAmount[] = { 2 };
+  Good    builtFrom  [] = NO_GOODS;
+  Integer builtAmount[] = {};
+  Good    buildsWith [] = NO_GOODS;
   
   Good needed  [] = NO_GOODS;
   Good produced[] = NO_GOODS;
@@ -120,6 +121,12 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
     Object split[][] = Visit.splitByModulus(args, 2);
     builtFrom   = (Good   []) castArray(split[0], Good   .class);
     builtAmount = (Integer[]) castArray(split[1], Integer.class);
+  }
+  
+  
+  int materialNeed(Good buildFrom) {
+    int index = Visit.indexOf(buildFrom, this.builtFrom);
+    return index == -1 ? 0 : builtAmount[index];
   }
   
   

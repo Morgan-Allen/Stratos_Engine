@@ -8,7 +8,7 @@ import util.*;
 
 
 
-public class BuildingForGather extends BuildingForDelivery {
+public class BuildingForGather extends BuildingForCrafts {
   
   
   /**  Data fields, construction and save/load methods-

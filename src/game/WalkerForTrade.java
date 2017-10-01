@@ -81,7 +81,7 @@ public class WalkerForTrade extends Walker implements Journeys {
 
     if (visits == home) {
       offloadGoods(partner, false);
-      homeCity.currentFunds += profits;
+      if (homeCity != null) homeCity.currentFunds += profits;
       profits   = 0;
       tradeFrom = null;
       tradeGoes = null;

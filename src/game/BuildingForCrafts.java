@@ -7,7 +7,7 @@ import util.*;
 
 
 
-public class BuildingForDelivery extends Building {
+public class BuildingForCrafts extends Building {
   
   
   /**  Data fields, construction and save/load methods-
@@ -16,12 +16,12 @@ public class BuildingForDelivery extends Building {
   boolean stalled = false;
   
   
-  BuildingForDelivery(ObjectType type) {
+  BuildingForCrafts(ObjectType type) {
     super(type);
   }
   
   
-  public BuildingForDelivery(Session s) throws Exception {
+  public BuildingForCrafts(Session s) throws Exception {
     super(s);
     craftProgress = s.loadFloat();
     stalled = s.loadBool();
@@ -109,19 +109,46 @@ public class BuildingForDelivery extends Building {
   /**  Handling walker behaviours:
     */
   public void selectWalkerBehaviour(Walker walker) {
+    //
+    //  Try and find a nearby building to construct:
+    int maxRange = Walker.MAX_WANDER_TIME;
+    Pick <Building> pickB = new Pick();
     
+    for (Good w : type.buildsWith) {
+      for (Building b : map.buildings) {
+        int   need       = b.type.materialNeed(w);
+        float amountDone = b.materials.valueFor(w);
+        float amountGot  = b.inventory.valueFor(w);
+        float dist       = CityMap.distance(entrance, b.entrance);
+        if (amountDone >= need || amountGot <= 0) continue;
+        if (dist > maxRange) continue;
+        
+        pickB.compare(b, (need - amountDone) * 10 / (10 + dist));
+      }
+    }
+    
+    Building builds = pickB.result();
+    if (builds != null) {
+      walker.embarkOnVisit(builds, 10, JOB.BUILDING, this);
+      return;
+    }
+    
+    //
+    //  Failing that, go here if you aren't already:
     if (walker.inside != this) {
       walker.returnTo(this);
       return;
     }
-    
+    //
+    //  Find someone to deliver to:
     class Order { Building goes; Good good; float amount; }
-    Pick <Order> pick = new Pick();
+    Pick <Order> pickD = new Pick();
     
     for (Good made : produced()) {
       int amount = (int) inventory.valueFor(made);
       if (amount <= 0) continue;
       
+      //  TODO:  Iterate over suitable building-types here.
       Building goes = findNearestDemanding(null, made, type.maxDeliverRange);
       if (goes == null) continue;
       
@@ -133,13 +160,14 @@ public class BuildingForDelivery extends Building {
       o.goes   = goes  ;
       o.good   = made  ;
       o.amount = amount;
-      pick.compare(o, amount / distFactor);
+      pickD.compare(o, amount / distFactor);
     }
-    
-    if (! pick.empty()) {
-      Order o = pick.result();
+    if (! pickD.empty()) {
+      Order o = pickD.result();
       walker.beginDelivery(this, o.goes, JOB.DELIVER, o.good, o.amount, this);
     }
+    //
+    //  And failing all that, start crafting:
     else {
       walker.embarkOnVisit(this, -1, JOB.CRAFTING, this);
     }
@@ -147,6 +175,7 @@ public class BuildingForDelivery extends Building {
   
   
   public void walkerEnters(Walker walker, Building enters) {
+    
     if (walker.jobType() == JOB.DELIVER) {
       if (enters == this) for (Good need : needed()) {
         walker.offloadGood(need, this);
@@ -156,7 +185,46 @@ public class BuildingForDelivery extends Building {
       }
       walker.returnTo(this);
     }
+    
+    if (walker.jobType() == JOB.BUILDING) {
+      advanceBuilding(walker, enters);
+    }
+  }
+  
+  
+  void advanceBuilding(Walker builds, Building b) {
+    float totalNeed = 0, totalDone = 0;
+    boolean didWork = false;
+    
+    for (Good g : type.buildsWith) {
+      int   need       = b.type.materialNeed(g);
+      float amountDone = b.materials.valueFor(g);
+      float amountGot  = b.inventory.valueFor(g);
+      if (amountDone >= need || amountGot <= 0) continue;
+      
+      totalNeed += need;
+      totalDone = amountDone;
+      
+      if (! didWork) {
+        float puts = Nums.min(0.1f, amountGot);
+        b.materials.add(puts    , g);
+        b.inventory.add(0 - puts, g);
+        didWork = true;
+      }
+    }
+    
+    b.buildLevel = 1.5f * (totalDone / totalNeed);
   }
 }
+
+
+
+
+
+
+
+
+
+
 
 

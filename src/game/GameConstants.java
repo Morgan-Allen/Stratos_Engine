@@ -126,7 +126,7 @@ public class GameConstants {
     CROP_TYPES [] = { MAIZE, RAW_COTTON },
     TREE_TYPES [] = { WOOD, RUBBER },
     STONE_TYPES[] = { CLAY, ADOBE },
-    BASIC_BUILT[] = { WOOD },
+    BUILD_GOODS[] = { WOOD, CLAY, ADOBE },
     ALL_GOODS  [] = (Good[]) GOODS_LIST.toArray(Good.class),
     NO_GOODS   [] = new Good[0];
   

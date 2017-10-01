@@ -6,7 +6,7 @@ import util.*;
 
 
 
-public class TestLoop {
+public class Test {
   
 
   static int graphic[][] = null;

@@ -6,7 +6,7 @@ import util.*;
 
 
 
-public class TestSieging extends TestLoop {
+public class TestSieging extends Test {
   
   
   public static void main(String args[]) {

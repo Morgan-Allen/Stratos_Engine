@@ -7,7 +7,7 @@ import util.I;
 
 
 
-public class TestTrading extends TestLoop {
+public class TestTrading extends Test {
   
 
   public static void main(String args[]) {

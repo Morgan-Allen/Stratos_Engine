@@ -5,7 +5,7 @@ import util.*;
 
 
 
-public class BuildingForMilitary extends BuildingForDelivery {
+public class BuildingForMilitary extends BuildingForCrafts {
   
   
   /**  Data fields, setup and save/load methods-

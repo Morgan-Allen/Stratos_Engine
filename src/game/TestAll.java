@@ -4,7 +4,7 @@ package game;
 import util.*;
 
 
-public class TestAllSuite {
+public class TestAll {
   
   
   public static void main(String args[]) {
