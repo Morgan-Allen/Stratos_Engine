@@ -21,6 +21,9 @@ public class TestSieging extends TestLoop {
     cityA.name = "Home City";
     cityB.name = "Away City";
     
+    City.setupRoute(cityA, cityB, 1);
+    City.setRelations(cityA, City.RELATION.ENEMY, cityB, City.RELATION.ENEMY);
+    
     BuildingForMilitary fort = (BuildingForMilitary) GARRISON.generate();
     fort.enterMap(map, 20, 20, 1);
     CityMap.applyPaving(map, 10, 19, 40, 1, true);

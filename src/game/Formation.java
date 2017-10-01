@@ -108,7 +108,12 @@ public class Formation implements
     if (away && map != null) {
       updateTacticalTarget();
     }
-    if (map != null && securedCity != map.city && formationReady()) {
+    //  This is a hacky way of saying "I want to go to a different city, is
+    //  everyone ready yet?"
+    if (
+      map != null && securedCity != null &&
+      securedCity != map.city && formationReady()
+    ) {
       beginJourney(map.city, securedCity);
     }
   }
@@ -137,6 +142,8 @@ public class Formation implements
     }
     goes.world.beginJourney(from, goes, this);
     away = true;
+    map  = null;
+    securedPoint = null;
   }
   
   
@@ -215,8 +222,9 @@ public class Formation implements
     //  parameters, et cetera!
     
     I.say("\n"+this+" CONDUCTED ACTION AGAINST "+goes);
-    I.say("  Victorious: "+victory);
-    I.say("  Casualties: "+casualties / origTotal);
+    I.say("  Victorious:    "+victory);
+    I.say("  Casualties:    "+casualties / origTotal);
+    I.say("  Home city now: "+goes.relations.get(from)+" of "+goes);
     
     stopSecuringPoint();
     goes.world.beginJourney(goes, from, this);
