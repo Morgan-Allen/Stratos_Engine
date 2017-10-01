@@ -3,6 +3,9 @@
 package game;
 import util.*;
 import static game.Walker.*;
+
+import game.Walker.JOB;
+
 import static game.GameConstants.*;
 
 
@@ -48,8 +51,16 @@ public class BuildingForHome extends Building {
   
   public void selectWalkerBehaviour(Walker walker) {
     //
-    //  TODO:  Get more samples of nearby buildings...
-    
+    //  See if you can repair your own home:
+    Building repairs = BuildingForCrafts.selectBuildTarget(
+      this, type.buildsWith, new Batch(this)
+    );
+    if (repairs != null) {
+      walker.embarkOnVisit(repairs, 10, JOB.BUILDING, this);
+      return;
+    }
+    //
+    //  Failing that, see if you can go shopping:
     Building goes = null;
     for (Good cons : type.consumed) {
       if (inventory.valueFor(cons) >= type.maxStock) continue;
@@ -63,10 +74,11 @@ public class BuildingForHome extends Building {
       walker.embarkOnVisit(goes, 5, JOB.SHOPPING, this);
       return;
     }
-    
+    //
+    //  Failing that, select a leisure behaviour to perform:
+    //  TODO:  Compare all nearby amenities!
     
     Pick <Building> pick = new Pick();
-    //  TODO:  Compare all nearby amenities!
 
     pick.compare(this, 1.0f * Rand.num());
     goes = findNearestWithFeature(IS_AMENITY, 50);
@@ -102,8 +114,16 @@ public class BuildingForHome extends Building {
         else if (stock > 0) {
           float taken = Nums.min(type.maxStock, stock / 2);
           walker.beginDelivery(enters, this, JOB.SHOPPING, cons, taken, this);
+          return;
         }
       }
+    }
+  }
+  
+  
+  public void walkerVisits(Walker walker, Building visits) {
+    if (walker.jobType() == JOB.BUILDING) {
+      BuildingForCrafts.advanceBuilding(walker, type.buildsWith, visits);
     }
   }
   

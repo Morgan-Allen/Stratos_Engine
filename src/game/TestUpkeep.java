@@ -22,14 +22,18 @@ public class TestUpkeep extends Test {
     post.enterMap(map, 2, 2, 1);
     post.ID = "(Stock of Goods)";
     post.setTradeLevels(true,
-      CLAY  , 20,
-      ADOBE , 20,
-      WOOD  , 30,
-      COTTON, 10
+      CLAY  , 40,
+      ADOBE , 40,
+      WOOD  , 60,
+      COTTON, 20
     );
     
-    BuildingForHome home = (BuildingForHome) HOUSE.generate();
-    home.enterMap(map, 6, 6, 0);
+    Building home   = (Building) HOUSE .generate();
+    Building palace = (Building) PALACE.generate();
+    Building mason  = (Building) MASON .generate();
+    home  .enterMap(map, 6, 6, 0);
+    palace.enterMap(map, 6, 0, 0);
+    mason .enterMap(map, 9, 6, 1);
     CityMap.applyPaving(map, 2, 5, 20, 1, true);
     
     

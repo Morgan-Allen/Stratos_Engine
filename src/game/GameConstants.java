@@ -174,12 +174,13 @@ public class GameConstants {
   final static BuildType  
     PALACE       = new BuildType("type_palace"      , IS_HOME_BLD   ),
     HOUSE        = new BuildType("type_house"       , IS_HOME_BLD   ),
+    MASON        = new BuildType("type_mason"       , IS_CRAFTS_BLD ),
     BALL_COURT   = new BuildType("type_ball_court"  , IS_BUILDING   ),
     FARMER_HUT   = new BuildType("type_farmer_hut"  , IS_GATHER_BLD ),
-    QUARRY_PIT   = new BuildType("type_quarry_pit"  , IS_DELIVER_BLD),
-    KILN         = new BuildType("type_kiln"        , IS_DELIVER_BLD),
-    WEAVER       = new BuildType("type_weaver"      , IS_DELIVER_BLD),
-    MARKET       = new BuildType("type_market"      , IS_DELIVER_BLD),
+    QUARRY_PIT   = new BuildType("type_quarry_pit"  , IS_CRAFTS_BLD ),
+    KILN         = new BuildType("type_kiln"        , IS_CRAFTS_BLD ),
+    WEAVER       = new BuildType("type_weaver"      , IS_CRAFTS_BLD ),
+    MARKET       = new BuildType("type_market"      , IS_CRAFTS_BLD ),
     PORTER_HOUSE = new BuildType("type_porter_house", IS_TRADE_BLD  ),
     GARRISON     = new BuildType("type_garrison"    , IS_ARMY_BLD   )
   ;
@@ -192,6 +193,16 @@ public class GameConstants {
     PALACE.maxHealth = 300;
     PALACE.setBuildMaterials(WOOD, 15, ADOBE, 25, COTTON, 10, POTTERY, 5);
     
+    MASON.name = "Mason";
+    MASON.wide = 2;
+    MASON.high = 2;
+    MASON.tint = colour(6, 2, 6);
+    MASON.setWalkerTypes(WORKER);
+    MASON.craftTime *= 2;
+    MASON.maxWalkers = 2;
+    MASON.setBuildMaterials(ADOBE, 2, WOOD, 2, CLAY, 2);
+    MASON.buildsWith = new Good[] { WOOD, CLAY, ADOBE };
+    
     HOUSE.name = "House";
     HOUSE.wide = 2;
     HOUSE.high = 2;
@@ -200,6 +211,7 @@ public class GameConstants {
     HOUSE.consumed = new Good[] { POTTERY };
     HOUSE.maxStock = 2;
     HOUSE.setBuildMaterials(WOOD, 2, CLAY, 1);
+    HOUSE.buildsWith = new Good[] { WOOD, CLAY };
     
     BALL_COURT.name = "Ball Court";
     BALL_COURT.wide = 3;

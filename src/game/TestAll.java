@@ -16,6 +16,7 @@ public class TestAll {
     TestCity    .testCity    (false);
     TestTerrain .testTerrain (false);
     TestTrading .testTrading (false);
+    TestUpkeep  .testUpkeep  (false);
     
     long taken = System.currentTimeMillis() - init;
     

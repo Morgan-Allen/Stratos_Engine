@@ -108,28 +108,11 @@ public class BuildingForCrafts extends Building {
   public void selectWalkerBehaviour(Walker walker) {
     //
     //  Try and find a nearby building to construct:
-    int maxRange = Walker.MAX_WANDER_TIME;
-    Pick <Building> pickB = new Pick();
-    
-    for (Good w : type.buildsWith) {
-      for (Building b : map.buildings) {
-        int   need       = b.type.materialNeed(w);
-        float amountDone = b.materials.valueFor(w);
-        float amountGot  = b.inventory.valueFor(w);
-        float dist       = CityMap.distance(entrance, b.entrance);
-        if (amountDone >= need || amountGot <= 0) continue;
-        if (dist > maxRange) continue;
-        
-        pickB.compare(b, (need - amountDone) * 10 / (10 + dist));
-      }
-    }
-    
-    Building builds = pickB.result();
+    Building builds = selectBuildTarget(this, type.buildsWith, map.buildings);
     if (builds != null) {
       walker.embarkOnVisit(builds, 10, JOB.BUILDING, this);
       return;
     }
-    
     //
     //  Failing that, go here if you aren't already:
     if (walker.inside != this) {
@@ -184,18 +167,46 @@ public class BuildingForCrafts extends Building {
       }
       walker.returnTo(this);
     }
-    
+  }
+  
+  
+  public void walkerVisits(Walker walker, Building visits) {
     if (walker.jobType() == JOB.BUILDING) {
-      advanceBuilding(walker, enters);
+      advanceBuilding(walker, type.buildsWith, visits);
     }
   }
   
   
-  void advanceBuilding(Walker builds, Building b) {
+  
+  /**  Supplementary methods for building construction-
+    */
+  static Building selectBuildTarget(
+    Building from, Good buildsWith[], Series <Building> buildings
+  ) {
+    int maxRange = Walker.MAX_WANDER_TIME;
+    Pick <Building> pickB = new Pick();
+    
+    for (Good w : buildsWith) {
+      for (Building b : buildings) {
+        int   need       = b.type.materialNeed(w);
+        float amountDone = b.materials.valueFor(w);
+        float amountGot  = b.inventory.valueFor(w);
+        float dist       = CityMap.distance(from.entrance, b.entrance);
+        if (amountDone >= need || amountGot <= 0) continue;
+        if (dist > maxRange) continue;
+        
+        pickB.compare(b, (need - amountDone) * 10 / (10 + dist));
+      }
+    }
+    return pickB.result();
+  }
+  
+  
+  static void advanceBuilding(Walker builds, Good buildsWith[], Building b) {
     float totalNeed = 0, totalDone = 0;
     boolean didWork = false;
     
-    for (Good g : type.buildsWith) {
+    for (Good g : buildsWith) {
       int   need       = b.type.materialNeed(g);
       float amountDone = b.materials.valueFor(g);
       float amountGot  = b.inventory.valueFor(g);

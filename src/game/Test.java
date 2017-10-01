@@ -141,7 +141,7 @@ public class Test {
       float amount = b.inventory.valueFor(g);
       float demand = b.demandFor(g) + amount;
       if (amount <= 0 && demand <= 0) continue;
-      report.append("\n  "+g+": "+amount+"/"+demand);
+      report.append("\n  "+g+": "+I.shorten(amount, 1)+"/"+I.shorten(demand, 1));
     }
     
     if (! goodRep.empty()) {
