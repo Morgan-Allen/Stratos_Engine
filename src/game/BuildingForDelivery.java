@@ -12,6 +12,7 @@ public class BuildingForDelivery extends Building {
   
   /**  Data fields, construction and save/load methods-
     */
+  float craftProgress;
   boolean stalled = false;
   
   
@@ -22,12 +23,14 @@ public class BuildingForDelivery extends Building {
   
   public BuildingForDelivery(Session s) throws Exception {
     super(s);
+    craftProgress = s.loadFloat();
     stalled = s.loadBool();
   }
   
   
   public void saveState(Session s) throws Exception {
     super.saveState(s);
+    s.saveFloat(craftProgress);
     s.saveBool(stalled);
   }
   
@@ -37,13 +40,11 @@ public class BuildingForDelivery extends Building {
     */
   void enterMap(CityMap map, int x, int y, float buildLevel) {
     super.enterMap(map, x, y, buildLevel);
-    updateDemands();
   }
   
   
   void update() {
     super.update();
-    updateDemands();
     advanceProduction();
   }
   
@@ -57,9 +58,10 @@ public class BuildingForDelivery extends Building {
   
   
   void updateDemands() {
+    super.updateDemands();
     for (Good need : needed()) {
       float gap = stockNeeded(need) - inventory.valueFor(need);
-      demands.set(need, gap);
+      demands.add(gap, need);
     }
   }
   
@@ -98,6 +100,14 @@ public class BuildingForDelivery extends Building {
   }
   
   
+  float craftProgress() {
+    return craftProgress;
+  }
+  
+  
+  
+  /**  Handling walker behaviours:
+    */
   public void selectWalkerBehaviour(Walker walker) {
     
     if (walker.inside != this) {

@@ -191,6 +191,22 @@ public abstract class Visit <T> implements Iterable <T>, Iterator <T> {
   }
   
   
+  public static Object[][] splitByDivision(Object a[], int parts) {
+    final int div = a.length / parts;
+    Object result[][] = new Object[parts][div];
+    for (int i = 0; i < div * parts; i++) result[i / div][i % div] = a[i];
+    return result;
+  }
+  
+  
+  public static Object[][] splitByModulus(Object a[], int parts) {
+    final int div = a.length / parts;
+    Object result[][] = new Object[parts][div];
+    for (int i = 0; i < div * parts; i++) result[i % parts][i / parts] = a[i];
+    return result;
+  }
+  
+  
   public static Object[] compose(Class arrayClass, Object[]... arrays) {
     int length = 0, i = 0;
     for (Object a[] : arrays) length += a.length;

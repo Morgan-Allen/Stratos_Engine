@@ -132,8 +132,8 @@ public class TestLoop {
       report += "\nBuild level:\n  "+I.percent(b.buildLevel);
     }
     
-    if (b.craftProgress > 0) {
-      report += "\nCraft progress:\n  "+I.percent(b.craftProgress);
+    if (b.craftProgress() > 0) {
+      report += "\nCraft progress:\n  "+I.percent(b.craftProgress());
     }
     
     if (b.inventory.size() > 0) {

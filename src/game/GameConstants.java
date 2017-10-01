@@ -43,7 +43,7 @@ public class GameConstants {
     
     int terrainIndex = 0;
     ObjectType fixtures[] = new ObjectType[0];
-    float      weights [] = new float     [0];
+    Float      weights [] = new Float     [0];
     
     Terrain(String name, int index) {
       super("terrain_"+index, IS_TERRAIN);
@@ -54,16 +54,11 @@ public class GameConstants {
     }
     
     void attachFixtures(Object... args) {
-      int hL = args.length / 2;
-      fixtures = new ObjectType[hL];
-      weights  = new float     [hL];
-      int i = 0;
-      while (i < hL) {
-        fixtures[i] = (ObjectType) args[i * 2];
-        weights [i] = (Float     ) args[(i * 2) + 1];
-        i++;
-      }
+      Object split[][] = Visit.splitByModulus(args, 2);
+      fixtures = (ObjectType[]) castArray(split[0], ObjectType.class);
+      weights  = (Float     []) castArray(split[1], Float     .class);
     }
+    
   }
   final static Terrain
     MEADOW = new Terrain("Meadow", 0),
@@ -115,19 +110,25 @@ public class GameConstants {
   final static Good
     MAIZE      = new Good("Maize"       , 10, 0 ),
     RAW_COTTON = new Good("Raw Cotton"  , 15, 1 ),
-    RUBBER     = new Good("Rubber"      , 25, 2 ),
-    
+    WOOD       = new Good("Wood"        , 10, 2 ),
+    RUBBER     = new Good("Rubber"      , 25, 3 ),
     CLAY       = new Good("Clay"        , 10, 4 ),
-    POTTERY    = new Good("Pottery"     , 50, 5 ),
-    COTTON     = new Good("Cotton"      , 75, 6 ),
+    ADOBE      = new Good("Adobe"       , 20, 5 ),
+    
+    POTTERY    = new Good("Pottery"     , 50, 6 ),
+    COTTON     = new Good("Cotton"      , 75, 7 ),
     
     IS_MARKET  = new Good("Is Market"   , -1, 22),
     IS_AMENITY = new Good("Is Amenity"  , -1, 23),
     IS_TRADER  = new Good("Is Trader"   , -1, 24),
+    IS_HOUSING = new Good("Is Housing"  , -1, 25),
     
-    CROP_TYPES[] = { MAIZE, RAW_COTTON, RUBBER },
-    ALL_GOODS [] = (Good[]) GOODS_LIST.toArray(Good.class),
-    NO_GOODS  [] = new Good[0];
+    CROP_TYPES [] = { MAIZE, RAW_COTTON },
+    TREE_TYPES [] = { WOOD, RUBBER },
+    STONE_TYPES[] = { CLAY, ADOBE },
+    BASIC_BUILT[] = { WOOD },
+    ALL_GOODS  [] = (Good[]) GOODS_LIST.toArray(Good.class),
+    NO_GOODS   [] = new Good[0];
   
   static {
     MAIZE     .tint = colour(9, 9, 1);
@@ -138,28 +139,10 @@ public class GameConstants {
   }
   
   
-  
-  /**  Infrastructure types-
+  /**  Walker types-
     */
-  static class BuildType extends ObjectType {
-    BuildType(String ID, int category) {
-      super(ID, category);
-      this.maxHealth = 100;
-    }
-  }
   final static ObjectType
     NO_WALKERS[] = new ObjectType[0],
-    
-    PALACE       = new ObjectType("type_palace"      , IS_HOME_BLD   ),
-    HOUSE        = new ObjectType("type_house"       , IS_HOME_BLD   ),
-    BALL_COURT   = new ObjectType("type_ball_court"  , IS_BUILDING   ),
-    FARMER_HUT   = new ObjectType("type_farmer_hut"  , IS_GATHER_BLD ),
-    QUARRY_PIT   = new ObjectType("type_quarry_pit"  , IS_DELIVER_BLD),
-    KILN         = new ObjectType("type_kiln"        , IS_DELIVER_BLD),
-    WEAVER       = new ObjectType("type_weaver"      , IS_DELIVER_BLD),
-    MARKET       = new ObjectType("type_market"      , IS_DELIVER_BLD),
-    PORTER_HOUSE = new ObjectType("type_porter_house", IS_TRADE_BLD  ),
-    GARRISON     = new ObjectType("type_garrison"    , IS_ARMY_BLD   ),
     
     CITIZEN      = new ObjectType("type_citizen"     , IS_WALKER     ),
     NOBLE        = new ObjectType("type_noble"       , IS_WALKER     ),
@@ -178,13 +161,36 @@ public class GameConstants {
     
     SOLDIER.attackScore = 5;
     SOLDIER.defendScore = 4;
-    
+  }
+  
+  
+  /**  Infrastructure types-
+    */
+  static class BuildType extends ObjectType {
+    BuildType(String ID, int category) {
+      super(ID, category);
+    }
+  }
+  final static BuildType  
+    PALACE       = new BuildType("type_palace"      , IS_HOME_BLD   ),
+    HOUSE        = new BuildType("type_house"       , IS_HOME_BLD   ),
+    BALL_COURT   = new BuildType("type_ball_court"  , IS_BUILDING   ),
+    FARMER_HUT   = new BuildType("type_farmer_hut"  , IS_GATHER_BLD ),
+    QUARRY_PIT   = new BuildType("type_quarry_pit"  , IS_DELIVER_BLD),
+    KILN         = new BuildType("type_kiln"        , IS_DELIVER_BLD),
+    WEAVER       = new BuildType("type_weaver"      , IS_DELIVER_BLD),
+    MARKET       = new BuildType("type_market"      , IS_DELIVER_BLD),
+    PORTER_HOUSE = new BuildType("type_porter_house", IS_TRADE_BLD  ),
+    GARRISON     = new BuildType("type_garrison"    , IS_ARMY_BLD   )
+  ;
+  static {
     PALACE.name = "Palace";
     PALACE.wide = 5;
     PALACE.high = 5;
     PALACE.tint = colour(7, 3, 3);
     PALACE.setWalkerTypes(NOBLE);
     PALACE.maxHealth = 300;
+    PALACE.setBuildMaterials(WOOD, 15, ADOBE, 25, COTTON, 10, POTTERY, 5);
     
     HOUSE.name = "House";
     HOUSE.wide = 2;
@@ -193,20 +199,23 @@ public class GameConstants {
     HOUSE.setWalkerTypes(CITIZEN);
     HOUSE.consumed = new Good[] { POTTERY };
     HOUSE.maxStock = 2;
+    HOUSE.setBuildMaterials(WOOD, 2, CLAY, 1);
     
     BALL_COURT.name = "Ball Court";
     BALL_COURT.wide = 3;
     BALL_COURT.high = 3;
     BALL_COURT.tint = colour(3, 3, 7);
     BALL_COURT.features = new Good[] { IS_AMENITY };
+    BALL_COURT.setBuildMaterials(ADOBE, 10, RUBBER, 5);
     
     FARMER_HUT.name = "Farmer Hut";
-    FARMER_HUT.wide = 4;
-    FARMER_HUT.high = 4;
+    FARMER_HUT.wide = 3;
+    FARMER_HUT.high = 3;
     FARMER_HUT.tint = colour(7, 7, 3);
     FARMER_HUT.setWalkerTypes(WORKER);
     FARMER_HUT.produced = CROP_TYPES;
     FARMER_HUT.maxWalkers = 2;
+    FARMER_HUT.setBuildMaterials(WOOD, 5, CLAY, 2);
     
     QUARRY_PIT.name = "Quarry Pit";
     QUARRY_PIT.wide = 4;
@@ -214,6 +223,7 @@ public class GameConstants {
     QUARRY_PIT.tint = colour(7, 7, 3);
     QUARRY_PIT.setWalkerTypes(WORKER);
     QUARRY_PIT.produced = new Good[] { CLAY };
+    QUARRY_PIT.setBuildMaterials(WOOD, 5, CLAY, 2);
     
     KILN.name = "Kiln";
     KILN.wide = 2;
@@ -223,6 +233,7 @@ public class GameConstants {
     KILN.needed   = new Good[] { CLAY };
     KILN.produced = new Good[] { POTTERY };
     KILN.craftTime *= 2;
+    KILN.setBuildMaterials(ADOBE, 2, WOOD, 2, CLAY, 1);
     
     WEAVER.name = "Weaver";
     WEAVER.wide = 2;
@@ -232,6 +243,7 @@ public class GameConstants {
     WEAVER.needed   = new Good[] { RAW_COTTON };
     WEAVER.produced = new Good[] { COTTON };
     WEAVER.craftTime *= 2;
+    WEAVER.setBuildMaterials(WOOD, 2, RAW_COTTON, 2, CLAY, 1);
     
     MARKET.name = "Marketplace";
     MARKET.wide = 4;
@@ -240,13 +252,15 @@ public class GameConstants {
     MARKET.setWalkerTypes(MERCHANT);
     MARKET.needed   = new Good[] { POTTERY };
     MARKET.features = new Good[] { IS_MARKET };
+    MARKET.setBuildMaterials(WOOD, 4, COTTON, 2, ADOBE, 2);
     
-    PORTER_HOUSE.name = "Warehouse";
+    PORTER_HOUSE.name = "Porter Post";
     PORTER_HOUSE.wide = 3;
     PORTER_HOUSE.high = 3;
     PORTER_HOUSE.tint = colour(8, 4, 8);
     PORTER_HOUSE.setWalkerTypes(PORTERS, WORKER);
     PORTER_HOUSE.features = new Good[] { IS_TRADER };
+    PORTER_HOUSE.setBuildMaterials(WOOD, 4, ADOBE, 2, POTTERY, 2);
     
     GARRISON.name = "Garrison";
     GARRISON.wide = 6;
@@ -255,6 +269,7 @@ public class GameConstants {
     GARRISON.setWalkerTypes(SOLDIER);
     GARRISON.maxWalkers = 2;
     GARRISON.maxHealth  = 250;
+    GARRISON.setBuildMaterials(ADOBE, 10, WOOD, 5);
   }
   
   

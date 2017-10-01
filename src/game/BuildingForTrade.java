@@ -13,6 +13,7 @@ public class BuildingForTrade extends BuildingForDelivery implements Trader {
     */
   Tally <Good> tradeLevel = new Tally();
   City tradePartner = null;
+  List <Good> tradeFixed = new List();
   Good needed[] = NO_GOODS, produced[] = NO_GOODS;
   
   
@@ -24,6 +25,7 @@ public class BuildingForTrade extends BuildingForDelivery implements Trader {
   public BuildingForTrade(Session s) throws Exception {
     super(s);
     s.loadTally(tradeLevel);
+    s.loadObjects(tradeFixed);
     tradePartner = (City) s.loadObject();
   }
   
@@ -31,6 +33,7 @@ public class BuildingForTrade extends BuildingForDelivery implements Trader {
   public void saveState(Session s) throws Exception {
     super.saveState(s);
     s.saveTally(tradeLevel);
+    s.saveObjects(tradeFixed);
     s.saveObject(tradePartner);
   }
 
@@ -38,6 +41,17 @@ public class BuildingForTrade extends BuildingForDelivery implements Trader {
   
   /**  Updating demands-
     */
+  public void setTradeLevels(boolean matchStock, Object... args) {
+    Object split[][] = Visit.splitByDivision(args, 2);
+    for (int i = split[0].length; i-- > 0;) {
+      Good  g = (Good ) split[0][i];
+      float a = (Float) split[1][i];
+      tradeLevel.set(g, a);
+      if (matchStock) inventory.set(g, Nums.abs(a));
+    }
+  }
+  
+  
   void updateDemands() {
     
     Batch <Good> impB = new Batch(), expB = new Batch();

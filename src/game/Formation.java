@@ -290,6 +290,7 @@ public class Formation implements
   
   
   Walker findCombatTarget(Walker member) {
+    if (map == null) return null;
     Pick <Walker> pick = new Pick();
     
     //  TODO:  Allow for targeting of anything noticed by other members of the

@@ -3,6 +3,7 @@
 package game;
 import util.*;
 import static game.GameConstants.*;
+import java.lang.reflect.Array;
 
 
 
@@ -10,7 +11,7 @@ import static game.GameConstants.*;
 public class ObjectType extends Index.Entry implements Session.Saveable {
   
   
-  /**  Indexing and save/load methods-
+  /**  Indexing, categorisation, spawning and save/load methods-
     */
   final static int
     IS_TERRAIN     = 0,
@@ -45,8 +46,24 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   }
   
   
+  Object generate() {
+    switch (category) {
+      case(IS_FIXTURE    ): return new Fixture(this);
+      case(IS_BUILDING   ): return new Building           (this);
+      case(IS_DELIVER_BLD): return new BuildingForDelivery(this);
+      case(IS_GATHER_BLD ): return new BuildingForGather  (this);
+      case(IS_TRADE_BLD  ): return new BuildingForTrade   (this);
+      case(IS_HOME_BLD   ): return new BuildingForHome    (this);
+      case(IS_ARMY_BLD   ): return new BuildingForMilitary(this);
+      case(IS_WALKER     ): return new Walker        (this);
+      case(IS_TRADE_WLK  ): return new WalkerForTrade(this);
+    }
+    return null;
+  }
   
-  /**  Data fields and setup functions-
+  
+  
+  /**  Common data fields and setup functions-
     */
   String name;
   int tint = BLACK_COLOR;
@@ -58,28 +75,6 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   float growRate = 0;
   
   
-  //  These are specific to buildings...
-  ObjectType walkerTypes[] = NO_WALKERS;
-  int maxWalkers  = 1;
-  int maxVisitors = 4;
-  int walkerCountdown = 50;
-  
-  Good needed  [] = NO_GOODS;
-  Good produced[] = NO_GOODS;
-  Good consumed[] = NO_GOODS;
-  Good features[] = NO_GOODS;
-  
-  int gatherRange     = 4  ;
-  int craftTime       = 20 ;
-  int maxStock        = 10 ;
-  int maxDeliverRange = 100;
-  int consumeTime     = 500;
-  
-  int maxRecruits = 16;
-  int numRanks    = 4 ;
-  int numFile     = 4 ;
-  
-  
   void setDimensions(int w, int h, int d) {
     this.wide = w;
     this.high = h;
@@ -88,24 +83,51 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   }
   
   
+  Object[] castArray(Object arr[], Class c) {
+    Object n[] = (Object[]) Array.newInstance(c, arr.length);
+    for (int i = arr.length; i-- > 0;) n[i] = arr[i];
+    return n;
+  }
+  
+  
+  
+  /**  Building-specific data fields and setup methods-
+    */
+  Good    builtFrom  [] = BASIC_BUILT;
+  Integer builtAmount[] = { 2 };
+  
+  Good needed  [] = NO_GOODS;
+  Good produced[] = NO_GOODS;
+  Good consumed[] = NO_GOODS;
+  Good features[] = NO_GOODS;
+  
+  int updateTime      = 50 ;
+  int gatherRange     = 4  ;
+  int craftTime       = 20 ;
+  int maxStock        = 10 ;
+  int maxDeliverRange = 100;
+  int consumeTime     = 500;
+  
+  ObjectType walkerTypes[] = NO_WALKERS;
+  int maxWalkers  = 1 ;
+  int maxVisitors = 4 ;
+  int maxRecruits = 16;
+  int numRanks    = 4 ;
+  int numFile     = 4 ;
+  
+  
+  void setBuildMaterials(Object... args) {
+    Object split[][] = Visit.splitByModulus(args, 2);
+    builtFrom   = (Good   []) castArray(split[0], Good   .class);
+    builtAmount = (Integer[]) castArray(split[1], Integer.class);
+  }
+  
+  
   void setWalkerTypes(ObjectType... types) {
     this.walkerTypes = types;
   }
   
   
-  //  And these are specific to walkers...
-  int attackScore =  2 ;
-  int defendScore =  2 ;
-  int maxHealth   =  5 ;
-  int sightRange  =  6 ;
-  int attackRange =  1 ;
-  
-  String names[];
-  
-  
-  
-  /**  General query utilities-
-    */
   boolean hasFeature(Good feature) {
     return Visit.arrayIncludes(features, feature);
   }
@@ -116,20 +138,16 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   }
   
   
-  Object generate() {
-    switch (category) {
-      case(IS_FIXTURE    ): return new Fixture(this);
-      case(IS_BUILDING   ): return new Building(this);
-      case(IS_DELIVER_BLD): return new BuildingForDelivery(this);
-      case(IS_GATHER_BLD ): return new BuildingForGather(this);
-      case(IS_TRADE_BLD  ): return new BuildingForTrade(this);
-      case(IS_HOME_BLD   ): return new BuildingForHome(this);
-      case(IS_ARMY_BLD   ): return new BuildingForMilitary(this);
-      case(IS_WALKER     ): return new Walker(this);
-      case(IS_TRADE_WLK  ): return new WalkerForTrade(this);
-    }
-    return null;
-  }
+  
+  /**  Walker-specific stats and setup methods-
+    */
+  int attackScore =  2 ;
+  int defendScore =  2 ;
+  int maxHealth   =  5 ;
+  int sightRange  =  6 ;
+  int attackRange =  1 ;
+  
+  String names[];
   
   
   

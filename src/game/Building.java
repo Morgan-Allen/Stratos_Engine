@@ -17,11 +17,11 @@ public class Building extends Fixture implements Session.Saveable, Employer {
   String ID;
   
   Tile entrance;
-  int walkerCountdown = 0;
+  int updateGap = 0;
   List <Walker> resident = new List();
   List <Walker> visitors = new List();
   
-  float craftProgress;
+  Tally <Good> materials = new Tally();
   Tally <Good> inventory = new Tally();
   Tally <Good> demands   = new Tally();
   
@@ -37,13 +37,13 @@ public class Building extends Fixture implements Session.Saveable, Employer {
     ID = s.loadString();
     
     entrance = loadTile(map, s);
-    walkerCountdown = s.loadInt();
+    updateGap = s.loadInt();
     s.loadObjects(resident);
     s.loadObjects(visitors);
     
-    craftProgress = s.loadFloat();
+    s.loadTally(materials);
     s.loadTally(inventory);
-    s.loadTally(demands);
+    s.loadTally(demands  );
   }
   
   
@@ -52,13 +52,13 @@ public class Building extends Fixture implements Session.Saveable, Employer {
     s.saveString(ID);
     
     saveTile(entrance, map, s);
-    s.saveInt(walkerCountdown);
+    s.saveInt(updateGap);
     s.saveObjects(resident);
     s.saveObjects(visitors);
     
-    s.saveFloat(craftProgress);
+    s.saveTally(materials);
     s.saveTally(inventory);
-    s.saveTally(demands);
+    s.saveTally(demands  );
   }
   
   
@@ -69,6 +69,7 @@ public class Building extends Fixture implements Session.Saveable, Employer {
     super.enterMap(map, x, y, buildLevel);
     map.buildings.add(this);
     selectEntrance();
+    updateDemands();
   }
   
 
@@ -87,19 +88,6 @@ public class Building extends Fixture implements Session.Saveable, Employer {
   }
   
   
-  void selectEntrance() {
-    for (Coord c : Visit.perimeter(at.x, at.y, type.wide, type.high)) {
-      boolean outx = c.x == at.x - 1 || c.x == at.x + type.wide;
-      boolean outy = c.y == at.y - 1 || c.y == at.y + type.high;
-      if (outx && outy         ) continue;
-      if (map.blocked(c.x, c.y)) continue;
-      if (! map.paved(c.x, c.y)) continue;
-      entrance = map.tileAt(c.x, c.y);
-      break;
-    }
-  }
-  
-  
   public CityMap.Tile centre() {
     return map.tileAt(
       at.x + (type.wide / 2),
@@ -113,6 +101,19 @@ public class Building extends Fixture implements Session.Saveable, Employer {
   }
   
   
+  void selectEntrance() {
+    for (Coord c : Visit.perimeter(at.x, at.y, type.wide, type.high)) {
+      boolean outx = c.x == at.x - 1 || c.x == at.x + type.wide;
+      boolean outy = c.y == at.y - 1 || c.y == at.y + type.high;
+      if (outx && outy         ) continue;
+      if (map.blocked(c.x, c.y)) continue;
+      if (! map.paved(c.x, c.y)) continue;
+      entrance = map.tileAt(c.x, c.y);
+      break;
+    }
+  }
+  
+  
   
   /**  Regular updates:
     */
@@ -120,13 +121,84 @@ public class Building extends Fixture implements Session.Saveable, Employer {
     if (entrance == null || map.blocked(entrance.x, entrance.y)) {
       selectEntrance();
     }
-    if (--walkerCountdown <= 0) {
+    
+    if (--updateGap <= 0) {
+      updateDemands();
+      
       for (ObjectType typeW : type.walkerTypes) {
         if (numWalkers(typeW) >= walkersNeeded(typeW)) continue;
         addWalker(typeW);
       }
-      walkerCountdown = type.walkerCountdown;
+      updateGap = type.updateTime;
     }
+  }
+  
+  
+  
+  /**  Utility methods for finding points of supply/demand:
+    */
+  void updateDemands() {
+    demands.clear();
+    
+    for (int i = 0; i < type.builtFrom.length; i++) {
+      Good  mat  = type.builtFrom  [i];
+      int   need = type.builtAmount[i];
+      float has  = materials.valueFor(mat);
+      demands.add(need - has, mat);
+    }
+  }
+  
+  
+  Building findNearestOfType(ObjectType type, int maxDist) {
+    return findNearestDemanding(type, null, null, -1);
+  }
+  
+  
+  Building findNearestWithFeature(Good feature, int maxDist) {
+    return findNearestDemanding(null, feature, null, -1);
+  }
+  
+  
+  Building findNearestDemanding(
+    ObjectType type, Good needed, int maxDist
+  ) {
+    return findNearestDemanding(type, null, needed, maxDist);
+  }
+  
+  
+  Building findNearestDemanding(
+    ObjectType type, Good feature,
+    Good needed, int maxDist
+  ) {
+    Pick <Building> pick = new Pick();
+    boolean trades = this.type.isTradeBuilding();
+    
+    for (Building b : map.buildings) {
+      if (type != null && b.type != type) continue;
+      
+      boolean otherTrades = b.type.isTradeBuilding();
+      if (trades && otherTrades) continue;
+      
+      boolean featured = b.type.hasFeature(feature);
+      if (feature != null && ! featured) continue;
+      
+      float dist = CityMap.distance(entrance, b.entrance);
+      if (maxDist > 0 && dist > maxDist) continue;
+      
+      float rating = 1;
+      if (needed != null) rating *= b.demands.valueFor(needed);
+      if (rating <= 0) continue;
+      if (otherTrades) rating /= 2;
+      
+      pick.compare(b, rating * 10 / (10 + dist));
+    }
+    
+    return pick.result();
+  }
+  
+  
+  float craftProgress() {
+    return 0;
   }
   
   
@@ -199,57 +271,6 @@ public class Building extends Fixture implements Session.Saveable, Employer {
   
   public void visitedBy(Walker walker) {
     return;
-  }
-  
-  
-  
-  /**  Utility methods for finding points of supply/demand:
-    */
-  Building findNearestOfType(ObjectType type, int maxDist) {
-    return findNearestDemanding(type, null, null, -1);
-  }
-  
-  
-  Building findNearestWithFeature(Good feature, int maxDist) {
-    return findNearestDemanding(null, feature, null, -1);
-  }
-  
-  
-  Building findNearestDemanding(
-    ObjectType type, Good needed, int maxDist
-  ) {
-    return findNearestDemanding(type, null, needed, maxDist);
-  }
-  
-  
-  Building findNearestDemanding(
-    ObjectType type, Good feature,
-    Good needed, int maxDist
-  ) {
-    Pick <Building> pick = new Pick();
-    boolean trades = this.type.isTradeBuilding();
-    
-    for (Building b : map.buildings) {
-      if (type != null && b.type != type) continue;
-      
-      boolean otherTrades = b.type.isTradeBuilding();
-      if (trades && otherTrades) continue;
-      
-      boolean featured = b.type.hasFeature(feature);
-      if (feature != null && ! featured) continue;
-      
-      float dist = CityMap.distance(entrance, b.entrance);
-      if (maxDist > 0 && dist > maxDist) continue;
-      
-      float rating = 1;
-      if (needed != null) rating *= b.demands.valueFor(needed);
-      if (rating <= 0) continue;
-      if (otherTrades) rating /= 2;
-      
-      pick.compare(b, rating * 10 / (10 + dist));
-    }
-    
-    return pick.result();
   }
   
   
