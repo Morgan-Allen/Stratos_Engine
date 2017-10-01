@@ -107,7 +107,7 @@ public class Fixture implements Session.Saveable, Target {
       if (focused == null) focused = new List();
       focused.include(w);
     }
-    else {
+    else if (focused != null) {
       focused.remove(w);
       if (focused.size() == 0) focused = null;
     }

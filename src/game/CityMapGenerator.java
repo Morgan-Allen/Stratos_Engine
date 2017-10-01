@@ -69,7 +69,8 @@ public class CityMapGenerator {
     
     for (Coord c : Visit.perimeter(at.x, at.y, t.wide, t.high)) {
       
-      boolean blocked = map.blocked(c.x, c.y);
+      Tile tile = map.tileAt(c.x, c.y);
+      boolean blocked = map.blocked(c.x, c.y) || tile.above != null;
       if (firstTile == -1) firstTile = blocked ? 0 : 1;
       //I.say("  B: "+blocked);
       

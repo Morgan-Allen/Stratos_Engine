@@ -10,6 +10,10 @@ public class TestMilitary extends TestLoop {
   
   
   public static void main(String args[]) {
+    testMilitary(true);
+  }
+  
+  static void testMilitary(boolean graphics) {
 
     World   world = GameConstants.setupDefaultWorld();
     City    cityA = world.cities.atIndex(0);
@@ -55,8 +59,8 @@ public class TestMilitary extends TestLoop {
     boolean awayWin   = false;
     boolean backHome  = false;
     
-    while (true) {
-      map = runGameLoop(map, 10);
+    while (map.time < 1000 || graphics) {
+      map = runGameLoop(map, 10, graphics);
       
       if (troops.recruits.size() >= 8 && ! recruited) {
         troops.beginSecuring(map.tileAt(30, 40), TileConstants.E, null);
@@ -96,10 +100,13 @@ public class TestMilitary extends TestLoop {
         backHome = ! someAway;
         
         if (backHome) {
-          I.say("\nTEST CONCLUDED SUCCESSFULLY!");
+          I.say("\nMILITARY TEST CONCLUDED SUCCESSFULLY!");
+          if (! graphics) return;
         }
       }
     }
+    
+    I.say("\nMILITARY TEST FAILED!");
   }
   
   

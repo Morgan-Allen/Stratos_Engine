@@ -2,6 +2,7 @@
 
 package game;
 import util.*;
+import static game.Walker.*;
 import static game.GameConstants.*;
 
 
@@ -59,7 +60,7 @@ public class BuildingForHome extends Building {
       goes = tried;
     }
     if (goes != null) {
-      walker.embarkOnVisit(goes, 5, Walker.JOB.SHOPPING, this);
+      walker.embarkOnVisit(goes, 5, JOB.SHOPPING, this);
       return;
     }
     
@@ -75,10 +76,10 @@ public class BuildingForHome extends Building {
     goes = pick.result();
     
     if (goes != this && goes != null) {
-      walker.embarkOnVisit(goes, 25, Walker.JOB.VISITING, this);
+      walker.embarkOnVisit(goes, 25, JOB.VISITING, this);
     }
     else if (goes == this && Rand.yes()) {
-      walker.embarkOnVisit(this, 10, Walker.JOB.RESTING, this);
+      walker.embarkOnVisit(this, 10, JOB.RESTING, this);
     }
     else if (goes == this) {
       walker.startRandomWalk();
@@ -91,7 +92,7 @@ public class BuildingForHome extends Building {
   
   public void walkerEnters(Walker walker, Building enters) {
     
-    if (walker.jobType() == Walker.JOB.SHOPPING) {
+    if (walker.jobType() == JOB.SHOPPING) {
       for (Good cons : type.consumed) {
         float stock = enters.inventory.valueFor(cons);
         
@@ -100,7 +101,7 @@ public class BuildingForHome extends Building {
         }
         else if (stock > 0) {
           float taken = Nums.min(type.maxStock, stock / 2);
-          walker.beginDelivery(enters, this, Walker.JOB.SHOPPING, cons, taken);
+          walker.beginDelivery(enters, this, JOB.SHOPPING, cons, taken, this);
         }
       }
     }

@@ -32,7 +32,7 @@ public class BuildingForGather extends BuildingForDelivery {
   /**  Life-cycle, update and economic functions-
     */
   void advanceProduction() {
-    super.advanceProduction();
+    //super.advanceProduction();
     return;
   }
   
@@ -51,6 +51,16 @@ public class BuildingForGather extends BuildingForDelivery {
   }
   
   
+  private boolean hasFocus(Fixture crop) {
+    //  TODO:  The hasFocus() method for elements/tiles should be accomplishing
+    //  this.
+    for (Walker w : resident) {
+      if (w.job != null && w.job.target == crop) return true;
+    }
+    return false;
+  }
+  
+  
   boolean pickNextCrop(Walker walker, Good cropType, Box2D box) {
     
     Pick <Fixture> pick = new Pick();
@@ -60,6 +70,9 @@ public class BuildingForGather extends BuildingForDelivery {
       if (t != null && t.above instanceof Fixture) {
         Fixture crop = (Fixture) t.above;
         if (crop.buildLevel < 1 || crop.type != cropType) continue;
+        
+        if (hasFocus(crop)) continue;
+        //if (crop.hasFocus()) continue;
         
         float distW = CityMap.distance(walker.at, t);
         float distB = CityMap.distance(this  .at, t);
@@ -87,7 +100,7 @@ public class BuildingForGather extends BuildingForDelivery {
     walker.carried      = (Good) above.type;
     walker.carryAmount += CROP_YIELD / 100f;
     
-    I.say(walker+" harvested "+walker.carryAmount+" of "+above.type);
+    ///I.say(walker+" harvested "+walker.carryAmount+" of "+above.type);
     
     if (walker.carryAmount >= 2) {
       walker.returnTo(this);

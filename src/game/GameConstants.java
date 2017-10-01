@@ -35,7 +35,7 @@ public class GameConstants {
   final public static int
     SCAN_PERIOD  = 200,
     RIPEN_PERIOD = 1000,
-    CROP_YIELD   = 10  //  percent of 1 full item
+    CROP_YIELD   = 25  //  percent of 1 full item
   ;
 
   private static List <Terrain> TERRAINS_LIST = new List();
@@ -206,6 +206,7 @@ public class GameConstants {
     FARMER_HUT.tint = colour(7, 7, 3);
     FARMER_HUT.setWalkerTypes(WORKER);
     FARMER_HUT.produced = CROP_TYPES;
+    FARMER_HUT.maxWalkers = 2;
     
     QUARRY_PIT.name = "Quarry Pit";
     QUARRY_PIT.wide = 4;

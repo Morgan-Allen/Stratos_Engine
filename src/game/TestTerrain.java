@@ -10,6 +10,10 @@ public class TestTerrain extends TestLoop {
   
   
   public static void main(String args[]) {
+    testTerrain(true);
+  }
+  
+  static void testTerrain(boolean graphics) {
     
     CityMap map = CityMapGenerator.generateTerrain(20, DESERT, MEADOW, JUNGLE);
     
@@ -17,7 +21,7 @@ public class TestTerrain extends TestLoop {
     farm.enterMap(map, 9, 9, 1);
     CityMap.applyPaving(map, 9, 8, 10, 1, true);
     
-    for (Coord c : Visit.grid(6, 6, 8, 8, 1)) {
+    for (Coord c : Visit.grid(6, 6, 10, 10, 1)) {
       if (map.blocked(c.x, c.y)) continue;
       if (map.paved  (c.x, c.y)) continue;
       
@@ -30,7 +34,33 @@ public class TestTerrain extends TestLoop {
     
     CityMapGenerator.populateFixtures(map);
     
-    runGameLoop(map, -1);
+    Good needed[] = { MAIZE, RAW_COTTON };
+    boolean harvest = false;
+    
+    while (map.time < 1000 || graphics) {
+      runGameLoop(map, 10, graphics);
+      
+      if (! harvest) {
+        boolean enough = true;
+        for (Good n : needed) if (farm.inventory.valueFor(n) < 5) {
+          enough = false;
+        }
+        harvest = enough;
+        
+        if (harvest) {
+          I.say("\nTERRAIN TEST CONCLUDED SUCCESSFULLY!");
+          if (! graphics) return;
+        }
+      }
+    }
+
+    I.say("\nTERRAIN TEST FAILED!");
   }
   
 }
+
+
+
+
+
+

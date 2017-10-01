@@ -10,6 +10,11 @@ public class TestSieging extends TestLoop {
   
   
   public static void main(String args[]) {
+    testSieging(true);
+  }
+  
+  
+  static void testSieging(boolean graphics) {
 
     World   world = GameConstants.setupDefaultWorld();
     City    cityA = world.cities.atIndex(0);
@@ -42,14 +47,17 @@ public class TestSieging extends TestLoop {
     
     boolean victorious = false;
     
-    while (true) {
-      map = runGameLoop(map, 10);
+    while (map.time < 1000 || graphics) {
+      map = runGameLoop(map, 10, graphics);
       
       if (cityA.hasLord(cityB) && (! enemies.away) && ! victorious) {
         victorious = true;
-        I.say("\nTEST CONCLUDED SUCCESSFULLY!");
+        I.say("\nSIEGING TEST CONCLUDED SUCCESSFULLY!");
+        if (! graphics) return;
       }
     }
+    
+    I.say("\nSIEGE TEST FAILED!");
   }
   
   

@@ -8,10 +8,15 @@ import util.*;
 
 public class TestCity extends TestLoop {
   
+  
   public static void main(String args[]) {
+    testCity(true);
+  }
+  
+  static void testCity(boolean graphics) {
     
     CityMap map = new CityMap();
-    map.performSetup(50);
+    map.performSetup(25);
     
     CityMap.applyPaving(map, 3, 8, 12, 1 , true);
     CityMap.applyPaving(map, 8, 2, 1 , 16, true);
@@ -36,9 +41,6 @@ public class TestCity extends TestLoop {
     kiln2 .enterMap(map, 9 , 14, 1);
     market.enterMap(map, 4 , 9 , 1);
     
-    quarry.inventory.add(2, CLAY   );
-    market.inventory.add(3, POTTERY);
-    
     try {
       Session.saveSession("test_save.tlt", map);
       Session loaded = Session.loadSession("test_save.tlt", true);
@@ -49,8 +51,33 @@ public class TestCity extends TestLoop {
       return;
     }
     
-    runGameLoop(map, -1);
+    boolean housesOkay = false;
+    
+    while (map.time < 1000 || graphics) {
+      runGameLoop(map, 10, graphics);
+      
+      if (! housesOkay) {
+        boolean allNeeds = true;
+        for (Building h : map.buildings) if (h.type == HOUSE) {
+          if (h.inventory.valueFor(POTTERY) < 1) allNeeds = false;
+        }
+        housesOkay = allNeeds;
+        
+        if (housesOkay) {
+          I.say("\nCITY SERVICES TEST CONCLUDED SUCCESSFULLY!");
+          if (! graphics) return;
+        }
+      }
+    }
+
+    I.say("\nCITY SERVICES TEST FAILED!");
   }
   
 }
+
+
+
+
+
+
 

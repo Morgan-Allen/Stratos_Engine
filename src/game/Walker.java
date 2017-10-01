@@ -175,7 +175,7 @@ public class Walker extends Fixture implements Session.Saveable {
     this.map = map;
     this.at  = map.tileAt(x, y);
     map.walkers.add(this);
-    I.say("\n"+this+" ENTERED MAP...");
+    //I.say("\n"+this+" ENTERED MAP...");
   }
   
   
@@ -189,7 +189,7 @@ public class Walker extends Fixture implements Session.Saveable {
     map = null;
     at  = null;
     job = null;
-    I.say("\n"+this+" EXITING MAP...");
+    //I.say("\n"+this+" EXITING MAP...");
   }
   
   
@@ -455,17 +455,19 @@ public class Walker extends Fixture implements Session.Saveable {
   
   void beginDelivery(
     Building from, Building goes, JOB jobType,
-    Good carried, float amount
+    Good carried, float amount, Employer e
   ) {
     if (from == null || goes == null || goes.entrance == null) return;
     if (from != inside) return;
+    
+    beginTask(e, goes, null, jobType, 0);
+    if (job == null) return;
     
     if (reports()) I.say(this+" will deliver "+amount+" "+carried+" to "+goes);
     
     from.inventory.add(0 - amount, carried);
     this.carried     = carried;
     this.carryAmount = amount ;
-    beginTask(from, goes, null, jobType, 0);
   }
   
   
@@ -512,7 +514,7 @@ public class Walker extends Fixture implements Session.Saveable {
   
   void checkHealthState() {
     if (injury + hunger > type.maxHealth && state != STATE_DEAD) {
-      I.say("\n"+this+" HAS BEEN KILLED!");
+      //I.say("\n"+this+" HAS BEEN KILLED!");
       state = STATE_DEAD;
       job   = null;
       exitMap();

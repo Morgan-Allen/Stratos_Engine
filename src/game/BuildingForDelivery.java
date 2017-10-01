@@ -90,8 +90,7 @@ public class BuildingForDelivery extends Building {
         for (Good made : produced()) {
           if (inventory.valueFor(made) >= stockLimit(made)) continue;
           inventory.add(1, made);
-          
-          I.say(this+" crafted 1 "+made);
+          //I.say(this+" crafted 1 "+made);
         }
         craftProgress = 0;
       }
@@ -129,7 +128,7 @@ public class BuildingForDelivery extends Building {
     
     if (! pick.empty()) {
       Order o = pick.result();
-      walker.beginDelivery(this, o.goes, JOB.DELIVER, o.good, o.amount);
+      walker.beginDelivery(this, o.goes, JOB.DELIVER, o.good, o.amount, this);
     }
     else {
       walker.embarkOnVisit(this, -1, JOB.CRAFTING, this);
