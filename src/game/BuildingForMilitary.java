@@ -35,9 +35,20 @@ public class BuildingForMilitary extends BuildingForDelivery {
     */
   void enterMap(CityMap map, int x, int y) {
     super.enterMap(map, x, y);
-    
-    formation = new Formation(this.type);
-    formation.map = map;
+  }
+  
+  
+  void update() {
+    if (formation == null && map.city != null) {
+      formation = new Formation();
+      formation.setupFormation(this.type, map.city);
+    }
+    super.update();
+  }
+  
+  
+  void assignFormation(Formation f) {
+    this.formation = f;
   }
   
   
@@ -58,6 +69,7 @@ public class BuildingForMilitary extends BuildingForDelivery {
   
   
   public void selectWalkerBehaviour(Walker walker) {
+    if (formation == null) return;
     Pick <Walker> pick = new Pick();
     
     if (formation.recruits.size() < type.maxRecruits) {

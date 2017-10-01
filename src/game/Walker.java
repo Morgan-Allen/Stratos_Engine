@@ -175,6 +175,7 @@ public class Walker extends Fixture implements Session.Saveable {
     this.map = map;
     this.at  = map.tileAt(x, y);
     map.walkers.add(this);
+    I.say("\n"+this+" ENTERED MAP...");
   }
   
   
@@ -183,11 +184,8 @@ public class Walker extends Fixture implements Session.Saveable {
     map.walkers.remove(this);
     map = null;
     at  = null;
-    if (job != null) {
-      job.visits = null;
-      job.target = null;
-      job.path   = null;
-    }
+    job = null;
+    I.say("\n"+this+" EXITING MAP...");
   }
   
   
@@ -195,7 +193,9 @@ public class Walker extends Fixture implements Session.Saveable {
     if (formation != null) formation.toggleRecruit(this, false);
     if (home      != null) home.resident.remove(this);
     if (work      != null) work.resident.remove(this);
-    home = null;
+    home      = null;
+    work      = null;
+    formation = null;
   }
   
   
@@ -205,10 +205,16 @@ public class Walker extends Fixture implements Session.Saveable {
   }
   
   
+  boolean onMap(CityMap map) {
+    return map != null && map == this.map;
+  }
+  
+  
   
   /**  Regular updates-
     */
   void update() {
+    
     //  TODO:  Don't allow another job to be assigned while this one is in
     //  the middle of an update!
     if (job != null && checkAndUpdatePathing(job)) {
@@ -478,10 +484,12 @@ public class Walker extends Fixture implements Session.Saveable {
     if (type.attackScore <= 0) return;
     
     int damage = Rand.index(type.attackScore + other.type.defendScore) + 1;
-    damage -= other.type.defendScore;
+    damage = Nums.max(0, damage - other.type.defendScore);
     
-    other.injury += damage;
-    other.checkHealthState();
+    if (damage > 0) {
+      other.injury += damage;
+      other.checkHealthState();
+    }
   }
   
   

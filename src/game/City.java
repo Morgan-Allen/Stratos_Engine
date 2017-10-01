@@ -27,7 +27,10 @@ public class City implements Session.Saveable, Trader {
   int currentFunds = 0;
   Tally <Good> tradeLevel = new Tally();
   Tally <Good> inventory  = new Tally();
+  
   Table <City, RELATION> relations = new Table();
+  List <Formation> formations = new List();
+  int armyPower = 0;
   
   boolean active;
   CityMap map;
@@ -53,11 +56,14 @@ public class City implements Session.Saveable, Trader {
     currentFunds = s.loadInt();
     s.loadTally(tradeLevel);
     s.loadTally(inventory);
+    
     for (int n = s.loadInt(); n-- > 0;) {
       City     c = (City) s.loadObject();
       RELATION r = RELATION.values()[s.loadInt()];
       relations.put(c, r);
     }
+    s.loadObjects(formations);
+    armyPower = s.loadInt();
     
     active = s.loadBool();
     map    = (CityMap) s.loadObject();
@@ -80,11 +86,14 @@ public class City implements Session.Saveable, Trader {
     s.saveInt(currentFunds);
     s.saveTally(tradeLevel);
     s.saveTally(inventory);
+    
     s.saveInt(relations.size());
     for (City c : relations.keySet()) {
       s.saveObject(c);
       s.saveInt(relations.get(c).ordinal());
     }
+    s.saveObjects(formations);
+    s.saveInt(armyPower);
     
     s.saveBool(active);
     s.saveObject(map);
@@ -97,12 +106,6 @@ public class City implements Session.Saveable, Trader {
   static void setupRoute(City a, City b, int distance) {
     a.distances.put(b, distance);
     b.distances.put(a, distance);
-  }
-  
-  
-  static void setRelations(City a, City b, RELATION r) {
-    a.relations.put(b, r);
-    b.relations.put(a, r);
   }
   
   
@@ -127,11 +130,32 @@ public class City implements Session.Saveable, Trader {
   }
   
   
+  static void setRelations(City a, RELATION RA, City b, RELATION RB) {
+    a.relations.put(b, RB);
+    b.relations.put(a, RA);
+  }
+  
+  
+  boolean isVassal(City o) { return relations.get(o) == RELATION.VASSAL; }
+  boolean isLord  (City o) { return relations.get(o) == RELATION.LORD  ; }
+  boolean isEnemy (City o) { return relations.get(o) == RELATION.ENEMY ; }
+  boolean isAlly  (City o) { return relations.get(o) == RELATION.ALLY  ; }
+  
+  
+  void setArmyPower(int power) {
+    this.armyPower = power;
+  }
+  
+  
   
   /**  Regular updates-
     */
   void updateFrom(CityMap map) {
-    
+    for (Formation f : formations) {
+      f.update();
+    }
+    //  TODO:  Update your army power here based on how many formations are
+    //         at home.
     return;
   }
   

@@ -114,7 +114,7 @@ public class CityMap implements Session.Saveable {
   
   
   public static class Tile implements Target {
-  
+    
     int x, y;
     
     Terrain terrain;
@@ -214,10 +214,15 @@ public class CityMap implements Session.Saveable {
   /**  Active updates:
     */
   void update() {
-    if (city != null) city.world.updateFrom(this);
-    for (Building b : buildings) b.update();
-    for (Walker   w : walkers  ) w.update();
-    
+    if (city != null) {
+      city.world.updateFrom(this);
+    }
+    for (Building b : buildings) {
+      b.update();
+    }
+    for (Walker w : walkers) {
+      w.update();
+    }
     time += 1;
     updateGrowth();
   }

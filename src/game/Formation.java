@@ -5,6 +5,7 @@ import util.*;
 import static game.Walker.*;
 import static game.GameConstants.*;
 import static game.CityMap.*;
+import static game.City.*;
 
 
 
@@ -17,16 +18,18 @@ public class Formation implements
     */
   ObjectType type;
   List <Walker> recruits = new List();
-  CityMap map;
+  
   boolean active = false;
-  Tile securedPoint;
-  int  facing;
-  City securedCity;
+  boolean away   = false;
+  City    belongs     ;
+  City    securedCity ;
+  CityMap map         ;
+  Tile    securedPoint;
+  int     facing      ;
   
   
-  
-  Formation(ObjectType type) {
-    this.type = type;
+  Formation() {
+    return;
   }
   
   
@@ -35,11 +38,14 @@ public class Formation implements
     
     type = (ObjectType) s.loadObject();
     s.loadObjects(recruits);
-    map          = (CityMap) s.loadObject();
+    
     active       = s.loadBool();
+    away         = s.loadBool();
+    belongs      = (City   ) s.loadObject();
+    securedCity  = (City   ) s.loadObject();
+    map          = (CityMap) s.loadObject();
     securedPoint = loadTile(map, s);
     facing       = s.loadInt();
-    securedCity  = (City) s.loadObject();
   }
   
   
@@ -47,17 +53,28 @@ public class Formation implements
     
     s.saveObject(type);
     s.saveObjects(recruits);
-    s.saveObject(map);
+    
     s.saveBool(active);
+    s.saveBool(away  );
+    s.saveObject(belongs    );
+    s.saveObject(securedCity);
+    s.saveObject(map        );
     saveTile(securedPoint, map, s);
     s.saveInt(facing);
-    s.saveObject(securedCity);
   }
   
   
   
   /**  Issuing specific marching orders-
     */
+  void setupFormation(ObjectType type, City belongs) {
+    this.type    = type;
+    this.belongs = belongs;
+    this.map     = belongs.map;
+    belongs.formations.add(this);
+  }
+  
+  
   void toggleRecruit(Walker s, boolean is) {
     this.recruits.toggleMember(s, is);
     if (is) s.formation = this;
@@ -73,14 +90,166 @@ public class Formation implements
   
   
   void stopSecuringPoint() {
+    this.securedCity  = null  ;
     this.securedPoint = null  ;
     this.active       = false ;
     this.facing       = CENTRE;
   }
   
   
+  void update() {
+    if ((! away) && securedCity != null && formationReady()) {
+      beginJourneyTo(securedCity);
+    }
+  }
+  
+  
+  
+  /**  Methods for handling treatment of foreign cities-
+    */
+  void beginSecuring(City city) {
+    this.securedCity = city;
+    
+    if (this.map != null) {
+      Tile exits = WalkerForTrade.findTransitPoint(map, city);
+      beginSecuring(exits, 0); //  Make this face the border!
+    }
+    else {
+      beginJourneyTo(securedCity);
+    }
+  }
+  
+  
+  void beginJourneyTo(City goes) {
+    I.say("\nREADY TO BEGIN FOREIGN MISSION!");
+    for (Walker w : recruits) if (w.onMap(map)) {
+      w.exitMap();
+    }
+    goes.world.beginJourney(map.city, goes, this);
+    away = true;
+  }
+  
+  
+  public void onArrival(City goes, World.Journey journey) {
+    //
+    //  There are 4 cases here: arriving home or away, and arriving on a map or
+    //  not.
+    boolean home  = goes == belongs;
+    boolean onMap = goes.map != null;
+    
+    if (onMap) {
+      I.say("\nARRIVED ON MAP: "+goes+" FROM "+journey.from);
+      
+      this.map = goes.map;
+      Tile entry = WalkerForTrade.findTransitPoint(map, journey.from);
+      for (Walker w : recruits) {
+        w.enterMap(map, entry.x, entry.y);
+      }
+      beginSecuring(entry, N);
+      
+      if (home) {
+        this.away = false;
+        stopSecuringPoint();
+      }
+      else {
+        pickTacticalTarget();
+      }
+    }
+    //
+    //  In the event that this happens off-map, either a foreign army has
+    //  returned home, or your own army has hit a foreign city:
+    else {
+      if (home) {
+        I.say("\nARRIVED HOME: "+goes+" FROM "+journey.from);
+        this.away = false;
+      }
+      else {
+        I.say("\nARRIVED AT FOREIGN CITY: "+goes+" FROM "+journey.from);
+        attendCityAway(goes, journey);
+      }
+    }
+  }
+  
+  
+  void attendCityAway(City goes, World.Journey journey) {
+    City  from      = journey.from;
+    float power     = formationPower();
+    float cityPower = goes.armyPower;
+    
+    float chance = 0, casualties = 0, origTotal = recruits.size();
+    boolean victory = false;
+    chance     = power / (power + cityPower);
+    chance     = Nums.clamp((chance * 2) - 0.5f, 0, 1);
+    casualties = Rand.num() + (1 - chance);
+    
+    if (Rand.num() < chance) {
+      setRelations(from, RELATION.LORD, goes, RELATION.VASSAL);
+      casualties -= 0.25f;
+      victory = true;
+    }
+    else {
+      casualties += 0.25f;
+      victory = false;
+    }
+    
+    casualties *= recruits.size();
+    while (casualties-- > 0 && ! recruits.empty()) {
+      Walker lost = (Walker) Rand.pickFrom(recruits);
+      recruits.remove(lost);
+    }
+    
+    //
+    //  TODO:  Consider staying to pacify the locals, depending on mission
+    //  parameters, et cetera!
+    
+    I.say("\n"+this+" CONDUCTED ACTION AGAINST "+goes);
+    I.say("  Victorious: "+victory);
+    I.say("  Casualties: "+casualties / origTotal);
+    
+    stopSecuringPoint();
+    goes.world.beginJourney(goes, from, this);
+  }
+  
+  
+  
+  /**  Other utility methods:
+    */
+  Tile standLocation(Walker member) {
+    
+    Tile c = this.securedPoint;
+    if (c == null) return null;
+    
+    int index = recruits.indexOf(member);
+    if (index == -1) return null;
+    
+    int ranks = type.numRanks;
+    int file  = type.numFile ;
+    int x     = index % file ;
+    int y     = index / file ;
+    x += c.x - (file  / 2);
+    y += c.y + (ranks / 2);
+    
+    x = Nums.clamp(x, map.size);
+    y = Nums.clamp(y, map.size);
+    
+    return map.tileAt(x, y);
+  }
+  
+  
+  boolean hostile(Walker a, Walker b) {
+    City CA = a.homeCity, CB = b.homeCity;
+    if (CA == null) CA = map.city;
+    if (CB == null) CB = map.city;
+    if (CA == CB) return false;
+    RELATION r = CA.relations.get(CB);
+    if (r == RELATION.ENEMY) return true;
+    return false;
+  }
+  
+  
   boolean formationReady() {
-    if ((! active) || securedPoint == null) return false;
+    if (securedPoint == null || ! active) return false;
+    if (recruits.empty()) return false;
     
     for (Walker w : recruits) {
       if (standLocation(w) != w.at) return false;
@@ -89,9 +258,45 @@ public class Formation implements
   }
   
   
+  int formationPower() {
+    float sumStats = 0;
+    for (Walker w : recruits) {
+      float stats = w.type.attackScore + w.type.defendScore;
+      stats *= 1 - ((w.injury + w.hunger) / w.type.maxHealth);
+      sumStats += stats;
+    }
+    return (int) sumStats;
+  }
+  
+  
+  Walker findTarget(Walker member) {
+    Pick <Walker> pick = new Pick();
+    
+    //  TODO:  Allow for targeting of anything noticed by other members of the
+    //  team?
+    float seeBonus = type.numFile;
+    
+    for (Walker w : map.walkers) if (hostile(w, member)) {
+      float distW = CityMap.distance(member.at, w.at);
+      float distF = CityMap.distance(w.at, securedPoint);
+      float range = member.type.sightRange + seeBonus;
+      if (distF > range + 1) continue;
+      if (distW > range + 1) continue;
+      pick.compare(w, 0 - distW);
+    }
+    
+    return pick.result();
+  }
+  
+  
   
   /**  Organising walkers-
     */
+  void pickTacticalTarget() {
+    //  TODO:  Fill this in!
+  }
+  
+  
   public void selectWalkerBehaviour(Walker w) {
     
     Walker target = w.inCombat() ? null : findTarget(w);
@@ -109,7 +314,6 @@ public class Formation implements
   
   
   public void walkerUpdates(Walker w) {
-    
     Walker target = w.inCombat() ? null : findTarget(w);
     if (target != null) {
       w.beginAttack(target, JOB.COMBAT, this);
@@ -120,6 +324,7 @@ public class Formation implements
   
   public void walkerTargets(Walker walker, Target other) {
     if (walker.inCombat()) {
+      ///I.say("\n"+walker+" launching attack on "+other);
       walker.performAttack((Walker) other);
     }
     return;
@@ -147,92 +352,11 @@ public class Formation implements
   
   
   
-  /**  Other utility methods:
+  /**  Graphical, debug and interface methods-
     */
-  Tile standLocation(Walker member) {
-    
-    Tile c = this.securedPoint;
-    if (c == null) return null;
-    
-    int index = recruits.indexOf(member);
-    if (index == -1) return null;
-    
-    int ranks = type.numRanks;
-    int file  = type.numFile ;
-    int x     = index % file ;
-    int y     = index / file ;
-    x += c.x - (file  / 2);
-    y += c.y + (ranks / 2);
-    
-    return map.tileAt(x, y);
+  public String toString() {
+    return "Formation ("+belongs+")";
   }
-  
-  
-  boolean hostile(Walker a, Walker b) {
-    City CA = a.homeCity, CB = b.homeCity;
-    if (CA == null) CA = map.city;
-    if (CB == null) CB = map.city;
-    if (CA == CB) return false;
-    City.RELATION r = CA.relations.get(CB);
-    if (r == City.RELATION.ENEMY) return true;
-    return false;
-  }
-  
-  
-  Walker findTarget(Walker member) {
-    Pick <Walker> pick = new Pick();
-    
-    //  TODO:  Allow for targeting of anything noticed by other members of the
-    //  team?
-    float seeBonus = type.numFile;
-    
-    for (Walker w : map.walkers) if (hostile(w, member)) {
-      float distW = CityMap.distance(member.at, w.at);
-      float distF = CityMap.distance(w.at, securedPoint);
-      float range = member.type.sightRange + seeBonus;
-      if (distF > range + 1) continue;
-      if (distW > range + 1) continue;
-      pick.compare(w, 0 - distW);
-    }
-    
-    return pick.result();
-  }
-  
-
-  
-  /**  TODO:  Start implementing this!
-    */
-  void beginSecuring(City city) {
-    this.securedCity = city;
-    this.active      = true;
-    
-    //  Tile exits = WalkerForTrade.findTransitPoint(map, city);
-    //  etc...
-  }
-  
-  
-  
-  
-  /**  Off-map invasions or relief operations:
-    */
-  //  TODO:  You will also need to add some basic tactical AI- what to attack,
-  //  and when to retreat.
-  
-  public void onArrival(City goes, World.Journey journey) {
-    if (goes.map == null) {
-      
-    }
-    else {
-      this.map = goes.map;
-      Tile entry = WalkerForTrade.findTransitPoint(map, journey.from);
-      for (Walker w : recruits) {
-        w.enterMap(map, entry.x, entry.y);
-      }
-    }
-  }
-  
-  
-  
 }
 
 

@@ -355,20 +355,27 @@ public class List <T> extends ListEntry <T> implements Series <T> {
   final public Iterator <T> iterator() {
     final List <T> list = this;
     return new Iterator <T> () {
-      ListEntry <T> current = list;
+      ListEntry <T> current = updateFrom(list.next);
+      //
+      private ListEntry <T> updateFrom(ListEntry <T> e) {
+        while (e != list && e.list == null) e = e.next;
+        return e;
+      }
       //
       public boolean hasNext() {
-        return current.next != list;
+        current = updateFrom(current);
+        return current != list;
       }
       //
       public T next() {
+        T refers = current.refers;
         current = current.next;
-        return current.refers;
+        return refers;
       }
       //
       public void remove() {
         removeEntry(current);
-        current = current.next;
+        current = updateFrom(current);
       }
     };
   }
@@ -452,12 +459,22 @@ public class List <T> extends ListEntry <T> implements Series <T> {
     I.say("  List contents: " + list);
     I.say("  First member is:  " + list.removeFirst());
     I.say("  List contents: " + list);
-    for (int n = 2; n-- > 0;)
+    for (int n = 2; n-- > 0;) {
       I.say("  First member is:  " + list.removeFirst());
-    list.clear();
+    }
+    
+    I.say("\nWill now remove all items:");
+    for (Integer i : list) {
+      for (Integer j : list) list.remove(j);
+      I.say("  Attending to "+i);
+    }
+    
     I.say("  List contents: " + list);
   }
 }
+
+
+
 
 
 
