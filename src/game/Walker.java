@@ -223,29 +223,30 @@ public class Walker extends Fixture implements Session.Saveable {
     //  TODO:  Don't allow another job to be assigned while this one is in
     //  the middle of an update!
     if (job != null && checkAndUpdatePathing(job)) {
+      final Task task = this.job;
       
-      boolean visiting  = job.visits != null;
-      boolean targeting = job.target != null;
+      boolean visiting  = task.visits != null;
+      boolean targeting = task.target != null;
       boolean combat    = inCombat();
-      Tile    pathEnd   = (Tile) Visit.last(job.path);
+      Tile    pathEnd   = (Tile) Visit.last(task.path);
       float   distance  = CityMap.distance(at, pathEnd);
       float   minRange  = Nums.max(0.1f, combat ? type.attackRange : 0);
       //
       //  If you're close enough to start the behaviour, act accordingly:
       if (distance <= minRange) {
-        if (visiting && inside != job.visits) {
-          setInside(job.visits, true);
+        if (visiting && inside != task.visits) {
+          setInside(task.visits, true);
         }
-        if (job.timeSpent++ <= job.maxTime) {
+        if (task.timeSpent++ <= task.maxTime) {
           if (visiting) {
-            onVisit(job.visits);
-            job.visits.visitedBy(this);
-            job.origin.walkerVisits(this, job.visits);
+            onVisit(task.visits);
+            task.visits.visitedBy(this);
+            task.origin.walkerVisits(this, task.visits);
           }
           if (targeting) {
-            onTarget(job.target);
-            job.target.targetedBy(this);
-            job.origin.walkerTargets(this, job.target);
+            onTarget(task.target);
+            task.target.targetedBy(this);
+            task.origin.walkerTargets(this, task.target);
           }
         }
         else {
@@ -255,8 +256,8 @@ public class Walker extends Fixture implements Session.Saveable {
       //
       //  Otherwise, close along the path:
       else {
-        job.pathIndex = Nums.clamp(job.pathIndex + 1, job.path.length);
-        Tile ahead = job.path[job.pathIndex];
+        task.pathIndex = Nums.clamp(task.pathIndex + 1, task.path.length);
+        Tile ahead = task.path[task.pathIndex];
         this.at = ahead;
         if (inside != null) setInside(inside, false);
       }

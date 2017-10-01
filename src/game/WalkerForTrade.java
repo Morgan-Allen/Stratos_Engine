@@ -15,7 +15,9 @@ public class WalkerForTrade extends Walker implements Journeys {
     */
   Tally <Good> cargo = new Tally();
   float profits;
-  City tradesWith;
+  
+  Trader tradeFrom;
+  Trader tradeGoes;
   boolean offMap = false;
   
   
@@ -27,16 +29,18 @@ public class WalkerForTrade extends Walker implements Journeys {
   public WalkerForTrade(Session s) throws Exception {
     super(s);
     s.loadTally(cargo);
-    tradesWith = (City) s.loadObject();
-    profits    = s.loadFloat();
-    offMap     = s.loadBool();
+    tradeFrom = (City) s.loadObject();
+    tradeGoes = (City) s.loadObject();
+    profits   = s.loadFloat();
+    offMap    = s.loadBool();
   }
   
   
   public void saveState(Session s) throws Exception {
     super.saveState(s);
     s.saveTally(cargo);
-    s.saveObject(tradesWith);
+    s.saveObject(tradeFrom);
+    s.saveObject(tradeFrom);
     s.saveFloat(profits);
     s.saveBool(offMap);
   }
@@ -62,9 +66,10 @@ public class WalkerForTrade extends Walker implements Journeys {
     if (exits == null) return;
     
     this.cargo.clear();
-    takeOnGoods((Trader) from, taken, false);
-    profits    = 0;
-    tradesWith = goes;
+    profits   = 0;
+    tradeFrom = (Trader) from;
+    tradeGoes = goes;
+    takeOnGoods(tradeFrom, taken, false);
     
     embarkOnTarget(exits, 0, JOB.TRADING, from);
   }
@@ -77,8 +82,9 @@ public class WalkerForTrade extends Walker implements Journeys {
     if (visits == home) {
       offloadGoods(partner, false);
       homeCity.currentFunds += profits;
-      profits    = 0;
-      tradesWith = null;
+      profits   = 0;
+      tradeFrom = null;
+      tradeGoes = null;
     }
     else {
       offloadGoods(partner, false);
@@ -126,19 +132,19 @@ public class WalkerForTrade extends Walker implements Journeys {
   
   
   protected void onTarget(Target target) {
-    if (target == null || tradesWith == null) return;
-    tradesWith.world.beginJourney(home.map.city, tradesWith, this);
+    if (target == null || ! (tradeGoes instanceof City)) return;
+    map.city.world.beginJourney(map.city, (City) tradeGoes, this);
     exitMap();
   }
   
   
   public void onArrival(City goes, World.Journey journey) {
-    Building base = (Building) I.cast(job.origin, Building.class);
+    Building base = home;
     if (base == null || base.destroyed()) return;
     
     City homeCity = home.map.city;
     if (goes == homeCity) {
-      Tile entry = findTransitPoint(homeCity.map, tradesWith);
+      Tile entry = findTransitPoint(homeCity.map, journey.from);
       enterMap(homeCity.map, entry.x, entry.y);
       returnTo(base);
     }
@@ -146,7 +152,7 @@ public class WalkerForTrade extends Walker implements Journeys {
       Tally <Good> taken = configureCargo(goes, (Trader) home, false);
       offloadGoods(goes,        true);
       takeOnGoods (goes, taken, true);
-      tradesWith.world.beginJourney(tradesWith, homeCity, this);
+      homeCity.world.beginJourney(journey.goes, homeCity, this);
     }
   }
   
@@ -158,9 +164,11 @@ public class WalkerForTrade extends Walker implements Journeys {
     Trader from, Trader goes, boolean cityOnly
   ) {
     Tally <Good> cargo = new Tally();
+    boolean fromCity = from.tradeOrigin() == from;
+    boolean goesCity = goes.tradeOrigin() == goes;
     
-    if (from == null || goes == null          ) return cargo;
-    if (cityOnly && goes.tradeOrigin() != goes) return cargo;
+    if (from == null || goes == null        ) return cargo;
+    if (cityOnly && ! (fromCity || goesCity)) return cargo;
     
     for (Good good : ALL_GOODS) {
       float amountO  = from.inventory ().valueFor(good);
