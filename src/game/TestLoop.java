@@ -117,12 +117,9 @@ public class TestLoop {
       }
     }
     
-    BuildingForMilitary MB = (BuildingForMilitary) I.cast(
-      b, BuildingForMilitary.class
-    );
-    if (MB != null && MB.formation.recruits.size() > 0) {
+    if (b.formation() != null && b.formation().recruits.size() > 0) {
       report += "\nRecruits:";
-      for (Walker w : MB.formation.recruits) {
+      for (Walker w : b.formation().recruits) {
         report += "\n  "+w;
       }
     }

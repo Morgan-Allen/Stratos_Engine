@@ -83,7 +83,7 @@ public class Building extends Fixture implements Session.Saveable, Employer {
   
   
   boolean destroyed() {
-    return buildLevel >= 0 && map == null;
+    return buildLevel < 0 && map == null;
   }
   
   
@@ -130,6 +130,9 @@ public class Building extends Fixture implements Session.Saveable, Employer {
   }
   
   
+  
+  /**  Spawning walkers and customising walker behaviour:
+    */
   protected int numWalkers(ObjectType type) {
     int sum = 0;
     for (Walker w : resident) if (w.type == type) sum++;
@@ -154,9 +157,11 @@ public class Building extends Fixture implements Session.Saveable, Employer {
   }
   
   
+  Formation formation() {
+    return null;
+  }
   
-  /**  Customising walker behaviour:
-    */
+  
   public void selectWalkerBehaviour(Walker walker) {
     walker.returnTo(this);
   }

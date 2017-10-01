@@ -19,12 +19,14 @@ public class Formation implements
   ObjectType type;
   List <Walker> recruits = new List();
   
-  boolean active = false;
   boolean away   = false;
   City    belongs     ;
   City    securedCity ;
   CityMap map         ;
+
+  boolean active = false;
   Tile    securedPoint;
+  Object  objective   ;
   int     facing      ;
   
   
@@ -39,12 +41,14 @@ public class Formation implements
     type = (ObjectType) s.loadObject();
     s.loadObjects(recruits);
     
-    active       = s.loadBool();
     away         = s.loadBool();
     belongs      = (City   ) s.loadObject();
     securedCity  = (City   ) s.loadObject();
     map          = (CityMap) s.loadObject();
+    
+    active       = s.loadBool();
     securedPoint = loadTile(map, s);
+    objective    = s.loadObject();
     facing       = s.loadInt();
   }
   
@@ -54,18 +58,20 @@ public class Formation implements
     s.saveObject(type);
     s.saveObjects(recruits);
     
-    s.saveBool(active);
     s.saveBool(away  );
     s.saveObject(belongs    );
     s.saveObject(securedCity);
     s.saveObject(map        );
+    
+    s.saveBool(active);
     saveTile(securedPoint, map, s);
+    s.saveObject(objective);
     s.saveInt(facing);
   }
   
   
   
-  /**  Issuing specific marching orders-
+  /**  Issuing specific marching orders on the current map-
     */
   void setupFormation(ObjectType type, City belongs) {
     this.type    = type;
@@ -82,10 +88,11 @@ public class Formation implements
   }
   
   
-  void beginSecuring(Tile point, int facing) {
-    this.securedPoint = point ;
-    this.facing       = facing;
-    this.active       = true  ;
+  void beginSecuring(Tile point, int facing, Object objective) {
+    this.securedPoint = point    ;
+    this.facing       = facing   ;
+    this.objective    = objective;
+    this.active       = true     ;
   }
   
   
@@ -98,8 +105,11 @@ public class Formation implements
   
   
   void update() {
-    if ((! away) && securedCity != null && formationReady()) {
-      beginJourneyTo(securedCity);
+    if (away && map != null) {
+      updateTacticalTarget();
+    }
+    if (map != null && securedCity != map.city && formationReady()) {
+      beginJourney(map.city, securedCity);
     }
   }
   
@@ -112,20 +122,20 @@ public class Formation implements
     
     if (this.map != null) {
       Tile exits = WalkerForTrade.findTransitPoint(map, city);
-      beginSecuring(exits, 0); //  Make this face the border!
+      beginSecuring(exits, 0, city); //  Make this face the border!
     }
     else {
-      beginJourneyTo(securedCity);
+      beginJourney(belongs, securedCity);
     }
   }
   
   
-  void beginJourneyTo(City goes) {
+  void beginJourney(City from, City goes) {
     I.say("\nREADY TO BEGIN FOREIGN MISSION!");
     for (Walker w : recruits) if (w.onMap(map)) {
       w.exitMap();
     }
-    goes.world.beginJourney(map.city, goes, this);
+    goes.world.beginJourney(from, goes, this);
     away = true;
   }
   
@@ -145,14 +155,15 @@ public class Formation implements
       for (Walker w : recruits) {
         w.enterMap(map, entry.x, entry.y);
       }
-      beginSecuring(entry, N);
+      beginSecuring(entry, N, null);
       
       if (home) {
         this.away = false;
         stopSecuringPoint();
       }
       else {
-        pickTacticalTarget();
+        this.away = true;
+        updateTacticalTarget();
       }
     }
     //
@@ -165,6 +176,7 @@ public class Formation implements
       }
       else {
         I.say("\nARRIVED AT FOREIGN CITY: "+goes+" FROM "+journey.from);
+        this.away = true;
         attendCityAway(goes, journey);
       }
     }
@@ -248,9 +260,8 @@ public class Formation implements
   
   
   boolean formationReady() {
+    if (map == null) return true;
     if (securedPoint == null || ! active) return false;
-    if (recruits.empty()) return false;
-    
     for (Walker w : recruits) {
       if (standLocation(w) != w.at) return false;
     }
@@ -327,37 +338,66 @@ public class Formation implements
   
   /**  Organising walkers-
     */
-  void pickTacticalTarget() {
+  boolean updateTacticalTarget() {
+    
+    if (objective instanceof Formation) {
+      Formation opposed = (Formation) objective;
+      Tile secures = opposed.securedPoint;
+      int  power   = opposed.formationPower();
+      if (secures == this.securedPoint && power > 0) return false;
+    }
+    
+    if (objective instanceof Building) {
+      Building sieged = (Building) objective;
+      if (! sieged.destroyed()) return false;
+    }
+    
+    if (objective instanceof City) {
+      return false;
+    }
     
     if (formationPower() == 0) {
       beginSecuring(belongs);
-      return;
+      return true;
     }
     
-    Pick <Tile> pick = new Pick();
+    class Option { Object target; Tile secures; }
+    Pick <Option> pick = new Pick();
     
     for (Formation f : map.city.formations) {
       if (f.away || f.securedPoint == null) continue;
       
-      float dist = CityMap.distance(f.securedPoint, securedPoint);
-      pick.compare(f.securedPoint, 0 - dist);
+      Option o = new Option();
+      o.secures = f.securedPoint;
+      o.target  = f;
+      float dist = CityMap.distance(o.secures, securedPoint);
+      pick.compare(o, 0 - dist);
     }
     
     for (Building b : map.buildings) {
       if (b.type.category != ObjectType.IS_ARMY_BLD) continue;
       
-      float dist = CityMap.distance(b.centre(), securedPoint);
-      pick.compare(b.centre(), 0 - dist);
+      Option o = new Option();
+      o.secures = b.centre();
+      o.target  = b;
+      float dist = CityMap.distance(o.secures, securedPoint);
+      pick.compare(o, 0 - dist);
     }
     
     if (! pick.empty()) {
-      beginSecuring(pick.result(), facing);
+      Option o = pick.result();
+      beginSecuring(o.secures, facing, o.target);
+      return true;
     }
     //
     //  If there are no targets left here, turn around and go home.
     else {
-      City.setRelations(belongs, RELATION.LORD, securedCity, RELATION.VASSAL);
+      City sieges = securedCity;
+      if (sieges != null) {
+        City.setRelations(belongs, RELATION.LORD, sieges, RELATION.VASSAL);
+      }
       beginSecuring(belongs);
+      return true;
     }
   }
   

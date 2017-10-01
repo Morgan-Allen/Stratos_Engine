@@ -52,6 +52,11 @@ public class BuildingForMilitary extends BuildingForDelivery {
   }
   
   
+  Formation formation() {
+    return this.formation;
+  }
+  
+  
   
   /**  Regular updates and active service-
     */

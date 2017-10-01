@@ -35,16 +35,17 @@ public class TestSieging extends TestLoop {
       fights.assignHomeCity(cityB);
       enemies.toggleRecruit(fights, true);
     }
+    enemies.beginSecuring(cityA);
     
-    World.Journey j = world.beginJourney(cityB, cityA, enemies);
-    world.completeJourney(j);
-    
-    
-    //  TODO:  Check to ensure that the fort is correctly besieged and
-    //  ultimately destroyed.
+    boolean victorious = false;
     
     while (true) {
       map = runGameLoop(map, 10);
+      
+      if (cityA.hasLord(cityB) && (! enemies.away) && ! victorious) {
+        victorious = true;
+        I.say("\nTEST CONCLUDED SUCCESSFULLY!");
+      }
     }
   }
   

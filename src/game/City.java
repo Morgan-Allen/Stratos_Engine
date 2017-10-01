@@ -136,10 +136,10 @@ public class City implements Session.Saveable, Trader {
   }
   
   
-  boolean isVassal(City o) { return relations.get(o) == RELATION.VASSAL; }
-  boolean isLord  (City o) { return relations.get(o) == RELATION.LORD  ; }
-  boolean isEnemy (City o) { return relations.get(o) == RELATION.ENEMY ; }
-  boolean isAlly  (City o) { return relations.get(o) == RELATION.ALLY  ; }
+  boolean hasVassal(City o) { return relations.get(o) == RELATION.VASSAL; }
+  boolean hasLord  (City o) { return relations.get(o) == RELATION.LORD  ; }
+  boolean hasEnemy (City o) { return relations.get(o) == RELATION.ENEMY ; }
+  boolean hasAlly  (City o) { return relations.get(o) == RELATION.ALLY  ; }
   
   
   void setArmyPower(int power) {

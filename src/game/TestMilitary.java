@@ -59,14 +59,14 @@ public class TestMilitary extends TestLoop {
       map = runGameLoop(map, 10);
       
       if (troops.recruits.size() >= 8 && ! recruited) {
-        troops.beginSecuring(map.tileAt(30, 40), TileConstants.E);
+        troops.beginSecuring(map.tileAt(30, 40), TileConstants.E, null);
         recruited = true;
       }
       
       if (troops.formationReady() && ! invaded) {
         World.Journey j = world.beginJourney(cityB, cityA, enemies);
         world.completeJourney(j);
-        enemies.beginSecuring(troops.securedPoint, TileConstants.W);
+        enemies.beginSecuring(troops.securedPoint, TileConstants.W, troops);
         invaded = true;
       }
       
@@ -84,7 +84,7 @@ public class TestMilitary extends TestLoop {
         invading = true;
       }
       
-      if (invading && cityA.isVassal(cityB)) {
+      if (invading && cityA.hasVassal(cityB)) {
         awayWin = true;
       }
       
