@@ -3,6 +3,7 @@
 package game;
 import util.*;
 import static game.GameConstants.*;
+import static game.CityBorders.*;
 
 
 
@@ -120,10 +121,10 @@ public class BuildingForTrade extends BuildingForCrafts implements Trader {
     }
     
     for (Trader t : targets) {
-      Tally <Good> cargoAway = WalkerForTrade.configureCargo(this, t, false);
-      Tally <Good> cargoBack = WalkerForTrade.configureCargo(t, this, true );
+      Tally <Good> cargoAway = configureCargo(this, t, false);
+      Tally <Good> cargoBack = configureCargo(t, this, true );
       
-      float distRating = WalkerForTrade.distanceRating(this, t);
+      float distRating = distanceRating(this, t);
       float rating = 0;
       
       if (cargoAway.size() > 0) {

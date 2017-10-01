@@ -6,6 +6,7 @@ import static game.Walker.*;
 import static game.GameConstants.*;
 import static game.CityMap.*;
 import static game.City.*;
+import static game.CityBorders.*;
 
 
 
@@ -126,7 +127,7 @@ public class Formation implements
     this.securedCity = city;
     
     if (this.map != null) {
-      Tile exits = WalkerForTrade.findTransitPoint(map, city);
+      Tile exits = findTransitPoint(map, city);
       beginSecuring(exits, 0, city); //  Make this face the border!
     }
     else {
@@ -158,7 +159,7 @@ public class Formation implements
       if (reports()) I.say("\nARRIVED ON MAP: "+goes+" FROM "+journey.from);
       
       this.map = goes.map;
-      Tile entry = WalkerForTrade.findTransitPoint(map, journey.from);
+      Tile entry = findTransitPoint(map, journey.from);
       for (Walker w : recruits) {
         w.enterMap(map, entry.x, entry.y);
       }

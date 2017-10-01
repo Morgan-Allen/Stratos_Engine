@@ -2,9 +2,9 @@
 
 
 package game;
+import util.*;
 import static game.GameConstants.*;
 import static util.TileConstants.*;
-import util.*;
 
 
 
@@ -22,9 +22,7 @@ public class CityMap implements Session.Saveable {
   List <Building> buildings = new List();
   List <Walker  > walkers   = new List();
   
-  Table <Object, CityMapDemands> demands = new Table();
   Table <City, Tile> transitPoints = new Table();
-  
   int growScanIndex = 0;
   
   
@@ -45,6 +43,12 @@ public class CityMap implements Session.Saveable {
     city = (City) s.loadObject();
     s.loadObjects(buildings);
     s.loadObjects(walkers  );
+    
+    for (int n = s.loadInt(); n-- > 0;) {
+      City with = (City) s.loadObject();
+      Tile point = loadTile(this, s);
+      transitPoints.put(with, point);
+    }
     growScanIndex = s.loadInt();
   }
   
@@ -60,6 +64,12 @@ public class CityMap implements Session.Saveable {
     s.saveObject(city);
     s.saveObjects(buildings);
     s.saveObjects(walkers  );
+    
+    s.saveInt(transitPoints.size());
+    for (City c : transitPoints.keySet()) {
+      s.saveObject(c);
+      saveTile(transitPoints.get(c), this, s);
+    }
     s.saveInt(growScanIndex);
   }
   
@@ -246,8 +256,13 @@ public class CityMap implements Session.Saveable {
     for (Walker w : walkers) {
       w.update();
     }
+    
     time += 1;
     updateGrowth();
+    
+    if (time % SCAN_PERIOD == 0) {
+      transitPoints.clear();
+    }
   }
   
   
