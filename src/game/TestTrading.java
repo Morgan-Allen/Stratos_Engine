@@ -26,7 +26,7 @@ public class TestTrading extends TestLoop {
     cityB.inventory .set(CLAY      ,  50);
     
     BuildingForTrade post1 = (BuildingForTrade) PORTER_HOUSE.generate();
-    post1.enterMap(map, 1, 6);
+    post1.enterMap(map, 1, 6, 1);
     post1.ID = "(Gets Cotton)";
     post1.tradeLevel.set(RAW_COTTON,  20);
     post1.tradeLevel.set(CLAY      ,  20);
@@ -41,17 +41,17 @@ public class TestTrading extends TestLoop {
     post1.inventory .set(POTTERY,  20);
     
     BuildingForTrade post2 = (BuildingForTrade) PORTER_HOUSE.generate();
-    post2.enterMap(map, 5, 6);
+    post2.enterMap(map, 5, 6, 1);
     post2.ID = "(Gets Clay)";
     post2.tradeLevel.set(RAW_COTTON, -10);
     post2.tradeLevel.set(CLAY      ,  20);
     post2.inventory .set(RAW_COTTON,  10);
     
     Building kiln = (Building) KILN.generate();
-    kiln.enterMap(map, 2, 3);
+    kiln.enterMap(map, 2, 3, 1);
     
     Building weaver = (Building) WEAVER.generate();
-    weaver.enterMap(map, 5, 3);
+    weaver.enterMap(map, 5, 3, 1);
     
     runGameLoop(map, -1);
   }

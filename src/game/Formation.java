@@ -261,6 +261,7 @@ public class Formation implements
   int formationPower() {
     float sumStats = 0;
     for (Walker w : recruits) {
+      if (w.state >= Walker.STATE_DEAD) continue;
       float stats = w.type.attackScore + w.type.defendScore;
       stats *= 1 - ((w.injury + w.hunger) / w.type.maxHealth);
       sumStats += stats;
@@ -269,7 +270,7 @@ public class Formation implements
   }
   
   
-  Walker findTarget(Walker member) {
+  Walker findCombatTarget(Walker member) {
     Pick <Walker> pick = new Pick();
     
     //  TODO:  Allow for targeting of anything noticed by other members of the
@@ -289,19 +290,89 @@ public class Formation implements
   }
   
   
+  Tile findSiegeTarget(Walker member) {
+    if (securedPoint == null || ! (securedPoint.above instanceof Building)) {
+      return null;
+    }
+    
+    Building sieged = (Building) securedPoint.above;
+    Tile c = sieged.at();
+    Pick <Tile> pick = new Pick();
+    
+    for (Coord p : Visit.perimeter(
+      c.x, c.y, sieged.type.wide, sieged.type.high
+    )) {
+      if (map.blocked(p.x, p.y)) continue;
+      Tile best = null;
+      
+      for (int dir : T_ADJACENT) {
+        Tile tile = map.tileAt(p.x + T_X[dir], p.y + T_Y[dir]);
+        if (tile == null || tile.above != sieged || tile.hasFocus()) continue;
+        best = tile;
+        break;
+      }
+      
+      float dist = CityMap.distance(member.at(), best);
+      pick.compare(best, 0 - dist);
+    }
+    
+    if (! (pick.result().above instanceof Building)) {
+      I.complain("PROBLEMMMM");
+    }
+    
+    return pick.result();
+  }
+  
+  
   
   /**  Organising walkers-
     */
   void pickTacticalTarget() {
-    //  TODO:  Fill this in!
+    
+    if (formationPower() == 0) {
+      beginSecuring(belongs);
+      return;
+    }
+    
+    Pick <Tile> pick = new Pick();
+    
+    for (Formation f : map.city.formations) {
+      if (f.away || f.securedPoint == null) continue;
+      
+      float dist = CityMap.distance(f.securedPoint, securedPoint);
+      pick.compare(f.securedPoint, 0 - dist);
+    }
+    
+    for (Building b : map.buildings) {
+      if (b.type.category != ObjectType.IS_ARMY_BLD) continue;
+      
+      float dist = CityMap.distance(b.centre(), securedPoint);
+      pick.compare(b.centre(), 0 - dist);
+    }
+    
+    if (! pick.empty()) {
+      beginSecuring(pick.result(), facing);
+    }
+    //
+    //  If there are no targets left here, turn around and go home.
+    else {
+      City.setRelations(belongs, RELATION.LORD, securedCity, RELATION.VASSAL);
+      beginSecuring(belongs);
+    }
   }
   
   
   public void selectWalkerBehaviour(Walker w) {
     
-    Walker target = w.inCombat() ? null : findTarget(w);
+    Walker target = w.inCombat() ? null : findCombatTarget(w);
     if (target != null) {
       w.beginAttack(target, JOB.COMBAT, this);
+      return;
+    }
+    
+    Tile sieges = w.inCombat() ? null : findSiegeTarget(w);
+    if (sieges != null) {
+      w.beginAttack(sieges, JOB.COMBAT, this);
       return;
     }
     
@@ -314,7 +385,7 @@ public class Formation implements
   
   
   public void walkerUpdates(Walker w) {
-    Walker target = w.inCombat() ? null : findTarget(w);
+    Walker target = w.inCombat() ? null : findCombatTarget(w);
     if (target != null) {
       w.beginAttack(target, JOB.COMBAT, this);
       return;
@@ -323,9 +394,12 @@ public class Formation implements
   
   
   public void walkerTargets(Walker walker, Target other) {
-    if (walker.inCombat()) {
-      ///I.say("\n"+walker+" launching attack on "+other);
+    if (walker.inCombat() && other instanceof Walker) {
       walker.performAttack((Walker) other);
+    }
+    if (walker.inCombat() && other instanceof Tile) {
+      Building siege = (Building) ((Tile) other).above;
+      walker.performAttack(siege);
     }
     return;
   }

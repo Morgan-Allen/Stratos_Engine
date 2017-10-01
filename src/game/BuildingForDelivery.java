@@ -35,8 +35,8 @@ public class BuildingForDelivery extends Building {
   
   /**  Life-cycle, update and economic functions-
     */
-  void enterMap(CityMap map, int x, int y) {
-    super.enterMap(map, x, y);
+  void enterMap(CityMap map, int x, int y, float buildLevel) {
+    super.enterMap(map, x, y, buildLevel);
     updateDemands();
   }
   

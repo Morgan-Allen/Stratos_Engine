@@ -14,7 +14,7 @@ public class TestTerrain extends TestLoop {
     CityMap map = CityMapGenerator.generateTerrain(20, DESERT, MEADOW, JUNGLE);
     
     Building farm = (Building) FARMER_HUT.generate();
-    farm.enterMap(map, 9, 9);
+    farm.enterMap(map, 9, 9, 1);
     CityMap.applyPaving(map, 9, 8, 10, 1, true);
     
     for (Coord c : Visit.grid(6, 6, 8, 8, 1)) {
@@ -24,7 +24,7 @@ public class TestTerrain extends TestLoop {
       Fixture crop;
       if (Rand.yes()) crop = new Fixture(MAIZE     );
       else            crop = new Fixture(RAW_COTTON);
-      crop.enterMap(map, c.x, c.y);
+      crop.enterMap(map, c.x, c.y, 1);
       crop.buildLevel = 0.5f + Rand.num();
     }
     

@@ -181,6 +181,10 @@ public class Walker extends Fixture implements Session.Saveable {
   
   void exitMap() {
     if (inside != null) setInside(inside, false);
+    
+    Target focus = pathTarget(job);
+    if (focus != null) focus.setFocused(this, false);
+    
     map.walkers.remove(this);
     map = null;
     at  = null;
@@ -214,6 +218,7 @@ public class Walker extends Fixture implements Session.Saveable {
   /**  Regular updates-
     */
   void update() {
+    Target oldFocus = pathTarget(job);
     
     //  TODO:  Don't allow another job to be assigned while this one is in
     //  the middle of an update!
@@ -264,6 +269,12 @@ public class Walker extends Fixture implements Session.Saveable {
     boolean originOK = job != null && job.origin != null;
     if (originOK) {
       job.origin.walkerUpdates(this);
+    }
+    
+    Target newFocus = pathTarget(job);
+    if (oldFocus != newFocus) {
+      if (oldFocus != null) oldFocus.setFocused(this, false);
+      if (newFocus != null) newFocus.setFocused(this, true );
     }
     //
     //  And update your current health-
@@ -399,6 +410,7 @@ public class Walker extends Fixture implements Session.Saveable {
     Tile heads = pathTarget(j);
     
     if (from == null || heads == null) return null;
+    heads.setFocused(this, true);
     
     PathSearch search = new PathSearch(map, this, from, heads);
     search.setPaveOnly(visiting && map.paved(from.x, from.y));
@@ -471,7 +483,7 @@ public class Walker extends Fixture implements Session.Saveable {
   
   /**  Combat and survival-related code:
     */
-  void beginAttack(Walker target, JOB jobType, Employer e) {
+  void beginAttack(Target target, JOB jobType, Employer e) {
     if (target == null) return;
     
     if (reports()) I.say(this+" will attack "+target);
@@ -480,16 +492,21 @@ public class Walker extends Fixture implements Session.Saveable {
   }
   
   
-  void performAttack(Walker other) {
-    if (type.attackScore <= 0) return;
+  void performAttack(Fixture other) {
+    if (other == null || type.attackScore <= 0) return;
     
     int damage = Rand.index(type.attackScore + other.type.defendScore) + 1;
     damage = Nums.max(0, damage - other.type.defendScore);
     
     if (damage > 0) {
-      other.injury += damage;
-      other.checkHealthState();
+      other.takeDamage(damage);
     }
+  }
+  
+  
+  void takeDamage(float damage) {
+    injury += damage;
+    checkHealthState();
   }
   
   
@@ -507,7 +524,7 @@ public class Walker extends Fixture implements Session.Saveable {
   
   /**  Wandering code:
     */
-  //  TODO:  Consider moving this out to a separate class?
+  //  TODO:  Consider moving this out to a separate class.
   
   void startRandomWalk() {
     if (reports()) I.say(this+" beginning random walk...");

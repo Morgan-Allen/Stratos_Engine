@@ -151,11 +151,11 @@ public class City implements Session.Saveable, Trader {
   /**  Regular updates-
     */
   void updateFrom(CityMap map) {
+    armyPower = 0;
     for (Formation f : formations) {
       f.update();
+      armyPower += f.formationPower();
     }
-    //  TODO:  Update your army power here based on how many formations are
-    //         at home.
     return;
   }
   

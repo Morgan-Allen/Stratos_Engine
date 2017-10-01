@@ -169,6 +169,11 @@ public class I {
   }
   
   
+  public static String percent(float val) {
+    return ((int) (val * 100)) + "%";
+  }
+  
+  
   public static String list(Object array[]) {
     if (array == null) return "NULL";
     final StringBuffer s = new StringBuffer();

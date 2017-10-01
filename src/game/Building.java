@@ -65,8 +65,8 @@ public class Building extends Fixture implements Session.Saveable, Employer {
   
   /**  World entry and exit-
     */
-  void enterMap(CityMap map, int x, int y) {
-    super.enterMap(map, x, y);
+  void enterMap(CityMap map, int x, int y, float buildLevel) {
+    super.enterMap(map, x, y, buildLevel);
     map.buildings.add(this);
     selectEntrance();
   }
@@ -75,6 +75,10 @@ public class Building extends Fixture implements Session.Saveable, Employer {
   void exitMap(CityMap map) {
     super.exitMap(map);
     map.buildings.remove(this);
+    for (Walker w : resident) {
+      if (w.home == this) w.home = null;
+      if (w.work == this) w.work = null;
+    }
   }
   
   
@@ -93,6 +97,19 @@ public class Building extends Fixture implements Session.Saveable, Employer {
       entrance = map.tileAt(c.x, c.y);
       break;
     }
+  }
+  
+  
+  public CityMap.Tile centre() {
+    return map.tileAt(
+      at.x + (type.wide / 2),
+      at.y + (type.high / 2)
+    );
+  }
+  
+  
+  public CityMap.Tile entrance() {
+    return entrance;
   }
   
   

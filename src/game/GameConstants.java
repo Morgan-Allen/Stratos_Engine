@@ -141,6 +141,12 @@ public class GameConstants {
   
   /**  Infrastructure types-
     */
+  static class BuildType extends ObjectType {
+    BuildType(String ID, int category) {
+      super(ID, category);
+      this.maxHealth = 100;
+    }
+  }
   final static ObjectType
     NO_WALKERS[] = new ObjectType[0],
     
@@ -178,6 +184,7 @@ public class GameConstants {
     PALACE.high = 5;
     PALACE.tint = colour(7, 3, 3);
     PALACE.setWalkerTypes(NOBLE);
+    PALACE.maxHealth = 300;
     
     HOUSE.name = "House";
     HOUSE.wide = 2;
@@ -246,6 +253,7 @@ public class GameConstants {
     GARRISON.tint = colour(8, 8, 8);
     GARRISON.setWalkerTypes(SOLDIER);
     GARRISON.maxWalkers = 2;
+    GARRISON.maxHealth  = 250;
   }
   
   
@@ -255,6 +263,7 @@ public class GameConstants {
   static interface Target {
     Tile at();
     void targetedBy(Walker w);
+    void setFocused(Walker w, boolean is);
   }
   
   static interface Trader {

@@ -59,17 +59,13 @@ public class Fixture implements Session.Saveable, Target {
   }
   
   
-  public CityMap.Tile at() {
-    return at;
-  }
-  
-  
   
   /**  Entering and exiting the map-
     */
-  void enterMap(CityMap map, int x, int y) {
+  void enterMap(CityMap map, int x, int y, float buildLevel) {
     this.map = map;
     this.at  = map.tileAt(x, y);
+    this.buildLevel = buildLevel;
     
     for (Coord c : Visit.grid(x, y, type.wide, type.high, 1)) {
       CityMap.Tile t = map.tileAt(c.x, c.y);
@@ -88,14 +84,13 @@ public class Fixture implements Session.Saveable, Target {
   }
   
   
+  void setDestroyed() {
+    return;
+  }
   
-  /**  Regular updates-
-    */
-  void updateGrowth() {
-    if (type.growRate > 0) {
-      buildLevel += SCAN_PERIOD * type.growRate / RIPEN_PERIOD;
-      if (buildLevel >= 1) buildLevel = 1;
-    }
+  
+  public CityMap.Tile at() {
+    return at;
   }
   
   
@@ -107,7 +102,7 @@ public class Fixture implements Session.Saveable, Target {
   }
   
   
-  void setFocused(Walker w, boolean is) {
+  public void setFocused(Walker w, boolean is) {
     if (is) {
       if (focused == null) focused = new List();
       focused.include(w);
@@ -115,6 +110,32 @@ public class Fixture implements Session.Saveable, Target {
     else {
       focused.remove(w);
       if (focused.size() == 0) focused = null;
+    }
+  }
+  
+  
+  public boolean hasFocus() {
+    return focused != null;
+  }
+
+  
+  
+  /**  Life cycle, combat and survival methods-
+    */
+  void updateGrowth() {
+    if (type.growRate > 0) {
+      buildLevel += SCAN_PERIOD * type.growRate / RIPEN_PERIOD;
+      if (buildLevel >= 1) buildLevel = 1;
+    }
+  }
+  
+  
+  void takeDamage(float damage) {
+    buildLevel -= damage / type.maxHealth;
+    
+    if (buildLevel <= 0) {
+      exitMap(map);
+      setDestroyed();
     }
   }
   

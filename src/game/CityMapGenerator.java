@@ -44,7 +44,7 @@ public class CityMapGenerator {
         
         if (Rand.num() < w && checkPlacingOkay(tile, t, map)) {
           Fixture f = (Fixture) t.generate();
-          f.enterMap(map, tile.x, tile.y);
+          f.enterMap(map, tile.x, tile.y, 1);
         }
       }
     }
@@ -53,7 +53,7 @@ public class CityMapGenerator {
   
   public static void populateFixture(ObjectType t, int x, int y, CityMap map) {
     Fixture f = (Fixture) t.generate();
-    f.enterMap(map, x, y);
+    f.enterMap(map, x, y, 1);
   }
   
   

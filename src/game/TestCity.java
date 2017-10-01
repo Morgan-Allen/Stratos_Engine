@@ -21,20 +21,20 @@ public class TestCity extends TestLoop {
     Building house2 = (Building) HOUSE     .generate();
     Building court  = (Building) BALL_COURT.generate();
     
-    palace.enterMap(map, 3 , 3 );
-    house1.enterMap(map, 9 , 6 );
-    house2.enterMap(map, 12, 6 );
-    court .enterMap(map, 9 , 9 );
+    palace.enterMap(map, 3 , 3 , 1);
+    house1.enterMap(map, 9 , 6 , 1);
+    house2.enterMap(map, 12, 6 , 1);
+    court .enterMap(map, 9 , 9 , 1);
     
     Building quarry = (Building) QUARRY_PIT.generate();
     Building kiln1  = (Building) KILN      .generate();
     Building kiln2  = (Building) KILN      .generate();
     Building market = (Building) MARKET    .generate();
     
-    quarry.enterMap(map, 4 , 15);
-    kiln1 .enterMap(map, 9 , 17);
-    kiln2 .enterMap(map, 9 , 14);
-    market.enterMap(map, 4 , 9 );
+    quarry.enterMap(map, 4 , 15, 1);
+    kiln1 .enterMap(map, 9 , 17, 1);
+    kiln2 .enterMap(map, 9 , 14, 1);
+    market.enterMap(map, 4 , 9 , 1);
     
     quarry.inventory.add(2, CLAY   );
     market.inventory.add(3, POTTERY);

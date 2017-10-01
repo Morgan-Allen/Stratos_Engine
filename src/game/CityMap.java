@@ -121,6 +121,7 @@ public class CityMap implements Session.Saveable {
     Fixture above;
     boolean paved;
     
+    List <Walker> focused = null;
     protected Object flag;
     
     
@@ -129,6 +130,8 @@ public class CityMap implements Session.Saveable {
       terrain = terrID == -1 ? null : ALL_TERRAINS[terrID];
       above   = (Fixture) s.loadObject();
       paved   = s.loadBool();
+      
+      if (s.loadBool()) s.loadObjects(focused = new List());
     }
     
     
@@ -136,6 +139,9 @@ public class CityMap implements Session.Saveable {
       s.saveInt(terrain == null ? -1 : terrain.terrainIndex);
       s.saveObject(above);
       s.saveBool(paved);
+      
+      s.saveBool(focused != null);
+      if (focused != null) s.saveObjects(focused);
     }
     
     
@@ -146,6 +152,23 @@ public class CityMap implements Session.Saveable {
     
     public void targetedBy(Walker w) {
       return;
+    }
+    
+    
+    public void setFocused(Walker w, boolean is) {
+      if (is) {
+        if (focused == null) focused = new List();
+        focused.include(w);
+      }
+      else {
+        focused.remove(w);
+        if (focused.size() == 0) focused = null;
+      }
+    }
+    
+    
+    public boolean hasFocus() {
+      return focused != null;
     }
     
     

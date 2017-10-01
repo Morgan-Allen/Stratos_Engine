@@ -20,14 +20,14 @@ public class TestMilitary extends TestLoop {
     map.attachCity(cityA);
     cityA.name = "Home City";
     cityB.name = "Away City";
-    cityB.setArmyPower(2);
     
     City.setupRoute(cityA, cityB, 1);
     City.setRelations(cityA, City.RELATION.ENEMY, cityB, City.RELATION.ENEMY);
     
     
     BuildingForMilitary fort = (BuildingForMilitary) GARRISON.generate();
-    fort.enterMap(map, 20, 20);
+    fort.enterMap(map, 20, 20, 1);
+    CityMap.applyPaving(map, 10, 19, 40, 1, true);
     
     Formation troops = new Formation();
     troops.setupFormation(GARRISON, cityA);
@@ -35,9 +35,8 @@ public class TestMilitary extends TestLoop {
     
     for (int n = 8; n-- > 0;) {
       Building house = (Building) HOUSE.generate();
-      house.enterMap(map, 10 + (n * 3), 17);
+      house.enterMap(map, 10 + (n * 3), 17, 1);
     }
-    CityMap.applyPaving(map, 10, 19, 40, 1, true);
     
     
     Formation enemies = new Formation();

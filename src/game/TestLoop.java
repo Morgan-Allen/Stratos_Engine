@@ -127,9 +127,12 @@ public class TestLoop {
       }
     }
     
+    if (b.buildLevel < 1) {
+      report += "\nBuild level:\n  "+I.percent(b.buildLevel);
+    }
     
     if (b.craftProgress > 0) {
-      report += "\nCraft progress:\n  "+b.craftProgress;
+      report += "\nCraft progress:\n  "+I.percent(b.craftProgress);
     }
     
     if (b.inventory.size() > 0) {

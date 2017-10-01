@@ -52,7 +52,7 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   int tint = BLACK_COLOR;
   
   int category;
-  int wide = 1, high = 1;
+  int wide = 1, high = 1, deep = 1;
   boolean blocks = true ;
   boolean mobile = false;
   float growRate = 0;
@@ -78,6 +78,14 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   int maxRecruits = 16;
   int numRanks    = 4 ;
   int numFile     = 4 ;
+  
+  
+  void setDimensions(int w, int h, int d) {
+    this.wide = w;
+    this.high = h;
+    this.deep = d;
+    this.maxHealth = (int) (10 * w * h * (1 + ((d - 1) / 2f)));
+  }
   
   
   void setWalkerTypes(ObjectType... types) {
