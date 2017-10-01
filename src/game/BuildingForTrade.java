@@ -140,9 +140,11 @@ public class BuildingForTrade extends BuildingForDelivery implements Trader {
     if (! pick.empty()) {
       Order o = pick.result();
       
-      I.say("\n"+this+" assigning delivery to "+trader);
-      I.say("  Cargo is: "+o.cargo);
-      I.say("  Destination is: "+o.goes);
+      if (reports()) {
+        I.say("\n"+this+" assigning delivery to "+trader);
+        I.say("  Cargo is: "+o.cargo);
+        I.say("  Destination is: "+o.goes);
+      }
       
       if (o.goes instanceof City) {
         City goes = (City) o.goes;

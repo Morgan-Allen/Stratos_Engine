@@ -105,9 +105,11 @@ public class WalkerForTrade extends Walker implements Journeys {
     if (doPayment) profits += totalValue;
     cargo.clear();
     
-    I.say("\n"+this+" depositing goods at "+store);
-    I.say("  Cargo: "+cargo);
-    I.say("  Value: "+totalValue);
+    if (reports()) {
+      I.say("\n"+this+" depositing goods at "+store);
+      I.say("  Cargo: "+cargo);
+      I.say("  Value: "+totalValue);
+    }
   }
   
   
@@ -125,9 +127,11 @@ public class WalkerForTrade extends Walker implements Journeys {
     }
     if (doPayment) profits -= totalCost;
     
-    I.say("\n"+this+" taking on goods from "+store);
-    I.say("  New cargo: "+cargo);
-    I.say("  Cost: "+totalCost+" Profit: "+profits);
+    if (reports()) {
+      I.say("\n"+this+" taking on goods from "+store);
+      I.say("  New cargo: "+cargo);
+      I.say("  Cost: "+totalCost+" Profit: "+profits);
+    }
   }
   
   

@@ -136,7 +136,7 @@ public class Formation implements
   
   
   void beginJourney(City from, City goes) {
-    I.say("\nREADY TO BEGIN FOREIGN MISSION!");
+    if (reports()) I.say("\nREADY TO BEGIN FOREIGN MISSION!");
     for (Walker w : recruits) if (w.onMap(map)) {
       w.exitMap();
     }
@@ -155,7 +155,7 @@ public class Formation implements
     boolean onMap = goes.map != null;
     
     if (onMap) {
-      I.say("\nARRIVED ON MAP: "+goes+" FROM "+journey.from);
+      if (reports()) I.say("\nARRIVED ON MAP: "+goes+" FROM "+journey.from);
       
       this.map = goes.map;
       Tile entry = WalkerForTrade.findTransitPoint(map, journey.from);
@@ -178,11 +178,11 @@ public class Formation implements
     //  returned home, or your own army has hit a foreign city:
     else {
       if (home) {
-        I.say("\nARRIVED HOME: "+goes+" FROM "+journey.from);
+        if (reports()) I.say("\nARRIVED HOME: "+goes+" FROM "+journey.from);
         this.away = false;
       }
       else {
-        I.say("\nARRIVED AT FOREIGN CITY: "+goes+" FROM "+journey.from);
+        if (reports()) I.say("\nARRIVED AT: "+goes+" FROM "+journey.from);
         this.away = true;
         attendCityAway(goes, journey);
       }
@@ -476,6 +476,11 @@ public class Formation implements
   
   /**  Graphical, debug and interface methods-
     */
+  boolean reports() {
+    return false;
+  }
+  
+  
   public String toString() {
     return "Formation ("+belongs+")";
   }

@@ -97,10 +97,12 @@ public class World implements Session.Saveable {
     j.arriveTime = j.startTime + (distance * Walker.TRADE_DIST_TIME);
     for (Journeys g : going) j.going.add(g);
     journeys.add(j);
-
-    I.say("\nBeginning journey: "+j.from+" to "+j.goes);
-    I.say("  Embarked: "+j.going);
-    I.say("  Time: "+time+", arrival: "+j.arriveTime);
+    
+    if (reports(j)) {
+      I.say("\nBeginning journey: "+j.from+" to "+j.goes);
+      I.say("  Embarked: "+j.going);
+      I.say("  Time: "+time+", arrival: "+j.arriveTime);
+    }
     
     return j;
   }
@@ -128,12 +130,25 @@ public class World implements Session.Saveable {
     
     for (Journey j : journeys) {
       if (time >= j.arriveTime) {
-        I.say("\nCompleted journey: "+j.from+" to "+j.goes);
-        I.say("  Embarked: "+j.going);
-        I.say("  Time: "+time+", arrival: "+j.arriveTime);
+        if (reports(j)) {
+          I.say("\nCompleted journey: "+j.from+" to "+j.goes);
+          I.say("  Embarked: "+j.going);
+          I.say("  Time: "+time+", arrival: "+j.arriveTime);
+        }
         completeJourney(j);
       }
     }
+  }
+  
+  
+  
+  /**  Graphical, debug and interface methods-
+    */
+  boolean reports(Journey j) {
+    for (Journeys k : j.going) {
+      if (k == I.talkAbout) return true;
+    }
+    return false;
   }
   
 }

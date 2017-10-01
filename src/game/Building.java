@@ -256,6 +256,11 @@ public class Building extends Fixture implements Session.Saveable, Employer {
   
   /**  Graphical, debug and interface methods-
     */
+  protected boolean reports() {
+    return I.talkAbout == this;
+  }
+  
+  
   public String toString() {
     return type.name+" "+ID;
   }
