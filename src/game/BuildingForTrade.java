@@ -1,8 +1,8 @@
 
 
 package game;
-import static game.GameConstants.*;
 import util.*;
+import static game.GameConstants.*;
 
 
 

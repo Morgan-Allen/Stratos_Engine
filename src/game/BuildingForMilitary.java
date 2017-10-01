@@ -38,12 +38,12 @@ public class BuildingForMilitary extends BuildingForCrafts {
   }
   
   
-  void update() {
+  void updateOnPeriod(int period) {
     if (formation == null && map.city != null) {
       formation = new Formation();
       formation.setupFormation(this.type, map.city);
     }
-    super.update();
+    super.updateOnPeriod(period);
   }
   
   

@@ -58,7 +58,7 @@ public class BuildingForCrafts extends Building {
   
   
   float demandFor(Good g) {
-    float need = stockNeeded(g);
+    float need = Visit.arrayIncludes(needed(), g) ? stockNeeded(g) : 0;
     return super.demandFor(g) + need;
   }
   

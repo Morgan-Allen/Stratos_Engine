@@ -1,9 +1,9 @@
 
 
 package game;
+import util.*;
 import static game.GameConstants.*;
 import static game.CityMap.*;
-import util.*;
 
 
 
