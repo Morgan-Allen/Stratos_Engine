@@ -18,12 +18,12 @@ public class Building extends Fixture implements Session.Saveable, Employer {
   
   Tile entrance;
   int updateGap = 0;
+  
   List <Walker> resident = new List();
   List <Walker> visitors = new List();
   
   Tally <Good> materials = new Tally();
   Tally <Good> inventory = new Tally();
-  Tally <Good> demands   = new Tally();
   
   
   Building(ObjectType type) {
@@ -43,7 +43,6 @@ public class Building extends Fixture implements Session.Saveable, Employer {
     
     s.loadTally(materials);
     s.loadTally(inventory);
-    s.loadTally(demands  );
   }
   
   
@@ -58,7 +57,6 @@ public class Building extends Fixture implements Session.Saveable, Employer {
     
     s.saveTally(materials);
     s.saveTally(inventory);
-    s.saveTally(demands  );
   }
   
   
@@ -69,7 +67,7 @@ public class Building extends Fixture implements Session.Saveable, Employer {
     super.enterMap(map, x, y, buildLevel);
     map.buildings.add(this);
     selectEntrance();
-    updateDemands();
+    updateOnPeriod(0);
     
     for (Good g : type.builtFrom) {
       int need = type.materialNeed(g);
@@ -128,13 +126,16 @@ public class Building extends Fixture implements Session.Saveable, Employer {
     }
     
     if (--updateGap <= 0) {
-      updateDemands();
-      
-      for (ObjectType typeW : type.walkerTypes) {
-        if (numWalkers(typeW) >= walkersNeeded(typeW)) continue;
-        addWalker(typeW);
-      }
+      updateOnPeriod(type.updateTime);
       updateGap = type.updateTime;
+    }
+  }
+  
+  
+  void updateOnPeriod(int period) {
+    for (ObjectType typeW : type.walkerTypes) {
+      if (numWalkers(typeW) >= walkersNeeded(typeW)) continue;
+      addWalker(typeW);
     }
   }
   
@@ -142,14 +143,11 @@ public class Building extends Fixture implements Session.Saveable, Employer {
   
   /**  Utility methods for finding points of supply/demand:
     */
-  void updateDemands() {
-    demands.clear();
-
-    for (Good g : type.builtFrom) {
-      int   need = type.materialNeed(g);
-      float has  = materials.valueFor(g);
-      demands.add(need - has, g);
-    }
+  float demandFor(Good g) {
+    int   need = type.materialNeed(g);
+    float hasB = materials.valueFor(g);
+    float hasG = inventory.valueFor(g);
+    return need - (hasB + hasG);
   }
   
   
@@ -190,7 +188,7 @@ public class Building extends Fixture implements Session.Saveable, Employer {
       if (maxDist > 0 && dist > maxDist) continue;
       
       float rating = 1;
-      if (needed != null) rating *= b.demands.valueFor(needed);
+      if (needed != null) rating *= b.demandFor(needed);
       if (rating <= 0) continue;
       if (otherTrades) rating /= 2;
       

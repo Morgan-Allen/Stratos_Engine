@@ -51,8 +51,9 @@ public class BuildingForTrade extends BuildingForCrafts implements Trader {
     }
   }
   
-  
-  void updateDemands() {
+
+  void updateOnPeriod(int period) {
+    super.updateOnPeriod(period);
     
     Batch <Good> impB = new Batch(), expB = new Batch();
     for (Good g : tradeLevel.keys()) {
@@ -62,8 +63,6 @@ public class BuildingForTrade extends BuildingForCrafts implements Trader {
     }
     produced = impB.toArray(Good.class);
     needed   = expB.toArray(Good.class);
-    
-    super.updateDemands();
   }
   
   

@@ -38,10 +38,10 @@ public class BuildingForHome extends Building {
   
   void advanceConsumption() {
     float conLevel = 1f / type.consumeTime;
-    
     for (Good cons : type.consumed) {
-      if (inventory.valueFor(cons) < 0) continue;
-      inventory.add(0 - conLevel, cons);
+      float amount = inventory.valueFor(cons);
+      amount = Nums.max(0, amount - conLevel);
+      inventory.set(cons, amount);
     }
   }
   

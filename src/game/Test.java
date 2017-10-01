@@ -105,51 +105,57 @@ public class Test {
   
   private static String reportFor(Building b) {
     
-    String report = ""+b+"\n";
+    StringBuffer report = new StringBuffer(""+b+"\n");
     
     if (b.resident.size() > 0) {
-      report += "\nWalkers:";
+      report.append("\nWalkers:");
       for (Walker w : b.resident) {
-        report += "\n  "+w+" ("+w.jobType()+")";
+        report.append("\n  "+w+" ("+w.jobType()+")");
       }
     }
     
     if (b.visitors.size() > 0) {
-      report += "\nVisitors:";
+      report.append("\nVisitors:");
       for (Walker w : b.visitors) {
-        report += "\n  "+w+" ("+w.jobType()+")";
+        report.append("\n  "+w+" ("+w.jobType()+")");
       }
     }
     
     if (b.formation() != null && b.formation().recruits.size() > 0) {
-      report += "\nRecruits:";
+      report.append("\nRecruits:");
       for (Walker w : b.formation().recruits) {
-        report += "\n  "+w;
+        report.append("\n  "+w);
       }
     }
     
     if (b.buildLevel < 1) {
-      report += "\nBuild level:\n  "+I.percent(b.buildLevel);
+      report.append("\nBuild level:\n  "+I.percent(b.buildLevel));
     }
     
     if (b.craftProgress() > 0) {
-      report += "\nCraft progress:\n  "+I.percent(b.craftProgress());
+      report.append("\nCraft progress:\n  "+I.percent(b.craftProgress()));
     }
     
-    if (b.inventory.size() > 0) {
-      report += "\nGoods:";
-      for (Good g : ALL_GOODS) {
-        float amount = b.inventory.valueFor(g);
-        if (amount <= 0) continue;
-        report += "\n  "+g+": "+amount;
-      }
+    List <String> goodRep = new List();
+    for (Good g : ALL_GOODS) {
+      float amount = b.inventory.valueFor(g);
+      float demand = b.demandFor(g) + amount;
+      if (amount <= 0 && demand <= 0) continue;
+      report.append("\n  "+g+": "+amount+"/"+demand);
     }
     
-    return report;
+    if (! goodRep.empty()) {
+      report.append("\nGoods:");
+      for (String s : goodRep) report.append(s);
+    }
+    
+    return report.toString();
   }
   
   
 }
+
+
 
 
 

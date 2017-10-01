@@ -1,9 +1,9 @@
 
 
 package game;
+import util.*;
 import static game.Walker.*;
 import static game.GameConstants.*;
-import util.*;
 
 
 
@@ -57,12 +57,9 @@ public class BuildingForCrafts extends Building {
   float stockLimit (Good made) { return type.maxStock; }
   
   
-  void updateDemands() {
-    super.updateDemands();
-    for (Good need : needed()) {
-      float gap = stockNeeded(need) - inventory.valueFor(need);
-      demands.add(gap, need);
-    }
+  float demandFor(Good g) {
+    float need = stockNeeded(g);
+    return super.demandFor(g) + need;
   }
   
   
@@ -152,8 +149,10 @@ public class BuildingForCrafts extends Building {
       Building goes = findNearestDemanding(null, made, type.maxDeliverRange);
       if (goes == null) continue;
       
-      amount = Nums.min(amount, 10                                   );
-      amount = Nums.min(amount, 2 + (int) goes.demands.valueFor(made));
+      int demand = Nums.round(goes.demandFor(made), 1, true);
+      amount = Nums.min(amount, 10    );
+      amount = Nums.min(amount, demand);
+      if (amount <= 0) continue;
       
       float distFactor = 10 + CityMap.distance(entrance, goes.entrance);
       Order o = new Order();
