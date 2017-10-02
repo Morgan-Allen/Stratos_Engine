@@ -10,6 +10,8 @@ import static game.GameConstants.*;
 public class CityBorders {
   
   
+  /**  General migration utilities-
+    */
   static Tile findTransitPoint(CityMap map, City with) {
     
     Tile current = map.transitPoints.get(with);
@@ -38,6 +40,111 @@ public class CityBorders {
   }
   
   
+  
+  /**  Finding migrants in and out-
+    */
+  static class Assessment {
+    float jobsTotal = 0, jobsFilled = 0;
+    float homeTotal = 0, homeFilled = 0;
+    float jobsCrowding, homeCrowding;
+    
+    Assessment(CityMap map) {
+      
+      for (Building b : map.buildings) {
+        for (int socialClass : ALL_CLASSES) {
+          homeTotal  += b.maxResidents(socialClass);
+          homeFilled += b.numResidents(socialClass);
+        }
+        for (ObjectType t : b.type.workerTypes) {
+          jobsTotal  += b.maxWorkers(t);
+          jobsFilled += b.numWorkers(t);
+        }
+      }
+      
+      jobsCrowding = jobsTotal == 0 ? 1 : (jobsFilled / jobsTotal);
+      homeCrowding = homeTotal == 0 ? 1 : (homeFilled / homeTotal);
+    }
+  }
+  
+  
+  static void spawnMigrants(CityMap map, int period) {
+    Assessment a = new Assessment(map);
+    
+    float crowding = Nums.max(a.jobsCrowding, a.homeCrowding);
+    float spaces = a.jobsTotal + a.homeTotal - (a.jobsFilled + a.homeFilled);
+    if (crowding >= 1) return;
+    
+    //  TODO:  Do this with each neighbouring city, based on their own
+    //  population/crowding levels, current relations, and proximity.
+    City from = map.city;
+    
+    Batch <Walker> migrants = new Batch();
+    float numSpawn = ((1 - crowding) * MIGRANTS_PER_1KD * period) / DAY_LENGTH;
+    numSpawn = Nums.min(numSpawn, spaces);
+    
+    while (numSpawn-- > 0) {
+      Walker w = new Walker(VAGRANT);
+      migrants.add(w);
+    }
+    map.city.world.beginJourney(from, map.city, (Batch) migrants);
+  }
+  
+  
+  static void findWork(CityMap map, Walker migrant) {
+    
+    class Opening { Building b; ObjectType position; }
+    Tile from = migrant.at();
+    final Pick <Opening> pick = new Pick();
+    
+    //  TODO:  You'll want a more sophisticated measure of which jobs you
+    //  could reasonably fill.
+    
+    for (Building b : map.buildings) {
+      for (ObjectType t : b.type.workerTypes) {
+        int space = b.maxWorkers(t) - b.numWorkers(t);
+        if (space <= 0) continue;
+
+        float near = 10 / (10f + CityMap.distance(from, b.entrance));
+        Opening o = new Opening();
+        o.b = b;
+        o.position = t;
+        pick.compare(o, space * near);
+      }
+    }
+    
+    Opening o = pick.result();
+    if (o != null) {
+      migrant.type = o.position;
+      o.b.setWorker(migrant, true);
+    }
+  }
+  
+  
+  static void findHome(CityMap map, Walker migrant) {
+    int socialClass = migrant.type.socialClass;
+    Tile from = migrant.at();
+    final Pick <Building> pick = new Pick();
+    
+    //
+    //  Note:  We actually allow for a little overcrowding here:
+    
+    for (Building b : map.buildings) {
+      int max   = b.maxResidents(socialClass);
+      int space = (max * 2) - b.numResidents(socialClass);
+      if (space <= 0) continue;
+      
+      float near = 10 / (10f + CityMap.distance(from, b.entrance));
+      pick.compare(b, space * near);
+    }
+    
+    Building home = pick.result();
+    if (home != null) home.setResident(migrant, true);
+  }
+  
+  
+  
+  /**  Trading utilities-
+    */
   static Tally <Good> configureCargo(
     Trader from, Trader goes, boolean cityOnly
   ) {

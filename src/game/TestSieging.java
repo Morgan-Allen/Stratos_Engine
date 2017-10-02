@@ -20,9 +20,9 @@ public class TestSieging extends Test {
     City    cityA = world.cities.atIndex(0);
     City    cityB = world.cities.atIndex(1);
     CityMap map   = CityMapGenerator.generateTerrain(
-      50, MEADOW, JUNGLE
+      cityA, 50, MEADOW, JUNGLE
     );
-    map.attachCity(cityA);
+    cityA.attachMap(map);
     cityA.name = "Home City";
     cityB.name = "Away City";
     

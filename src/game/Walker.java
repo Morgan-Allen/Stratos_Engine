@@ -8,7 +8,7 @@ import static util.TileConstants.*;
 
 
 
-public class Walker extends Fixture implements Session.Saveable {
+public class Walker extends Fixture implements Session.Saveable, Journeys {
   
   
   /**  Data fields and setup/initialisation-
@@ -190,14 +190,13 @@ public class Walker extends Fixture implements Session.Saveable {
     map = null;
     at  = null;
     job = null;
-    //I.say("\n"+this+" EXITING MAP...");
   }
   
   
   void setDestroyed() {
     if (formation != null) formation.toggleRecruit(this, false);
-    if (home      != null) home.resident.remove(this);
-    if (work      != null) work.resident.remove(this);
+    if (home      != null) home.residents.remove(this);
+    if (work      != null) work.workers  .remove(this);
     home      = null;
     work      = null;
     formation = null;
@@ -287,6 +286,11 @@ public class Walker extends Fixture implements Session.Saveable {
   void beginNextBehaviour() {
     
     job = null;
+    
+    if (homeCity == null || homeCity == map.city) {
+      if (work == null) CityBorders.findWork(map, this);
+      if (home == null) CityBorders.findHome(map, this);
+    }
     
     if (formation != null && formation.active) {
       formation.selectWalkerBehaviour(this);
@@ -582,6 +586,18 @@ public class Walker extends Fixture implements Session.Saveable {
     }
     
     return walk.toArray(Tile.class);
+  }
+  
+  
+  
+  /**  Migration code:
+    */
+  public void onArrival(City goes, World.Journey journey) {
+    if (goes.map != null) {
+      Tile entry = CityBorders.findTransitPoint(goes.map, journey.from);
+      enterMap(goes.map, entry.x, entry.y);
+      beginNextBehaviour();
+    }
   }
   
   

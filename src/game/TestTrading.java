@@ -1,9 +1,8 @@
 
 
 package game;
+import util.*;
 import static game.GameConstants.*;
-
-import util.I;
 
 
 
@@ -19,10 +18,12 @@ public class TestTrading extends Test {
     World   world = GameConstants.setupDefaultWorld();
     City    cityA = world.cities.atIndex(0);
     City    cityB = world.cities.atIndex(1);
-    CityMap map   = new CityMap();
+    CityMap map   = new CityMap(cityA);
+    cityA.name = "(Home City)";
+    cityB.name = "(Away City)";
     
     map.performSetup(10);
-    map.attachCity(cityA);
+    cityA.attachMap(map);
     City.setupRoute(cityA, cityB, 1);
     
     cityB.tradeLevel.set(COTTON    ,  50);
@@ -57,6 +58,8 @@ public class TestTrading extends Test {
     
     Building weaver = (Building) WEAVER.generate();
     weaver.enterMap(map, 5, 3, 1);
+    
+    Test.fillAllVacancies(map);
     
     
     boolean tradeOkay = false;

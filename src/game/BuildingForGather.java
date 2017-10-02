@@ -54,7 +54,7 @@ public class BuildingForGather extends BuildingForCrafts {
   private boolean hasFocus(Fixture crop) {
     //  TODO:  The hasFocus() method for elements/tiles should be accomplishing
     //  this.
-    for (Walker w : resident) {
+    for (Walker w : workers) {
       if (w.job != null && w.job.target == crop) return true;
     }
     return false;

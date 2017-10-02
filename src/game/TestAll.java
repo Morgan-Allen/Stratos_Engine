@@ -11,12 +11,12 @@ public class TestAll {
     
     long init = System.currentTimeMillis();
     
-    TestMilitary.testMilitary(false);
-    TestSieging .testSieging (false);
-    TestCity    .testCity    (false);
-    TestTerrain .testTerrain (false);
-    TestTrading .testTrading (false);
-    TestUpkeep  .testUpkeep  (false);
+    TestMilitary .testMilitary (false);
+    TestSieging  .testSieging  (false);
+    TestCity     .testCity     (false);
+    TestGathering.testGathering(false);
+    TestTrading  .testTrading  (false);
+    TestUpkeep   .testUpkeep   (false);
     
     long taken = System.currentTimeMillis() - init;
     

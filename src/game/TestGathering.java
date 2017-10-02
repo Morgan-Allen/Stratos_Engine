@@ -6,19 +6,25 @@ import util.*;
 
 
 
-public class TestTerrain extends Test {
+public class TestGathering extends Test {
   
   
   public static void main(String args[]) {
-    testTerrain(true);
+    testGathering(true);
   }
   
-  static void testTerrain(boolean graphics) {
+  static void testGathering(boolean graphics) {
     
-    CityMap map = CityMapGenerator.generateTerrain(20, DESERT, MEADOW, JUNGLE);
+    World   world = new World();
+    City    city  = new City(world);
+    CityMap map   = CityMapGenerator.generateTerrain(
+      city, 20, DESERT, MEADOW, JUNGLE
+    );
+    city.assignMap(map);
     
     Building farm = (Building) FARMER_HUT.generate();
     farm.enterMap(map, 9, 9, 1);
+    fillWorkVacancies(farm);
     CityMap.applyPaving(map, 9, 8, 10, 1, true);
     
     for (Coord c : Visit.grid(6, 6, 10, 10, 1)) {

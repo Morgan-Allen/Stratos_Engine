@@ -38,9 +38,15 @@ public class BuildingForMilitary extends BuildingForCrafts {
   }
   
   
+  void exitMap(CityMap map) {
+    if (formation != null) formation.disband();
+    super.exitMap(map);
+  }
+  
+  
   void updateOnPeriod(int period) {
     if (formation == null && map.city != null) {
-      formation = new Formation();
+      this.formation = new Formation();
       formation.setupFormation(this.type, map.city);
     }
     super.updateOnPeriod(period);
@@ -61,15 +67,14 @@ public class BuildingForMilitary extends BuildingForCrafts {
   /**  Regular updates and active service-
     */
   boolean eligible(Walker walker) {
-    if (resident.includes(walker)) return false;
+    if (workers.includes(walker)) return false;
     return walker.formation == null;
   }
   
   
-  protected Walker addWalker(ObjectType type) {
-    Walker w = super.addWalker(type);
-    formation.toggleRecruit(w, true);
-    return w;
+  public void setWorker(Walker w, boolean is) {
+    super.setWorker(w, is);
+    if (is) formation.toggleRecruit(w, true);
   }
   
   
@@ -79,7 +84,7 @@ public class BuildingForMilitary extends BuildingForCrafts {
     
     if (formation.recruits.size() < type.maxRecruits) {
       for (Building b : map.buildings) {
-        for (Walker w : b.resident) {
+        for (Walker w : b.residents) {
           if (eligible(w)) {
             float dist = CityMap.distance(b.entrance, entrance);
             float rating = 10 / (10 + dist);
@@ -103,7 +108,7 @@ public class BuildingForMilitary extends BuildingForCrafts {
   
   
   public void walkerVisits(Walker walker, Building other) {
-    for (Walker w : other.resident) if (eligible(w)) {
+    for (Walker w : other.residents) if (eligible(w)) {
       formation.toggleRecruit(w, true);
     }
   }

@@ -150,7 +150,7 @@ public class BuildingForCrafts extends Building {
     }
     //
     //  And failing all that, start crafting:
-    else {
+    else if (! stalled) {
       walker.embarkOnVisit(this, -1, JOB.CRAFTING, this);
     }
   }

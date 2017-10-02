@@ -147,6 +147,11 @@ public class City implements Session.Saveable, Trader {
   }
   
   
+  void assignMap(CityMap map) {
+    this.map = map;
+  }
+  
+  
   
   /**  Regular updates-
     */

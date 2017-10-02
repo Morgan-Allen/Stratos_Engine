@@ -88,7 +88,11 @@ public class World implements Session.Saveable {
     if (from == null || goes == null) return null;
     
     Integer distance = from.distances.get(goes);
-    if (distance == null) return null;
+    if (distance == null) {
+      float dx = from.mapX - goes.mapX;
+      float dy = from.mapY - goes.mapY;
+      distance = (int) Nums.sqrt((dx * dx) + (dy * dy));
+    }
     
     Journey j = new Journey();
     j.from       = from;
@@ -105,6 +109,11 @@ public class World implements Session.Saveable {
     }
     
     return j;
+  }
+
+  
+  Journey beginJourney(City from, City goes, Series <Journeys> going) {
+    return beginJourney(from, goes, going.toArray(Journeys.class));
   }
   
   

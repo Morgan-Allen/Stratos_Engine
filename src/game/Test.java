@@ -37,7 +37,8 @@ public class Test {
         }
         for (Walker w : map.walkers) if (w.inside == null) {
           int fill = WALKER_COLOR;
-          if (w.home != null) fill = w.home.type.tint;
+          if      (w.work != null) fill = w.work.type.tint;
+          else if (w.home != null) fill = w.home.type.tint;
           graphic[w.at.x][w.at.y] = fill;
         }
         try { graphic[hover.x][hover.y] = WHITE_COLOR; }
@@ -92,6 +93,62 @@ public class Test {
   }
   
   
+  
+  /**  Other setup utilities:
+    */
+  static CityMap setupTestCity(int size) {
+    World   world = new World();
+    City    city  = new City(world);
+    CityMap map   = new CityMap(city);
+    city.assignMap(map);
+    map.performSetup(size);
+    return map;
+  }
+  
+  
+  static void fillAllVacancies(CityMap map) {
+    for (Building b : map.buildings) {
+      fillWorkVacancies(b);
+      for (Walker w : b.workers) CityBorders.findHome(map, w);
+    }
+  }
+  
+  
+  static void fillWorkVacancies(Building b) {
+    for (ObjectType t : b.type.workerTypes) {
+      while (b.numWorkers(t) < b.maxWorkers(t)) {
+        spawnWalker(b, t, false);
+      }
+    }
+  }
+  
+  
+  static void fillHomeVacancies(Building b, ObjectType... types) {
+    for (ObjectType t : types) {
+      while (b.numResidents(t.socialClass) < b.maxResidents(t.socialClass)) {
+        spawnWalker(b, t, true);
+      }
+    }
+  }
+  
+  
+  static Walker spawnWalker(Building b, ObjectType type, boolean resident) {
+    
+    Walker walker = (Walker) type.generate();
+    walker.enterMap(b.map, b.at.x, b.at.y);
+    walker.inside = b;
+    
+    if (resident) b.setResident(walker, true);
+    else          b.setWorker  (walker, true);
+    b.visitors.add(walker);
+    
+    return walker;
+  }
+  
+  
+  
+  /**  UI outputs:
+    */
   private static String baseReport(CityMap map, boolean paused) {
     String report = "";
     if (map.city != null) {
@@ -107,9 +164,16 @@ public class Test {
     
     StringBuffer report = new StringBuffer(""+b+"\n");
     
-    if (b.resident.size() > 0) {
-      report.append("\nWalkers:");
-      for (Walker w : b.resident) {
+    if (b.workers.size() > 0) {
+      report.append("\nWorkers:");
+      for (Walker w : b.workers) {
+        report.append("\n  "+w+" ("+w.jobType()+")");
+      }
+    }
+    
+    if (b.residents.size() > 0) {
+      report.append("\nResidents:");
+      for (Walker w : b.residents) {
         report.append("\n  "+w+" ("+w.jobType()+")");
       }
     }

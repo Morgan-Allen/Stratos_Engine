@@ -33,9 +33,12 @@ public class GameConstants {
   /**  Terrain-related constants-
     */
   final public static int
-    SCAN_PERIOD  = 200,
-    RIPEN_PERIOD = 1000,
-    CROP_YIELD   = 25  //  percent of 1 full item
+    HOUR_LENGTH      = 4   ,
+    DAY_LENGTH       = 48  ,
+    SCAN_PERIOD      = 200 ,
+    RIPEN_PERIOD     = 1000,
+    CROP_YIELD       = 25  ,  //  percent of 1 full item
+    MIGRANTS_PER_1KD = 10     //  per day per 1000 foreign citizens
   ;
 
   private static List <Terrain> TERRAINS_LIST = new List();
@@ -141,18 +144,35 @@ public class GameConstants {
   
   /**  Walker types-
     */
-  final static ObjectType
-    NO_WALKERS[] = new ObjectType[0],
+  static class WalkerType extends ObjectType {
+    WalkerType(String ID, int category, int socialClass) {
+      super(ID, category);
+      this.socialClass = socialClass;
+    }
+  }
+  final static int
+    CLASS_SLAVE   = 0,
+    CLASS_COMMON  = 1,
+    CLASS_TRADER  = 2,
+    CLASS_NOBLE   = 3,
+    ALL_CLASSES[] = { 0, 1, 2, 3 }
+  ;
+  final static WalkerType
+    NO_WALKERS[] = new WalkerType[0],
     
-    CITIZEN      = new ObjectType("type_citizen"     , IS_WALKER     ),
-    NOBLE        = new ObjectType("type_noble"       , IS_WALKER     ),
-    WORKER       = new ObjectType("type_worker"      , IS_WALKER     ),
-    MERCHANT     = new ObjectType("type_merchant"    , IS_WALKER     ),
-    PORTERS      = new ObjectType("type_porters"     , IS_TRADE_WLK  ),
-    SOLDIER      = new ObjectType("type_soldier"     , IS_WALKER     )
+    VAGRANT  = new WalkerType("type_vagrant" , IS_WALKER   , CLASS_COMMON),
+    CITIZEN  = new WalkerType("type_citizen" , IS_WALKER   , CLASS_COMMON),
+    SERVANT  = new WalkerType("type_servant" , IS_WALKER   , CLASS_SLAVE ),
+    NOBLE    = new WalkerType("type_noble"   , IS_WALKER   , CLASS_NOBLE ),
+    WORKER   = new WalkerType("type_worker"  , IS_WALKER   , CLASS_COMMON),
+    MERCHANT = new WalkerType("type_merchant", IS_WALKER   , CLASS_TRADER),
+    PORTERS  = new WalkerType("type_porters" , IS_TRADE_WLK, CLASS_SLAVE ),
+    SOLDIER  = new WalkerType("type_soldier" , IS_WALKER   , CLASS_NOBLE )
   ;
   static {
+    VAGRANT .name = "Vagrant" ;
     CITIZEN .name = "Citizen" ;
+    SERVANT .name = "Servant" ;
     NOBLE   .name = "Noble"   ;
     WORKER  .name = "Worker"  ;
     MERCHANT.name = "Merchant";
@@ -189,7 +209,10 @@ public class GameConstants {
     PALACE.wide = 5;
     PALACE.high = 5;
     PALACE.tint = colour(7, 3, 3);
-    PALACE.setWalkerTypes(NOBLE);
+    PALACE.homeSocialClass = CLASS_NOBLE;
+    PALACE.maxResidents = 2;
+    PALACE.setWorkerTypes(NOBLE);
+    PALACE.maxWorkers = 2;
     PALACE.maxHealth = 300;
     PALACE.setBuildMaterials(WOOD, 15, ADOBE, 25, COTTON, 10, POTTERY, 5);
     
@@ -197,9 +220,9 @@ public class GameConstants {
     MASON.wide = 2;
     MASON.high = 2;
     MASON.tint = colour(6, 2, 6);
-    MASON.setWalkerTypes(WORKER);
+    MASON.setWorkerTypes(WORKER);
     MASON.craftTime *= 2;
-    MASON.maxWalkers = 2;
+    MASON.maxWorkers = 2;
     MASON.setBuildMaterials(ADOBE, 2, WOOD, 2, CLAY, 2);
     MASON.buildsWith = new Good[] { WOOD, CLAY, ADOBE };
     
@@ -207,7 +230,7 @@ public class GameConstants {
     HOUSE.wide = 2;
     HOUSE.high = 2;
     HOUSE.tint = colour(3, 7, 3);
-    HOUSE.setWalkerTypes(CITIZEN);
+    HOUSE.maxResidents = 2;
     HOUSE.consumed = new Good[] { POTTERY };
     HOUSE.maxStock = 2;
     HOUSE.setBuildMaterials(WOOD, 2, CLAY, 1);
@@ -224,16 +247,16 @@ public class GameConstants {
     FARMER_HUT.wide = 3;
     FARMER_HUT.high = 3;
     FARMER_HUT.tint = colour(7, 7, 3);
-    FARMER_HUT.setWalkerTypes(WORKER);
+    FARMER_HUT.setWorkerTypes(WORKER);
     FARMER_HUT.produced = CROP_TYPES;
-    FARMER_HUT.maxWalkers = 2;
+    FARMER_HUT.maxWorkers = 2;
     FARMER_HUT.setBuildMaterials(WOOD, 5, CLAY, 2);
     
     QUARRY_PIT.name = "Quarry Pit";
     QUARRY_PIT.wide = 4;
     QUARRY_PIT.high = 4;
     QUARRY_PIT.tint = colour(7, 7, 3);
-    QUARRY_PIT.setWalkerTypes(WORKER);
+    QUARRY_PIT.setWorkerTypes(WORKER);
     QUARRY_PIT.produced = new Good[] { CLAY };
     QUARRY_PIT.setBuildMaterials(WOOD, 5, CLAY, 2);
     
@@ -241,7 +264,7 @@ public class GameConstants {
     KILN.wide = 2;
     KILN.high = 2;
     KILN.tint = colour(7, 3, 7);
-    KILN.setWalkerTypes(WORKER);
+    KILN.setWorkerTypes(WORKER);
     KILN.needed   = new Good[] { CLAY };
     KILN.produced = new Good[] { POTTERY };
     KILN.craftTime *= 2;
@@ -251,7 +274,7 @@ public class GameConstants {
     WEAVER.wide = 2;
     WEAVER.high = 2;
     WEAVER.tint = colour(7, 3, 7);
-    WEAVER.setWalkerTypes(WORKER);
+    WEAVER.setWorkerTypes(WORKER);
     WEAVER.needed   = new Good[] { RAW_COTTON };
     WEAVER.produced = new Good[] { COTTON };
     WEAVER.craftTime *= 2;
@@ -261,7 +284,7 @@ public class GameConstants {
     MARKET.wide = 4;
     MARKET.high = 4;
     MARKET.tint = colour(4, 8, 4);
-    MARKET.setWalkerTypes(MERCHANT);
+    MARKET.setWorkerTypes(MERCHANT);
     MARKET.needed   = new Good[] { POTTERY };
     MARKET.features = new Good[] { IS_MARKET };
     MARKET.setBuildMaterials(WOOD, 4, COTTON, 2, ADOBE, 2);
@@ -270,7 +293,7 @@ public class GameConstants {
     PORTER_HOUSE.wide = 3;
     PORTER_HOUSE.high = 3;
     PORTER_HOUSE.tint = colour(8, 4, 8);
-    PORTER_HOUSE.setWalkerTypes(PORTERS, WORKER);
+    PORTER_HOUSE.setWorkerTypes(PORTERS, WORKER);
     PORTER_HOUSE.features = new Good[] { IS_TRADER };
     PORTER_HOUSE.setBuildMaterials(WOOD, 4, ADOBE, 2, POTTERY, 2);
     
@@ -278,8 +301,8 @@ public class GameConstants {
     GARRISON.wide = 6;
     GARRISON.high = 6;
     GARRISON.tint = colour(8, 8, 8);
-    GARRISON.setWalkerTypes(SOLDIER);
-    GARRISON.maxWalkers = 2;
+    GARRISON.setWorkerTypes(SOLDIER);
+    GARRISON.maxWorkers = 2;
     GARRISON.maxHealth  = 250;
     GARRISON.setBuildMaterials(ADOBE, 10, WOOD, 5);
   }

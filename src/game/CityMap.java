@@ -14,11 +14,11 @@ public class CityMap implements Session.Saveable {
   
   /**  Data fields and initialisation-
     */
+  City city;
   int size;
   Tile grid[][];
   int time = 0;
   
-  City city = null;
   List <Building> buildings = new List();
   List <Walker  > walkers   = new List();
   
@@ -26,21 +26,21 @@ public class CityMap implements Session.Saveable {
   int growScanIndex = 0;
   
   
-  CityMap() {
-    return;
+  CityMap(City city) {
+    this.city = city;
   }
   
   
   public CityMap(Session s) throws Exception {
     s.cacheInstance(this);
     
+    city = (City) s.loadObject();
     performSetup(s.loadInt());
     for (Coord c : Visit.grid(0, 0, size, size, 1)) {
       grid[c.x][c.y].loadState(s);
     }
     time = s.loadInt();
     
-    city = (City) s.loadObject();
     s.loadObjects(buildings);
     s.loadObjects(walkers  );
     
@@ -55,13 +55,13 @@ public class CityMap implements Session.Saveable {
   
   public void saveState(Session s) throws Exception {
     
+    s.saveObject(city);
     s.saveInt(size);
     for (Coord c : Visit.grid(0, 0, size, size, 1)) {
       grid[c.x][c.y].saveState(s);
     }
     s.saveInt(time);
     
-    s.saveObject(city);
     s.saveObjects(buildings);
     s.saveObjects(walkers  );
     
@@ -82,12 +82,6 @@ public class CityMap implements Session.Saveable {
       t.x = c.x;
       t.y = c.y;
     }
-  }
-  
-  
-  void attachCity(City city) {
-    this.city = city;
-    city.map  = this;
   }
   
   
@@ -257,12 +251,16 @@ public class CityMap implements Session.Saveable {
       w.update();
     }
     
-    time += 1;
-    updateGrowth();
-    
     if (time % SCAN_PERIOD == 0) {
       transitPoints.clear();
     }
+    
+    if (time % DAY_LENGTH == 0) {
+      CityBorders.spawnMigrants(this, DAY_LENGTH);
+    }
+    
+    time += 1;
+    updateGrowth();
   }
   
   

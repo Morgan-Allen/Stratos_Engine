@@ -19,9 +19,9 @@ public class TestMilitary extends Test {
     City    cityA = world.cities.atIndex(0);
     City    cityB = world.cities.atIndex(1);
     CityMap map   = CityMapGenerator.generateTerrain(
-      50, MEADOW, JUNGLE
+      cityA, 50, MEADOW, JUNGLE
     );
-    map.attachCity(cityA);
+    cityA.attachMap(map);
     cityA.name = "Home City";
     cityB.name = "Away City";
     
@@ -31,15 +31,15 @@ public class TestMilitary extends Test {
     
     BuildingForMilitary fort = (BuildingForMilitary) GARRISON.generate();
     fort.enterMap(map, 20, 20, 1);
+    fillWorkVacancies(fort);
     CityMap.applyPaving(map, 10, 19, 40, 1, true);
     
-    Formation troops = new Formation();
-    troops.setupFormation(GARRISON, cityA);
-    fort.assignFormation(troops);
+    Formation troops = fort.formation;
     
     for (int n = 8; n-- > 0;) {
       Building house = (Building) HOUSE.generate();
       house.enterMap(map, 10 + (n * 3), 17, 1);
+      fillHomeVacancies(house, CITIZEN);
     }
     
     
@@ -83,7 +83,7 @@ public class TestMilitary extends Test {
         if (homeWin) fort.formation.stopSecuringPoint();
       }
       
-      if (homeWin && troops.recruits.size() >= 8 && ! invading) {
+      if (homeWin && troops.recruits.size() >= 12 && ! invading) {
         troops.beginSecuring(cityB);
         invading = true;
       }
@@ -97,7 +97,7 @@ public class TestMilitary extends Test {
         for (Walker w : troops.recruits) {
           if (w.map != map) someAway = true;
         }
-        backHome = ! someAway;
+        backHome = troops.recruits.size() > 8 && ! someAway;
         
         if (backHome) {
           I.say("\nMILITARY TEST CONCLUDED SUCCESSFULLY!");

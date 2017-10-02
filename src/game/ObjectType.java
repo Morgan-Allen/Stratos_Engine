@@ -109,12 +109,14 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   int maxDeliverRange = 100;
   int consumeTime     = 500;
   
-  ObjectType walkerTypes[] = NO_WALKERS;
-  int maxWalkers  = 1 ;
-  int maxVisitors = 4 ;
-  int maxRecruits = 16;
-  int numRanks    = 4 ;
-  int numFile     = 4 ;
+  int homeSocialClass = CLASS_COMMON;
+  ObjectType workerTypes[] = NO_WALKERS;
+  int maxWorkers   = 1 ;
+  int maxResidents = 0 ;
+  int maxVisitors  = 4 ;
+  int maxRecruits  = 16;
+  int numRanks     = 4 ;
+  int numFile      = 4 ;
   
   
   void setBuildMaterials(Object... args) {
@@ -130,8 +132,8 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   }
   
   
-  void setWalkerTypes(ObjectType... types) {
-    this.walkerTypes = types;
+  void setWorkerTypes(ObjectType... types) {
+    this.workerTypes = types;
   }
   
   
@@ -148,6 +150,8 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   
   /**  Walker-specific stats and setup methods-
     */
+  int socialClass = CLASS_COMMON;
+  
   int attackScore =  2 ;
   int defendScore =  2 ;
   int maxHealth   =  5 ;

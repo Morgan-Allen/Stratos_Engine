@@ -19,8 +19,9 @@ public class Building extends Fixture implements Session.Saveable, Employer {
   Tile entrance;
   int updateGap = 0;
   
-  List <Walker> resident = new List();
-  List <Walker> visitors = new List();
+  List <Walker> workers   = new List();
+  List <Walker> residents = new List();
+  List <Walker> visitors  = new List();
   
   Tally <Good> materials = new Tally();
   Tally <Good> inventory = new Tally();
@@ -38,8 +39,10 @@ public class Building extends Fixture implements Session.Saveable, Employer {
     
     entrance = loadTile(map, s);
     updateGap = s.loadInt();
-    s.loadObjects(resident);
-    s.loadObjects(visitors);
+    
+    s.loadObjects(workers  );
+    s.loadObjects(residents);
+    s.loadObjects(visitors );
     
     s.loadTally(materials);
     s.loadTally(inventory);
@@ -52,8 +55,10 @@ public class Building extends Fixture implements Session.Saveable, Employer {
     
     saveTile(entrance, map, s);
     s.saveInt(updateGap);
-    s.saveObjects(resident);
-    s.saveObjects(visitors);
+    
+    s.saveObjects(workers  );
+    s.saveObjects(residents);
+    s.saveObjects(visitors );
     
     s.saveTally(materials);
     s.saveTally(inventory);
@@ -79,9 +84,11 @@ public class Building extends Fixture implements Session.Saveable, Employer {
   void exitMap(CityMap map) {
     super.exitMap(map);
     map.buildings.remove(this);
-    for (Walker w : resident) {
-      if (w.home == this) w.home = null;
-      if (w.work == this) w.work = null;
+    for (Walker w : workers) if (w.work == this) {
+      w.work = null;
+    }
+    for (Walker w : residents) if (w.home == this) {
+      w.home = null;
     }
   }
   
@@ -133,10 +140,7 @@ public class Building extends Fixture implements Session.Saveable, Employer {
   
   
   void updateOnPeriod(int period) {
-    for (ObjectType typeW : type.walkerTypes) {
-      if (numWalkers(typeW) >= walkersNeeded(typeW)) continue;
-      addWalker(typeW);
-    }
+    return;
   }
   
   
@@ -207,27 +211,47 @@ public class Building extends Fixture implements Session.Saveable, Employer {
   
   /**  Spawning walkers and customising walker behaviour:
     */
-  protected int numWalkers(ObjectType type) {
+  protected int numWorkers(ObjectType type) {
     int sum = 0;
-    for (Walker w : resident) if (w.type == type) sum++;
+    for (Walker w : workers) if (w.type == type) sum++;
     return sum;
   }
   
   
-  protected int walkersNeeded(ObjectType type) {
-    return this.type.maxWalkers;
+  protected int numResidents(int socialClass) {
+    int sum = 0;
+    for (Walker w : residents) if (w.type.socialClass == socialClass) sum++;
+    return sum;
   }
   
   
-  protected Walker addWalker(ObjectType type) {
-    Walker walker = (Walker) type.generate();
-    walker.enterMap(map, at.x, at.y);
-    walker.inside = this;
-    walker.home   = this;
-    resident.add(walker);
-    visitors.add(walker);
-    //  TODO:  You need to start distinguishing between home and work...
-    return walker;
+  protected int maxWorkers(ObjectType w) {
+    if (! Visit.arrayIncludes(type.workerTypes, w)) return 0;
+    return type.maxWorkers;
+  }
+  
+  
+  protected int maxResidents(int socialClass) {
+    if (type.homeSocialClass != socialClass) return 0;
+    return type.maxResidents;
+  }
+  
+  
+  public void setWorker(Walker w, boolean is) {
+    if (w.type.category == ObjectType.IS_TRADE_WLK && is) {
+      if (! (w instanceof WalkerForTrade)) {
+        I.complain("");
+      }
+    }
+    
+    w.work = is ? this : null;
+    workers.toggleMember(w, is);
+  }
+  
+  
+  public void setResident(Walker w, boolean is) {
+    w.home = is ? this : null;
+    residents.toggleMember(w, is);
   }
   
   

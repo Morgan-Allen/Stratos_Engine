@@ -10,8 +10,10 @@ import util.*;
 public class CityMapGenerator {
   
   
-  public static CityMap generateTerrain(int size, Terrain... gradient) {
-    CityMap map = new CityMap();
+  public static CityMap generateTerrain(
+    City city, int size, Terrain... gradient
+  ) {
+    CityMap map = new CityMap(city);
     map.performSetup(size);
     populateTerrain(map, gradient);
     return map;

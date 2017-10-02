@@ -15,8 +15,7 @@ public class TestCity extends Test {
   
   static void testCity(boolean graphics) {
     
-    CityMap map = new CityMap();
-    map.performSetup(25);
+    CityMap map = setupTestCity(25);
     
     CityMap.applyPaving(map, 3, 8, 12, 1 , true);
     CityMap.applyPaving(map, 8, 2, 1 , 16, true);

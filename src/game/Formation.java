@@ -82,6 +82,11 @@ public class Formation implements
   }
   
   
+  void disband() {
+    for (Walker r : recruits) toggleRecruit(r, false);
+  }
+  
+  
   void toggleRecruit(Walker s, boolean is) {
     this.recruits.toggleMember(s, is);
     if (is) s.formation = this;
@@ -196,11 +201,11 @@ public class Formation implements
     float power     = formationPower();
     float cityPower = goes.armyPower;
     
-    float chance = 0, casualties = 0, origTotal = recruits.size();
+    float chance = 0, casualties = 0, numFought = recruits.size();
     boolean victory = false;
     chance     = power / (power + cityPower);
     chance     = Nums.clamp((chance * 2) - 0.5f, 0, 1);
-    casualties = Rand.num() + (1 - chance);
+    casualties = (Rand.num() + (1 - chance)) / 2;
     
     if (Rand.num() < chance) {
       setRelations(from, RELATION.LORD, goes, RELATION.VASSAL);
@@ -212,10 +217,10 @@ public class Formation implements
       victory = false;
     }
     
-    casualties *= recruits.size();
-    while (casualties-- > 0 && ! recruits.empty()) {
+    casualties *= numFought;
+    for (float i = Nums.min(numFought, casualties); i-- > 0;) {
       Walker lost = (Walker) Rand.pickFrom(recruits);
-      recruits.remove(lost);
+      this.toggleRecruit(lost, false);
     }
     
     //
@@ -224,7 +229,7 @@ public class Formation implements
     
     I.say("\n"+this+" CONDUCTED ACTION AGAINST "+goes);
     I.say("  Victorious:    "+victory);
-    I.say("  Casualties:    "+casualties / origTotal);
+    I.say("  Casualties:    "+casualties / numFought);
     I.say("  Home city now: "+goes.relations.get(from)+" of "+goes);
     
     stopSecuringPoint();
