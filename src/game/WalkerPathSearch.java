@@ -9,21 +9,23 @@ import util.*;
 public class WalkerPathSearch extends Search <Tile> {
   
   CityMap map;
-  Walker moves;
   Tile dest;
   Tile temp[] = new Tile[8];
   boolean getNear = false;
   boolean paveOnly = true;
   
+
+  public WalkerPathSearch(Walker w, Tile dest) {
+    this(w.map, w.at, dest, -1);
+  }
   
-  public WalkerPathSearch(
-    CityMap map, Walker moves, Tile init, Tile dest
-  ) {
+  
+  public WalkerPathSearch(CityMap map, Tile init, Tile dest, int maxDist) {
     super(init, -1);
-    this.map   = map  ;
-    this.moves = moves;
-    this.dest  = dest ;
-    getNear    = ! canEnter(dest);
+    this.map     = map;
+    this.dest    = dest;
+    this.maxCost = maxDist;
+    this.getNear = ! canEnter(dest);
   }
   
   

@@ -186,7 +186,7 @@ public class CityBorders {
     ) {
       Building fromB = (Building) from, goesB = (Building) goes;
       float mapDist = CityMap.distance(fromB.entrance, goesB.entrance);
-      distRating += mapDist / Walker.MAX_WANDER_TIME;
+      distRating += mapDist / Walker.MAX_WANDER_RANGE;
     }
     
     return distRating;

@@ -35,6 +35,7 @@ public abstract class Search <T> {
 
   final protected T init;
   protected int maxSearched;
+  protected int maxCost;
   protected Batch <T> flagged = new Batch <T> ();
   
   private float totalCost = -1;
@@ -82,9 +83,15 @@ public abstract class Search <T> {
       if (report) I.say("  Reached maximum search size ("+maxSearched+")");
       return false;
     }
+    
     final Object nextRef = agenda.leastRef();
     final T next = agenda.refValue(nextRef);
     agenda.deleteRef(nextRef);
+    
+    if (maxCost > 0 && entryFor(next).total > maxCost) {
+      if (report) I.say("  Reached maximum search cost ("+maxCost+")");
+      return false;
+    }
     
     if (report) I.say("\nBEST ENTRY IS: "+next);
     if (endSearch(next)) {

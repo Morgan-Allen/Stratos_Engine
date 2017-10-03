@@ -49,11 +49,11 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   Object generate() {
     switch (category) {
       case(IS_FIXTURE    ): return new Fixture(this);
-      case(IS_BUILDING   ): return new Building         (this);
-      case(IS_CRAFTS_BLD ): return new BuildingForCrafts(this);
-      case(IS_GATHER_BLD ): return new BuildingForGather(this);
-      case(IS_TRADE_BLD  ): return new BuildingForTrade (this);
-      case(IS_HOME_BLD   ): return new BuildingForHome  (this);
+      case(IS_BUILDING   ): return new Building           (this);
+      case(IS_CRAFTS_BLD ): return new BuildingForCrafts  (this);
+      case(IS_GATHER_BLD ): return new BuildingForGather  (this);
+      case(IS_TRADE_BLD  ): return new BuildingForTrade   (this);
+      case(IS_HOME_BLD   ): return new BuildingForHome    (this);
       case(IS_ARMY_BLD   ): return new BuildingForMilitary(this);
       case(IS_WALKER     ): return new Walker        (this);
       case(IS_TRADE_WLK  ): return new WalkerForTrade(this);
@@ -73,6 +73,7 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   boolean blocks = true ;
   boolean mobile = false;
   float growRate = 0;
+  int   ambience = 0;
   
   
   void setDimensions(int w, int h, int d) {
@@ -109,14 +110,19 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   int maxDeliverRange = 100;
   int consumeTime     = 500;
   
-  int homeSocialClass = CLASS_COMMON;
-  ObjectType workerTypes[] = NO_WALKERS;
+  int homeSocialClass  = CLASS_COMMON;
+  int homeAmbienceNeed = AMBIENCE_MIN;
+  
+  ObjectType workerTypes [] = NO_WALKERS  ;
+  ObjectType amenityNeeds[] = NO_AMENITIES;
+  
   int maxWorkers   = 1 ;
   int maxResidents = 0 ;
   int maxVisitors  = 4 ;
   int maxRecruits  = 16;
   int numRanks     = 4 ;
   int numFile      = 4 ;
+  
   
   
   void setBuildMaterials(Object... args) {

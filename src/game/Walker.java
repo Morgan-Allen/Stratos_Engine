@@ -31,9 +31,9 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
   };
   final public static int
     
-    MAX_WANDER_TIME = 20,
-    AVG_VISIT_TIME  = 20,
-    TRADE_DIST_TIME = 50,
+    MAX_WANDER_RANGE = 20,
+    AVG_VISIT_TIME   = 20,
+    TRADE_DIST_TIME  = 50,
     
     STATE_OKAY   = 1,
     STATE_SLEEP  = 2,
@@ -418,7 +418,7 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
     if (from == null || heads == null) return null;
     heads.setFocused(this, true);
     
-    WalkerPathSearch search = new WalkerPathSearch(map, this, from, heads);
+    WalkerPathSearch search = new WalkerPathSearch(map, from, heads, -1);
     search.setPaveOnly(visiting && map.paved(from.x, from.y));
     search.doSearch();
     return search.fullPath(Tile.class);
@@ -555,7 +555,7 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
     Batch <Tile> walk = new Batch();
     Tile next = this.at;
     
-    while (walk.size() < MAX_WANDER_TIME) {
+    while (walk.size() < MAX_WANDER_RANGE) {
       boolean prefPave = map.paved(next.x, next.y);
       int nx, ny, numDirs = 0;
       int backDir = (facing + 4) % 8;

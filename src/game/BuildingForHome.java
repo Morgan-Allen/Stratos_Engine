@@ -2,11 +2,10 @@
 
 package game;
 import util.*;
+import static game.CityMap.*;
 import static game.Walker.*;
-
-import game.Walker.JOB;
-
 import static game.GameConstants.*;
+import static util.TileConstants.*;
 
 
 
@@ -31,6 +30,92 @@ public class BuildingForHome extends Building {
   
   
   
+  /**  Passive ambience and access-checks:
+    */
+  boolean performAmbienceCheck(ObjectType tier) {
+    //
+    //  This method checks the surrounding tiles out to a 
+    final int MAX_AMBIENCE_DIST = 6;
+    
+    final Tally <Tile> costs = new Tally();
+    final Tile temp[] = new Tile[8];
+    
+    Search <Tile> spread = new Search <Tile> (entrance, -1) {
+      
+      protected Tile[] adjacent(Tile spot) {
+        return CityMap.adjacent(spot, temp, map, true);
+      }
+      
+      protected boolean endSearch(Tile best) {
+        float cost = fullCostEstimate(best);
+        if (cost > MAX_AMBIENCE_DIST) return true;
+        costs.set(best, cost);
+        return false;
+      }
+      
+      protected float cost(Tile prior, Tile spot) {
+        return 1;
+      }
+      
+      protected float estimate(Tile spot) {
+        return 0;
+      }
+      
+      protected void setEntry(Tile spot, Entry flag) { spot.flag = flag; }
+      protected Entry entryFor(Tile spot) { return (Entry) spot.flag; }
+    };
+    spread.doSearch();
+    
+    
+    float sumAmb = 0, sumWeights = 0;
+    final int AMB_DIRS[] = { N, E, S, W, CENTRE };
+    
+    for (Tile tile : costs.keys()) {
+      float cost = costs.valueFor(tile);
+      
+      for (int dir : AMB_DIRS) {
+        Tile n = map.tileAt(tile.x + T_X[dir], tile.y + T_Y[dir]);
+        if (n == null || n.above == null) continue;
+        sumAmb     += n.above.type.ambience / (1 + cost);
+        sumWeights += 1f / (1 + cost);
+      }
+    }
+    
+    float ambience = sumAmb / Nums.max(1, sumWeights);
+    return ambience >= tier.homeAmbienceNeed;
+  }
+  
+  
+  boolean performAmenitiesCheck(ObjectType tier) {
+    //
+    //  This methods checks for the presence of all required amenities within
+    //  a given wander-range.
+    int maxRange  = Walker.MAX_WANDER_RANGE;
+    boolean allOK = true;
+    
+    for (ObjectType t : tier.amenityNeeds) {
+      for (Building b : map.buildings) {
+        if (b.type != t) continue;
+        
+        float dist = CityMap.distance(b.entrance, entrance);
+        if (dist > maxRange) continue;
+        
+        WalkerPathSearch search = new WalkerPathSearch(
+          map, b.entrance, entrance, maxRange
+        );
+        search.doSearch();
+        
+        if (! search.success()) {
+          allOK = false;
+        }
+      }
+    }
+    
+    return allOK;
+  }
+  
+  
+  
   /**  Life-cycle, update and economic functions-
     */
   void update() {
@@ -49,6 +134,9 @@ public class BuildingForHome extends Building {
   }
   
   
+  
+  /**  Orchestrating walker behaviour-
+    */
   public void selectWalkerBehaviour(Walker walker) {
     //
     //  See if you can repair your own home:

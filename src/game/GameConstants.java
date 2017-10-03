@@ -191,6 +191,12 @@ public class GameConstants {
       super(ID, category);
     }
   }
+  final static int
+    AMBIENCE_MIN = -10,
+    AMBIENCE_AVG =  5 ,
+    AMBIENCE_PAD =  2 ,
+    AMBIENCE_MAX =  20
+  ;
   final static BuildType  
     PALACE       = new BuildType("type_palace"      , IS_HOME_BLD   ),
     HOUSE        = new BuildType("type_house"       , IS_HOME_BLD   ),
@@ -202,7 +208,9 @@ public class GameConstants {
     WEAVER       = new BuildType("type_weaver"      , IS_CRAFTS_BLD ),
     MARKET       = new BuildType("type_market"      , IS_CRAFTS_BLD ),
     PORTER_HOUSE = new BuildType("type_porter_house", IS_TRADE_BLD  ),
-    GARRISON     = new BuildType("type_garrison"    , IS_ARMY_BLD   )
+    GARRISON     = new BuildType("type_garrison"    , IS_ARMY_BLD   ),
+    
+    NO_AMENITIES[] = new BuildType[0]
   ;
   static {
     PALACE.name = "Palace";

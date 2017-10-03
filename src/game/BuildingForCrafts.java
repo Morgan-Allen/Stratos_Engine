@@ -183,7 +183,7 @@ public class BuildingForCrafts extends Building {
   static Building selectBuildTarget(
     Building from, Good buildsWith[], Series <Building> buildings
   ) {
-    int maxRange = Walker.MAX_WANDER_TIME;
+    int maxRange = Walker.MAX_WANDER_RANGE;
     Pick <Building> pickB = new Pick();
     
     for (Good w : buildsWith) {
