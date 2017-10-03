@@ -19,6 +19,8 @@ public class CityMap implements Session.Saveable {
   Tile grid[][];
   int time = 0;
   
+  byte fogVals[][], oldVals[][];
+  
   List <Building> buildings = new List();
   List <Walker  > walkers   = new List();
   
@@ -41,6 +43,9 @@ public class CityMap implements Session.Saveable {
     }
     time = s.loadInt();
     
+    s.loadByteArray(fogVals);
+    s.loadByteArray(oldVals);
+    
     s.loadObjects(buildings);
     s.loadObjects(walkers  );
     
@@ -62,6 +67,9 @@ public class CityMap implements Session.Saveable {
     }
     s.saveInt(time);
     
+    s.saveByteArray(fogVals);
+    s.saveByteArray(oldVals);
+    
     s.saveObjects(buildings);
     s.saveObjects(walkers  );
     
@@ -82,41 +90,14 @@ public class CityMap implements Session.Saveable {
       t.x = c.x;
       t.y = c.y;
     }
+    this.fogVals = new byte[size][size];
+    this.oldVals = new byte[size][size];
   }
   
   
   
-  
-  /**  Tiles, blockage and paving:
+  /**  Tiles and related setup/query methods-
     */
-  Tile tileAt(int x, int y) {
-    try { return grid[x][y]; }
-    catch (Exception e) { return null; }
-  }
-  
-  
-  Fixture above(int x, int y) {
-    Tile under = tileAt(x, y);
-    return under == null ? null : under.above;
-  }
-  
-  
-  boolean blocked(int x, int y) {
-    Tile under = tileAt(x, y);
-    if (under == null) return true;
-    
-    Terrain terr = under.terrain;
-    if (under.above != null) return under.above.type.blocks;
-    else return terr == null ? false : terr.blocks;
-  }
-  
-  
-  boolean paved(int x, int y) {
-    Tile under = tileAt(x, y);
-    return under == null ? false : under.paved;
-  }
-  
-  
   public static class Tile implements Target {
     
     int x, y;
@@ -218,15 +199,42 @@ public class CityMap implements Session.Saveable {
   
   public static float distance(Tile a, Tile b) {
     if (a == null || b == null) return 1000000000;
-    float dist = Nums.max(Nums.abs(a.x - b.x), Nums.abs(a.y - b.y));
-    if (a.x != b.x && a.y != b.y) dist += 0.25f;
-    return dist;
+    float dx = a.x - b.x, dy = a.y - b.y;
+    return Nums.sqrt((dx * dx) + (dy * dy));
+  }
+  
+  
+  Tile tileAt(int x, int y) {
+    try { return grid[x][y]; }
+    catch (Exception e) { return null; }
   }
   
   
   
-  /**  Other utility methods-
+  /**  Blockage and paving methods-
     */
+  Fixture above(int x, int y) {
+    Tile under = tileAt(x, y);
+    return under == null ? null : under.above;
+  }
+  
+  
+  boolean blocked(int x, int y) {
+    Tile under = tileAt(x, y);
+    if (under == null) return true;
+    
+    Terrain terr = under.terrain;
+    if (under.above != null) return under.above.type.blocks;
+    else return terr == null ? false : terr.blocks;
+  }
+  
+  
+  boolean paved(int x, int y) {
+    Tile under = tileAt(x, y);
+    return under == null ? false : under.paved;
+  }
+  
+  
   public static void applyPaving(
     CityMap map, int x, int y, int w, int h, boolean is
   ) {
@@ -235,6 +243,32 @@ public class CityMap implements Session.Saveable {
       if (t != null) t.paved = is;
     }
   }
+  
+  
+  
+  /**  Fog of war:
+    */
+  void liftFog(Tile around, float range) {
+    if (! GameSettings.toggleFog) {
+      return;
+    }
+    Box2D area = new Box2D(around.x, around.y, 0, 0);
+    area.expandBy(Nums.round(range, 1, true));
+    
+    for (Coord c : Visit.grid(area)) {
+      Tile t = tileAt(c.x, c.y);
+      float distance = CityMap.distance(t, around);
+      if (distance > range) continue;
+      fogVals[c.x][c.y] = 100;
+    }
+  }
+  
+  
+  float fogAt(int x, int y) {
+    Tile t = tileAt(x, y);
+    return t == null ? 0 : (oldVals[x][y] / 100f);
+  }
+  
   
   
   
@@ -260,7 +294,19 @@ public class CityMap implements Session.Saveable {
     }
     
     time += 1;
+    updateFog();
     updateGrowth();
+  }
+  
+  
+  void updateFog() {
+    if (! GameSettings.toggleFog) {
+      return;
+    }
+    for (Coord c : Visit.grid(0, 0, size, size, 1)) {
+      oldVals[c.x][c.y] = fogVals[c.x][c.y];
+      fogVals[c.x][c.y] = 0;
+    }
   }
   
   
