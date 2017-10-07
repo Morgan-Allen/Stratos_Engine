@@ -18,13 +18,15 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
     IS_FIXTURE     = 1,
     IS_GOOD        = 2,
     IS_BUILDING    = 3,
-    IS_CRAFTS_BLD  = 4,
-    IS_GATHER_BLD  = 5,
-    IS_TRADE_BLD   = 6,
-    IS_HOME_BLD    = 7,
-    IS_ARMY_BLD    = 8,
-    IS_WALKER      = 9,
-    IS_TRADE_WLK   = 10
+    IS_UPGRADE     = 4,
+    IS_CRAFTS_BLD  = 5,
+    IS_GATHER_BLD  = 6,
+    IS_TRADE_BLD   = 7,
+    IS_HOME_BLD    = 8,
+    IS_SERVICE_BLD = 9,
+    IS_ARMY_BLD    = 10,
+    IS_WALKER      = 11,
+    IS_TRADE_WLK   = 12
   ;
   
   final static Index <ObjectType> INDEX = new Index();
@@ -54,6 +56,7 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
       case(IS_GATHER_BLD ): return new BuildingForGather  (this);
       case(IS_TRADE_BLD  ): return new BuildingForTrade   (this);
       case(IS_HOME_BLD   ): return new BuildingForHome    (this);
+      case(IS_SERVICE_BLD): return new BuildingForService (this);
       case(IS_ARMY_BLD   ): return new BuildingForMilitary(this);
       case(IS_WALKER     ): return new Walker        (this);
       case(IS_TRADE_WLK  ): return new WalkerForTrade(this);
@@ -94,9 +97,14 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   
   /**  Building-specific data fields and setup methods-
     */
-  Good    builtFrom  [] = NO_GOODS;
-  Integer builtAmount[] = {};
-  Good    buildsWith [] = NO_GOODS;
+  Good       builtFrom   [] = NO_GOODS;
+  Integer    builtAmount [] = {};
+  Good       buildsWith  [] = NO_GOODS;
+  ObjectType upgradeTiers[] = NO_TIERS;
+  ObjectType upgradeNeeds[] = NO_NEEDS;
+  Integer    needAmounts [] = {};
+  int homeSocialClass  = CLASS_COMMON;
+  int homeAmbienceNeed = AMBIENCE_MIN;
   
   Good needed  [] = NO_GOODS;
   Good produced[] = NO_GOODS;
@@ -109,13 +117,9 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   int maxStock        = 10 ;
   int maxDeliverRange = 100;
   int consumeTime     = 500;
+  int featureAmount   = 10 ;
   
-  int homeSocialClass  = CLASS_COMMON;
-  int homeAmbienceNeed = AMBIENCE_MIN;
-  
-  ObjectType workerTypes [] = NO_WALKERS  ;
-  ObjectType amenityNeeds[] = NO_AMENITIES;
-  
+  ObjectType workerTypes[] = NO_WALKERS;
   int maxWorkers   = 1 ;
   int maxResidents = 0 ;
   int maxVisitors  = 4 ;
@@ -124,11 +128,22 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   int numFile      = 4 ;
   
   
-  
   void setBuildMaterials(Object... args) {
     Object split[][] = Visit.splitByModulus(args, 2);
     builtFrom   = (Good   []) castArray(split[0], Good   .class);
     builtAmount = (Integer[]) castArray(split[1], Integer.class);
+  }
+  
+  
+  void setUpgradeTiers(ObjectType... tiers) {
+    this.upgradeTiers = tiers;
+  }
+  
+  
+  void setUpgradeNeeds(Object... args) {
+    Object split[][] = Visit.splitByModulus(args, 2);
+    upgradeNeeds = (ObjectType[]) castArray(split[0], ObjectType.class);
+    needAmounts  = (Integer   []) castArray(split[1], Integer   .class);
   }
   
   

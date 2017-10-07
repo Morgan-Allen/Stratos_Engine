@@ -213,7 +213,7 @@ public class BuildingForCrafts extends Building {
       if (amountDone >= need || amountGot <= 0) continue;
       
       totalNeed += need;
-      totalDone = amountDone;
+      totalDone += amountDone;
       
       if (! didWork) {
         float puts = Nums.min(0.1f, amountGot);
@@ -225,13 +225,23 @@ public class BuildingForCrafts extends Building {
     
     b.buildLevel = 1.5f * (totalDone / totalNeed);
   }
+  
+  
+  //  TODO:  Take building-tiers into account for this...
+  /*
+  static void updateBuildLevel(Building b) {
+    float totalNeed = 0, totalDone = 0;
+    for (Good g : b.type.builtFrom) {
+      int   need       = b.type.materialNeed(g);
+      float amountDone = b.materials.valueFor(g);
+      
+      totalNeed += need;
+      totalDone += amountDone;
+    }
+    b.buildLevel = 1.5f * (totalDone / totalNeed);
+  }
+  //*/
 }
-
-
-
-
-
-
 
 
 

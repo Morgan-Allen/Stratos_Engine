@@ -17,18 +17,22 @@ public class TestCity extends Test {
     
     CityMap map = setupTestCity(25);
     
-    CityMap.applyPaving(map, 3, 8, 12, 1 , true);
+    CityMap.applyPaving(map, 3, 8, 16, 1 , true);
     CityMap.applyPaving(map, 8, 2, 1 , 16, true);
     
     Building palace = (Building) PALACE    .generate();
     Building house1 = (Building) HOUSE     .generate();
     Building house2 = (Building) HOUSE     .generate();
+    Building house3 = (Building) HOUSE     .generate();
+    Building school = (Building) SCHOOL    .generate();
     Building court  = (Building) BALL_COURT.generate();
     
     palace.enterMap(map, 3 , 3 , 1);
     house1.enterMap(map, 9 , 6 , 1);
     house2.enterMap(map, 12, 6 , 1);
+    house3.enterMap(map, 15, 6 , 1);
     court .enterMap(map, 9 , 9 , 1);
+    school.enterMap(map, 9 , 3 , 1);
     
     Building quarry = (Building) QUARRY_PIT.generate();
     Building kiln1  = (Building) KILN      .generate();
@@ -53,12 +57,19 @@ public class TestCity extends Test {
     boolean housesOkay = false;
     
     while (map.time < 1000 || graphics) {
+      
       runGameLoop(map, 10, graphics);
       
       if (! housesOkay) {
         boolean allNeeds = true;
-        for (Building h : map.buildings) if (h.type == HOUSE) {
-          if (h.inventory.valueFor(POTTERY) < 1) allNeeds = false;
+        for (Building b : map.buildings) {
+          if (b.type == MARKET && b.inventory.valueFor(COTTON) < 10) {
+            b.inventory.add(10, COTTON);
+          }
+          if (b.type == HOUSE) {
+            BuildingForHome home = (BuildingForHome) b;
+            if (home.currentTier != HOUSE_T2) allNeeds = false;
+          }
         }
         housesOkay = allNeeds;
         

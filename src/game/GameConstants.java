@@ -121,17 +121,24 @@ public class GameConstants {
     POTTERY    = new Good("Pottery"     , 50, 6 ),
     COTTON     = new Good("Cotton"      , 75, 7 ),
     
+    IS_ADMIN   = new Good("Is Admin"    , -1, 21),
     IS_MARKET  = new Good("Is Market"   , -1, 22),
-    IS_AMENITY = new Good("Is Amenity"  , -1, 23),
     IS_TRADER  = new Good("Is Trader"   , -1, 24),
     IS_HOUSING = new Good("Is Housing"  , -1, 25),
+    DIVERSION  = new Good("Diversion"   , -1, 30),
+    EDUCATION  = new Good("Education"   , -1, 31),
+    HEALTHCARE = new Good("Healthcare"  , -1, 32),
+    RELIGION   = new Good("Religion"    , -1, 33),
     
     CROP_TYPES [] = { MAIZE, RAW_COTTON },
     TREE_TYPES [] = { WOOD, RUBBER },
     STONE_TYPES[] = { CLAY, ADOBE },
     BUILD_GOODS[] = { WOOD, CLAY, ADOBE },
     ALL_GOODS  [] = (Good[]) GOODS_LIST.toArray(Good.class),
-    NO_GOODS   [] = new Good[0];
+    
+    COMMERCE_TYPES[] = { IS_ADMIN, IS_TRADER, IS_MARKET, IS_HOUSING },
+    SERVICE_TYPES [] = { DIVERSION, EDUCATION, HEALTHCARE, RELIGION },
+    NO_GOODS      [] = new Good[0];
   
   static {
     MAIZE     .tint = colour(9, 9, 1);
@@ -198,24 +205,34 @@ public class GameConstants {
     AMBIENCE_MAX =  20
   ;
   final static BuildType  
-    PALACE       = new BuildType("type_palace"      , IS_HOME_BLD   ),
-    HOUSE        = new BuildType("type_house"       , IS_HOME_BLD   ),
-    MASON        = new BuildType("type_mason"       , IS_CRAFTS_BLD ),
-    BALL_COURT   = new BuildType("type_ball_court"  , IS_BUILDING   ),
-    FARMER_HUT   = new BuildType("type_farmer_hut"  , IS_GATHER_BLD ),
-    QUARRY_PIT   = new BuildType("type_quarry_pit"  , IS_CRAFTS_BLD ),
-    KILN         = new BuildType("type_kiln"        , IS_CRAFTS_BLD ),
-    WEAVER       = new BuildType("type_weaver"      , IS_CRAFTS_BLD ),
-    MARKET       = new BuildType("type_market"      , IS_CRAFTS_BLD ),
-    PORTER_HOUSE = new BuildType("type_porter_house", IS_TRADE_BLD  ),
-    GARRISON     = new BuildType("type_garrison"    , IS_ARMY_BLD   ),
     
-    NO_AMENITIES[] = new BuildType[0]
+    NO_TIERS[] = new BuildType[0],
+    NO_NEEDS[] = new BuildType[0],
+    
+    PALACE        = new BuildType("type_palace"       , IS_HOME_BLD   ),
+    HOUSE         = new BuildType("type_house"        , IS_HOME_BLD   ),
+    HOUSE_T1      = new BuildType("type_house_tier1"  , IS_UPGRADE    ),
+    HOUSE_T2      = new BuildType("type_house_tier2"  , IS_UPGRADE    ),
+    
+    MASON         = new BuildType("type_mason"        , IS_CRAFTS_BLD ),
+    LATRINE       = new BuildType("type_latrine"      , IS_SERVICE_BLD),
+    SCHOOL        = new BuildType("type_public_school", IS_SERVICE_BLD),
+    BALL_COURT    = new BuildType("type_ball_court"   , IS_SERVICE_BLD),
+    
+    FARMER_HUT    = new BuildType("type_farmer_hut"   , IS_GATHER_BLD ),
+    QUARRY_PIT    = new BuildType("type_quarry_pit"   , IS_CRAFTS_BLD ),
+    KILN          = new BuildType("type_kiln"         , IS_CRAFTS_BLD ),
+    WEAVER        = new BuildType("type_weaver"       , IS_CRAFTS_BLD ),
+    
+    MARKET        = new BuildType("type_market"       , IS_CRAFTS_BLD ),
+    PORTER_HOUSE  = new BuildType("type_porter_house" , IS_TRADE_BLD  ),
+    
+    GARRISON      = new BuildType("type_garrison"     , IS_ARMY_BLD   )
   ;
   static {
+    
     PALACE.name = "Palace";
-    PALACE.wide = 5;
-    PALACE.high = 5;
+    PALACE.setDimensions(5, 5, 2);
     PALACE.tint = colour(7, 3, 3);
     PALACE.homeSocialClass = CLASS_NOBLE;
     PALACE.maxResidents = 2;
@@ -224,9 +241,30 @@ public class GameConstants {
     PALACE.maxHealth = 300;
     PALACE.setBuildMaterials(WOOD, 15, ADOBE, 25, COTTON, 10, POTTERY, 5);
     
+    HOUSE.name = "House";
+    HOUSE.setDimensions(2, 2, 1);
+    HOUSE.tint = colour(3, 7, 3);
+    HOUSE.maxResidents = 2;
+    HOUSE.maxStock = 2;
+    HOUSE.setBuildMaterials(WOOD, 2, CLAY, 1);
+    HOUSE.buildsWith = new Good[] { WOOD, CLAY };
+    HOUSE.setUpgradeTiers(HOUSE, HOUSE_T1, HOUSE_T2);
+    
+    HOUSE_T1.name = "Improved House";
+    HOUSE_T1.setBuildMaterials(WOOD, 4, CLAY, 2);
+    HOUSE_T1.consumed = new Good[] { POTTERY };
+    HOUSE_T1.maxStock = 2;
+    HOUSE_T1.setUpgradeNeeds(DIVERSION, 10);
+    
+    HOUSE_T2.name = "Fancy House";
+    HOUSE_T2.setBuildMaterials(WOOD, 6, CLAY, 3);
+    HOUSE_T2.consumed = new Good[] { POTTERY, COTTON };
+    HOUSE_T2.maxStock = 2;
+    HOUSE_T2.setUpgradeNeeds(DIVERSION, 15, SCHOOL, 1);
+    
+    
     MASON.name = "Mason";
-    MASON.wide = 2;
-    MASON.high = 2;
+    MASON.setDimensions(2, 2, 1);
     MASON.tint = colour(6, 2, 6);
     MASON.setWorkerTypes(WORKER);
     MASON.craftTime *= 2;
@@ -234,26 +272,29 @@ public class GameConstants {
     MASON.setBuildMaterials(ADOBE, 2, WOOD, 2, CLAY, 2);
     MASON.buildsWith = new Good[] { WOOD, CLAY, ADOBE };
     
-    HOUSE.name = "House";
-    HOUSE.wide = 2;
-    HOUSE.high = 2;
-    HOUSE.tint = colour(3, 7, 3);
-    HOUSE.maxResidents = 2;
-    HOUSE.consumed = new Good[] { POTTERY };
-    HOUSE.maxStock = 2;
-    HOUSE.setBuildMaterials(WOOD, 2, CLAY, 1);
-    HOUSE.buildsWith = new Good[] { WOOD, CLAY };
+    LATRINE.name = "Latrine";
+    LATRINE.setDimensions(1, 1, 1);
+    LATRINE.tint = colour(6, 2, 6);
+    LATRINE.setWorkerTypes(WORKER);
+    LATRINE.setBuildMaterials(WOOD, 2, CLAY, 1);
+    
+    SCHOOL.name = "Public School";
+    SCHOOL.setDimensions(2, 2, 1);
+    SCHOOL.tint = colour(3, 7, 3);
+    SCHOOL.setWorkerTypes(CITIZEN);
+    SCHOOL.features = new Good[] { EDUCATION };
+    SCHOOL.setBuildMaterials(WOOD, 5, CLAY, 2, ADOBE, 3);
     
     BALL_COURT.name = "Ball Court";
-    BALL_COURT.wide = 3;
-    BALL_COURT.high = 3;
+    BALL_COURT.setDimensions(3, 3, 1);
     BALL_COURT.tint = colour(3, 3, 7);
-    BALL_COURT.features = new Good[] { IS_AMENITY };
+    BALL_COURT.features = new Good[] { DIVERSION };
+    BALL_COURT.featureAmount = 15;
     BALL_COURT.setBuildMaterials(ADOBE, 10, RUBBER, 5);
     
+    
     FARMER_HUT.name = "Farmer Hut";
-    FARMER_HUT.wide = 3;
-    FARMER_HUT.high = 3;
+    FARMER_HUT.setDimensions(3, 3, 1);
     FARMER_HUT.tint = colour(7, 7, 3);
     FARMER_HUT.setWorkerTypes(WORKER);
     FARMER_HUT.produced = CROP_TYPES;
@@ -261,16 +302,14 @@ public class GameConstants {
     FARMER_HUT.setBuildMaterials(WOOD, 5, CLAY, 2);
     
     QUARRY_PIT.name = "Quarry Pit";
-    QUARRY_PIT.wide = 4;
-    QUARRY_PIT.high = 4;
+    QUARRY_PIT.setDimensions(4, 4, 0);
     QUARRY_PIT.tint = colour(7, 7, 3);
     QUARRY_PIT.setWorkerTypes(WORKER);
     QUARRY_PIT.produced = new Good[] { CLAY };
     QUARRY_PIT.setBuildMaterials(WOOD, 5, CLAY, 2);
     
     KILN.name = "Kiln";
-    KILN.wide = 2;
-    KILN.high = 2;
+    KILN.setDimensions(2, 2, 1);
     KILN.tint = colour(7, 3, 7);
     KILN.setWorkerTypes(WORKER);
     KILN.needed   = new Good[] { CLAY };
@@ -279,8 +318,7 @@ public class GameConstants {
     KILN.setBuildMaterials(ADOBE, 2, WOOD, 2, CLAY, 1);
     
     WEAVER.name = "Weaver";
-    WEAVER.wide = 2;
-    WEAVER.high = 2;
+    WEAVER.setDimensions(2, 2, 1);
     WEAVER.tint = colour(7, 3, 7);
     WEAVER.setWorkerTypes(WORKER);
     WEAVER.needed   = new Good[] { RAW_COTTON };
@@ -298,16 +336,14 @@ public class GameConstants {
     MARKET.setBuildMaterials(WOOD, 4, COTTON, 2, ADOBE, 2);
     
     PORTER_HOUSE.name = "Porter Post";
-    PORTER_HOUSE.wide = 3;
-    PORTER_HOUSE.high = 3;
+    PORTER_HOUSE.setDimensions(3, 3, 1);
     PORTER_HOUSE.tint = colour(8, 4, 8);
     PORTER_HOUSE.setWorkerTypes(PORTERS, WORKER);
     PORTER_HOUSE.features = new Good[] { IS_TRADER };
     PORTER_HOUSE.setBuildMaterials(WOOD, 4, ADOBE, 2, POTTERY, 2);
     
     GARRISON.name = "Garrison";
-    GARRISON.wide = 6;
-    GARRISON.high = 6;
+    GARRISON.setDimensions(6, 6, 2);
     GARRISON.tint = colour(8, 8, 8);
     GARRISON.setWorkerTypes(SOLDIER);
     GARRISON.maxWorkers = 2;
