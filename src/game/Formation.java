@@ -333,7 +333,8 @@ public class Formation implements
       
       for (int dir : T_ADJACENT) {
         Tile tile = map.tileAt(p.x + T_X[dir], p.y + T_Y[dir]);
-        if (tile == null || tile.above != sieged || tile.hasFocus()) continue;
+        //if (tile == null || tile.above != sieged || tile.hasFocus()) continue;
+        if (tile == null || tile.above != sieged) continue;
         best = tile;
         break;
       }
@@ -421,19 +422,19 @@ public class Formation implements
     
     Walker target = w.inCombat() ? null : findCombatTarget(w);
     if (target != null) {
-      w.beginAttack(target, JOB.COMBAT, this);
+      w.beginAttack(target, Task.JOB.COMBAT, this);
       return;
     }
     
     Tile sieges = w.inCombat() ? null : findSiegeTarget(w);
     if (sieges != null) {
-      w.beginAttack(sieges, JOB.COMBAT, this);
+      w.beginAttack(sieges, Task.JOB.COMBAT, this);
       return;
     }
     
     Tile stands = standLocation(w);
     if (stands != null) {
-      w.embarkOnTarget(stands, 10, JOB.MILITARY, this);
+      w.embarkOnTarget(stands, 10, Task.JOB.MILITARY, this);
       return;
     }
   }
@@ -442,7 +443,7 @@ public class Formation implements
   public void walkerUpdates(Walker w) {
     Walker target = w.inCombat() ? null : findCombatTarget(w);
     if (target != null) {
-      w.beginAttack(target, JOB.COMBAT, this);
+      w.beginAttack(target, Task.JOB.COMBAT, this);
       return;
     }
   }

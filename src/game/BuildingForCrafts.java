@@ -110,7 +110,7 @@ public class BuildingForCrafts extends Building {
     //  Try and find a nearby building to construct:
     Building builds = selectBuildTarget(this, type.buildsWith, map.buildings);
     if (builds != null) {
-      walker.embarkOnVisit(builds, 10, JOB.BUILDING, this);
+      walker.embarkOnVisit(builds, 10, Task.JOB.BUILDING, this);
       return;
     }
     //
@@ -146,19 +146,19 @@ public class BuildingForCrafts extends Building {
     }
     if (! pickD.empty()) {
       Order o = pickD.result();
-      walker.beginDelivery(this, o.goes, JOB.DELIVER, o.good, o.amount, this);
+      walker.beginDelivery(this, o.goes, Task.JOB.DELIVER, o.good, o.amount, this);
     }
     //
     //  And failing all that, start crafting:
     else if (! stalled) {
-      walker.embarkOnVisit(this, -1, JOB.CRAFTING, this);
+      walker.embarkOnVisit(this, -1, Task.JOB.CRAFTING, this);
     }
   }
   
   
   public void walkerEnters(Walker walker, Building enters) {
     
-    if (walker.jobType() == JOB.DELIVER) {
+    if (walker.jobType() == Task.JOB.DELIVER) {
       if (enters == this) for (Good need : needed()) {
         walker.offloadGood(need, this);
       }
@@ -171,7 +171,7 @@ public class BuildingForCrafts extends Building {
   
   
   public void walkerVisits(Walker walker, Building visits) {
-    if (walker.jobType() == JOB.BUILDING) {
+    if (walker.jobType() == Task.JOB.BUILDING) {
       advanceBuilding(walker, type.buildsWith, visits);
     }
   }

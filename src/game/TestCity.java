@@ -57,7 +57,6 @@ public class TestCity extends Test {
     boolean housesOkay = false;
     
     while (map.time < 1000 || graphics) {
-      
       runGameLoop(map, 10, graphics);
       
       if (! housesOkay) {

@@ -139,7 +139,7 @@ public class CityMap implements Session.Saveable {
       return;
     }
     
-    
+    /*
     public void setFocused(Walker w, boolean is) {
       if (is) {
         if (focused == null) focused = new List();
@@ -155,6 +155,7 @@ public class CityMap implements Session.Saveable {
     public boolean hasFocus() {
       return focused != null;
     }
+    //*/
     
     
     public String toString() {

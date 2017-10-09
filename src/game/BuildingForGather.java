@@ -82,7 +82,7 @@ public class BuildingForGather extends BuildingForCrafts {
     
     Fixture goes = pick.result();
     if (goes != null) {
-      walker.embarkOnTarget(goes, 2, Walker.JOB.GATHERING, this);
+      walker.embarkOnTarget(goes, 2, Task.JOB.GATHERING, this);
       return true;
     }
     

@@ -13,22 +13,6 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
   
   /**  Data fields and setup/initialisation-
     */
-  public static enum JOB {
-    NONE     ,
-    RETURNING,
-    RESTING  ,
-    WANDERING,
-    DELIVER  ,
-    SHOPPING ,
-    TRADING  ,
-    VISITING ,
-    GATHERING,
-    CRAFTING ,
-    BUILDING ,
-    MILITARY ,
-    HUNTING  ,
-    COMBAT   ,
-  };
   final public static int
     
     MAX_WANDER_RANGE = 20,
@@ -53,19 +37,6 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
   Building  inside;
   boolean   guest;
   
-  static class Task {
-    Employer origin;
-    
-    JOB type      = JOB.NONE;
-    int timeSpent = 0 ;
-    int maxTime   = 20;
-    
-    Tile path[] = null;
-    int pathIndex = -1;
-    
-    Target   target;
-    Building visits;
-  }
   Task job;
   
   Good  carried = null;
@@ -76,6 +47,7 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
   float fatigue;
   float stress ;
   int   state = STATE_OKAY;
+  Tally <ObjectType> skills = new Tally();
   
   
   
@@ -97,26 +69,7 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
     inside    = (Building ) s.loadObject();
     guest     = s.loadBool();
     
-    if (s.loadBool()) {
-      Task j = this.job = new Task();
-      j.origin    = (Employer) s.loadObject();
-      j.type      = JOB.values()[s.loadInt()];
-      j.timeSpent = s.loadInt();
-      j.maxTime   = s.loadInt();
-      
-      int PL = s.loadInt();
-      if (PL == -1) {
-        j.path = null;
-      }
-      else {
-        j.path = new Tile[PL];
-        for (int i = 0; i < PL; i++) j.path[i] = loadTile(map, s);
-      }
-      j.pathIndex = s.loadInt();
-      j.target    = (Target  ) s.loadObject();
-      j.visits    = (Building) s.loadObject();
-    }
-    else job = null;
+    job = (Task) s.loadObject();
     
     carried     = (Good) s.loadObject();
     carryAmount = s.loadFloat();
@@ -126,6 +79,7 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
     fatigue = s.loadFloat();
     stress  = s.loadFloat();
     state   = s.loadInt();
+    s.loadTally(skills);
   }
   
   
@@ -141,22 +95,7 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
     s.saveObject(inside   );
     s.saveBool  (guest    );
     
-    s.saveBool(job != null);
-    if (job != null) {
-      s.saveObject(job.origin);
-      s.saveInt(job.type.ordinal());
-      s.saveInt(job.timeSpent);
-      s.saveInt(job.maxTime);
-      
-      if (job.path == null) s.saveInt(-1);
-      else {
-        s.saveInt(job.path.length);
-        for (Tile t : job.path) saveTile(t, map, s);
-      }
-      s.saveInt(job.pathIndex);
-      s.saveObject(job.target);
-      s.saveObject(job.visits);
-    }
+    s.saveObject(job);
     
     s.saveObject(carried);
     s.saveFloat(carryAmount);
@@ -166,6 +105,7 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
     s.saveFloat(fatigue);
     s.saveFloat(stress );
     s.saveInt  (state  );
+    s.saveTally(skills);
   }
   
   
@@ -182,9 +122,6 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
   
   void exitMap() {
     if (inside != null) setInside(inside, false);
-    
-    Target focus = pathTarget(job);
-    if (focus != null) focus.setFocused(this, false);
     
     map.walkers.remove(this);
     map = null;
@@ -218,11 +155,9 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
   /**  Regular updates-
     */
   void update() {
-    Target oldFocus = pathTarget(job);
-    
     //  TODO:  Don't allow another job to be assigned while this one is in
     //  the middle of an update!
-    if (job != null && checkAndUpdatePathing(job)) {
+    if (job != null && job.checkAndUpdatePathing()) {
       final Task task = this.job;
       
       boolean visiting  = task.visits != null;
@@ -271,12 +206,6 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
     if (originOK) {
       job.origin.walkerUpdates(this);
     }
-    
-    Target newFocus = pathTarget(job);
-    if (oldFocus != newFocus) {
-      if (oldFocus != null) oldFocus.setFocused(this, false);
-      if (newFocus != null) newFocus.setFocused(this, true );
-    }
     //
     //  And update your current health-
     checkHealthState();
@@ -315,14 +244,14 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
   }
   
   
-  public JOB jobType() {
-    if (job == null) return JOB.NONE;
+  public Task.JOB jobType() {
+    if (job == null) return Task.JOB.NONE;
     return job.type;
   }
   
   
   public boolean inCombat() {
-    return jobType() == JOB.COMBAT;
+    return jobType() == Task.JOB.COMBAT;
   }
   
   
@@ -346,85 +275,6 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
   }
   
   
-  private void beginTask(
-    Employer origin, Building visits, Target target, JOB jobType, int maxTime
-  ) {
-    Task j = this.job = new Task();
-    j.origin    = origin ;
-    j.type      = jobType;
-    j.timeSpent = 0      ;
-    j.maxTime   = maxTime;
-    j.visits    = visits ;
-    j.target    = target ;
-    
-    if (maxTime == -1) j.maxTime = AVG_VISIT_TIME;
-    j.path = updatePathing(j);
-    
-    if (j.path != null) {
-      if (reports()) I.say("  Path is: "+j.path.length+" tiles long...");
-    }
-    else {
-      if (reports()) I.say("  Could not find path!");
-      this.job = null;
-    }
-  }
-  
-  
-  private boolean checkAndUpdatePathing(Task j) {
-    if (checkPathing(j)) return true;
-    
-    job.path = updatePathing(job);
-    if (job.path != null) return true;
-    
-    job = null;
-    return false;
-  }
-  
-  
-  private boolean checkPathing(Task j) {
-    if (j == null || j.path == null        ) return false;
-    if (Visit.last(j.path) != pathTarget(j)) return false;
-    
-    for (int i = 0; i < type.sightRange; i++) {
-      if (i >= j.path.length) break;
-      Tile t = j.path[i];
-      if (map.blocked(t.x, t.y)) return false;
-    }
-    
-    return true;
-  }
-  
-  
-  private Tile pathTarget(Task j) {
-    if (j == null) return null;
-    Tile t = null;
-    if (t == null && j.visits != null) t = j.visits.entrance;
-    if (t == null && j.target != null) t = j.target.at();
-    if (t == null && j.path   != null) t = (Tile) Visit.last(j.path);
-    return t;
-  }
-  
-  
-  private Tile[] updatePathing(Task j) {
-    boolean visiting = j.visits != null;
-    
-    if (reports()) {
-      I.say(this+" pathing toward "+(visiting ? j.visits : j.target));
-    }
-    
-    Tile from  = (inside == null) ? this.at : inside.entrance;
-    Tile heads = pathTarget(j);
-    
-    if (from == null || heads == null) return null;
-    heads.setFocused(this, true);
-    
-    WalkerPathSearch search = new WalkerPathSearch(map, from, heads, -1);
-    search.setPaveOnly(visiting && map.paved(from.x, from.y));
-    search.doSearch();
-    return search.fullPath(Tile.class);
-  }
-  
-  
   protected void onVisit(Building visits) {
     return;
   }
@@ -438,35 +288,42 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
   
   /**  Miscellaneous behaviour triggers:
     */
-  void embarkOnVisit(Building goes, int maxTime, JOB jobType, Employer e) {
+  void embarkOnVisit(Building goes, int maxTime, Task.JOB jobType, Employer e) {
     if (goes == null) return;
     if (reports()) I.say(this+" will visit "+goes+" for time "+maxTime);
-    beginTask(e, goes, null, jobType, maxTime);
+    
+    job = new Task(this);
+    job = job.configTask(e, goes, null, jobType, maxTime);
   }
   
   
-  void embarkOnTarget(Target goes, int maxTime, JOB jobType, Employer e) {
+  void embarkOnTarget(Target goes, int maxTime, Task.JOB jobType, Employer e) {
     if (goes == null) return;
     if (reports()) I.say(this+" will target "+goes+" for time "+maxTime);
-    beginTask(e, null, goes, jobType, maxTime);
+    
+    job = new Task(this);
+    job = job.configTask(e, null, goes, jobType, maxTime);
   }
   
   
   void returnTo(Building origin) {
     if (origin == null || origin.entrance == null || inside == origin) return;
     if (reports()) I.say(this+" will return to "+origin);
-    beginTask(origin, origin, null, JOB.RETURNING, 0);
+    
+    job = new Task(this);
+    job = job.configTask(origin, origin, null, Task.JOB.RETURNING, 0);
   }
   
   
   void beginDelivery(
-    Building from, Building goes, JOB jobType,
+    Building from, Building goes, Task.JOB jobType,
     Good carried, float amount, Employer e
   ) {
     if (from == null || goes == null || goes.entrance == null) return;
     if (from != inside) return;
     
-    beginTask(e, goes, null, jobType, 0);
+    job = new Task(this);
+    job = job.configTask(e, goes, null, jobType, 0);
     if (job == null) return;
     
     if (reports()) I.say(this+" will deliver "+amount+" "+carried+" to "+goes);
@@ -477,6 +334,19 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
   }
   
   
+  void beginAttack(Target target, Task.JOB jobType, Employer e) {
+    if (target == null) return;
+    if (reports()) I.say(this+" will attack "+target);
+    
+    job = new Task(this);
+    job = job.configTask(e, null, target, jobType, 0);
+  }
+  
+  
+  
+  
+  /**  Inventory methods-
+    */
   void offloadGood(Good carried, Building store) {
     if (store == null || carried != this.carried) return;
     
@@ -491,15 +361,6 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
   
   /**  Combat and survival-related code:
     */
-  void beginAttack(Target target, JOB jobType, Employer e) {
-    if (target == null) return;
-    
-    if (reports()) I.say(this+" will attack "+target);
-    
-    beginTask(e, null, target, jobType, 0);
-  }
-  
-  
   void performAttack(Fixture other) {
     if (other == null || type.attackScore <= 0) return;
     
@@ -543,8 +404,8 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
     }
     facing = T_ADJACENT[Rand.index(4)];
     
-    Task j = this.job = new Task();
-    j.type      = JOB.WANDERING;
+    Task j = this.job = new Task(this);
+    j.type      = Task.JOB.WANDERING;
     j.timeSpent = 0;
     j.maxTime   = 0;
     j.path      = extractRandomWalk();

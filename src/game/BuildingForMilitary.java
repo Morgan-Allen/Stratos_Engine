@@ -96,7 +96,7 @@ public class BuildingForMilitary extends BuildingForCrafts {
     
     Walker drafts = pick.result();
     if (drafts != null) {
-      walker.embarkOnVisit(drafts.home, 2, Walker.JOB.VISITING, this);
+      walker.embarkOnVisit(drafts.home, 2, Task.JOB.VISITING, this);
     }
     else {
       formation.selectWalkerBehaviour(walker);

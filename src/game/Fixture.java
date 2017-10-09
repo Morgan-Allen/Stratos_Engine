@@ -102,6 +102,7 @@ public class Fixture implements Session.Saveable, Target {
   }
   
   
+  /*
   public void setFocused(Walker w, boolean is) {
     if (is) {
       if (focused == null) focused = new List();
@@ -117,6 +118,7 @@ public class Fixture implements Session.Saveable, Target {
   public boolean hasFocus() {
     return focused != null;
   }
+  //*/
 
   
   

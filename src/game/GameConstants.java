@@ -3,10 +3,8 @@
 package game;
 import util.*;
 import static game.ObjectType.*;
+import static game.CityMap.*;
 import java.awt.Color;
-
-import game.CityMap.Tile;
-import game.World.Journey;
 
 
 
@@ -358,7 +356,7 @@ public class GameConstants {
   static interface Target {
     Tile at();
     void targetedBy(Walker w);
-    void setFocused(Walker w, boolean is);
+    //void setFocused(Walker w, boolean is);
   }
   
   static interface Trader {
@@ -368,7 +366,7 @@ public class GameConstants {
   }
   
   static interface Journeys {
-    void onArrival(City goes, Journey journey);
+    void onArrival(City goes, World.Journey journey);
   }
   
   static interface Employer {
