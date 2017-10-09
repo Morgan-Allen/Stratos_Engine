@@ -343,6 +343,14 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
   }
   
   
+  void startRandomWalk() {
+    if (reports()) I.say(this+" beginning random walk...");
+    
+    job = new TaskWander(this);
+    job = job.configTask(null, null, null, Task.JOB.WANDERING, 0);
+  }
+  
+  
   
   
   /**  Inventory methods-
@@ -387,66 +395,6 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
       exitMap();
       setDestroyed();
     }
-  }
-  
-  
-  
-  /**  Wandering code:
-    */
-  //  TODO:  Consider moving this out to a separate class.
-  
-  void startRandomWalk() {
-    if (reports()) I.say(this+" beginning random walk...");
-    
-    if (inside != null && inside.entrance != null) {
-      this.at = inside.entrance;
-      setInside(inside, false);
-    }
-    facing = T_ADJACENT[Rand.index(4)];
-    
-    Task j = this.job = new Task(this);
-    j.type      = Task.JOB.WANDERING;
-    j.timeSpent = 0;
-    j.maxTime   = 0;
-    j.path      = extractRandomWalk();
-  }
-  
-  
-  Tile[] extractRandomWalk() {
-    Batch <Tile> walk = new Batch();
-    Tile next = this.at;
-    
-    while (walk.size() < MAX_WANDER_RANGE) {
-      boolean prefPave = map.paved(next.x, next.y);
-      int nx, ny, numDirs = 0;
-      int backDir = (facing + 4) % 8;
-      
-      for (int dir : T_ADJACENT) {
-        if (dir == backDir) continue;
-        nx = next.x + T_X[dir];
-        ny = next.y + T_Y[dir];
-        if (prefPave && ! map.paved(nx, ny)) continue;
-        if (map.blocked(nx, ny)) continue;
-        dirs[numDirs] = dir;
-        numDirs++;
-      }
-      if (numDirs == 0) {
-        facing = backDir;
-      }
-      else if (numDirs > 1) {
-        facing = dirs[Rand.index(numDirs)];
-      }
-      else {
-        facing = dirs[0];
-      }
-      next = map.tileAt(
-        next.x + T_X[facing],
-        next.y + T_Y[facing]
-      );
-      walk.add(next);
-    }
-    
-    return walk.toArray(Tile.class);
   }
   
   
