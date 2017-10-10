@@ -4,7 +4,6 @@ package game;
 import util.*;
 import static game.GameConstants.*;
 import static game.CityMap.*;
-import static util.TileConstants.*;
 
 
 
@@ -175,11 +174,13 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
         if (task.timeSpent++ <= task.maxTime) {
           if (visiting) {
             onVisit(task.visits);
+            task.onVisit(task.visits);
             task.visits.visitedBy(this);
             task.origin.walkerVisits(this, task.visits);
           }
           if (targeting) {
             onTarget(task.target);
+            task.onTarget(task.target);
             task.target.targetedBy(this);
             task.origin.walkerTargets(this, task.target);
           }
@@ -288,6 +289,11 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
   
   /**  Miscellaneous behaviour triggers:
     */
+  void assignTask(Task task) {
+    this.job = task;
+  }
+  
+  
   void embarkOnVisit(Building goes, int maxTime, Task.JOB jobType, Employer e) {
     if (goes == null) return;
     if (reports()) I.say(this+" will visit "+goes+" for time "+maxTime);
@@ -320,17 +326,12 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
     Good carried, float amount, Employer e
   ) {
     if (from == null || goes == null || goes.entrance == null) return;
-    if (from != inside) return;
     
-    job = new Task(this);
-    job = job.configTask(e, goes, null, jobType, 0);
+    TaskDelivery d = new TaskDelivery(this);
+    job = d.configDelivery(from, goes, Task.JOB.SHOPPING, carried, amount, e);
     if (job == null) return;
     
     if (reports()) I.say(this+" will deliver "+amount+" "+carried+" to "+goes);
-    
-    from.inventory.add(0 - amount, carried);
-    this.carried     = carried;
-    this.carryAmount = amount ;
   }
   
   
@@ -355,6 +356,15 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
   
   /**  Inventory methods-
     */
+  void pickupGood(Good carried, float amount, Building store) {
+    if (store == null || carried == null || amount <= 0) return;
+    
+    store.inventory.add(0 - amount, carried);
+    this.carried     = carried;
+    this.carryAmount = amount ;
+  }
+  
+  
   void offloadGood(Good carried, Building store) {
     if (store == null || carried != this.carried) return;
     

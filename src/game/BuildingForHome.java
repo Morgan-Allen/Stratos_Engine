@@ -3,7 +3,7 @@
 package game;
 import util.*;
 import static game.CityMap.*;
-import static game.Walker.*;
+import static game.Task.*;
 import static game.GameConstants.*;
 import static util.TileConstants.*;
 
@@ -200,7 +200,7 @@ public class BuildingForHome extends Building {
       this, type.buildsWith, new Batch(this)
     );
     if (repairs != null) {
-      walker.embarkOnVisit(repairs, 10, Task.JOB.BUILDING, this);
+      walker.embarkOnVisit(repairs, 10, JOB.BUILDING, this);
       return;
     }
     //
@@ -216,7 +216,7 @@ public class BuildingForHome extends Building {
       goes = tried;
     }
     if (goes != null) {
-      walker.embarkOnVisit(goes, 5, Task.JOB.SHOPPING, this);
+      walker.embarkOnVisit(goes, 5, JOB.SHOPPING, this);
       return;
     }
     //
@@ -233,10 +233,10 @@ public class BuildingForHome extends Building {
     goes = pick.result();
     
     if (goes != this && goes != null) {
-      walker.embarkOnVisit(goes, 25, Task.JOB.VISITING, this);
+      walker.embarkOnVisit(goes, 25, JOB.VISITING, this);
     }
     else if (goes == this && Rand.yes()) {
-      walker.embarkOnVisit(this, 10, Task.JOB.RESTING, this);
+      walker.embarkOnVisit(this, 10, JOB.RESTING, this);
     }
     else if (goes == this) {
       walker.startRandomWalk();
@@ -250,7 +250,7 @@ public class BuildingForHome extends Building {
   public void walkerEnters(Walker walker, Building enters) {
     ObjectType tier = tierOffset(1);
     
-    if (walker.jobType() == Task.JOB.SHOPPING) {
+    if (walker.jobType() == JOB.SHOPPING) {
       
       if (enters == this) {
         walker.offloadGood(walker.carried, this);
@@ -263,7 +263,7 @@ public class BuildingForHome extends Building {
         if (stock <= 0) continue;
         
         float taken = Nums.min(tier.maxStock, stock / 2);
-        walker.beginDelivery(enters, this, Task.JOB.SHOPPING, cons, taken, this);
+        walker.beginDelivery(enters, this, JOB.SHOPPING, cons, taken, this);
         break;
       }
     }
@@ -271,7 +271,7 @@ public class BuildingForHome extends Building {
   
   
   public void walkerVisits(Walker walker, Building visits) {
-    if (walker.jobType() == Task.JOB.BUILDING) {
+    if (walker.jobType() == JOB.BUILDING) {
       BuildingForCrafts.advanceBuilding(walker, type.buildsWith, visits);
     }
   }

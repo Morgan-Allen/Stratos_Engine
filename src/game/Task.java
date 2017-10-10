@@ -1,19 +1,19 @@
 
 
 package game;
-import static game.CityMap.loadTile;
-import static game.CityMap.saveTile;
+import util.*;
+import static game.CityMap.*;
+import static game.GameConstants.*;
 
-import game.CityMap.*;
-import game.GameConstants.*;
-import util.I;
-import util.Visit;
+import game.GameConstants.Target;
 
 
 
 public class Task implements Session.Saveable {
   
   
+  /**  Data fields, construction and save/load methods-
+    */
   public static enum JOB {
     NONE     ,
     RETURNING,
@@ -30,7 +30,6 @@ public class Task implements Session.Saveable {
     HUNTING  ,
     COMBAT   ,
   };
-  
   
   Walker actor;
   Employer origin;
@@ -118,6 +117,18 @@ public class Task implements Session.Saveable {
     }
   }
   
+  
+  
+  /**  Activity calls-
+    */
+  protected void onVisit(Building visits) {
+    return;
+  }
+  
+  
+  protected void onTarget(Target target) {
+    return;
+  }
   
 
   
