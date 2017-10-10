@@ -2,8 +2,9 @@
 
 package game;
 import util.*;
-import static game.GameConstants.*;
+import static game.Task.*;
 import static game.CityMap.*;
+import static game.GameConstants.*;
 
 
 
@@ -154,6 +155,7 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
   /**  Regular updates-
     */
   void update() {
+    //
     //  TODO:  Don't allow another job to be assigned while this one is in
     //  the middle of an update!
     if (job != null && job.checkAndUpdatePathing()) {
@@ -245,14 +247,14 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
   }
   
   
-  public Task.JOB jobType() {
-    if (job == null) return Task.JOB.NONE;
+  public JOB jobType() {
+    if (job == null) return JOB.NONE;
     return job.type;
   }
   
   
   public boolean inCombat() {
-    return jobType() == Task.JOB.COMBAT;
+    return jobType() == JOB.COMBAT;
   }
   
   
@@ -294,7 +296,7 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
   }
   
   
-  void embarkOnVisit(Building goes, int maxTime, Task.JOB jobType, Employer e) {
+  void embarkOnVisit(Building goes, int maxTime, JOB jobType, Employer e) {
     if (goes == null) return;
     if (reports()) I.say(this+" will visit "+goes+" for time "+maxTime);
     
@@ -303,7 +305,7 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
   }
   
   
-  void embarkOnTarget(Target goes, int maxTime, Task.JOB jobType, Employer e) {
+  void embarkOnTarget(Target goes, int maxTime, JOB jobType, Employer e) {
     if (goes == null) return;
     if (reports()) I.say(this+" will target "+goes+" for time "+maxTime);
     
@@ -317,25 +319,25 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
     if (reports()) I.say(this+" will return to "+origin);
     
     job = new Task(this);
-    job = job.configTask(origin, origin, null, Task.JOB.RETURNING, 0);
+    job = job.configTask(origin, origin, null, JOB.RETURNING, 0);
   }
   
   
   void beginDelivery(
-    Building from, Building goes, Task.JOB jobType,
+    Building from, Building goes, JOB jobType,
     Good carried, float amount, Employer e
   ) {
     if (from == null || goes == null || goes.entrance == null) return;
     
     TaskDelivery d = new TaskDelivery(this);
-    job = d.configDelivery(from, goes, Task.JOB.SHOPPING, carried, amount, e);
+    job = d.configDelivery(from, goes, JOB.SHOPPING, carried, amount, e);
     if (job == null) return;
     
     if (reports()) I.say(this+" will deliver "+amount+" "+carried+" to "+goes);
   }
   
   
-  void beginAttack(Target target, Task.JOB jobType, Employer e) {
+  void beginAttack(Target target, JOB jobType, Employer e) {
     if (target == null) return;
     if (reports()) I.say(this+" will attack "+target);
     
@@ -348,7 +350,7 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
     if (reports()) I.say(this+" beginning random walk...");
     
     job = new TaskWander(this);
-    job = job.configTask(null, null, null, Task.JOB.WANDERING, 0);
+    job = job.configTask(null, null, null, JOB.WANDERING, 0);
   }
   
   
@@ -359,9 +361,11 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
   void pickupGood(Good carried, float amount, Building store) {
     if (store == null || carried == null || amount <= 0) return;
     
+    if (this.carried != carried) this.carryAmount = 0;
+    
     store.inventory.add(0 - amount, carried);
-    this.carried     = carried;
-    this.carryAmount = amount ;
+    this.carried      = carried;
+    this.carryAmount += amount ;
   }
   
   

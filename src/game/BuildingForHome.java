@@ -153,6 +153,15 @@ public class BuildingForHome extends Building {
   }
   
   
+  Batch <Good> consumedBy(ObjectType tier) {
+    Batch <Good> consumes = new Batch();
+    consumes.add(WATER);
+    for (Good g : tier.consumed) consumes.add(g);
+    //  TODO:  Add the various food types as well?
+    return consumes;
+  }
+  
+  
   
   /**  Life-cycle functions-
     */
@@ -181,12 +190,18 @@ public class BuildingForHome extends Building {
   
   
   void advanceConsumption(ObjectType tier) {
-    float conLevel = 1f / tier.consumeTime;
-    for (Good cons : tier.consumed) {
+    float conLevel = 1f * residents.size() / tier.consumeTime;
+    conLevel *= type.updateTime;
+    
+    for (Good cons : consumedBy(tier)) {
       float amount = inventory.valueFor(cons);
       amount = Nums.max(0, amount - conLevel);
       inventory.set(cons, amount);
     }
+    
+    float taxGen = TAX_VALUES[type.homeSocialClass] * conLevel;
+    inventory.add(taxGen  , TAXES    );
+    inventory.add(conLevel, NIGHTSOIL);
   }
   
   
@@ -206,31 +221,45 @@ public class BuildingForHome extends Building {
     //
     //  Failing that, see if you can go shopping:
     ObjectType tier = tierOffset(1);
-    Building goes = null;
-    for (Good cons : tier.consumed) {
-      if (inventory.valueFor(cons) >= tier.maxStock) continue;
+    class Order { Building b; Good g; }
+    Pick <Order> pickS = new Pick();
+    
+    for (Good cons : consumedBy(tier)) {
+      float need = tier.maxStock - inventory.valueFor(cons);
+      if (need <= 0) continue;
       
-      Building tried = findNearestWithFeature(IS_MARKET, 50);
-      if (tried == null || tried.inventory.valueFor(cons) < 1) continue;
-      
-      goes = tried;
+      for (Building b : map.buildings) {
+        if (! b.type.hasFeature(IS_MARKET)) continue;
+        
+        float dist = CityMap.distance(entrance, b.entrance);
+        if (dist > 50) continue;
+        
+        float amount = b.inventory.valueFor(cons);
+        if (amount < 1) continue;
+        
+        float rating = need * amount * 10 / (10 + dist);
+        Order o = new Order();
+        o.b = b;
+        o.g = cons;
+        pickS.compare(o, rating);
+      }
     }
-    if (goes != null) {
-      walker.embarkOnVisit(goes, 5, JOB.SHOPPING, this);
+    if (! pickS.empty()) {
+      Order o = pickS.result();
+      walker.embarkOnVisit(o.b, 5, JOB.SHOPPING, this);
       return;
     }
     //
     //  Failing that, select a leisure behaviour to perform:
     //  TODO:  Compare all nearby amenities!
+    Pick <Building> pickV = new Pick();
     
-    Pick <Building> pick = new Pick();
-
-    pick.compare(this, 1.0f * Rand.num());
-    goes = findNearestWithFeature(DIVERSION, 50);
+    pickV.compare(this, 1.0f * Rand.num());
+    Building goes = findNearestWithFeature(DIVERSION, 50);
     if (goes != null) {
-      pick.compare(goes, 1.0f * Rand.num());
+      pickV.compare(goes, 1.0f * Rand.num());
     }
-    goes = pick.result();
+    goes = pickV.result();
     
     if (goes != this && goes != null) {
       walker.embarkOnVisit(goes, 25, JOB.VISITING, this);
@@ -256,7 +285,7 @@ public class BuildingForHome extends Building {
         walker.offloadGood(walker.carried, this);
       }
       
-      else for (Good cons : tier.consumed) {
+      else for (Good cons : consumedBy(tier)) {
         if (this.inventory.valueFor(cons) >= tier.maxStock) continue;
         
         float stock = enters.inventory.valueFor(cons);

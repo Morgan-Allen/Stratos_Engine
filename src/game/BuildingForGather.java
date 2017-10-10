@@ -31,12 +31,6 @@ public class BuildingForGather extends BuildingForCrafts {
   
   /**  Life-cycle, update and economic functions-
     */
-  void advanceProduction() {
-    //super.advanceProduction();
-    return;
-  }
-  
-  
   public void selectWalkerBehaviour(Walker walker) {
     
     Box2D box = new Box2D(at.x, at.y, type.wide, type.high);
@@ -48,6 +42,11 @@ public class BuildingForGather extends BuildingForCrafts {
     }
     
     super.selectWalkerBehaviour(walker);
+  }
+  
+  
+  void advanceProduction() {
+    return;
   }
   
   

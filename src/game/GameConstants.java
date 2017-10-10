@@ -110,19 +110,26 @@ public class GameConstants {
   }
   final static Good
     MAIZE      = new Good("Maize"       , 10, 0 ),
-    RAW_COTTON = new Good("Raw Cotton"  , 15, 1 ),
-    WOOD       = new Good("Wood"        , 10, 2 ),
-    RUBBER     = new Good("Rubber"      , 25, 3 ),
-    CLAY       = new Good("Clay"        , 10, 4 ),
-    ADOBE      = new Good("Adobe"       , 20, 5 ),
+    CHILI      = new Good("Chili"       , 12, 1 ),
+    WATER      = new Good("Water"       , 0 , 2 ),
+    RAW_COTTON = new Good("Raw Cotton"  , 15, 3 ),
+    WOOD       = new Good("Wood"        , 10, 4 ),
+    RUBBER     = new Good("Rubber"      , 25, 5 ),
+    CLAY       = new Good("Clay"        , 10, 6 ),
+    ADOBE      = new Good("Adobe"       , 20, 7 ),
     
-    POTTERY    = new Good("Pottery"     , 50, 6 ),
-    COTTON     = new Good("Cotton"      , 75, 7 ),
+    POTTERY    = new Good("Pottery"     , 50, 8 ),
+    COTTON     = new Good("Cotton"      , 75, 9 ),
+    
+    TAXES      = new Good("Taxes"       , 1 , 10),
+    NIGHTSOIL  = new Good("Nightsoil"   , 5 , 11),
     
     IS_ADMIN   = new Good("Is Admin"    , -1, 21),
     IS_MARKET  = new Good("Is Market"   , -1, 22),
     IS_TRADER  = new Good("Is Trader"   , -1, 24),
     IS_HOUSING = new Good("Is Housing"  , -1, 25),
+    IS_WATER   = new Good("Is Water"    , -1, 26),
+    
     DIVERSION  = new Good("Diversion"   , -1, 30),
     EDUCATION  = new Good("Education"   , -1, 31),
     HEALTHCARE = new Good("Healthcare"  , -1, 32),
@@ -160,7 +167,8 @@ public class GameConstants {
     CLASS_COMMON  = 1,
     CLASS_TRADER  = 2,
     CLASS_NOBLE   = 3,
-    ALL_CLASSES[] = { 0, 1, 2, 3 }
+    ALL_CLASSES[] = { 0, 1, 2, 3 },
+    TAX_VALUES [] = { 0, 10, 25, 100 }
   ;
   final static WalkerType
     NO_WALKERS[] = new WalkerType[0],
@@ -213,9 +221,11 @@ public class GameConstants {
     HOUSE_T2      = new BuildType("type_house_tier2"  , IS_UPGRADE    ),
     
     MASON         = new BuildType("type_mason"        , IS_CRAFTS_BLD ),
-    LATRINE       = new BuildType("type_latrine"      , IS_SERVICE_BLD),
-    SCHOOL        = new BuildType("type_public_school", IS_SERVICE_BLD),
-    BALL_COURT    = new BuildType("type_ball_court"   , IS_SERVICE_BLD),
+    COLLECTOR     = new BuildType("type_collector"    , IS_COLLECT_BLD),
+    LATRINE       = new BuildType("type_latrine"      , IS_COLLECT_BLD),
+    BASIN         = new BuildType("type_basin"        , IS_WATER_BLD  ),
+    SCHOOL        = new BuildType("type_public_school", IS_AMENITY_BLD),
+    BALL_COURT    = new BuildType("type_ball_court"   , IS_AMENITY_BLD),
     
     FARMER_HUT    = new BuildType("type_farmer_hut"   , IS_GATHER_BLD ),
     QUARRY_PIT    = new BuildType("type_quarry_pit"   , IS_CRAFTS_BLD ),
@@ -234,19 +244,22 @@ public class GameConstants {
     PALACE.tint = colour(7, 3, 3);
     PALACE.homeSocialClass = CLASS_NOBLE;
     PALACE.maxResidents = 2;
-    PALACE.setWorkerTypes(NOBLE);
+    PALACE.setWorkerTypes(NOBLE, SERVANT);
     PALACE.maxWorkers = 2;
     PALACE.maxHealth = 300;
     PALACE.setBuildMaterials(WOOD, 15, ADOBE, 25, COTTON, 10, POTTERY, 5);
+    PALACE.features = new Good[] { IS_HOUSING };
     
     HOUSE.name = "House";
     HOUSE.setDimensions(2, 2, 1);
     HOUSE.tint = colour(3, 7, 3);
-    HOUSE.maxResidents = 2;
+    HOUSE.setWorkerTypes(CITIZEN);
+    HOUSE.maxResidents = 4;
     HOUSE.maxStock = 2;
     HOUSE.setBuildMaterials(WOOD, 2, CLAY, 1);
     HOUSE.buildsWith = new Good[] { WOOD, CLAY };
     HOUSE.setUpgradeTiers(HOUSE, HOUSE_T1, HOUSE_T2);
+    HOUSE.features = new Good[] { IS_HOUSING };
     
     HOUSE_T1.name = "Improved House";
     HOUSE_T1.setBuildMaterials(WOOD, 4, CLAY, 2);
@@ -270,11 +283,26 @@ public class GameConstants {
     MASON.setBuildMaterials(ADOBE, 2, WOOD, 2, CLAY, 2);
     MASON.buildsWith = new Good[] { WOOD, CLAY, ADOBE };
     
+    COLLECTOR.name = "Collector";
+    COLLECTOR.setDimensions(2, 2, 1);
+    COLLECTOR.tint = colour(6, 2, 6);
+    COLLECTOR.setWorkerTypes(MERCHANT);
+    COLLECTOR.setBuildMaterials(ADOBE, 2, WOOD, 2, CLAY, 2);
+    COLLECTOR.produced = new Good[] { TAXES };
+    COLLECTOR.features = new Good[] { IS_ADMIN };
+    
+    BASIN.name = "Basin";
+    BASIN.setDimensions(2, 2, 0);
+    BASIN.tint = colour(6, 2, 6);
+    BASIN.setBuildMaterials(ADOBE, 2, CLAY, 2);
+    BASIN.features = new Good[] { IS_WATER, IS_MARKET };
+    
     LATRINE.name = "Latrine";
     LATRINE.setDimensions(1, 1, 1);
     LATRINE.tint = colour(6, 2, 6);
     LATRINE.setWorkerTypes(WORKER);
     LATRINE.setBuildMaterials(WOOD, 2, CLAY, 1);
+    LATRINE.produced = new Good[] { NIGHTSOIL };
     
     SCHOOL.name = "Public School";
     SCHOOL.setDimensions(2, 2, 1);
@@ -339,6 +367,7 @@ public class GameConstants {
     PORTER_HOUSE.setWorkerTypes(PORTERS, WORKER);
     PORTER_HOUSE.features = new Good[] { IS_TRADER };
     PORTER_HOUSE.setBuildMaterials(WOOD, 4, ADOBE, 2, POTTERY, 2);
+    
     
     GARRISON.name = "Garrison";
     GARRISON.setDimensions(6, 6, 2);

@@ -21,12 +21,14 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
     IS_UPGRADE     = 4,
     IS_CRAFTS_BLD  = 5,
     IS_GATHER_BLD  = 6,
-    IS_TRADE_BLD   = 7,
-    IS_HOME_BLD    = 8,
-    IS_SERVICE_BLD = 9,
-    IS_ARMY_BLD    = 10,
-    IS_WALKER      = 11,
-    IS_TRADE_WLK   = 12
+    IS_WATER_BLD   = 7,
+    IS_TRADE_BLD   = 8,
+    IS_HOME_BLD    = 9,
+    IS_AMENITY_BLD = 10,
+    IS_COLLECT_BLD = 11,
+    IS_ARMY_BLD    = 12,
+    IS_WALKER      = 13,
+    IS_TRADE_WLK   = 14
   ;
   
   final static Index <ObjectType> INDEX = new Index();
@@ -54,36 +56,16 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
       case(IS_BUILDING   ): return new Building           (this);
       case(IS_CRAFTS_BLD ): return new BuildingForCrafts  (this);
       case(IS_GATHER_BLD ): return new BuildingForGather  (this);
+      case(IS_WATER_BLD  ): return new BuildingForWater   (this);
       case(IS_TRADE_BLD  ): return new BuildingForTrade   (this);
       case(IS_HOME_BLD   ): return new BuildingForHome    (this);
-      case(IS_SERVICE_BLD): return new BuildingForService (this);
+      case(IS_AMENITY_BLD): return new BuildingForAmenity (this);
+      case(IS_COLLECT_BLD): return new BuildingForCollect (this);
       case(IS_ARMY_BLD   ): return new BuildingForMilitary(this);
       case(IS_WALKER     ): return new Walker        (this);
       case(IS_TRADE_WLK  ): return new WalkerForTrade(this);
     }
     return null;
-  }
-  
-  
-  
-  /**  Common data fields and setup functions-
-    */
-  String name;
-  int tint = BLACK_COLOR;
-  
-  int category;
-  int wide = 1, high = 1, deep = 1;
-  boolean blocks = true ;
-  boolean mobile = false;
-  float growRate = 0;
-  int   ambience = 0;
-  
-  
-  void setDimensions(int w, int h, int d) {
-    this.wide = w;
-    this.high = h;
-    this.deep = d;
-    this.maxHealth = (int) (10 * w * h * (1 + ((d - 1) / 2f)));
   }
   
   
@@ -95,10 +77,41 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   
   
   
+  /**  Common data fields and setup functions-
+    */
+  String name;
+  int tint = BLACK_COLOR;
+  
+  int category;
+  int wide = 1, high = 1, deep = 1;
+  
+  Good    builtFrom  [] = NO_GOODS;
+  Integer builtAmount[] = {};
+  boolean blocks   = true ;
+  boolean mobile   = false;
+  float   growRate = 0;
+  int     ambience = 0;
+  boolean aqueduct = false;
+  
+  
+  void setDimensions(int w, int h, int d) {
+    this.wide = w;
+    this.high = h;
+    this.deep = d;
+    this.maxHealth = (int) (10 * w * h * (1 + ((d - 1) / 2f)));
+  }
+  
+  
+  void setBuildMaterials(Object... args) {
+    Object split[][] = Visit.splitByModulus(args, 2);
+    builtFrom   = (Good   []) castArray(split[0], Good   .class);
+    builtAmount = (Integer[]) castArray(split[1], Integer.class);
+  }
+  
+  
+  
   /**  Building-specific data fields and setup methods-
     */
-  Good       builtFrom   [] = NO_GOODS;
-  Integer    builtAmount [] = {};
   Good       buildsWith  [] = NO_GOODS;
   ObjectType upgradeTiers[] = NO_TIERS;
   ObjectType upgradeNeeds[] = NO_NEEDS;
@@ -126,13 +139,6 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   int maxRecruits  = 16;
   int numRanks     = 4 ;
   int numFile      = 4 ;
-  
-  
-  void setBuildMaterials(Object... args) {
-    Object split[][] = Visit.splitByModulus(args, 2);
-    builtFrom   = (Good   []) castArray(split[0], Good   .class);
-    builtAmount = (Integer[]) castArray(split[1], Integer.class);
-  }
   
   
   void setUpgradeTiers(ObjectType... tiers) {

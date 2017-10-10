@@ -49,15 +49,22 @@ public class CityBorders {
     float jobsCrowding, homeCrowding;
     
     Assessment(CityMap map) {
+      int MR, NR, MW, NW;
       
       for (Building b : map.buildings) {
+        boolean report = b.reports();
+        if (report) {
+          I.say("\nGetting job assessment for "+b);
+        }
         for (int socialClass : ALL_CLASSES) {
-          homeTotal  += b.maxResidents(socialClass);
-          homeFilled += b.numResidents(socialClass);
+          homeTotal  += MR = b.maxResidents(socialClass);
+          homeFilled += NR = b.numResidents(socialClass);
+          if (report) I.say("  Class "+socialClass+": "+NR+"/"+MR);
         }
         for (ObjectType t : b.type.workerTypes) {
-          jobsTotal  += b.maxWorkers(t);
-          jobsFilled += b.numWorkers(t);
+          jobsTotal  += MW = b.maxWorkers(t);
+          jobsFilled += NW = b.numWorkers(t);
+          if (report) I.say("  Job "+t+": "+NW+"/"+MW);
         }
       }
       
@@ -114,8 +121,12 @@ public class CityBorders {
     
     Opening o = pick.result();
     if (o != null) {
+      Building b = o.b;
+      int SC = o.position.socialClass;
+      
       migrant.type = o.position;
-      o.b.setWorker(migrant, true);
+      b.setWorker(migrant, true);
+      if (b.maxResidents(SC) > b.numResidents(SC)) b.setResident(migrant, true);
     }
   }
   
