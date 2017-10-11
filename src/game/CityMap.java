@@ -242,6 +242,7 @@ public class CityMap implements Session.Saveable {
     for (Coord c : Visit.grid(x, y, w, h, 1)) {
       Tile t = map.tileAt(c.x, c.y);
       if (t != null) t.paved = is;
+      if (t.above != null) t.above.exitMap(map);
     }
   }
   

@@ -110,6 +110,8 @@ public class GameConstants {
     MEADOW      .tint = colour(2, 5, 2);
     LAKE        .tint = colour(0, 0, 3);
     
+    //  TODO:  UNIFY WITH CROPS BELOW!
+    JUNGLE_TREE1.growRate = 0.5f;
     DESERT_ROCK1.wide = DESERT_ROCK1.high = 2;
     LAKE.blocks = true;
   }
@@ -174,6 +176,9 @@ public class GameConstants {
     for (Good g : CROP_TYPES) {
       g.tint = TINT_CROPS[i++ % 3];
       g.growRate = 1f;
+    }
+    for (Good g : TREE_TYPES) {
+      g.growRate = 0.5f;
     }
   }
   

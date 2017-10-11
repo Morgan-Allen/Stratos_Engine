@@ -23,6 +23,7 @@ public class Task implements Session.Saveable {
     SHOPPING ,
     TRADING  ,
     VISITING ,
+    PLANTING ,
     GATHERING,
     CRAFTING ,
     BUILDING ,
@@ -104,7 +105,7 @@ public class Task implements Session.Saveable {
     this.visits    = visits ;
     this.target    = target ;
     
-    if (maxTime == -1) maxTime = Walker.AVG_VISIT_TIME;
+    if (maxTime == -1) this.maxTime = Walker.AVG_VISIT_TIME;
     path = updatePathing();
     
     if (path != null) {
