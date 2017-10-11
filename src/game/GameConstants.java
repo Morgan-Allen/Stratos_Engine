@@ -23,7 +23,31 @@ public class GameConstants {
     WALKER_COLOR = colour(9, 9, 0),
     
     WHITE_COLOR  = colour(10, 10, 10),
-    BLACK_COLOR  = colour(0 , 0 , 0 )
+    BLACK_COLOR  = colour(0 , 0 , 0 ),
+    
+    //  Brown, Grey, White, Red, Green, Blue, Orange, Purple, Yellow.
+    //  Industrial and sanitation in brown.
+    TINT_LITE_INDUSTRIAL  = colour(6, 3, 3),
+    TINT_INDUSTRIAL       = colour(5, 2, 2),
+    //  Military in red.
+    TINT_MILITARY         = colour(7, 0, 0),
+    //  Economic in blue.
+    TINT_LITE_COMMERCIAL  = colour(3, 1, 8),
+    TINT_COMMERCIAL       = colour(2, 0, 7),
+    //  Residential in yellow.
+    TINT_LITE_RESIDENTIAL = colour(8, 8, 1),
+    TINT_RESIDENTIAL      = colour(7, 7, 0),
+    //  Entertainment in purple.
+    TINT_AMENITY          = colour(7, 0, 7),
+    //  Health/education in white.
+    TINT_HEALTH_ED        = colour(7, 7, 7),
+    
+    //  Crops in shades of green:
+    TINT_CROPS[] = {
+      colour(1, 8, 3),
+      colour(0, 7, 2),
+      colour(2, 8, 0),
+    }
   ;
   
   
@@ -109,9 +133,9 @@ public class GameConstants {
     }
   }
   final static Good
-    MAIZE      = new Good("Maize"       , 10, 0 ),
-    CHILI      = new Good("Chili"       , 12, 1 ),
-    WATER      = new Good("Water"       , 0 , 2 ),
+    WATER      = new Good("Water"       , 0 , 0 ),
+    MAIZE      = new Good("Maize"       , 10, 1 ),
+    CHILI      = new Good("Chili"       , 12, 2 ),
     RAW_COTTON = new Good("Raw Cotton"  , 15, 3 ),
     WOOD       = new Good("Wood"        , 10, 4 ),
     RUBBER     = new Good("Rubber"      , 25, 5 ),
@@ -135,7 +159,7 @@ public class GameConstants {
     HEALTHCARE = new Good("Healthcare"  , -1, 32),
     RELIGION   = new Good("Religion"    , -1, 33),
     
-    CROP_TYPES [] = { MAIZE, RAW_COTTON },
+    CROP_TYPES [] = { MAIZE, CHILI, RAW_COTTON },
     TREE_TYPES [] = { WOOD, RUBBER },
     STONE_TYPES[] = { CLAY, ADOBE },
     BUILD_GOODS[] = { WOOD, CLAY, ADOBE },
@@ -146,11 +170,11 @@ public class GameConstants {
     NO_GOODS      [] = new Good[0];
   
   static {
-    MAIZE     .tint = colour(9, 9, 1);
-    RAW_COTTON.tint = colour(9, 8, 9);
-    RUBBER    .tint = colour(2, 2, 2);
-    
-    for (Good g : CROP_TYPES) g.growRate = 1f;
+    int i = 0;
+    for (Good g : CROP_TYPES) {
+      g.tint = TINT_CROPS[i++ % 3];
+      g.growRate = 1f;
+    }
   }
   
   
@@ -241,7 +265,7 @@ public class GameConstants {
     
     PALACE.name = "Palace";
     PALACE.setDimensions(5, 5, 2);
-    PALACE.tint = colour(7, 3, 3);
+    PALACE.tint = TINT_RESIDENTIAL;
     PALACE.homeSocialClass = CLASS_NOBLE;
     PALACE.maxResidents = 2;
     PALACE.setWorkerTypes(NOBLE, SERVANT);
@@ -252,7 +276,7 @@ public class GameConstants {
     
     HOUSE.name = "House";
     HOUSE.setDimensions(2, 2, 1);
-    HOUSE.tint = colour(3, 7, 3);
+    HOUSE.tint = TINT_LITE_RESIDENTIAL;
     HOUSE.setWorkerTypes(CITIZEN);
     HOUSE.maxResidents = 4;
     HOUSE.maxStock = 2;
@@ -276,7 +300,7 @@ public class GameConstants {
     
     MASON.name = "Mason";
     MASON.setDimensions(2, 2, 1);
-    MASON.tint = colour(6, 2, 6);
+    MASON.tint = TINT_LITE_INDUSTRIAL;
     MASON.setWorkerTypes(WORKER);
     MASON.craftTime *= 2;
     MASON.maxWorkers = 2;
@@ -285,7 +309,7 @@ public class GameConstants {
     
     COLLECTOR.name = "Collector";
     COLLECTOR.setDimensions(2, 2, 1);
-    COLLECTOR.tint = colour(6, 2, 6);
+    COLLECTOR.tint = TINT_COMMERCIAL;
     COLLECTOR.setWorkerTypes(MERCHANT);
     COLLECTOR.setBuildMaterials(ADOBE, 2, WOOD, 2, CLAY, 2);
     COLLECTOR.produced = new Good[] { TAXES };
@@ -293,27 +317,27 @@ public class GameConstants {
     
     BASIN.name = "Basin";
     BASIN.setDimensions(2, 2, 0);
-    BASIN.tint = colour(6, 2, 6);
+    BASIN.tint = TINT_HEALTH_ED;
     BASIN.setBuildMaterials(ADOBE, 2, CLAY, 2);
     BASIN.features = new Good[] { IS_WATER, IS_MARKET };
     
     LATRINE.name = "Latrine";
     LATRINE.setDimensions(1, 1, 1);
-    LATRINE.tint = colour(6, 2, 6);
+    LATRINE.tint = TINT_LITE_INDUSTRIAL;
     LATRINE.setWorkerTypes(WORKER);
     LATRINE.setBuildMaterials(WOOD, 2, CLAY, 1);
     LATRINE.produced = new Good[] { NIGHTSOIL };
     
     SCHOOL.name = "Public School";
     SCHOOL.setDimensions(2, 2, 1);
-    SCHOOL.tint = colour(3, 7, 3);
+    SCHOOL.tint = TINT_HEALTH_ED;
     SCHOOL.setWorkerTypes(CITIZEN);
     SCHOOL.features = new Good[] { EDUCATION };
     SCHOOL.setBuildMaterials(WOOD, 5, CLAY, 2, ADOBE, 3);
     
     BALL_COURT.name = "Ball Court";
     BALL_COURT.setDimensions(3, 3, 1);
-    BALL_COURT.tint = colour(3, 3, 7);
+    BALL_COURT.tint = TINT_AMENITY;
     BALL_COURT.features = new Good[] { DIVERSION };
     BALL_COURT.featureAmount = 15;
     BALL_COURT.setBuildMaterials(ADOBE, 10, RUBBER, 5);
@@ -321,7 +345,7 @@ public class GameConstants {
     
     FARMER_HUT.name = "Farmer Hut";
     FARMER_HUT.setDimensions(3, 3, 1);
-    FARMER_HUT.tint = colour(7, 7, 3);
+    FARMER_HUT.tint = TINT_LITE_INDUSTRIAL;
     FARMER_HUT.setWorkerTypes(WORKER);
     FARMER_HUT.produced = CROP_TYPES;
     FARMER_HUT.maxWorkers = 2;
@@ -329,14 +353,14 @@ public class GameConstants {
     
     QUARRY_PIT.name = "Quarry Pit";
     QUARRY_PIT.setDimensions(4, 4, 0);
-    QUARRY_PIT.tint = colour(7, 7, 3);
+    QUARRY_PIT.tint = TINT_LITE_INDUSTRIAL;
     QUARRY_PIT.setWorkerTypes(WORKER);
     QUARRY_PIT.produced = new Good[] { CLAY };
     QUARRY_PIT.setBuildMaterials(WOOD, 5, CLAY, 2);
     
     KILN.name = "Kiln";
     KILN.setDimensions(2, 2, 1);
-    KILN.tint = colour(7, 3, 7);
+    KILN.tint = TINT_INDUSTRIAL;
     KILN.setWorkerTypes(WORKER);
     KILN.needed   = new Good[] { CLAY };
     KILN.produced = new Good[] { POTTERY };
@@ -345,7 +369,7 @@ public class GameConstants {
     
     WEAVER.name = "Weaver";
     WEAVER.setDimensions(2, 2, 1);
-    WEAVER.tint = colour(7, 3, 7);
+    WEAVER.tint = TINT_INDUSTRIAL;
     WEAVER.setWorkerTypes(WORKER);
     WEAVER.needed   = new Good[] { RAW_COTTON };
     WEAVER.produced = new Good[] { COTTON };
@@ -355,7 +379,7 @@ public class GameConstants {
     MARKET.name = "Marketplace";
     MARKET.wide = 4;
     MARKET.high = 4;
-    MARKET.tint = colour(4, 8, 4);
+    MARKET.tint = TINT_COMMERCIAL;
     MARKET.setWorkerTypes(MERCHANT);
     MARKET.needed   = new Good[] { POTTERY };
     MARKET.features = new Good[] { IS_MARKET };
@@ -363,7 +387,7 @@ public class GameConstants {
     
     PORTER_HOUSE.name = "Porter Post";
     PORTER_HOUSE.setDimensions(3, 3, 1);
-    PORTER_HOUSE.tint = colour(8, 4, 8);
+    PORTER_HOUSE.tint = TINT_COMMERCIAL;
     PORTER_HOUSE.setWorkerTypes(PORTERS, WORKER);
     PORTER_HOUSE.features = new Good[] { IS_TRADER };
     PORTER_HOUSE.setBuildMaterials(WOOD, 4, ADOBE, 2, POTTERY, 2);
@@ -371,7 +395,7 @@ public class GameConstants {
     
     GARRISON.name = "Garrison";
     GARRISON.setDimensions(6, 6, 2);
-    GARRISON.tint = colour(8, 8, 8);
+    GARRISON.tint = TINT_MILITARY;
     GARRISON.setWorkerTypes(SOLDIER);
     GARRISON.maxWorkers = 2;
     GARRISON.maxHealth  = 250;

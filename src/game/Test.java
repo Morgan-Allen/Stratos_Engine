@@ -155,7 +155,8 @@ public class Test {
       report += "Funding: "+map.city.currentFunds;
       report += "\n";
     }
-    report += "Paused: "+paused;
+    report += "Time: "+map.time;
+    report += "\nPaused: "+paused;
     return report;
   }
   
