@@ -91,17 +91,21 @@ public class BuildingForTrade extends BuildingForCrafts implements Trader {
   /**  Small workaround for creating porter-chains:
     */
   public void setWorker(Walker w, boolean is) {
-    if (w.type.category == ObjectType.IS_TRADE_WLK) {
+    //  TODO:  THIS IS A TEMPORARY HACK!  REPLACE SOON!
+    boolean isTrader = w instanceof WalkerForTrade;
+    if (w.type.category == ObjectType.IS_TRADE_WLK && ! isTrader) {
       if (is) {
         CityMap.Tile at = w.at();
         w.setDestroyed();
+        w.exitMap();
+        w.ageSeconds = LIFESPAN_LENGTH / 2;
         w = new WalkerForTrade(w.type);
         w.enterMap(map, at.x, at.y);
         super.setWorker(w, true);
       }
       else {
         //  TODO:  You will need a better solution than this.  Create
-        //  behaviours instead?
+        //  behaviours instead!
         super.setWorker(w, false);
       }
     }

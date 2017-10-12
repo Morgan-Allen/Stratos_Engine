@@ -37,7 +37,7 @@ public class Test {
         }
         for (Walker w : map.walkers) if (w.inside == null) {
           int fill = WALKER_COLOR;
-          if      (w.work != null) fill = w.work.type.tint;
+          if      (w.work() != null) fill = w.work().type.tint;
           else if (w.home != null) fill = w.home.type.tint;
           graphic[w.at.x][w.at.y] = fill;
         }
@@ -135,6 +135,7 @@ public class Test {
   static Walker spawnWalker(Building b, ObjectType type, boolean resident) {
     
     Walker walker = (Walker) type.generate();
+    type.initAsMigrant(walker);
     walker.enterMap(b.map, b.at.x, b.at.y);
     walker.inside = b;
     

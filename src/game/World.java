@@ -98,7 +98,7 @@ public class World implements Session.Saveable {
     j.from       = from;
     j.goes       = goes;
     j.startTime  = time;
-    j.arriveTime = j.startTime + (distance * Walker.TRADE_DIST_TIME);
+    j.arriveTime = j.startTime + (distance * TRADE_DIST_TIME);
     for (Journeys g : going) j.going.add(g);
     journeys.add(j);
     

@@ -3,6 +3,7 @@
 package game;
 import util.*;
 import static game.CityMap.*;
+import static game.GameConstants.*;
 import static util.TileConstants.*;
 
 
@@ -36,7 +37,7 @@ public class TaskWander extends Task {
     Tile    next   = actor.at;
     int     facing = T_ADJACENT[Rand.index(4)];
     
-    while (walk.size() < Walker.MAX_WANDER_RANGE) {
+    while (walk.size() < MAX_WANDER_RANGE) {
       boolean prefPave = map.paved(next.x, next.y);
       int nx, ny, numDirs = 0;
       int backDir = (facing + 4) % 8;

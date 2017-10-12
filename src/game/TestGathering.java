@@ -14,6 +14,7 @@ public class TestGathering extends Test {
     testGathering(true);
   }
   
+  
   static void testGathering(boolean graphics) {
     
     World   world = new World();
@@ -81,7 +82,7 @@ public class TestGathering extends Test {
         }
       }
     }
-
+    
     I.say("\nTERRAIN TEST FAILED!");
     I.say("  Total gathered: "+farm.inventory);
   }

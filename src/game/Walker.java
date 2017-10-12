@@ -3,6 +3,9 @@
 package game;
 import util.*;
 import static game.Task.*;
+
+import game.GameConstants.Good;
+
 import static game.CityMap.*;
 import static game.GameConstants.*;
 
@@ -14,15 +17,13 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
   /**  Data fields and setup/initialisation-
     */
   final public static int
-    
-    MAX_WANDER_RANGE = 20,
-    AVG_VISIT_TIME   = 20,
-    TRADE_DIST_TIME  = 50,
-    
     STATE_OKAY   = 1,
     STATE_SLEEP  = 2,
     STATE_DEAD   = 3,
-    STATE_DECOMP = 4
+    STATE_DECOMP = 4,
+    
+    SEX_MALE   = 1 << 0,
+    SEX_FEMALE = 1 << 1
   ;
   static int nextID = 0;
   int dirs[] = new int[4];
@@ -30,23 +31,36 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
   
   String ID;
   
-  Building  work;
+  private Building  work;
   Building  home;
   City      homeCity;
   Formation formation;
   Building  inside;
   boolean   guest;
   
+  //*
+  Building work() { return work; }
+  
+  void setWork(Building work) {
+    this.work = work;
+  }
+  //*/
+  
   Task job;
   
   Good  carried = null;
   float carryAmount = 0;
   
+  int sexData    = -1;
+  int ageSeconds =  0;
+  int pregnancy  =  0;
   float injury ;
   float hunger ;
   float fatigue;
   float stress ;
   int   state = STATE_OKAY;
+  
+  //Tally <Good> cargo = new Tally();
   Tally <ObjectType> skills = new Tally();
   
   
@@ -74,6 +88,10 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
     carried     = (Good) s.loadObject();
     carryAmount = s.loadFloat();
     
+    sexData    = s.loadInt();
+    ageSeconds = s.loadInt();
+    pregnancy  = s.loadInt();
+    
     injury  = s.loadFloat();
     hunger  = s.loadFloat();
     fatigue = s.loadFloat();
@@ -100,6 +118,10 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
     s.saveObject(carried);
     s.saveFloat(carryAmount);
     
+    s.saveInt(sexData   );
+    s.saveInt(ageSeconds);
+    s.saveInt(pregnancy );
+    
     s.saveFloat(injury );
     s.saveFloat(hunger );
     s.saveFloat(fatigue);
@@ -116,7 +138,6 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
     this.map = map;
     this.at  = map.tileAt(x, y);
     map.walkers.add(this);
-    //I.say("\n"+this+" ENTERED MAP...");
   }
   
   
@@ -132,8 +153,8 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
   
   void setDestroyed() {
     if (formation != null) formation.toggleRecruit(this, false);
-    if (home      != null) home.residents.remove(this);
-    if (work      != null) work.workers  .remove(this);
+    if (home      != null) home.setResident(this, false);
+    if (work      != null) work.setWorker  (this, false);
     home      = null;
     work      = null;
     formation = null;
@@ -211,17 +232,25 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
     }
     //
     //  And update your current health-
+    updateAging();
     checkHealthState();
   }
   
   
   void beginNextBehaviour() {
-    
+    boolean adult = adult();
     job = null;
     
-    if (homeCity == null || homeCity == map.city) {
+    //  Adults will search for work and a place to live:
+    if ((homeCity == null || homeCity == map.city) && adult) {
       if (work == null) CityBorders.findWork(map, this);
+      if (map == null) return;  //  TODO:  TEMPORARY HACK, REMOVE
       if (home == null) CityBorders.findHome(map, this);
+      if (map == null) return;  //  TODO:  TEMPORARY HACK, REMOVE
+    }
+    //  Children and retirees don't work:
+    if (work != null && ! adult) {
+      work.setWorker(this, false);
     }
     
     if (formation != null && formation.active) {
@@ -244,17 +273,6 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
         if (job.target != null) I.say("  TARGETING: "+job.target);
       }
     }
-  }
-  
-  
-  public JOB jobType() {
-    if (job == null) return JOB.NONE;
-    return job.type;
-  }
-  
-  
-  public boolean inCombat() {
-    return jobType() == JOB.COMBAT;
   }
   
   
@@ -354,6 +372,17 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
   }
   
   
+  public JOB jobType() {
+    if (job == null) return JOB.NONE;
+    return job.type;
+  }
+  
+  
+  public boolean inCombat() {
+    return jobType() == JOB.COMBAT;
+  }
+  
+  
   
   
   /**  Inventory methods-
@@ -401,14 +430,28 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
   }
   
   
+  void setAsKilled(String cause) {
+    state = STATE_DEAD;
+    job   = null;
+    exitMap();
+    setDestroyed();
+  }
+  
+  
   void checkHealthState() {
     if (injury + hunger > type.maxHealth && state != STATE_DEAD) {
-      //I.say("\n"+this+" HAS BEEN KILLED!");
-      state = STATE_DEAD;
-      job   = null;
-      exitMap();
-      setDestroyed();
+      setAsKilled("Injury/Hunger");
     }
+  }
+  
+  
+  boolean alive() {
+    return state != STATE_DEAD;
+  }
+  
+  
+  boolean dead() {
+    return state == STATE_DEAD;
   }
   
   
@@ -420,6 +463,92 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
       Tile entry = CityBorders.findTransitPoint(goes.map, journey.from);
       enterMap(goes.map, entry.x, entry.y);
       beginNextBehaviour();
+    }
+  }
+  
+  
+  
+  /**  Aging, reproduction and life-cycle:
+    */
+  float ageYears() {
+    float years = ageSeconds / (YEAR_LENGTH * 1f);
+    return years;
+  }
+  
+  
+  boolean child() {
+    return ageYears() < AVG_PUBERTY;
+  }
+  
+  
+  boolean senior() {
+    return ageYears() > AVG_RETIREMENT;
+  }
+  
+  
+  boolean fertile() {
+    return ageYears() > AVG_MARRIED && ageYears() < AVG_MENOPAUSE;
+  }
+  
+  
+  boolean adult() {
+    return ! (child() || senior());
+  }
+  
+  
+  boolean man() {
+    return (sexData & SEX_MALE) != 0;
+  }
+  
+  
+  boolean woman() {
+    return (sexData & SEX_FEMALE) != 0;
+  }
+  
+  
+  void updateAging() {
+    ageSeconds += 1;
+    
+    //  TODO:  Try moving this out into another class somehow...
+    
+    if (pregnancy > 0) {
+      pregnancy += 1;
+      if (pregnancy > PREGNANCY_LENGTH && home != null && inside == home) {
+        
+        float dieChance = AVG_CHILD_MORT / 100f;
+        if (Rand.num() >= dieChance) {
+          Tile at = home.at();
+          Walker child = new Walker(CHILD);
+          child.enterMap(map, at.x, at.y);
+          child.inside = home;
+          child.home   = home;
+        }
+        pregnancy = 0;
+      }
+      if (pregnancy > PREGNANCY_LENGTH + MONTH_LENGTH) {
+        pregnancy = 0;
+      }
+    }
+    
+    if (ageSeconds % YEAR_LENGTH == 0) {
+      if (senior() && Rand.index(100) < AVG_SENIOR_MORT) {
+        setAsKilled("Old age");
+      }
+      
+      if (woman() && fertile() && pregnancy == 0 && home != null) {
+        float
+          ageYears   = ageSeconds / (YEAR_LENGTH * 1f),
+          fertSpan   = AVG_MENOPAUSE - AVG_MARRIED,
+          fertility  = (AVG_MENOPAUSE - ageYears) / fertSpan,
+          wealth     = BuildingForHome.wealthLevel(home),
+          chanceRng  = MAX_PREG_CHANCE - MIN_PREG_CHANCE,
+          chanceW    = MIN_PREG_CHANCE + (wealth * chanceRng),
+          pregChance = fertility * chanceW / 100;
+        
+        if (Rand.num() < pregChance) {
+          pregnancy = 1;
+        }
+      }
     }
   }
   

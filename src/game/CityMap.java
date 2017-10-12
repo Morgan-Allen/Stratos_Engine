@@ -205,6 +205,17 @@ public class CityMap implements Session.Saveable {
   }
   
   
+  public static float distancePenalty(float dist) {
+    float range = MAX_WANDER_RANGE / 2;
+    return range / (range + dist);
+  }
+  
+  
+  public static float distancePenalty(Tile a, Tile b) {
+    return distancePenalty(distance(a, b));
+  }
+  
+  
   Tile tileAt(int x, int y) {
     try { return grid[x][y]; }
     catch (Exception e) { return null; }
@@ -291,8 +302,8 @@ public class CityMap implements Session.Saveable {
       transitPoints.clear();
     }
     
-    if (time % DAY_LENGTH == 0) {
-      CityBorders.spawnMigrants(this, DAY_LENGTH);
+    if (time % MONTH_LENGTH == 0) {
+      CityBorders.spawnMigrants(this, MONTH_LENGTH);
     }
     
     time += 1;

@@ -44,7 +44,7 @@ public class BuildingForHome extends Building {
     //  a given wander-range.
     Tally <ObjectType> access = new Tally();
     if (entrance == null) return access;
-    int maxRange = Walker.MAX_WANDER_RANGE;
+    int maxRange = MAX_WANDER_RANGE;
     
     //  TODO:  Include information about the number of *distinct* venues
     //  providing a given service (like religious access?)
@@ -186,6 +186,7 @@ public class BuildingForHome extends Building {
     }
     
     advanceConsumption(nextTier);
+    generateTax(nextTier);
   }
   
   
@@ -198,10 +199,29 @@ public class BuildingForHome extends Building {
       amount = Nums.max(0, amount - conLevel);
       inventory.set(cons, amount);
     }
+  }
+  
+  
+  void generateTax(ObjectType tier) {
+    float conLevel = 1f * residents.size() / tier.consumeTime;
+    conLevel *= type.updateTime;
     
     float taxGen = TAX_VALUES[type.homeSocialClass] * conLevel;
+    taxGen *= (1 + Visit.indexOf(tier, type.upgradeTiers));
     inventory.add(taxGen  , TAXES    );
     inventory.add(conLevel, NIGHTSOIL);
+  }
+  
+  
+  static float wealthLevel(Building home) {
+    ObjectType type = home.type;
+    if (type.category != ObjectType.IS_HOME_BLD) return 0;
+    
+    ObjectType currentTier = ((BuildingForHome) home).currentTier;
+    float tier = Visit.indexOf(currentTier, type.upgradeTiers);
+    tier /= Nums.max(1, type.upgradeTiers.length - 1);
+    tier += type.homeSocialClass * 1f / CLASS_NOBLE;
+    return tier / 2;
   }
   
   
@@ -209,6 +229,11 @@ public class BuildingForHome extends Building {
   /**  Orchestrating walker behaviour-
     */
   public void selectWalkerBehaviour(Walker walker) {
+    //
+    //  Non-adults don't do much-
+    if (! walker.adult()) {
+      walker.returnTo(this);
+    }
     //
     //  See if you can repair your own home:
     Building repairs = BuildingForCrafts.selectBuildTarget(
@@ -237,7 +262,7 @@ public class BuildingForHome extends Building {
         float amount = b.inventory.valueFor(cons);
         if (amount < 1) continue;
         
-        float rating = need * amount * 10 / (10 + dist);
+        float rating = need * amount * CityMap.distancePenalty(dist);
         Order o = new Order();
         o.b = b;
         o.g = cons;
@@ -305,8 +330,9 @@ public class BuildingForHome extends Building {
     }
   }
   
-  
 }
+
+
 
 
 

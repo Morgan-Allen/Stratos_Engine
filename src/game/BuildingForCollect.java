@@ -58,7 +58,7 @@ public class BuildingForCollect extends BuildingForCrafts {
       int amount = (int) b.inventory.valueFor(g);
       if (amount <= 0) continue;
       
-      pick.compare(b, amount * 10 / (10 + distW));
+      pick.compare(b, amount * CityMap.distancePenalty(distW));
     }
     
     if (! pick.empty()) {

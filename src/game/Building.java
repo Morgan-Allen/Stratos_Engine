@@ -84,8 +84,9 @@ public class Building extends Fixture implements Session.Saveable, Employer {
   void exitMap(CityMap map) {
     super.exitMap(map);
     map.buildings.remove(this);
-    for (Walker w : workers) if (w.work == this) {
-      w.work = null;
+    for (Walker w : workers) if (w.work() == this) {
+      w.setWork(null);
+      //w.work = null;
     }
     for (Walker w : residents) if (w.home == this) {
       w.home = null;
@@ -196,7 +197,7 @@ public class Building extends Fixture implements Session.Saveable, Employer {
       if (rating <= 0) continue;
       if (otherTrades) rating /= 2;
       
-      pick.compare(b, rating * 10 / (10 + dist));
+      pick.compare(b, rating * CityMap.distancePenalty(dist));
     }
     
     return pick.result();
@@ -244,7 +245,8 @@ public class Building extends Fixture implements Session.Saveable, Employer {
       }
     }
     
-    w.work = is ? this : null;
+    //w.work = is ? this : null;
+    w.setWork(is ? this : null);
     workers.toggleMember(w, is);
   }
   

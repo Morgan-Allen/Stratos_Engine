@@ -86,8 +86,7 @@ public class BuildingForMilitary extends BuildingForCrafts {
       for (Building b : map.buildings) {
         for (Walker w : b.residents) {
           if (eligible(w)) {
-            float dist = CityMap.distance(b.entrance, entrance);
-            float rating = 10 / (10 + dist);
+            float rating = CityMap.distancePenalty(b.entrance, entrance);
             pick.compare(w, rating);
           }
         }

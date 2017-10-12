@@ -124,21 +124,21 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   Good consumed[] = NO_GOODS;
   Good features[] = NO_GOODS;
   
-  int updateTime      = 50 ;
-  int gatherRange     = 4  ;
-  int craftTime       = 20 ;
-  int maxStock        = 10 ;
-  int maxDeliverRange = 100;
-  int consumeTime     = 500;
-  int featureAmount   = 10 ;
+  int updateTime      = AVG_UPDATE_GAP  ;
+  int craftTime       = AVG_CRAFT_TIME  ;
+  int gatherRange     = AVG_GATHER_RANGE;
+  int maxDeliverRange = MAX_TRADER_RANGE;
+  int maxStock        = AVG_MAX_STOCK   ;
+  int consumeTime     = AVG_CONSUME_TIME;
+  int featureAmount   = AVG_SERVICE_GIVE;
   
   ObjectType workerTypes[] = NO_WALKERS;
-  int maxWorkers   = 1 ;
-  int maxResidents = 0 ;
-  int maxVisitors  = 4 ;
-  int maxRecruits  = 16;
-  int numRanks     = 4 ;
-  int numFile      = 4 ;
+  int maxWorkers   = 1;
+  int maxResidents = 0;
+  int maxVisitors  = AVG_MAX_VISITORS;
+  int maxRecruits  = AVG_ARMY_SIZE;
+  int numRanks     = AVG_RANKS    ;
+  int numFile      = AVG_FILE     ;
   
   
   void setUpgradeTiers(ObjectType... tiers) {
@@ -186,6 +186,14 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   int attackRange =  1 ;
   
   String names[];
+  
+  
+  void initAsMigrant(Walker w) {
+    float age = Rand.range(AVG_MARRIED, AVG_MENOPAUSE) + Rand.num() - 0.5f;
+    int   sex = Rand.yes() ? Walker.SEX_FEMALE : Walker.SEX_MALE;
+    w.ageSeconds = (int) (age * YEAR_LENGTH);
+    w.sexData    = sex;
+  }
   
   
   

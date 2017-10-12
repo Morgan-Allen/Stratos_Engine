@@ -55,13 +55,59 @@ public class GameConstants {
   /**  Terrain-related constants-
     */
   final public static int
+    //
+    //  Time and distance-
     HOUR_LENGTH      = 4   ,
-    DAY_LENGTH       = 48  ,
+    DAY_LENGTH       = 6   ,
+    DAYS_PER_MONTH   = 20  ,
+    DAYS_PER_YEAR    = 365 ,
+    MONTH_LENGTH     = DAY_LENGTH * DAYS_PER_MONTH,
+    YEAR_LENGTH      = DAY_LENGTH * DAYS_PER_YEAR ,
+    //
+    //  Growth and crops-
     SCAN_PERIOD      = 200 ,
     RIPEN_PERIOD     = 1000,
     CROP_YIELD       = 25  ,  //  percent of 1 full item
-    MIGRANTS_PER_1KD = 10     //  per day per 1000 foreign citizens
+    AVG_GATHER_RANGE = 4   ,
+    //
+    //  Buildings and manufacture-
+    AVG_UPDATE_GAP   = 50  ,  //  seconds between updates
+    AVG_CRAFT_TIME   = 20  ,
+    AVG_MAX_STOCK    = 10  ,
+    MAX_TRADER_RANGE = 100 ,
+    //
+    //  Life cycle constants-
+    AVG_INFANCY      = 4   ,
+    AVG_PUBERTY      = 12  ,
+    AVG_MARRIED      = 24  ,
+    AVG_MENOPAUSE    = 48  ,
+    AVG_RETIREMENT   = 60  ,
+    MIN_PREG_CHANCE  = 35  ,
+    MAX_PREG_CHANCE  = 65  ,
+    PREGNANCY_LENGTH = 9 * MONTH_LENGTH,
+    AVG_CHILD_MORT   = 75  ,  //  child mortality percent
+    AVG_SENIOR_MORT  = 10  ,  //  senior mortality percent
+    LIFESPAN_LENGTH  = AVG_RETIREMENT * YEAR_LENGTH,
+    //
+    //  Commerce and amenities-
+    MAX_WANDER_RANGE = 20  ,
+    AVG_VISIT_TIME   = 20  ,
+    MAX_SHOP_RANGE   = 50  ,
+    AVG_CONSUME_TIME = 500 ,
+    AVG_SERVICE_GIVE = 10  , //  value of education, diversion, etc.
+    AVG_MAX_VISITORS = 4   ,
+    //
+    //  Military and combat-
+    AVG_ARMY_SIZE    = 16  ,
+    AVG_RANKS        = 4   ,
+    AVG_FILE         = 4   ,
+    //
+    //  Trade and migration-
+    TRADE_DIST_TIME  = 50  ,
+    MIGRANTS_PER_1KM = 10     //  per month per 1000 foreign citizens
   ;
+  
+  
 
   private static List <Terrain> TERRAINS_LIST = new List();
   static class Terrain extends ObjectType {
@@ -203,6 +249,7 @@ public class GameConstants {
     NO_WALKERS[] = new WalkerType[0],
     
     VAGRANT  = new WalkerType("type_vagrant" , IS_WALKER   , CLASS_COMMON),
+    CHILD    = new WalkerType("type_child"   , IS_WALKER   , CLASS_COMMON),
     CITIZEN  = new WalkerType("type_citizen" , IS_WALKER   , CLASS_COMMON),
     SERVANT  = new WalkerType("type_servant" , IS_WALKER   , CLASS_SLAVE ),
     NOBLE    = new WalkerType("type_noble"   , IS_WALKER   , CLASS_NOBLE ),

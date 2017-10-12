@@ -24,6 +24,7 @@ public class WalkerForTrade extends Walker implements Journeys {
   
   public WalkerForTrade(ObjectType type) {
     super(type);
+    //I.say("JUST INITIALISED TRADE-WALKER: "+this.hashCode());
   }
   
   
@@ -48,6 +49,24 @@ public class WalkerForTrade extends Walker implements Journeys {
   
   
   
+  /**  TODO:  This is a temporary hack!
+    */
+  void updateAging() {
+    return;
+  }
+  
+  
+  void update() {
+    super.update();
+  }
+  
+  
+  void beginNextBehaviour() {
+    super.beginNextBehaviour();
+  }
+  
+  
+
   /**  Behaviour scripting...
     */
   void beginDelivery(Building from, Building goes, Tally <Good> taken) {

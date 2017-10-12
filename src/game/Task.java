@@ -105,7 +105,7 @@ public class Task implements Session.Saveable {
     this.visits    = visits ;
     this.target    = target ;
     
-    if (maxTime == -1) this.maxTime = Walker.AVG_VISIT_TIME;
+    if (maxTime == -1) this.maxTime = AVG_VISIT_TIME;
     path = updatePathing();
     
     if (path != null) {

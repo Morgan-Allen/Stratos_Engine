@@ -86,11 +86,13 @@ public class CityBorders {
     City from = map.city;
     
     Batch <Walker> migrants = new Batch();
-    float numSpawn = ((1 - crowding) * MIGRANTS_PER_1KD * period) / DAY_LENGTH;
+    float months   = period * 1f / MONTH_LENGTH;
+    float numSpawn = ((1 - crowding) * MIGRANTS_PER_1KM * months);
     numSpawn = Nums.min(numSpawn, spaces);
     
     while (numSpawn-- > 0) {
       Walker w = new Walker(VAGRANT);
+      w.type.initAsMigrant(w);
       migrants.add(w);
     }
     map.city.world.beginJourney(from, map.city, (Batch) migrants);
@@ -188,7 +190,7 @@ public class CityBorders {
     
     City fromC = from.tradeOrigin(), goesC = goes.tradeOrigin();
     Integer distance = fromC.distances.get(goesC);
-    float distRating = distance == null ? 100 : (1 + distance);
+    float distRating = distance == null ? MAX_TRADER_RANGE : (1 + distance);
     
     if (
       from instanceof Building &&
@@ -197,7 +199,7 @@ public class CityBorders {
     ) {
       Building fromB = (Building) from, goesB = (Building) goes;
       float mapDist = CityMap.distance(fromB.entrance, goesB.entrance);
-      distRating += mapDist / Walker.MAX_WANDER_RANGE;
+      distRating += mapDist / MAX_WANDER_RANGE;
     }
     
     return distRating;

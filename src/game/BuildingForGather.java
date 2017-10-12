@@ -61,6 +61,27 @@ public class BuildingForGather extends BuildingForCrafts {
   }
   
   
+  Good seedType(Tile t) {
+    float sumL = 0;
+    for (Good g : cropLevels.keys()) {
+      sumL += cropLevels.valueFor(g);
+    }
+    
+    float index = t.x % 5;
+    index += (t.y % 5) / 5f;
+    index *= sumL / 5;
+    
+    Good seed = null;
+    sumL = 0;
+    for (Good g : cropLevels.keys()) {
+      sumL += cropLevels.valueFor(g);
+      if (sumL >= index) { seed = g; break; }
+    }
+    
+    return seed;
+  }
+  
+  
   private boolean hasFocus(Target t) {
     //  TODO:  The hasFocus() method for elements/tiles should be accomplishing
     //  this.
@@ -140,28 +161,14 @@ public class BuildingForGather extends BuildingForCrafts {
     if (walker.jobType() == JOB.PLANTING) {
       //
       //  We have to pick a seed-type to plant first:
-      float sumL = 0;
-      for (Good g : cropLevels.keys()) {
-        sumL += cropLevels.valueFor(g);
-      }
-      
-      Tile t = other.at();
-      float index = t.x % 5;
-      index += (t.y % 5) / 5f;
-      index *= sumL / 5;
-      
-      Good seed = null;
-      sumL = 0;
-      for (Good g : cropLevels.keys()) {
-        sumL += cropLevels.valueFor(g);
-        if (sumL >= index) { seed = g; break; }
-      }
+      Tile under = other.at();
+      Good seed = seedType(under);
       if (seed == null) return;
       //
       //  Then plonk it in the ground:
       if (above != null) above.exitMap(map);
       Fixture crop = new Fixture(seed);
-      crop.enterMap(map, t.x, t.y, 0);
+      crop.enterMap(map, under.x, under.y, 0);
       //
       //  Then pick another point to sow:
       if (! pickPlantPoint(walker, area, false)) {

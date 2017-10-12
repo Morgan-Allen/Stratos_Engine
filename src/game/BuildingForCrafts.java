@@ -137,12 +137,12 @@ public class BuildingForCrafts extends Building {
       amount = Nums.min(amount, demand);
       if (amount <= 0) continue;
       
-      float distFactor = 10 + CityMap.distance(entrance, goes.entrance);
+      float penalty = CityMap.distancePenalty(entrance, goes.entrance);
       Order o = new Order();
       o.goes   = goes  ;
       o.good   = made  ;
       o.amount = amount;
-      pickD.compare(o, amount / distFactor);
+      pickD.compare(o, amount * penalty);
     }
     if (! pickD.empty()) {
       Order o = pickD.result();
@@ -174,7 +174,7 @@ public class BuildingForCrafts extends Building {
   static Building selectBuildTarget(
     Building from, Good buildsWith[], Series <Building> buildings
   ) {
-    int maxRange = Walker.MAX_WANDER_RANGE;
+    int maxRange = MAX_WANDER_RANGE;
     Pick <Building> pickB = new Pick();
     
     for (Good w : buildsWith) {
