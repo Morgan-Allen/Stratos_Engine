@@ -85,7 +85,7 @@ public class GameConstants {
     MIN_PREG_CHANCE  = 35  ,
     MAX_PREG_CHANCE  = 65  ,
     PREGNANCY_LENGTH = 9 * MONTH_LENGTH,
-    AVG_CHILD_MORT   = 75  ,  //  child mortality percent
+    AVG_CHILD_MORT   = 50  ,  //  child mortality percent
     AVG_SENIOR_MORT  = 10  ,  //  senior mortality percent
     LIFESPAN_LENGTH  = AVG_RETIREMENT * YEAR_LENGTH,
     //
@@ -260,6 +260,7 @@ public class GameConstants {
   ;
   static {
     VAGRANT .name = "Vagrant" ;
+    CHILD   .name = "Child"   ;
     CITIZEN .name = "Citizen" ;
     SERVANT .name = "Servant" ;
     NOBLE   .name = "Noble"   ;

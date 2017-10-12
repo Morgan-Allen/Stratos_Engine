@@ -21,7 +21,6 @@ public class TestMilitary extends Test {
     CityMap map   = CityMapGenerator.generateTerrain(
       cityA, 50, MEADOW, JUNGLE
     );
-    cityA.attachMap(map);
     cityA.name = "Home City";
     cityB.name = "Away City";
     

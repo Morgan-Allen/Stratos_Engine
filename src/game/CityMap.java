@@ -92,6 +92,7 @@ public class CityMap implements Session.Saveable {
     }
     this.fogVals = new byte[size][size];
     this.oldVals = new byte[size][size];
+    city.assignMap(this);
   }
   
   

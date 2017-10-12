@@ -23,7 +23,6 @@ public class TestTrading extends Test {
     cityB.name = "(Away City)";
     
     map.performSetup(10);
-    cityA.attachMap(map);
     City.setupRoute(cityA, cityB, 1);
     
     cityB.tradeLevel.set(COTTON    ,  50);

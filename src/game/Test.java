@@ -37,7 +37,7 @@ public class Test {
         }
         for (Walker w : map.walkers) if (w.inside == null) {
           int fill = WALKER_COLOR;
-          if      (w.work() != null) fill = w.work().type.tint;
+          if      (w.work != null) fill = w.work.type.tint;
           else if (w.home != null) fill = w.home.type.tint;
           graphic[w.at.x][w.at.y] = fill;
         }
@@ -100,7 +100,6 @@ public class Test {
     World   world = new World();
     City    city  = new City(world);
     CityMap map   = new CityMap(city);
-    city.assignMap(map);
     map.performSetup(size);
     return map;
   }

@@ -18,7 +18,7 @@ public class City implements Session.Saveable, Trader {
     LORD  ,
   };
   
-  String name;
+  String name = "City";
   
   World world;
   float mapX, mapY;

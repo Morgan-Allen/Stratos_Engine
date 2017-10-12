@@ -31,20 +31,12 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
   
   String ID;
   
-  private Building  work;
+  Building  work;
   Building  home;
   City      homeCity;
   Formation formation;
   Building  inside;
   boolean   guest;
-  
-  //*
-  Building work() { return work; }
-  
-  void setWork(Building work) {
-    this.work = work;
-  }
-  //*/
   
   Task job;
   
@@ -60,7 +52,7 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
   float stress ;
   int   state = STATE_OKAY;
   
-  //Tally <Good> cargo = new Tally();
+  //Tally <Good> cargo = null;
   Tally <ObjectType> skills = new Tally();
   
   
@@ -238,6 +230,8 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
   
   
   void beginNextBehaviour() {
+    
+    //  Establish some facts about the citizen first:
     boolean adult = adult();
     job = null;
     
@@ -248,11 +242,14 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
       if (home == null) CityBorders.findHome(map, this);
       if (map == null) return;  //  TODO:  TEMPORARY HACK, REMOVE
     }
+    
     //  Children and retirees don't work:
     if (work != null && ! adult) {
       work.setWorker(this, false);
     }
     
+    //  Once home & work have been established, try to derive a task to
+    //  perform-
     if (formation != null && formation.active) {
       formation.selectWalkerBehaviour(this);
     }
@@ -266,6 +263,7 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
       startRandomWalk();
     }
     
+    //  And report afterward...
     if (reports()) {
       I.say("\n"+this+" BEGAN NEW BEHAVIOUR: "+jobType()+", TIME: "+map.time);
       if (job != null) {
@@ -542,9 +540,9 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
           fertility  = (AVG_MENOPAUSE - ageYears) / fertSpan,
           wealth     = BuildingForHome.wealthLevel(home),
           chanceRng  = MAX_PREG_CHANCE - MIN_PREG_CHANCE,
-          chanceW    = MIN_PREG_CHANCE + (wealth * chanceRng),
-          pregChance = fertility * chanceW / 100;
-        
+          chanceW    = MAX_PREG_CHANCE - (wealth * chanceRng),
+          pregChance = fertility * chanceW / 100
+        ;
         if (Rand.num() < pregChance) {
           pregnancy = 1;
         }

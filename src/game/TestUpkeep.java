@@ -16,7 +16,7 @@ public class TestUpkeep extends Test {
   static void testUpkeep(boolean graphics) {
     
     CityMap map = setupTestCity(25);
-
+    
     BuildingForTrade post = (BuildingForTrade) PORTER_HOUSE.generate();
     post.enterMap(map, 2, 2, 1);
     post.ID = "(Stock of Goods)";

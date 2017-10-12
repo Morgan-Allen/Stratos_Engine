@@ -22,7 +22,6 @@ public class TestGathering extends Test {
     CityMap map   = CityMapGenerator.generateTerrain(
       city, 20, DESERT, MEADOW, JUNGLE
     );
-    city.assignMap(map);
     CityMapGenerator.populateFixtures(map);
     
     
