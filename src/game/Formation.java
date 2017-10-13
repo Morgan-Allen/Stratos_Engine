@@ -166,7 +166,7 @@ public class Formation implements
       this.map = goes.map;
       Tile entry = findTransitPoint(map, journey.from);
       for (Walker w : recruits) {
-        w.enterMap(map, entry.x, entry.y);
+        w.enterMap(map, entry.x, entry.y, 1);
       }
       beginSecuring(entry, N, null);
       

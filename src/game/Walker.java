@@ -3,9 +3,6 @@
 package game;
 import util.*;
 import static game.Task.*;
-
-import game.GameConstants.Good;
-
 import static game.CityMap.*;
 import static game.GameConstants.*;
 
@@ -42,6 +39,7 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
   
   Good  carried = null;
   float carryAmount = 0;
+  Tally <Good> cargo = null;
   
   int sexData    = -1;
   int ageSeconds =  0;
@@ -52,7 +50,6 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
   float stress ;
   int   state = STATE_OKAY;
   
-  //Tally <Good> cargo = null;
   Tally <ObjectType> skills = new Tally();
   
   
@@ -79,6 +76,7 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
     
     carried     = (Good) s.loadObject();
     carryAmount = s.loadFloat();
+    if (s.loadBool()) s.loadTally(cargo);
     
     sexData    = s.loadInt();
     ageSeconds = s.loadInt();
@@ -109,6 +107,8 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
     
     s.saveObject(carried);
     s.saveFloat(carryAmount);
+    s.saveBool(cargo != null);
+    if (cargo != null) s.saveTally(cargo);
     
     s.saveInt(sexData   );
     s.saveInt(ageSeconds);
@@ -126,7 +126,7 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
   
   /**  World entry and exit-
     */
-  void enterMap(CityMap map, int x, int y) {
+  void enterMap(CityMap map, int x, int y, float buildLevel) {
     this.map = map;
     this.at  = map.tileAt(x, y);
     map.walkers.add(this);
@@ -139,7 +139,6 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
     map.walkers.remove(this);
     map = null;
     at  = null;
-    job = null;
   }
   
   
@@ -147,9 +146,11 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
     if (formation != null) formation.toggleRecruit(this, false);
     if (home      != null) home.setResident(this, false);
     if (work      != null) work.setWorker  (this, false);
+    if (job       != null) job.onCancel();
     home      = null;
     work      = null;
     formation = null;
+    job       = null;
   }
   
   
@@ -172,32 +173,32 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
     //  TODO:  Don't allow another job to be assigned while this one is in
     //  the middle of an update!
     if (job != null && job.checkAndUpdatePathing()) {
-      final Task task = this.job;
-      
-      boolean visiting  = task.visits != null;
-      boolean targeting = task.target != null;
-      boolean combat    = inCombat();
-      Tile    pathEnd   = (Tile) Visit.last(task.path);
-      float   distance  = CityMap.distance(at, pathEnd);
-      float   minRange  = Nums.max(0.1f, combat ? type.attackRange : 0);
+      Task     task      = this.job;
+      Employer origin    = task.origin;
+      Building visits    = task.visits;
+      Target   target    = task.target;
+      boolean  combat    = inCombat();
+      Tile     pathEnd   = (Tile) Visit.last(task.path);
+      float    distance  = CityMap.distance(at, pathEnd);
+      float    minRange  = Nums.max(0.1f, combat ? type.attackRange : 0);
       //
       //  If you're close enough to start the behaviour, act accordingly:
       if (distance <= minRange) {
-        if (visiting && inside != task.visits) {
-          setInside(task.visits, true);
+        if (visits != null && inside != visits) {
+          setInside(visits, true);
         }
         if (task.timeSpent++ <= task.maxTime) {
-          if (visiting) {
-            onVisit(task.visits);
-            task.onVisit(task.visits);
-            task.visits.visitedBy(this);
-            task.origin.walkerVisits(this, task.visits);
+          if (visits != null) {
+            onVisit(visits);
+            task.onVisit(visits);
+            visits.visitedBy(this);
+            origin.walkerVisits(this, visits);
           }
-          if (targeting) {
-            onTarget(task.target);
-            task.onTarget(task.target);
-            task.target.targetedBy(this);
-            task.origin.walkerTargets(this, task.target);
+          if (target != null) {
+            onTarget(target);
+            task.onTarget(target);
+            target.targetedBy(this);
+            origin.walkerTargets(this, target);
           }
         }
         else {
@@ -382,8 +383,7 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
   
   
   
-  
-  /**  Inventory methods-
+  /**  Methods to assist trade and migration-
     */
   void pickupGood(Good carried, float amount, Building store) {
     if (store == null || carried == null || amount <= 0) return;
@@ -404,6 +404,22 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
     store.inventory.add(carryAmount, carried);
     this.carried = null;
     this.carryAmount = 0;
+  }
+  
+  
+  void assignCargo(Tally <Good> cargo) {
+    this.cargo = cargo;
+  }
+  
+  
+  public void onArrival(City goes, World.Journey journey) {
+    if (goes.map != null) {
+      Tile entry = CityBorders.findTransitPoint(goes.map, journey.from);
+      enterMap(goes.map, entry.x, entry.y, 1);
+    }
+    if (job != null) {
+      job.onArrival(goes, journey);
+    }
   }
   
   
@@ -450,18 +466,6 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
   
   boolean dead() {
     return state == STATE_DEAD;
-  }
-  
-  
-  
-  /**  Migration code:
-    */
-  public void onArrival(City goes, World.Journey journey) {
-    if (goes.map != null) {
-      Tile entry = CityBorders.findTransitPoint(goes.map, journey.from);
-      enterMap(goes.map, entry.x, entry.y);
-      beginNextBehaviour();
-    }
   }
   
   
@@ -517,7 +521,7 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
         if (Rand.num() >= dieChance) {
           Tile at = home.at();
           Walker child = new Walker(CHILD);
-          child.enterMap(map, at.x, at.y);
+          child.enterMap(map, at.x, at.y, 1);
           child.inside = home;
           child.home   = home;
         }

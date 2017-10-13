@@ -238,12 +238,6 @@ public class Building extends Fixture implements Session.Saveable, Employer {
   
   
   public void setWorker(Walker w, boolean is) {
-    if (w.type.category == ObjectType.IS_TRADE_WLK && is) {
-      if (! (w instanceof WalkerForTrade)) {
-        I.complain("");
-      }
-    }
-    
     w.work = is ? this : null;
     workers.toggleMember(w, is);
   }

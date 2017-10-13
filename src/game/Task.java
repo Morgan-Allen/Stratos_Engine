@@ -41,7 +41,7 @@ public class Task implements Session.Saveable {
   
   Tile path[] = null;
   int pathIndex = -1;
-  
+  boolean  offMap;
   Target   target;
   Building visits;
   
@@ -70,6 +70,7 @@ public class Task implements Session.Saveable {
       for (int i = 0; i < PL; i++) path[i] = loadTile(actor.map, s);
     }
     pathIndex = s.loadInt();
+    offMap    = s.loadBool();
     target    = (Target  ) s.loadObject();
     visits    = (Building) s.loadObject();
   }
@@ -87,6 +88,7 @@ public class Task implements Session.Saveable {
       for (Tile t : path) saveTile(t, actor.map, s);
     }
     s.saveInt(pathIndex);
+    s.saveBool(offMap);
     s.saveObject(target);
     s.saveObject(visits);
   }
@@ -131,7 +133,17 @@ public class Task implements Session.Saveable {
     return;
   }
   
-
+  
+  protected void onArrival(City goes, World.Journey journey) {
+    return;
+  }
+  
+  
+  protected void onCancel() {
+    return;
+  }
+  
+  
   
   /**  Pathing-related methods:
     */
@@ -188,6 +200,19 @@ public class Task implements Session.Saveable {
     return search.fullPath(Tile.class);
   }
   
+  
+  
+  /**  Rendering, debug and interface methods-
+    */
+  public String toString() {
+    Object subject = visits == null ? target : visits;
+    return type.name()+": "+subject;
+  }
+  
+  
+  boolean reports() {
+    return actor.reports();
+  }
 }
 
 

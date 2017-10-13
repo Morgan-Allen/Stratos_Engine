@@ -135,7 +135,7 @@ public class Test {
     
     Walker walker = (Walker) type.generate();
     type.initAsMigrant(walker);
-    walker.enterMap(b.map, b.at.x, b.at.y);
+    walker.enterMap(b.map, b.at.x, b.at.y, 1);
     walker.inside = b;
     
     if (resident) b.setResident(walker, true);

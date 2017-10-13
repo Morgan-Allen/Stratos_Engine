@@ -37,7 +37,6 @@ public class TaskDelivery extends Task {
   }
   
   
-  
   TaskDelivery configDelivery(
     Building from, Building goes, Task.JOB jobType,
     Good carried, float amount, Employer e

@@ -27,8 +27,7 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
     IS_AMENITY_BLD = 10,
     IS_COLLECT_BLD = 11,
     IS_ARMY_BLD    = 12,
-    IS_WALKER      = 13,
-    IS_TRADE_WLK   = 14
+    IS_WALKER      = 13
   ;
   
   final static Index <ObjectType> INDEX = new Index();
@@ -62,8 +61,7 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
       case(IS_AMENITY_BLD): return new BuildingForAmenity (this);
       case(IS_COLLECT_BLD): return new BuildingForCollect (this);
       case(IS_ARMY_BLD   ): return new BuildingForMilitary(this);
-      case(IS_WALKER     ): return new Walker        (this);
-      case(IS_TRADE_WLK  ): return new WalkerForTrade(this);
+      case(IS_WALKER     ): return new Walker(this);
     }
     return null;
   }

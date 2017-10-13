@@ -75,7 +75,7 @@ public class BuildingForCollect extends BuildingForCrafts {
       walker.offloadGood(made, this);
       int amount = (int) inventory.valueFor(made);
       
-      boolean taxes = made == TAXES;
+      boolean taxes = made == CASH;
       if (taxes && amount > 0) {
         map.city.currentFunds += amount;
         inventory.add(0 - amount, made);
@@ -87,7 +87,7 @@ public class BuildingForCollect extends BuildingForCrafts {
     
     else if (walker.jobType() == JOB.VISITING) {
       for (Good g : type.produced) {
-        boolean taxes = g == TAXES;
+        boolean taxes = g == CASH;
         int carryLimit = taxes ? 100 : 10;
         
         float amount = enters.inventory.valueFor(g);

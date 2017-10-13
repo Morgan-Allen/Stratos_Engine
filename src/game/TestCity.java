@@ -52,7 +52,7 @@ public class TestCity extends Test {
     
     for (Building b : map.buildings) if (b.type == HOUSE) {
       b.inventory.set(NIGHTSOIL, 2 );
-      b.inventory.set(TAXES    , 20);
+      b.inventory.set(CASH    , 20);
     }
     
     try {
@@ -80,7 +80,7 @@ public class TestCity extends Test {
             BuildingForHome home = (BuildingForHome) b;
             if (home.currentTier != HOUSE_T2             ) allNeeds = false;
             if (home.inventory.valueFor(NIGHTSOIL) > 0.5f) allNeeds = false;
-            if (home.inventory.valueFor(TAXES    ) > 5.0f) allNeeds = false;
+            if (home.inventory.valueFor(CASH     ) > 5.0f) allNeeds = false;
           }
         }
         housesOkay = allNeeds;

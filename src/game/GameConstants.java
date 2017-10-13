@@ -193,7 +193,7 @@ public class GameConstants {
     POTTERY    = new Good("Pottery"     , 50, 8 ),
     COTTON     = new Good("Cotton"      , 75, 9 ),
     
-    TAXES      = new Good("Taxes"       , 1 , 10),
+    CASH       = new Good("Cash"        , 1 , 10),
     NIGHTSOIL  = new Good("Nightsoil"   , 5 , 11),
     
     IS_ADMIN   = new Good("Is Admin"    , -1, 21),
@@ -255,7 +255,7 @@ public class GameConstants {
     NOBLE    = new WalkerType("type_noble"   , IS_WALKER   , CLASS_NOBLE ),
     WORKER   = new WalkerType("type_worker"  , IS_WALKER   , CLASS_COMMON),
     MERCHANT = new WalkerType("type_merchant", IS_WALKER   , CLASS_TRADER),
-    PORTERS  = new WalkerType("type_porters" , IS_TRADE_WLK, CLASS_SLAVE ),
+    PORTERS  = new WalkerType("type_porters" , IS_WALKER   , CLASS_SLAVE ),
     SOLDIER  = new WalkerType("type_soldier" , IS_WALKER   , CLASS_NOBLE )
   ;
   static {
@@ -365,7 +365,7 @@ public class GameConstants {
     COLLECTOR.tint = TINT_COMMERCIAL;
     COLLECTOR.setWorkerTypes(MERCHANT);
     COLLECTOR.setBuildMaterials(ADOBE, 2, WOOD, 2, CLAY, 2);
-    COLLECTOR.produced = new Good[] { TAXES };
+    COLLECTOR.produced = new Good[] { CASH };
     COLLECTOR.features = new Good[] { IS_ADMIN };
     
     BASIN.name = "Basin";

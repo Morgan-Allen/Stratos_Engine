@@ -88,38 +88,11 @@ public class BuildingForTrade extends BuildingForCrafts implements Trader {
   
   
   
-  /**  Small workaround for creating porter-chains:
-    */
-  public void setWorker(Walker w, boolean is) {
-    //  TODO:  THIS IS A TEMPORARY HACK!  REPLACE SOON!
-    boolean isTrader = w instanceof WalkerForTrade;
-    if (w.type.category == ObjectType.IS_TRADE_WLK && ! isTrader) {
-      if (is) {
-        CityMap.Tile at = w.at();
-        w.setDestroyed();
-        w.exitMap();
-        w.ageSeconds = LIFESPAN_LENGTH / 2;
-        w = new WalkerForTrade(w.type);
-        w.enterMap(map, at.x, at.y);
-        super.setWorker(w, true);
-      }
-      else {
-        //  TODO:  You will need a better solution than this.  Create
-        //  behaviours instead!
-        super.setWorker(w, false);
-      }
-    }
-    else super.setWorker(w, is);
-  }
-  
-  
-  
   /**  Selecting behaviour for walkers-
     */
   public void selectWalkerBehaviour(Walker walker) {
-    if (walker.type.category == ObjectType.IS_TRADE_WLK) {
-      WalkerForTrade trader = (WalkerForTrade) walker;
-      selectTraderBehaviour(trader);
+    if (walker.type == PORTERS) {
+      selectTraderBehaviour(walker);
     }
     else {
       super.selectWalkerBehaviour(walker);
@@ -127,7 +100,7 @@ public class BuildingForTrade extends BuildingForCrafts implements Trader {
   }
   
   
-  void selectTraderBehaviour(WalkerForTrade trader) {
+  void selectTraderBehaviour(Walker trader) {
     
     if (trader.inside != this) {
       trader.returnTo(this);
@@ -186,14 +159,9 @@ public class BuildingForTrade extends BuildingForCrafts implements Trader {
         I.say("  Destination is: "+o.goes);
       }
       
-      if (o.goes instanceof City) {
-        City goes = (City) o.goes;
-        trader.beginTravel(this, goes, o.cargo);
-      }
-      else {
-        Building goes = (Building) o.goes;
-        trader.beginDelivery(this, goes, o.cargo);
-      }
+      TaskTrading t = new TaskTrading(trader);
+      t.configTrading(this, o.goes, o.cargo);
+      trader.assignTask(t);
     }
     
   }

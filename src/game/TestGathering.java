@@ -76,13 +76,13 @@ public class TestGathering extends Test {
         harvest = enough;
         
         if (harvest) {
-          I.say("\nTERRAIN TEST CONCLUDED SUCCESSFULLY!");
+          I.say("\nGATHER TEST CONCLUDED SUCCESSFULLY!");
           if (! graphics) return;
         }
       }
     }
     
-    I.say("\nTERRAIN TEST FAILED!");
+    I.say("\nGATHER TEST FAILED!");
     I.say("  Total gathered: "+farm.inventory);
   }
   

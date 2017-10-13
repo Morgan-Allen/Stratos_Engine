@@ -186,7 +186,7 @@ public class BuildingForHome extends Building {
     }
     
     advanceConsumption(nextTier);
-    generateTax(nextTier);
+    generateOutputs(nextTier);
   }
   
   
@@ -202,14 +202,14 @@ public class BuildingForHome extends Building {
   }
   
   
-  void generateTax(ObjectType tier) {
+  void generateOutputs(ObjectType tier) {
     float conLevel = 1f * residents.size() / tier.consumeTime;
     conLevel *= type.updateTime;
+    inventory.add(conLevel, NIGHTSOIL);
     
     float taxGen = TAX_VALUES[type.homeSocialClass] * conLevel;
     taxGen *= (1 + Visit.indexOf(tier, type.upgradeTiers));
-    inventory.add(taxGen  , TAXES    );
-    inventory.add(conLevel, NIGHTSOIL);
+    inventory.add(taxGen, CASH);
   }
   
   
