@@ -14,6 +14,7 @@ public class TestMilitary extends Test {
   }
   
   static void testMilitary(boolean graphics) {
+    GameSettings.toggleFog = false;
 
     World   world = GameConstants.setupDefaultWorld();
     City    cityA = world.cities.atIndex(0);

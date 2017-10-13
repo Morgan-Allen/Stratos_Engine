@@ -219,9 +219,13 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     }
     //
     //  Finally, allow the current employer to monitor the walker-
-    boolean originOK = job != null && job.origin != null;
-    if (originOK) {
+    if (job != null && job.origin != null) {
       job.origin.walkerUpdates(this);
+    }
+    //
+    //  Update vision-
+    if (map != null && inside == null) {
+      updateVision();
     }
     //
     //  And update your current health-
@@ -424,6 +428,12 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     job   = null;
     exitMap();
     setDestroyed();
+  }
+  
+  
+  void updateVision() {
+    float range = type.sightRange * (map.lightLevel() + 1f) / 2;
+    map.liftFog(at, range);
   }
   
   

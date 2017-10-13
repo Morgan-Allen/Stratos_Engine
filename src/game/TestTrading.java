@@ -14,6 +14,7 @@ public class TestTrading extends Test {
   }
   
   static void testTrading(boolean graphics) {
+    GameSettings.toggleFog = false;
     
     World   world = GameConstants.setupDefaultWorld();
     City    cityA = world.cities.atIndex(0);

@@ -14,6 +14,7 @@ public class TestUpkeep extends Test {
   }
   
   static void testUpkeep(boolean graphics) {
+    GameSettings.toggleFog = false;
     
     CityMap map = setupTestCity(25);
     

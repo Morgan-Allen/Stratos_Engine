@@ -15,6 +15,7 @@ public class TestSieging extends Test {
   
   
   static void testSieging(boolean graphics) {
+    GameSettings.toggleFog = false;
 
     World   world = GameConstants.setupDefaultWorld();
     City    cityA = world.cities.atIndex(0);

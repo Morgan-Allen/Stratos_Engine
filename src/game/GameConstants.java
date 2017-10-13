@@ -52,7 +52,7 @@ public class GameConstants {
   
   
   
-  /**  Terrain-related constants-
+  /**  Various numeric gameplay constants-
     */
   final public static int
     //

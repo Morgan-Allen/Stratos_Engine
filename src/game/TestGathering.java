@@ -16,6 +16,7 @@ public class TestGathering extends Test {
   
   
   static void testGathering(boolean graphics) {
+    GameSettings.toggleFog = false;
     
     World   world = new World();
     City    city  = new City(world);

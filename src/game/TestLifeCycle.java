@@ -15,6 +15,7 @@ public class TestLifeCycle extends Test {
   
   
   static void testLifeCycle(boolean graphics) {
+    GameSettings.toggleFog = false;
     
     World   world = new World();
     City    city  = new City(world);
