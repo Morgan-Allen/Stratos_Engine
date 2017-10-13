@@ -73,8 +73,9 @@ public class TestCity extends Test {
       if (! housesOkay) {
         boolean allNeeds = true;
         for (Building b : map.buildings) {
-          if (b.type == MARKET && b.inventory.valueFor(COTTON) < 10) {
-            b.inventory.add(10, COTTON);
+          if (b.type == MARKET) {
+            b.inventory.set(COTTON, 10);
+            b.inventory.set(MAIZE , 10);
           }
           if (b.type == HOUSE) {
             BuildingForHome home = (BuildingForHome) b;
@@ -93,6 +94,12 @@ public class TestCity extends Test {
     }
 
     I.say("\nCITY SERVICES TEST FAILED!");
+    for (Building b : map.buildings) if (b.type == HOUSE) {
+      BuildingForHome house = (BuildingForHome) b;
+      I.say("  "+house);
+      I.say("    Tier:      "+house.currentTier);
+      I.say("    Inventory: "+house.inventory);
+    }
   }
   
 }

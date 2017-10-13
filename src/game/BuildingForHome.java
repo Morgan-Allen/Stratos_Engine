@@ -156,8 +156,8 @@ public class BuildingForHome extends Building {
   Batch <Good> consumedBy(ObjectType tier) {
     Batch <Good> consumes = new Batch();
     consumes.add(WATER);
+    for (Good g : FOOD_TYPES   ) consumes.add(g);
     for (Good g : tier.consumed) consumes.add(g);
-    //  TODO:  Add the various food types as well?
     return consumes;
   }
   
@@ -191,10 +191,10 @@ public class BuildingForHome extends Building {
   
   
   void advanceConsumption(ObjectType tier) {
-    float conLevel = 1f * residents.size() / tier.consumeTime;
+    float conLevel = residents.size() * 1f / tier.consumeTime;
     conLevel *= type.updateTime;
     
-    for (Good cons : consumedBy(tier)) {
+    for (Good cons : tier.consumed) {
       float amount = inventory.valueFor(cons);
       amount = Nums.max(0, amount - conLevel);
       inventory.set(cons, amount);

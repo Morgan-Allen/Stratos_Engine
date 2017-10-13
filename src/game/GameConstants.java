@@ -60,15 +60,22 @@ public class GameConstants {
     HOUR_LENGTH      = 4   ,
     DAY_LENGTH       = 6   ,
     DAYS_PER_MONTH   = 20  ,
+    MONTHS_PER_YEAR  = 18  ,
     DAYS_PER_YEAR    = 365 ,
     MONTH_LENGTH     = DAY_LENGTH * DAYS_PER_MONTH,
     YEAR_LENGTH      = DAY_LENGTH * DAYS_PER_YEAR ,
     //
     //  Growth and crops-
-    SCAN_PERIOD      = 200 ,
-    RIPEN_PERIOD     = 1000,
+    SCAN_PERIOD      = MONTH_LENGTH * 2,
+    RIPEN_PERIOD     = MONTH_LENGTH * 6,
     CROP_YIELD       = 25  ,  //  percent of 1 full item
     AVG_GATHER_RANGE = 4   ,
+    //
+    //  Okay.  this means that a 16x16 area of crops will produce:
+    //    256 x 0.25 = 64 units of food every 6 months (120 days.)
+    //    That gives you ~10 units of food per month.
+    //    Every citizen consumes 2 units of food per 2 months.  So that's just
+    //    enough for 10 citizens.
     //
     //  Buildings and manufacture-
     AVG_UPDATE_GAP   = 50  ,  //  seconds between updates
@@ -89,6 +96,15 @@ public class GameConstants {
     AVG_SENIOR_MORT  = 10  ,  //  senior mortality percent
     LIFESPAN_LENGTH  = AVG_RETIREMENT * YEAR_LENGTH,
     //
+    //  Health and survival-
+    STARVE_INTERVAL  = MONTH_LENGTH * 2,
+    FATIGUE_INTERVAL = MONTH_LENGTH * 2,
+    HUNGER_REGEN     = 1,
+    FOOD_UNIT_PER_HP = 2,
+    FATIGUE_REGEN    = MONTH_LENGTH / 4,
+    HEALTH_REGEN     = MONTH_LENGTH / 2,
+    AVG_MAX_HEALTH   = 5,
+    //
     //  Commerce and amenities-
     MAX_WANDER_RANGE = 20  ,
     AVG_VISIT_TIME   = 20  ,
@@ -101,6 +117,10 @@ public class GameConstants {
     AVG_ARMY_SIZE    = 16  ,
     AVG_RANKS        = 4   ,
     AVG_FILE         = 4   ,
+    AVG_ATTACK       = 2   ,
+    AVG_DEFEND       = 2   ,
+    AVG_SIGHT        = 6   ,
+    AVG_RANGE        = 1   ,
     //
     //  Trade and migration-
     TRADE_DIST_TIME  = 50  ,
@@ -208,6 +228,7 @@ public class GameConstants {
     RELIGION   = new Good("Religion"    , -1, 33),
     
     CROP_TYPES [] = { MAIZE, CHILI, RAW_COTTON },
+    FOOD_TYPES [] = { MAIZE, CHILI },
     TREE_TYPES [] = { WOOD, RUBBER },
     STONE_TYPES[] = { CLAY, ADOBE },
     BUILD_GOODS[] = { WOOD, CLAY, ADOBE },

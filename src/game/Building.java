@@ -90,6 +90,7 @@ public class Building extends Fixture implements Session.Saveable, Employer {
     for (Walker w : residents) if (w.home == this) {
       w.home = null;
     }
+    entrance = null;
   }
   
   

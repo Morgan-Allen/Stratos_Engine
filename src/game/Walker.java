@@ -231,46 +231,11 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
   
   
   void beginNextBehaviour() {
-    
-    //  Establish some facts about the citizen first:
-    boolean adult = adult();
     job = null;
     
-    //  Adults will search for work and a place to live:
-    if ((homeCity == null || homeCity == map.city) && adult) {
-      if (work == null) CityBorders.findWork(map, this);
-      if (map == null) return;  //  TODO:  TEMPORARY HACK, REMOVE
-      if (home == null) CityBorders.findHome(map, this);
-      if (map == null) return;  //  TODO:  TEMPORARY HACK, REMOVE
-    }
-    
-    //  Children and retirees don't work:
-    if (work != null && ! adult) {
-      work.setWorker(this, false);
-    }
-    
-    //  Once home & work have been established, try to derive a task to
-    //  perform-
-    if (formation != null && formation.active) {
-      formation.selectWalkerBehaviour(this);
-    }
-    if (job == null && work != null) {
-      work.selectWalkerBehaviour(this);
-    }
-    if (job == null && home != null) {
-      home.selectWalkerBehaviour(this);
-    }
+    //  NOTE:  Subclasses are expected to override this behaviour!
     if (job == null) {
       startRandomWalk();
-    }
-    
-    //  And report afterward...
-    if (reports()) {
-      I.say("\n"+this+" BEGAN NEW BEHAVIOUR: "+jobType()+", TIME: "+map.time);
-      if (job != null) {
-        if (job.visits != null) I.say("  VISITING:  "+job.visits);
-        if (job.target != null) I.say("  TARGETING: "+job.target);
-      }
     }
   }
   
@@ -363,6 +328,15 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
   }
   
   
+  void beginResting(Building rests) {
+    if (rests == null) return;
+    if (reports()) I.say(this+" will rest at "+rests);
+    
+    job = new Task(this);
+    job = job.configTask(rests, rests, null, JOB.RESTING, -1);
+  }
+  
+  
   void startRandomWalk() {
     if (reports()) I.say(this+" beginning random walk...");
     
@@ -439,6 +413,7 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
   
   
   void takeDamage(float damage) {
+    if (! GameSettings.toggleInjury) return;
     injury += damage;
     checkHealthState();
   }

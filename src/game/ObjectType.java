@@ -178,14 +178,13 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   /**  Walker-specific stats and setup methods-
     */
   int socialClass = CLASS_COMMON;
+  String names[] = {};
   
-  int attackScore =  2 ;
-  int defendScore =  2 ;
-  int maxHealth   =  5 ;
-  int sightRange  =  6 ;
-  int attackRange =  1 ;
-  
-  String names[];
+  int maxHealth   = AVG_MAX_HEALTH;
+  int attackScore = AVG_ATTACK;
+  int defendScore = AVG_DEFEND;
+  int sightRange  = AVG_SIGHT;
+  int attackRange = AVG_RANGE;
   
   
   void initAsMigrant(Walker w) {
