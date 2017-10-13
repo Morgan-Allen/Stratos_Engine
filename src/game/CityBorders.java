@@ -91,7 +91,7 @@ public class CityBorders {
     numSpawn = Nums.min(numSpawn, spaces);
     
     while (numSpawn-- > 0) {
-      Walker w = new Walker(VAGRANT);
+      Walker w = (Walker) VAGRANT.generate();
       w.type.initAsMigrant(w);
       migrants.add(w);
     }

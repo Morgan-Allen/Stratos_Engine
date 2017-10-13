@@ -248,15 +248,15 @@ public class GameConstants {
   final static WalkerType
     NO_WALKERS[] = new WalkerType[0],
     
-    VAGRANT  = new WalkerType("type_vagrant" , IS_WALKER   , CLASS_COMMON),
-    CHILD    = new WalkerType("type_child"   , IS_WALKER   , CLASS_COMMON),
-    CITIZEN  = new WalkerType("type_citizen" , IS_WALKER   , CLASS_COMMON),
-    SERVANT  = new WalkerType("type_servant" , IS_WALKER   , CLASS_SLAVE ),
-    NOBLE    = new WalkerType("type_noble"   , IS_WALKER   , CLASS_NOBLE ),
-    WORKER   = new WalkerType("type_worker"  , IS_WALKER   , CLASS_COMMON),
-    MERCHANT = new WalkerType("type_merchant", IS_WALKER   , CLASS_TRADER),
-    PORTERS  = new WalkerType("type_porters" , IS_WALKER   , CLASS_SLAVE ),
-    SOLDIER  = new WalkerType("type_soldier" , IS_WALKER   , CLASS_NOBLE )
+    VAGRANT  = new WalkerType("type_vagrant" , IS_PERSON_WLK, CLASS_COMMON),
+    CHILD    = new WalkerType("type_child"   , IS_PERSON_WLK, CLASS_COMMON),
+    CITIZEN  = new WalkerType("type_citizen" , IS_PERSON_WLK, CLASS_COMMON),
+    SERVANT  = new WalkerType("type_servant" , IS_PERSON_WLK, CLASS_SLAVE ),
+    NOBLE    = new WalkerType("type_noble"   , IS_PERSON_WLK, CLASS_NOBLE ),
+    WORKER   = new WalkerType("type_worker"  , IS_PERSON_WLK, CLASS_COMMON),
+    MERCHANT = new WalkerType("type_merchant", IS_PERSON_WLK, CLASS_TRADER),
+    PORTERS  = new WalkerType("type_porters" , IS_PERSON_WLK, CLASS_SLAVE ),
+    SOLDIER  = new WalkerType("type_soldier" , IS_PERSON_WLK, CLASS_NOBLE )
   ;
   static {
     VAGRANT .name = "Vagrant" ;
