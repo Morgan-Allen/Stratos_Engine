@@ -7,7 +7,7 @@ import static game.CityMap.*;
 
 
 
-public class Building extends Fixture implements Session.Saveable, Employer {
+public class Building extends Element implements Session.Saveable, Employer {
   
   
   /**  Data fields and setup/initialisation-
@@ -19,15 +19,15 @@ public class Building extends Fixture implements Session.Saveable, Employer {
   Tile entrance;
   int updateGap = 0;
   
-  List <Walker> workers   = new List();
-  List <Walker> residents = new List();
-  List <Walker> visitors  = new List();
+  List <Actor> workers   = new List();
+  List <Actor> residents = new List();
+  List <Actor> visitors  = new List();
   
   Tally <Good> materials = new Tally();
   Tally <Good> inventory = new Tally();
   
   
-  Building(ObjectType type) {
+  Building(Type type) {
     super(type);
     this.ID = "#"+nextID++;
   }
@@ -84,10 +84,10 @@ public class Building extends Fixture implements Session.Saveable, Employer {
   void exitMap(CityMap map) {
     super.exitMap(map);
     map.buildings.remove(this);
-    for (Walker w : workers) if (w.work == this) {
+    for (Actor w : workers) if (w.work == this) {
       w.work = null;
     }
-    for (Walker w : residents) if (w.home == this) {
+    for (Actor w : residents) if (w.home == this) {
       w.home = null;
     }
     entrance = null;
@@ -156,7 +156,7 @@ public class Building extends Fixture implements Session.Saveable, Employer {
   }
   
   
-  Building findNearestOfType(ObjectType type, int maxDist) {
+  Building findNearestOfType(Type type, int maxDist) {
     return findNearestDemanding(type, null, null, -1);
   }
   
@@ -167,14 +167,14 @@ public class Building extends Fixture implements Session.Saveable, Employer {
   
   
   Building findNearestDemanding(
-    ObjectType type, Good needed, int maxDist
+    Type type, Good needed, int maxDist
   ) {
     return findNearestDemanding(type, null, needed, maxDist);
   }
   
   
   Building findNearestDemanding(
-    ObjectType type, Good feature,
+    Type type, Good feature,
     Good needed, int maxDist
   ) {
     Pick <Building> pick = new Pick();
@@ -212,21 +212,21 @@ public class Building extends Fixture implements Session.Saveable, Employer {
   
   /**  Spawning walkers and customising walker behaviour:
     */
-  protected int numWorkers(ObjectType type) {
+  protected int numWorkers(Type type) {
     int sum = 0;
-    for (Walker w : workers) if (w.type == type) sum++;
+    for (Actor w : workers) if (w.type == type) sum++;
     return sum;
   }
   
   
   protected int numResidents(int socialClass) {
     int sum = 0;
-    for (Walker w : residents) if (w.type.socialClass == socialClass) sum++;
+    for (Actor w : residents) if (w.type.socialClass == socialClass) sum++;
     return sum;
   }
   
   
-  protected int maxWorkers(ObjectType w) {
+  protected int maxWorkers(Type w) {
     if (! Visit.arrayIncludes(type.workerTypes, w)) return 0;
     return type.maxWorkers;
   }
@@ -238,13 +238,13 @@ public class Building extends Fixture implements Session.Saveable, Employer {
   }
   
   
-  public void setWorker(Walker w, boolean is) {
+  public void setWorker(Actor w, boolean is) {
     w.work = is ? this : null;
     workers.toggleMember(w, is);
   }
   
   
-  public void setResident(Walker w, boolean is) {
+  public void setResident(Actor w, boolean is) {
     w.home = is ? this : null;
     residents.toggleMember(w, is);
   }
@@ -255,42 +255,42 @@ public class Building extends Fixture implements Session.Saveable, Employer {
   }
   
   
-  public void selectWalkerBehaviour(Walker walker) {
+  public void selectWalkerBehaviour(Actor walker) {
     walker.returnTo(this);
   }
   
   
-  public void walkerUpdates(Walker w) {
+  public void walkerUpdates(Actor w) {
     return;
   }
   
   
-  public void walkerPasses(Walker walker, Building other) {
+  public void walkerPasses(Actor walker, Building other) {
     return;
   }
   
   
-  public void walkerTargets(Walker walker, Target other) {
+  public void walkerTargets(Actor walker, Target other) {
     return;
   }
   
   
-  public void walkerEnters(Walker walker, Building enters) {
+  public void walkerEnters(Actor walker, Building enters) {
     return;
   }
   
   
-  public void walkerVisits(Walker walker, Building visits) {
+  public void walkerVisits(Actor walker, Building visits) {
     return;
   }
   
   
-  public void walkerExits(Walker walker, Building enters) {
+  public void walkerExits(Actor walker, Building enters) {
     return;
   }
   
   
-  public void visitedBy(Walker walker) {
+  public void visitedBy(Actor walker) {
     return;
   }
   

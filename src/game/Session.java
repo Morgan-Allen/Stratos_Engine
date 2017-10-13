@@ -4,10 +4,9 @@
   *  for now, feel free to poke around for non-commercial purposes.
   */
 package game;
+import util.*;
 import java.io.*;
 import java.lang.reflect.*;
-import java.util.Map;
-import util.*;
 
 
 
@@ -281,7 +280,7 @@ public final class Session {
   public void saveTable(Table t) throws Exception {
     saveInt(t.size());
     for (Object o : t.entrySet()) {
-      Map.Entry entry = (Map.Entry) o;
+      java.util.Map.Entry entry = (java.util.Map.Entry) o;
       saveObject(entry.getKey  ());
       saveObject(entry.getValue());
     }
@@ -643,88 +642,6 @@ public final class Session {
     out.writeInt(chars.length);
     out.write(chars);
     bytesOut += chars.length + 4;
-  }
-  
-  
-  
-  /**  And finally, some methods for generalised save/loading given a base
-    *  type-
-    */
-  final static Object NO_VALUE = new Object();
-  
-  
-  public void saveAllFields(Object o) throws Exception {
-    final Class c = o.getClass();
-    for (Field f : c.getFields()) {
-      final Object val = f.get(o);
-      saveWithType(val, f.getType());
-    }
-  }
-  
-  
-  public void loadAllFields(Object o) throws Exception {
-    final Class c = o.getClass();
-    for (Field f : c.getFields()) {
-      final Object val = loadWithType(f.getType());
-      if (val != NO_VALUE) f.set(o, val);
-    }
-  }
-  
-  
-  
-  public Object loadWithType(Type t) throws Exception {
-    
-    if      (t == Boolean.TYPE) return loadBool  ();
-    else if (t == Float  .TYPE) return loadFloat ();
-    else if (t == Integer.TYPE) return loadInt   ();
-    else if (t == String.class) return loadString();
-    
-    else if (t == Double   .TYPE) return (double) loadFloat();
-    else if (t == Character.TYPE) return (char  ) loadInt  ();
-    else if (t == Short    .TYPE) return (short ) loadInt  ();
-    
-    else {
-      if (! (t instanceof Class)) return NO_VALUE;
-      final Class c = (Class) t;
-      if (! Saveable.class.isAssignableFrom(c)) return NO_VALUE;
-      return loadObject();
-    }
-  }
-  
-  
-  public void saveWithType(Object o, Type t) throws Exception {
-    
-    if      (t == Boolean.TYPE) saveBool  ((Boolean) o);
-    else if (t == Float  .TYPE) saveFloat ((Float  ) o);
-    else if (t == Integer.TYPE) saveInt   ((Integer) o);
-    else if (t == String.class) saveString((String ) o);
-    
-    else if (t == Double   .TYPE) saveFloat((float) (double) (Double   ) o);
-    else if (t == Character.TYPE) saveInt  ((int  ) (char  ) (Character) o);
-    else if (t == Short    .TYPE) saveInt  ((int  ) (short ) (Short    ) o);
-    
-    else if (o instanceof Saveable) saveObject((Saveable) o);
-  }
-  
-  
-  public Object[] loadWithTypes(Type... types) throws Exception {
-    final Object loaded[] = new Object[types.length];
-    for (int i = 0; i < types.length; i++) {
-      loaded[i] = loadWithType(types[i]);
-    }
-    return loaded;
-  }
-  
-  
-  public void saveWithTypes(Object objects[], Type... types) throws Exception {
-    
-    if (objects.length != types.length) {
-      I.say("PROBLEM!");
-    }
-    
-    for (int i = 0; i < types.length; i++) {
-      saveWithType(objects[i], types[i]);
-    }
   }
 }
 

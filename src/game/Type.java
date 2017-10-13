@@ -8,7 +8,7 @@ import java.lang.reflect.Array;
 
 
 
-public class ObjectType extends Index.Entry implements Session.Saveable {
+public class Type extends Index.Entry implements Session.Saveable {
   
   
   /**  Indexing, categorisation, spawning and save/load methods-
@@ -31,16 +31,16 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
     IS_PERSON_WLK  = 14
   ;
   
-  final static Index <ObjectType> INDEX = new Index();
+  final static Index <Type> INDEX = new Index();
   
   
-  ObjectType(String ID, int category) {
+  Type(String ID, int category) {
     super(INDEX, ID);
     this.category = category;
   }
   
   
-  public static ObjectType loadConstant(Session s) throws Exception {
+  public static Type loadConstant(Session s) throws Exception {
     return INDEX.loadEntry(s.input());
   }
   
@@ -52,7 +52,7 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   
   Object generate() {
     switch (category) {
-      case(IS_FIXTURE    ): return new Fixture(this);
+      case(IS_FIXTURE    ): return new Element(this);
       case(IS_BUILDING   ): return new Building           (this);
       case(IS_CRAFTS_BLD ): return new BuildingForCrafts  (this);
       case(IS_GATHER_BLD ): return new BuildingForGather  (this);
@@ -62,8 +62,8 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
       case(IS_AMENITY_BLD): return new BuildingForAmenity (this);
       case(IS_COLLECT_BLD): return new BuildingForCollect (this);
       case(IS_ARMY_BLD   ): return new BuildingForMilitary(this);
-      case(IS_WALKER     ): return new Walker(this);
-      case(IS_PERSON_WLK ): return new WalkerAsPerson(this);
+      case(IS_WALKER     ): return new Actor(this);
+      case(IS_PERSON_WLK ): return new ActorAsPerson(this);
     }
     return null;
   }
@@ -113,8 +113,8 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   /**  Building-specific data fields and setup methods-
     */
   Good       buildsWith  [] = NO_GOODS;
-  ObjectType upgradeTiers[] = NO_TIERS;
-  ObjectType upgradeNeeds[] = NO_NEEDS;
+  Type upgradeTiers[] = NO_TIERS;
+  Type upgradeNeeds[] = NO_NEEDS;
   Integer    needAmounts [] = {};
   int homeSocialClass  = CLASS_COMMON;
   int homeAmbienceNeed = AMBIENCE_MIN;
@@ -132,7 +132,7 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   int consumeTime     = AVG_CONSUME_TIME;
   int featureAmount   = AVG_SERVICE_GIVE;
   
-  ObjectType workerTypes[] = NO_WALKERS;
+  Type workerTypes[] = NO_WALKERS;
   int maxWorkers   = 1;
   int maxResidents = 0;
   int maxVisitors  = AVG_MAX_VISITORS;
@@ -141,14 +141,14 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   int numFile      = AVG_FILE     ;
   
   
-  void setUpgradeTiers(ObjectType... tiers) {
+  void setUpgradeTiers(Type... tiers) {
     this.upgradeTiers = tiers;
   }
   
   
   void setUpgradeNeeds(Object... args) {
     Object split[][] = Visit.splitByModulus(args, 2);
-    upgradeNeeds = (ObjectType[]) castArray(split[0], ObjectType.class);
+    upgradeNeeds = (Type[]) castArray(split[0], Type.class);
     needAmounts  = (Integer   []) castArray(split[1], Integer   .class);
   }
   
@@ -159,7 +159,7 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   }
   
   
-  void setWorkerTypes(ObjectType... types) {
+  void setWorkerTypes(Type... types) {
     this.workerTypes = types;
   }
   
@@ -187,9 +187,9 @@ public class ObjectType extends Index.Entry implements Session.Saveable {
   int attackRange = AVG_RANGE;
   
   
-  void initAsMigrant(Walker w) {
+  void initAsMigrant(Actor w) {
     float age = Rand.range(AVG_MARRIED, AVG_MENOPAUSE) + Rand.num() - 0.5f;
-    int   sex = Rand.yes() ? Walker.SEX_FEMALE : Walker.SEX_MALE;
+    int   sex = Rand.yes() ? Actor.SEX_FEMALE : Actor.SEX_MALE;
     w.ageSeconds = (int) (age * YEAR_LENGTH);
     w.sexData    = sex;
   }

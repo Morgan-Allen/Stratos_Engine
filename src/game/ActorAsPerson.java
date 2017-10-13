@@ -7,18 +7,18 @@ import static game.GameConstants.*;
 
 
 
-public class WalkerAsPerson extends Walker {
+public class ActorAsPerson extends Actor {
   
   
   
   /**  Data fields, construction and save/load methods-
     */
-  public WalkerAsPerson(ObjectType type) {
+  public ActorAsPerson(Type type) {
     super(type);
   }
   
   
-  public WalkerAsPerson(Session s) throws Exception {
+  public ActorAsPerson(Session s) throws Exception {
     super(s);
   }
   
@@ -133,7 +133,7 @@ public class WalkerAsPerson extends Walker {
         float dieChance = AVG_CHILD_MORT / 100f;
         if (Rand.num() >= dieChance) {
           Tile at = home.at();
-          Walker child = (Walker) CHILD.generate();
+          Actor child = (Actor) CHILD.generate();
           child.enterMap(map, at.x, at.y, 1);
           child.inside = home;
           child.home   = home;

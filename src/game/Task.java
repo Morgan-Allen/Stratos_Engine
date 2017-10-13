@@ -32,7 +32,7 @@ public class Task implements Session.Saveable {
     COMBAT   ,
   };
   
-  Walker actor;
+  Actor actor;
   Employer origin;
   
   JOB type      = JOB.NONE;
@@ -47,7 +47,7 @@ public class Task implements Session.Saveable {
   
   
   
-  Task(Walker actor) {
+  Task(Actor actor) {
     this.actor = actor;
   }
   
@@ -55,7 +55,7 @@ public class Task implements Session.Saveable {
   public Task(Session s) throws Exception {
     s.cacheInstance(this);
     
-    actor     = (Walker  ) s.loadObject();
+    actor     = (Actor  ) s.loadObject();
     origin    = (Employer) s.loadObject();
     type      = JOB.values()[s.loadInt()];
     timeSpent = s.loadInt();
@@ -194,7 +194,7 @@ public class Task implements Session.Saveable {
     if (from == null || heads == null) return null;
     //heads.setFocused(actor, true);
     
-    WalkerPathSearch search = new WalkerPathSearch(map, from, heads, -1);
+    ActorPathSearch search = new ActorPathSearch(map, from, heads, -1);
     search.setPaveOnly(visiting && map.paved(from.x, from.y));
     search.doSearch();
     return search.fullPath(Tile.class);

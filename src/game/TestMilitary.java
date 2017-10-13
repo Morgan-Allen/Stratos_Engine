@@ -46,7 +46,7 @@ public class TestMilitary extends Test {
     enemies.setupFormation(GARRISON, cityB);
     
     for (int n = 4; n-- > 0;) {
-      Walker fights = (Walker) ((n == 0) ? SOLDIER : CITIZEN).generate();
+      Actor fights = (Actor) ((n == 0) ? SOLDIER : CITIZEN).generate();
       fights.assignHomeCity(cityB);
       enemies.toggleRecruit(fights, true);
     }
@@ -75,8 +75,8 @@ public class TestMilitary extends Test {
       
       if (recruited && ! homeWin) {
         boolean survivors = false;
-        for (Walker w : enemies.recruits) {
-          if (w.state < Walker.STATE_DEAD) survivors = true;
+        for (Actor w : enemies.recruits) {
+          if (w.state < Actor.STATE_DEAD) survivors = true;
         }
         homeWin = ! survivors;
         if (homeWin) fort.formation.stopSecuringPoint();
@@ -93,7 +93,7 @@ public class TestMilitary extends Test {
       
       if (awayWin && ! backHome) {
         boolean someAway = false;
-        for (Walker w : troops.recruits) {
+        for (Actor w : troops.recruits) {
           if (w.map != map) someAway = true;
         }
         backHome = troops.recruits.size() > 8 && ! someAway;

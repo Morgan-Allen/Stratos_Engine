@@ -22,7 +22,7 @@ public class CityMap implements Session.Saveable {
   byte fogVals[][], oldVals[][];
   
   List <Building> buildings = new List();
-  List <Walker  > walkers   = new List();
+  List <Actor  > walkers   = new List();
   
   Table <City, Tile> transitPoints = new Table();
   int growScanIndex = 0;
@@ -104,17 +104,17 @@ public class CityMap implements Session.Saveable {
     int x, y;
     
     Terrain terrain;
-    Fixture above;
+    Element above;
     boolean paved;
     
-    List <Walker> focused = null;
+    List <Actor> focused = null;
     protected Object flag;
     
     
     void loadState(Session s) throws Exception {
       int terrID = s.loadInt();
       terrain = terrID == -1 ? null : ALL_TERRAINS[terrID];
-      above   = (Fixture) s.loadObject();
+      above   = (Element) s.loadObject();
       paved   = s.loadBool();
       
       if (s.loadBool()) s.loadObjects(focused = new List());
@@ -136,7 +136,7 @@ public class CityMap implements Session.Saveable {
     }
     
     
-    public void targetedBy(Walker w) {
+    public void targetedBy(Actor w) {
       return;
     }
     
@@ -226,7 +226,7 @@ public class CityMap implements Session.Saveable {
   
   /**  Blockage and paving methods-
     */
-  Fixture above(int x, int y) {
+  Element above(int x, int y) {
     Tile under = tileAt(x, y);
     return under == null ? null : under.above;
   }
@@ -295,7 +295,7 @@ public class CityMap implements Session.Saveable {
     for (Building b : buildings) {
       b.update();
     }
-    for (Walker w : walkers) {
+    for (Actor w : walkers) {
       w.update();
     }
     
@@ -331,7 +331,7 @@ public class CityMap implements Session.Saveable {
     
     while (++growScanIndex < targetIndex) {
       int x = growScanIndex / size, y = growScanIndex % size;
-      Fixture above = grid[x][y].above;
+      Element above = grid[x][y].above;
       if (above != null) above.updateGrowth();
     }
     

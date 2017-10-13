@@ -19,7 +19,7 @@ public class TaskTrading extends Task {
   Trader tradeGoes;
   
   
-  public TaskTrading(Walker actor) {
+  public TaskTrading(Actor actor) {
     super(actor);
   }
   

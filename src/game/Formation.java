@@ -2,7 +2,7 @@
 
 package game;
 import util.*;
-import static game.Walker.*;
+import static game.Actor.*;
 import static game.GameConstants.*;
 import static game.CityMap.*;
 import static game.City.*;
@@ -17,8 +17,8 @@ public class Formation implements
   
   /**  Data fields, setup and save/load methods-
     */
-  ObjectType type;
-  List <Walker> recruits = new List();
+  Type type;
+  List <Actor> recruits = new List();
   
   boolean away   = false;
   City    belongs     ;
@@ -39,7 +39,7 @@ public class Formation implements
   public Formation(Session s) throws Exception {
     s.cacheInstance(this);
     
-    type = (ObjectType) s.loadObject();
+    type = (Type) s.loadObject();
     s.loadObjects(recruits);
     
     away         = s.loadBool();
@@ -74,7 +74,7 @@ public class Formation implements
   
   /**  Issuing specific marching orders on the current map-
     */
-  void setupFormation(ObjectType type, City belongs) {
+  void setupFormation(Type type, City belongs) {
     this.type    = type;
     this.belongs = belongs;
     this.map     = belongs.map;
@@ -83,11 +83,11 @@ public class Formation implements
   
   
   void disband() {
-    for (Walker r : recruits) toggleRecruit(r, false);
+    for (Actor r : recruits) toggleRecruit(r, false);
   }
   
   
-  void toggleRecruit(Walker s, boolean is) {
+  void toggleRecruit(Actor s, boolean is) {
     this.recruits.toggleMember(s, is);
     if (is) s.formation = this;
     else    s.formation = null;
@@ -143,7 +143,7 @@ public class Formation implements
   
   void beginJourney(City from, City goes) {
     if (reports()) I.say("\nREADY TO BEGIN FOREIGN MISSION!");
-    for (Walker w : recruits) if (w.onMap(map)) {
+    for (Actor w : recruits) if (w.onMap(map)) {
       w.exitMap();
     }
     goes.world.beginJourney(from, goes, this);
@@ -165,7 +165,7 @@ public class Formation implements
       
       this.map = goes.map;
       Tile entry = findTransitPoint(map, journey.from);
-      for (Walker w : recruits) {
+      for (Actor w : recruits) {
         w.enterMap(map, entry.x, entry.y, 1);
       }
       beginSecuring(entry, N, null);
@@ -219,7 +219,7 @@ public class Formation implements
     
     casualties *= numFought;
     for (float i = Nums.min(numFought, casualties); i-- > 0;) {
-      Walker lost = (Walker) Rand.pickFrom(recruits);
+      Actor lost = (Actor) Rand.pickFrom(recruits);
       this.toggleRecruit(lost, false);
     }
     
@@ -240,7 +240,7 @@ public class Formation implements
   
   /**  Other utility methods:
     */
-  Tile standLocation(Walker member) {
+  Tile standLocation(Actor member) {
     
     Tile c = this.securedPoint;
     if (c == null) return null;
@@ -262,7 +262,7 @@ public class Formation implements
   }
   
   
-  boolean hostile(Walker a, Walker b) {
+  boolean hostile(Actor a, Actor b) {
     City CA = a.homeCity, CB = b.homeCity;
     if (CA == null) CA = map.city;
     if (CB == null) CB = map.city;
@@ -276,7 +276,7 @@ public class Formation implements
   boolean formationReady() {
     if (map == null) return true;
     if (securedPoint == null || ! active) return false;
-    for (Walker w : recruits) {
+    for (Actor w : recruits) {
       if (standLocation(w) != w.at) return false;
     }
     return true;
@@ -285,8 +285,8 @@ public class Formation implements
   
   int formationPower() {
     float sumStats = 0;
-    for (Walker w : recruits) {
-      if (w.state >= Walker.STATE_DEAD) continue;
+    for (Actor w : recruits) {
+      if (w.state >= Actor.STATE_DEAD) continue;
       float stats = w.type.attackScore + w.type.defendScore;
       stats *= 1 - ((w.injury + w.hunger) / w.type.maxHealth);
       sumStats += stats;
@@ -295,15 +295,15 @@ public class Formation implements
   }
   
   
-  Walker findCombatTarget(Walker member) {
+  Actor findCombatTarget(Actor member) {
     if (map == null) return null;
-    Pick <Walker> pick = new Pick();
+    Pick <Actor> pick = new Pick();
     
     //  TODO:  Allow for targeting of anything noticed by other members of the
     //  team?
     float seeBonus = type.numFile;
     
-    for (Walker w : map.walkers) if (hostile(w, member)) {
+    for (Actor w : map.walkers) if (hostile(w, member)) {
       float distW = CityMap.distance(member.at, w.at);
       float distF = CityMap.distance(w.at, securedPoint);
       float range = member.type.sightRange + seeBonus;
@@ -316,7 +316,7 @@ public class Formation implements
   }
   
   
-  Tile findSiegeTarget(Walker member) {
+  Tile findSiegeTarget(Actor member) {
     if (securedPoint == null || ! (securedPoint.above instanceof Building)) {
       return null;
     }
@@ -391,7 +391,7 @@ public class Formation implements
     }
     
     for (Building b : map.buildings) {
-      if (b.type.category != ObjectType.IS_ARMY_BLD) continue;
+      if (b.type.category != Type.IS_ARMY_BLD) continue;
       
       Option o = new Option();
       o.secures = b.centre();
@@ -418,9 +418,9 @@ public class Formation implements
   }
   
   
-  public void selectWalkerBehaviour(Walker w) {
+  public void selectWalkerBehaviour(Actor w) {
     
-    Walker target = w.inCombat() ? null : findCombatTarget(w);
+    Actor target = w.inCombat() ? null : findCombatTarget(w);
     if (target != null) {
       w.beginAttack(target, Task.JOB.COMBAT, this);
       return;
@@ -440,8 +440,8 @@ public class Formation implements
   }
   
   
-  public void walkerUpdates(Walker w) {
-    Walker target = w.inCombat() ? null : findCombatTarget(w);
+  public void walkerUpdates(Actor w) {
+    Actor target = w.inCombat() ? null : findCombatTarget(w);
     if (target != null) {
       w.beginAttack(target, Task.JOB.COMBAT, this);
       return;
@@ -449,9 +449,9 @@ public class Formation implements
   }
   
   
-  public void walkerTargets(Walker walker, Target other) {
-    if (walker.inCombat() && other instanceof Walker) {
-      walker.performAttack((Walker) other);
+  public void walkerTargets(Actor walker, Target other) {
+    if (walker.inCombat() && other instanceof Actor) {
+      walker.performAttack((Actor) other);
     }
     if (walker.inCombat() && other instanceof Tile) {
       Building siege = (Building) ((Tile) other).above;
@@ -461,22 +461,22 @@ public class Formation implements
   }
   
   
-  public void walkerPasses(Walker walker, Building other) {
+  public void walkerPasses(Actor walker, Building other) {
     return;
   }
   
   
-  public void walkerEnters(Walker walker, Building enters) {
+  public void walkerEnters(Actor walker, Building enters) {
     return;
   }
   
   
-  public void walkerVisits(Walker walker, Building visits) {
+  public void walkerVisits(Actor walker, Building visits) {
     return;
   }
   
   
-  public void walkerExits(Walker walker, Building enters) {
+  public void walkerExits(Actor walker, Building enters) {
     return;
   }
   

@@ -2,7 +2,7 @@
 
 package game;
 import util.*;
-import static game.ObjectType.*;
+import static game.Type.*;
 import static game.CityMap.*;
 import java.awt.Color;
 
@@ -130,10 +130,10 @@ public class GameConstants {
   
 
   private static List <Terrain> TERRAINS_LIST = new List();
-  static class Terrain extends ObjectType {
+  static class Terrain extends Type {
     
     int terrainIndex = 0;
-    ObjectType fixtures[] = new ObjectType[0];
+    Type fixtures[] = new Type[0];
     Float      weights [] = new Float     [0];
     
     Terrain(String name, int index) {
@@ -146,7 +146,7 @@ public class GameConstants {
     
     void attachFixtures(Object... args) {
       Object split[][] = Visit.splitByModulus(args, 2);
-      fixtures = (ObjectType[]) castArray(split[0], ObjectType.class);
+      fixtures = (Type[]) castArray(split[0], Type.class);
       weights  = (Float     []) castArray(split[1], Float     .class);
     }
     
@@ -158,10 +158,10 @@ public class GameConstants {
     LAKE   = new Terrain("Lake"  , 3),
     ALL_TERRAINS[] = TERRAINS_LIST.toArray(Terrain.class)
   ;
-  final static ObjectType
-    JUNGLE_TREE1 = new ObjectType("fixture_j_tree1", IS_FIXTURE),
-    DESERT_ROCK1 = new ObjectType("fixture_d_rock1", IS_FIXTURE),
-    DESERT_ROCK2 = new ObjectType("fixture_d_rock2", IS_FIXTURE)
+  final static Type
+    JUNGLE_TREE1 = new Type("fixture_j_tree1", IS_FIXTURE),
+    DESERT_ROCK1 = new Type("fixture_d_rock1", IS_FIXTURE),
+    DESERT_ROCK2 = new Type("fixture_d_rock2", IS_FIXTURE)
   ;
   static {
     JUNGLE.attachFixtures(JUNGLE_TREE1, 0.50f);
@@ -187,7 +187,7 @@ public class GameConstants {
   /**  Economic constants-
     */
   private static List <Good> GOODS_LIST = new List();
-  static class Good extends ObjectType {
+  static class Good extends Type {
     
     int price;
     
@@ -252,7 +252,7 @@ public class GameConstants {
   
   /**  Walker types-
     */
-  static class WalkerType extends ObjectType {
+  static class WalkerType extends Type {
     WalkerType(String ID, int category, int socialClass) {
       super(ID, category);
       this.socialClass = socialClass;
@@ -297,7 +297,7 @@ public class GameConstants {
   
   /**  Infrastructure types-
     */
-  static class BuildType extends ObjectType {
+  static class BuildType extends Type {
     BuildType(String ID, int category) {
       super(ID, category);
     }
@@ -482,7 +482,7 @@ public class GameConstants {
     */
   static interface Target {
     Tile at();
-    void targetedBy(Walker w);
+    void targetedBy(Actor w);
     //void setFocused(Walker w, boolean is);
   }
   
@@ -497,13 +497,13 @@ public class GameConstants {
   }
   
   static interface Employer {
-    void selectWalkerBehaviour(Walker walker);
-    void walkerUpdates(Walker walker);
-    void walkerPasses (Walker walker, Building other );
-    void walkerTargets(Walker walker, Target   other );
-    void walkerEnters (Walker walker, Building enters);
-    void walkerVisits (Walker walker, Building visits);
-    void walkerExits  (Walker walker, Building enters);
+    void selectWalkerBehaviour(Actor walker);
+    void walkerUpdates(Actor walker);
+    void walkerPasses (Actor walker, Building other );
+    void walkerTargets(Actor walker, Target   other );
+    void walkerEnters (Actor walker, Building enters);
+    void walkerVisits (Actor walker, Building visits);
+    void walkerExits  (Actor walker, Building enters);
   }
   
   

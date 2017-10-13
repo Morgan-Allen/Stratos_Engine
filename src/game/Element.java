@@ -7,12 +7,12 @@ import static util.TileConstants.*;
 
 
 
-public class Fixture implements Session.Saveable, Target {
+public class Element implements Session.Saveable, Target {
   
   
   /**  Data fields, construction and save/load methods-
     */
-  ObjectType type;
+  Type type;
   
   CityMap map;
   CityMap.Tile at;
@@ -21,18 +21,18 @@ public class Fixture implements Session.Saveable, Target {
   float buildLevel;
   boolean complete;
   
-  List <Walker> focused = null;
+  List <Actor> focused = null;
   
   
-  Fixture(ObjectType type) {
+  Element(Type type) {
     this.type = type;
   }
   
   
-  public Fixture(Session s) throws Exception {
+  public Element(Session s) throws Exception {
     s.cacheInstance(this);
     
-    type   = (ObjectType) s.loadObject();
+    type   = (Type) s.loadObject();
     map    = (CityMap) s.loadObject();
     at     = CityMap.loadTile(map, s);
     facing = s.loadInt();
@@ -97,7 +97,7 @@ public class Fixture implements Session.Saveable, Target {
   
   /**  Handling focus for walker activities-
     */
-  public void targetedBy(Walker w) {
+  public void targetedBy(Actor w) {
     return;
   }
   

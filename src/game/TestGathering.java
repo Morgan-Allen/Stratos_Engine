@@ -47,13 +47,13 @@ public class TestGathering extends Test {
       //  (C) impassible,
       //  ...for this to count as complete.
       if (! planted) {
-        Batch <Fixture> crops = new Batch();
+        Batch <Element> crops = new Batch();
         int numT = 0;
         for (Coord c : Visit.grid(farm.fullArea())) {
           Tile t = map.tileAt(c.x, c.y);
           
           if (t == null || t.paved) continue;
-          ObjectType above = t.above == null ? null : t.above.type;
+          Type above = t.above == null ? null : t.above.type;
           if (above != null && above.growRate == 0) continue;
           
           numT += 1;
@@ -63,7 +63,7 @@ public class TestGathering extends Test {
         //  If that's true, we bump up maturation to speed up harvest:
         if (crops.size() > (numT * 0.9f)) {
           planted = true;
-          for (Fixture c : crops) c.buildLevel = (3 + Rand.num()) / 4;
+          for (Element c : crops) c.buildLevel = (3 + Rand.num()) / 4;
         }
       }
       //

@@ -41,11 +41,11 @@ public class CityMapGenerator {
       Terrain terr = tile.terrain;
       
       for (int i = terr.fixtures.length; i-- > 0;) {
-        ObjectType t = terr.fixtures[i];
+        Type t = terr.fixtures[i];
         float      w = terr.weights [i] / (t.wide * t.high);
         
         if (Rand.num() < w && checkPlacingOkay(tile, t, map)) {
-          Fixture f = (Fixture) t.generate();
+          Element f = (Element) t.generate();
           f.enterMap(map, tile.x, tile.y, 1);
         }
       }
@@ -53,13 +53,13 @@ public class CityMapGenerator {
   }
   
   
-  public static void populateFixture(ObjectType t, int x, int y, CityMap map) {
-    Fixture f = (Fixture) t.generate();
+  public static void populateFixture(Type t, int x, int y, CityMap map) {
+    Element f = (Element) t.generate();
     f.enterMap(map, x, y, 1);
   }
   
   
-  static boolean checkPlacingOkay(Tile at, ObjectType t, CityMap map) {
+  static boolean checkPlacingOkay(Tile at, Type t, CityMap map) {
     
     for (Coord c : Visit.grid(at.x, at.y, t.wide, t.high, 1)) {
       Tile u = map.tileAt(c.x, c.y);

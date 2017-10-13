@@ -14,10 +14,10 @@ public class BuildingForHome extends Building {
   
   /**  Data fields, construction and save/load methods-
     */
-  ObjectType currentTier;
+  Type currentTier;
   
   
-  BuildingForHome(ObjectType type) {
+  BuildingForHome(Type type) {
     super(type);
     this.currentTier = type;
   }
@@ -25,7 +25,7 @@ public class BuildingForHome extends Building {
   
   public BuildingForHome(Session s) throws Exception {
     super(s);
-    currentTier = (ObjectType) s.loadObject();
+    currentTier = (Type) s.loadObject();
   }
   
   
@@ -38,11 +38,11 @@ public class BuildingForHome extends Building {
   
   /**  Passive ambience and access-checks:
     */
-  Tally <ObjectType> checkServiceAccess() {
+  Tally <Type> checkServiceAccess() {
     //
     //  This methods checks for the presence of all required amenities within
     //  a given wander-range.
-    Tally <ObjectType> access = new Tally();
+    Tally <Type> access = new Tally();
     if (entrance == null) return access;
     int maxRange = MAX_WANDER_RANGE;
     
@@ -56,7 +56,7 @@ public class BuildingForHome extends Building {
         float dist = CityMap.distance(b.entrance, entrance);
         if (dist > maxRange) continue;
         
-        WalkerPathSearch search = new WalkerPathSearch(
+        ActorPathSearch search = new ActorPathSearch(
           map, b.entrance, entrance, maxRange
         );
         search.doSearch();
@@ -70,7 +70,7 @@ public class BuildingForHome extends Building {
   }
   
   
-  boolean performAmbienceCheck(ObjectType tier, Tally <ObjectType> access) {
+  boolean performAmbienceCheck(Type tier, Tally <Type> access) {
     //
     //  This method checks the surrounding tiles out to a distance of 6 tiles:
     if (entrance == null) return false;
@@ -125,10 +125,10 @@ public class BuildingForHome extends Building {
   }
   
   
-  boolean performServicesCheck(ObjectType tier, Tally <ObjectType> access) {
+  boolean performServicesCheck(Type tier, Tally <Type> access) {
     boolean allOK = true;
     for (int i = tier.upgradeNeeds.length; i-- > 0;) {
-      ObjectType need   = tier.upgradeNeeds[i];
+      Type need   = tier.upgradeNeeds[i];
       int        amount = tier.needAmounts [i];
       if (access.valueFor(need) < amount) allOK = false;
     }
@@ -136,7 +136,7 @@ public class BuildingForHome extends Building {
   }
   
   
-  boolean performConsumerCheck(ObjectType tier, Tally <ObjectType> access) {
+  boolean performConsumerCheck(Type tier, Tally <Type> access) {
     for (Good g : tier.consumed) {
       float amount = inventory.valueFor(g);
       if (amount < tier.maxStock) return false;
@@ -145,15 +145,15 @@ public class BuildingForHome extends Building {
   }
   
   
-  ObjectType tierOffset(int off) {
-    ObjectType tiers[] = type.upgradeTiers;
+  Type tierOffset(int off) {
+    Type tiers[] = type.upgradeTiers;
     int index = Visit.indexOf(currentTier, tiers);
     if (index == -1) return type;
     return tiers[Nums.clamp(index + off, tiers.length)];
   }
   
   
-  Batch <Good> consumedBy(ObjectType tier) {
+  Batch <Good> consumedBy(Type tier) {
     Batch <Good> consumes = new Batch();
     consumes.add(WATER);
     for (Good g : FOOD_TYPES   ) consumes.add(g);
@@ -168,8 +168,8 @@ public class BuildingForHome extends Building {
   void updateOnPeriod(int period) {
     super.updateOnPeriod(period);
     
-    ObjectType nextTier = tierOffset(1), lastTier = tierOffset(-1);
-    Tally <ObjectType> access = checkServiceAccess();
+    Type nextTier = tierOffset(1), lastTier = tierOffset(-1);
+    Tally <Type> access = checkServiceAccess();
     
     boolean nextAmbOK = performAmbienceCheck(nextTier   , access);
     boolean nextSerOK = performServicesCheck(nextTier   , access);
@@ -190,7 +190,7 @@ public class BuildingForHome extends Building {
   }
   
   
-  void advanceConsumption(ObjectType tier) {
+  void advanceConsumption(Type tier) {
     float conLevel = residents.size() * 1f / tier.consumeTime;
     conLevel *= type.updateTime;
     
@@ -202,7 +202,7 @@ public class BuildingForHome extends Building {
   }
   
   
-  void generateOutputs(ObjectType tier) {
+  void generateOutputs(Type tier) {
     float conLevel = 1f * residents.size() / tier.consumeTime;
     conLevel *= type.updateTime;
     inventory.add(conLevel, NIGHTSOIL);
@@ -214,10 +214,10 @@ public class BuildingForHome extends Building {
   
   
   static float wealthLevel(Building home) {
-    ObjectType type = home.type;
-    if (type.category != ObjectType.IS_HOME_BLD) return 0;
+    Type type = home.type;
+    if (type.category != Type.IS_HOME_BLD) return 0;
     
-    ObjectType currentTier = ((BuildingForHome) home).currentTier;
+    Type currentTier = ((BuildingForHome) home).currentTier;
     float tier = Visit.indexOf(currentTier, type.upgradeTiers);
     tier /= Nums.max(1, type.upgradeTiers.length - 1);
     tier += type.homeSocialClass * 1f / CLASS_NOBLE;
@@ -228,7 +228,7 @@ public class BuildingForHome extends Building {
   
   /**  Orchestrating walker behaviour-
     */
-  public void selectWalkerBehaviour(Walker walker) {
+  public void selectWalkerBehaviour(Actor walker) {
     //
     //  Non-adults don't do much-
     if (! walker.adult()) {
@@ -245,7 +245,7 @@ public class BuildingForHome extends Building {
     }
     //
     //  Failing that, see if you can go shopping:
-    ObjectType tier = tierOffset(1);
+    Type tier = tierOffset(1);
     class Order { Building b; Good g; }
     Pick <Order> pickS = new Pick();
     
@@ -301,8 +301,8 @@ public class BuildingForHome extends Building {
   }
   
   
-  public void walkerEnters(Walker walker, Building enters) {
-    ObjectType tier = tierOffset(1);
+  public void walkerEnters(Actor walker, Building enters) {
+    Type tier = tierOffset(1);
     
     if (walker.jobType() == JOB.SHOPPING) {
       
@@ -324,7 +324,7 @@ public class BuildingForHome extends Building {
   }
   
   
-  public void walkerVisits(Walker walker, Building visits) {
+  public void walkerVisits(Actor walker, Building visits) {
     if (walker.jobType() == JOB.BUILDING) {
       BuildingForCrafts.advanceBuilding(walker, type.buildsWith, visits);
     }

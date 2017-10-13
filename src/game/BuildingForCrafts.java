@@ -16,7 +16,7 @@ public class BuildingForCrafts extends Building {
   boolean stalled = false;
   
   
-  BuildingForCrafts(ObjectType type) {
+  BuildingForCrafts(Type type) {
     super(type);
   }
   
@@ -105,7 +105,7 @@ public class BuildingForCrafts extends Building {
   
   /**  Handling walker behaviours:
     */
-  public void selectWalkerBehaviour(Walker walker) {
+  public void selectWalkerBehaviour(Actor walker) {
     //
     //  Try and find a nearby building to construct:
     Building builds = selectBuildTarget(this, type.buildsWith, map.buildings);
@@ -156,12 +156,12 @@ public class BuildingForCrafts extends Building {
   }
   
   
-  public void walkerEnters(Walker walker, Building enters) {
+  public void walkerEnters(Actor walker, Building enters) {
     return;
   }
   
   
-  public void walkerVisits(Walker walker, Building visits) {
+  public void walkerVisits(Actor walker, Building visits) {
     if (walker.jobType() == JOB.BUILDING) {
       advanceBuilding(walker, type.buildsWith, visits);
     }
@@ -193,7 +193,7 @@ public class BuildingForCrafts extends Building {
   }
   
   
-  static void advanceBuilding(Walker builds, Good buildsWith[], Building b) {
+  static void advanceBuilding(Actor builds, Good buildsWith[], Building b) {
     float totalNeed = 0, totalDone = 0;
     boolean didWork = false;
     

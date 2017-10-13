@@ -6,7 +6,7 @@ import util.*;
 
 
 
-public class WalkerPathSearch extends Search <Tile> {
+public class ActorPathSearch extends Search <Tile> {
   
   CityMap map;
   Tile dest;
@@ -15,12 +15,12 @@ public class WalkerPathSearch extends Search <Tile> {
   boolean paveOnly = true;
   
 
-  public WalkerPathSearch(Walker w, Tile dest) {
+  public ActorPathSearch(Actor w, Tile dest) {
     this(w.map, w.at, dest, -1);
   }
   
   
-  public WalkerPathSearch(CityMap map, Tile init, Tile dest, int maxDist) {
+  public ActorPathSearch(CityMap map, Tile init, Tile dest, int maxDist) {
     super(init, -1);
     this.map     = map;
     this.dest    = dest;

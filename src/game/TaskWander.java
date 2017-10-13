@@ -14,7 +14,7 @@ public class TaskWander extends Task {
   static int dirs[] = new int[4];
   
   
-  public TaskWander(Walker actor) {
+  public TaskWander(Actor actor) {
     super(actor);
   }
   

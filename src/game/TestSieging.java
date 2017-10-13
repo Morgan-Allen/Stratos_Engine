@@ -38,7 +38,7 @@ public class TestSieging extends Test {
     enemies.setupFormation(GARRISON, cityB);
     
     for (int n = 8; n-- > 0;) {
-      Walker fights = (Walker) ((n < 3) ? SOLDIER : CITIZEN).generate();
+      Actor fights = (Actor) ((n < 3) ? SOLDIER : CITIZEN).generate();
       fights.assignHomeCity(cityB);
       enemies.toggleRecruit(fights, true);
     }

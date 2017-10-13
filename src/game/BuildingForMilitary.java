@@ -13,7 +13,7 @@ public class BuildingForMilitary extends BuildingForCrafts {
   Formation formation = null;
   
   
-  public BuildingForMilitary(ObjectType type) {
+  public BuildingForMilitary(Type type) {
     super(type);
   }
   
@@ -66,25 +66,25 @@ public class BuildingForMilitary extends BuildingForCrafts {
   
   /**  Regular updates and active service-
     */
-  boolean eligible(Walker walker) {
+  boolean eligible(Actor walker) {
     if (workers.includes(walker)) return false;
     return walker.formation == null;
   }
   
   
-  public void setWorker(Walker w, boolean is) {
+  public void setWorker(Actor w, boolean is) {
     super.setWorker(w, is);
     if (is) formation.toggleRecruit(w, true);
   }
   
   
-  public void selectWalkerBehaviour(Walker walker) {
+  public void selectWalkerBehaviour(Actor walker) {
     if (formation == null) return;
-    Pick <Walker> pick = new Pick();
+    Pick <Actor> pick = new Pick();
     
     if (formation.recruits.size() < type.maxRecruits) {
       for (Building b : map.buildings) {
-        for (Walker w : b.residents) {
+        for (Actor w : b.residents) {
           if (eligible(w)) {
             float rating = CityMap.distancePenalty(b.entrance, entrance);
             pick.compare(w, rating);
@@ -93,7 +93,7 @@ public class BuildingForMilitary extends BuildingForCrafts {
       }
     }
     
-    Walker drafts = pick.result();
+    Actor drafts = pick.result();
     if (drafts != null) {
       walker.embarkOnVisit(drafts.home, 2, Task.JOB.VISITING, this);
     }
@@ -106,8 +106,8 @@ public class BuildingForMilitary extends BuildingForCrafts {
   }
   
   
-  public void walkerVisits(Walker walker, Building other) {
-    for (Walker w : other.residents) if (eligible(w)) {
+  public void walkerVisits(Actor walker, Building other) {
+    for (Actor w : other.residents) if (eligible(w)) {
       formation.toggleRecruit(w, true);
     }
   }

@@ -8,7 +8,7 @@ import static game.GameConstants.*;
 
 
 
-public class Walker extends Fixture implements Session.Saveable, Journeys {
+public class Actor extends Element implements Session.Saveable, Journeys {
   
   
   /**  Data fields and setup/initialisation-
@@ -50,17 +50,17 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
   float stress ;
   int   state = STATE_OKAY;
   
-  Tally <ObjectType> skills = new Tally();
+  Tally <Type> skills = new Tally();
   
   
   
-  Walker(ObjectType type) {
+  Actor(Type type) {
     super(type);
     this.ID = "#"+nextID++;
   }
   
   
-  public Walker(Session s) throws Exception {
+  public Actor(Session s) throws Exception {
     super(s);
     
     ID = s.loadString();
@@ -400,7 +400,7 @@ public class Walker extends Fixture implements Session.Saveable, Journeys {
   
   /**  Combat and survival-related code:
     */
-  void performAttack(Fixture other) {
+  void performAttack(Element other) {
     if (other == null || type.attackScore <= 0) return;
     
     int damage = Rand.index(type.attackScore + other.type.defendScore) + 1;

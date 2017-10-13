@@ -14,7 +14,7 @@ public class TaskDelivery extends Task {
   float amount;
   
   
-  public TaskDelivery(Walker actor) {
+  public TaskDelivery(Actor actor) {
     super(actor);
   }
   

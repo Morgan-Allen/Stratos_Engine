@@ -23,7 +23,7 @@ public class TestLifeCycle extends Test {
     
     for (int x = 7; x > 0; x -= 3) {
       for (int y = 7; y > 0; y -= 3) {
-        ObjectType type = y == 7 ? HOUSE : KILN;
+        Type type = y == 7 ? HOUSE : KILN;
         Building built = (Building) type.generate();
         built.enterMap(map, x, y, 1);
       }
@@ -33,9 +33,9 @@ public class TestLifeCycle extends Test {
     
     final int RUN_TIME = LIFESPAN_LENGTH;
     boolean migrated = false;
-    List <Walker> originalPop = null;
-    List <Walker> births = new List();
-    List <Walker> deaths = new List();
+    List <Actor> originalPop = null;
+    List <Actor> births = new List();
+    List <Actor> deaths = new List();
     boolean noBadJobs = true;
     boolean cycled = false;
     
@@ -51,7 +51,7 @@ public class TestLifeCycle extends Test {
       if (! migrated) {
         boolean allFilled = true;
         for (Building b : map.buildings) {
-          for (ObjectType t : b.type.workerTypes) {
+          for (Type t : b.type.workerTypes) {
             if (b.numWorkers(t) < b.maxWorkers(t)) allFilled = false;
           }
         }
@@ -59,8 +59,8 @@ public class TestLifeCycle extends Test {
           migrated = true;
           originalPop = map.walkers.copy();
           int i = 0;
-          for (Walker w : originalPop) {
-            w.sexData = ((i++ % 2) == 0) ? Walker.SEX_FEMALE : Walker.SEX_MALE;
+          for (Actor w : originalPop) {
+            w.sexData = ((i++ % 2) == 0) ? Actor.SEX_FEMALE : Actor.SEX_MALE;
           }
         }
       }
@@ -94,13 +94,13 @@ public class TestLifeCycle extends Test {
           break;
         }
         
-        for (Walker w : map.walkers) {
+        for (Actor w : map.walkers) {
           if (w.child() && w.alive() && ! originalPop.includes(w)) {
             if (! births.includes(w)) I.say("  Born: "+w);
             births.include(w);
           }
         }
-        for (Walker w : originalPop) {
+        for (Actor w : originalPop) {
           if (w.dead() && ! map.walkers.includes(w)) {
             if (! deaths.includes(w)) I.say("  Died: "+w);
             deaths.include(w);

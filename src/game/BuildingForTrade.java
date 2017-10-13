@@ -18,7 +18,7 @@ public class BuildingForTrade extends BuildingForCrafts implements Trader {
   Good needed[] = NO_GOODS, produced[] = NO_GOODS;
   
   
-  public BuildingForTrade(ObjectType type) {
+  public BuildingForTrade(Type type) {
     super(type);
   }
   
@@ -90,7 +90,7 @@ public class BuildingForTrade extends BuildingForCrafts implements Trader {
   
   /**  Selecting behaviour for walkers-
     */
-  public void selectWalkerBehaviour(Walker walker) {
+  public void selectWalkerBehaviour(Actor walker) {
     if (walker.type == PORTERS) {
       selectTraderBehaviour(walker);
     }
@@ -100,7 +100,7 @@ public class BuildingForTrade extends BuildingForCrafts implements Trader {
   }
   
   
-  void selectTraderBehaviour(Walker trader) {
+  void selectTraderBehaviour(Actor trader) {
     
     if (trader.inside != this) {
       trader.returnTo(this);

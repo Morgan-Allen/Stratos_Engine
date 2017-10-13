@@ -11,7 +11,7 @@ public class BuildingForWater extends Building {
   
   /**  Data fields, construction and save/load methods-
     */
-  BuildingForWater(ObjectType type) {
+  BuildingForWater(Type type) {
     super(type);
   }
   

@@ -13,7 +13,7 @@ public class BuildingForCollect extends BuildingForCrafts {
   
   /**  Data fields, construction and save/load methods-
     */
-  BuildingForCollect(ObjectType type) {
+  BuildingForCollect(Type type) {
     super(type);
   }
   
@@ -31,7 +31,7 @@ public class BuildingForCollect extends BuildingForCrafts {
   
   /**  Assigning walker behaviours:
     */
-  public void selectWalkerBehaviour(Walker walker) {
+  public void selectWalkerBehaviour(Actor walker) {
     
     for (Good g : type.produced) {
       if (pickNextCollection(walker, g)) return;
@@ -46,7 +46,7 @@ public class BuildingForCollect extends BuildingForCrafts {
   }
   
   
-  boolean pickNextCollection(Walker walker, Good g) {
+  boolean pickNextCollection(Actor walker, Good g) {
     Pick <Building> pick = new Pick();
     
     for (Building b : map.buildings) {
@@ -69,7 +69,7 @@ public class BuildingForCollect extends BuildingForCrafts {
   }
   
   
-  public void walkerEnters(Walker walker, Building enters) {
+  public void walkerEnters(Actor walker, Building enters) {
     
     if (enters == this) for (Good made : type.produced) {
       walker.offloadGood(made, this);

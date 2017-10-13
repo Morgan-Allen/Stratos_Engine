@@ -61,7 +61,7 @@ public class CityBorders {
           homeFilled += NR = b.numResidents(socialClass);
           if (report) I.say("  Class "+socialClass+": "+NR+"/"+MR);
         }
-        for (ObjectType t : b.type.workerTypes) {
+        for (Type t : b.type.workerTypes) {
           jobsTotal  += MW = b.maxWorkers(t);
           jobsFilled += NW = b.numWorkers(t);
           if (report) I.say("  Job "+t+": "+NW+"/"+MW);
@@ -85,13 +85,13 @@ public class CityBorders {
     //  population/crowding levels, current relations, and proximity.
     City from = map.city;
     
-    Batch <Walker> migrants = new Batch();
+    Batch <Actor> migrants = new Batch();
     float months   = period * 1f / MONTH_LENGTH;
     float numSpawn = ((1 - crowding) * MIGRANTS_PER_1KM * months);
     numSpawn = Nums.min(numSpawn, spaces);
     
     while (numSpawn-- > 0) {
-      Walker w = (Walker) VAGRANT.generate();
+      Actor w = (Actor) VAGRANT.generate();
       w.type.initAsMigrant(w);
       migrants.add(w);
     }
@@ -99,9 +99,9 @@ public class CityBorders {
   }
   
   
-  static void findWork(CityMap map, Walker migrant) {
+  static void findWork(CityMap map, Actor migrant) {
     
-    class Opening { Building b; ObjectType position; }
+    class Opening { Building b; Type position; }
     Tile from = migrant.at();
     final Pick <Opening> pick = new Pick();
     
@@ -109,7 +109,7 @@ public class CityBorders {
     //  could reasonably fill.
     
     for (Building b : map.buildings) {
-      for (ObjectType t : b.type.workerTypes) {
+      for (Type t : b.type.workerTypes) {
         int space = b.maxWorkers(t) - b.numWorkers(t);
         if (space <= 0) continue;
 
@@ -133,7 +133,7 @@ public class CityBorders {
   }
   
   
-  static void findHome(CityMap map, Walker migrant) {
+  static void findHome(CityMap map, Actor migrant) {
     int socialClass = migrant.type.socialClass;
     Tile from = migrant.at();
     final Pick <Building> pick = new Pick();

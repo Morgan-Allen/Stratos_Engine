@@ -17,7 +17,7 @@ public class BuildingForGather extends BuildingForCrafts {
   Tally <Good> cropLevels = new Tally();
   
   
-  public BuildingForGather(ObjectType type) {
+  public BuildingForGather(Type type) {
     super(type);
     cropLevels.set(type.produced[0], 1);
   }
@@ -38,7 +38,7 @@ public class BuildingForGather extends BuildingForCrafts {
   
   /**  Life-cycle, update and economic functions-
     */
-  public void selectWalkerBehaviour(Walker walker) {
+  public void selectWalkerBehaviour(Actor walker) {
     
     Box2D box = fullArea();
     if (pickPlantPoint(walker, box, true         )) return;
@@ -85,14 +85,14 @@ public class BuildingForGather extends BuildingForCrafts {
   private boolean hasFocus(Target t) {
     //  TODO:  The hasFocus() method for elements/tiles should be accomplishing
     //  this.
-    for (Walker w : workers) {
+    for (Actor w : workers) {
       if (w.job != null && w.job.target == t) return true;
     }
     return false;
   }
   
   
-  boolean pickPlantPoint(Walker walker, Box2D box, boolean start) {
+  boolean pickPlantPoint(Actor walker, Box2D box, boolean start) {
     if (start && walker.inside != this) return false;
     if (cropLevels.empty()) return false;
     
@@ -103,7 +103,7 @@ public class BuildingForGather extends BuildingForCrafts {
       Tile t = map.tileAt(c.x, c.y);
       if (t == null || t.paved || hasFocus(t)) continue;
       
-      ObjectType above = t.above == null ? null : t.above.type;
+      Type above = t.above == null ? null : t.above.type;
       if (above != null && levels.valueFor(above) > 0) continue;
       if (above != null && above.growRate == 0       ) continue;
       
@@ -122,15 +122,15 @@ public class BuildingForGather extends BuildingForCrafts {
   }
   
   
-  boolean pickNextCrop(Walker walker, Box2D box, Good... cropTypes) {
+  boolean pickNextCrop(Actor walker, Box2D box, Good... cropTypes) {
     if (Visit.empty(cropTypes)) return false;
     
-    Pick <Fixture> pick = new Pick();
+    Pick <Element> pick = new Pick();
     for (Coord c : Visit.grid(box)) {
       Tile t = map.tileAt(c.x, c.y);
       
-      if (t != null && t.above instanceof Fixture) {
-        Fixture crop = (Fixture) t.above;
+      if (t != null && t.above instanceof Element) {
+        Element crop = (Element) t.above;
         if (crop.buildLevel < 1 || hasFocus(crop)) continue;
         if (! Visit.arrayIncludes(cropTypes, crop.type)) continue;
         
@@ -140,7 +140,7 @@ public class BuildingForGather extends BuildingForCrafts {
       }
     }
     
-    Fixture goes = pick.result();
+    Element goes = pick.result();
     if (goes != null) {
       walker.embarkOnTarget(goes, 2, JOB.GATHERING, this);
       return true;
@@ -150,13 +150,13 @@ public class BuildingForGather extends BuildingForCrafts {
   }
   
   
-  public void walkerTargets(Walker walker, Target other) {
+  public void walkerTargets(Actor walker, Target other) {
     if (other == null) return;
     
     Box2D area = new Box2D(walker.at.x, walker.at.y, 1, 1);
     area.expandBy(2);
     area.cropBy(fullArea());
-    Fixture above = other.at().above;
+    Element above = other.at().above;
     
     if (walker.jobType() == JOB.PLANTING) {
       //
@@ -167,7 +167,7 @@ public class BuildingForGather extends BuildingForCrafts {
       //
       //  Then plonk it in the ground:
       if (above != null) above.exitMap(map);
-      Fixture crop = new Fixture(seed);
+      Element crop = new Element(seed);
       crop.enterMap(map, under.x, under.y, 0);
       //
       //  Then pick another point to sow:
@@ -195,7 +195,7 @@ public class BuildingForGather extends BuildingForCrafts {
   }
   
   
-  public void walkerEnters(Walker walker, Building enters) {
+  public void walkerEnters(Actor walker, Building enters) {
     if (enters == this) for (Good made : type.produced) {
       walker.offloadGood(made, this);
     }

@@ -12,7 +12,7 @@ public class Test {
   static int graphic[][] = null;
   static boolean paused = false;
   static Coord   hover  = new Coord(-1, -1);
-  static Fixture above  = null;
+  static Element above  = null;
   static Series <Character> pressed = new Batch();
   
   
@@ -35,7 +35,7 @@ public class Test {
           else if (at.terrain != null) fill = at.terrain.tint;
           graphic[c.x][c.y] = fill;
         }
-        for (Walker w : map.walkers) if (w.inside == null) {
+        for (Actor w : map.walkers) if (w.inside == null) {
           int fill = WALKER_COLOR;
           if      (w.work != null) fill = w.work.type.tint;
           else if (w.home != null) fill = w.home.type.tint;
@@ -108,13 +108,13 @@ public class Test {
   static void fillAllVacancies(CityMap map) {
     for (Building b : map.buildings) {
       fillWorkVacancies(b);
-      for (Walker w : b.workers) CityBorders.findHome(map, w);
+      for (Actor w : b.workers) CityBorders.findHome(map, w);
     }
   }
   
   
   static void fillWorkVacancies(Building b) {
-    for (ObjectType t : b.type.workerTypes) {
+    for (Type t : b.type.workerTypes) {
       while (b.numWorkers(t) < b.maxWorkers(t)) {
         spawnWalker(b, t, false);
       }
@@ -122,8 +122,8 @@ public class Test {
   }
   
   
-  static void fillHomeVacancies(Building b, ObjectType... types) {
-    for (ObjectType t : types) {
+  static void fillHomeVacancies(Building b, Type... types) {
+    for (Type t : types) {
       while (b.numResidents(t.socialClass) < b.maxResidents(t.socialClass)) {
         spawnWalker(b, t, true);
       }
@@ -131,9 +131,9 @@ public class Test {
   }
   
   
-  static Walker spawnWalker(Building b, ObjectType type, boolean resident) {
+  static Actor spawnWalker(Building b, Type type, boolean resident) {
     
-    Walker walker = (Walker) type.generate();
+    Actor walker = (Actor) type.generate();
     type.initAsMigrant(walker);
     walker.enterMap(b.map, b.at.x, b.at.y, 1);
     walker.inside = b;
@@ -167,28 +167,28 @@ public class Test {
     
     if (b.workers.size() > 0) {
       report.append("\nWorkers:");
-      for (Walker w : b.workers) {
+      for (Actor w : b.workers) {
         report.append("\n  "+w+" ("+w.jobType()+")");
       }
     }
     
     if (b.residents.size() > 0) {
       report.append("\nResidents:");
-      for (Walker w : b.residents) {
+      for (Actor w : b.residents) {
         report.append("\n  "+w+" ("+w.jobType()+")");
       }
     }
     
     if (b.visitors.size() > 0) {
       report.append("\nVisitors:");
-      for (Walker w : b.visitors) {
+      for (Actor w : b.visitors) {
         report.append("\n  "+w+" ("+w.jobType()+")");
       }
     }
     
     if (b.formation() != null && b.formation().recruits.size() > 0) {
       report.append("\nRecruits:");
-      for (Walker w : b.formation().recruits) {
+      for (Actor w : b.formation().recruits) {
         report.append("\n  "+w);
       }
     }
