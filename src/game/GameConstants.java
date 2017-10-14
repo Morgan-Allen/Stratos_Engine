@@ -42,6 +42,9 @@ public class GameConstants {
     TINT_AMENITY          = colour(7, 0, 7),
     //  Health/education in white.
     TINT_HEALTH_ED        = colour(7, 7, 7),
+    //  Religious in orange.
+    TINT_LITE_RELIGIOUS   = colour(8, 4, 1),
+    TINT_RELIGIOUS        = colour(7, 3, 0),
     
     //  Crops in shades of green:
     TINT_CROPS[] = {
@@ -278,7 +281,8 @@ public class GameConstants {
     WORKER   = new WalkerType("type_worker"  , IS_PERSON_WLK, CLASS_COMMON),
     MERCHANT = new WalkerType("type_merchant", IS_PERSON_WLK, CLASS_TRADER),
     PORTERS  = new WalkerType("type_porters" , IS_PERSON_WLK, CLASS_SLAVE ),
-    SOLDIER  = new WalkerType("type_soldier" , IS_PERSON_WLK, CLASS_NOBLE )
+    SOLDIER  = new WalkerType("type_soldier" , IS_PERSON_WLK, CLASS_NOBLE ),
+    PRIEST   = new WalkerType("type_priest"  , IS_PERSON_WLK, CLASS_NOBLE )
   ;
   static {
     VAGRANT .name = "Vagrant" ;
@@ -290,6 +294,7 @@ public class GameConstants {
     MERCHANT.name = "Merchant";
     PORTERS .name = "Porters" ;
     SOLDIER .name = "Soldier" ;
+    PRIEST  .name = "Priest"  ;
     
     SOLDIER.attackScore = 5;
     SOLDIER.defendScore = 4;
@@ -315,50 +320,62 @@ public class GameConstants {
     NO_NEEDS[] = new BuildType[0],
     
     PALACE        = new BuildType("type_palace"       , IS_HOME_BLD   ),
+    PALACE_BUILDINGS[] = { PALACE },
+    
     HOUSE         = new BuildType("type_house"        , IS_HOME_BLD   ),
     HOUSE_T1      = new BuildType("type_house_tier1"  , IS_UPGRADE    ),
     HOUSE_T2      = new BuildType("type_house_tier2"  , IS_UPGRADE    ),
-    
-    MASON         = new BuildType("type_mason"        , IS_CRAFTS_BLD ),
-    COLLECTOR     = new BuildType("type_collector"    , IS_COLLECT_BLD),
-    LATRINE       = new BuildType("type_latrine"      , IS_COLLECT_BLD),
+    SWEEPER       = new BuildType("type_sweeper"      , IS_COLLECT_BLD),
     BASIN         = new BuildType("type_basin"        , IS_WATER_BLD  ),
     SCHOOL        = new BuildType("type_public_school", IS_AMENITY_BLD),
     BALL_COURT    = new BuildType("type_ball_court"   , IS_AMENITY_BLD),
+    RESIDENTIAL_BUILDINGS[] = { HOUSE, SWEEPER, BASIN, SCHOOL, BALL_COURT },
     
     FARMER_HUT    = new BuildType("type_farmer_hut"   , IS_GATHER_BLD ),
     QUARRY_PIT    = new BuildType("type_quarry_pit"   , IS_CRAFTS_BLD ),
     KILN          = new BuildType("type_kiln"         , IS_CRAFTS_BLD ),
     WEAVER        = new BuildType("type_weaver"       , IS_CRAFTS_BLD ),
+    MASON         = new BuildType("type_mason"        , IS_CRAFTS_BLD ),
+    INDUSTRIAL_BUILDINGS[] = { FARMER_HUT, QUARRY_PIT, KILN, WEAVER, MASON },
     
     MARKET        = new BuildType("type_market"       , IS_CRAFTS_BLD ),
     PORTER_HOUSE  = new BuildType("type_porter_house" , IS_TRADE_BLD  ),
+    COLLECTOR     = new BuildType("type_collector"    , IS_COLLECT_BLD),
+    ECONOMIC_BUILDINGS[] = { MARKET, PORTER_HOUSE, COLLECTOR },
     
-    GARRISON      = new BuildType("type_garrison"     , IS_ARMY_BLD   )
+    GARRISON      = new BuildType("type_garrison"     , IS_ARMY_BLD   ),
+    MILITARY_BUILDINGS[] = { GARRISON },
+    
+    TEMPLE_QZ     = new BuildType("type_temple_qz"    , IS_FAITH_BLD  ),
+    TEMPLE_XT     = new BuildType("type_temple_xt"    , IS_FAITH_BLD  ),
+    RELIGIOUS_BUILDINGS[] = { TEMPLE_QZ, TEMPLE_XT }
   ;
   static {
-    
+    //
+    //  Palace structures:
     PALACE.name = "Palace";
-    PALACE.setDimensions(5, 5, 2);
     PALACE.tint = TINT_RESIDENTIAL;
+    PALACE.setDimensions(5, 5, 2);
+    PALACE.setBuildMaterials(WOOD, 15, ADOBE, 25, COTTON, 10, POTTERY, 5);
+    PALACE.setWorkerTypes(NOBLE, SERVANT);
     PALACE.homeSocialClass = CLASS_NOBLE;
     PALACE.maxResidents = 2;
-    PALACE.setWorkerTypes(NOBLE, SERVANT);
     PALACE.maxWorkers = 2;
     PALACE.maxHealth = 300;
-    PALACE.setBuildMaterials(WOOD, 15, ADOBE, 25, COTTON, 10, POTTERY, 5);
     PALACE.features = new Good[] { IS_HOUSING };
     
+    //
+    //  Residential structures:
     HOUSE.name = "House";
-    HOUSE.setDimensions(2, 2, 1);
     HOUSE.tint = TINT_LITE_RESIDENTIAL;
+    HOUSE.setDimensions(2, 2, 1);
+    HOUSE.setBuildMaterials(WOOD, 2, CLAY, 1);
     HOUSE.setWorkerTypes(CITIZEN);
     HOUSE.maxResidents = 4;
     HOUSE.maxStock = 2;
-    HOUSE.setBuildMaterials(WOOD, 2, CLAY, 1);
     HOUSE.buildsWith = new Good[] { WOOD, CLAY };
-    HOUSE.setUpgradeTiers(HOUSE, HOUSE_T1, HOUSE_T2);
     HOUSE.features = new Good[] { IS_HOUSING };
+    HOUSE.setUpgradeTiers(HOUSE, HOUSE_T1, HOUSE_T2);
     
     HOUSE_T1.name = "Improved House";
     HOUSE_T1.setBuildMaterials(WOOD, 4, CLAY, 2);
@@ -372,109 +389,129 @@ public class GameConstants {
     HOUSE_T2.maxStock = 2;
     HOUSE_T2.setUpgradeNeeds(DIVERSION, 15, SCHOOL, 1);
     
-    
-    MASON.name = "Mason";
-    MASON.setDimensions(2, 2, 1);
-    MASON.tint = TINT_LITE_INDUSTRIAL;
-    MASON.setWorkerTypes(WORKER);
-    MASON.craftTime *= 2;
-    MASON.maxWorkers = 2;
-    MASON.setBuildMaterials(ADOBE, 2, WOOD, 2, CLAY, 2);
-    MASON.buildsWith = new Good[] { WOOD, CLAY, ADOBE };
-    
     COLLECTOR.name = "Collector";
-    COLLECTOR.setDimensions(2, 2, 1);
     COLLECTOR.tint = TINT_COMMERCIAL;
-    COLLECTOR.setWorkerTypes(MERCHANT);
+    COLLECTOR.setDimensions(2, 2, 1);
     COLLECTOR.setBuildMaterials(ADOBE, 2, WOOD, 2, CLAY, 2);
+    COLLECTOR.setWorkerTypes(MERCHANT);
     COLLECTOR.produced = new Good[] { CASH };
     COLLECTOR.features = new Good[] { IS_ADMIN };
     
     BASIN.name = "Basin";
-    BASIN.setDimensions(2, 2, 0);
     BASIN.tint = TINT_HEALTH_ED;
+    BASIN.setDimensions(2, 2, 0);
     BASIN.setBuildMaterials(ADOBE, 2, CLAY, 2);
     BASIN.features = new Good[] { IS_WATER, IS_MARKET };
     
-    LATRINE.name = "Latrine";
-    LATRINE.setDimensions(1, 1, 1);
-    LATRINE.tint = TINT_LITE_INDUSTRIAL;
-    LATRINE.setWorkerTypes(WORKER);
-    LATRINE.setBuildMaterials(WOOD, 2, CLAY, 1);
-    LATRINE.produced = new Good[] { NIGHTSOIL };
+    SWEEPER.name = "Sweeper";
+    SWEEPER.tint = TINT_LITE_INDUSTRIAL;
+    SWEEPER.setDimensions(1, 1, 1);
+    SWEEPER.setBuildMaterials(WOOD, 2, CLAY, 1);
+    SWEEPER.setWorkerTypes(WORKER);
+    SWEEPER.produced = new Good[] { NIGHTSOIL };
     
     SCHOOL.name = "Public School";
-    SCHOOL.setDimensions(2, 2, 1);
     SCHOOL.tint = TINT_HEALTH_ED;
+    SCHOOL.setDimensions(2, 2, 1);
+    SCHOOL.setBuildMaterials(WOOD, 5, CLAY, 2, ADOBE, 3);
     SCHOOL.setWorkerTypes(CITIZEN);
     SCHOOL.features = new Good[] { EDUCATION };
-    SCHOOL.setBuildMaterials(WOOD, 5, CLAY, 2, ADOBE, 3);
     
     BALL_COURT.name = "Ball Court";
-    BALL_COURT.setDimensions(3, 3, 1);
     BALL_COURT.tint = TINT_AMENITY;
+    BALL_COURT.setDimensions(3, 3, 1);
+    BALL_COURT.setBuildMaterials(ADOBE, 10, RUBBER, 5);
     BALL_COURT.features = new Good[] { DIVERSION };
     BALL_COURT.featureAmount = 15;
-    BALL_COURT.setBuildMaterials(ADOBE, 10, RUBBER, 5);
-    
+
+    //
+    //  Industrial structures:
+    MASON.name = "Mason";
+    MASON.tint = TINT_LITE_INDUSTRIAL;
+    MASON.setDimensions(2, 2, 1);
+    MASON.setBuildMaterials(ADOBE, 2, WOOD, 2, CLAY, 2);
+    MASON.setWorkerTypes(WORKER);
+    MASON.craftTime *= 2;
+    MASON.maxWorkers = 2;
+    MASON.buildsWith = new Good[] { WOOD, CLAY, ADOBE };
     
     FARMER_HUT.name = "Farmer Hut";
-    FARMER_HUT.setDimensions(3, 3, 1);
     FARMER_HUT.tint = TINT_LITE_INDUSTRIAL;
+    FARMER_HUT.setDimensions(3, 3, 1);
+    FARMER_HUT.setBuildMaterials(WOOD, 5, CLAY, 2);
     FARMER_HUT.setWorkerTypes(WORKER);
     FARMER_HUT.produced = CROP_TYPES;
     FARMER_HUT.maxWorkers = 2;
-    FARMER_HUT.setBuildMaterials(WOOD, 5, CLAY, 2);
     
     QUARRY_PIT.name = "Quarry Pit";
-    QUARRY_PIT.setDimensions(4, 4, 0);
     QUARRY_PIT.tint = TINT_LITE_INDUSTRIAL;
+    QUARRY_PIT.setDimensions(4, 4, 0);
+    QUARRY_PIT.setBuildMaterials(WOOD, 5, CLAY, 2);
     QUARRY_PIT.setWorkerTypes(WORKER);
     QUARRY_PIT.produced = new Good[] { CLAY };
-    QUARRY_PIT.setBuildMaterials(WOOD, 5, CLAY, 2);
     
     KILN.name = "Kiln";
-    KILN.setDimensions(2, 2, 1);
     KILN.tint = TINT_INDUSTRIAL;
+    KILN.setDimensions(2, 2, 1);
+    KILN.setBuildMaterials(ADOBE, 2, WOOD, 2, CLAY, 1);
     KILN.setWorkerTypes(WORKER);
     KILN.needed   = new Good[] { CLAY };
     KILN.produced = new Good[] { POTTERY };
     KILN.craftTime *= 2;
-    KILN.setBuildMaterials(ADOBE, 2, WOOD, 2, CLAY, 1);
     
     WEAVER.name = "Weaver";
-    WEAVER.setDimensions(2, 2, 1);
     WEAVER.tint = TINT_INDUSTRIAL;
+    WEAVER.setDimensions(2, 2, 1);
+    WEAVER.setBuildMaterials(WOOD, 2, RAW_COTTON, 2, CLAY, 1);
     WEAVER.setWorkerTypes(WORKER);
     WEAVER.needed   = new Good[] { RAW_COTTON };
     WEAVER.produced = new Good[] { COTTON };
     WEAVER.craftTime *= 2;
-    WEAVER.setBuildMaterials(WOOD, 2, RAW_COTTON, 2, CLAY, 1);
     
+    //
+    //  Commercial structures:
     MARKET.name = "Marketplace";
-    MARKET.wide = 4;
-    MARKET.high = 4;
     MARKET.tint = TINT_COMMERCIAL;
+    MARKET.setDimensions(4, 4, 1);
+    MARKET.setBuildMaterials(WOOD, 4, COTTON, 2, ADOBE, 2);
     MARKET.setWorkerTypes(MERCHANT);
     MARKET.needed   = new Good[] { POTTERY };
     MARKET.features = new Good[] { IS_MARKET };
-    MARKET.setBuildMaterials(WOOD, 4, COTTON, 2, ADOBE, 2);
     
     PORTER_HOUSE.name = "Porter Post";
-    PORTER_HOUSE.setDimensions(3, 3, 1);
     PORTER_HOUSE.tint = TINT_COMMERCIAL;
+    PORTER_HOUSE.setDimensions(3, 3, 1);
+    PORTER_HOUSE.setBuildMaterials(WOOD, 4, ADOBE, 2, POTTERY, 2);
     PORTER_HOUSE.setWorkerTypes(PORTERS, WORKER);
     PORTER_HOUSE.features = new Good[] { IS_TRADER };
-    PORTER_HOUSE.setBuildMaterials(WOOD, 4, ADOBE, 2, POTTERY, 2);
     
-    
+    //
+    //  Military structures:
     GARRISON.name = "Garrison";
-    GARRISON.setDimensions(6, 6, 2);
     GARRISON.tint = TINT_MILITARY;
+    GARRISON.setDimensions(6, 6, 2);
+    GARRISON.setBuildMaterials(ADOBE, 10, WOOD, 5);
     GARRISON.setWorkerTypes(SOLDIER);
     GARRISON.maxWorkers = 2;
     GARRISON.maxHealth  = 250;
-    GARRISON.setBuildMaterials(ADOBE, 10, WOOD, 5);
+    
+    //
+    //  Religious structures:
+    TEMPLE_QZ.name = "Temple to Quetzalcoatl";
+    TEMPLE_QZ.tint = TINT_RELIGIOUS;
+    TEMPLE_QZ.setDimensions(6, 6, 3);
+    TEMPLE_QZ.setBuildMaterials(ADOBE, 15, POTTERY, 5);
+    TEMPLE_QZ.setWorkerTypes(PRIEST);
+    TEMPLE_QZ.maxWorkers = 1;
+    TEMPLE_QZ.maxHealth  = 100;
+    
+    TEMPLE_XT.name = "Temple to Xipe Totec";
+    TEMPLE_XT.tint = TINT_RELIGIOUS;
+    TEMPLE_XT.setDimensions(6, 6, 3);
+    TEMPLE_XT.setBuildMaterials(ADOBE, 15, POTTERY, 5);
+    TEMPLE_XT.setWorkerTypes(PRIEST);
+    TEMPLE_XT.maxWorkers = 1;
+    TEMPLE_XT.maxHealth  = 100;
   }
   
   

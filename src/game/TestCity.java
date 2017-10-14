@@ -27,7 +27,7 @@ public class TestCity extends Test {
     Building school  = (Building) SCHOOL    .generate();
     Building court   = (Building) BALL_COURT.generate();
     Building basin   = (Building) BASIN     .generate();
-    Building latrine = (Building) LATRINE   .generate();
+    Building sweeper = (Building) SWEEPER   .generate();
     Building admin   = (Building) COLLECTOR .generate();
     
     palace .enterMap(map, 3 , 3 , 1);
@@ -37,7 +37,7 @@ public class TestCity extends Test {
     court  .enterMap(map, 9 , 9 , 1);
     school .enterMap(map, 9 , 3 , 1);
     basin  .enterMap(map, 13, 9 , 1);
-    latrine.enterMap(map, 16, 9 , 1);
+    sweeper.enterMap(map, 16, 9 , 1);
     admin  .enterMap(map, 18, 9 , 1);
     
     Building quarry = (Building) QUARRY_PIT.generate();

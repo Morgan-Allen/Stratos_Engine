@@ -5,7 +5,7 @@ import util.*;
 
 
 
-public class BuildingForMilitary extends BuildingForCrafts {
+public class BuildingForArmy extends BuildingForCrafts {
   
   
   /**  Data fields, setup and save/load methods-
@@ -13,12 +13,12 @@ public class BuildingForMilitary extends BuildingForCrafts {
   Formation formation = null;
   
   
-  public BuildingForMilitary(Type type) {
+  public BuildingForArmy(Type type) {
     super(type);
   }
   
   
-  public BuildingForMilitary(Session s) throws Exception {
+  public BuildingForArmy(Session s) throws Exception {
     super(s);
     formation = (Formation) s.loadObject();
   }

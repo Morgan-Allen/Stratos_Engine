@@ -27,8 +27,9 @@ public class Type extends Index.Entry implements Session.Saveable {
     IS_AMENITY_BLD = 10,
     IS_COLLECT_BLD = 11,
     IS_ARMY_BLD    = 12,
-    IS_WALKER      = 13,
-    IS_PERSON_WLK  = 14
+    IS_FAITH_BLD   = 13,
+    IS_WALKER      = 14,
+    IS_PERSON_WLK  = 15
   ;
   
   final static Index <Type> INDEX = new Index();
@@ -53,16 +54,17 @@ public class Type extends Index.Entry implements Session.Saveable {
   Object generate() {
     switch (category) {
       case(IS_FIXTURE    ): return new Element(this);
-      case(IS_BUILDING   ): return new Building           (this);
-      case(IS_CRAFTS_BLD ): return new BuildingForCrafts  (this);
-      case(IS_GATHER_BLD ): return new BuildingForGather  (this);
-      case(IS_WATER_BLD  ): return new BuildingForWater   (this);
-      case(IS_TRADE_BLD  ): return new BuildingForTrade   (this);
-      case(IS_HOME_BLD   ): return new BuildingForHome    (this);
-      case(IS_AMENITY_BLD): return new BuildingForAmenity (this);
-      case(IS_COLLECT_BLD): return new BuildingForCollect (this);
-      case(IS_ARMY_BLD   ): return new BuildingForMilitary(this);
-      case(IS_WALKER     ): return new Actor(this);
+      case(IS_BUILDING   ): return new Building          (this);
+      case(IS_CRAFTS_BLD ): return new BuildingForCrafts (this);
+      case(IS_GATHER_BLD ): return new BuildingForGather (this);
+      case(IS_WATER_BLD  ): return new BuildingForWater  (this);
+      case(IS_TRADE_BLD  ): return new BuildingForTrade  (this);
+      case(IS_HOME_BLD   ): return new BuildingForHome   (this);
+      case(IS_AMENITY_BLD): return new BuildingForAmenity(this);
+      case(IS_COLLECT_BLD): return new BuildingForCollect(this);
+      case(IS_ARMY_BLD   ): return new BuildingForArmy   (this);
+      case(IS_FAITH_BLD  ): return new BuildingForFaith  (this);
+      case(IS_WALKER     ): return new Actor        (this);
       case(IS_PERSON_WLK ): return new ActorAsPerson(this);
     }
     return null;
