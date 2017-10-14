@@ -21,6 +21,7 @@ public class GameConstants {
     BLANK_COLOR  = colour(5, 5, 5),
     PAVE_COLOR   = colour(8, 8, 8),
     WALKER_COLOR = colour(9, 9, 0),
+    CITY_COLOR   = colour(7, 7, 1),
     
     WHITE_COLOR  = colour(10, 10, 10),
     BLACK_COLOR  = colour(0 , 0 , 0 ),
@@ -523,11 +524,11 @@ public class GameConstants {
     
     world.addCity(cityA);
     world.addCity(cityB);
+    world.mapWide = world.mapHigh = 10;
+    
     return world;
   }
 }
-
-
 
 
 

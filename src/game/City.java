@@ -1,8 +1,8 @@
 
 
 package game;
-import game.GameConstants.*;
 import util.*;
+import static game.GameConstants.*;
 
 
 
@@ -19,6 +19,7 @@ public class City implements Session.Saveable, Trader {
   };
   
   String name = "City";
+  int tint = CITY_COLOR;
   
   World world;
   float mapX, mapY;

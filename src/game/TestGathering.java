@@ -18,13 +18,7 @@ public class TestGathering extends Test {
   static void testGathering(boolean graphics) {
     GameSettings.toggleFog = false;
     
-    World   world = new World();
-    City    city  = new City(world);
-    CityMap map   = CityMapGenerator.generateTerrain(
-      city, 20, DESERT, MEADOW, JUNGLE
-    );
-    CityMapGenerator.populateFixtures(map);
-    
+    CityMap map = setupTestCity(20, DESERT, MEADOW, JUNGLE);
     
     BuildingForGather farm = (BuildingForGather) FARMER_HUT.generate();
     farm.enterMap(map, 9, 9, 1);

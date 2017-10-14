@@ -115,6 +115,8 @@ public class BuildingForTrade extends BuildingForCrafts implements Trader {
       if (b == this || ! (b instanceof Trader)) continue;
       targets.add((Trader) b);
     }
+    
+    //  TODO:  Allow iteration over any and all neighbouring cities.
     if (tradePartner != null) {
       targets.add(tradePartner);
     }

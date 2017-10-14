@@ -27,6 +27,9 @@ public class World implements Session.Saveable {
   List <City> cities = new List();
   List <Journey> journeys = new List();
   
+  //  Only used for graphical reference...
+  int mapWide = 10, mapHigh = 10;
+  
   
   World() {
     return;
@@ -48,6 +51,9 @@ public class World implements Session.Saveable {
       s.loadObjects(j.going);
       journeys.add(j);
     }
+    
+    mapWide = s.loadInt();
+    mapHigh = s.loadInt();
   }
   
   
@@ -64,6 +70,9 @@ public class World implements Session.Saveable {
       s.saveInt(j.arriveTime);
       s.saveObjects(j.going);
     }
+    
+    s.saveInt(mapWide);
+    s.saveInt(mapHigh);
   }
   
   

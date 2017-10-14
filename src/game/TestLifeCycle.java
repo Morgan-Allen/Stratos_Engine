@@ -17,10 +17,7 @@ public class TestLifeCycle extends Test {
   static void testLifeCycle(boolean graphics) {
     GameSettings.toggleFog = false;
     
-    World   world = new World();
-    City    city  = new City(world);
-    CityMap map   = new CityMap(city);
-    map.performSetup(10);
+    CityMap map = setupTestCity(10);
     
     for (int x = 7; x > 0; x -= 3) {
       for (int y = 7; y > 0; y -= 3) {
