@@ -22,6 +22,7 @@ public class GameConstants {
     PAVE_COLOR   = colour(8, 8, 8),
     WALKER_COLOR = colour(9, 9, 0),
     CITY_COLOR   = colour(7, 7, 1),
+    NO_BLD_COLOR = colour(9, 0, 0),
     
     WHITE_COLOR  = colour(10, 10, 10),
     BLACK_COLOR  = colour(0 , 0 , 0 ),

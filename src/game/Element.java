@@ -2,6 +2,7 @@
 
 package game;
 import util.*;
+import static game.CityMap.*;
 import static game.GameConstants.*;
 import static util.TileConstants.*;
 
@@ -15,7 +16,7 @@ public class Element implements Session.Saveable, Target {
   Type type;
   
   CityMap map;
-  CityMap.Tile at;
+  Tile at;
   int facing = N;
   
   float buildLevel;
@@ -34,7 +35,7 @@ public class Element implements Session.Saveable, Target {
     
     type   = (Type) s.loadObject();
     map    = (CityMap) s.loadObject();
-    at     = CityMap.loadTile(map, s);
+    at     = loadTile(map, s);
     facing = s.loadInt();
     
     buildLevel = s.loadFloat();
@@ -48,7 +49,7 @@ public class Element implements Session.Saveable, Target {
     
     s.saveObject(type);
     s.saveObject(map);
-    CityMap.saveTile(at, map, s);
+    saveTile(at, map, s);
     s.saveInt(facing);
     
     s.saveFloat(buildLevel);
@@ -62,13 +63,22 @@ public class Element implements Session.Saveable, Target {
   
   /**  Entering and exiting the map-
     */
+  boolean canPlace(CityMap map, int x, int y) {
+    for (Coord c : Visit.grid(x, y, type.wide, type.high, 1)) {
+      Tile t = map.tileAt(c.x, c.y);
+      if (t == null || t.paved || t.above != null) return false;
+    }
+    return true;
+  }
+  
+  
   void enterMap(CityMap map, int x, int y, float buildLevel) {
     this.map = map;
     this.at  = map.tileAt(x, y);
     this.buildLevel = buildLevel;
     
     for (Coord c : Visit.grid(x, y, type.wide, type.high, 1)) {
-      CityMap.Tile t = map.tileAt(c.x, c.y);
+      Tile t = map.tileAt(c.x, c.y);
       t.above = this;
     }
   }
@@ -76,7 +86,7 @@ public class Element implements Session.Saveable, Target {
   
   void exitMap(CityMap map) {
     for (Coord c : Visit.grid(at.x, at.y, type.wide, type.high, 1)) {
-      CityMap.Tile t = map.tileAt(c.x, c.y);
+      Tile t = map.tileAt(c.x, c.y);
       t.above = null;
     }
     this.map = null;
@@ -89,7 +99,7 @@ public class Element implements Session.Saveable, Target {
   }
   
   
-  public CityMap.Tile at() {
+  public Tile at() {
     return at;
   }
   

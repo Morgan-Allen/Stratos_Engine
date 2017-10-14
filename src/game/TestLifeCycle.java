@@ -40,7 +40,7 @@ public class TestLifeCycle extends Test {
     I.say("\nTOTAL LIFE CYCLE RUN TIME: "+RUN_TIME);
     
     while (map.time < RUN_TIME || graphics) {
-      runGameLoop(map, 100, graphics);
+      runGameLoop(map, 100, graphics, "saves/test_life_cycle.tlt");
       
       if (map.time % 1000 == 0) {
         I.say("  Time: "+map.time);

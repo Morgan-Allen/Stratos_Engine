@@ -65,7 +65,7 @@ public class TestTrading extends Test {
     boolean tradeOkay = false;
     
     while (map.time < 1000 || graphics) {
-      runGameLoop(map, 10, graphics);
+      runGameLoop(map, 10, graphics, "saves/test_trading.tlt");
       
       if (! tradeOkay) {
         boolean check = true;

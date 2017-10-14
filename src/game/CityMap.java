@@ -25,10 +25,12 @@ public class CityMap implements Session.Saveable {
   byte fogVals[][], oldVals[][];
   
   List <Building> buildings = new List();
-  List <Actor  > walkers   = new List();
+  List <Actor   > walkers   = new List();
   
   Table <City, Tile> transitPoints = new Table();
   int growScanIndex = 0;
+  
+  String saveName;
   
   
   CityMap(City city) {
@@ -59,6 +61,8 @@ public class CityMap implements Session.Saveable {
       transitPoints.put(with, point);
     }
     growScanIndex = s.loadInt();
+    
+    saveName = s.loadString();
   }
   
   
@@ -84,6 +88,8 @@ public class CityMap implements Session.Saveable {
       saveTile(transitPoints.get(c), this, s);
     }
     s.saveInt(growScanIndex);
+    
+    s.saveString(saveName);
   }
   
   
@@ -258,7 +264,19 @@ public class CityMap implements Session.Saveable {
   ) {
     for (Coord c : Visit.grid(x, y, w, h, 1)) {
       Tile t = map.tileAt(c.x, c.y);
-      if (t != null) t.paved = is;
+      if (t       != null) t.paved = is;
+      if (t.above != null) t.above.exitMap(map);
+    }
+  }
+  
+  
+  public static void demolish(
+    CityMap map, int x, int y, int w, int h
+  ) {
+    for (Coord c : Visit.grid(x, y, w, h, 1)) {
+      Tile t = map.tileAt(c.x, c.y);
+      if (t       == null) continue;
+      if (t.paved        ) t.paved = false;
       if (t.above != null) t.above.exitMap(map);
     }
   }

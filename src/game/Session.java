@@ -135,6 +135,12 @@ public final class Session {
   }
   
   
+  public static boolean fileExists(String filename) {
+    final File asFile = new File(filename);
+    return asFile.exists();
+  }
+  
+  
   public float loadProgress() {
     return ((float) bytesIn) / fileSize;
   }

@@ -78,11 +78,30 @@ public class Test {
   
   /**  Graphical display and loop-execution:
     */
-  static int graphic[][] = null;
-  static boolean paused   = false;
-  static boolean cityView = true;
-  static Coord   hover    = new Coord(-1, -1);
-  static Object  above    = null;
+  final static String
+    VIEW_NAME = "Tlatoani";
+  final static BuildType BUILD_MENUS[][] = {
+    PALACE_BUILDINGS     ,
+    INDUSTRIAL_BUILDINGS ,
+    ECONOMIC_BUILDINGS   ,
+    RESIDENTIAL_BUILDINGS,
+    MILITARY_BUILDINGS   ,
+    RELIGIOUS_BUILDINGS  
+  };
+  final static String BUILD_MENU_NAMES[] = {
+    "Palace"     , "Industrial", "Economic" ,
+    "Residential", "Military"  , "Religious"
+  };
+  
+  static int[][]  graphic   = null;
+  static int      frames    = 0   ;
+  static boolean  cityView  = true;
+  static boolean  paused    = false;
+  static Coord    hover     = new Coord(-1, -1);
+  static boolean  doBuild   = false;
+  static Object   buildMenu = null;
+  static Building placing   = null;
+  static Object   above     = null;
   static Series <Character> pressed = new Batch();
   
   
@@ -104,12 +123,25 @@ public class Test {
       else if (at.terrain != null) fill = at.terrain.tint;
       graphic[c.x][c.y] = fill;
     }
+    
     for (Actor w : map.walkers) if (w.inside == null) {
       int fill = WALKER_COLOR;
       if      (w.work != null) fill = w.work.type.tint;
       else if (w.home != null) fill = w.home.type.tint;
       graphic[w.at.x][w.at.y] = fill;
     }
+    
+    if (placing != null) {
+      Type type = placing.type;
+      int x = hover.x, y = hover.y, w = type.wide, h = type.high;
+      boolean canPlace = placing.canPlace(map, x, y);
+      
+      for (Coord c : Visit.grid(x, y, w, h, 1)) try {
+        graphic[c.x][c.y] = canPlace ? type.tint : NO_BLD_COLOR;
+      }
+      catch (Exception e) {}
+    }
+    
     try { graphic[hover.x][hover.y] = WHITE_COLOR; }
     catch (Exception e) {}
   }
@@ -135,74 +167,34 @@ public class Test {
   
   
   static CityMap runGameLoop(
-    CityMap map, int numUpdates, boolean graphics
+    CityMap map, int numUpdates, boolean graphics, String filename
   ) {
-    final String VIEW_NAME = "Tlatoani";
-    
     while (true) {
       
       if (graphics) {
-        
-        if (cityView) {
-          updateCityMapView(map);
-        }
-        else {
-          updateWorldMapView(map);
-        }
-        
+        if (cityView) updateCityMapView (map);
+        else          updateWorldMapView(map);
         I.present(graphic, VIEW_NAME, 400, 400);
         hover   = I.getDataCursor(VIEW_NAME, false);
         pressed = I.getKeysPressed(VIEW_NAME);
-        above   = null;
         
-        if (cityView) {
-          above = map.above(hover.x, hover.y);
-        }
-        else {
-          for (City city : map.city.world.cities) {
-            int x = (int) city.mapX, y = (int) city.mapY;
-            if (x == hover.x && y == hover.y) above = city;
-          }
-        }
+        if (cityView) above = map.above(hover.x, hover.y);
+        else above = map.city.world.onMap(hover.x, hover.y);
+        I.talkAbout = above;
+        I.used60Frames = (frames++ % 60) == 0;
         
-        if (above instanceof City) {
+        if (doBuild) {
+          I.presentInfo(reportForBuildMenu(map), VIEW_NAME);
+        }
+        else if (above instanceof City) {
           I.presentInfo(reportFor((City) above), VIEW_NAME);
-          I.talkAbout = above;
         }
         else if (above instanceof Building) {
           I.presentInfo(reportFor((Building) above), VIEW_NAME);
-          I.talkAbout = above;
         }
         else {
-          I.presentInfo(baseReport(map, paused), VIEW_NAME);
-          I.talkAbout = null;
+          I.presentInfo(baseReport(map, filename), VIEW_NAME);
         }
-        
-        if (pressed.includes('c')) {
-          cityView = true;
-        }
-        if (pressed.includes('w')) {
-          cityView = false;
-        }
-        
-        if (pressed.includes('p')) {
-          paused = ! paused;
-          I.say("\nPAUSING: "+paused);
-        }
-        
-        if (pressed.includes('s')) try {
-          I.say("\nWILL SAVE CURRENT MAP...");
-          Session.saveSession("test_save.tlt", map);
-        }
-        catch (Exception e) { I.report(e); }
-        
-        if (pressed.includes('l')) try {
-          I.say("\nWILL LOAD SAVED MAP...");
-          Session s = Session.loadSession("test_save.tlt", true);
-          map = (CityMap) s.loaded()[0];
-          if (map == null) throw new Exception("No map loaded!");
-        }
-        catch (Exception e) { I.report(e); }
       }
       
       if (! paused) {
@@ -215,17 +207,43 @@ public class Test {
         catch (Exception e) {}
       }
     }
-    
     return map;
   }
   
   
   
-  /**  UI outputs:
+  /**  Saving and loading-
+    */
+  static void saveMap(CityMap map, String filename) {
+    try {
+      I.say("\nWILL SAVE CURRENT MAP...");
+      Session.saveSession(filename, map);
+    }
+    catch (Exception e) { I.report(e); }
+  }
+  
+  
+  static CityMap loadMap(CityMap oldMap, String filename) {
+    if (! Session.fileExists(filename)) {
+      return oldMap;
+    }
+    try {
+      I.say("\nWILL LOAD SAVED MAP...");
+      Session s = Session.loadSession(filename, true);
+      CityMap map = (CityMap) s.loaded()[0];
+      if (map == null) throw new Exception("No map loaded!");
+      return map;
+    }
+    catch (Exception e) { I.report(e); }
+    return oldMap;
+  }
+  
+  
+  
+  /**  UI outputs-
     */
   private static String reportFor(City c) {
     StringBuffer report = new StringBuffer(""+c);
-    
     
     List <String> borderRep = new List();
     for (City other : c.world.cities) {
@@ -317,16 +335,102 @@ public class Test {
   }
   
   
-  private static String baseReport(CityMap map, boolean paused) {
-    String report = "Home City: "+map.city;
+  private static String reportForBuildMenu(CityMap map) {
+    StringBuffer report = new StringBuffer("");
     
-    report += "\n\nFunds: "+map.city.currentFunds;
+    if (placing != null) {
+      report.append("Place Building: "+placing.type.name);
+      report.append("\n  (P) place");
+      
+      int x = hover.x, y = hover.y;
+      if (pressed.includes('p') && placing.canPlace(map, x, y)) {
+        placing.enterMap(map, x, y, 1);
+        placing = null;
+      }
+      
+      report.append("\n  (X) cancel");
+      if (pressed.includes('x')) {
+        placing = null;
+      }
+    }
     
-    report += "\n\nTime: "+map.time;
-    report += "\nPaused: "+paused;
+    else if (buildMenu == null) {
+      report.append("Build Menu: Main\n");
+      int i = 1;
+      for (BuildType[] menu : BUILD_MENUS) {
+        report.append("\n  ("+i+") "+BUILD_MENU_NAMES[i - 1]);
+        if (pressed.includes((char) ('0' + i))) {
+          buildMenu = menu;
+        }
+        i++;
+      }
+      
+      report.append("\n  (X) cancel");
+      if (pressed.includes('x')) {
+        doBuild = false;
+      }
+    }
     
-    report += "\n\n(P) Un/pause\n(C) city view\n(W) world view";
-    return report;
+    else {
+      int catIndex = Visit.indexOf(buildMenu, BUILD_MENUS);
+      report.append("Build Menu: "+BUILD_MENU_NAMES[catIndex]+"\n");
+      int i = 1;
+      for (BuildType b : (BuildType[]) buildMenu) {
+        report.append("\n  ("+i+") "+b.name);
+        if (pressed.includes((char) ('0' + i))) {
+          placing = (Building) b.generate();
+        }
+        i++;
+      }
+      
+      report.append("\n  (X) cancel");
+      if (pressed.includes('x')) {
+        buildMenu = null;
+      }
+    }
+    
+    return report.toString();
+  }
+  
+  
+  private static String baseReport(CityMap map, String filename) {
+    StringBuffer report = new StringBuffer("Home City: "+map.city);
+    
+    report.append("\n\nFunds: "+map.city.currentFunds);
+    report.append("\n\nTime: "+map.time);
+    report.append("\nPaused: "+paused  );
+    report.append("\n");
+
+    report.append("\n(C) city view");
+    if (pressed.includes('c')) {
+      cityView = true;
+    }
+    report.append("\n(W) world view");
+    if (pressed.includes('w')) {
+      cityView = false;
+    }
+    report.append("\n(B) build menu");
+    if (pressed.includes('b')) {
+      doBuild = true;
+    }
+    report.append("\n(P) un/pause");
+    if (pressed.includes('p')) {
+      paused = ! paused;
+    }
+    report.append("\n(S) save");
+    if (pressed.includes('s')) {
+      saveMap(map, filename);
+    }
+    report.append("\n(L) load");
+    if (pressed.includes('l')) {
+      map = loadMap(map, filename);
+    }
+    report.append("\n(Q) quit");
+    if (pressed.includes('q')) {
+      System.exit(0);
+    }
+    
+    return report.toString();
   }
   
 }

@@ -34,7 +34,7 @@ public class TestGathering extends Test {
     boolean harvest = false;
     
     while (map.time < 1000 || graphics) {
-      runGameLoop(map, 10, graphics);
+      runGameLoop(map, 10, graphics, "saves/test_gathering.tlt");
       //
       //  Every surrounding tile needs to be either:
       //  (A) paved,

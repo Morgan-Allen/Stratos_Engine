@@ -40,7 +40,7 @@ public class TestUpkeep extends Test {
     boolean upkeepOkay = false;
     
     while (map.time < 1000 || graphics) {
-      runGameLoop(map, 10, graphics);
+      runGameLoop(map, 10, graphics, "saves/test_upkeep.tlt");
       
       if (! upkeepOkay) {
         boolean allBuilt = true;

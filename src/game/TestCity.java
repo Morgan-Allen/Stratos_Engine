@@ -68,7 +68,7 @@ public class TestCity extends Test {
     boolean housesOkay = false;
     
     while (map.time < 1000 || graphics) {
-      runGameLoop(map, 10, graphics);
+      runGameLoop(map, 10, graphics, "saves/test_city.tlt");
       
       if (! housesOkay) {
         boolean allNeeds = true;

@@ -169,6 +169,15 @@ public class World implements Session.Saveable {
     return false;
   }
   
+  
+  City onMap(int mapX, int mapY) {
+    for (City city : cities) {
+      int x = (int) city.mapX, y = (int) city.mapY;
+      if (x == mapX && y == mapY) return city;
+    }
+    return null;
+  }
+  
 }
 
 

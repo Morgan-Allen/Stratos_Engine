@@ -48,7 +48,7 @@ public class TestSieging extends Test {
     boolean victorious = false;
     
     while (map.time < 1000 || graphics) {
-      map = runGameLoop(map, 10, graphics);
+      map = runGameLoop(map, 10, graphics, "saves/test_sieging.tlt");
       
       if (cityA.hasLord(cityB) && (! enemies.away) && ! victorious) {
         victorious = true;

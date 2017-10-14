@@ -60,7 +60,7 @@ public class TestMilitary extends Test {
     boolean backHome  = false;
     
     while (map.time < 1000 || graphics) {
-      map = runGameLoop(map, 10, graphics);
+      map = runGameLoop(map, 10, graphics, "saves/test_military.tlt");
       
       if (troops.recruits.size() >= 8 && ! recruited) {
         troops.beginSecuring(map.tileAt(30, 40), TileConstants.E, null);
