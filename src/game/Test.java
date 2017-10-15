@@ -2,6 +2,7 @@
 
 package game;
 import util.*;
+import static game.CityMap.*;
 import static game.GameConstants.*;
 
 
@@ -86,12 +87,16 @@ public class Test {
     ECONOMIC_BUILDINGS   ,
     RESIDENTIAL_BUILDINGS,
     MILITARY_BUILDINGS   ,
-    RELIGIOUS_BUILDINGS  
+    RELIGIOUS_BUILDINGS  ,
   };
   final static String BUILD_MENU_NAMES[] = {
     "Palace"     , "Industrial", "Economic" ,
     "Residential", "Military"  , "Religious"
   };
+  final static String
+    ROADS      = "Roads",
+    DEMOLITION = "Demolition"
+  ;
   
   static int[][]  graphic   = null;
   static int      frames    = 0   ;
@@ -100,7 +105,8 @@ public class Test {
   static Coord    hover     = new Coord(-1, -1);
   static boolean  doBuild   = false;
   static Object   buildMenu = null;
-  static Building placing   = null;
+  static Coord    drawnTile = null;
+  static Object   placing   = null;
   static Object   above     = null;
   static Series <Character> pressed = new Batch();
   
@@ -112,13 +118,24 @@ public class Test {
   }
   
   
+  static Box2D drawnBox(CityMap map) {
+    Box2D b = new Box2D(hover.x, hover.y, 0, 0);
+    if (drawnTile != null) b.include(drawnTile.x, drawnTile.y, 0);
+    b.incHigh(1);
+    b.incWide(1);
+    Box2D full = new Box2D(0, 0, map.size, map.size);
+    b.cropBy(full);
+    return b;
+  }
+  
+  
   static void updateCityMapView(CityMap map) {
     configGraphic(map.size, map.size);
     
     for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
       int fill = BLANK_COLOR;
       CityMap.Tile at = map.tileAt(c.x, c.y);
-      if      (at.above != null  ) fill = at.above.type.tint;
+      if      (at.above   != null) fill = at.above.type.tint;
       else if (at.paved          ) fill = PAVE_COLOR;
       else if (at.terrain != null) fill = at.terrain.tint;
       graphic[c.x][c.y] = fill;
@@ -131,10 +148,25 @@ public class Test {
       graphic[w.at.x][w.at.y] = fill;
     }
     
-    if (placing != null) {
-      Type type = placing.type;
+    if (placing == ROADS) {
+      for (Coord c : Visit.grid(drawnBox(map))) {
+        if (map.blocked(c.x, c.y)) continue;
+        graphic[c.x][c.y] = PAVE_COLOR;
+      }
+    }
+    
+    else if (placing == DEMOLITION) {
+      for (Coord c : Visit.grid(drawnBox(map))) {
+        if (map.above(c.x, c.y) == null) continue;
+        graphic[c.x][c.y] = NO_BLD_COLOR;
+      }
+    }
+    
+    else if (placing != null) {
+      Building builds = (Building) placing;
+      Type type = builds.type;
       int x = hover.x, y = hover.y, w = type.wide, h = type.high;
-      boolean canPlace = placing.canPlace(map, x, y);
+      boolean canPlace = builds.canPlace(map, x, y);
       
       for (Coord c : Visit.grid(x, y, w, h, 1)) try {
         graphic[c.x][c.y] = canPlace ? type.tint : NO_BLD_COLOR;
@@ -338,13 +370,66 @@ public class Test {
   private static String reportForBuildMenu(CityMap map) {
     StringBuffer report = new StringBuffer("");
     
-    if (placing != null) {
-      report.append("Place Building: "+placing.type.name);
+    if (placing == ROADS) {
+      report.append("Place Roads");
+      if (drawnTile == null) {
+        report.append("\n  (S) select start");
+        if (pressed.includes('s')) {
+          drawnTile = new Coord(hover);
+        }
+      }
+      else {
+        report.append("\n  (E) select end");
+        if (pressed.includes('e')) {
+          for (Coord c : Visit.grid(drawnBox(map))) {
+            if (map.blocked(c.x, c.y)) continue;
+            map.tileAt(c.x, c.y).paved = true;
+          }
+          drawnTile = null;
+        }
+      }
+      
+      report.append("\n  (X) cancel");
+      if (pressed.includes('x')) {
+        drawnTile = null;
+        placing   = null;
+      }
+    }
+    else if (placing == DEMOLITION) {
+      report.append("Demolition");
+      
+      if (drawnTile == null) {
+        report.append("\n  (S) select start");
+        if (pressed.includes('s')) {
+          drawnTile = new Coord(hover);
+        }
+      }
+      else {
+        report.append("\n  (E) select end");
+        if (pressed.includes('e')) {
+          for (Coord c : Visit.grid(drawnBox(map))) {
+            Element above = map.above(c.x, c.y);
+            if (above == null) continue;
+            above.exitMap(map);
+          }
+          drawnTile = null;
+        }
+      }
+      
+      report.append("\n  (X) cancel");
+      if (pressed.includes('x')) {
+        drawnTile = null;
+        placing   = null;
+      }
+    }
+    else if (placing != null) {
+      Building builds = (Building) placing;
+      report.append("Place Building: "+builds.type.name);
       report.append("\n  (P) place");
       
       int x = hover.x, y = hover.y;
-      if (pressed.includes('p') && placing.canPlace(map, x, y)) {
-        placing.enterMap(map, x, y, 1);
+      if (pressed.includes('p') && builds.canPlace(map, x, y)) {
+        builds.enterMap(map, x, y, 1);
         placing = null;
       }
       
@@ -363,6 +448,16 @@ public class Test {
           buildMenu = menu;
         }
         i++;
+      }
+      
+      report.append("\n  (R) roads");
+      if (pressed.includes('r')) {
+        placing = ROADS;
+      }
+      
+      report.append("\n  (D) demolish");
+      if (pressed.includes('d')) {
+        placing = DEMOLITION;
       }
       
       report.append("\n  (X) cancel");
