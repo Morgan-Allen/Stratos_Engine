@@ -72,7 +72,7 @@ public class TestLifeCycle extends Test {
           }
           if (b.type == HOUSE) {
             b.inventory.set(MAIZE  , 5);
-            b.inventory.set(CHILI  , 5);
+            b.inventory.set(FRUIT  , 5);
             b.inventory.set(POTTERY, 5);
             b.inventory.set(COTTON , 5);
           }

@@ -208,7 +208,7 @@ public class GameConstants {
   final static Good
     WATER      = new Good("Water"       , 0 , 0 ),
     MAIZE      = new Good("Maize"       , 10, 1 ),
-    CHILI      = new Good("Chili"       , 12, 2 ),
+    FRUIT      = new Good("Fruit"       , 12, 2 ),
     RAW_COTTON = new Good("Raw Cotton"  , 15, 3 ),
     WOOD       = new Good("Wood"        , 10, 4 ),
     RUBBER     = new Good("Rubber"      , 25, 5 ),
@@ -232,12 +232,14 @@ public class GameConstants {
     HEALTHCARE = new Good("Healthcare"  , -1, 32),
     RELIGION   = new Good("Religion"    , -1, 33),
     
-    CROP_TYPES [] = { MAIZE, CHILI, RAW_COTTON },
-    FOOD_TYPES [] = { MAIZE, CHILI },
-    TREE_TYPES [] = { WOOD, RUBBER },
-    STONE_TYPES[] = { CLAY, ADOBE },
-    BUILD_GOODS[] = { WOOD, CLAY, ADOBE },
-    ALL_GOODS  [] = (Good[]) GOODS_LIST.toArray(Good.class),
+    CROP_TYPES  [] = { MAIZE, FRUIT, RAW_COTTON },
+    FOOD_TYPES  [] = { MAIZE, FRUIT },
+    TREE_TYPES  [] = { WOOD, RUBBER },
+    STONE_TYPES [] = { CLAY, ADOBE  },
+    BUILD_GOODS [] = { WOOD, CLAY, ADOBE },
+    HOME_GOODS  [] = { POTTERY, COTTON },
+    MARKET_GOODS[] = (Good[]) Visit.compose(Good.class, FOOD_TYPES, HOME_GOODS),
+    ALL_GOODS   [] = (Good[]) GOODS_LIST.toArray(Good.class),
     
     COMMERCE_TYPES[] = { IS_ADMIN, IS_TRADER, IS_MARKET, IS_HOUSING },
     SERVICE_TYPES [] = { DIVERSION, EDUCATION, HEALTHCARE, RELIGION },
@@ -390,14 +392,6 @@ public class GameConstants {
     HOUSE_T2.maxStock = 2;
     HOUSE_T2.setUpgradeNeeds(DIVERSION, 15, SCHOOL, 1);
     
-    COLLECTOR.name = "Collector";
-    COLLECTOR.tint = TINT_COMMERCIAL;
-    COLLECTOR.setDimensions(2, 2, 1);
-    COLLECTOR.setBuildMaterials(ADOBE, 2, WOOD, 2, CLAY, 2);
-    COLLECTOR.setWorkerTypes(MERCHANT);
-    COLLECTOR.produced = new Good[] { CASH };
-    COLLECTOR.features = new Good[] { IS_ADMIN };
-    
     BASIN.name = "Basin";
     BASIN.tint = TINT_HEALTH_ED;
     BASIN.setDimensions(2, 2, 0);
@@ -476,7 +470,7 @@ public class GameConstants {
     MARKET.setDimensions(4, 4, 1);
     MARKET.setBuildMaterials(WOOD, 4, COTTON, 2, ADOBE, 2);
     MARKET.setWorkerTypes(MERCHANT);
-    MARKET.needed   = new Good[] { POTTERY };
+    MARKET.needed   = MARKET_GOODS;
     MARKET.features = new Good[] { IS_MARKET };
     
     PORTER_HOUSE.name = "Porter Post";
@@ -485,6 +479,14 @@ public class GameConstants {
     PORTER_HOUSE.setBuildMaterials(WOOD, 4, ADOBE, 2, POTTERY, 2);
     PORTER_HOUSE.setWorkerTypes(PORTERS, WORKER);
     PORTER_HOUSE.features = new Good[] { IS_TRADER };
+    
+    COLLECTOR.name = "Collector";
+    COLLECTOR.tint = TINT_COMMERCIAL;
+    COLLECTOR.setDimensions(2, 2, 1);
+    COLLECTOR.setBuildMaterials(ADOBE, 2, WOOD, 2, CLAY, 2);
+    COLLECTOR.setWorkerTypes(MERCHANT);
+    COLLECTOR.produced = new Good[] { CASH };
+    COLLECTOR.features = new Good[] { IS_ADMIN };
     
     //
     //  Military structures:

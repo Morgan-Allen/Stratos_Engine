@@ -156,6 +156,11 @@ public class Building extends Element implements Session.Saveable, Employer {
   }
   
   
+  Tally <Good> homeConsumption() {
+    return new Tally();
+  }
+  
+  
   Building findNearestOfType(Type type, int maxDist) {
     return findNearestDemanding(type, null, null, -1);
   }

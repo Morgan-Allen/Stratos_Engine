@@ -55,7 +55,7 @@ public class Task implements Session.Saveable {
   public Task(Session s) throws Exception {
     s.cacheInstance(this);
     
-    actor     = (Actor  ) s.loadObject();
+    actor     = (Actor   ) s.loadObject();
     origin    = (Employer) s.loadObject();
     type      = JOB.values()[s.loadInt()];
     timeSpent = s.loadInt();
@@ -77,6 +77,8 @@ public class Task implements Session.Saveable {
   
   
   public void saveState(Session s) throws Exception {
+    
+    s.saveObject(actor );
     s.saveObject(origin);
     s.saveInt(type.ordinal());
     s.saveInt(timeSpent);

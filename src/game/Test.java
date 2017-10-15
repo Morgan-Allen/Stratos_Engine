@@ -224,8 +224,17 @@ public class Test {
         else if (above instanceof Building) {
           I.presentInfo(reportFor((Building) above), VIEW_NAME);
         }
+        else if (above instanceof Element) {
+          I.presentInfo(reportFor((Element) above), VIEW_NAME);
+        }
         else {
-          I.presentInfo(baseReport(map, filename), VIEW_NAME);
+          Vars.Ref <CityMap> ref = new Vars.Ref(map);
+          I.presentInfo(baseReport(ref, filename), VIEW_NAME);
+          map = ref.value;
+        }
+        
+        if (pressed.includes('p')) {
+          paused = ! paused;
         }
       }
       
@@ -310,6 +319,13 @@ public class Test {
   }
   
   
+  private static String reportFor(Element e) {
+    StringBuffer report = new StringBuffer(""+e+"\n");
+    report.append("\n  Build level: "+I.percent(e.buildLevel));
+    return report.toString();
+  }
+  
+  
   private static String reportFor(Building b) {
     
     StringBuffer report = new StringBuffer(""+b+"\n");
@@ -350,11 +366,18 @@ public class Test {
       report.append("\nCraft progress:\n  "+I.percent(b.craftProgress()));
     }
     
+    //
+    //  Finally, present a tally of goods in demand:
+    Tally <Good> homeCons = b.homeConsumption();
     List <String> goodRep = new List();
+    
     for (Good g : ALL_GOODS) {
-      float amount = b.inventory.valueFor(g);
-      float demand = b.demandFor(g) + amount;
-      if (amount <= 0 && demand <= 0) continue;
+      float amount   = b.inventory.valueFor(g);
+      float demand   = b.demandFor(g) + amount;
+      float consumes = homeCons.valueFor(g);
+      if (amount <= 0 && demand <= 0 && consumes <= 0) continue;
+      
+      demand += consumes;
       goodRep.add("\n  "+g+": "+I.shorten(amount, 1)+"/"+I.shorten(demand, 1));
     }
     
@@ -425,10 +448,10 @@ public class Test {
     else if (placing != null) {
       Building builds = (Building) placing;
       report.append("Place Building: "+builds.type.name);
-      report.append("\n  (P) place");
+      report.append("\n  (S) confirm site");
       
       int x = hover.x, y = hover.y;
-      if (pressed.includes('p') && builds.canPlace(map, x, y)) {
+      if (pressed.includes('s') && builds.canPlace(map, x, y)) {
         builds.enterMap(map, x, y, 1);
         placing = null;
       }
@@ -488,7 +511,8 @@ public class Test {
   }
   
   
-  private static String baseReport(CityMap map, String filename) {
+  private static String baseReport(Vars.Ref <CityMap> ref, String filename) {
+    CityMap map = ref.value;
     StringBuffer report = new StringBuffer("Home City: "+map.city);
     
     report.append("\n\nFunds: "+map.city.currentFunds);
@@ -508,17 +532,15 @@ public class Test {
     if (pressed.includes('b')) {
       doBuild = true;
     }
+    
     report.append("\n(P) un/pause");
-    if (pressed.includes('p')) {
-      paused = ! paused;
-    }
     report.append("\n(S) save");
     if (pressed.includes('s')) {
       saveMap(map, filename);
     }
     report.append("\n(L) load");
     if (pressed.includes('l')) {
-      map = loadMap(map, filename);
+      ref.value = map = loadMap(map, filename);
     }
     report.append("\n(Q) quit");
     if (pressed.includes('q')) {

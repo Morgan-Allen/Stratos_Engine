@@ -89,7 +89,6 @@ public class BuildingForCrafts extends Building {
         for (Good made : produced()) {
           if (inventory.valueFor(made) >= stockLimit(made)) continue;
           inventory.add(1, made);
-          //I.say(this+" crafted 1 "+made);
         }
         craftProgress = 0;
       }

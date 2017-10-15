@@ -16,7 +16,7 @@ public class TestBlankMap extends Test {
     if (map == null) map = setupTestCity(32);
     
     while (true) {
-      runGameLoop(map, 10, true, filename);
+      map = runGameLoop(map, 10, true, filename);
     }
   }
   

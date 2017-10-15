@@ -316,7 +316,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     if (from == null || goes == null || goes.entrance == null) return;
     
     TaskDelivery d = new TaskDelivery(this);
-    job = d.configDelivery(from, goes, JOB.SHOPPING, carried, amount, e);
+    job = d.configDelivery(from, goes, jobType, carried, amount, e);
     if (job == null) return;
     
     if (reports()) I.say(this+" will deliver "+amount+" "+carried+" to "+goes);

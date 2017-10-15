@@ -162,6 +162,15 @@ public class BuildingForHome extends Building {
   }
   
   
+  Tally <Good> homeConsumption() {
+    Type tier = tierOffset(1);
+    Batch <Good> consumed = consumedBy(tier);
+    Tally <Good> cons = new Tally();
+    for (Good g : consumed) cons.set(g, tier.maxStock);
+    return cons;
+  }
+  
+  
   
   /**  Life-cycle functions-
     */
