@@ -49,8 +49,11 @@ public class ActorAsPerson extends Actor {
     }
     
     //  If you're seriously hungry/beat/tired, try going home:
-    float hurtRating = hunger + fatigue + injury;
-    if (hurtRating > (type.maxHealth * 0.5f)) beginResting(home);
+    Batch <Good> menu = menuAt(home);
+    float hurtRating = fatigue + injury + (menu.size() > 0 ? hunger : 0);
+    if (hurtRating > (type.maxHealth * (Rand.num() + 0.5f))) {
+      beginResting(home);
+    }
     
     //  Once home & work have been established, try to derive a task to
     //  perform-
@@ -95,14 +98,20 @@ public class ActorAsPerson extends Actor {
   }
   
   
+  Batch <Good> menuAt(Building visits) {
+    Batch <Good> menu = new Batch();
+    if (visits != null) for (Good g : FOOD_TYPES) {
+      if (visits.inventory.valueFor(g) >= 1) menu.add(g);
+    }
+    return menu;
+  }
+  
+  
   protected void onVisit(Building visits) {
     if (jobType() == Task.JOB.RESTING) {
       
       if (hunger >= 1) {
-        Batch <Good> menu = new Batch();
-        for (Good g : FOOD_TYPES) {
-          if (visits.inventory.valueFor(g) >= 1) menu.add(g);
-        }
+        Batch <Good> menu = menuAt(visits);
         
         if (menu.size() > 0) for (Good g : menu) {
           float eats = 1f / (menu.size() * HUNGER_REGEN);
