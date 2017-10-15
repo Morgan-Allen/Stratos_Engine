@@ -41,14 +41,15 @@ public class BuildingForGather extends BuildingForCrafts {
   public void selectWalkerBehaviour(Actor walker) {
     
     Box2D box = fullArea();
+    if (pickNextDelivery(walker)) return;
     if (pickPlantPoint(walker, box, true         )) return;
     if (pickNextCrop  (walker, box, type.produced)) return;
-    
     super.selectWalkerBehaviour(walker);
   }
   
   
   void advanceProduction() {
+    this.stalled = true;
     return;
   }
   

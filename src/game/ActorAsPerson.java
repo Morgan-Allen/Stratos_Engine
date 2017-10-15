@@ -110,7 +110,7 @@ public class ActorAsPerson extends Actor {
   protected void onVisit(Building visits) {
     if (jobType() == Task.JOB.RESTING) {
       
-      if (hunger >= 1) {
+      if (hunger >= 1f / HUNGER_REGEN) {
         Batch <Good> menu = menuAt(visits);
         
         if (menu.size() > 0) for (Good g : menu) {
@@ -145,7 +145,7 @@ public class ActorAsPerson extends Actor {
           Actor child = (Actor) CHILD.generate();
           child.enterMap(map, at.x, at.y, 1);
           child.inside = home;
-          child.home   = home;
+          home.setResident(child, true);
         }
         pregnancy = 0;
       }

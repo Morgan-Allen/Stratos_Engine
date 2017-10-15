@@ -325,7 +325,10 @@ public class BuildingForHome extends Building {
         float stock = enters.inventory.valueFor(cons);
         if (stock <= 0) continue;
         
-        float taken = Nums.min(tier.maxStock, stock / 2);
+        float taken = tier.maxStock;
+        if (Visit.arrayIncludes(FOOD_TYPES, cons)) taken *= 2;
+        taken = Nums.min(taken, stock / 2);
+        
         walker.beginDelivery(enters, this, JOB.SHOPPING, cons, taken, this);
         break;
       }

@@ -119,6 +119,18 @@ public class BuildingForCrafts extends Building {
       return;
     }
     //
+    //  And failing all that, start crafting:
+    else if (pickNextDelivery(walker)) {
+      return;
+    }
+    else if (! stalled) {
+      walker.embarkOnVisit(this, -1, JOB.CRAFTING, this);
+    }
+  }
+  
+  
+  boolean pickNextDelivery(Actor walker) {
+    //
     //  Find someone to deliver to:
     class Order { Building goes; Good good; float amount; }
     Pick <Order> pickD = new Pick();
@@ -143,14 +155,14 @@ public class BuildingForCrafts extends Building {
       o.amount = amount;
       pickD.compare(o, amount * penalty);
     }
+    
     if (! pickD.empty()) {
       Order o = pickD.result();
       walker.beginDelivery(this, o.goes, JOB.DELIVER, o.good, o.amount, this);
+      return true;
     }
-    //
-    //  And failing all that, start crafting:
-    else if (! stalled) {
-      walker.embarkOnVisit(this, -1, JOB.CRAFTING, this);
+    else {
+      return false;
     }
   }
   

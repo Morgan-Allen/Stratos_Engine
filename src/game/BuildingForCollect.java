@@ -69,9 +69,9 @@ public class BuildingForCollect extends BuildingForCrafts {
   }
   
   
-  public void walkerEnters(Actor walker, Building enters) {
+  public void walkerVisits(Actor walker, Building visits) {
     
-    if (enters == this) for (Good made : type.produced) {
+    if (visits == this) for (Good made : type.produced) {
       walker.offloadGood(made, this);
       int amount = (int) inventory.valueFor(made);
       
@@ -90,9 +90,9 @@ public class BuildingForCollect extends BuildingForCrafts {
         boolean taxes = g == CASH;
         int carryLimit = taxes ? 100 : 10;
         
-        float amount = enters.inventory.valueFor(g);
+        float amount = visits.inventory.valueFor(g);
         if (amount <= 0) continue;
-        walker.pickupGood(g, amount, enters);
+        walker.pickupGood(g, amount, visits);
         
         if (walker.carryAmount >= carryLimit) {
           walker.returnTo(this);

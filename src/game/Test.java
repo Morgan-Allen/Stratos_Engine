@@ -157,8 +157,9 @@ public class Test {
     
     else if (placing == DEMOLITION) {
       for (Coord c : Visit.grid(drawnBox(map))) {
-        if (map.above(c.x, c.y) == null) continue;
-        graphic[c.x][c.y] = NO_BLD_COLOR;
+        if (map.above(c.x, c.y) != null || map.paved(c.x, c.y)) {
+          graphic[c.x][c.y] = NO_BLD_COLOR;
+        }
       }
     }
     
@@ -432,8 +433,8 @@ public class Test {
         if (pressed.includes('e')) {
           for (Coord c : Visit.grid(drawnBox(map))) {
             Element above = map.above(c.x, c.y);
-            if (above == null) continue;
-            above.exitMap(map);
+            if (above != null) above.exitMap(map);
+            if (map.paved(c.x, c.y)) map.tileAt(c.x, c.y).paved = false;
           }
           drawnTile = null;
         }
@@ -515,11 +516,22 @@ public class Test {
     CityMap map = ref.value;
     StringBuffer report = new StringBuffer("Home City: "+map.city);
     
+    //*
     report.append("\n\nFunds: "+map.city.currentFunds);
     report.append("\n\nTime: "+map.time);
     report.append("\nPaused: "+paused  );
     report.append("\n");
-
+    //*/
+    
+    float avgHunger = 0;
+    for (Actor a : map.walkers) avgHunger += a.hunger / a.type.maxHealth;
+    avgHunger /= map.walkers.size();
+    
+    report.append("\nTOTAL POPULATION: "+map.walkers.size());
+    report.append("\nHUNGER LEVEL: "+I.percent(avgHunger)+"\n\n");
+    //for (Actor a : map.walkers) report.append("\n  "+a);
+    
+    
     report.append("\n(C) city view");
     if (pressed.includes('c')) {
       cityView = true;
