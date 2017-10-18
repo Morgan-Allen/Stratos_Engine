@@ -15,8 +15,10 @@ public class CityMap implements Session.Saveable {
   
   /**  Data fields and initialisation-
     */
+  final static int SCAN_RES = 16;
+  
   City city;
-  int size;
+  int size, scanSize;
   Tile grid[][];
   
   int time     =  0;
@@ -67,7 +69,11 @@ public class CityMap implements Session.Saveable {
       Tile point = loadTile(this, s);
       transitPoints.put(with, point);
     }
+    
     growScanIndex = s.loadInt();
+    for (int i = 2; i-- > 0;) for (int h = ALL_TERRAINS.length; h-- > 0;) {
+      scans[i][h] = loadScan(s);
+    }
     
     saveName = s.loadString();
   }
@@ -94,14 +100,20 @@ public class CityMap implements Session.Saveable {
       s.saveObject(c);
       saveTile(transitPoints.get(c), this, s);
     }
+    
     s.saveInt(growScanIndex);
+    for (int i = 2; i-- > 0;) for (int h = ALL_TERRAINS.length; h-- > 0;) {
+      saveScan(scans[i][h], s);
+    }
     
     s.saveString(saveName);
   }
   
   
   void performSetup(int size) {
-    this.size = size;
+    this.size     = size;
+    this.scanSize = Nums.round(size * 1f / SCAN_RES, 1, true);
+    
     this.grid = new Tile[size][size];
     for (Coord c : Visit.grid(0, 0, size, size, 1)) {
       Tile t = grid[c.x][c.y] = new Tile();
@@ -110,6 +122,7 @@ public class CityMap implements Session.Saveable {
     }
     this.fogVals = new byte[size][size];
     this.oldVals = new byte[size][size];
+    
     city.assignMap(this);
   }
   
@@ -343,7 +356,43 @@ public class CityMap implements Session.Saveable {
   }
   
   
-  final static int SCAN_RES = 16;
+  void endScan() {
+    growScanIndex = 0;
+    for (int i = ALL_TERRAINS.length; i-- > 0;) {
+      scans[0][i] = scans[1][i];
+      scans[1][i] = null;
+    }
+  }
+  
+  
+  HabitatScan initHabitatScan() {
+    HabitatScan scan = new HabitatScan();
+    scan.densities = new int[scanSize][scanSize];
+    return scan;
+  }
+  
+  
+  HabitatScan loadScan(Session s) throws Exception {
+    if (! s.loadBool()) return null;
+    
+    HabitatScan scan = initHabitatScan();
+    scan.numTiles = s.loadInt();
+    for (Coord c : Visit.grid(0, 0, scanSize, scanSize, 1)) {
+      scan.densities[c.x][c.y] = s.loadInt();
+    }
+    return scan;
+  }
+  
+  
+  void saveScan(HabitatScan scan, Session s) throws Exception {
+    if (scan == null) { s.saveBool(false); return; }
+    
+    s.saveInt(scan.numTiles);
+    for (Coord c : Visit.grid(0, 0, scanSize, scanSize, 1)) {
+      s.saveInt(scan.densities[c.x][c.y]);
+    }
+  }
+  
   
   void scanHabitat(Tile tile) {
     Terrain t = tile.terrain;
@@ -355,23 +404,10 @@ public class CityMap implements Session.Saveable {
     }
     
     HabitatScan scan = scans[1][t.terrainIndex];
-    if (scan == null) {
-      int denseSize = Nums.round(size * 1f / SCAN_RES, 1, true);
-      scans[1][t.terrainIndex] = scan = new HabitatScan();
-      scan.densities = new int[denseSize][denseSize];
-    }
+    if (scan == null) scan = scans[1][t.terrainIndex] = initHabitatScan();
     
     scan.numTiles += 1;
     scan.densities[tile.x / SCAN_RES][tile.y / SCAN_RES] += 1;
-  }
-  
-  
-  void endScan() {
-    growScanIndex = 0;
-    for (int i = ALL_TERRAINS.length; i-- > 0;) {
-      scans[0][i] = scans[1][i];
-      scans[1][i] = null;
-    }
   }
   
   
