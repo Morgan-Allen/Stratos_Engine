@@ -235,13 +235,13 @@ public class BuildingForHome extends Building {
   
   
   
-  /**  Orchestrating walker behaviour-
+  /**  Orchestrating actor behaviour-
     */
-  public void selectWalkerBehaviour(Actor walker) {
+  public void selectActorBehaviour(Actor actor) {
     //
     //  Non-adults don't do much-
-    if (! walker.adult()) {
-      walker.returnTo(this);
+    if (! actor.adult()) {
+      actor.returnTo(this);
     }
     //
     //  See if you can repair your own home:
@@ -249,7 +249,7 @@ public class BuildingForHome extends Building {
       this, type.buildsWith, new Batch(this)
     );
     if (repairs != null) {
-      walker.embarkOnVisit(repairs, 10, JOB.BUILDING, this);
+      actor.embarkOnVisit(repairs, 10, JOB.BUILDING, this);
       return;
     }
     //
@@ -280,7 +280,7 @@ public class BuildingForHome extends Building {
     }
     if (! pickS.empty()) {
       Order o = pickS.result();
-      walker.embarkOnVisit(o.b, 5, JOB.SHOPPING, this);
+      actor.embarkOnVisit(o.b, 5, JOB.SHOPPING, this);
       return;
     }
     //
@@ -296,27 +296,27 @@ public class BuildingForHome extends Building {
     goes = pickV.result();
     
     if (goes != this && goes != null) {
-      walker.embarkOnVisit(goes, 25, JOB.VISITING, this);
+      actor.embarkOnVisit(goes, 25, JOB.VISITING, this);
     }
     else if (goes == this && Rand.yes()) {
-      walker.embarkOnVisit(this, 10, JOB.RESTING, this);
+      actor.embarkOnVisit(this, 10, JOB.RESTING, this);
     }
     else if (goes == this) {
-      walker.startRandomWalk();
+      actor.startRandomWalk();
     }
     else {
-      super.selectWalkerBehaviour(walker);
+      super.selectActorBehaviour(actor);
     }
   }
   
   
-  public void walkerEnters(Actor walker, Building enters) {
+  public void actorEnters(Actor actor, Building enters) {
     Type tier = tierOffset(1);
     
-    if (walker.jobType() == JOB.SHOPPING) {
+    if (actor.jobType() == JOB.SHOPPING) {
       
       if (enters == this) {
-        walker.offloadGood(walker.carried, this);
+        actor.offloadGood(actor.carried, this);
       }
       
       else for (Good cons : consumedBy(tier)) {
@@ -329,16 +329,16 @@ public class BuildingForHome extends Building {
         if (Visit.arrayIncludes(FOOD_TYPES, cons)) taken *= 2;
         taken = Nums.min(taken, stock / 2);
         
-        walker.beginDelivery(enters, this, JOB.SHOPPING, cons, taken, this);
+        actor.beginDelivery(enters, this, JOB.SHOPPING, cons, taken, this);
         break;
       }
     }
   }
   
   
-  public void walkerVisits(Actor walker, Building visits) {
-    if (walker.jobType() == JOB.BUILDING) {
-      BuildingForCrafts.advanceBuilding(walker, type.buildsWith, visits);
+  public void actorVisits(Actor actor, Building visits) {
+    if (actor.jobType() == JOB.BUILDING) {
+      BuildingForCrafts.advanceBuilding(actor, type.buildsWith, visits);
     }
   }
   

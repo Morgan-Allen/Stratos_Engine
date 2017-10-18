@@ -215,7 +215,7 @@ public class Building extends Element implements Session.Saveable, Employer {
   
   
   
-  /**  Spawning walkers and customising walker behaviour:
+  /**  Spawning walkers and customising actor behaviour:
     */
   protected int numWorkers(Type type) {
     int sum = 0;
@@ -260,42 +260,42 @@ public class Building extends Element implements Session.Saveable, Employer {
   }
   
   
-  public void selectWalkerBehaviour(Actor walker) {
-    walker.returnTo(this);
+  public void selectActorBehaviour(Actor actor) {
+    actor.returnTo(this);
   }
   
   
-  public void walkerUpdates(Actor w) {
+  public void actorUpdates(Actor w) {
     return;
   }
   
   
-  public void walkerPasses(Actor walker, Building other) {
+  public void actorPasses(Actor actor, Building other) {
     return;
   }
   
   
-  public void walkerTargets(Actor walker, Target other) {
+  public void actorTargets(Actor actor, Target other) {
     return;
   }
   
   
-  public void walkerEnters(Actor walker, Building enters) {
+  public void actorEnters(Actor actor, Building enters) {
     return;
   }
   
   
-  public void walkerVisits(Actor walker, Building visits) {
+  public void actorVisits(Actor actor, Building visits) {
     return;
   }
   
   
-  public void walkerExits(Actor walker, Building enters) {
+  public void actorExits(Actor actor, Building enters) {
     return;
   }
   
   
-  public void visitedBy(Actor walker) {
+  public void visitedBy(Actor actor) {
     return;
   }
   

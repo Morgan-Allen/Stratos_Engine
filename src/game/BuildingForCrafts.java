@@ -102,34 +102,34 @@ public class BuildingForCrafts extends Building {
   
   
   
-  /**  Handling walker behaviours:
+  /**  Handling actor behaviours:
     */
-  public void selectWalkerBehaviour(Actor walker) {
+  public void selectActorBehaviour(Actor actor) {
     //
     //  Try and find a nearby building to construct:
     Building builds = selectBuildTarget(this, type.buildsWith, map.buildings);
     if (builds != null) {
-      walker.embarkOnVisit(builds, 10, JOB.BUILDING, this);
+      actor.embarkOnVisit(builds, 10, JOB.BUILDING, this);
       return;
     }
     //
     //  Failing that, go here if you aren't already:
-    if (walker.inside != this) {
-      walker.returnTo(this);
+    if (actor.inside != this) {
+      actor.returnTo(this);
       return;
     }
     //
     //  And failing all that, start crafting:
-    else if (pickNextDelivery(walker)) {
+    else if (pickNextDelivery(actor)) {
       return;
     }
     else if (! stalled) {
-      walker.embarkOnVisit(this, -1, JOB.CRAFTING, this);
+      actor.embarkOnVisit(this, -1, JOB.CRAFTING, this);
     }
   }
   
   
-  boolean pickNextDelivery(Actor walker) {
+  boolean pickNextDelivery(Actor actor) {
     //
     //  Find someone to deliver to:
     class Order { Building goes; Good good; float amount; }
@@ -158,7 +158,7 @@ public class BuildingForCrafts extends Building {
     
     if (! pickD.empty()) {
       Order o = pickD.result();
-      walker.beginDelivery(this, o.goes, JOB.DELIVER, o.good, o.amount, this);
+      actor.beginDelivery(this, o.goes, JOB.DELIVER, o.good, o.amount, this);
       return true;
     }
     else {
@@ -167,14 +167,14 @@ public class BuildingForCrafts extends Building {
   }
   
   
-  public void walkerEnters(Actor walker, Building enters) {
+  public void actorEnters(Actor actor, Building enters) {
     return;
   }
   
   
-  public void walkerVisits(Actor walker, Building visits) {
-    if (walker.jobType() == JOB.BUILDING) {
-      advanceBuilding(walker, type.buildsWith, visits);
+  public void actorVisits(Actor actor, Building visits) {
+    if (actor.jobType() == JOB.BUILDING) {
+      advanceBuilding(actor, type.buildsWith, visits);
     }
   }
   

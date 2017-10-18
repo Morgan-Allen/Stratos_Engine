@@ -90,12 +90,12 @@ public class BuildingForTrade extends BuildingForCrafts implements Trader {
   
   /**  Selecting behaviour for walkers-
     */
-  public void selectWalkerBehaviour(Actor walker) {
-    if (walker.type == PORTERS) {
-      selectTraderBehaviour(walker);
+  public void selectActorBehaviour(Actor actor) {
+    if (actor.type == PORTERS) {
+      selectTraderBehaviour(actor);
     }
     else {
-      super.selectWalkerBehaviour(walker);
+      super.selectActorBehaviour(actor);
     }
   }
   

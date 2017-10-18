@@ -192,13 +192,13 @@ public class Actor extends Element implements Session.Saveable, Journeys {
             onVisit(visits);
             task.onVisit(visits);
             visits.visitedBy(this);
-            origin.walkerVisits(this, visits);
+            if (origin != null) origin.actorVisits(this, visits);
           }
           if (target != null) {
             onTarget(target);
             task.onTarget(target);
             target.targetedBy(this);
-            origin.walkerTargets(this, target);
+            if (origin != null) origin.actorTargets(this, target);
           }
         }
         else {
@@ -218,9 +218,9 @@ public class Actor extends Element implements Session.Saveable, Journeys {
       beginNextBehaviour();
     }
     //
-    //  Finally, allow the current employer to monitor the walker-
+    //  Finally, allow the current employer to monitor the actor-
     if (job != null && job.origin != null) {
-      job.origin.walkerUpdates(this);
+      job.origin.actorUpdates(this);
     }
     //
     //  Update vision-
@@ -249,15 +249,15 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     */
   private void setInside(Building b, boolean yes) {
     if (b == null) return;
-    Employer j = job == null ? null : job.origin;
+    Employer origin = job == null ? null : job.origin;
     
     if (yes && b != inside) {
       b.visitors.include(this);
       inside = b;
-      if (j != null) j.walkerEnters(this, inside);
+      if (origin != null) origin.actorEnters(this, inside);
     }
     if (b == inside && ! yes) {
-      if (j != null) j.walkerExits(this, inside);
+      if (origin != null) origin.actorExits(this, inside);
       b.visitors.remove(this);
       inside = null;
     }
@@ -432,8 +432,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   
   void updateVision() {
-    float range = type.sightRange * (map.lightLevel() + 1f) / 2;
-    map.liftFog(at, range);
+    return;
   }
   
   

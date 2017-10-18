@@ -80,9 +80,9 @@ public class GameConstants {
     //    That gives you ~8 units of food per month.
     //    Every citizen consumes 2 units of food per 2 months.  So that's just
     //    enough for 8 citizens.
-    TILES_PER_GRAZER = 25  ,
-    TILES_PER_HUNTER = 100 ,
-    AVG_ANIMAL_YIELD = 4   ,
+    TILES_PER_GRAZER = 100 ,
+    TILES_PER_HUNTER = 400 ,
+    AVG_ANIMAL_YIELD = 8   ,
     AVG_ANIMAL_LIFE  = MONTH_LENGTH * 8 * 2,
     ANIMAL_PREG_TIME = AVG_ANIMAL_LIFE / 8,
     AVG_BUTCHER_TIME = MONTH_LENGTH / (AVG_ANIMAL_YIELD * 2),
@@ -578,13 +578,13 @@ public class GameConstants {
   }
   
   static interface Employer {
-    void selectWalkerBehaviour(Actor walker);
-    void walkerUpdates(Actor walker);
-    void walkerPasses (Actor walker, Building other );
-    void walkerTargets(Actor walker, Target   other );
-    void walkerEnters (Actor walker, Building enters);
-    void walkerVisits (Actor walker, Building visits);
-    void walkerExits  (Actor walker, Building enters);
+    void selectActorBehaviour(Actor actor);
+    void actorUpdates(Actor actor);
+    void actorPasses (Actor actor, Building other );
+    void actorTargets(Actor actor, Target   other );
+    void actorEnters (Actor actor, Building enters);
+    void actorVisits (Actor actor, Building visits);
+    void actorExits  (Actor actor, Building enters);
   }
   
   

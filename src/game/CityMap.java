@@ -346,16 +346,17 @@ public class CityMap implements Session.Saveable {
   final static int SCAN_RES = 16;
   
   void scanHabitat(Tile tile) {
-    if (tile.paved) return;
+    Terrain t = tile.terrain;
+    if (t == null || tile.paved) {
+      return;
+    }
     if (tile.above != null && tile.above.type.category != Type.IS_FIXTURE) {
       return;
     }
     
-    Terrain t = tile.terrain;
-    int denseSize = Nums.round(size * 1f / SCAN_RES, 1, true);
-    
     HabitatScan scan = scans[1][t.terrainIndex];
     if (scan == null) {
+      int denseSize = Nums.round(size * 1f / SCAN_RES, 1, true);
       scans[1][t.terrainIndex] = scan = new HabitatScan();
       scan.densities = new int[denseSize][denseSize];
     }

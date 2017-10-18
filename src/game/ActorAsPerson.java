@@ -58,13 +58,13 @@ public class ActorAsPerson extends Actor {
     //  Once home & work have been established, try to derive a task to
     //  perform-
     if (job == null && formation != null && formation.active) {
-      formation.selectWalkerBehaviour(this);
+      formation.selectActorBehaviour(this);
     }
     if (job == null && work != null) {
-      work.selectWalkerBehaviour(this);
+      work.selectActorBehaviour(this);
     }
     if (job == null && home != null) {
-      home.selectWalkerBehaviour(this);
+      home.selectActorBehaviour(this);
     }
     if (job == null && (hurtRating >= 1 || injury > 0)) {
       beginResting(home);
@@ -131,6 +131,15 @@ public class ActorAsPerson extends Actor {
         }
       }
     }
+  }
+  
+  
+  
+  /**  Handling sight-range:
+    */
+  void updateVision() {
+    float range = type.sightRange * (map.lightLevel() + 1f) / 2;
+    map.liftFog(at, range);
   }
   
   

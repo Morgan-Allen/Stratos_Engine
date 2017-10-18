@@ -418,7 +418,7 @@ public class Formation implements
   }
   
   
-  public void selectWalkerBehaviour(Actor w) {
+  public void selectActorBehaviour(Actor w) {
     
     Actor target = w.inCombat() ? null : findCombatTarget(w);
     if (target != null) {
@@ -440,7 +440,7 @@ public class Formation implements
   }
   
   
-  public void walkerUpdates(Actor w) {
+  public void actorUpdates(Actor w) {
     Actor target = w.inCombat() ? null : findCombatTarget(w);
     if (target != null) {
       w.beginAttack(target, Task.JOB.COMBAT, this);
@@ -449,34 +449,34 @@ public class Formation implements
   }
   
   
-  public void walkerTargets(Actor walker, Target other) {
-    if (walker.inCombat() && other instanceof Actor) {
-      walker.performAttack((Actor) other);
+  public void actorTargets(Actor actor, Target other) {
+    if (actor.inCombat() && other instanceof Actor) {
+      actor.performAttack((Actor) other);
     }
-    if (walker.inCombat() && other instanceof Tile) {
+    if (actor.inCombat() && other instanceof Tile) {
       Building siege = (Building) ((Tile) other).above;
-      walker.performAttack(siege);
+      actor.performAttack(siege);
     }
     return;
   }
   
   
-  public void walkerPasses(Actor walker, Building other) {
+  public void actorPasses(Actor actor, Building other) {
     return;
   }
   
   
-  public void walkerEnters(Actor walker, Building enters) {
+  public void actorEnters(Actor actor, Building enters) {
     return;
   }
   
   
-  public void walkerVisits(Actor walker, Building visits) {
+  public void actorVisits(Actor actor, Building visits) {
     return;
   }
   
   
-  public void walkerExits(Actor walker, Building enters) {
+  public void actorExits(Actor actor, Building enters) {
     return;
   }
   

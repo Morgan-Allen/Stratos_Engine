@@ -63,16 +63,16 @@ public class Test {
   
   static Actor spawnWalker(Building b, Type type, boolean resident) {
     
-    Actor walker = (Actor) type.generate();
-    type.initAsMigrant(walker);
-    walker.enterMap(b.map, b.at.x, b.at.y, 1);
-    walker.inside = b;
+    Actor actor = (Actor) type.generate();
+    type.initAsMigrant(actor);
+    actor.enterMap(b.map, b.at.x, b.at.y, 1);
+    actor.inside = b;
     
-    if (resident) b.setResident(walker, true);
-    else          b.setWorker  (walker, true);
-    b.visitors.add(walker);
+    if (resident) b.setResident(actor, true);
+    else          b.setWorker  (actor, true);
+    b.visitors.add(actor);
     
-    return walker;
+    return actor;
   }
   
   

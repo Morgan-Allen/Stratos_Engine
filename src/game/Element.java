@@ -105,7 +105,7 @@ public class Element implements Session.Saveable, Target {
   
   
   
-  /**  Handling focus for walker activities-
+  /**  Handling focus for actor activities-
     */
   public void targetedBy(Actor w) {
     return;

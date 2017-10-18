@@ -66,9 +66,9 @@ public class BuildingForArmy extends BuildingForCrafts {
   
   /**  Regular updates and active service-
     */
-  boolean eligible(Actor walker) {
-    if (workers.includes(walker)) return false;
-    return walker.formation == null;
+  boolean eligible(Actor actor) {
+    if (workers.includes(actor)) return false;
+    return actor.formation == null;
   }
   
   
@@ -78,7 +78,7 @@ public class BuildingForArmy extends BuildingForCrafts {
   }
   
   
-  public void selectWalkerBehaviour(Actor walker) {
+  public void selectActorBehaviour(Actor actor) {
     if (formation == null) return;
     Pick <Actor> pick = new Pick();
     
@@ -95,18 +95,18 @@ public class BuildingForArmy extends BuildingForCrafts {
     
     Actor drafts = pick.result();
     if (drafts != null) {
-      walker.embarkOnVisit(drafts.home, 2, Task.JOB.VISITING, this);
+      actor.embarkOnVisit(drafts.home, 2, Task.JOB.VISITING, this);
     }
     else {
-      formation.selectWalkerBehaviour(walker);
+      formation.selectActorBehaviour(actor);
     }
-    if (walker.job == null) {
-      super.selectWalkerBehaviour(walker);
+    if (actor.job == null) {
+      super.selectActorBehaviour(actor);
     }
   }
   
   
-  public void walkerVisits(Actor walker, Building other) {
+  public void actorVisits(Actor actor, Building other) {
     for (Actor w : other.residents) if (eligible(w)) {
       formation.toggleRecruit(w, true);
     }

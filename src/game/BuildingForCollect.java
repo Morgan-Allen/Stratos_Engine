@@ -29,15 +29,15 @@ public class BuildingForCollect extends BuildingForCrafts {
   
   
   
-  /**  Assigning walker behaviours:
+  /**  Assigning actor behaviours:
     */
-  public void selectWalkerBehaviour(Actor walker) {
+  public void selectActorBehaviour(Actor actor) {
     
     for (Good g : type.produced) {
-      if (pickNextCollection(walker, g)) return;
+      if (pickNextCollection(actor, g)) return;
     }
     
-    super.selectWalkerBehaviour(walker);
+    super.selectActorBehaviour(actor);
   }
   
   
@@ -46,12 +46,12 @@ public class BuildingForCollect extends BuildingForCrafts {
   }
   
   
-  boolean pickNextCollection(Actor walker, Good g) {
+  boolean pickNextCollection(Actor actor, Good g) {
     Pick <Building> pick = new Pick();
     
     for (Building b : map.buildings) {
       if (! b.type.hasFeature(IS_HOUSING)) continue;
-      float distW = CityMap.distance(walker.at, b.entrance);
+      float distW = CityMap.distance(actor.at, b.entrance);
       float distB = CityMap.distance(entrance , b.entrance);
       if (distB > type.maxDeliverRange) continue;
       
@@ -62,17 +62,17 @@ public class BuildingForCollect extends BuildingForCrafts {
     }
     
     if (! pick.empty()) {
-      walker.embarkOnVisit(pick.result(), 1, Task.JOB.VISITING, this);
+      actor.embarkOnVisit(pick.result(), 1, Task.JOB.VISITING, this);
       return true;
     }
     return false;
   }
   
   
-  public void walkerVisits(Actor walker, Building visits) {
+  public void actorVisits(Actor actor, Building visits) {
     
     if (visits == this) for (Good made : type.produced) {
-      walker.offloadGood(made, this);
+      actor.offloadGood(made, this);
       int amount = (int) inventory.valueFor(made);
       
       boolean taxes = made == CASH;
@@ -85,24 +85,24 @@ public class BuildingForCollect extends BuildingForCrafts {
       }
     }
     
-    else if (walker.jobType() == JOB.VISITING) {
+    else if (actor.jobType() == JOB.VISITING) {
       for (Good g : type.produced) {
         boolean taxes = g == CASH;
         int carryLimit = taxes ? 100 : 10;
         
         float amount = visits.inventory.valueFor(g);
         if (amount <= 0) continue;
-        walker.pickupGood(g, amount, visits);
+        actor.pickupGood(g, amount, visits);
         
-        if (walker.carryAmount >= carryLimit) {
-          walker.returnTo(this);
+        if (actor.carryAmount >= carryLimit) {
+          actor.returnTo(this);
           return;
         }
-        else if (pickNextCollection(walker, g)) {
+        else if (pickNextCollection(actor, g)) {
           return;
         }
         else {
-          walker.returnTo(this);
+          actor.returnTo(this);
           return;
         }
       }

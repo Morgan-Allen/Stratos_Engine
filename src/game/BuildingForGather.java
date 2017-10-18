@@ -38,13 +38,13 @@ public class BuildingForGather extends BuildingForCrafts {
   
   /**  Life-cycle, update and economic functions-
     */
-  public void selectWalkerBehaviour(Actor walker) {
+  public void selectActorBehaviour(Actor actor) {
     
     Box2D box = fullArea();
-    if (pickNextDelivery(walker)) return;
-    if (pickPlantPoint(walker, box, true         )) return;
-    if (pickNextCrop  (walker, box, type.produced)) return;
-    super.selectWalkerBehaviour(walker);
+    if (pickNextDelivery(actor)) return;
+    if (pickPlantPoint(actor, box, true         )) return;
+    if (pickNextCrop  (actor, box, type.produced)) return;
+    super.selectActorBehaviour(actor);
   }
   
   
@@ -93,8 +93,8 @@ public class BuildingForGather extends BuildingForCrafts {
   }
   
   
-  boolean pickPlantPoint(Actor walker, Box2D box, boolean start) {
-    if (start && walker.inside != this) return false;
+  boolean pickPlantPoint(Actor actor, Box2D box, boolean start) {
+    if (start && actor.inside != this) return false;
     if (cropLevels.empty()) return false;
     
     Pick <Tile> pick = new Pick();
@@ -108,14 +108,14 @@ public class BuildingForGather extends BuildingForCrafts {
       if (above != null && levels.valueFor(above) > 0) continue;
       if (above != null && above.growRate == 0       ) continue;
       
-      float distW = CityMap.distance(walker.at, t);
+      float distW = CityMap.distance(actor.at, t);
       float distB = CityMap.distance(this  .at, t);
       pick.compare(t, 0 - (distW + distB));
     }
     
     Tile goes = pick.result();
     if (goes != null) {
-      walker.embarkOnTarget(goes, 2, JOB.PLANTING, this);
+      actor.embarkOnTarget(goes, 2, JOB.PLANTING, this);
       return true;
     }
     
@@ -123,7 +123,7 @@ public class BuildingForGather extends BuildingForCrafts {
   }
   
   
-  boolean pickNextCrop(Actor walker, Box2D box, Good... cropTypes) {
+  boolean pickNextCrop(Actor actor, Box2D box, Good... cropTypes) {
     if (Visit.empty(cropTypes)) return false;
     
     Pick <Element> pick = new Pick();
@@ -135,7 +135,7 @@ public class BuildingForGather extends BuildingForCrafts {
         if (crop.buildLevel < 1 || hasFocus(crop)) continue;
         if (! Visit.arrayIncludes(cropTypes, crop.type)) continue;
         
-        float distW = CityMap.distance(walker.at, t);
+        float distW = CityMap.distance(actor.at, t);
         float distB = CityMap.distance(this  .at, t);
         pick.compare(crop, 0 - (distW + distB));
       }
@@ -143,7 +143,7 @@ public class BuildingForGather extends BuildingForCrafts {
     
     Element goes = pick.result();
     if (goes != null) {
-      walker.embarkOnTarget(goes, 2, JOB.HARVEST, this);
+      actor.embarkOnTarget(goes, 2, JOB.HARVEST, this);
       return true;
     }
     
@@ -151,15 +151,15 @@ public class BuildingForGather extends BuildingForCrafts {
   }
   
   
-  public void walkerTargets(Actor walker, Target other) {
+  public void actorTargets(Actor actor, Target other) {
     if (other == null) return;
     
-    Box2D area = new Box2D(walker.at.x, walker.at.y, 1, 1);
+    Box2D area = new Box2D(actor.at.x, actor.at.y, 1, 1);
     area.expandBy(2);
     area.cropBy(fullArea());
     Element above = other.at().above;
     
-    if (walker.jobType() == JOB.PLANTING) {
+    if (actor.jobType() == JOB.PLANTING) {
       //
       //  We have to pick a seed-type to plant first:
       Tile under = other.at();
@@ -172,35 +172,35 @@ public class BuildingForGather extends BuildingForCrafts {
       crop.enterMap(map, under.x, under.y, 0);
       //
       //  Then pick another point to sow:
-      if (! pickPlantPoint(walker, area, false)) {
-        walker.returnTo(this);
+      if (! pickPlantPoint(actor, area, false)) {
+        actor.returnTo(this);
       }
     }
     
-    if (walker.jobType() == JOB.HARVEST) {
+    if (actor.jobType() == JOB.HARVEST) {
       if (above == null || ! (above.type instanceof Good)) return;
       
       above.buildLevel = 0;
-      walker.carried      = (Good) above.type;
-      walker.carryAmount += CROP_YIELD / 100f;
+      actor.carried      = (Good) above.type;
+      actor.carryAmount += CROP_YIELD / 100f;
       
-      ///I.say(walker+" harvested "+walker.carryAmount+" of "+above.type);
+      ///I.say(actor+" harvested "+actor.carryAmount+" of "+above.type);
       
-      if (walker.carryAmount >= 2) {
-        walker.returnTo(this);
+      if (actor.carryAmount >= 2) {
+        actor.returnTo(this);
       }
-      else if (! pickNextCrop(walker, area, walker.carried)) {
-        walker.returnTo(this);
+      else if (! pickNextCrop(actor, area, actor.carried)) {
+        actor.returnTo(this);
       }
     }
   }
   
   
-  public void walkerEnters(Actor walker, Building enters) {
+  public void actorEnters(Actor actor, Building enters) {
     if (enters == this) for (Good made : type.produced) {
-      walker.offloadGood(made, this);
+      actor.offloadGood(made, this);
     }
-    super.walkerEnters(walker, enters);
+    super.actorEnters(actor, enters);
   }
   
   

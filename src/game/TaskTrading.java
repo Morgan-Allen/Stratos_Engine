@@ -54,7 +54,7 @@ public class TaskTrading extends Task {
   
   
   
-  /**  Handling walker events-
+  /**  Handling actor events-
     */
   protected void onVisit(Building visits) {
     //
