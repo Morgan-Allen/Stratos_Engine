@@ -165,7 +165,6 @@ public class ActorAsAnimal extends Actor {
     if (jobType() == JOB.RESTING) {
       float rests = 1f / FATIGUE_REGEN;
       float heals = 1f / HEALTH_REGEN ;
-      
       fatigue = Nums.max(0, fatigue - rests);
       injury  = Nums.max(0, injury  - heals);
     }

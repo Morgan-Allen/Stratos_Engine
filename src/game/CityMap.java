@@ -441,9 +441,8 @@ public class CityMap implements Session.Saveable {
   }
   
   
-  float fogAt(int x, int y) {
-    Tile t = tileAt(x, y);
-    return t == null ? 0 : (oldVals[x][y] / 100f);
+  float sightLevel(Tile t) {
+    return t == null ? 0 : (oldVals[t.x][t.y] / 100f);
   }
   
   

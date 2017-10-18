@@ -11,8 +11,9 @@ public class ActorPathSearch extends Search <Tile> {
   CityMap map;
   Tile dest;
   Tile temp[] = new Tile[8];
-  boolean getNear = false;
-  boolean paveOnly = true;
+  boolean getNear  = false;
+  boolean paveOnly = false;
+  boolean stealthy = false;
   
 
   public ActorPathSearch(Actor w, Tile dest) {
@@ -52,7 +53,10 @@ public class ActorPathSearch extends Search <Tile> {
   
   
   protected float cost(Tile prior, Tile spot) {
-    return distance(prior, spot);
+    float dist = distance(prior, spot);
+    if (spot.paved) dist *= 0.75f;
+    if (stealthy  ) dist += map.sightLevel(spot);
+    return dist;
   }
   
   
