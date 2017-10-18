@@ -200,10 +200,14 @@ public class Type extends Index.Entry implements Session.Saveable {
     int   sex = Rand.yes() ? Actor.SEX_FEMALE : Actor.SEX_MALE;
     w.ageSeconds = (int) (age * YEAR_LENGTH);
     w.sexData    = sex;
+    w.hunger     = Rand.num() - 0.5f;
   }
   
   
   void initAsAnimal(Actor w) {
+    float age = Rand.num() * w.type.lifespan;
+    w.ageSeconds = (int) age;
+    w.hunger     = Rand.num() - 0.5f;
     return;
   }
   

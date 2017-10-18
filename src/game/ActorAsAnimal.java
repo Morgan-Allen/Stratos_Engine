@@ -2,6 +2,7 @@
 
 package game;
 import util.*;
+import static game.Task.*;
 import static game.CityMap.*;
 import static game.GameConstants.*;
 
@@ -39,7 +40,7 @@ public class ActorAsAnimal extends Actor {
     //
     //  If you're seriously tired or hurt, but not hungry, find a place to rest:
     if (hurtRating > type.maxHealth / 2 && hunger < 1 && rests != null) {
-      embarkOnTarget(rests, 10, Task.JOB.RESTING, null);
+      embarkOnTarget(rests, 10, JOB.RESTING, null);
     }
     //
     //  If you're hungry, look for food, either by grazing within your habitat
@@ -47,16 +48,16 @@ public class ActorAsAnimal extends Actor {
     if (job == null && hunger >= 1) {
       if (type.predator) {
         Actor prey = findPrey();
-        if (prey != null) beginAttack(prey, Task.JOB.HUNTING, null);
+        if (prey != null) beginAttack(prey, JOB.HUNTING, null);
       }
       else if (rests != null) {
-        embarkOnTarget(rests, 1, Task.JOB.FORAGING, null);
+        embarkOnTarget(rests, 1, JOB.FORAGING, null);
       }
     }
     //
     //  If you're still in pain, rest up-
     if (job == null && hurtRating >= 0.5 && rests != null) {
-      embarkOnTarget(at(), 10, Task.JOB.RESTING, null);
+      embarkOnTarget(at(), 10, JOB.RESTING, null);
     }
     //
     //  If that all fails, wander about a little-
@@ -66,26 +67,7 @@ public class ActorAsAnimal extends Actor {
   }
   
   
-  Actor findPrey() {
-    //
-    //  TODO:  Try and sample a smaller number of targets.
-    Pick <Actor> pick = new Pick();
-    
-    for (Actor a : map.walkers) {
-      int category = a.type.category;
-      if (a.type.predator) continue;
-      
-      float dist = CityMap.distance(a.at(), at());
-      float rating = 1f * CityMap.distancePenalty(dist);
-      
-      if (category != Type.IS_ANIMAL_WLK) rating /= 2;
-      if (! a.adult()) rating /= 2;
-      
-      pick.compare(a, rating);
-    }
-    return pick.result();
-  }
-  
+  static float grazeOkay = 0, grazeFail = 0;
   
   Tile findGrazePoint() {
     
@@ -96,41 +78,69 @@ public class ActorAsAnimal extends Actor {
       pick.compare(t, Rand.num());
     }
     
-    if (! pick.empty()) return pick.result();
+    if (! pick.empty()) {
+      grazeOkay += 1;
+      return pick.result();
+    }
     
+    grazeFail += 1;
     return CityMapTerrain.findGrazePoint(type, map);
+  }
+  
+  
+  Actor findPrey() {
+    //
+    //  TODO:  Try and sample a smaller number of targets.
+    Pick <Actor> pick = new Pick();
+    
+    //  NOTE:  We generously assume that hunters are chivalrous enough not to
+    //  target pregnant animals (for the sake of ensuring that populations can
+    //  regenerate.)
+    
+    for (Actor a : map.walkers) {
+      int category = a.type.category;
+      if (a.type.predator) continue;
+      if (a.pregnancy != 0) continue;
+      
+      float dist   = CityMap.distance(a.at(), at());
+      float rating = CityMap.distancePenalty(dist);
+      if (category != Type.IS_ANIMAL_WLK) rating /= 2;
+      
+      pick.compare(a, rating);
+    }
+    return pick.result();
+  }
+  
+  
+  static float meatYield(Actor prey) {
+    return AVG_ANIMAL_YIELD * prey.growLevel();
   }
   
   
   protected void onTarget(Target target) {
     
-    if (jobType() == Task.JOB.RESTING) {
+    if (jobType() == JOB.RESTING) {
       return;
     }
     
-    if (jobType() == Task.JOB.FORAGING) {
-      float eatTime = STARVE_INTERVAL / (TILES_PER_GRAZER * 4);
-      hunger -= 1f / eatTime;
+    if (jobType() == JOB.FORAGING) {
+      hunger -= 1f / (STARVE_INTERVAL / 4);
     }
     
-    if (jobType() == Task.JOB.HUNTING) {
+    if (jobType() == JOB.HUNTING) {
       Actor prey = (Actor) target;
       performAttack(prey);
       
       if (prey.alive()) {
-        beginAttack(prey, Task.JOB.HUNTING, null);
+        beginAttack(prey, JOB.HUNTING, null);
       }
       else {
-        float yield = meatYield(prey);
+        float oldH = hunger, yield = meatYield(prey);
         hunger -= yield * 1f / FOOD_UNIT_PER_HP;
+        //I.say(this+" ATE PREY: "+prey);
+        //I.add(", yield: "+yield+", hunger: "+oldH+"->"+hunger);
       }
     }
-  }
-  
-  
-  static float meatYield(Actor prey) {
-    if (prey.adult()) return AVG_ANIMAL_YIELD;
-    return AVG_ANIMAL_YIELD * prey.growLevel();
   }
   
   
@@ -152,7 +162,7 @@ public class ActorAsAnimal extends Actor {
     
     hunger += GameSettings.toggleHunger ? (1f / STARVE_INTERVAL ) : 0;
     
-    if (jobType() == Task.JOB.RESTING) {
+    if (jobType() == JOB.RESTING) {
       float rests = 1f / FATIGUE_REGEN;
       float heals = 1f / HEALTH_REGEN ;
       
@@ -169,9 +179,12 @@ public class ActorAsAnimal extends Actor {
   
   void updateAging() {
     super.updateAging();
-    
+    //
+    //  Once per month, check to see if breeding conditions are correct.  (In
+    //  the event that your numbers are really low, pregnancy is set to -1 to
+    //  discourage predators.)
     if (ageSeconds % MONTH_LENGTH == 0) {
-      if (growLevel() == 1 && pregnancy == 0) {
+      if (growLevel() == 1 && pregnancy <= 0) {
         
         float idealPop = CityMapTerrain.idealPopulation(type, map);
         float actualPop = 0;
@@ -179,22 +192,30 @@ public class ActorAsAnimal extends Actor {
           actualPop += a.pregnancy > 0 ? 2 : 1;
         }
         
-        if (idealPop < actualPop) {
+        float birthChance = 1.25f - (actualPop / idealPop);
+        if (Rand.num() < birthChance) {
           pregnancy = 1;
+        }
+        
+        if (actualPop < idealPop / 2) {
+          pregnancy = -1;
         }
       }
     }
-    
+    //
+    //  If you've come to term, give birth:
     if (pregnancy > 0) {
       pregnancy += 1;
       if (pregnancy > ANIMAL_PREG_TIME) {
         pregnancy = 0;
-        Tile at = home.at();
-        Actor child = (Actor) CHILD.generate();
+        
+        Actor child = (ActorAsAnimal) type.generate();
         child.enterMap(map, at.x, at.y, 1);
+        //I.say(this+" GAVE BIRTH");
       }
     }
-    
+    //
+    //  And if you're too damned old, just die-
     if (ageSeconds > type.lifespan) {
       setAsKilled("Old age");
     }
@@ -202,9 +223,6 @@ public class ActorAsAnimal extends Actor {
   
   
 }
-
-
-
 
 
 

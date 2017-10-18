@@ -428,6 +428,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     job   = null;
     exitMap();
     setDestroyed();
+    ///I.say(this+" DIED FROM CAUSE: "+cause);
   }
   
   
@@ -438,7 +439,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   void checkHealthState() {
     if (injury + hunger > type.maxHealth && state != STATE_DEAD) {
-      setAsKilled("Injury/Hunger");
+      setAsKilled("Injury: "+injury+" Hunger "+hunger);
     }
   }
   

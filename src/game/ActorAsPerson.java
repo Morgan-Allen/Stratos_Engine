@@ -2,6 +2,7 @@
 
 package game;
 import util.*;
+import static game.Task.*;
 import static game.CityMap.*;
 import static game.GameConstants.*;
 
@@ -92,7 +93,7 @@ public class ActorAsPerson extends Actor {
     
     hunger += GameSettings.toggleHunger ? (1f / STARVE_INTERVAL ) : 0;
     
-    if (jobType() == Task.JOB.RESTING) {
+    if (jobType() == JOB.RESTING) {
       float rests = 1f / FATIGUE_REGEN;
       float heals = 1f / HEALTH_REGEN ;
       
@@ -117,7 +118,7 @@ public class ActorAsPerson extends Actor {
   
   
   protected void onVisit(Building visits) {
-    if (jobType() == Task.JOB.RESTING) {
+    if (jobType() == JOB.RESTING) {
       
       if (hunger >= 1f / HUNGER_REGEN) {
         Batch <Good> menu = menuAt(visits);
