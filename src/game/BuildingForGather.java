@@ -143,7 +143,7 @@ public class BuildingForGather extends BuildingForCrafts {
     
     Element goes = pick.result();
     if (goes != null) {
-      walker.embarkOnTarget(goes, 2, JOB.GATHERING, this);
+      walker.embarkOnTarget(goes, 2, JOB.HARVEST, this);
       return true;
     }
     
@@ -177,7 +177,7 @@ public class BuildingForGather extends BuildingForCrafts {
       }
     }
     
-    if (walker.jobType() == JOB.GATHERING) {
+    if (walker.jobType() == JOB.HARVEST) {
       if (above == null || ! (above.type instanceof Good)) return;
       
       above.buildLevel = 0;

@@ -28,7 +28,14 @@ public class CityMap implements Session.Saveable {
   List <Actor   > walkers   = new List();
   
   Table <City, Tile> transitPoints = new Table();
+  
+  
   int growScanIndex = 0;
+  static class HabitatScan {
+    int numTiles = 0;
+    int densities[][];
+  }
+  HabitatScan scans[][] = new HabitatScan[2][ALL_TERRAINS.length];
   
   String saveName;
   
@@ -197,6 +204,8 @@ public class CityMap implements Session.Saveable {
   public static Tile[] adjacent(
     Tile spot, Tile temp[], CityMap map, boolean paveOnly
   ) {
+    if (temp == null) temp = new Tile[8];
+    
     for (int dir : T_INDEX) {
       int x = spot.x + T_X[dir], y = spot.y + T_Y[dir];
       if (paveOnly) {
@@ -314,7 +323,7 @@ public class CityMap implements Session.Saveable {
   
   
   
-  /**  Growth and fertility:
+  /**  Growth, habitats and fertility:
     */
   void updateGrowth() {
     int totalTiles  = size * size;
@@ -325,10 +334,42 @@ public class CityMap implements Session.Saveable {
       int x = growScanIndex / size, y = growScanIndex % size;
       Element above = grid[x][y].above;
       if (above != null) above.updateGrowth();
+      scanHabitat(grid[x][y]);
     }
     
     if (targetIndex == totalTiles) {
-      growScanIndex = 0;
+      endScan();
+    }
+  }
+  
+  
+  final static int SCAN_RES = 16;
+  
+  void scanHabitat(Tile tile) {
+    if (tile.paved) return;
+    if (tile.above != null && tile.above.type.category != Type.IS_FIXTURE) {
+      return;
+    }
+    
+    Terrain t = tile.terrain;
+    int denseSize = Nums.round(size * 1f / SCAN_RES, 1, true);
+    
+    HabitatScan scan = scans[1][t.terrainIndex];
+    if (scan == null) {
+      scans[1][t.terrainIndex] = scan = new HabitatScan();
+      scan.densities = new int[denseSize][denseSize];
+    }
+    
+    scan.numTiles += 1;
+    scan.densities[tile.x / SCAN_RES][tile.y / SCAN_RES] += 1;
+  }
+  
+  
+  void endScan() {
+    growScanIndex = 0;
+    for (int i = ALL_TERRAINS.length; i-- > 0;) {
+      scans[0][i] = scans[1][i];
+      scans[1][i] = null;
     }
   }
   

@@ -22,8 +22,8 @@ public class Test {
       map.performSetup(size);
     }
     else {
-      map = CityMapGenerator.generateTerrain(city, size, gradient);
-      CityMapGenerator.populateFixtures(map);
+      map = CityMapTerrain.generateTerrain(city, size, gradient);
+      CityMapTerrain.populateFixtures(map);
     }
     
     world.mapHigh = 10;

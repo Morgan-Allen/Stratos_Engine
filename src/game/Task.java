@@ -24,10 +24,11 @@ public class Task implements Session.Saveable {
     TRADING  ,
     VISITING ,
     PLANTING ,
-    GATHERING,
+    HARVEST  ,
     CRAFTING ,
     BUILDING ,
     MILITARY ,
+    FORAGING ,
     HUNTING  ,
     COMBAT   ,
   };

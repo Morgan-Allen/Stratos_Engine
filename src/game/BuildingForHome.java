@@ -214,7 +214,7 @@ public class BuildingForHome extends Building {
   void generateOutputs(Type tier) {
     float conLevel = 1f * residents.size() / tier.consumeTime;
     conLevel *= type.updateTime;
-    inventory.add(conLevel, NIGHTSOIL);
+    inventory.add(conLevel, SOIL);
     
     float taxGen = TAX_VALUES[type.homeSocialClass] * conLevel;
     taxGen *= (1 + Visit.indexOf(tier, type.upgradeTiers));

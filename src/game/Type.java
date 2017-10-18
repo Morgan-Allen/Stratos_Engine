@@ -29,7 +29,8 @@ public class Type extends Index.Entry implements Session.Saveable {
     IS_ARMY_BLD    = 12,
     IS_FAITH_BLD   = 13,
     IS_WALKER      = 14,
-    IS_PERSON_WLK  = 15
+    IS_PERSON_WLK  = 15,
+    IS_ANIMAL_WLK  = 16
   ;
   
   final static Index <Type> INDEX = new Index();
@@ -66,6 +67,7 @@ public class Type extends Index.Entry implements Session.Saveable {
       case(IS_FAITH_BLD  ): return new BuildingForFaith  (this);
       case(IS_WALKER     ): return new Actor        (this);
       case(IS_PERSON_WLK ): return new ActorAsPerson(this);
+      case(IS_ANIMAL_WLK ): return new ActorAsAnimal(this);
     }
     return null;
   }
@@ -114,10 +116,10 @@ public class Type extends Index.Entry implements Session.Saveable {
   
   /**  Building-specific data fields and setup methods-
     */
-  Good       buildsWith  [] = NO_GOODS;
-  Type upgradeTiers[] = NO_TIERS;
-  Type upgradeNeeds[] = NO_NEEDS;
-  Integer    needAmounts [] = {};
+  Good    buildsWith  [] = NO_GOODS;
+  Type    upgradeTiers[] = NO_TIERS;
+  Type    upgradeNeeds[] = NO_NEEDS;
+  Integer needAmounts [] = {};
   int homeSocialClass  = CLASS_COMMON;
   int homeAmbienceNeed = AMBIENCE_MIN;
   
@@ -188,12 +190,21 @@ public class Type extends Index.Entry implements Session.Saveable {
   int sightRange  = AVG_SIGHT;
   int attackRange = AVG_RANGE;
   
+  Terrain habitats[]     = NO_HABITAT;
+  boolean predator       = false;
+  float   animalLifespan = AVG_ANIMAL_LIFE;
+  
   
   void initAsMigrant(Actor w) {
     float age = Rand.range(AVG_MARRIED, AVG_MENOPAUSE) + Rand.num() - 0.5f;
     int   sex = Rand.yes() ? Actor.SEX_FEMALE : Actor.SEX_MALE;
     w.ageSeconds = (int) (age * YEAR_LENGTH);
     w.sexData    = sex;
+  }
+  
+  
+  void initAsAnimal(Actor w) {
+    return;
   }
   
   
@@ -204,8 +215,6 @@ public class Type extends Index.Entry implements Session.Saveable {
     return name;
   }
 }
-
-
 
 
 

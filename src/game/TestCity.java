@@ -51,7 +51,7 @@ public class TestCity extends Test {
     market.enterMap(map, 4 , 9 , 1);
     
     for (Building b : map.buildings) if (b.type == HOUSE) {
-      b.inventory.set(NIGHTSOIL, 2 );
+      b.inventory.set(SOIL, 2 );
       b.inventory.set(CASH    , 20);
     }
     
@@ -80,8 +80,8 @@ public class TestCity extends Test {
           if (b.type == HOUSE) {
             BuildingForHome home = (BuildingForHome) b;
             if (home.currentTier != HOUSE_T2             ) allNeeds = false;
-            if (home.inventory.valueFor(NIGHTSOIL) > 0.5f) allNeeds = false;
-            if (home.inventory.valueFor(CASH     ) > 5.0f) allNeeds = false;
+            if (home.inventory.valueFor(SOIL) > 0.5f) allNeeds = false;
+            if (home.inventory.valueFor(CASH) > 5.0f) allNeeds = false;
           }
         }
         housesOkay = allNeeds;

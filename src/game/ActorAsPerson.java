@@ -90,11 +90,20 @@ public class ActorAsPerson extends Actor {
   void update() {
     super.update();
     
-    hunger  += GameSettings.toggleHunger  ? (1f / STARVE_INTERVAL ) : 0;
-    fatigue += GameSettings.toggleFatigue ? (1f / FATIGUE_INTERVAL) : 0;
+    hunger += GameSettings.toggleHunger ? (1f / STARVE_INTERVAL ) : 0;
     
-    float heals = 0.5f / HEALTH_REGEN;
-    injury = Nums.max(0, injury - heals);
+    if (jobType() == Task.JOB.RESTING) {
+      float rests = 1f / FATIGUE_REGEN;
+      float heals = 1f / HEALTH_REGEN ;
+      
+      fatigue = Nums.max(0, fatigue - rests);
+      injury  = Nums.max(0, injury  - heals);
+    }
+    else {
+      fatigue += GameSettings.toggleFatigue ? (1f / FATIGUE_INTERVAL) : 0;
+      float heals = 0.5f / HEALTH_REGEN;
+      injury = Nums.max(0, injury - heals);
+    }
   }
   
   
@@ -112,19 +121,15 @@ public class ActorAsPerson extends Actor {
       
       if (hunger >= 1f / HUNGER_REGEN) {
         Batch <Good> menu = menuAt(visits);
+        boolean adult = adult();
         
         if (menu.size() > 0) for (Good g : menu) {
           float eats = 1f / (menu.size() * HUNGER_REGEN);
+          if (! adult) eats /= 2;
           visits.inventory.add(0 - eats, g);
           hunger -= eats / FOOD_UNIT_PER_HP;
         }
       }
-      
-      float rests = 1f   / FATIGUE_REGEN;
-      float heals = 0.5f / HEALTH_REGEN ;
-      
-      fatigue = Nums.max(0, fatigue - rests);
-      injury  = Nums.max(0, injury  - heals);
     }
   }
   

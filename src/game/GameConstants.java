@@ -62,7 +62,6 @@ public class GameConstants {
   final public static int
     //
     //  Time and distance-
-    HOUR_LENGTH      = 4   ,
     DAY_LENGTH       = 6   ,
     DAYS_PER_MONTH   = 20  ,
     MONTHS_PER_YEAR  = 18  ,
@@ -81,6 +80,22 @@ public class GameConstants {
     //    That gives you ~8 units of food per month.
     //    Every citizen consumes 2 units of food per 2 months.  So that's just
     //    enough for 8 citizens.
+    TILES_PER_GRAZER = 25  ,
+    TILES_PER_HUNTER = 100 ,
+    AVG_ANIMAL_YIELD = 4   ,
+    AVG_ANIMAL_LIFE  = MONTH_LENGTH * 8 * 2,
+    ANIMAL_PREG_TIME = AVG_ANIMAL_LIFE / 8,
+    AVG_BUTCHER_TIME = MONTH_LENGTH / (AVG_ANIMAL_YIELD * 2),
+    //
+    //  If 1 animal is worth 4 food, and 4 of them fit within 10x10 tiles, then
+    //  if they 'ripen' within 1 month, that would be 16 units of food.
+    //
+    //  Slash that by a factor of 8, so it's 1/4 as land-efficient as farming.
+    //  That gives a maturation period of 8 months (double that for lifespan),
+    //  yielding 2 food per month.
+    //
+    //  That's enough to support 1 predator eating half of available prey (1
+    //  food/month, just like humans.)
     //
     //  Buildings and manufacture-
     AVG_UPDATE_GAP   = 50  ,  //  seconds between updates
@@ -138,8 +153,8 @@ public class GameConstants {
   static class Terrain extends Type {
     
     int terrainIndex = 0;
-    Type fixtures[] = new Type[0];
-    Float      weights [] = new Float     [0];
+    Type  fixtures[] = new Type [0];
+    Float weights [] = new Float[0];
     
     Terrain(String name, int index) {
       super("terrain_"+index, IS_TERRAIN);
@@ -151,8 +166,8 @@ public class GameConstants {
     
     void attachFixtures(Object... args) {
       Object split[][] = Visit.splitByModulus(args, 2);
-      fixtures = (Type[]) castArray(split[0], Type.class);
-      weights  = (Float     []) castArray(split[1], Float     .class);
+      fixtures = (Type []) castArray(split[0], Type .class);
+      weights  = (Float[]) castArray(split[1], Float.class);
     }
     
   }
@@ -161,12 +176,19 @@ public class GameConstants {
     JUNGLE = new Terrain("Jungle", 1),
     DESERT = new Terrain("Desert", 2),
     LAKE   = new Terrain("Lake"  , 3),
-    ALL_TERRAINS[] = TERRAINS_LIST.toArray(Terrain.class)
+    ALL_TERRAINS[] = TERRAINS_LIST.toArray(Terrain.class),
+    NO_HABITAT  [] = {}
   ;
   final static Type
     JUNGLE_TREE1 = new Type("fixture_j_tree1", IS_FIXTURE),
     DESERT_ROCK1 = new Type("fixture_d_rock1", IS_FIXTURE),
     DESERT_ROCK2 = new Type("fixture_d_rock2", IS_FIXTURE)
+  ;
+  final static Type
+    TAPIR   = new Type("animal_tapir" , IS_ANIMAL_WLK),
+    QUAIL   = new Type("animal_quail" , IS_ANIMAL_WLK),
+    JAGUAR  = new Type("animal_jaguar", IS_ANIMAL_WLK),
+    ALL_ANIMALS[] = { TAPIR, QUAIL, JAGUAR }
   ;
   static {
     JUNGLE.attachFixtures(JUNGLE_TREE1, 0.50f);
@@ -185,6 +207,18 @@ public class GameConstants {
     JUNGLE_TREE1.growRate = 0.5f;
     DESERT_ROCK1.wide = DESERT_ROCK1.high = 2;
     LAKE.blocks = true;
+    
+    TAPIR.name     = "Tapir";
+    TAPIR.habitats = new Terrain[] { JUNGLE, MEADOW };
+    TAPIR.predator = false;
+    
+    QUAIL.name     = "Quail";
+    QUAIL.habitats = new Terrain[] { MEADOW, DESERT };
+    QUAIL.predator = false;
+    
+    JAGUAR.name     = "Jaguar";
+    JAGUAR.habitats = new Terrain[] { JUNGLE };
+    JAGUAR.predator = true;
   }
   
   
@@ -219,7 +253,7 @@ public class GameConstants {
     COTTON     = new Good("Cotton"      , 75, 9 ),
     
     CASH       = new Good("Cash"        , 1 , 10),
-    NIGHTSOIL  = new Good("Nightsoil"   , 5 , 11),
+    SOIL       = new Good("Soil"        , 5 , 11),
     
     IS_ADMIN   = new Good("Is Admin"    , -1, 21),
     IS_MARKET  = new Good("Is Market"   , -1, 22),
@@ -403,7 +437,7 @@ public class GameConstants {
     SWEEPER.setDimensions(1, 1, 1);
     SWEEPER.setBuildMaterials(WOOD, 2, CLAY, 1);
     SWEEPER.setWorkerTypes(WORKER);
-    SWEEPER.produced = new Good[] { NIGHTSOIL };
+    SWEEPER.produced = new Good[] { SOIL };
     
     SCHOOL.name = "Public School";
     SCHOOL.tint = TINT_HEALTH_ED;
@@ -505,16 +539,22 @@ public class GameConstants {
     TEMPLE_QZ.setDimensions(6, 6, 3);
     TEMPLE_QZ.setBuildMaterials(ADOBE, 15, POTTERY, 5);
     TEMPLE_QZ.setWorkerTypes(PRIEST);
-    TEMPLE_QZ.maxWorkers = 1;
-    TEMPLE_QZ.maxHealth  = 100;
+    TEMPLE_QZ.maxWorkers      = 1;
+    TEMPLE_QZ.maxHealth       = 100;
+    TEMPLE_QZ.maxResidents    = 1;
+    TEMPLE_QZ.homeSocialClass = CLASS_NOBLE;
+    TEMPLE_QZ.features        = new Good[] { RELIGION };
     
     TEMPLE_XT.name = "Temple to Xipe Totec";
     TEMPLE_XT.tint = TINT_RELIGIOUS;
     TEMPLE_XT.setDimensions(6, 6, 3);
     TEMPLE_XT.setBuildMaterials(ADOBE, 15, POTTERY, 5);
     TEMPLE_XT.setWorkerTypes(PRIEST);
-    TEMPLE_XT.maxWorkers = 1;
-    TEMPLE_XT.maxHealth  = 100;
+    TEMPLE_XT.maxWorkers      = 1;
+    TEMPLE_XT.maxHealth       = 100;
+    TEMPLE_XT.maxResidents    = 1;
+    TEMPLE_XT.homeSocialClass = CLASS_NOBLE;
+    TEMPLE_XT.features        = new Good[] { RELIGION };
   }
   
   

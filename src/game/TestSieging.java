@@ -20,7 +20,7 @@ public class TestSieging extends Test {
     World   world = GameConstants.setupDefaultWorld();
     City    cityA = world.cities.atIndex(0);
     City    cityB = world.cities.atIndex(1);
-    CityMap map   = CityMapGenerator.generateTerrain(
+    CityMap map   = CityMapTerrain.generateTerrain(
       cityA, 50, MEADOW, JUNGLE
     );
     cityA.name = "Home City";
