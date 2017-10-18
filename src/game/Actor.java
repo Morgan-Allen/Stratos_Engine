@@ -462,6 +462,11 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   }
   
   
+  float growLevel() {
+    return Nums.min(1, ageYears() / AVG_MARRIED);
+  }
+  
+  
   boolean adult() {
     return true;
   }

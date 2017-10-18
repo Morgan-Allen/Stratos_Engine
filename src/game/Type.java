@@ -190,9 +190,9 @@ public class Type extends Index.Entry implements Session.Saveable {
   int sightRange  = AVG_SIGHT;
   int attackRange = AVG_RANGE;
   
-  Terrain habitats[]     = NO_HABITAT;
-  boolean predator       = false;
-  float   animalLifespan = AVG_ANIMAL_LIFE;
+  Terrain habitats[] = NO_HABITAT;
+  boolean predator   = false;
+  int     lifespan   = LIFESPAN_LENGTH;
   
   
   void initAsMigrant(Actor w) {

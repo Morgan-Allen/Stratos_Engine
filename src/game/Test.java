@@ -211,7 +211,14 @@ public class Test {
         hover   = I.getDataCursor(VIEW_NAME, false);
         pressed = I.getKeysPressed(VIEW_NAME);
         
-        if (cityView) above = map.above(hover.x, hover.y);
+        if (cityView) {
+          above = map.above(hover.x, hover.y);
+          
+          //  TODO:  Have actors register within nearby tiles themselves.
+          for (Actor a : map.walkers) {
+            if (a.at.x == hover.x && a.at.y == hover.y) above = a;
+          }
+        }
         else above = map.city.world.onMap(hover.x, hover.y);
         I.talkAbout = above;
         I.used60Frames = (frames++ % 60) == 0;

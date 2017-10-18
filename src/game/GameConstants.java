@@ -83,15 +83,17 @@ public class GameConstants {
     TILES_PER_GRAZER = 100 ,
     TILES_PER_HUNTER = 400 ,
     AVG_ANIMAL_YIELD = 8   ,
-    AVG_ANIMAL_LIFE  = MONTH_LENGTH * 8 * 2,
-    ANIMAL_PREG_TIME = AVG_ANIMAL_LIFE / 8,
+    ANIMAL_MATURES   = MONTH_LENGTH * 4,
+    GRAZER_LIFESPAN  = YEAR_LENGTH  * 2,
+    HUNTER_LIFESPAN  = YEAR_LENGTH  * 8,
+    ANIMAL_PREG_TIME = ANIMAL_MATURES / 2,
     AVG_BUTCHER_TIME = MONTH_LENGTH / (AVG_ANIMAL_YIELD * 2),
     //
-    //  If 1 animal is worth 4 food, and 4 of them fit within 10x10 tiles, then
-    //  if they 'ripen' within 1 month, that would be 16 units of food.
+    //  If 1 animal is worth 8 food, and 1 of them fit within 10x10 tiles, then
+    //  if they 'ripen' within 1 month, that would be 8 units of food.
     //
-    //  Slash that by a factor of 8, so it's 1/4 as land-efficient as farming.
-    //  That gives a maturation period of 8 months (double that for lifespan),
+    //  Slash that by a factor of 4, so it's 1/4 as land-efficient as farming.
+    //  That gives a maturation period of 4 months (double that for lifespan),
     //  yielding 2 food per month.
     //
     //  That's enough to support 1 predator eating half of available prey (1
@@ -219,6 +221,10 @@ public class GameConstants {
     JAGUAR.name     = "Jaguar";
     JAGUAR.habitats = new Terrain[] { JUNGLE };
     JAGUAR.predator = true;
+    
+    for (Type s : ALL_ANIMALS) {
+      s.lifespan = s.predator ? HUNTER_LIFESPAN : GRAZER_LIFESPAN;
+    }
   }
   
   

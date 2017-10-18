@@ -32,11 +32,14 @@ public class ActorAsAnimal extends Actor {
     */
   void beginNextBehaviour() {
     //
-    //  If you're seriously tired or hurt, but not hungry, find a place to rest:
+    //  Establish a few details first...
     float hurtRating = fatigue + injury;
     Tile rests = findGrazePoint();
+    job = null;
+    //
+    //  If you're seriously tired or hurt, but not hungry, find a place to rest:
     if (hurtRating > type.maxHealth / 2 && hunger < 1 && rests != null) {
-      embarkOnTarget(at(), 10, Task.JOB.RESTING, null);
+      embarkOnTarget(rests, 10, Task.JOB.RESTING, null);
     }
     //
     //  If you're hungry, look for food, either by grazing within your habitat
@@ -65,14 +68,20 @@ public class ActorAsAnimal extends Actor {
   
   Actor findPrey() {
     //
-    //  TODO:  This is pretty inefficient- you shouldn't be iterating over the
-    //  entire map!
+    //  TODO:  Try and sample a smaller number of targets.
     Pick <Actor> pick = new Pick();
+    
     for (Actor a : map.walkers) {
+      int category = a.type.category;
       if (a.type.predator) continue;
-      float dist = CityMap.distance(a.at(), at());
       
-      pick.compare(a, CityMap.distancePenalty(dist));
+      float dist = CityMap.distance(a.at(), at());
+      float rating = 1f * CityMap.distancePenalty(dist);
+      
+      if (category != Type.IS_ANIMAL_WLK) rating /= 2;
+      if (! a.adult()) rating /= 2;
+      
+      pick.compare(a, rating);
     }
     return pick.result();
   }
@@ -112,15 +121,32 @@ public class ActorAsAnimal extends Actor {
         beginAttack(prey, Task.JOB.HUNTING, null);
       }
       else {
-        hunger -= AVG_ANIMAL_YIELD * 1f / FOOD_UNIT_PER_HP;
+        float yield = meatYield(prey);
+        hunger -= yield * 1f / FOOD_UNIT_PER_HP;
       }
     }
+  }
+  
+  
+  static float meatYield(Actor prey) {
+    if (prey.adult()) return AVG_ANIMAL_YIELD;
+    return AVG_ANIMAL_YIELD * prey.growLevel();
   }
   
   
   
   /**  Regular updates and life-cycle:
     */
+  boolean adult() {
+    return ageSeconds > ANIMAL_MATURES;
+  }
+  
+  
+  float growLevel() {
+    return Nums.min(1, ageSeconds * 1f / ANIMAL_MATURES);
+  }
+  
+  
   void update() {
     super.update();
     
@@ -145,7 +171,7 @@ public class ActorAsAnimal extends Actor {
     super.updateAging();
     
     if (ageSeconds % MONTH_LENGTH == 0) {
-      if (ageSeconds > type.animalLifespan / 2 && pregnancy == 0) {
+      if (growLevel() == 1 && pregnancy == 0) {
         
         float idealPop = CityMapTerrain.idealPopulation(type, map);
         float actualPop = 0;
@@ -169,7 +195,7 @@ public class ActorAsAnimal extends Actor {
       }
     }
     
-    if (ageSeconds > type.animalLifespan) {
+    if (ageSeconds > type.lifespan) {
       setAsKilled("Old age");
     }
   }
