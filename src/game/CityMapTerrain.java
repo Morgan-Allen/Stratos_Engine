@@ -163,7 +163,7 @@ public class CityMapTerrain implements TileConstants {
   
   
   static Tile findGrazePoint(Type species, CityMap map) {
-    int x = SCAN_RES / 2, y = SCAN_RES / 2;
+    int x = SCAN_RES / 2, y = SCAN_RES / 2, QR = SCAN_RES / 4;
     
     Batch <Tile > points  = new Batch();
     Batch <Float> ratings = new Batch();
@@ -179,6 +179,11 @@ public class CityMapTerrain implements TileConstants {
     
     Tile point = (Tile) Rand.pickFrom(points, ratings);
     if (point == null) return null;
+    
+    point = map.tileAt(
+      Nums.clamp(point.x + Rand.index(QR * 2) - QR, map.size),
+      Nums.clamp(point.y + Rand.index(QR * 2) - QR, map.size)
+    );
     
     point = nearestOpenTile(point, map);
     return point;

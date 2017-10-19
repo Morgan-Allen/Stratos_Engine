@@ -46,8 +46,8 @@ public class TaskTrading extends Task {
     BuildingForTrade from, Trader goes, Tally <Good> taken
   ) {
     this.taken     = taken;
-    this.tradeFrom = from;
-    this.tradeGoes = goes;
+    this.tradeFrom = from ;
+    this.tradeGoes = goes ;
     this.homeCity  = from.map.city;
     return (TaskTrading) configTask(from, from, null, Task.JOB.TRADING, 0);
   }

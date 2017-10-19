@@ -139,8 +139,8 @@ public class ActorAsPerson extends Actor {
   /**  Handling sight-range:
     */
   void updateVision() {
-    float range = type.sightRange * (map.lightLevel() + 1f) / 2;
-    map.liftFog(at, range);
+    float range = type.sightRange * (map.fog.lightLevel() + 1f) / 2;
+    map.fog.liftFog(at, range);
   }
   
   

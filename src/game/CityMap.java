@@ -20,11 +20,9 @@ public class CityMap implements Session.Saveable {
   City city;
   int size, scanSize;
   Tile grid[][];
+  CityMapFog fog = new CityMapFog(this);
   
-  int time     =  0;
-  int dayState = -1;
-  
-  byte fogVals[][], oldVals[][];
+  int time = 0;
   
   List <Building> buildings = new List();
   List <Actor   > walkers   = new List();
@@ -55,11 +53,9 @@ public class CityMap implements Session.Saveable {
     for (Coord c : Visit.grid(0, 0, size, size, 1)) {
       grid[c.x][c.y].loadState(s);
     }
-    time     = s.loadInt();
-    dayState = s.loadInt();
+    fog.loadState(s);
     
-    s.loadByteArray(fogVals);
-    s.loadByteArray(oldVals);
+    time = s.loadInt();
     
     s.loadObjects(buildings);
     s.loadObjects(walkers  );
@@ -86,11 +82,9 @@ public class CityMap implements Session.Saveable {
     for (Coord c : Visit.grid(0, 0, size, size, 1)) {
       grid[c.x][c.y].saveState(s);
     }
-    s.saveInt(time    );
-    s.saveInt(dayState);
+    fog.saveState(s);
     
-    s.saveByteArray(fogVals);
-    s.saveByteArray(oldVals);
+    s.saveInt(time);
     
     s.saveObjects(buildings);
     s.saveObjects(walkers  );
@@ -120,9 +114,8 @@ public class CityMap implements Session.Saveable {
       t.x = c.x;
       t.y = c.y;
     }
-    this.fogVals = new byte[size][size];
-    this.oldVals = new byte[size][size];
     
+    fog.performSetup(size);
     city.assignMap(this);
   }
   
@@ -328,9 +321,8 @@ public class CityMap implements Session.Saveable {
     }
     
     time += 1;
-    dayState = WorldCalendar.dayState(time);
     
-    updateFog();
+    fog.updateFog();
     updateGrowth();
   }
   
@@ -408,58 +400,6 @@ public class CityMap implements Session.Saveable {
     
     scan.numTiles += 1;
     scan.densities[tile.x / SCAN_RES][tile.y / SCAN_RES] += 1;
-  }
-  
-  
-  
-  /**  Fog of war:
-    */
-  void liftFog(Tile around, float range) {
-    if (! GameSettings.toggleFog) {
-      return;
-    }
-    Box2D area = new Box2D(around.x, around.y, 0, 0);
-    area.expandBy(Nums.round(range, 1, true));
-    
-    for (Coord c : Visit.grid(area)) {
-      Tile t = tileAt(c.x, c.y);
-      float distance = distance(t, around);
-      if (distance > range) continue;
-      fogVals[c.x][c.y] = 100;
-    }
-  }
-  
-  
-  void updateFog() {
-    if (! GameSettings.toggleFog) {
-      return;
-    }
-    for (Coord c : Visit.grid(0, 0, size, size, 1)) {
-      oldVals[c.x][c.y] = fogVals[c.x][c.y];
-      fogVals[c.x][c.y] = 0;
-    }
-  }
-  
-  
-  float sightLevel(Tile t) {
-    return t == null ? 0 : (oldVals[t.x][t.y] / 100f);
-  }
-  
-  
-  boolean day() {
-    return dayState == STATE_LIGHT;
-  }
-  
-  
-  boolean night() {
-    return dayState == STATE_DARKNESS;
-  }
-  
-  
-  float lightLevel() {
-    if (day  ()) return 1;
-    if (night()) return 0;
-    return 0.5f;
   }
 }
 

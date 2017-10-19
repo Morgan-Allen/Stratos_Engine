@@ -55,7 +55,7 @@ public class ActorPathSearch extends Search <Tile> {
   protected float cost(Tile prior, Tile spot) {
     float dist = distance(prior, spot);
     if (spot.paved) dist *= 0.75f;
-    if (stealthy  ) dist += map.sightLevel(spot);
+    if (stealthy  ) dist += map.fog.sightLevel(spot);
     return dist;
   }
   
