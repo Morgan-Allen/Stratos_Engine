@@ -461,7 +461,7 @@ public class Test {
       int x = hover.x, y = hover.y;
       if (pressed.includes('s') && builds.canPlace(map, x, y)) {
         builds.enterMap(map, x, y, 1);
-        placing = null;
+        placing = (Building) builds.type.generate();
       }
       
       report.append("\n  (X) cancel");

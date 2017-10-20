@@ -30,6 +30,7 @@ public class Task implements Session.Saveable {
     MILITARY ,
     FORAGING ,
     HUNTING  ,
+    EXPLORING,
     COMBAT   ,
   };
   

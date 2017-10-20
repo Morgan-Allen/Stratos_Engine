@@ -551,10 +551,10 @@ public final class Session {
     *  required.
     */
   public DataOutputStream output() { return out; }
-  public DataInputStream  input()  { return in; }
+  public DataInputStream  input () { return in ; }
   
   
-  public int bytesIn() { return bytesIn; }
+  public int bytesIn () { return bytesIn ; }
   public int bytesOut() { return bytesOut; }
   
   

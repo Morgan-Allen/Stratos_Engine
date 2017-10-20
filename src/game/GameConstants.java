@@ -80,6 +80,7 @@ public class GameConstants {
     //    That gives you ~8 units of food per month.
     //    Every citizen consumes 2 units of food per 2 months.  So that's just
     //    enough for 8 citizens.
+    //
     TILES_PER_GRAZER = 100 ,
     TILES_PER_HUNTER = 400 ,
     AVG_ANIMAL_YIELD = 8   ,
@@ -135,7 +136,7 @@ public class GameConstants {
     AVG_SERVICE_GIVE = 10  , //  value of education, diversion, etc.
     AVG_MAX_VISITORS = 4   ,
     //
-    //  Military and combat-
+    //  Military, recon and combat-
     AVG_ARMY_SIZE    = 16  ,
     AVG_RANKS        = 4   ,
     AVG_FILE         = 4   ,
@@ -143,6 +144,7 @@ public class GameConstants {
     AVG_DEFEND       = 2   ,
     AVG_SIGHT        = 6   ,
     AVG_RANGE        = 1   ,
+    MAX_EXPLORE_DIST = 200 ,
     //
     //  Trade and migration-
     TRADE_DIST_TIME  = 50  ,
@@ -187,9 +189,9 @@ public class GameConstants {
     DESERT_ROCK2 = new Type("fixture_d_rock2", IS_FIXTURE)
   ;
   final static Type
-    TAPIR   = new Type("animal_tapir" , IS_ANIMAL_WLK),
-    QUAIL   = new Type("animal_quail" , IS_ANIMAL_WLK),
-    JAGUAR  = new Type("animal_jaguar", IS_ANIMAL_WLK),
+    TAPIR   = new Type("animal_tapir" , IS_ANIMAL_ACT),
+    QUAIL   = new Type("animal_quail" , IS_ANIMAL_ACT),
+    JAGUAR  = new Type("animal_jaguar", IS_ANIMAL_ACT),
     ALL_ANIMALS[] = { TAPIR, QUAIL, JAGUAR }
   ;
   static {
@@ -316,16 +318,17 @@ public class GameConstants {
   final static WalkerType
     NO_WALKERS[] = new WalkerType[0],
     
-    VAGRANT  = new WalkerType("type_vagrant" , IS_PERSON_WLK, CLASS_COMMON),
-    CHILD    = new WalkerType("type_child"   , IS_PERSON_WLK, CLASS_COMMON),
-    CITIZEN  = new WalkerType("type_citizen" , IS_PERSON_WLK, CLASS_COMMON),
-    SERVANT  = new WalkerType("type_servant" , IS_PERSON_WLK, CLASS_SLAVE ),
-    NOBLE    = new WalkerType("type_noble"   , IS_PERSON_WLK, CLASS_NOBLE ),
-    WORKER   = new WalkerType("type_worker"  , IS_PERSON_WLK, CLASS_COMMON),
-    MERCHANT = new WalkerType("type_merchant", IS_PERSON_WLK, CLASS_TRADER),
-    PORTERS  = new WalkerType("type_porters" , IS_PERSON_WLK, CLASS_SLAVE ),
-    SOLDIER  = new WalkerType("type_soldier" , IS_PERSON_WLK, CLASS_NOBLE ),
-    PRIEST   = new WalkerType("type_priest"  , IS_PERSON_WLK, CLASS_NOBLE )
+    VAGRANT  = new WalkerType("type_vagrant" , IS_PERSON_ACT, CLASS_COMMON),
+    CHILD    = new WalkerType("type_child"   , IS_PERSON_ACT, CLASS_COMMON),
+    CITIZEN  = new WalkerType("type_citizen" , IS_PERSON_ACT, CLASS_COMMON),
+    SERVANT  = new WalkerType("type_servant" , IS_PERSON_ACT, CLASS_SLAVE ),
+    NOBLE    = new WalkerType("type_noble"   , IS_PERSON_ACT, CLASS_NOBLE ),
+    WORKER   = new WalkerType("type_worker"  , IS_PERSON_ACT, CLASS_COMMON),
+    MERCHANT = new WalkerType("type_merchant", IS_PERSON_ACT, CLASS_TRADER),
+    PORTERS  = new WalkerType("type_porters" , IS_PERSON_ACT, CLASS_SLAVE ),
+    HUNTER   = new WalkerType("type_hunter"  , IS_PERSON_ACT, CLASS_NOBLE ),
+    SOLDIER  = new WalkerType("type_soldier" , IS_PERSON_ACT, CLASS_NOBLE ),
+    PRIEST   = new WalkerType("type_priest"  , IS_PERSON_ACT, CLASS_NOBLE )
   ;
   static {
     VAGRANT .name = "Vagrant" ;
@@ -339,8 +342,13 @@ public class GameConstants {
     SOLDIER .name = "Soldier" ;
     PRIEST  .name = "Priest"  ;
     
+    HUNTER .attackScore = 4;
+    HUNTER .defendScore = 3;
+    HUNTER .attackRange = 6;
+    
     SOLDIER.attackScore = 5;
     SOLDIER.defendScore = 4;
+    SOLDIER.maxHealth   = 6;
   }
   
   
@@ -386,6 +394,7 @@ public class GameConstants {
     COLLECTOR     = new BuildType("type_collector"    , IS_COLLECT_BLD),
     ECONOMIC_BUILDINGS[] = { MARKET, PORTER_HOUSE, COLLECTOR },
     
+    HUNTER_LODGE  = new BuildType("type_hunter_lodge" , IS_HUNTS_BLD  ),
     GARRISON      = new BuildType("type_garrison"     , IS_ARMY_BLD   ),
     MILITARY_BUILDINGS[] = { GARRISON },
     
@@ -546,6 +555,14 @@ public class GameConstants {
     
     //
     //  Military structures:
+    HUNTER_LODGE.name = "Hunter Lodge";
+    HUNTER_LODGE.tint = TINT_MILITARY;
+    HUNTER_LODGE.setDimensions(4, 4, 1);
+    HUNTER_LODGE.setBuildMaterials(WOOD, 10, COTTON, 5);
+    HUNTER_LODGE.setWorkerTypes(HUNTER);
+    HUNTER_LODGE.maxWorkers = 2;
+    HUNTER_LODGE.maxHealth  = 100;
+    
     GARRISON.name = "Garrison";
     GARRISON.tint = TINT_MILITARY;
     GARRISON.setDimensions(6, 6, 2);

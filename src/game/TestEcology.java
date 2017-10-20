@@ -11,7 +11,7 @@ public class TestEcology extends Test {
   
   
   public static void main(String args[]) {
-    testAnimals(false);
+    testAnimals(true);
   }
   
   
@@ -22,6 +22,10 @@ public class TestEcology extends Test {
     Type species[] = { QUAIL, JAGUAR };
     Tally <Type> realPops  = new Tally();
     Tally <Type> popLevels = new Tally();
+    
+    Building lodge = (Building) HUNTER_LODGE.generate();
+    lodge.enterMap(map, 4, 4, 1);
+    Test.fillWorkVacancies(lodge);
     
     CityMapTerrain.populateAnimals(map, species);
     
