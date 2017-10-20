@@ -390,8 +390,24 @@ public class GameConstants {
     MILITARY_BUILDINGS[] = { GARRISON },
     
     TEMPLE_QZ     = new BuildType("type_temple_qz"    , IS_FAITH_BLD  ),
+    TEMPLE_TZ     = new BuildType("type_temple_tz"    , IS_FAITH_BLD  ),
+    TEMPLE_HU     = new BuildType("type_temple_hu"    , IS_FAITH_BLD  ),
+    TEMPLE_TL     = new BuildType("type_temple_tl"    , IS_FAITH_BLD  ),
+    TEMPLE_MI     = new BuildType("type_temple_mi"    , IS_FAITH_BLD  ),
     TEMPLE_XT     = new BuildType("type_temple_xt"    , IS_FAITH_BLD  ),
-    RELIGIOUS_BUILDINGS[] = { TEMPLE_QZ, TEMPLE_XT }
+    
+    SHRINE_OMC    = new BuildType("type_shrine_omc"   , IS_FAITH_BLD  ),
+    SHRINE_OMT    = new BuildType("type_shrine_omt"   , IS_FAITH_BLD  ),
+    
+    ALL_TEMPLES[] = {
+      TEMPLE_QZ, TEMPLE_TZ, TEMPLE_HU, TEMPLE_TL, TEMPLE_MI, TEMPLE_XT
+    },
+    ALL_SHRINES[] = {
+      SHRINE_OMC, SHRINE_OMT
+    },
+    RELIGIOUS_BUILDINGS[] = (BuildType[]) Visit.compose(
+      BuildType.class, ALL_TEMPLES, ALL_SHRINES
+    )
   ;
   static {
     //
@@ -540,27 +556,80 @@ public class GameConstants {
     
     //
     //  Religious structures:
-    TEMPLE_QZ.name = "Temple to Quetzalcoatl";
-    TEMPLE_QZ.tint = TINT_RELIGIOUS;
-    TEMPLE_QZ.setDimensions(6, 6, 3);
-    TEMPLE_QZ.setBuildMaterials(ADOBE, 15, POTTERY, 5);
-    TEMPLE_QZ.setWorkerTypes(PRIEST);
-    TEMPLE_QZ.maxWorkers      = 1;
-    TEMPLE_QZ.maxHealth       = 100;
-    TEMPLE_QZ.maxResidents    = 1;
-    TEMPLE_QZ.homeSocialClass = CLASS_NOBLE;
-    TEMPLE_QZ.features        = new Good[] { RELIGION };
+    //
+    //  Day/Order and Night/Freedom : Qz / Tz
+    TEMPLE_QZ .name = "Temple to Quetzalcoatl";
+    TEMPLE_TZ .name = "Temple to Tezcatlipoca";
+    //
+    //  Fire and Water: Hu / Tl
+    TEMPLE_HU .name = "Temple to Huitzilipochtli";
+    TEMPLE_TL .name = "Temple to Tlaloc";
+    //
+    //  Life and Death: Om / Mi
+    TEMPLE_MI .name = "Temple to Mictecacehuatl";
+    SHRINE_OMC.name = "Shrine to Omecihuatl";
+    SHRINE_OMT.name = "Shrine to Ometicuhtli";
+    //
+    //  Neutrality/balance: Xt
+    TEMPLE_XT .name = "Temple to Xipe Totec";
     
-    TEMPLE_XT.name = "Temple to Xipe Totec";
-    TEMPLE_XT.tint = TINT_RELIGIOUS;
-    TEMPLE_XT.setDimensions(6, 6, 3);
-    TEMPLE_XT.setBuildMaterials(ADOBE, 15, POTTERY, 5);
-    TEMPLE_XT.setWorkerTypes(PRIEST);
-    TEMPLE_XT.maxWorkers      = 1;
-    TEMPLE_XT.maxHealth       = 100;
-    TEMPLE_XT.maxResidents    = 1;
-    TEMPLE_XT.homeSocialClass = CLASS_NOBLE;
-    TEMPLE_XT.features        = new Good[] { RELIGION };
+    for (Type t : ALL_TEMPLES) {
+      t.tint = TINT_RELIGIOUS;
+      t.setDimensions(6, 6, 3);
+      t.setBuildMaterials(ADOBE, 15, POTTERY, 5);
+      t.setWorkerTypes(PRIEST);
+      t.maxWorkers      = 1;
+      t.maxHealth       = 100;
+      t.maxResidents    = 1;
+      t.homeSocialClass = CLASS_NOBLE;
+      t.features        = new Good[] { RELIGION };
+    }
+    //
+    //  TODO:  Possibly, later-
+    //  Note:  I'm doing a certain amount of shoe-horning here for the sake of
+    //         balance/concision.  Bear with me.
+    //         These might also work as 'upgrades' for a particular temple...
+    //
+    //  Associates of Quetzalcoatl:
+    //    Patecatl, god of medicine and healing
+    //    Yacetecuhtli, god of merchants and travel
+    //    Ehecatl, god of winds
+    //
+    //  Associates of Tezcatlipoca:
+    //    Itztli, god of obsidian
+    //    Huehuecoyotl, festive trickster
+    //    Tlazolteotl, sin and confession
+    //
+    //  Associates of Huitzilipochtli:
+    //    Tonatiuh, god of the sun
+    //    Mixcoatl, war and hunting
+    //    Xiuhtecuhtli/Chantico, hearth, lordship and calendar
+    //
+    //  Associates of Tlaloc:
+    //    Chalchiutlicue, lakes and rivers
+    //    Xochiquetzal, nature and beauty
+    //    Cipactli/Tlaltecuhtli, caves and aquatic monsters
+    //
+    //  Associates of Mictecacehuatl/Mictlantecuhtli:
+    //    Xolotl, guide to the dead
+    //    Coyolxauhqui/Itzapapalotl, moon, stars and eclipses
+    //    Toci-Quilaztli, childbirth and vengeance
+    //
+    //  Associates of Xipe Totec:
+    //    Centeotl/Xilonen, god/dess of maize
+    //    Balance between other Gods counts as bonus for XT.
+    
+    for (Type t : ALL_SHRINES) {
+      t.tint = TINT_RELIGIOUS;
+      if (t == SHRINE_OMC || t == SHRINE_OMT) {
+        t.setDimensions(2, 2, 1);
+        t.setBuildMaterials(ADOBE, 8);
+      }
+      else {
+        t.setDimensions(1, 1, 1);
+        t.setBuildMaterials(ADOBE, 2);
+      }
+    }
   }
   
   
