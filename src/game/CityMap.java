@@ -16,6 +16,8 @@ public class CityMap implements Session.Saveable {
     */
   final static int SCAN_RES = 16;
   
+  final CityMapSettings settings = new CityMapSettings();
+  
   City city;
   int size, scanSize;
   Tile grid[][];
@@ -47,6 +49,8 @@ public class CityMap implements Session.Saveable {
   public CityMap(Session s) throws Exception {
     s.cacheInstance(this);
     
+    settings.loadState(s);
+    
     city = (City) s.loadObject();
     performSetup(s.loadInt());
     for (Coord c : Visit.grid(0, 0, size, size, 1)) {
@@ -76,6 +80,8 @@ public class CityMap implements Session.Saveable {
   
   public void saveState(Session s) throws Exception {
     
+    settings.saveState(s);
+    
     s.saveObject(city);
     s.saveInt(size);
     for (Coord c : Visit.grid(0, 0, size, size, 1)) {
@@ -104,6 +110,11 @@ public class CityMap implements Session.Saveable {
   
   
   void performSetup(int size) {
+    
+    int s = 1;
+    while (s < size) s *= 2;
+    size = s;
+    
     this.size     = size;
     this.scanSize = Nums.round(size * 1f / SCAN_RES, 1, true);
     

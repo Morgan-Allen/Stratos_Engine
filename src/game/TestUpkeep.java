@@ -14,9 +14,9 @@ public class TestUpkeep extends Test {
   }
   
   static void testUpkeep(boolean graphics) {
-    GameSettings.toggleFog = false;
     
     CityMap map = setupTestCity(25);
+    map.settings.toggleFog = false;
     
     BuildingForTrade post = (BuildingForTrade) PORTER_HOUSE.generate();
     post.enterMap(map, 2, 2, 1);

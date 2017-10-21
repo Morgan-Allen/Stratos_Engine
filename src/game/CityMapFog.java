@@ -72,9 +72,10 @@ public class CityMapFog {
   /**  Regular updates-
     */
   void liftFog(Tile around, float range) {
-    if (! GameSettings.toggleFog) {
+    if (! map.settings.toggleFog) {
       return;
     }
+    
     Box2D area = new Box2D(around.x, around.y, 0, 0);
     area.expandBy(Nums.round(range, 1, true));
     
@@ -90,7 +91,7 @@ public class CityMapFog {
   void updateFog() {
     dayState = WorldCalendar.dayState(map.time);
     
-    if (! GameSettings.toggleFog) {
+    if (! map.settings.toggleFog) {
       return;
     }
     for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {

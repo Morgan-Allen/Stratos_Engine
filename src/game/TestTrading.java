@@ -14,12 +14,12 @@ public class TestTrading extends Test {
   }
   
   static void testTrading(boolean graphics) {
-    GameSettings.toggleFog = false;
     
     World   world = GameConstants.setupDefaultWorld();
     City    cityA = world.cities.atIndex(0);
     City    cityB = world.cities.atIndex(1);
     CityMap map   = new CityMap(cityA);
+    map.settings.toggleFog = false;
     cityA.name = "(Home City)";
     cityB.name = "(Away City)";
     

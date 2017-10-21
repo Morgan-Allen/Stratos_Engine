@@ -14,8 +14,7 @@ public class TestMilitary extends Test {
   }
   
   static void testMilitary(boolean graphics) {
-    GameSettings.toggleFog = false;
-
+    
     World   world = GameConstants.setupDefaultWorld();
     City    cityA = world.cities.atIndex(0);
     City    cityB = world.cities.atIndex(1);
@@ -24,6 +23,7 @@ public class TestMilitary extends Test {
     );
     cityA.name = "Home City";
     cityB.name = "Away City";
+    map.settings.toggleFog = false;
     
     City.setupRoute(cityA, cityB, 1);
     City.setRelations(cityA, City.RELATION.ENEMY, cityB, City.RELATION.ENEMY);

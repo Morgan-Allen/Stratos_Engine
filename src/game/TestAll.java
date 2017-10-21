@@ -17,6 +17,7 @@ public class TestAll {
     TestGathering.testGathering(false);
     TestTrading  .testTrading  (false);
     TestUpkeep   .testUpkeep   (false);
+    TestExploring.testExploring(false);
     
     long taken = System.currentTimeMillis() - init;
     

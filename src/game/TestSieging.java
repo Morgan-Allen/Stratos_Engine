@@ -15,14 +15,14 @@ public class TestSieging extends Test {
   
   
   static void testSieging(boolean graphics) {
-    GameSettings.toggleFog = false;
-
+    
     World   world = GameConstants.setupDefaultWorld();
     City    cityA = world.cities.atIndex(0);
     City    cityB = world.cities.atIndex(1);
     CityMap map   = CityMapTerrain.generateTerrain(
       cityA, 50, MEADOW, JUNGLE
     );
+    map.settings.toggleFog = false;
     cityA.name = "Home City";
     cityB.name = "Away City";
     

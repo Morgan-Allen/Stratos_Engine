@@ -89,9 +89,7 @@ public class ActorAsPerson extends Actor {
   /**  Handling hunger, injury, healing and eating, etc:
     */
   void update() {
-    super.update();
-    
-    hunger += GameSettings.toggleHunger ? (1f / STARVE_INTERVAL ) : 0;
+    hunger += map.settings.toggleHunger ? (1f / STARVE_INTERVAL ) : 0;
     
     if (jobType() == JOB.RESTING) {
       float rests = 1f / FATIGUE_REGEN;
@@ -101,10 +99,12 @@ public class ActorAsPerson extends Actor {
       injury  = Nums.max(0, injury  - heals);
     }
     else {
-      fatigue += GameSettings.toggleFatigue ? (1f / FATIGUE_INTERVAL) : 0;
+      fatigue += map.settings.toggleFatigue ? (1f / FATIGUE_INTERVAL) : 0;
       float heals = 0.5f / HEALTH_REGEN;
       injury = Nums.max(0, injury - heals);
     }
+    
+    super.update();
   }
   
   
