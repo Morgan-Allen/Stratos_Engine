@@ -15,11 +15,10 @@ public class CityMapFog {
     */
   CityMap map;
   
-  int dayState = -1;
+  int  dayState = -1;
   byte fogVals[][];
   byte oldVals[][];
-  byte maxVals[][];
-  int mipMap[][][];
+  int  maxVals[][][];
   
   
   
@@ -32,9 +31,8 @@ public class CityMapFog {
     dayState = s.loadInt();
     s.loadByteArray(fogVals);
     s.loadByteArray(oldVals);
-    s.loadByteArray(maxVals);
     
-    for (int[][] level : mipMap) {
+    for (int[][] level : maxVals) {
       for (Coord c : Visit.grid(0, 0, level.length, level.length, 1)) {
         level[c.x][c.y] = s.loadInt();
       }
@@ -46,9 +44,8 @@ public class CityMapFog {
     s.saveInt(dayState);
     s.saveByteArray(fogVals);
     s.saveByteArray(oldVals);
-    s.saveByteArray(maxVals);
     
-    for (int[][] level : mipMap) {
+    for (int[][] level : maxVals) {
       for (Coord c : Visit.grid(0, 0, level.length, level.length, 1)) {
         s.saveInt(level[c.x][c.y]);
       }
@@ -59,15 +56,15 @@ public class CityMapFog {
   void performSetup(int size) {
     this.fogVals = new byte[size][size];
     this.oldVals = new byte[size][size];
-    this.maxVals = new byte[size][size];
     
     Batch <int[][]> levels = new Batch();
     int span = size;
-    while ((span = span / 4) > 1) {
+    while (span > 1) {
       int level[][] = new int[span][span];
       levels.add(level);
+      span = Nums.round(span / 4f, 1, true);
     }
-    this.mipMap = (int[][][]) levels.toArray(int[][].class);
+    this.maxVals = (int[][][]) levels.toArray(int[][].class);
   }
   
   
@@ -99,21 +96,20 @@ public class CityMapFog {
     for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
       byte val = oldVals[c.x][c.y] = fogVals[c.x][c.y];
       fogVals[c.x][c.y] = 0;
-      byte max = maxVals[c.x][c.y];
+      int max = maxVals[0][c.x][c.y];
       if (val > max) {
-        maxVals[c.x][c.y] = max;
         incMipVal(c.x, c.y, val - max);
       }
     }
   }
   
   
-  void incMipVal(int x, int y, int inc) {
+  private void incMipVal(int x, int y, int inc) {
     int l = 0;
-    while (l < mipMap.length) {
+    while (l < maxVals.length) {
+      maxVals[l][x][y] += inc;
       x /= 4;
       y /= 4;
-      mipMap[l][x][y] += inc;
       l += 1;
     }
   }
@@ -123,24 +119,41 @@ public class CityMapFog {
   /**  Exploration-related queries:
     */
   Tile pickRandomFogPoint(Element near) {
+    
+    boolean report = near.reports();
+    if (report) I.say("\nGETTING TILE TO LOOK AT...");
+    
     Tile from = near.at();
-    int res = 1 << (4 * mipMap.length);
+    int res = (int) Nums.pow(4, maxVals.length - 1);
     Coord mip = new Coord(0, 0);
     
-    for (int l = mipMap.length; l-- > 0;) {
-      int level[][] = mipMap[l], side = Nums.min(4, level.length);
+    for (int l = maxVals.length; l-- > 0;) {
+      if (report) I.say("  Current level: "+l);
       
+      int level[][] = maxVals[l];
+      int sideX = Nums.min(4, level.length - mip.x);
+      int sideY = Nums.min(4, level.length - mip.y);
+      int maxSum = res * res * 100;
       Pick <Coord> pick = new Pick(0);
-      for (Coord c : Visit.grid(mip.x, mip.y, side, side, 1)) {
-        float rating = 1 - (level[c.x][c.y] * 1f / (res * res)), dist = 0;
+      
+      for (Coord c : Visit.grid(mip.x, mip.y, sideX, sideY, 1)) {
+        float rating = 1 - (level[c.x][c.y] * 1f / maxSum), dist = 0;
         dist += Nums.abs(from.x - ((c.x + 0.5f) * res));
         dist += Nums.abs(from.y - ((c.y + 0.5f) * res));
-        pick.compare(c, rating * CityMap.distancePenalty(dist) * Rand.num());
+        rating *= res * Rand.num() / (dist + res);
+        pick.compare(new Coord(c), rating);
+        
+        if (report) I.say("    "+c+" -> "+rating);
       }
       
-      if (pick.empty()) return null;
+      if (pick.empty()) {
+        if (report) I.say("    No result found!");
+        return null;
+      }
       
       mip.setTo(pick.result());
+      if (report) I.say("    Delving in at: "+mip);
+      
       if (l == 0) {
         break;
       }
@@ -163,7 +176,7 @@ public class CityMapFog {
     for (Coord c : Visit.grid(minX, minY, range * 2, range * 2, 1)) {
       Tile t = map.tileAt(c.x, c.y);
       float dist = CityMap.distance(from, t);
-      if (dist > range || maxVals[t.x][t.y] != 0) continue;
+      if (dist > range || maxVals[0][t.x][t.y] != 0) continue;
       pick.compare(t, 0 - dist);
     }
     
@@ -176,6 +189,11 @@ public class CityMapFog {
     */
   float sightLevel(Tile t) {
     return t == null ? 0 : (oldVals[t.x][t.y] / 100f);
+  }
+  
+  
+  float maxSightLevel(Tile t) {
+    return t == null ? 0 : (maxVals[0][t.x][t.y] / 100f);
   }
   
   

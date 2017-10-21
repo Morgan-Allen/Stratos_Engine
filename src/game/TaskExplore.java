@@ -39,7 +39,9 @@ public class TaskExplore extends Task {
   TaskExplore configExploration() {
     CityMap map  = actor.map;
     Tile    goes = map.fog.pickRandomFogPoint(actor);
-    if (goes == null || map.blocked(goes.x, goes.y)) return null;
+    if (goes == null) return null;
+    goes = CityMapTerrain.nearestOpenTile(goes, map);
+    if (goes == null) return null;
     
     totalDist += CityMap.distance(actor.at(), goes);
     return (TaskExplore) configTask(null, null, goes, JOB.EXPLORING, 0);
@@ -49,6 +51,9 @@ public class TaskExplore extends Task {
   protected void onTarget(Target target) {
     CityMap map = actor.map;
     Tile goes = map.fog.findNearbyFogPoint(actor, actor.type.sightRange + 2);
+    if (goes == null) return;
+    goes = CityMapTerrain.nearestOpenTile(goes, map);
+    if (goes == null) return;
     
     if (goes != null && totalDist < MAX_EXPLORE_DIST) {
       totalDist += CityMap.distance(actor.at(), goes);

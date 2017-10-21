@@ -208,9 +208,11 @@ public class Actor extends Element implements Session.Saveable, Journeys {
       //
       //  Otherwise, close along the path:
       else {
+        
         task.pathIndex = Nums.clamp(task.pathIndex + 1, task.path.length);
         Tile ahead = task.path[task.pathIndex];
         this.at = ahead;
+        
         if (inside != null) setInside(inside, false);
       }
     }
@@ -495,6 +497,12 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   public String toString() {
     String from = homeCity == null ? "" : " ("+homeCity.name+")";
     return type.name+" "+ID+from;
+  }
+  
+  
+  public String jobDesc() {
+    if (job == null) return "Idle";
+    return job.toString();
   }
 }
 

@@ -79,6 +79,9 @@ public class Test {
   
   /**  Graphical display and loop-execution:
     */
+  final static int FOG_SCALE[] = new int[10];
+  static { for (int i = 10; i-- > 0;) FOG_SCALE[i] = colour(0, 0, 0, i); }
+  
   final static String
     VIEW_NAME = "Tlatoani";
   final static BuildType BUILD_MENUS[][] = {
@@ -99,6 +102,7 @@ public class Test {
   ;
   
   static int[][]  graphic   = null;
+  static int[][]  fogLayer  = null;
   static int      frames    = 0   ;
   static boolean  cityView  = true;
   static boolean  paused    = false;
@@ -113,7 +117,8 @@ public class Test {
   
   static void configGraphic(int w, int h) {
     if (graphic == null || graphic.length != w || graphic[0].length != h) {
-      graphic = new int[w][h];
+      graphic  = new int[w][h];
+      fogLayer = new int[w][h];
     }
   }
   
@@ -180,6 +185,18 @@ public class Test {
   }
   
   
+  private static void updateCityFogLayer(CityMap map) {
+    for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
+      Tile t = map.tileAt(c.x, c.y);
+      float sight = 0;
+      sight += map.fog.sightLevel(t);
+      sight += map.fog.maxSightLevel(t);
+      float fog = 1 - (sight / 2);
+      fogLayer[c.x][c.y] = FOG_SCALE[Nums.clamp((int) (fog * 10), 10)];
+    }
+  }
+  
+  
   private static void updateWorldMapView(CityMap map) {
     World world = map.city.world;
     configGraphic(world.mapWide, world.mapHigh);
@@ -205,9 +222,15 @@ public class Test {
     while (true) {
       
       if (graphics) {
-        if (cityView) updateCityMapView (map);
-        else          updateWorldMapView(map);
-        I.present(graphic, VIEW_NAME, 400, 400);
+        if (cityView) {
+          updateCityMapView(map);
+          updateCityFogLayer(map);
+          I.present(VIEW_NAME, 400, 400, graphic, fogLayer);
+        }
+        else {
+          updateWorldMapView(map);
+          I.present(VIEW_NAME, 400, 400, graphic);
+        }
         hover   = I.getDataCursor(VIEW_NAME, false);
         pressed = I.getKeysPressed(VIEW_NAME);
         
@@ -329,7 +352,16 @@ public class Test {
   
   private static String reportFor(Element e) {
     StringBuffer report = new StringBuffer(""+e+"\n");
-    report.append("\n  Build level: "+I.percent(e.buildLevel));
+    
+    if (e instanceof Actor) {
+      Actor a = (Actor) e;
+      report.append("\n  Growth: "+I.percent(a.growLevel()));
+      report.append("\n  Task: "+a.jobDesc());
+    }
+    else {
+      report.append("\n  Build level: "+I.percent(e.buildLevel));
+    }
+    
     return report.toString();
   }
   
@@ -341,21 +373,21 @@ public class Test {
     if (b.workers.size() > 0) {
       report.append("\nWorkers:");
       for (Actor w : b.workers) {
-        report.append("\n  "+w+" ("+w.jobType()+")");
+        report.append("\n  "+w+" ("+w.jobDesc()+")");
       }
     }
     
     if (b.residents.size() > 0) {
       report.append("\nResidents:");
       for (Actor w : b.residents) {
-        report.append("\n  "+w+" ("+w.jobType()+")");
+        report.append("\n  "+w+" ("+w.jobDesc()+")");
       }
     }
     
     if (b.visitors.size() > 0) {
       report.append("\nVisitors:");
       for (Actor w : b.visitors) {
-        report.append("\n  "+w+" ("+w.jobType()+")");
+        report.append("\n  "+w+" ("+w.jobDesc()+")");
       }
     }
     

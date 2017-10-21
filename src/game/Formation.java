@@ -266,7 +266,7 @@ public class Formation implements
     City CA = a.homeCity, CB = b.homeCity;
     if (CA == null) CA = map.city;
     if (CB == null) CB = map.city;
-    if (CA == CB) return false;
+    if (CA == CB  ) return false;
     RELATION r = CA.relations.get(CB);
     if (r == RELATION.ENEMY) return true;
     return false;

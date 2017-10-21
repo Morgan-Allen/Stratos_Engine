@@ -155,6 +155,11 @@ public class Element implements Session.Saveable, Target {
   
   /**  Graphical, debug and interface methods-
     */
+  protected boolean reports() {
+    return I.talkAbout == this;
+  }
+  
+  
   public String toString() {
     return type.name;
   }

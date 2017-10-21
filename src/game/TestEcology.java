@@ -35,12 +35,12 @@ public class TestEcology extends Test {
     I.say("\nTOTAL ECOLOGY RUN TIME: "+RUN_TIME);
     
     while(map.time < RUN_TIME || graphics) {
-      boolean popsOkay = true;
       
       //  We want to be sure that populations remain relatively stable over
       //  time, so we check whether actual populations are within a certain
       //  range compared to their 'ideal' levels.
       
+      boolean popsOkay = true;
       for (Type s : species) {
         float
           idealPop = CityMapTerrain.idealPopulation(s, map),

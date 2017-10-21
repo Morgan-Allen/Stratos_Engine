@@ -238,7 +238,8 @@ public class Building extends Element implements Session.Saveable, Employer {
   
   
   protected int maxResidents(int socialClass) {
-    if (type.homeSocialClass != socialClass) return 0;
+    //  TODO:  Restore this later once you have multiple housing types...
+    //if (type.homeSocialClass != socialClass) return 0;
     return type.maxResidents;
   }
   

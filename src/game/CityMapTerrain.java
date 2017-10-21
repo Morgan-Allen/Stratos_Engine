@@ -130,8 +130,10 @@ public class CityMapTerrain implements TileConstants {
       float idealPop = idealPopulation(s, map);
       
       while (idealPop-- > 0) {
-        ActorAsAnimal a = (ActorAsAnimal) s.generate();
         Tile point = findGrazePoint(s, map);
+        if (point == null) continue;
+        
+        ActorAsAnimal a = (ActorAsAnimal) s.generate();
         s.initAsAnimal(a);
         a.enterMap(map, point.x, point.y, 1);
       }

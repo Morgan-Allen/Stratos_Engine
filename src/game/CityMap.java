@@ -249,12 +249,22 @@ public class CityMap implements Session.Saveable {
   }
   
   
+  Tile tileAt(Coord c) {
+    return tileAt(c.x, c.y);
+  }
+  
+  
   
   /**  Blockage and paving methods-
     */
   Element above(int x, int y) {
     Tile under = tileAt(x, y);
     return under == null ? null : under.above;
+  }
+  
+  
+  Element above(Coord c) {
+    return above(c.x, c.y);
   }
   
   
@@ -268,9 +278,19 @@ public class CityMap implements Session.Saveable {
   }
   
   
+  boolean blocked(Coord c) {
+    return blocked(c.x, c.y);
+  }
+  
+  
   boolean paved(int x, int y) {
     Tile under = tileAt(x, y);
     return under == null ? false : under.paved;
+  }
+  
+  
+  boolean paved(Coord c) {
+    return paved(c.x, c.y);
   }
   
   

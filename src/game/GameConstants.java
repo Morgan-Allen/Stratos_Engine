@@ -13,19 +13,25 @@ public class GameConstants {
   
   /**  Colour prototyping-
     */
-  private static int colour(int r, int g, int b) {
+  static int colour(int r, int g, int b) {
     return new Color(r / 10f, g / 10f, b / 10f).getRGB();
   }
   
+  static int colour(int r, int g, int b, int a) {
+    return new Color(r / 10f, g / 10f, b / 10f, a / 10f).getRGB();
+  }
+  
   final static int
+    
+    //  Some default colours for diagnostic-display purposes:
     BLANK_COLOR  = colour(5, 5, 5),
     PAVE_COLOR   = colour(8, 8, 8),
     WALKER_COLOR = colour(9, 9, 0),
     CITY_COLOR   = colour(7, 7, 1),
     NO_BLD_COLOR = colour(9, 0, 0),
-    
     WHITE_COLOR  = colour(10, 10, 10),
     BLACK_COLOR  = colour(0 , 0 , 0 ),
+    CLEAR_COLOR  = colour(0 , 0 , 0 , 0),
     
     //  Brown, Grey, White, Red, Green, Blue, Orange, Purple, Yellow.
     //  Industrial and sanitation in brown.
@@ -325,7 +331,7 @@ public class GameConstants {
     NOBLE    = new WalkerType("type_noble"   , IS_PERSON_ACT, CLASS_NOBLE ),
     WORKER   = new WalkerType("type_worker"  , IS_PERSON_ACT, CLASS_COMMON),
     MERCHANT = new WalkerType("type_merchant", IS_PERSON_ACT, CLASS_TRADER),
-    PORTERS  = new WalkerType("type_porters" , IS_PERSON_ACT, CLASS_SLAVE ),
+    PORTER   = new WalkerType("type_porter"  , IS_PERSON_ACT, CLASS_SLAVE ),
     HUNTER   = new WalkerType("type_hunter"  , IS_PERSON_ACT, CLASS_NOBLE ),
     SOLDIER  = new WalkerType("type_soldier" , IS_PERSON_ACT, CLASS_NOBLE ),
     PRIEST   = new WalkerType("type_priest"  , IS_PERSON_ACT, CLASS_NOBLE )
@@ -338,7 +344,8 @@ public class GameConstants {
     NOBLE   .name = "Noble"   ;
     WORKER  .name = "Worker"  ;
     MERCHANT.name = "Merchant";
-    PORTERS .name = "Porters" ;
+    PORTER  .name = "Porter"  ;
+    HUNTER  .name = "Hunter"  ;
     SOLDIER .name = "Soldier" ;
     PRIEST  .name = "Priest"  ;
     
@@ -542,7 +549,7 @@ public class GameConstants {
     PORTER_HOUSE.tint = TINT_COMMERCIAL;
     PORTER_HOUSE.setDimensions(3, 3, 1);
     PORTER_HOUSE.setBuildMaterials(WOOD, 4, ADOBE, 2, POTTERY, 2);
-    PORTER_HOUSE.setWorkerTypes(PORTERS, WORKER);
+    PORTER_HOUSE.setWorkerTypes(PORTER, WORKER);
     PORTER_HOUSE.features = new Good[] { IS_TRADER };
     
     COLLECTOR.name = "Collector";
@@ -587,7 +594,7 @@ public class GameConstants {
     SHRINE_OMC.name = "Shrine to Omecihuatl";
     SHRINE_OMT.name = "Shrine to Ometicuhtli";
     //
-    //  Neutrality/balance: Xt
+    //  Balancing/tension: Xt
     TEMPLE_XT .name = "Temple to Xipe Totec";
     
     for (Type t : ALL_TEMPLES) {
@@ -605,36 +612,36 @@ public class GameConstants {
     //  TODO:  Possibly, later-
     //  Note:  I'm doing a certain amount of shoe-horning here for the sake of
     //         balance/concision.  Bear with me.
-    //         These might also work as 'upgrades' for a particular temple...
+    //  Note:  These might also work as 'upgrades' for a particular temple?
     //
     //  Associates of Quetzalcoatl:
-    //    Patecatl, god of medicine and healing
-    //    Yacetecuhtli, god of merchants and travel
-    //    Ehecatl, god of winds
+    //    Patecatl- god of medicine and healing
+    //    Yacetecuhtli- god of merchants and travel
+    //    Ehecatl- god of winds
     //
     //  Associates of Tezcatlipoca:
-    //    Itztli, god of obsidian
-    //    Huehuecoyotl, festive trickster
-    //    Tlazolteotl, sin and confession
+    //    Itztli- god of obsidian
+    //    Huehuecoyotl- festive trickster
+    //    Tlazolteotl- filth, purity, sin and confession
     //
     //  Associates of Huitzilipochtli:
-    //    Tonatiuh, god of the sun
-    //    Mixcoatl, war and hunting
-    //    Xiuhtecuhtli/Chantico, hearth, lordship and calendar
+    //    Tonatiuh- god of the sun
+    //    Mixcoatl- war and hunting
+    //    Xiuhtecuhtli/Chantico- hearth, lordship and calendar
     //
     //  Associates of Tlaloc:
-    //    Chalchiutlicue, lakes and rivers
-    //    Xochiquetzal, nature and beauty
-    //    Cipactli/Tlaltecuhtli, caves and aquatic monsters
+    //    Chalchiutlicue- lakes and rivers
+    //    Xochiquetzal/Xochipilli- fertility and sensation
+    //    Cipactli/Tlaltecuhtli- caves and aquatic monsters
     //
     //  Associates of Mictecacehuatl/Mictlantecuhtli:
-    //    Xolotl, guide to the dead
-    //    Coyolxauhqui/Itzapapalotl, moon, stars and eclipses
-    //    Toci-Quilaztli, childbirth and vengeance
+    //    Xolotl- guide to the dead
+    //    Coyolxauhqui/Itzapapalotl- moon, stars and eclipses
+    //    Toci-Quilaztli- childbirth and vengeance
     //
     //  Associates of Xipe Totec:
-    //    Centeotl/Xilonen, god/dess of maize
-    //    Balance between other Gods counts as bonus for XT.
+    //    Centeotl/Xilonen- god/dess of maize
+    //    Tension between other Gods counts as bonus to worship.
     
     for (Type t : ALL_SHRINES) {
       t.tint = TINT_RELIGIOUS;
