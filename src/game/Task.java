@@ -112,9 +112,10 @@ public class Task implements Session.Saveable {
     this.target    = target ;
     
     if (maxTime == -1) this.maxTime = AVG_VISIT_TIME;
+    this.pathIndex = -1;
     path = updatePathing();
     
-    if (path != null) {
+    if (! Visit.empty(path)) {
       if (actor.reports()) I.say("  Path is: "+path.length+" tiles long...");
       return this;
     }
@@ -210,7 +211,8 @@ public class Task implements Session.Saveable {
     */
   public String toString() {
     Object subject = visits == null ? target : visits;
-    return type.name()+": "+subject;
+    if (subject == null) return type.name();
+    else return type.name()+": "+subject;
   }
   
   

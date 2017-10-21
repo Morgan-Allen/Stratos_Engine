@@ -212,12 +212,13 @@ public class CityMap implements Session.Saveable {
     if (temp == null) temp = new Tile[8];
     
     for (int dir : T_INDEX) {
+      temp[dir] = null;
       int x = spot.x + T_X[dir], y = spot.y + T_Y[dir];
       if (paveOnly) {
         if (map.paved(x, y)) temp[dir] = map.tileAt(x, y);
       }
       else {
-        if (!map.blocked(x, y)) temp[dir] = map.tileAt(x, y);
+        if (! map.blocked(x, y)) temp[dir] = map.tileAt(x, y);
       }
     }
     return temp;
