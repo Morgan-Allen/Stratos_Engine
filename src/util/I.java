@@ -290,7 +290,7 @@ public class I {
     
     private JPanel pane;
     private JTextPane info;
-    private Object data;
+    private Object data[];
     private int dataWide, dataHigh;
     private float min, max;
     
@@ -298,7 +298,7 @@ public class I {
     private Table <Character, Boolean> keysPressed = new Table();
     
     
-    Presentation(String name, Object data, final int mode) {
+    Presentation(String name, Object data[], final int mode) {
       super(name);
       
       this.data = data;
@@ -341,35 +341,39 @@ public class I {
     
     public void keyPressed (KeyEvent e) {}
     public void keyReleased(KeyEvent e) {}
-
-
+    
+    
     private void paintGrey(Graphics g) {
       final byte scale[] = new byte[256];
       for (int s = 256; s-- > 0;) {
         scale[s] = (byte) s;
       }
-      float vals[][] = (float[][]) data;
-      final int w = dataWide = vals.length, h = dataHigh = vals[0].length;
-      
-      final byte byteData[] = new byte[w * h];
-      for (Coord c : Visit.grid(0, 0, w, h, 1)) {
-        final float pushed = (vals[c.x][c.y] - min) / (max - min);
-        final int grey = (int) Nums.clamp(pushed * 255, 0, 255);
-        byteData[imgIndex(c.x, c.y, w, h)] = scale[grey];
+      for (Object layer : data) if (layer != null) {
+        float vals[][] = (float[][]) layer;
+        final int w = dataWide = vals.length, h = dataHigh = vals[0].length;
+        
+        final byte byteData[] = new byte[w * h];
+        for (Coord c : Visit.grid(0, 0, w, h, 1)) {
+          final float pushed = (vals[c.x][c.y] - min) / (max - min);
+          final int grey = (int) Nums.clamp(pushed * 255, 0, 255);
+          byteData[imgIndex(c.x, c.y, w, h)] = scale[grey];
+        }
+        presentImage(g, byteData, BufferedImage.TYPE_BYTE_GRAY, w, h);
       }
-      presentImage(g, byteData, BufferedImage.TYPE_BYTE_GRAY, w, h);
     }
     
     
     private void paintColour(Graphics g) {
-      final int vals[][] = (int[][]) data;
-      final int w = dataWide = vals.length, h = dataHigh = vals[0].length;
-      
-      final int intData[] = new int[w * h];
-      for (Coord c : Visit.grid(0, 0, w, h, 1)) {
-        intData[imgIndex(c.x, c.y, w, h)] = vals[c.x][c.y];
+      for (Object layer : data) if (layer != null) {
+        final int vals[][] = (int[][]) layer;
+        final int w = dataWide = vals.length, h = dataHigh = vals[0].length;
+        
+        final int intData[] = new int[w * h];
+        for (Coord c : Visit.grid(0, 0, w, h, 1)) {
+          intData[imgIndex(c.x, c.y, w, h)] = vals[c.x][c.y];
+        }
+        presentImage(g, intData, BufferedImage.TYPE_INT_ARGB, w, h);
       }
-      presentImage(g, intData, BufferedImage.TYPE_INT_ARGB, w, h);
     }
     
     
@@ -394,8 +398,8 @@ public class I {
   
   
   public static void present(
-    float greyVals[][],
-    String name, int w, int h, float min, float max
+    String name, int w, int h, float min, float max,
+    float[][]... greyVals
   ) {
     final Presentation p = present(greyVals, MODE_GREY, name, w, h);
     p.min = min;
@@ -404,15 +408,15 @@ public class I {
   
   
   public static void present(
-    int colourVals[][],
-    String name, int w, int h
+    String name, int w, int h,
+    int[][]... colourVals
   ) {
     final Presentation p = present(colourVals, MODE_COLOUR, name, w, h);
   }
   
   
   private static Presentation present(
-    Object vals, int mode,
+    Object vals[], int mode,
     String name, int w, int h
   ) {
     Presentation window = windows.get(name);
