@@ -2,11 +2,10 @@
 
 package game;
 import util.*;
-import static game.Actor.*;
-import static game.GameConstants.*;
 import static game.CityMap.*;
 import static game.City.*;
 import static game.CityBorders.*;
+import static game.GameConstants.*;
 
 
 

@@ -30,14 +30,14 @@ public class CityMap implements Session.Saveable {
   
   Table <City, Tile> transitPoints = new Table();
   
-  
-  //  TODO:  Move this into the terrain class...
+  //  TODO:  Move this into the terrain class!
   int growScanIndex = 0;
   static class HabitatScan {
     int numTiles = 0;
     int densities[][];
   }
   HabitatScan scans[][] = new HabitatScan[2][ALL_TERRAINS.length];
+  Table <Type, CityMapFlagging> flagging = new Table();
   
   String saveName;
   
@@ -74,6 +74,13 @@ public class CityMap implements Session.Saveable {
     for (int i = 2; i-- > 0;) for (int h = ALL_TERRAINS.length; h-- > 0;) {
       scans[i][h] = loadScan(s);
     }
+    for (int n = s.loadInt(); n-- > 0;) {
+      Type key = (Type) s.loadObject();
+      CityMapFlagging forKey = new CityMapFlagging(this, key);
+      forKey.setupWithSize(size);
+      forKey.loadState(s);
+      flagging.put(key, forKey);
+    }
     
     saveName = s.loadString();
   }
@@ -104,6 +111,11 @@ public class CityMap implements Session.Saveable {
     s.saveInt(growScanIndex);
     for (int i = 2; i-- > 0;) for (int h = ALL_TERRAINS.length; h-- > 0;) {
       saveScan(scans[i][h], s);
+    }
+    s.saveInt(flagging.size());
+    for (Type key : flagging.keySet()) {
+      s.saveObject(key);
+      flagging.get(key).saveState(s);
     }
     
     s.saveString(saveName);
@@ -437,6 +449,20 @@ public class CityMap implements Session.Saveable {
     
     scan.numTiles += 1;
     scan.densities[tile.x / SCAN_RES][tile.y / SCAN_RES] += 1;
+  }
+  
+  
+  
+  /**  Flagging the presence/absence of specific object-types:
+    */
+  void flagType(Type key, int x, int y, boolean is) {
+    CityMapFlagging forKey = flagging.get(key);
+    if (forKey == null) {
+      forKey = new CityMapFlagging(this, key);
+      forKey.setupWithSize(size);
+      flagging.put(key, forKey);
+    }
+    forKey.setFlagVal(x, y, is ? 1 : 0);
   }
 }
 

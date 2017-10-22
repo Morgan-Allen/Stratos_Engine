@@ -81,7 +81,7 @@ public class BuildingForGather extends Building {
   }
   
   
-  private boolean hasFocus(Target t) {
+  protected boolean hasFocus(Target t) {
     //  TODO:  The hasFocus() method for elements/tiles should be accomplishing
     //  this.
     for (Actor w : workers) {
@@ -130,7 +130,7 @@ public class BuildingForGather extends Building {
       
       if (t != null && t.above instanceof Element) {
         Element crop = (Element) t.above;
-        if (crop.buildLevel < 1 || hasFocus(crop)) continue;
+        if (crop.buildLevel() < 1 || hasFocus(crop)) continue;
         if (! Visit.arrayIncludes(cropTypes, crop.type)) continue;
         
         float distW = CityMap.distance(actor.at, t);
@@ -178,7 +178,7 @@ public class BuildingForGather extends Building {
     if (actor.jobType() == JOB.HARVEST) {
       if (above == null || ! (above.type instanceof Good)) return;
       
-      above.buildLevel = 0;
+      above.setBuildLevel(0);
       actor.carried      = (Good) above.type;
       actor.carryAmount += CROP_YIELD / 100f;
       

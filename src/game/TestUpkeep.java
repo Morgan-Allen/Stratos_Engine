@@ -15,7 +15,7 @@ public class TestUpkeep extends Test {
   
   static void testUpkeep(boolean graphics) {
     
-    CityMap map = setupTestCity(25);
+    CityMap map = setupTestCity(16);
     map.settings.toggleFog = false;
     
     BuildingForTrade post = (BuildingForTrade) PORTER_HOUSE.generate();
@@ -34,7 +34,9 @@ public class TestUpkeep extends Test {
     home  .enterMap(map, 6, 6, 0);
     palace.enterMap(map, 6, 0, 0);
     mason .enterMap(map, 9, 6, 1);
-    CityMap.applyPaving(map, 2, 5, 20, 1, true);
+    CityMap.applyPaving(map, 2, 5, 15, 1, true);
+    
+    for (Building b : map.buildings) fillWorkVacancies(b);
     
     
     boolean upkeepOkay = false;
@@ -45,7 +47,7 @@ public class TestUpkeep extends Test {
       if (! upkeepOkay) {
         boolean allBuilt = true;
         for (Building b : map.buildings) {
-          if (b.buildLevel < 1) allBuilt = false;
+          if (b.buildLevel() < 1) allBuilt = false;
         }
         
         upkeepOkay = allBuilt;

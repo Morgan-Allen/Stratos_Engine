@@ -505,7 +505,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   public String jobDesc() {
     if (job == null) return "Idle";
-    return job.toString();
+    return jobType().toString();
   }
 }
 

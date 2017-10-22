@@ -372,7 +372,7 @@ public class Test {
       }
     }
     else {
-      report.append("\n  Build level: "+I.percent(e.buildLevel));
+      report.append("\n  Build level: "+I.percent(e.buildLevel()));
     }
     
     return report.toString();
@@ -411,8 +411,8 @@ public class Test {
       }
     }
     
-    if (b.buildLevel < 1) {
-      report.append("\nBuild level:\n  "+I.percent(b.buildLevel));
+    if (b.buildLevel() < 1) {
+      report.append("\nBuild level:\n  "+I.percent(b.buildLevel()));
     }
     
     if (b.craftProgress() > 0) {

@@ -95,7 +95,7 @@ public class Building extends Element implements Session.Saveable, Employer {
   
   
   boolean destroyed() {
-    return buildLevel < 0 && map == null;
+    return buildLevel() <= 0 && map == null;
   }
   
   
@@ -191,9 +191,11 @@ public class Building extends Element implements Session.Saveable, Employer {
   
   
   protected int numResidents(int socialClass) {
-    int sum = 0;
-    for (Actor w : residents) if (w.type.socialClass == socialClass) sum++;
-    return sum;
+    return residents.size();
+    //  TODO:  Restore this later once you have multiple housing types...
+    //int sum = 0;
+    //for (Actor w : residents) if (w.type.socialClass == socialClass) sum++;
+    //return sum;
   }
   
   

@@ -91,7 +91,7 @@ public class CityMapFog {
     */
   Tile pickRandomFogPoint(Element near) {
     if (! map.settings.toggleFog) return null;
-    return maxMap.pickRandomPoint(near);
+    return maxMap.pickRandomPoint(near, -1);
   }
   
   

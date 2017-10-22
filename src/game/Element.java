@@ -20,7 +20,6 @@ public class Element implements Session.Saveable, Target {
   int facing = N;
   
   float buildLevel;
-  boolean complete;
   
   List <Actor> focused = null;
   
@@ -39,7 +38,6 @@ public class Element implements Session.Saveable, Target {
     facing = s.loadInt();
     
     buildLevel = s.loadFloat();
-    complete   = s.loadBool();
     
     if (s.loadBool()) s.loadObjects(focused = new List());
   }
@@ -53,7 +51,6 @@ public class Element implements Session.Saveable, Target {
     s.saveInt(facing);
     
     s.saveFloat(buildLevel);
-    s.saveBool(complete);
     
     s.saveBool(focused != null);
     if (focused != null) s.saveObjects(focused);
@@ -75,7 +72,7 @@ public class Element implements Session.Saveable, Target {
   void enterMap(CityMap map, int x, int y, float buildLevel) {
     this.map = map;
     this.at  = map.tileAt(x, y);
-    this.buildLevel = buildLevel;
+    setBuildLevel(buildLevel);
     
     for (Coord c : Visit.grid(x, y, type.wide, type.high, 1)) {
       Tile t = map.tileAt(c.x, c.y);
@@ -85,6 +82,7 @@ public class Element implements Session.Saveable, Target {
   
   
   void exitMap(CityMap map) {
+    setFlagging(false);
     for (Coord c : Visit.grid(at.x, at.y, type.wide, type.high, 1)) {
       Tile t = map.tileAt(c.x, c.y);
       t.above = null;
@@ -146,19 +144,39 @@ public class Element implements Session.Saveable, Target {
     */
   void updateGrowth() {
     if (type.growRate > 0) {
-      buildLevel += SCAN_PERIOD * type.growRate / RIPEN_PERIOD;
-      if (buildLevel >= 1) buildLevel = 1;
+      incBuildLevel(SCAN_PERIOD * type.growRate / RIPEN_PERIOD);
     }
   }
   
   
   void takeDamage(float damage) {
-    buildLevel -= damage / type.maxHealth;
-    
-    if (buildLevel <= 0) {
+    if (incBuildLevel(0 - damage / type.maxHealth) <= 0) {
       exitMap(map);
       setDestroyed();
     }
+  }
+  
+  
+  float buildLevel() {
+    return buildLevel;
+  }
+  
+  
+  float incBuildLevel(float inc) {
+    return setBuildLevel(buildLevel + inc);
+  }
+  
+  
+  float setBuildLevel(float level) {
+    buildLevel = Nums.clamp(level, 0, 1.1f);
+    setFlagging(buildLevel == 1);
+    return buildLevel;
+  }
+  
+  
+  void setFlagging(boolean is) {
+    if (type.flagKey == null || type.mobile) return;
+    map.flagType(type.flagKey, at.x, at.y, is);
   }
   
   

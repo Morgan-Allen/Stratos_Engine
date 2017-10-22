@@ -148,14 +148,17 @@ public class BuildingForCrafts extends Building {
     
     for (Good w : buildsWith) {
       for (Building b : buildings) {
+        if (b.buildLevel() >= 1) continue;
+        
         int   need       = b.type.materialNeed(w);
         float amountDone = b.materials.valueFor(w);
         float amountGot  = b.inventory.valueFor(w);
         float dist       = CityMap.distance(from.entrance, b.entrance);
+        float distRating = CityMap.distancePenalty(dist);
         if (amountDone >= need || amountGot <= 0) continue;
         if (dist > maxRange) continue;
         
-        pickB.compare(b, (need - amountDone) * 10 / (10 + dist));
+        pickB.compare(b, (need - amountDone) * distRating);
       }
     }
     return pickB.result();
@@ -170,20 +173,27 @@ public class BuildingForCrafts extends Building {
       int   need       = b.type.materialNeed(g);
       float amountDone = b.materials.valueFor(g);
       float amountGot  = b.inventory.valueFor(g);
-      if (amountDone >= need || amountGot <= 0) continue;
       
       totalNeed += need;
       totalDone += amountDone;
       
-      if (! didWork) {
-        float puts = Nums.min(0.1f, amountGot);
-        b.materials.add(puts    , g);
-        b.inventory.add(0 - puts, g);
-        didWork = true;
-      }
+      if (amountDone >= need || amountGot <= 0) continue;
+      
+      float puts = Nums.min(0.1f, amountGot);
+      b.materials.add(puts    , g);
+      b.inventory.add(0 - puts, g);
+      didWork = true;
     }
     
-    b.buildLevel = 1.5f * (totalDone / totalNeed);
+    if (didWork) {
+      b.setBuildLevel(1.1f * (totalDone / totalNeed));
+      
+      if (builds.reports()) {
+        I.say("\nBuilding "+b+"...");
+        I.say("  Did: "+totalDone+"/"+totalNeed);
+        I.say("  Build level: "+b.buildLevel());
+      }
+    }
   }
   
   

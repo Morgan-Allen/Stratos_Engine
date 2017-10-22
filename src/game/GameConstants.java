@@ -192,7 +192,10 @@ public class GameConstants {
   final static Type
     JUNGLE_TREE1 = new Type("fixture_j_tree1", IS_FIXTURE),
     DESERT_ROCK1 = new Type("fixture_d_rock1", IS_FIXTURE),
-    DESERT_ROCK2 = new Type("fixture_d_rock2", IS_FIXTURE)
+    DESERT_ROCK2 = new Type("fixture_d_rock2", IS_FIXTURE),
+    
+    ALL_TREES[] = { JUNGLE_TREE1 },
+    ALL_ROCKS[] = { DESERT_ROCK1, DESERT_ROCK2 }
   ;
   final static Type
     TAPIR   = new Type("animal_tapir" , IS_ANIMAL_ACT),
@@ -218,6 +221,7 @@ public class GameConstants {
     DESERT_ROCK1.wide = DESERT_ROCK1.high = 2;
     LAKE.blocks = true;
     
+    //  TODO:  UNIFY WITH WALKER-TYPES BELOW!
     TAPIR.name     = "Tapir";
     TAPIR.habitats = new Terrain[] { JUNGLE, MEADOW };
     TAPIR.predator = false;
@@ -232,6 +236,7 @@ public class GameConstants {
     
     for (Type s : ALL_ANIMALS) {
       s.lifespan = s.predator ? HUNTER_LIFESPAN : GRAZER_LIFESPAN;
+      s.mobile   = true;
     }
   }
   
@@ -260,9 +265,8 @@ public class GameConstants {
     MEAT       = new Good("Meat"        , 35, 3 ),
     RAW_COTTON = new Good("Raw Cotton"  , 15, 4 ),
     WOOD       = new Good("Wood"        , 10, 5 ),
-    RUBBER     = new Good("Rubber"      , 25, 6 ),
-    CLAY       = new Good("Clay"        , 10, 7 ),
-    ADOBE      = new Good("Adobe"       , 20, 8 ),
+    CLAY       = new Good("Clay"        , 10, 6 ),
+    ADOBE      = new Good("Adobe"       , 20, 7 ),
     
     POTTERY    = new Good("Pottery"     , 50, 9 ),
     COTTON     = new Good("Cotton"      , 75, 10),
@@ -270,11 +274,15 @@ public class GameConstants {
     CASH       = new Good("Cash"        , 1 , 11),
     SOIL       = new Good("Soil"        , 5 , 12),
     
-    IS_ADMIN   = new Good("Is Admin"    , -1, 21),
-    IS_MARKET  = new Good("Is Market"   , -1, 22),
+    IS_CROP    = new Good("Is Crop"     , -1, 18),
+    IS_TREE    = new Good("Is Tree"     , -1, 19),
+    IS_WATER   = new Good("Is Water"    , -1, 20),
+    IS_STONE   = new Good("Is Stone"    , -1, 21),
+    
+    IS_ADMIN   = new Good("Is Admin"    , -1, 22),
+    IS_MARKET  = new Good("Is Market"   , -1, 23),
     IS_TRADER  = new Good("Is Trader"   , -1, 24),
     IS_HOUSING = new Good("Is Housing"  , -1, 25),
-    IS_WATER   = new Good("Is Water"    , -1, 26),
     
     DIVERSION  = new Good("Diversion"   , -1, 30),
     EDUCATION  = new Good("Education"   , -1, 31),
@@ -283,7 +291,6 @@ public class GameConstants {
     
     CROP_TYPES  [] = { MAIZE, FRUIT, RAW_COTTON },
     FOOD_TYPES  [] = { MAIZE, FRUIT, MEAT },
-    TREE_TYPES  [] = { WOOD, RUBBER },
     STONE_TYPES [] = { CLAY, ADOBE  },
     BUILD_GOODS [] = { WOOD, CLAY, ADOBE },
     HOME_GOODS  [] = { POTTERY, COTTON },
@@ -299,9 +306,11 @@ public class GameConstants {
     for (Good g : CROP_TYPES) {
       g.tint = TINT_CROPS[i++ % 3];
       g.growRate = 1f;
+      g.flagKey  = IS_CROP;
     }
-    for (Good g : TREE_TYPES) {
+    for (Type g : ALL_TREES) {
       g.growRate = 0.5f;
+      g.flagKey  = IS_TREE;
     }
   }
   
@@ -312,6 +321,7 @@ public class GameConstants {
     WalkerType(String ID, int category, int socialClass) {
       super(ID, category);
       this.socialClass = socialClass;
+      this.mobile      = true;
     }
   }
   final static int
@@ -448,9 +458,9 @@ public class GameConstants {
     HOUSE.setBuildMaterials(WOOD, 2, CLAY, 1);
     HOUSE.setWorkerTypes(CITIZEN);
     HOUSE.maxResidents = 4;
-    HOUSE.maxStock = 2;
-    HOUSE.buildsWith = new Good[] { WOOD, CLAY };
-    HOUSE.features = new Good[] { IS_HOUSING };
+    HOUSE.maxStock     = 2;
+    HOUSE.buildsWith   = new Good[] { WOOD, CLAY };
+    HOUSE.features     = new Good[] { IS_HOUSING };
     HOUSE.setUpgradeTiers(HOUSE, HOUSE_T1, HOUSE_T2);
     
     HOUSE_T1.name = "Improved House";
@@ -488,7 +498,7 @@ public class GameConstants {
     BALL_COURT.name = "Ball Court";
     BALL_COURT.tint = TINT_AMENITY;
     BALL_COURT.setDimensions(3, 3, 1);
-    BALL_COURT.setBuildMaterials(ADOBE, 10, RUBBER, 5);
+    BALL_COURT.setBuildMaterials(ADOBE, 10);
     BALL_COURT.features = new Good[] { DIVERSION };
     BALL_COURT.featureAmount = 15;
 

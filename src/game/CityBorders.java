@@ -138,12 +138,9 @@ public class CityBorders {
     Tile from = migrant.at();
     final Pick <Building> pick = new Pick();
     
-    //
-    //  Note:  We actually allow for a little overcrowding here:
-    
     for (Building b : map.buildings) {
       int max   = b.maxResidents(socialClass);
-      int space = (max * 2) - b.numResidents(socialClass);
+      int space = max - b.numResidents(socialClass);
       if (space <= 0) continue;
       
       float near = 10 / (10f + CityMap.distance(from, b.entrance));

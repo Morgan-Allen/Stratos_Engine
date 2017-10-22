@@ -81,7 +81,7 @@ public class CityMapFlagging {
   
   /**  More complex queries-
     */
-  Tile pickRandomPoint(Element near) {
+  Tile pickRandomPoint(Element near, int maxRange) {
     
     boolean report = near.reports();
     if (report) I.say("\nGETTING TILE TO LOOK AT...");
@@ -89,6 +89,9 @@ public class CityMapFlagging {
     Tile from = near.at();
     int res = (int) Nums.pow(4, flagVals.length - 1);
     Coord mip = new Coord(0, 0);
+    
+    //  TODO:  This will need to be converted into a full-blown search to
+    //  handle some of the nuances of complex queries.
     
     for (int l = flagVals.length; l-- > 0;) {
       if (report) I.say("  Current level: "+l);
@@ -103,6 +106,9 @@ public class CityMapFlagging {
         float rating = 1 - (level[c.x][c.y] * 1f / maxSum), dist = 0;
         dist += Nums.abs(from.x - ((c.x + 0.5f) * res));
         dist += Nums.abs(from.y - ((c.y + 0.5f) * res));
+        
+        if (maxRange > 0 && dist > maxRange + res) continue;
+        
         rating *= res * Rand.num() / (dist + res);
         pick.compare(new Coord(c), rating);
         

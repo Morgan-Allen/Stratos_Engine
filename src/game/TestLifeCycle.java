@@ -34,8 +34,8 @@ public class TestLifeCycle extends Test {
     List <Actor> originalPop = null;
     List <Actor> births = new List();
     List <Actor> deaths = new List();
-    boolean noBadJobs = true;
-    boolean cycled = false;
+    boolean noBadJobs = true ;
+    boolean cycled    = false;
     
     I.say("\nTOTAL LIFE CYCLE RUN TIME: "+RUN_TIME);
     

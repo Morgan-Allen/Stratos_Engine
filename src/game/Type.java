@@ -89,6 +89,7 @@ public class Type extends Index.Entry implements Session.Saveable {
   int tint = BLACK_COLOR;
   
   int category;
+  Type flagKey = null;
   int wide = 1, high = 1, deep = 1;
   
   Good    builtFrom  [] = NO_GOODS;
