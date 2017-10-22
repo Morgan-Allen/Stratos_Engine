@@ -433,7 +433,6 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     job   = null;
     exitMap();
     setDestroyed();
-    ///I.say(this+" DIED FROM CAUSE: "+cause);
   }
   
   

@@ -11,13 +11,14 @@ public class TestEcology extends Test {
   
   
   public static void main(String args[]) {
-    testAnimals(true);
+    testAnimals(false);
   }
   
   
   static void testAnimals(boolean graphics) {
     
     CityMap map = Test.setupTestCity(64, JUNGLE, MEADOW);
+    ActorAsAnimal.reportCycle = graphics;
     
     Type species[] = { QUAIL, JAGUAR };
     Tally <Type> realPops  = new Tally();

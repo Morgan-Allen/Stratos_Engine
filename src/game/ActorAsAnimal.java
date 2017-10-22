@@ -13,6 +13,10 @@ public class ActorAsAnimal extends Actor {
   
   /**  Data fields, construction and save/load methods-
     */
+  static float grazeOkay = 0, grazeFail = 0;
+  static boolean reportCycle = false;
+  
+  
   public ActorAsAnimal(Type type) {
     super(type);
   }
@@ -66,8 +70,6 @@ public class ActorAsAnimal extends Actor {
     }
   }
   
-  
-  static float grazeOkay = 0, grazeFail = 0;
   
   Tile findGrazePoint() {
     
@@ -137,8 +139,11 @@ public class ActorAsAnimal extends Actor {
       else {
         float oldH = hunger, yield = meatYield(prey);
         hunger -= yield * 1f / FOOD_UNIT_PER_HP;
-        //I.say(this+" ATE PREY: "+prey);
-        //I.add(", yield: "+yield+", hunger: "+oldH+"->"+hunger);
+        
+        if (reportCycle) {
+          I.say(this+" ATE PREY: "+prey);
+          I.add(", yield: "+yield+", hunger: "+oldH+"->"+hunger);
+        }
       }
     }
   }
@@ -210,7 +215,7 @@ public class ActorAsAnimal extends Actor {
         
         Actor child = (ActorAsAnimal) type.generate();
         child.enterMap(map, at.x, at.y, 1);
-        //I.say(this+" GAVE BIRTH");
+        if (reportCycle) I.say(this+" GAVE BIRTH");
       }
     }
     //
@@ -218,6 +223,12 @@ public class ActorAsAnimal extends Actor {
     if (ageSeconds > type.lifespan) {
       setAsKilled("Old age");
     }
+  }
+  
+  
+  void setAsKilled(String cause) {
+    super.setAsKilled(cause);
+    if (reportCycle) I.say(this+" DIED FROM CAUSE: "+cause);
   }
   
   
