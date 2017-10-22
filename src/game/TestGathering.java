@@ -53,7 +53,7 @@ public class TestGathering extends Test {
         int numT = 0;
         for (Tile t : plantTiles) {
           Type above = t.above == null ? null : t.above.type;
-          if (above != null && above.growRate == 0) continue;
+          if (above == null || above.growRate == 0) continue;
           numT += 1;
           if (Visit.arrayIncludes(needed, above) && t.above.buildLevel() >= 0) {
             crops.add(t.above);

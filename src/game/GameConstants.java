@@ -310,20 +310,26 @@ public class GameConstants {
   
   static {
     int i = 0;
-    for (Good g : CROP_TYPES) {
-      g.tint = TINT_CROPS[i++ % 3];
-      g.growRate    = 1f;
-      g.isCrop      = true;
-      g.flagKey     = IS_CROP;
-      g.yields      = g;
-      g.yieldAmount = CROP_YIELD / 100f;
+    for (Good c : CROP_TYPES) {
+      c.tint = TINT_CROPS[i++ % 3];
+      c.growRate    = 1f;
+      c.isCrop      = true;
+      c.flagKey     = IS_CROP;
+      c.yields      = c;
+      c.yieldAmount = CROP_YIELD / 100f;
     }
-    for (Type g : ALL_TREES) {
-      g.name = "Forest";
-      g.growRate    = CROP_YIELD * 0.5f / 100f;
-      g.flagKey     = IS_TREE;
-      g.yields      = WOOD;
-      g.yieldAmount = 1f;
+    for (Type t : ALL_TREES) {
+      t.name = "Forest";
+      t.growRate    = CROP_YIELD * 0.5f / 100f;
+      t.flagKey     = IS_TREE;
+      t.yields      = WOOD;
+      t.yieldAmount = 1f;
+    }
+    for (Type r : ALL_ROCKS) {
+      r.name = "Rocks";
+      r.flagKey     = IS_STONE;
+      r.yields      = ADOBE;
+      r.yieldAmount = 1f;
     }
   }
   

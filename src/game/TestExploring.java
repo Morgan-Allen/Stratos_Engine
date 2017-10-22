@@ -18,9 +18,6 @@ public class TestExploring extends Test {
   static void testExploring(boolean graphics) {
     
     CityMap map = Test.setupTestCity(32, JUNGLE, MEADOW);
-    //map.settings.toggleFog = false;
-    //map.settings.slowed = true;
-    //map.settings.paused = true;
     
     Building lodge = (Building) HUNTER_LODGE.generate();
     lodge.enterMap(map, 4, 4, 1);

@@ -13,6 +13,8 @@ public class CityMapFog {
   
   /**  Data fields, setup and save/load methods-
     */
+  final static int MAX_FOG = 100;
+  
   CityMap map;
   
   int  dayState = -1;
@@ -46,8 +48,12 @@ public class CityMapFog {
   void performSetup(int size) {
     this.fogVals = new byte[size][size];
     this.oldVals = new byte[size][size];
-    this.maxMap = new CityMapFlagging(map, "max. fog", 100);
+    this.maxMap = new CityMapFlagging(map, "max. fog", MAX_FOG);
     maxMap.setupWithSize(size);
+
+    for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
+      maxMap.setFlagVal(c.x, c.y, MAX_FOG);
+    }
   }
   
   
@@ -66,7 +72,7 @@ public class CityMapFog {
       Tile t = map.tileAt(c.x, c.y);
       float distance = distance(t, around);
       if (distance > range) continue;
-      fogVals[c.x][c.y] = 100;
+      fogVals[c.x][c.y] = MAX_FOG;
     }
   }
   
@@ -80,7 +86,10 @@ public class CityMapFog {
     for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
       byte val = oldVals[c.x][c.y] = fogVals[c.x][c.y];
       fogVals[c.x][c.y] = 0;
-      maxMap.setFlagVal(c.x, c.y, 100 - val);
+      
+      int oldVal = maxMap.flagVal(c.x, c.y);
+      int newVal = MAX_FOG - val;
+      if (oldVal > newVal) maxMap.setFlagVal(c.x, c.y, newVal);
     }
   }
   
@@ -105,13 +114,15 @@ public class CityMapFog {
     */
   float sightLevel(Tile t) {
     if (! map.settings.toggleFog) return 1;
-    return t == null ? 0 : (oldVals[t.x][t.y] / 100f);
+    if (t == null) return 0;
+    return oldVals[t.x][t.y] * 1f / MAX_FOG;
   }
   
   
   float maxSightLevel(Tile t) {
     if (! map.settings.toggleFog) return 1;
-    return t == null ? 0 : 1 - (maxMap.flagVal(t.x, t.y) / 100f);
+    if (t == null) return 0;
+    return 1 - (maxMap.flagVal(t.x, t.y) / MAX_FOG);
   }
   
   
