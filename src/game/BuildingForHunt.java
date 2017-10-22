@@ -34,9 +34,8 @@ public class BuildingForHunt extends Building {
   public void selectActorBehaviour(Actor actor) {
     
     Task delivery = TaskDelivery.pickNextDelivery(actor, this, produced());
-    if (delivery != null) {
+    if (actor.idle() && delivery != null) {
       actor.assignTask(delivery);
-      return;
     }
     
     if (actor.idle() && inventory.valueFor(MEAT) < type.maxStock) {

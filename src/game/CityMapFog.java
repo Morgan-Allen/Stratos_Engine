@@ -18,7 +18,7 @@ public class CityMapFog {
   int  dayState = -1;
   byte fogVals[][];
   byte oldVals[][];
-  int  maxVals[][][];
+  CityMapFlagging maxMap;
   
   
   
@@ -31,12 +31,7 @@ public class CityMapFog {
     dayState = s.loadInt();
     s.loadByteArray(fogVals);
     s.loadByteArray(oldVals);
-    
-    for (int[][] level : maxVals) {
-      for (Coord c : Visit.grid(0, 0, level.length, level.length, 1)) {
-        level[c.x][c.y] = s.loadInt();
-      }
-    }
+    maxMap.loadState(s);
   }
   
   
@@ -44,27 +39,15 @@ public class CityMapFog {
     s.saveInt(dayState);
     s.saveByteArray(fogVals);
     s.saveByteArray(oldVals);
-    
-    for (int[][] level : maxVals) {
-      for (Coord c : Visit.grid(0, 0, level.length, level.length, 1)) {
-        s.saveInt(level[c.x][c.y]);
-      }
-    }
+    maxMap.saveState(s);
   }
   
   
   void performSetup(int size) {
     this.fogVals = new byte[size][size];
     this.oldVals = new byte[size][size];
-    
-    Batch <int[][]> levels = new Batch();
-    int span = size;
-    while (span > 1) {
-      int level[][] = new int[span][span];
-      levels.add(level);
-      span = Nums.round(span / 4f, 1, true);
-    }
-    this.maxVals = (int[][][]) levels.toArray(int[][].class);
+    this.maxMap = new CityMapFlagging(map, "max. fog");
+    maxMap.setupWithSize(size);
   }
   
   
@@ -97,21 +80,8 @@ public class CityMapFog {
     for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
       byte val = oldVals[c.x][c.y] = fogVals[c.x][c.y];
       fogVals[c.x][c.y] = 0;
-      int max = maxVals[0][c.x][c.y];
-      if (val > max) {
-        incMipVal(c.x, c.y, val - max);
-      }
-    }
-  }
-  
-  
-  private void incMipVal(int x, int y, int inc) {
-    int l = 0;
-    while (l < maxVals.length) {
-      maxVals[l][x][y] += inc;
-      x /= 4;
-      y /= 4;
-      l += 1;
+      int max = maxMap.flagVal(c.x, c.y);
+      if (val > max) maxMap.incFlagVal(c.x, c.y, val - max);
     }
   }
   
@@ -121,73 +91,13 @@ public class CityMapFog {
     */
   Tile pickRandomFogPoint(Element near) {
     if (! map.settings.toggleFog) return null;
-    
-    boolean report = near.reports();
-    if (report) I.say("\nGETTING TILE TO LOOK AT...");
-    
-    Tile from = near.at();
-    int res = (int) Nums.pow(4, maxVals.length - 1);
-    Coord mip = new Coord(0, 0);
-    
-    for (int l = maxVals.length; l-- > 0;) {
-      if (report) I.say("  Current level: "+l);
-      
-      int level[][] = maxVals[l];
-      int sideX = Nums.min(4, level.length - mip.x);
-      int sideY = Nums.min(4, level.length - mip.y);
-      int maxSum = res * res * 100;
-      Pick <Coord> pick = new Pick(0);
-      
-      for (Coord c : Visit.grid(mip.x, mip.y, sideX, sideY, 1)) {
-        float rating = 1 - (level[c.x][c.y] * 1f / maxSum), dist = 0;
-        dist += Nums.abs(from.x - ((c.x + 0.5f) * res));
-        dist += Nums.abs(from.y - ((c.y + 0.5f) * res));
-        rating *= res * Rand.num() / (dist + res);
-        pick.compare(new Coord(c), rating);
-        
-        if (report) I.say("    "+c+" -> "+rating);
-      }
-      
-      if (pick.empty()) {
-        if (report) I.say("    No result found!");
-        return null;
-      }
-      
-      mip.setTo(pick.result());
-      if (report) I.say("    Delving in at: "+mip);
-      
-      if (l == 0) {
-        break;
-      }
-      else {
-        mip.x *= 4;
-        mip.y *= 4;
-        res   /= 4;
-      }
-    }
-    
-    return map.tileAt(mip.x, mip.y);
+    return maxMap.pickRandomPoint(near);
   }
   
   
   Tile findNearbyFogPoint(Element near, int range) {
     if (! map.settings.toggleFog) return null;
-    
-    Tile from = near.at();
-    int minX = from.x - range, minY = from.y - range;
-    Pick <Tile> pick = new Pick();
-    
-    //  TODO:  Randomise this is a little, and avoid having two or more actors
-    //  exploring the same area at once.
-    
-    for (Coord c : Visit.grid(minX, minY, range * 2, range * 2, 1)) {
-      Tile t = map.tileAt(c.x, c.y);
-      float dist = CityMap.distance(from, t);
-      if (dist > range || maxVals[0][t.x][t.y] != 0) continue;
-      pick.compare(t, 0 - dist);
-    }
-    
-    return pick.result();
+    return maxMap.findNearbyPoint(near, range);
   }
   
   
@@ -202,7 +112,7 @@ public class CityMapFog {
   
   float maxSightLevel(Tile t) {
     if (! map.settings.toggleFog) return 1;
-    return t == null ? 0 : (maxVals[0][t.x][t.y] / 100f);
+    return t == null ? 0 : (maxMap.flagVal(t.x, t.y) / 100f);
   }
   
   
