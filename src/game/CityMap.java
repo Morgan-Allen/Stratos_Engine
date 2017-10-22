@@ -76,7 +76,7 @@ public class CityMap implements Session.Saveable {
     }
     for (int n = s.loadInt(); n-- > 0;) {
       Type key = (Type) s.loadObject();
-      CityMapFlagging forKey = new CityMapFlagging(this, key);
+      CityMapFlagging forKey = new CityMapFlagging(this, key, 1);
       forKey.setupWithSize(size);
       forKey.loadState(s);
       flagging.put(key, forKey);
@@ -458,7 +458,7 @@ public class CityMap implements Session.Saveable {
   void flagType(Type key, int x, int y, boolean is) {
     CityMapFlagging forKey = flagging.get(key);
     if (forKey == null) {
-      forKey = new CityMapFlagging(this, key);
+      forKey = new CityMapFlagging(this, key, 1);
       forKey.setupWithSize(size);
       flagging.put(key, forKey);
     }

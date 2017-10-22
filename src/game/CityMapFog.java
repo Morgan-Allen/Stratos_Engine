@@ -46,7 +46,7 @@ public class CityMapFog {
   void performSetup(int size) {
     this.fogVals = new byte[size][size];
     this.oldVals = new byte[size][size];
-    this.maxMap = new CityMapFlagging(map, "max. fog");
+    this.maxMap = new CityMapFlagging(map, "max. fog", 100);
     maxMap.setupWithSize(size);
   }
   
@@ -80,8 +80,7 @@ public class CityMapFog {
     for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
       byte val = oldVals[c.x][c.y] = fogVals[c.x][c.y];
       fogVals[c.x][c.y] = 0;
-      int max = maxMap.flagVal(c.x, c.y);
-      if (val > max) maxMap.incFlagVal(c.x, c.y, val - max);
+      maxMap.setFlagVal(c.x, c.y, 100 - val);
     }
   }
   
@@ -112,7 +111,7 @@ public class CityMapFog {
   
   float maxSightLevel(Tile t) {
     if (! map.settings.toggleFog) return 1;
-    return t == null ? 0 : (maxMap.flagVal(t.x, t.y) / 100f);
+    return t == null ? 0 : 1 - (maxMap.flagVal(t.x, t.y) / 100f);
   }
   
   

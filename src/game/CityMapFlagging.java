@@ -13,12 +13,14 @@ public class CityMapFlagging {
     */
   CityMap map;
   Object  key;
+  int range;
   int flagVals[][][];
   
   
-  CityMapFlagging(CityMap map, Object key) {
+  CityMapFlagging(CityMap map, Object key, int range) {
     this.map = map;
     this.key = key;
+    this.range = range;
   }
   
   
@@ -99,11 +101,11 @@ public class CityMapFlagging {
       int level[][] = flagVals[l];
       int sideX = Nums.min(4, level.length - mip.x);
       int sideY = Nums.min(4, level.length - mip.y);
-      int maxSum = res * res * 100;
+      int maxSum = res * res * range;
       Pick <Coord> pick = new Pick(0);
       
       for (Coord c : Visit.grid(mip.x, mip.y, sideX, sideY, 1)) {
-        float rating = 1 - (level[c.x][c.y] * 1f / maxSum), dist = 0;
+        float rating = level[c.x][c.y] * 1f / maxSum, dist = 0;
         dist += Nums.abs(from.x - ((c.x + 0.5f) * res));
         dist += Nums.abs(from.y - ((c.y + 0.5f) * res));
         
@@ -149,14 +151,26 @@ public class CityMapFlagging {
     for (Coord c : Visit.grid(minX, minY, range * 2, range * 2, 1)) {
       Tile t = map.tileAt(c.x, c.y);
       float dist = CityMap.distance(from, t);
-      if (dist > range || flagVals[0][t.x][t.y] != 0) continue;
+      if (dist > range || flagVals[0][t.x][t.y] == 0) continue;
       pick.compare(t, 0 - dist);
     }
     
     return pick.result();
   }
   
+  
+  int totalSum() {
+    int sum = 0;
+    int l = flagVals.length - 1;
+    for (int[] r : flagVals[l]) for (int v : r) sum += v;
+    return sum;
+  }
+  
 }
+
+
+
+
 
 
 

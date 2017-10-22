@@ -31,11 +31,9 @@ public class BuildingForCollect extends BuildingForCrafts {
   /**  Assigning actor behaviours:
     */
   public void selectActorBehaviour(Actor actor) {
-    
     for (Good g : type.produced) {
       if (pickNextCollection(actor, g)) return;
     }
-    
     super.selectActorBehaviour(actor);
   }
   

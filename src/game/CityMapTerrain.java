@@ -54,7 +54,8 @@ public class CityMapTerrain implements TileConstants {
         
         if (Rand.num() < w && checkPlacingOkay(tile, t, map)) {
           Element f = (Element) t.generate();
-          f.enterMap(map, tile.x, tile.y, 1);
+          float level = t.growRate > 0 ? (Rand.num() + 0.5f) : 1;
+          f.enterMap(map, tile.x, tile.y, level);
         }
       }
     }

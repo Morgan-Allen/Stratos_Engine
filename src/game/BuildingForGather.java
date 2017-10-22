@@ -3,6 +3,9 @@
 package game;
 import util.*;
 import static game.Task.*;
+
+import game.CityMap.Tile;
+
 import static game.CityMap.*;
 import static game.GameConstants.*;
 
@@ -14,24 +17,48 @@ public class BuildingForGather extends Building {
   
   /**  Data fields, construction and save/load methods-
     */
-  Tally <Good> cropLevels = new Tally();
-  
-  
   public BuildingForGather(Type type) {
     super(type);
-    cropLevels.set(type.produced[0], 1);
   }
   
   
   public BuildingForGather(Session s) throws Exception {
     super(s);
-    s.loadTally(cropLevels);
   }
   
   
   public void saveState(Session s) throws Exception {
     super.saveState(s);
-    s.saveTally(cropLevels);
+  }
+  
+  
+  
+  /**  Utility methods for filling up crop areas:
+    */
+  static Tile[] applyPlanting(
+    CityMap map, int x, int y, int w, int h, Good... crops
+  ) {
+    Batch <Tile> planted = new Batch();
+    for (Coord c : Visit.grid(x, y, w, h, 1)) {
+      
+      Tile t = map.tileAt(c);
+      if (t == null || t.paved) continue;
+      if (t.above != null && t.above.type.growRate == 0) continue;
+      
+      Good seed = seedType(t, crops);
+      Element crop = new Element(seed);
+      crop.enterMap(map, c.x, c.y, -1);
+      planted.add(t);
+    }
+    return planted.toArray(Tile.class);
+  }
+  
+  
+  static Good seedType(Tile t, Good crops[]) {
+    float index = t.x % 5;
+    index += (t.y % 5) / 5f;
+    index *= crops.length / 5;
+    return crops[(int) index];
   }
   
   
@@ -46,38 +73,13 @@ public class BuildingForGather extends Building {
       return;
     }
     
-    Box2D box = fullArea();
-    if (pickPlantPoint(actor, box, true         )) return;
-    if (pickNextCrop  (actor, box, type.produced)) return;
-  }
-  
-  
-  Box2D fullArea() {
-    Box2D box = new Box2D(at.x, at.y, type.wide, type.high);
-    int range = type.gatherRange;
-    box.expandBy(range);
-    return box;
-  }
-  
-  
-  Good seedType(Tile t) {
-    float sumL = 0;
-    for (Good g : cropLevels.keys()) {
-      sumL += cropLevels.valueFor(g);
+    if (actor.inside != this) {
+      actor.returnTo(this);
+      return;
     }
     
-    float index = t.x % 5;
-    index += (t.y % 5) / 5f;
-    index *= sumL / 5;
-    
-    Good seed = null;
-    sumL = 0;
-    for (Good g : cropLevels.keys()) {
-      sumL += cropLevels.valueFor(g);
-      if (sumL >= index) { seed = g; break; }
-    }
-    
-    return seed;
+    if (pickPlantPoint(actor, false, true         )) return;
+    if (pickNextCrop  (actor, false, type.produced)) return;
   }
   
   
@@ -91,27 +93,20 @@ public class BuildingForGather extends Building {
   }
   
   
-  boolean pickPlantPoint(Actor actor, Box2D box, boolean start) {
+  boolean pickPlantPoint(Actor actor, boolean close, boolean start) {
     if (start && actor.inside != this) return false;
-    if (cropLevels.empty()) return false;
     
-    Pick <Tile> pick = new Pick();
-    Tally levels = cropLevels;
+    boolean canPlant = false;
+    for (Good g : type.produced) if (g.isCrop) canPlant = true;
+    if (! canPlant) return false;
     
-    for (Coord c : Visit.grid(box)) {
-      Tile t = map.tileAt(c.x, c.y);
-      if (t == null || t.paved || hasFocus(t)) continue;
-      
-      Type above = t.above == null ? null : t.above.type;
-      if (above != null && levels.valueFor(above) > 0) continue;
-      if (above != null && above.growRate == 0       ) continue;
-      
-      float distW = CityMap.distance(actor.at, t);
-      float distB = CityMap.distance(this  .at, t);
-      pick.compare(t, 0 - (distW + distB));
-    }
+    CityMapFlagging flagging = map.flagging.get(NEED_PLANT);
+    if (flagging == null) return false;
     
-    Tile goes = pick.result();
+    Tile goes = null;
+    if (close) goes = flagging.findNearbyPoint(actor, AVG_GATHER_RANGE);
+    else goes = flagging.pickRandomPoint(this, type.maxDeliverRange);
+    
     if (goes != null) {
       actor.embarkOnTarget(goes, 2, JOB.PLANTING, this);
       return true;
@@ -121,73 +116,60 @@ public class BuildingForGather extends Building {
   }
   
   
-  boolean pickNextCrop(Actor actor, Box2D box, Good... cropTypes) {
+  boolean pickNextCrop(Actor actor, boolean close, Good... cropTypes) {
     if (Visit.empty(cropTypes)) return false;
     
-    Pick <Element> pick = new Pick();
-    for (Coord c : Visit.grid(box)) {
-      Tile t = map.tileAt(c.x, c.y);
-      
-      if (t != null && t.above instanceof Element) {
-        Element crop = (Element) t.above;
-        if (crop.buildLevel() < 1 || hasFocus(crop)) continue;
-        if (! Visit.arrayIncludes(cropTypes, crop.type)) continue;
-        
-        float distW = CityMap.distance(actor.at, t);
-        float distB = CityMap.distance(this  .at, t);
-        pick.compare(crop, 0 - (distW + distB));
-      }
-    }
+    int spaceTaken = 0;
+    for (Good g : type.produced) spaceTaken += inventory.valueFor(g);
+    if (spaceTaken >= type.maxStock) return false;
     
-    Element goes = pick.result();
-    if (goes != null) {
-      actor.embarkOnTarget(goes, 2, JOB.HARVEST, this);
-      return true;
-    }
+    CityMapFlagging flagging = map.flagging.get(type.gatherFlag);
+    if (flagging == null) return false;
     
-    return false;
+    Tile goes = null;
+    if (close) goes = flagging.findNearbyPoint(actor, AVG_GATHER_RANGE);
+    else goes = flagging.pickRandomPoint(this, type.maxDeliverRange);
+    Element above = goes == null ? null : goes.above;
+    
+    if (above == null) return false;
+    if (! Visit.arrayIncludes(cropTypes, above.type.yields)) return false;
+    
+    actor.embarkOnTarget(goes, 2, JOB.HARVEST, this);
+    return true;
   }
   
   
   public void actorTargets(Actor actor, Target other) {
     if (other == null) return;
     
-    Box2D area = new Box2D(actor.at.x, actor.at.y, 1, 1);
-    area.expandBy(2);
-    area.cropBy(fullArea());
     Element above = other.at().above;
+    if (above == null || above.type.yields == null) return;
     
     if (actor.jobType() == JOB.PLANTING) {
       //
-      //  We have to pick a seed-type to plant first:
-      Tile under = other.at();
-      Good seed = seedType(under);
-      if (seed == null) return;
-      //
-      //  Then plonk it in the ground:
-      if (above != null) above.exitMap(map);
-      Element crop = new Element(seed);
-      crop.enterMap(map, under.x, under.y, 0);
+      //  First, initialise the crop:
+      above.setBuildLevel(0);
       //
       //  Then pick another point to sow:
-      if (! pickPlantPoint(actor, area, false)) {
+      if (! pickPlantPoint(actor, true, false)) {
         actor.returnTo(this);
       }
     }
     
     if (actor.jobType() == JOB.HARVEST) {
-      if (above == null || ! (above.type instanceof Good)) return;
       
-      above.setBuildLevel(0);
-      actor.carried      = (Good) above.type;
-      actor.carryAmount += CROP_YIELD / 100f;
+      if      (above.type.isCrop      ) above.setBuildLevel(-1);
+      else if (above.type.growRate > 0) above.setBuildLevel( 0);
+      
+      actor.carried      = above.type.yields;
+      actor.carryAmount += above.type.yieldAmount;
       
       ///I.say(actor+" harvested "+actor.carryAmount+" of "+above.type);
       
       if (actor.carryAmount >= 2) {
         actor.returnTo(this);
       }
-      else if (! pickNextCrop(actor, area, actor.carried)) {
+      else if (! pickNextCrop(actor, true, actor.carried)) {
         actor.returnTo(this);
       }
     }

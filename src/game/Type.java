@@ -92,12 +92,16 @@ public class Type extends Index.Entry implements Session.Saveable {
   Type flagKey = null;
   int wide = 1, high = 1, deep = 1;
   
+  Good    yields      = null;
+  float   yieldAmount = 0;
   Good    builtFrom  [] = NO_GOODS;
   Integer builtAmount[] = {};
+  
   boolean blocks   = true ;
   boolean mobile   = false;
   float   growRate = 0;
   int     ambience = 0;
+  boolean isCrop   = false;
   boolean aqueduct = false;
   
   
@@ -130,6 +134,7 @@ public class Type extends Index.Entry implements Session.Saveable {
   Good produced[] = NO_GOODS;
   Good consumed[] = NO_GOODS;
   Good features[] = NO_GOODS;
+  Type gatherFlag = null;
   
   int updateTime      = AVG_UPDATE_GAP  ;
   int craftTime       = AVG_CRAFT_TIME  ;

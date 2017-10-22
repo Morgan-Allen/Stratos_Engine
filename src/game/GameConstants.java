@@ -4,6 +4,8 @@ package game;
 import util.*;
 import static game.Type.*;
 import static game.CityMap.*;
+import static game.GameConstants.CROP_YIELD;
+
 import java.awt.Color;
 
 
@@ -29,6 +31,8 @@ public class GameConstants {
     WALKER_COLOR = colour(9, 9, 0),
     CITY_COLOR   = colour(7, 7, 1),
     NO_BLD_COLOR = colour(9, 0, 0),
+    MISSED_COLOR = colour(9, 0, 9),
+    
     WHITE_COLOR  = colour(10, 10, 10),
     BLACK_COLOR  = colour(0 , 0 , 0 ),
     CLEAR_COLOR  = colour(0 , 0 , 0 , 0),
@@ -274,6 +278,9 @@ public class GameConstants {
     CASH       = new Good("Cash"        , 1 , 11),
     SOIL       = new Good("Soil"        , 5 , 12),
     
+    NEED_BUILD = new Good("Need Build"  , -1, 16),
+    NEED_PLANT = new Good("Need Plant"  , -1, 17),
+    
     IS_CROP    = new Good("Is Crop"     , -1, 18),
     IS_TREE    = new Good("Is Tree"     , -1, 19),
     IS_WATER   = new Good("Is Water"    , -1, 20),
@@ -305,12 +312,18 @@ public class GameConstants {
     int i = 0;
     for (Good g : CROP_TYPES) {
       g.tint = TINT_CROPS[i++ % 3];
-      g.growRate = 1f;
-      g.flagKey  = IS_CROP;
+      g.growRate    = 1f;
+      g.isCrop      = true;
+      g.flagKey     = IS_CROP;
+      g.yields      = g;
+      g.yieldAmount = CROP_YIELD / 100f;
     }
     for (Type g : ALL_TREES) {
-      g.growRate = 0.5f;
-      g.flagKey  = IS_TREE;
+      g.name = "Forest";
+      g.growRate    = CROP_YIELD * 0.5f / 100f;
+      g.flagKey     = IS_TREE;
+      g.yields      = WOOD;
+      g.yieldAmount = 1f;
     }
   }
   
@@ -400,12 +413,13 @@ public class GameConstants {
     BALL_COURT    = new BuildType("type_ball_court"   , IS_AMENITY_BLD),
     RESIDENTIAL_BUILDINGS[] = { HOUSE, SWEEPER, BASIN, SCHOOL, BALL_COURT },
     
-    FARMER_HUT    = new BuildType("type_farmer_hut"   , IS_GATHER_BLD ),
+    FARM_PLOT     = new BuildType("type_farm_plot"    , IS_GATHER_BLD ),
+    LOGGER        = new BuildType("type_logger"       , IS_GATHER_BLD ),
     QUARRY_PIT    = new BuildType("type_quarry_pit"   , IS_CRAFTS_BLD ),
     KILN          = new BuildType("type_kiln"         , IS_CRAFTS_BLD ),
     WEAVER        = new BuildType("type_weaver"       , IS_CRAFTS_BLD ),
     MASON         = new BuildType("type_mason"        , IS_CRAFTS_BLD ),
-    INDUSTRIAL_BUILDINGS[] = { FARMER_HUT, QUARRY_PIT, KILN, WEAVER, MASON },
+    INDUSTRIAL_BUILDINGS[] = { FARM_PLOT, QUARRY_PIT, KILN, WEAVER, MASON },
     
     MARKET        = new BuildType("type_market"       , IS_CRAFTS_BLD ),
     PORTER_HOUSE  = new BuildType("type_porter_house" , IS_TRADE_BLD  ),
@@ -513,20 +527,35 @@ public class GameConstants {
     MASON.maxWorkers = 2;
     MASON.buildsWith = new Good[] { WOOD, CLAY, ADOBE };
     
-    FARMER_HUT.name = "Farmer Hut";
-    FARMER_HUT.tint = TINT_LITE_INDUSTRIAL;
-    FARMER_HUT.setDimensions(3, 3, 1);
-    FARMER_HUT.setBuildMaterials(WOOD, 5, CLAY, 2);
-    FARMER_HUT.setWorkerTypes(WORKER);
-    FARMER_HUT.produced = CROP_TYPES;
-    FARMER_HUT.maxWorkers = 2;
+    FARM_PLOT.name = "Farm Plot";
+    FARM_PLOT.tint = TINT_LITE_INDUSTRIAL;
+    FARM_PLOT.setDimensions(2, 2, 1);
+    FARM_PLOT.setBuildMaterials(WOOD, 5, CLAY, 2);
+    FARM_PLOT.setWorkerTypes(WORKER);
+    FARM_PLOT.gatherFlag = IS_CROP;
+    FARM_PLOT.produced   = CROP_TYPES;
+    FARM_PLOT.maxStock   = 25;
+    FARM_PLOT.maxWorkers = 2;
+    
+    LOGGER.name = "Logger";
+    LOGGER.tint = TINT_LITE_INDUSTRIAL;
+    LOGGER.setDimensions(2, 2, 1);
+    LOGGER.setBuildMaterials(WOOD, 5, CLAY, 2);
+    LOGGER.setWorkerTypes(WORKER);
+    LOGGER.gatherFlag = IS_TREE;
+    LOGGER.maxStock   = 25;
+    LOGGER.produced   = new Good[] { WOOD };
+    LOGGER.maxWorkers = 2;
     
     QUARRY_PIT.name = "Quarry Pit";
     QUARRY_PIT.tint = TINT_LITE_INDUSTRIAL;
-    QUARRY_PIT.setDimensions(4, 4, 0);
+    QUARRY_PIT.setDimensions(2, 2, 1);
     QUARRY_PIT.setBuildMaterials(WOOD, 5, CLAY, 2);
     QUARRY_PIT.setWorkerTypes(WORKER);
-    QUARRY_PIT.produced = new Good[] { CLAY };
+    QUARRY_PIT.gatherFlag = IS_STONE;
+    QUARRY_PIT.maxStock   = 25;
+    QUARRY_PIT.produced   = new Good[] { CLAY, ADOBE };
+    QUARRY_PIT.maxWorkers = 2;
     
     KILN.name = "Kiln";
     KILN.tint = TINT_INDUSTRIAL;
@@ -625,32 +654,32 @@ public class GameConstants {
     //  Note:  I'm doing a certain amount of shoe-horning here for the sake of
     //         balance/concision.  Bear with me.
     //  Note:  These might also work as 'upgrades' for a particular temple?
-    //
+    //  
     //  Associates of Quetzalcoatl:
     //    Patecatl- god of medicine and healing
     //    Yacetecuhtli- god of merchants and travel
-    //    Ehecatl- god of winds
-    //
+    //    Ehecatl- god of winds and sailing
+    //  
     //  Associates of Tezcatlipoca:
     //    Itztli- god of obsidian
     //    Huehuecoyotl- festive trickster
     //    Tlazolteotl- filth, purity, sin and confession
-    //
+    //  
     //  Associates of Huitzilipochtli:
     //    Tonatiuh- god of the sun
     //    Mixcoatl- war and hunting
-    //    Xiuhtecuhtli/Chantico- hearth, lordship and calendar
-    //
+    //    Xiuhtecuhtli/Chantico- hearth, wealth and calendar
+    //  
     //  Associates of Tlaloc:
     //    Chalchiutlicue- lakes and rivers
     //    Xochiquetzal/Xochipilli- fertility and sensation
     //    Cipactli/Tlaltecuhtli- caves and monsters
-    //
+    //  
     //  Associates of Mictecacehuatl/Mictlantecuhtli:
     //    Xolotl- guide to the dead
     //    Coyolxauhqui/Itzapapalotl- moon, stars and eclipses
-    //    Toci-Quilaztli- childbirth and vengeance
-    //
+    //    Quilaztli- childbirth and vengeance
+    //  
     //  Associates of Xipe Totec:
     //    Centeotl/Xilonen- god/dess of maize
     //    Tension between other Gods counts as bonus to worship.

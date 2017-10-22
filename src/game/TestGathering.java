@@ -20,15 +20,22 @@ public class TestGathering extends Test {
     CityMap map = setupTestCity(20, DESERT, MEADOW, JUNGLE);
     map.settings.toggleFog = false;
     
-    BuildingForGather farm = (BuildingForGather) FARMER_HUT.generate();
+    BuildingForGather farm = (BuildingForGather) FARM_PLOT.generate();
     farm.enterMap(map, 9, 9, 1);
     fillWorkVacancies(farm);
     CityMap.applyPaving(map, 9, 8, 10, 1, true);
     
-    
     Good needed[] = { MAIZE, RAW_COTTON };
-    farm.cropLevels.set(MAIZE, 0.5f);
-    farm.cropLevels.set(RAW_COTTON, 0.5f);
+    Tile plantTiles[] = BuildingForGather.applyPlanting(
+      map, 6, 6, 10, 10, needed
+    );
+    
+    CityMapFlagging forCrops = map.flagging.get(NEED_PLANT);
+    if (plantTiles.length != forCrops.totalSum()) {
+      I.say("\nGATHER TEST FAILED- NOT ALL PLANTED TILES WERE FLAGGED");
+      I.say("  Flagged: "+forCrops.totalSum()+"/"+plantTiles.length);
+      return;
+    }
     
     boolean planted = false;
     boolean harvest = false;
@@ -44,15 +51,13 @@ public class TestGathering extends Test {
       if (! planted) {
         Batch <Element> crops = new Batch();
         int numT = 0;
-        for (Coord c : Visit.grid(farm.fullArea())) {
-          Tile t = map.tileAt(c.x, c.y);
-          
-          if (t == null || t.paved) continue;
+        for (Tile t : plantTiles) {
           Type above = t.above == null ? null : t.above.type;
           if (above != null && above.growRate == 0) continue;
-          
           numT += 1;
-          if (Visit.arrayIncludes(needed, above)) crops.add(t.above);
+          if (Visit.arrayIncludes(needed, above) && t.above.buildLevel() >= 0) {
+            crops.add(t.above);
+          }
         }
         //
         //  If that's true, we bump up maturation to speed up harvest:

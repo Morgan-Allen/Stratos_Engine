@@ -19,7 +19,7 @@ public class Element implements Session.Saveable, Target {
   Tile at;
   int facing = N;
   
-  float buildLevel;
+  float buildLevel = -1;
   
   List <Actor> focused = null;
   
@@ -76,13 +76,16 @@ public class Element implements Session.Saveable, Target {
     
     for (Coord c : Visit.grid(x, y, type.wide, type.high, 1)) {
       Tile t = map.tileAt(c.x, c.y);
+      if (t.above != null) t.above.exitMap(map);
       t.above = this;
     }
   }
   
   
   void exitMap(CityMap map) {
-    setFlagging(false);
+    if (true       ) setFlagging(false, type.flagKey);
+    if (type.isCrop) setFlagging(false, NEED_PLANT  );
+    
     for (Coord c : Visit.grid(at.x, at.y, type.wide, type.high, 1)) {
       Tile t = map.tileAt(c.x, c.y);
       t.above = null;
@@ -143,7 +146,7 @@ public class Element implements Session.Saveable, Target {
   /**  Life cycle, combat and survival methods-
     */
   void updateGrowth() {
-    if (type.growRate > 0) {
+    if (type.growRate > 0 && buildLevel != -1) {
       incBuildLevel(SCAN_PERIOD * type.growRate / RIPEN_PERIOD);
     }
   }
@@ -168,15 +171,25 @@ public class Element implements Session.Saveable, Target {
   
   
   float setBuildLevel(float level) {
-    buildLevel = Nums.clamp(level, 0, 1.1f);
-    setFlagging(buildLevel == 1);
+    if (level == -1) {
+      buildLevel = -1;
+    }
+    else {
+      buildLevel = Nums.clamp(level, 0, 1.1f);
+    }
+    if (true) {
+      setFlagging(buildLevel >= 1, type.flagKey);
+    }
+    if (type.isCrop) {
+      setFlagging(buildLevel == -1, NEED_PLANT);
+    }
     return buildLevel;
   }
   
   
-  void setFlagging(boolean is) {
-    if (type.flagKey == null || type.mobile) return;
-    map.flagType(type.flagKey, at.x, at.y, is);
+  void setFlagging(boolean is, Type key) {
+    if (key == null || type.mobile) return;
+    map.flagType(key, at.x, at.y, is);
   }
   
   

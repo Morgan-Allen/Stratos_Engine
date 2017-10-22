@@ -139,9 +139,17 @@ public class Test {
     for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
       int fill = BLANK_COLOR;
       CityMap.Tile at = map.tileAt(c.x, c.y);
-      if      (at.above   != null) fill = at.above.type.tint;
-      else if (at.paved          ) fill = PAVE_COLOR;
-      else if (at.terrain != null) fill = at.terrain.tint;
+      
+      if (at.above != null) {
+        if (at.above.buildLevel() == -1) fill = MISSED_COLOR;
+        else fill = at.above.type.tint;
+      }
+      else if (at.paved) {
+        fill = PAVE_COLOR;
+      }
+      else if (at.terrain != null) {
+        fill = at.terrain.tint;
+      }
       graphic[c.x][c.y] = fill;
     }
     
