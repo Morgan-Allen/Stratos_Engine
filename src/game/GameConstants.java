@@ -134,6 +134,7 @@ public class GameConstants {
     FATIGUE_INTERVAL = MONTH_LENGTH * 2,
     HUNGER_REGEN     = 5,
     FOOD_UNIT_PER_HP = 2,
+    FECES_UNIT_TIME  = MONTH_LENGTH * 3,
     FATIGUE_REGEN    = MONTH_LENGTH / 4,
     HEALTH_REGEN     = MONTH_LENGTH / 2,
     AVG_MAX_HEALTH   = 5,
@@ -142,7 +143,7 @@ public class GameConstants {
     MAX_WANDER_RANGE = 20  ,
     AVG_VISIT_TIME   = 20  ,
     MAX_SHOP_RANGE   = 50  ,
-    AVG_CONSUME_TIME = 500 ,
+    AVG_CONSUME_TIME = YEAR_LENGTH,
     AVG_SERVICE_GIVE = 10  , //  value of education, diversion, etc.
     AVG_MAX_VISITORS = 4   ,
     //
@@ -349,7 +350,8 @@ public class GameConstants {
     CLASS_TRADER  = 2,
     CLASS_NOBLE   = 3,
     ALL_CLASSES[] = { 0, 1, 2, 3 },
-    TAX_VALUES [] = { 0, 10, 25, 100 }
+    TAX_VALUES [] = { 0, 10, 25, 100 },
+    TAX_INTERVAL  = YEAR_LENGTH
   ;
   final static WalkerType
     NO_WALKERS[] = new WalkerType[0],

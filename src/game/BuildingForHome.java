@@ -194,31 +194,38 @@ public class BuildingForHome extends Building {
       currentTier = nextTier;
     }
     
-    advanceConsumption(nextTier);
+    advanceWear(nextTier);
     generateOutputs(nextTier);
   }
   
   
-  void advanceConsumption(Type tier) {
-    float conLevel = residents.size() * 1f / tier.consumeTime;
+  void advanceWear(Type tier) {
+    float conLevel = 1 + (residents.size() * 1f / type.maxResidents);
     conLevel *= type.updateTime;
+    conLevel /= tier.consumeTime;
     
     for (Good cons : tier.consumed) {
       float amount = inventory.valueFor(cons);
       amount = Nums.max(0, amount - conLevel);
       inventory.set(cons, amount);
+      map.city.usedTotals.add(conLevel, cons);
     }
   }
   
   
   void generateOutputs(Type tier) {
-    float conLevel = 1f * residents.size() / tier.consumeTime;
-    conLevel *= type.updateTime;
-    inventory.add(conLevel, SOIL);
-    
-    float taxGen = TAX_VALUES[type.homeSocialClass] * conLevel;
-    taxGen *= (1 + Visit.indexOf(tier, type.upgradeTiers));
-    inventory.add(taxGen, CASH);
+    float soilLevel = residents.size();
+    soilLevel *= type.updateTime;
+    soilLevel /= FECES_UNIT_TIME;
+    inventory.add(soilLevel, SOIL);
+    map.city.makeTotals.add(soilLevel, SOIL);
+
+    float taxLevel = residents.size() * TAX_VALUES[type.homeSocialClass];
+    taxLevel *= (1 + Visit.indexOf(tier, type.upgradeTiers));
+    taxLevel *= type.updateTime;
+    taxLevel /= TAX_INTERVAL;
+    inventory.add(taxLevel, CASH);
+    map.city.makeTotals.add(taxLevel, CASH);
   }
   
   
@@ -259,7 +266,7 @@ public class BuildingForHome extends Building {
     Pick <Order> pickS = new Pick();
     
     for (Good cons : consumedBy(tier)) {
-      float need = tier.maxStock - inventory.valueFor(cons);
+      float need = tier.maxStock + 1 - inventory.valueFor(cons);
       if (need <= 0) continue;
       
       for (Building b : map.buildings) {
@@ -320,14 +327,14 @@ public class BuildingForHome extends Building {
       }
       
       else for (Good cons : consumedBy(tier)) {
-        if (this.inventory.valueFor(cons) >= tier.maxStock) continue;
+        int maxStock = tier.maxStock + 1;
+        if (this.inventory.valueFor(cons) >= maxStock) continue;
         
         float stock = enters.inventory.valueFor(cons);
         if (stock <= 0) continue;
         
-        float taken = tier.maxStock;
-        if (Visit.arrayIncludes(FOOD_TYPES, cons)) taken *= 2;
-        taken = Nums.min(taken, stock / 2);
+        if (Visit.arrayIncludes(FOOD_TYPES, cons)) maxStock *= 2;
+        float taken = Nums.min(maxStock, stock / 2);
         
         TaskDelivery d = new TaskDelivery(actor);
         d.configDelivery(enters, this, JOB.SHOPPING, cons, taken, this);
@@ -345,7 +352,18 @@ public class BuildingForHome extends Building {
     }
   }
   
+  
+  
+  /**  Rendering, debug and interface methods-
+    */
+  public String toString() {
+    if (currentTier == null) return super.toString();
+    return currentTier.name+" "+ID;
+  }
 }
+
+
+
 
 
 

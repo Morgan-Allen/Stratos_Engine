@@ -36,6 +36,10 @@ public class City implements Session.Saveable, Trader {
   boolean active;
   CityMap map;
   
+  Tally <Type> makeTotals = new Tally();
+  Tally <Type> usedTotals = new Tally();
+  
+  
   
   City(World world) {
     this.world = world;
@@ -68,6 +72,9 @@ public class City implements Session.Saveable, Trader {
     
     active = s.loadBool();
     map    = (CityMap) s.loadObject();
+    
+    s.loadTally(makeTotals);
+    s.loadTally(usedTotals);
   }
   
   
@@ -98,6 +105,9 @@ public class City implements Session.Saveable, Trader {
     
     s.saveBool(active);
     s.saveObject(map);
+    
+    s.saveTally(makeTotals);
+    s.saveTally(usedTotals);
   }
   
   

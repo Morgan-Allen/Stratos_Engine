@@ -1,8 +1,8 @@
 
 
 package game;
-import static game.GameConstants.*;
 import util.*;
+import static game.GameConstants.*;
 
 
 
@@ -13,6 +13,7 @@ public class TestCity extends Test {
     testCity(true);
   }
   
+  
   static void testCity(boolean graphics) {
     
     CityMap map = setupTestCity(32);
@@ -21,9 +22,6 @@ public class TestCity extends Test {
     CityMap.applyPaving(map, 8, 2, 1 , 25, true);
     
     Building palace  = (Building) PALACE    .generate();
-    Building house1  = (Building) HOUSE     .generate();
-    Building house2  = (Building) HOUSE     .generate();
-    Building house3  = (Building) HOUSE     .generate();
     Building school  = (Building) SCHOOL    .generate();
     Building court   = (Building) BALL_COURT.generate();
     Building basin   = (Building) BASIN     .generate();
@@ -31,14 +29,16 @@ public class TestCity extends Test {
     Building admin   = (Building) COLLECTOR .generate();
     
     palace .enterMap(map, 3 , 3 , 1);
-    house1 .enterMap(map, 9 , 6 , 1);
-    house2 .enterMap(map, 12, 6 , 1);
-    house3 .enterMap(map, 15, 6 , 1);
     court  .enterMap(map, 9 , 9 , 1);
     school .enterMap(map, 9 , 3 , 1);
     basin  .enterMap(map, 13, 9 , 1);
     sweeper.enterMap(map, 16, 9 , 1);
     admin  .enterMap(map, 18, 9 , 1);
+    
+    for (int n = 4; n-- > 0;) {
+      Building house = (Building) HOUSE.generate();
+      house.enterMap(map, 9 + (n * 3), 6, 1f);
+    }
     
     Building quarry = (Building) QUARRY_PIT.generate();
     Building kiln1  = (Building) KILN      .generate();
@@ -79,8 +79,8 @@ public class TestCity extends Test {
           }
           if (b.type == HOUSE) {
             BuildingForHome home = (BuildingForHome) b;
-            if (home.currentTier != HOUSE_T2             ) allNeeds = false;
-            if (home.inventory.valueFor(SOIL) > 0.5f) allNeeds = false;
+            if (home.currentTier != HOUSE_T2        ) allNeeds = false;
+            if (home.inventory.valueFor(SOIL) > 1.0f) allNeeds = false;
             if (home.inventory.valueFor(CASH) > 5.0f) allNeeds = false;
           }
         }
@@ -88,17 +88,31 @@ public class TestCity extends Test {
         
         if (housesOkay) {
           I.say("\nCITY SERVICES TEST CONCLUDED SUCCESSFULLY!");
+          reportOnMap(map, true);
           if (! graphics) return;
         }
       }
     }
 
     I.say("\nCITY SERVICES TEST FAILED!");
-    for (Building b : map.buildings) if (b.type == HOUSE) {
+    reportOnMap(map, false);
+  }
+  
+  
+  static void reportOnMap(CityMap map, boolean okay) {
+    if (! okay) for (Building b : map.buildings) if (b.type == HOUSE) {
       BuildingForHome house = (BuildingForHome) b;
       I.say("  "+house);
       I.say("    Tier:      "+house.currentTier);
       I.say("    Inventory: "+house.inventory);
+    }
+    I.say("\nTotal goods produced:");
+    for (Good g : HOUSE_T2.consumed) {
+      I.say("  "+g+": "+map.city.makeTotals.valueFor(g));
+    }
+    I.say("\nTotal goods consumed:");
+    for (Good g : HOUSE_T2.consumed) {
+      I.say("  "+g+": "+map.city.usedTotals.valueFor(g));
     }
   }
   

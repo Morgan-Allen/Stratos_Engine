@@ -69,6 +69,9 @@ public class BuildingForCrafts extends Building {
     
     stalled = (! allMaterials) || (! anyRoom);
     
+    
+    //  TODO:  Move this out into dedicated Tasks...
+    
     if (! stalled) {
       float prog = 1f / type.craftTime;
       
@@ -81,6 +84,7 @@ public class BuildingForCrafts extends Building {
         for (Good made : produced()) {
           if (inventory.valueFor(made) >= stockLimit(made)) continue;
           inventory.add(1, made);
+          map.city.makeTotals.add(1, made);
         }
         craftProgress = 0;
       }

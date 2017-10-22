@@ -197,7 +197,7 @@ public class Task implements Session.Saveable {
     }
     
     ActorPathSearch search = new ActorPathSearch(map, from, heads, -1);
-    search.setPaveOnly(visiting && map.paved(from.x, from.y));
+    ///search.setPaveOnly(visiting && map.paved(from.x, from.y));
     search.doSearch();
     Tile path[] = search.fullPath(Tile.class);
     
