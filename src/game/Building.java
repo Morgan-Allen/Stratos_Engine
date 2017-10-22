@@ -2,8 +2,8 @@
 
 package game;
 import util.*;
-import static game.GameConstants.*;
 import static game.CityMap.*;
+import static game.GameConstants.*;
 
 
 
@@ -113,15 +113,20 @@ public class Building extends Element implements Session.Saveable, Employer {
   
   
   void selectEntrance() {
+    Pick <Tile> pick = new Pick();
+    
     for (Coord c : Visit.perimeter(at.x, at.y, type.wide, type.high)) {
       boolean outx = c.x == at.x - 1 || c.x == at.x + type.wide;
       boolean outy = c.y == at.y - 1 || c.y == at.y + type.high;
-      if (outx && outy         ) continue;
-      if (map.blocked(c.x, c.y)) continue;
-      if (! map.paved(c.x, c.y)) continue;
-      entrance = map.tileAt(c.x, c.y);
-      break;
+      if (outx && outy  ) continue;
+      if (map.blocked(c)) continue;
+      
+      float rating = 1;
+      if (! map.paved(c.x, c.y)) rating /= 2;
+      pick.compare(map.tileAt(c), rating);
     }
+    
+    entrance = pick.result();
   }
   
   
@@ -129,11 +134,12 @@ public class Building extends Element implements Session.Saveable, Employer {
   /**  Regular updates:
     */
   void update() {
-    if (entrance == null || ! map.paved(entrance.x, entrance.y)) {
+    if (entrance == null || map.blocked(entrance.x, entrance.y)) {
       selectEntrance();
     }
     
     if (--updateGap <= 0) {
+      selectEntrance();
       updateOnPeriod(type.updateTime);
       updateGap = type.updateTime;
     }
@@ -156,56 +162,16 @@ public class Building extends Element implements Session.Saveable, Employer {
   }
   
   
+  Good[] needed  () { return type.needed  ; }
+  Good[] produced() { return type.produced; }
+  
+  
+  float stockNeeded(Good need) { return type.maxStock; }
+  float stockLimit (Good made) { return type.maxStock; }
+  
+  
   Tally <Good> homeConsumption() {
     return new Tally();
-  }
-  
-  
-  Building findNearestOfType(Type type, int maxDist) {
-    return findNearestDemanding(type, null, null, -1);
-  }
-  
-  
-  Building findNearestWithFeature(Good feature, int maxDist) {
-    return findNearestDemanding(null, feature, null, -1);
-  }
-  
-  
-  Building findNearestDemanding(
-    Type type, Good needed, int maxDist
-  ) {
-    return findNearestDemanding(type, null, needed, maxDist);
-  }
-  
-  
-  Building findNearestDemanding(
-    Type type, Good feature,
-    Good needed, int maxDist
-  ) {
-    Pick <Building> pick = new Pick();
-    boolean trades = this.type.isTradeBuilding();
-    
-    for (Building b : map.buildings) {
-      if (type != null && b.type != type) continue;
-      
-      boolean otherTrades = b.type.isTradeBuilding();
-      if (trades && otherTrades) continue;
-      
-      boolean featured = b.type.hasFeature(feature);
-      if (feature != null && ! featured) continue;
-      
-      float dist = CityMap.distance(entrance, b.entrance);
-      if (maxDist > 0 && dist > maxDist) continue;
-      
-      float rating = 1;
-      if (needed != null) rating *= b.demandFor(needed);
-      if (rating <= 0) continue;
-      if (otherTrades) rating /= 2;
-      
-      pick.compare(b, rating * CityMap.distancePenalty(dist));
-    }
-    
-    return pick.result();
   }
   
   
@@ -298,6 +264,29 @@ public class Building extends Element implements Session.Saveable, Employer {
   
   public void visitedBy(Actor actor) {
     return;
+  }
+  
+  
+  
+  /**  Handling fog and visibility-
+    */
+  public float sightLevel() {
+    return sightLevel(false);
+  }
+  
+  
+  public float maxSightLevel() {
+    return sightLevel(true);
+  }
+  
+  
+  private float sightLevel(boolean max) {
+    float avg = 0;
+    for (int x = 2; x-- > 0;) for (int y = 2; y-- > 0;) {
+      Tile t = map.tileAt(at.x + (x * type.wide), at.y + (y * type.high));
+      avg += max ? map.fog.maxSightLevel(t) : map.fog.sightLevel(t);
+    }
+    return avg / 4;
   }
   
   

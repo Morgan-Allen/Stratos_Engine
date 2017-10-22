@@ -31,6 +31,7 @@ public class CityMap implements Session.Saveable {
   Table <City, Tile> transitPoints = new Table();
   
   
+  //  TODO:  Move this into the terrain class...
   int growScanIndex = 0;
   static class HabitatScan {
     int numTiles = 0;
@@ -111,9 +112,13 @@ public class CityMap implements Session.Saveable {
   
   void performSetup(int size) {
     
+    //  TODO:  The mip structure is a pain.  Do I want that right now?  No,
+    //  I do not.
+    //*
     int s = 1;
     while (s < size) s *= 2;
     size = s;
+    //*/
     
     this.size     = size;
     this.scanSize = Nums.round(size * 1f / SCAN_RES, 1, true);
@@ -310,8 +315,10 @@ public class CityMap implements Session.Saveable {
   ) {
     for (Coord c : Visit.grid(x, y, w, h, 1)) {
       Tile t = map.tileAt(c.x, c.y);
-      if (t       != null) t.paved = is;
-      if (t.above != null) t.above.exitMap(map);
+      if (t == null) continue;
+      t.paved = is;
+      if (t.above == null) continue;
+      t.above.exitMap(map);
     }
   }
   
@@ -326,7 +333,6 @@ public class CityMap implements Session.Saveable {
       if (t.above != null) t.above.exitMap(map);
     }
   }
-  
   
   
   

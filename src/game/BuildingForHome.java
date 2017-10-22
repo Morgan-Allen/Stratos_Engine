@@ -289,7 +289,7 @@ public class BuildingForHome extends Building {
     Pick <Building> pickV = new Pick();
     
     pickV.compare(this, 1.0f * Rand.num());
-    Building goes = findNearestWithFeature(DIVERSION, 50);
+    Building goes = TaskDelivery.findNearestWithFeature(DIVERSION, 50, this);
     if (goes != null) {
       pickV.compare(goes, 1.0f * Rand.num());
     }
@@ -329,7 +329,10 @@ public class BuildingForHome extends Building {
         if (Visit.arrayIncludes(FOOD_TYPES, cons)) taken *= 2;
         taken = Nums.min(taken, stock / 2);
         
-        actor.beginDelivery(enters, this, JOB.SHOPPING, cons, taken, this);
+        TaskDelivery d = new TaskDelivery(actor);
+        d.configDelivery(enters, this, JOB.SHOPPING, cons, taken, this);
+        if (d != null) actor.assignTask(d);
+        
         break;
       }
     }

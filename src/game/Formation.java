@@ -301,6 +301,9 @@ public class Formation implements
     
     //  TODO:  Allow for targeting of anything noticed by other members of the
     //  team?
+    
+    //  TODO:  This needs to be replaced with personal sight range, I think.
+    
     float seeBonus = type.numFile;
     
     for (Actor w : map.walkers) if (hostile(w, member)) {

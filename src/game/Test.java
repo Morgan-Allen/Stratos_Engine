@@ -105,7 +105,6 @@ public class Test {
   static int[][]  fogLayer  = null;
   static int      frames    = 0   ;
   static boolean  cityView  = true;
-  static boolean  paused    = false;
   static Coord    hover     = new Coord(-1, -1);
   static boolean  doBuild   = false;
   static Object   buildMenu = null;
@@ -219,6 +218,8 @@ public class Test {
   static CityMap runGameLoop(
     CityMap map, int numUpdates, boolean graphics, String filename
   ) {
+    int skipUpdate = 0;
+    
     while (true) {
       
       if (graphics) {
@@ -265,12 +266,13 @@ public class Test {
         }
         
         if (pressed.includes('p')) {
-          paused = ! paused;
+          map.settings.paused = ! map.settings.paused;
         }
       }
       
-      if (! paused) {
+      if (skipUpdate <= 0 && ! map.settings.paused) {
         map.update();
+        skipUpdate = map.settings.slowed ? 10 : 1;
         if (numUpdates > 0 && --numUpdates == 0) break;
       }
       
@@ -278,6 +280,7 @@ public class Test {
         try { Thread.sleep(100); }
         catch (Exception e) {}
       }
+      skipUpdate -= 1;
     }
     return map;
   }
@@ -357,6 +360,16 @@ public class Test {
       Actor a = (Actor) e;
       report.append("\n  Growth: "+I.percent(a.growLevel()));
       report.append("\n  Task: "+a.jobDesc());
+      
+      if (a.carried != null) {
+        report.append("\n  Carried: "+a.carried+": "+a.carryAmount);
+      }
+      if (a.cargo != null) {
+        report.append("\n  Cargo:");
+        for (Good g : a.cargo.keys()) {
+          report.append("\n    "+g+": "+a.cargo.valueFor(g));
+        }
+      }
     }
     else {
       report.append("\n  Build level: "+I.percent(e.buildLevel));
@@ -558,7 +571,7 @@ public class Test {
     //*
     report.append("\n\nFunds: "+map.city.currentFunds);
     report.append("\n\nTime: "+map.time);
-    report.append("\nPaused: "+paused  );
+    report.append("\nPaused: "+map.settings.paused);
     report.append("\n");
     //*/
     

@@ -115,14 +115,9 @@ public class Task implements Session.Saveable {
     this.pathIndex = -1;
     path = updatePathing();
     
-    if (! Visit.empty(path)) {
-      if (actor.reports()) I.say("  Path is: "+path.length+" tiles long...");
-      return this;
-    }
-    else {
-      if (actor.reports()) I.say("  Could not find path!");
-      return null;
-    }
+    if (Visit.empty(path)) return null;
+    
+    return this;
   }
   
   
@@ -185,24 +180,39 @@ public class Task implements Session.Saveable {
   
   
   Tile[] updatePathing() {
-    CityMap map = actor.map;
-    Building inside = actor.inside;
-    boolean visiting = visits != null;
     
-    if (actor.reports()) {
-      I.say(this+" pathing toward "+(visiting ? visits : target));
-    }
+    CityMap  map      = actor.map;
+    Building inside   = actor.inside;
+    boolean  visiting = visits != null;
+    
+    boolean report = actor.reports();
+    if (report) I.say(this+" pathing toward "+(visiting ? visits : target));
     
     Tile from  = (inside == null) ? actor.at : inside.entrance;
     Tile heads = pathTarget();
     
-    if (from == null || heads == null) return null;
-    //heads.setFocused(actor, true);
+    if (from == null || heads == null) {
+      if (report) I.say("  Bad endpoints: "+from+" -> "+heads);
+      return null;
+    }
     
     ActorPathSearch search = new ActorPathSearch(map, from, heads, -1);
     search.setPaveOnly(visiting && map.paved(from.x, from.y));
     search.doSearch();
-    return search.fullPath(Tile.class);
+    Tile path[] = search.fullPath(Tile.class);
+    
+    if (path == null) {
+      if (report) I.say("  Could not find path!");
+      return null;
+    }
+    else if (path.length < (CityMap.distance(from, heads) / 2) - 1) {
+      if (report) I.say("  Path is impossible!");
+      return null;
+    }
+    else {
+      if (report) I.say("  Path is: "+path.length+" tiles long...");
+      return path;
+    }
   }
   
   

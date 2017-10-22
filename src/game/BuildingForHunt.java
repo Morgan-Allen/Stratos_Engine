@@ -8,9 +8,11 @@ import static game.GameConstants.*;
 
 
 
-public class BuildingForHunt extends BuildingForCrafts {
+public class BuildingForHunt extends Building {
   
   
+  /**  Data fields, construction and save/load methods-
+    */
   public BuildingForHunt(Type type) {
     super(type);
   }
@@ -27,46 +29,30 @@ public class BuildingForHunt extends BuildingForCrafts {
   
   
   
-  
+  /**  Handling walker behaviours-
+    */
   public void selectActorBehaviour(Actor actor) {
     
-    TaskExplore task = new TaskExplore(actor);
-    task = task.configExploration();
-    
-    if (task != null) {
-      actor.assignTask(task);
+    Task delivery = TaskDelivery.pickNextDelivery(actor, this, produced());
+    if (delivery != null) {
+      actor.assignTask(delivery);
       return;
     }
     
-    
-    //  TODO:  Implement this once exploring is tested.
-    /*
-    Pick <Actor> forHunt = new Pick();
-    
-    for (Actor a : map.walkers) {
-      if (a.type.category != Type.IS_ANIMAL_WLK) continue;
-      if (a.type.predator || a.growLevel() < 1 ) continue;
-      
-      float dist = CityMap.distance(actor.at(), a.at());
-      if (dist > MAX_EXPLORE_DIST) continue;
-      
-      forHunt.compare(a, CityMap.distancePenalty(dist));
+    if (actor.idle() && inventory.valueFor(MEAT) < type.maxStock) {
+      TaskHunting hunting = new TaskHunting(actor);
+      hunting = hunting.configHunting(this);
+      if (hunting != null) actor.assignTask(hunting);
     }
     
-    if (! forHunt.empty()) {
-      
+    if (actor.idle()) {
+      TaskExplore exploring = new TaskExplore(actor);
+      exploring = exploring.configExploration();
+      if (exploring != null) actor.assignTask(exploring);
     }
-    //*/
-    
   }
   
-  
 }
-
-
-
-
-
 
 
 

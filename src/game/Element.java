@@ -107,6 +107,16 @@ public class Element implements Session.Saveable, Target {
   
   /**  Handling focus for actor activities-
     */
+  public float sightLevel() {
+    return map.fog.sightLevel(at);
+  }
+  
+  
+  public float maxSightLevel() {
+    return map.fog.maxSightLevel(at);
+  }
+  
+  
   public void targetedBy(Actor w) {
     return;
   }

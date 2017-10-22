@@ -19,7 +19,7 @@ public class TestMilitary extends Test {
     City    cityA = world.cities.atIndex(0);
     City    cityB = world.cities.atIndex(1);
     CityMap map   = CityMapTerrain.generateTerrain(
-      cityA, 50, MEADOW, JUNGLE
+      cityA, 32, MEADOW, JUNGLE
     );
     cityA.name = "Home City";
     cityB.name = "Away City";
@@ -30,15 +30,15 @@ public class TestMilitary extends Test {
     
     
     BuildingForArmy fort = (BuildingForArmy) GARRISON.generate();
-    fort.enterMap(map, 20, 20, 1);
+    fort.enterMap(map, 10, 10, 1);
     fillWorkVacancies(fort);
-    CityMap.applyPaving(map, 10, 19, 40, 1, true);
+    CityMap.applyPaving(map, 2, 9, 30, 1, true);
     
     Formation troops = fort.formation;
     
     for (int n = 8; n-- > 0;) {
       Building house = (Building) HOUSE.generate();
-      house.enterMap(map, 10 + (n * 3), 17, 1);
+      house.enterMap(map, 2 + (n * 3), 7, 1);
       fillHomeVacancies(house, CITIZEN);
     }
     
@@ -63,7 +63,7 @@ public class TestMilitary extends Test {
       map = runGameLoop(map, 10, graphics, "saves/test_military.tlt");
       
       if (troops.recruits.size() >= 8 && ! recruited) {
-        troops.beginSecuring(map.tileAt(30, 40), TileConstants.E, null);
+        troops.beginSecuring(map.tileAt(25, 25), TileConstants.E, null);
         recruited = true;
       }
       

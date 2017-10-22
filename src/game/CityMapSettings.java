@@ -16,7 +16,10 @@ public class CityMapSettings {
     toggleFog     = true,
     toggleHunger  = true,
     toggleFatigue = true,
-    toggleInjury  = true;
+    toggleInjury  = true,
+    
+    slowed = false,
+    paused = false;
   
   
   void loadState(Session s) throws Exception {

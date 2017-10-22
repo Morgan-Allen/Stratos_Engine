@@ -257,17 +257,18 @@ public class GameConstants {
     WATER      = new Good("Water"       , 0 , 0 ),
     MAIZE      = new Good("Maize"       , 10, 1 ),
     FRUIT      = new Good("Fruit"       , 12, 2 ),
-    RAW_COTTON = new Good("Raw Cotton"  , 15, 3 ),
-    WOOD       = new Good("Wood"        , 10, 4 ),
-    RUBBER     = new Good("Rubber"      , 25, 5 ),
-    CLAY       = new Good("Clay"        , 10, 6 ),
-    ADOBE      = new Good("Adobe"       , 20, 7 ),
+    MEAT       = new Good("Meat"        , 35, 3 ),
+    RAW_COTTON = new Good("Raw Cotton"  , 15, 4 ),
+    WOOD       = new Good("Wood"        , 10, 5 ),
+    RUBBER     = new Good("Rubber"      , 25, 6 ),
+    CLAY       = new Good("Clay"        , 10, 7 ),
+    ADOBE      = new Good("Adobe"       , 20, 8 ),
     
-    POTTERY    = new Good("Pottery"     , 50, 8 ),
-    COTTON     = new Good("Cotton"      , 75, 9 ),
+    POTTERY    = new Good("Pottery"     , 50, 9 ),
+    COTTON     = new Good("Cotton"      , 75, 10),
     
-    CASH       = new Good("Cash"        , 1 , 10),
-    SOIL       = new Good("Soil"        , 5 , 11),
+    CASH       = new Good("Cash"        , 1 , 11),
+    SOIL       = new Good("Soil"        , 5 , 12),
     
     IS_ADMIN   = new Good("Is Admin"    , -1, 21),
     IS_MARKET  = new Good("Is Market"   , -1, 22),
@@ -281,7 +282,7 @@ public class GameConstants {
     RELIGION   = new Good("Religion"    , -1, 33),
     
     CROP_TYPES  [] = { MAIZE, FRUIT, RAW_COTTON },
-    FOOD_TYPES  [] = { MAIZE, FRUIT },
+    FOOD_TYPES  [] = { MAIZE, FRUIT, MEAT },
     TREE_TYPES  [] = { WOOD, RUBBER },
     STONE_TYPES [] = { CLAY, ADOBE  },
     BUILD_GOODS [] = { WOOD, CLAY, ADOBE },
@@ -569,6 +570,7 @@ public class GameConstants {
     HUNTER_LODGE.setWorkerTypes(HUNTER);
     HUNTER_LODGE.maxWorkers = 2;
     HUNTER_LODGE.maxHealth  = 100;
+    HUNTER_LODGE.produced   = new Good[] { MEAT };
     
     GARRISON.name = "Garrison";
     GARRISON.tint = TINT_MILITARY;
@@ -632,7 +634,7 @@ public class GameConstants {
     //  Associates of Tlaloc:
     //    Chalchiutlicue- lakes and rivers
     //    Xochiquetzal/Xochipilli- fertility and sensation
-    //    Cipactli/Tlaltecuhtli- caves and aquatic monsters
+    //    Cipactli/Tlaltecuhtli- caves and monsters
     //
     //  Associates of Mictecacehuatl/Mictlantecuhtli:
     //    Xolotl- guide to the dead

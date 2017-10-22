@@ -120,6 +120,7 @@ public class CityMapFog {
   /**  Exploration-related queries:
     */
   Tile pickRandomFogPoint(Element near) {
+    if (! map.settings.toggleFog) return null;
     
     boolean report = near.reports();
     if (report) I.say("\nGETTING TILE TO LOOK AT...");
@@ -170,9 +171,14 @@ public class CityMapFog {
   
   
   Tile findNearbyFogPoint(Element near, int range) {
+    if (! map.settings.toggleFog) return null;
+    
     Tile from = near.at();
     int minX = from.x - range, minY = from.y - range;
     Pick <Tile> pick = new Pick();
+    
+    //  TODO:  Randomise this is a little, and avoid having two or more actors
+    //  exploring the same area at once.
     
     for (Coord c : Visit.grid(minX, minY, range * 2, range * 2, 1)) {
       Tile t = map.tileAt(c.x, c.y);
@@ -189,11 +195,13 @@ public class CityMapFog {
   /**  Common queries-
     */
   float sightLevel(Tile t) {
+    if (! map.settings.toggleFog) return 1;
     return t == null ? 0 : (oldVals[t.x][t.y] / 100f);
   }
   
   
   float maxSightLevel(Tile t) {
+    if (! map.settings.toggleFog) return 1;
     return t == null ? 0 : (maxVals[0][t.x][t.y] / 100f);
   }
   

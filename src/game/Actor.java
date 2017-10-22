@@ -180,7 +180,9 @@ public class Actor extends Element implements Session.Saveable, Journeys {
       boolean  combat    = inCombat();
       Tile     pathEnd   = (Tile) Visit.last(task.path);
       float    distance  = CityMap.distance(at, pathEnd);
-      float    minRange  = Nums.max(0.1f, combat ? type.attackRange : 0);
+      float    minRange  = 0.1f;
+      
+      if (combat && ! indoors()) minRange = type.attackRange;
       //
       //  If you're close enough to start the behaviour, act accordingly:
       if (distance <= minRange) {
@@ -276,6 +278,11 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   }
   
   
+  public boolean indoors() {
+    return inside != null;
+  }
+  
+  
   
   /**  Miscellaneous behaviour triggers:
     */
@@ -311,20 +318,6 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   }
   
   
-  void beginDelivery(
-    Building from, Building goes, JOB jobType,
-    Good carried, float amount, Employer e
-  ) {
-    if (from == null || goes == null || goes.entrance == null) return;
-    
-    TaskDelivery d = new TaskDelivery(this);
-    job = d.configDelivery(from, goes, jobType, carried, amount, e);
-    if (job == null) return;
-    
-    if (reports()) I.say(this+" will deliver "+amount+" "+carried+" to "+goes);
-  }
-  
-  
   void beginAttack(Target target, JOB jobType, Employer e) {
     if (target == null) return;
     if (reports()) I.say(this+" will attack "+target);
@@ -357,8 +350,14 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   }
   
   
+  public boolean idle() {
+    return job == null;
+  }
+  
+  
   public boolean inCombat() {
-    return jobType() == JOB.COMBAT;
+    JOB type = jobType();
+    return type == JOB.COMBAT || type == JOB.HUNTING;
   }
   
   
@@ -368,11 +367,8 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   void pickupGood(Good carried, float amount, Building store) {
     if (store == null || carried == null || amount <= 0) return;
     
-    if (this.carried != carried) this.carryAmount = 0;
-    
     store.inventory.add(0 - amount, carried);
-    this.carried      = carried;
-    this.carryAmount += amount ;
+    setCarried(carried, amount);
   }
   
   
@@ -384,6 +380,13 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     store.inventory.add(carryAmount, carried);
     this.carried = null;
     this.carryAmount = 0;
+  }
+  
+  
+  void setCarried(Good carried, float amount) {
+    if (this.carried != carried) this.carryAmount = 0;
+    this.carried      = carried;
+    this.carryAmount += amount ;
   }
   
   

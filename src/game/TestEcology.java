@@ -23,10 +23,6 @@ public class TestEcology extends Test {
     Tally <Type> realPops  = new Tally();
     Tally <Type> popLevels = new Tally();
     
-    Building lodge = (Building) HUNTER_LODGE.generate();
-    lodge.enterMap(map, 4, 4, 1);
-    Test.fillWorkVacancies(lodge);
-    
     CityMapTerrain.populateAnimals(map, species);
     
     final int RUN_TIME = HUNTER_LIFESPAN;

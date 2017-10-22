@@ -9,7 +9,7 @@ import static game.GameConstants.*;
 
 
 
-public class BuildingForGather extends BuildingForCrafts {
+public class BuildingForGather extends Building {
   
   
   /**  Data fields, construction and save/load methods-
@@ -40,17 +40,15 @@ public class BuildingForGather extends BuildingForCrafts {
     */
   public void selectActorBehaviour(Actor actor) {
     
+    Task delivery = TaskDelivery.pickNextDelivery(actor, this, produced());
+    if (delivery != null) {
+      actor.assignTask(delivery);
+      return;
+    }
+    
     Box2D box = fullArea();
-    if (pickNextDelivery(actor)) return;
     if (pickPlantPoint(actor, box, true         )) return;
     if (pickNextCrop  (actor, box, type.produced)) return;
-    super.selectActorBehaviour(actor);
-  }
-  
-  
-  void advanceProduction() {
-    this.stalled = true;
-    return;
   }
   
   

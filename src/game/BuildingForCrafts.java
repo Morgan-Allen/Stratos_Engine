@@ -49,14 +49,6 @@ public class BuildingForCrafts extends Building {
   }
   
   
-  
-  Good[] needed  () { return type.needed  ; }
-  Good[] produced() { return type.produced; }
-  
-  float stockNeeded(Good need) { return type.maxStock; }
-  float stockLimit (Good made) { return type.maxStock; }
-  
-  
   float demandFor(Good g) {
     float need = Visit.arrayIncludes(needed(), g) ? stockNeeded(g) : 0;
     return super.demandFor(g) + need;
@@ -119,50 +111,16 @@ public class BuildingForCrafts extends Building {
       return;
     }
     //
-    //  And failing all that, start crafting:
-    else if (pickNextDelivery(actor)) {
+    //  If you're already home, see if any deliveries are required:
+    Task delivery = TaskDelivery.pickNextDelivery(actor, this, produced());
+    if (delivery != null) {
+      actor.assignTask(delivery);
       return;
     }
-    else if (! stalled) {
-      actor.embarkOnVisit(this, -1, JOB.CRAFTING, this);
-    }
-  }
-  
-  
-  boolean pickNextDelivery(Actor actor) {
     //
-    //  Find someone to deliver to:
-    class Order { Building goes; Good good; float amount; }
-    Pick <Order> pickD = new Pick();
-    
-    for (Good made : produced()) {
-      int amount = (int) inventory.valueFor(made);
-      if (amount <= 0) continue;
-      
-      //  TODO:  Iterate over suitable building-types here.
-      Building goes = findNearestDemanding(null, made, type.maxDeliverRange);
-      if (goes == null) continue;
-      
-      int demand = Nums.round(goes.demandFor(made), 1, true);
-      amount = Nums.min(amount, 10    );
-      amount = Nums.min(amount, demand);
-      if (amount <= 0) continue;
-      
-      float penalty = CityMap.distancePenalty(entrance, goes.entrance);
-      Order o = new Order();
-      o.goes   = goes  ;
-      o.good   = made  ;
-      o.amount = amount;
-      pickD.compare(o, amount * penalty);
-    }
-    
-    if (! pickD.empty()) {
-      Order o = pickD.result();
-      actor.beginDelivery(this, o.goes, JOB.DELIVER, o.good, o.amount, this);
-      return true;
-    }
-    else {
-      return false;
+    //  And failing all that, start crafting:
+    if (! stalled) {
+      actor.embarkOnVisit(this, -1, JOB.CRAFTING, this);
     }
   }
   
