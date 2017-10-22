@@ -57,7 +57,7 @@ public class BuildingForGather extends Building {
   static Good seedType(Tile t, Good crops[]) {
     float index = t.x % 5;
     index += (t.y % 5) / 5f;
-    index *= crops.length / 5;
+    index *= crops.length / 5f;
     return crops[(int) index];
   }
   
