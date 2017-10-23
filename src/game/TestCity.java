@@ -50,6 +50,19 @@ public class TestCity extends Test {
     kiln2 .enterMap(map, 9 , 14, 1);
     market.enterMap(map, 4 , 9 , 1);
     
+    for (int n = 4; n-- > 0;) {
+      Element rock = new Element(CLAY_BANK1);
+      rock.enterMap(map, 1 + (n * 3), 28, 1);
+    }
+    
+    CityMapFlagging forRock = map.flagging.get(IS_STONE);
+    if (forRock.totalSum() != 4) {
+      I.say("NO ROCKS FLAGGED: "+forRock.totalSum());
+      return;
+    }
+    
+    
+    
     for (Building b : map.buildings) if (b.type == HOUSE) {
       b.inventory.set(SOIL, 2 );
       b.inventory.set(CASH    , 20);

@@ -198,9 +198,11 @@ public class GameConstants {
     JUNGLE_TREE1 = new Type("fixture_j_tree1", IS_FIXTURE),
     DESERT_ROCK1 = new Type("fixture_d_rock1", IS_FIXTURE),
     DESERT_ROCK2 = new Type("fixture_d_rock2", IS_FIXTURE),
+    CLAY_BANK1   = new Type("fixture_b_clay1", IS_FIXTURE),
     
     ALL_TREES[] = { JUNGLE_TREE1 },
-    ALL_ROCKS[] = { DESERT_ROCK1, DESERT_ROCK2 }
+    ALL_ROCKS[] = { DESERT_ROCK1, DESERT_ROCK2 },
+    ALL_CLAYS[] = { CLAY_BANK1 }
   ;
   final static Type
     TAPIR   = new Type("animal_tapir" , IS_ANIMAL_ACT),
@@ -216,6 +218,7 @@ public class GameConstants {
     JUNGLE_TREE1.tint = colour(0, 3, 0);
     DESERT_ROCK1.tint = colour(6, 4, 4);
     DESERT_ROCK2.tint = colour(6, 4, 4);
+    CLAY_BANK1  .tint = colour(5, 3, 3);
     JUNGLE      .tint = colour(1, 4, 1);
     DESERT      .tint = colour(5, 4, 3);
     MEADOW      .tint = colour(2, 5, 2);
@@ -223,7 +226,8 @@ public class GameConstants {
     
     //  TODO:  UNIFY WITH CROPS BELOW!
     JUNGLE_TREE1.growRate = 0.5f;
-    DESERT_ROCK1.wide = DESERT_ROCK1.high = 2;
+    DESERT_ROCK1.setDimensions(2, 2, 1);
+    CLAY_BANK1  .setDimensions(2, 2, 0);
     LAKE.blocks = true;
     
     //  TODO:  UNIFY WITH WALKER-TYPES BELOW!
@@ -332,6 +336,12 @@ public class GameConstants {
       r.yields      = ADOBE;
       r.yieldAmount = 1f;
     }
+    for (Type c : ALL_CLAYS) {
+      c.name = "Clay Bank";
+      c.flagKey     = IS_STONE;
+      c.yields      = CLAY;
+      c.yieldAmount = 1f;
+    }
   }
   
   
@@ -423,7 +433,7 @@ public class GameConstants {
     
     FARM_PLOT     = new BuildType("type_farm_plot"    , IS_GATHER_BLD ),
     LOGGER        = new BuildType("type_logger"       , IS_GATHER_BLD ),
-    QUARRY_PIT    = new BuildType("type_quarry_pit"   , IS_CRAFTS_BLD ),
+    QUARRY_PIT    = new BuildType("type_quarry_pit"   , IS_GATHER_BLD ),
     KILN          = new BuildType("type_kiln"         , IS_CRAFTS_BLD ),
     WEAVER        = new BuildType("type_weaver"       , IS_CRAFTS_BLD ),
     MASON         = new BuildType("type_mason"        , IS_CRAFTS_BLD ),
