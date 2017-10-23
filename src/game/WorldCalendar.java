@@ -20,14 +20,10 @@ public class WorldCalendar {
     int maxDay = DAYS_PER_MONTH * MONTHS_PER_YEAR;
     
     if (calDay > maxDay) return STATE_GREY_DAYS;
-    
     int month = calDay / DAYS_PER_MONTH;
     return (month % 2) == 1 ? STATE_DARKNESS : STATE_LIGHT;
   }
   
   
+  
 }
-
-
-
-

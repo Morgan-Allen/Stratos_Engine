@@ -100,7 +100,7 @@ public class BuildingForArmy extends BuildingForCrafts {
     else {
       formation.selectActorBehaviour(actor);
     }
-    if (actor.job == null) {
+    if (actor.idle()) {
       super.selectActorBehaviour(actor);
     }
   }

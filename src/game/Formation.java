@@ -335,8 +335,9 @@ public class Formation implements
       
       for (int dir : T_ADJACENT) {
         Tile tile = map.tileAt(p.x + T_X[dir], p.y + T_Y[dir]);
-        //if (tile == null || tile.above != sieged || tile.hasFocus()) continue;
         if (tile == null || tile.above != sieged) continue;
+        if (Task.hasTaskFocus(tile, Task.JOB.COMBAT)) continue;
+        
         best = tile;
         break;
       }

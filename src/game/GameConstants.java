@@ -4,8 +4,6 @@ package game;
 import util.*;
 import static game.Type.*;
 import static game.CityMap.*;
-import static game.GameConstants.CROP_YIELD;
-
 import java.awt.Color;
 
 
@@ -610,6 +608,8 @@ public class GameConstants {
     PORTER_HOUSE.setWorkerTypes(PORTER, WORKER);
     PORTER_HOUSE.features = new Good[] { IS_TRADER };
     
+    //  TODO:  You could make this into more of a 'governor's post', since the
+    //  tax-collectors basically functioned that way.
     COLLECTOR.name = "Collector";
     COLLECTOR.tint = TINT_COMMERCIAL;
     COLLECTOR.setDimensions(2, 2, 1);
@@ -667,41 +667,10 @@ public class GameConstants {
       t.homeSocialClass = CLASS_NOBLE;
       t.features        = new Good[] { RELIGION };
     }
-    //
-    //  TODO:  Possibly, later-
-    //  Note:  I'm doing a certain amount of shoe-horning here for the sake of
-    //         balance/concision.  Bear with me.
-    //  Note:  These might also work as 'upgrades' for a particular temple?
-    //  
-    //  Associates of Quetzalcoatl:
-    //    Patecatl- god of medicine and healing
-    //    Yacetecuhtli- god of merchants and travel
-    //    Ehecatl- god of winds and sailing
-    //  
-    //  Associates of Tezcatlipoca:
-    //    Itztli- god of obsidian
-    //    Huehuecoyotl- festive trickster
-    //    Tlazolteotl- filth, purity, sin and confession
-    //  
-    //  Associates of Huitzilipochtli:
-    //    Tonatiuh- god of the sun
-    //    Mixcoatl- war and hunting
-    //    Xiuhtecuhtli/Chantico- hearth, wealth and calendar
-    //  
-    //  Associates of Tlaloc:
-    //    Chalchiutlicue- lakes and rivers
-    //    Xochiquetzal/Xochipilli- fertility and sensation
-    //    Cipactli/Tlaltecuhtli- caves and monsters
-    //  
-    //  Associates of Mictecacehuatl/Mictlantecuhtli:
-    //    Xolotl- guide to the dead
-    //    Coyolxauhqui/Itzapapalotl- moon, stars and eclipses
-    //    Quilaztli- childbirth and vengeance
-    //  
-    //  Associates of Xipe Totec:
-    //    Centeotl/Xilonen- god/dess of maize
-    //    Tension between other Gods counts as bonus to worship.
     
+    //
+    //  NOTE- there's a bunch of other shrines/upgrades I might add later, but
+    //  I want to work those out in due time.  Later.
     for (Type t : ALL_SHRINES) {
       t.tint = TINT_RELIGIOUS;
       if (t == SHRINE_OMC || t == SHRINE_OMT) {
@@ -719,10 +688,14 @@ public class GameConstants {
   
   /**  Commonly used interfaces-
     */
+  final static Series <Actor> NO_FOCUS = new Batch();
+  
   static interface Target {
     Tile at();
-    void targetedBy(Actor w);
-    //void setFocused(Walker w, boolean is);
+    void targetedBy(Actor a);
+    void setFocused(Actor a, boolean is);
+    Series <Actor> focused();
+    boolean hasFocus();
   }
   
   static interface Trader {

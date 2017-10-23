@@ -75,18 +75,8 @@ public class BuildingForGather extends Building {
       return;
     }
     
-    if (pickPlantPoint(actor, false, true         )) return;
     if (pickNextCrop  (actor, false, type.produced)) return;
-  }
-  
-  
-  protected boolean hasFocus(Target t) {
-    //  TODO:  The hasFocus() method for elements/tiles should be accomplishing
-    //  this.
-    for (Actor w : workers) {
-      if (w.job != null && w.job.target == t) return true;
-    }
-    return false;
+    if (pickPlantPoint(actor, false, true         )) return;
   }
   
   

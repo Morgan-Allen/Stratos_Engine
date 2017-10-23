@@ -191,23 +191,27 @@ public class CityMap implements Session.Saveable {
       return;
     }
     
-    /*
-    public void setFocused(Walker w, boolean is) {
+    
+    public void setFocused(Actor a, boolean is) {
       if (is) {
         if (focused == null) focused = new List();
-        focused.include(w);
+        focused.include(a);
       }
       else if (focused != null) {
-        focused.remove(w);
+        focused.remove(a);
         if (focused.size() == 0) focused = null;
       }
+    }
+    
+    
+    public Series <Actor> focused() {
+      return focused == null ? NO_FOCUS : focused;
     }
     
     
     public boolean hasFocus() {
       return focused != null;
     }
-    //*/
     
     
     public String toString() {

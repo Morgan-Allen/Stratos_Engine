@@ -40,7 +40,7 @@ public class ActorAsAnimal extends Actor {
     //  Establish a few details first...
     float hurtRating = fatigue + injury;
     Tile rests = findGrazePoint();
-    job = null;
+    assignTask(null);
     //
     //  If you're seriously tired or hurt, but not hungry, find a place to rest:
     if (hurtRating > type.maxHealth / 2 && hunger < 1 && rests != null) {
@@ -49,7 +49,7 @@ public class ActorAsAnimal extends Actor {
     //
     //  If you're hungry, look for food, either by grazing within your habitat
     //  or seeking prey:
-    if (job == null && hunger >= 1) {
+    if (idle() && hunger >= 1) {
       if (type.predator) {
         Actor prey = findPrey();
         if (prey != null) beginAttack(prey, JOB.HUNTING, null);
@@ -60,12 +60,12 @@ public class ActorAsAnimal extends Actor {
     }
     //
     //  If you're still in pain, rest up-
-    if (job == null && hurtRating >= 0.5 && rests != null) {
+    if (idle() && hurtRating >= 0.5 && rests != null) {
       embarkOnTarget(at(), 10, JOB.RESTING, null);
     }
     //
     //  If that all fails, wander about a little-
-    if (job == null) {
+    if (idle()) {
       startRandomWalk();
     }
   }

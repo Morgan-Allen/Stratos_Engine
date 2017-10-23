@@ -20,7 +20,7 @@ public class TestSieging extends Test {
     City    cityA = world.cities.atIndex(0);
     City    cityB = world.cities.atIndex(1);
     CityMap map   = CityMapTerrain.generateTerrain(
-      cityA, 50, MEADOW, JUNGLE
+      cityA, 32, MEADOW, JUNGLE
     );
     map.settings.toggleFog = false;
     cityA.name = "Home City";
@@ -30,9 +30,8 @@ public class TestSieging extends Test {
     City.setRelations(cityA, City.RELATION.ENEMY, cityB, City.RELATION.ENEMY);
     
     BuildingForArmy fort = (BuildingForArmy) GARRISON.generate();
-    fort.enterMap(map, 20, 20, 1);
-    CityMap.applyPaving(map, 10, 19, 40, 1, true);
-    
+    fort.enterMap(map, 10, 10, 1);
+    CityMap.applyPaving(map, 10, 9, 40, 1, true);
     
     
     Formation enemies = new Formation();

@@ -145,8 +145,32 @@ public class Task implements Session.Saveable {
   
   
   
-  /**  Pathing-related methods:
+  /**  Pathing and focus-related methods:
     */
+  static Target focusTarget(Task t) {
+    if (t        == null) return null;
+    if (t.target != null) return t.target;
+    if (t.visits != null) return t.visits;
+    if (t.path   != null) return (Tile) Visit.last(t.path);
+    return null;
+  }
+  
+  
+  static boolean hasTaskFocus(Target t, JOB type) {
+    for (Actor a : t.focused()) if (a.jobType() == type) return true;
+    return false;
+  }
+  
+  
+  Tile pathTarget() {
+    Tile t = null;
+    if (t == null && visits != null) t = visits.entrance;
+    if (t == null && target != null) t = target.at();
+    if (t == null && path   != null) t = (Tile) Visit.last(path);
+    return t;
+  }
+  
+  
   boolean checkAndUpdatePathing() {
     if (checkPathing()) return true;
     
@@ -167,15 +191,6 @@ public class Task implements Session.Saveable {
     }
     
     return true;
-  }
-  
-  
-  Tile pathTarget() {
-    Tile t = null;
-    if (t == null && visits != null) t = visits.entrance;
-    if (t == null && target != null) t = target.at();
-    if (t == null && path   != null) t = (Tile) Visit.last(path);
-    return t;
   }
   
   

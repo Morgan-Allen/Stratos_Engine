@@ -35,7 +35,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   Building  inside;
   boolean   guest;
   
-  Task job;
+  Task task;
   
   Good  carried = null;
   float carryAmount = 0;
@@ -72,7 +72,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     inside    = (Building ) s.loadObject();
     guest     = s.loadBool();
     
-    job = (Task) s.loadObject();
+    task = (Task) s.loadObject();
     
     carried     = (Good) s.loadObject();
     carryAmount = s.loadFloat();
@@ -103,7 +103,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     s.saveObject(inside   );
     s.saveBool  (guest    );
     
-    s.saveObject(job);
+    s.saveObject(task);
     
     s.saveObject(carried);
     s.saveFloat(carryAmount);
@@ -146,11 +146,11 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     if (formation != null) formation.toggleRecruit(this, false);
     if (home      != null) home.setResident(this, false);
     if (work      != null) work.setWorker  (this, false);
-    if (job       != null) job.onCancel();
+    if (task      != null) task.onCancel();
     home      = null;
     work      = null;
     formation = null;
-    job       = null;
+    assignTask(null);
   }
   
   
@@ -172,8 +172,8 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     //
     //  TODO:  Don't allow another job to be assigned while this one is in
     //  the middle of an update!
-    if (job != null && job.checkAndUpdatePathing()) {
-      Task     task      = this.job;
+    if (task != null && task.checkAndUpdatePathing()) {
+      Task     task      = this.task;
       Employer origin    = task.origin;
       Building visits    = task.visits;
       Target   target    = task.target;
@@ -217,14 +217,12 @@ public class Actor extends Element implements Session.Saveable, Journeys {
         
         if (inside != null) setInside(inside, false);
       }
+      //
+      //  Either way, allow the employer to monitor yourself:
+      if (origin != null) origin.actorUpdates(this);
     }
     else {
       beginNextBehaviour();
-    }
-    //
-    //  Finally, allow the current employer to monitor the actor-
-    if (job != null && job.origin != null) {
-      job.origin.actorUpdates(this);
     }
     //
     //  Update vision-
@@ -239,10 +237,10 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   
   void beginNextBehaviour() {
-    job = null;
+    assignTask(null);
     
     //  NOTE:  Subclasses are expected to override this behaviour!
-    if (job == null) {
+    if (idle()) {
       startRandomWalk();
     }
   }
@@ -253,7 +251,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     */
   private void setInside(Building b, boolean yes) {
     if (b == null) return;
-    Employer origin = job == null ? null : job.origin;
+    Employer origin = task == null ? null : task.origin;
     
     if (yes && b != inside) {
       b.visitors.include(this);
@@ -287,7 +285,12 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   /**  Miscellaneous behaviour triggers:
     */
   void assignTask(Task task) {
-    this.job = task;
+    Target oldT = Task.focusTarget(this.task);
+    this.task = task;
+    Target newT = Task.focusTarget(this.task);
+    
+    if (oldT != null) oldT.setFocused(this, false);
+    if (newT != null) newT.setFocused(this, true );
   }
   
   
@@ -295,8 +298,8 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     if (goes == null) return;
     if (reports()) I.say(this+" will visit "+goes+" for time "+maxTime);
     
-    job = new Task(this);
-    job = job.configTask(e, goes, null, jobType, maxTime);
+    Task t = new Task(this);
+    assignTask(t.configTask(e, goes, null, jobType, maxTime));
   }
   
   
@@ -304,8 +307,8 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     if (goes == null) return;
     if (reports()) I.say(this+" will target "+goes+" for time "+maxTime);
     
-    job = new Task(this);
-    job = job.configTask(e, null, goes, jobType, maxTime);
+    Task t = new Task(this);
+    assignTask(t.configTask(e, null, goes, jobType, maxTime));
   }
   
   
@@ -313,8 +316,8 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     if (origin == null || origin.entrance == null || inside == origin) return;
     if (reports()) I.say(this+" will return to "+origin);
     
-    job = new Task(this);
-    job = job.configTask(origin, origin, null, JOB.RETURNING, 0);
+    Task t = new Task(this);
+    assignTask(t.configTask(origin, origin, null, JOB.RETURNING, 0));
   }
   
   
@@ -322,8 +325,8 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     if (target == null) return;
     if (reports()) I.say(this+" will attack "+target);
     
-    job = new Task(this);
-    job = job.configTask(e, null, target, jobType, 0);
+    Task t = new Task(this);
+    assignTask(t.configTask(e, null, target, jobType, 0));
   }
   
   
@@ -331,27 +334,27 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     if (rests == null) return;
     if (reports()) I.say(this+" will rest at "+rests);
     
-    job = new Task(this);
-    job = job.configTask(rests, rests, null, JOB.RESTING, -1);
+    Task t = new Task(this);
+    assignTask(t.configTask(rests, rests, null, JOB.RESTING, -1));
   }
   
   
   void startRandomWalk() {
     if (reports()) I.say(this+" beginning random walk...");
     
-    job = new TaskWander(this);
-    job = job.configTask(null, null, null, JOB.WANDERING, 0);
+    Task t = new TaskWander(this);
+    assignTask(t.configTask(null, null, null, JOB.WANDERING, 0));
   }
   
   
   public JOB jobType() {
-    if (job == null) return JOB.NONE;
-    return job.type;
+    if (task == null) return JOB.NONE;
+    return task.type;
   }
   
   
   public boolean idle() {
-    return job == null;
+    return task == null;
   }
   
   
@@ -400,8 +403,8 @@ public class Actor extends Element implements Session.Saveable, Journeys {
       Tile entry = CityBorders.findTransitPoint(goes.map, journey.from);
       enterMap(goes.map, entry.x, entry.y, 1);
     }
-    if (job != null) {
-      job.onArrival(goes, journey);
+    if (task != null) {
+      task.onArrival(goes, journey);
     }
   }
   
@@ -430,7 +433,6 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   void setAsKilled(String cause) {
     state = STATE_DEAD;
-    job   = null;
     exitMap();
     setDestroyed();
   }
@@ -503,7 +505,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   
   public String jobDesc() {
-    if (job == null) return "Idle";
+    if (task == null) return "Idle";
     return jobType().toString();
   }
 }

@@ -110,6 +110,7 @@ public class CityMapFlagging {
         dist += Nums.abs(from.y - ((c.y + 0.5f) * res));
         
         if (maxRange > 0 && dist > maxRange + res) continue;
+        if (l == 0 && map.tileAt(c).hasFocus()   ) continue;
         
         rating *= res * Rand.num() / (dist + res);
         pick.compare(new Coord(c), rating);
@@ -145,13 +146,16 @@ public class CityMapFlagging {
     int minX = from.x - range, minY = from.y - range;
     Pick <Tile> pick = new Pick();
     
-    //  TODO:  Randomise this is a little, and avoid having two or more actors
-    //  pick the same point at once.
+    //  TODO:  Randomise this a little?
     
     for (Coord c : Visit.grid(minX, minY, range * 2, range * 2, 1)) {
+      
       Tile t = map.tileAt(c.x, c.y);
+      if (t == null || t.hasFocus()) continue;
+      
       float dist = CityMap.distance(from, t);
       if (dist > range || flagVals[0][t.x][t.y] == 0) continue;
+      
       pick.compare(t, 0 - dist);
     }
     

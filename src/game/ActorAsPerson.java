@@ -36,7 +36,7 @@ public class ActorAsPerson extends Actor {
     //
     //  Establish some facts about the citizen first:
     boolean adult = adult();
-    job = null;
+    assignTask(null);
     
     //  Adults will search for work and a place to live:
     if ((homeCity == null || homeCity == map.city) && adult) {
@@ -58,29 +58,20 @@ public class ActorAsPerson extends Actor {
     
     //  Once home & work have been established, try to derive a task to
     //  perform-
-    if (job == null && formation != null && formation.active) {
+    if (idle() && formation != null && formation.active) {
       formation.selectActorBehaviour(this);
     }
-    if (job == null && work != null) {
+    if (idle() && work != null) {
       work.selectActorBehaviour(this);
     }
-    if (job == null && home != null) {
+    if (idle() && home != null) {
       home.selectActorBehaviour(this);
     }
-    if (job == null && (hurtRating >= 1 || injury > 0)) {
+    if (idle() && (hurtRating >= 1 || injury > 0)) {
       beginResting(home);
     }
-    if (job == null) {
+    if (idle()) {
       startRandomWalk();
-    }
-    
-    //  And report afterward...
-    if (reports()) {
-      I.say("\n"+this+" BEGAN NEW BEHAVIOUR: "+jobType()+", TIME: "+map.time);
-      if (job != null) {
-        if (job.visits != null) I.say("  VISITING:  "+job.visits);
-        if (job.target != null) I.say("  TARGETING: "+job.target);
-      }
     }
   }
   

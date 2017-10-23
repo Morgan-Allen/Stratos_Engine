@@ -40,13 +40,12 @@ public class TaskHunting extends Task {
     */
   TaskHunting configHunting(Building store) {
     
-    //  TODO:  ENSURE MORE THAN ONE HUNTER DOESN'T TARGET THE SAME PREY!
-    
     Pick <Actor> forHunt = new Pick();
     for (Actor a : actor.map.walkers) {
-      if (a.maxSightLevel() == 0) continue;
+      if (a.maxSightLevel() == 0               ) continue;
       if (a.type.category != Type.IS_ANIMAL_ACT) continue;
       if (a.type.predator || a.growLevel() < 1 ) continue;
+      if (hasTaskFocus(a, JOB.HUNTING)         ) continue;
       
       float dist = CityMap.distance(actor.at(), a.at());
       if (dist > MAX_EXPLORE_DIST) continue;

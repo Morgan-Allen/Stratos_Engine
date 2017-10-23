@@ -37,11 +37,42 @@ public class TestGathering extends Test {
       return;
     }
     
-    boolean planted = false;
-    boolean harvest = false;
+    boolean planted  = false;
+    boolean harvest  = false;
+    boolean badFocus = false;
     
     while (map.time < 1000 || graphics) {
       runGameLoop(map, 10, graphics, "saves/test_gathering.tlt");
+      
+      //
+      //  Ensure that every actor has exactly one focus-target:
+      for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
+        
+        Tile t = map.tileAt(c);
+        
+        if (t.focused().size() > 1) {
+          I.say("\nGATHER TEST FAILED- MULTIPLE ACTORS FOCUSED ON POINT:");
+          I.say("  "+t+" -> "+t.focused());
+          badFocus = true;
+          break;
+        }
+        
+        Actor a = t.focused().first();
+        if (a == null) continue;
+        
+        Target mainFocus = Task.focusTarget(a.task);
+        if (mainFocus != t) {
+          I.say("\nGATHER TEST FAILED- ACTOR-FOCUS WAS NOT REMOVED FROM:");
+          I.say("  "+t+", focused by "+a+", now focused on "+mainFocus);
+          badFocus = true;
+          break;
+        }
+      }
+      
+      if (badFocus) {
+        break;
+      }
+      
       //
       //  Every surrounding tile needs to be either:
       //  (A) paved,
