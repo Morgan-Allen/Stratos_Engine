@@ -305,7 +305,7 @@ public class Formation implements
     
     float seeBonus = type.numFile;
     
-    for (Actor w : map.walkers) if (hostile(w, member)) {
+    for (Actor w : map.actors) if (hostile(w, member)) {
       float distW = CityMap.distance(member.at, w.at);
       float distF = CityMap.distance(w.at, securedPoint);
       float range = member.type.sightRange + seeBonus;

@@ -153,7 +153,7 @@ public class Test {
       graphic[c.x][c.y] = fill;
     }
     
-    for (Actor w : map.walkers) if (w.inside == null) {
+    for (Actor w : map.actors) if (w.inside == null) {
       int fill = WALKER_COLOR;
       if      (w.work != null) fill = w.work.type.tint;
       else if (w.home != null) fill = w.home.type.tint;
@@ -247,7 +247,7 @@ public class Test {
           above = map.above(hover.x, hover.y);
           
           //  TODO:  Have actors register within nearby tiles themselves.
-          for (Actor a : map.walkers) {
+          for (Actor a : map.actors) {
             if (a.at.x == hover.x && a.at.y == hover.y) above = a;
           }
         }
@@ -584,10 +584,10 @@ public class Test {
     //*/
     
     float avgHunger = 0;
-    for (Actor a : map.walkers) avgHunger += a.hunger / a.type.maxHealth;
-    avgHunger /= map.walkers.size();
+    for (Actor a : map.actors) avgHunger += a.hunger / a.type.maxHealth;
+    avgHunger /= map.actors.size();
     
-    report.append("\nTOTAL POPULATION: "+map.walkers.size());
+    report.append("\nTOTAL POPULATION: "+map.actors.size());
     report.append("\nHUNGER LEVEL: "+I.percent(avgHunger)+"\n\n");
     //for (Actor a : map.walkers) report.append("\n  "+a);
     

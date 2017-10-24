@@ -41,7 +41,7 @@ public class TaskHunting extends Task {
   TaskHunting configHunting(Building store) {
     
     Pick <Actor> forHunt = new Pick();
-    for (Actor a : actor.map.walkers) {
+    for (Actor a : actor.map.actors) {
       if (a.maxSightLevel() == 0               ) continue;
       if (a.type.category != Type.IS_ANIMAL_ACT) continue;
       if (a.type.predator || a.growLevel() < 1 ) continue;

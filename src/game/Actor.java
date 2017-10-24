@@ -129,14 +129,14 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   void enterMap(CityMap map, int x, int y, float buildLevel) {
     this.map = map;
     this.at  = map.tileAt(x, y);
-    map.walkers.add(this);
+    map.actors.add(this);
   }
   
   
   void exitMap() {
     if (inside != null) setInside(inside, false);
     
-    map.walkers.remove(this);
+    map.actors.remove(this);
     map = null;
     at  = null;
   }

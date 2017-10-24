@@ -50,7 +50,7 @@ public class CityMapFog {
     this.oldVals = new byte[size][size];
     this.maxMap = new CityMapFlagging(map, "max. fog", MAX_FOG);
     maxMap.setupWithSize(size);
-
+    
     for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
       maxMap.setFlagVal(c.x, c.y, MAX_FOG);
     }

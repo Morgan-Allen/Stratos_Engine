@@ -26,7 +26,7 @@ public class CityMap implements Session.Saveable {
   int time = 0;
   
   List <Building> buildings = new List();
-  List <Actor   > walkers   = new List();
+  List <Actor   > actors    = new List();
   
   Table <City, Tile> transitPoints = new Table();
   
@@ -62,7 +62,7 @@ public class CityMap implements Session.Saveable {
     time = s.loadInt();
     
     s.loadObjects(buildings);
-    s.loadObjects(walkers  );
+    s.loadObjects(actors   );
     
     for (int n = s.loadInt(); n-- > 0;) {
       City with = (City) s.loadObject();
@@ -100,7 +100,7 @@ public class CityMap implements Session.Saveable {
     s.saveInt(time);
     
     s.saveObjects(buildings);
-    s.saveObjects(walkers  );
+    s.saveObjects(actors   );
     
     s.saveInt(transitPoints.size());
     for (City c : transitPoints.keySet()) {
@@ -124,8 +124,7 @@ public class CityMap implements Session.Saveable {
   
   void performSetup(int size) {
     
-    //  TODO:  The mip structure is a pain.  Do I want that right now?  No,
-    //  I do not.
+    //  TODO:  This might not be strictly required?
     //*
     int s = 1;
     while (s < size) s *= 2;
@@ -361,7 +360,7 @@ public class CityMap implements Session.Saveable {
     for (Building b : buildings) {
       b.update();
     }
-    for (Actor w : walkers) {
+    for (Actor w : actors) {
       w.update();
     }
     

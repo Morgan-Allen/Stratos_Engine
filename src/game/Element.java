@@ -17,8 +17,6 @@ public class Element implements Session.Saveable, Target {
   
   CityMap map;
   Tile at;
-  int facing = N;
-  
   float buildLevel = -1;
   
   List <Actor> focused = null;
@@ -35,8 +33,6 @@ public class Element implements Session.Saveable, Target {
     type   = (Type) s.loadObject();
     map    = (CityMap) s.loadObject();
     at     = loadTile(map, s);
-    facing = s.loadInt();
-    
     buildLevel = s.loadFloat();
     
     if (s.loadBool()) s.loadObjects(focused = new List());
@@ -48,8 +44,6 @@ public class Element implements Session.Saveable, Target {
     s.saveObject(type);
     s.saveObject(map);
     saveTile(at, map, s);
-    s.saveInt(facing);
-    
     s.saveFloat(buildLevel);
     
     s.saveBool(focused != null);

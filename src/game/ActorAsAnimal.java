@@ -99,7 +99,7 @@ public class ActorAsAnimal extends Actor {
     //  target pregnant animals (for the sake of ensuring that populations can
     //  regenerate.)
     
-    for (Actor a : map.walkers) {
+    for (Actor a : map.actors) {
       int category = a.type.category;
       if (a.type.predator) continue;
       if (a.pregnancy != 0) continue;
@@ -192,7 +192,7 @@ public class ActorAsAnimal extends Actor {
         
         float idealPop = CityMapTerrain.idealPopulation(type, map);
         float actualPop = 0;
-        for (Actor a : map.walkers) if (a.type == type) {
+        for (Actor a : map.actors) if (a.type == type) {
           actualPop += a.pregnancy > 0 ? 2 : 1;
         }
         

@@ -45,7 +45,7 @@ public class TestEcology extends Test {
           maxPop   = (idealPop * 1.5f) + 2,
           realPop  = 0;
         
-        for (Actor a : map.walkers) {
+        for (Actor a : map.actors) {
           if (a.type == s) realPop++;
         }
         

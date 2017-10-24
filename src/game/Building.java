@@ -190,6 +190,12 @@ public class Building extends Element implements Session.Saveable, Employer {
   }
   
   
+  protected int maxWorkers(Type w) {
+    if (! Visit.arrayIncludes(type.workerTypes, w)) return 0;
+    return type.maxWorkers;
+  }
+  
+  
   protected int numResidents(int socialClass) {
     return residents.size();
     //  TODO:  Restore this later once you have multiple housing types...
@@ -199,16 +205,11 @@ public class Building extends Element implements Session.Saveable, Employer {
   }
   
   
-  protected int maxWorkers(Type w) {
-    if (! Visit.arrayIncludes(type.workerTypes, w)) return 0;
-    return type.maxWorkers;
-  }
-  
-  
   protected int maxResidents(int socialClass) {
+    return type.maxResidents;
     //  TODO:  Restore this later once you have multiple housing types...
     //if (type.homeSocialClass != socialClass) return 0;
-    return type.maxResidents;
+    //return type.maxResidents;
   }
   
   

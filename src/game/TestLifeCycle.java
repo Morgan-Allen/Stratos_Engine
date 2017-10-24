@@ -55,7 +55,7 @@ public class TestLifeCycle extends Test {
         }
         if (allFilled) {
           migrated = true;
-          originalPop = map.walkers.copy();
+          originalPop = map.actors.copy();
           int i = 0;
           for (Actor w : originalPop) {
             w.sexData = ((i++ % 2) == 0) ? Actor.SEX_FEMALE : Actor.SEX_MALE;
@@ -92,14 +92,14 @@ public class TestLifeCycle extends Test {
           break;
         }
         
-        for (Actor w : map.walkers) {
+        for (Actor w : map.actors) {
           if (w.child() && w.alive() && ! originalPop.includes(w)) {
             if (! births.includes(w)) I.say("  Born: "+w);
             births.include(w);
           }
         }
         for (Actor w : originalPop) {
-          if (w.dead() && ! map.walkers.includes(w)) {
+          if (w.dead() && ! map.actors.includes(w)) {
             if (! deaths.includes(w)) I.say("  Died: "+w);
             deaths.include(w);
           }
