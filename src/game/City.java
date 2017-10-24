@@ -23,6 +23,8 @@ public class City implements Session.Saveable, Trader {
   
   World world;
   float mapX, mapY;
+  
+  CityEvents events = new CityEvents(this);
   Table <City, Integer> distances = new Table();
   
   int currentFunds = 0;
@@ -54,6 +56,8 @@ public class City implements Session.Saveable, Trader {
     world = (World) s.loadObject();
     mapX  = s.loadFloat();
     mapY  = s.loadFloat();
+    
+    events.loadState(s);
     for (int n = s.loadInt(); n-- > 0;) {
       distances.put((City) s.loadObject(), s.loadInt());
     }
@@ -85,6 +89,8 @@ public class City implements Session.Saveable, Trader {
     s.saveObject(world);
     s.saveFloat(mapX);
     s.saveFloat(mapY);
+    
+    events.saveState(s);
     s.saveInt(distances.size());
     for (City c : distances.keySet()) {
       s.saveObject(c);

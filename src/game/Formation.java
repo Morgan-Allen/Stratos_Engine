@@ -189,50 +189,9 @@ public class Formation implements
       else {
         if (reports()) I.say("\nARRIVED AT: "+goes+" FROM "+journey.from);
         this.away = true;
-        attendCityAway(goes, journey);
+        CityEvents.handleInvasion(this, goes, journey);
       }
     }
-  }
-  
-  
-  void attendCityAway(City goes, World.Journey journey) {
-    City  from      = journey.from;
-    float power     = formationPower();
-    float cityPower = goes.armyPower;
-    
-    float chance = 0, casualties = 0, numFought = recruits.size();
-    boolean victory = false;
-    chance     = power / (power + cityPower);
-    chance     = Nums.clamp((chance * 2) - 0.5f, 0, 1);
-    casualties = (Rand.num() + (1 - chance)) / 2;
-    
-    if (Rand.num() < chance) {
-      setRelations(from, RELATION.LORD, goes, RELATION.VASSAL);
-      casualties -= 0.25f;
-      victory = true;
-    }
-    else {
-      casualties += 0.25f;
-      victory = false;
-    }
-    
-    casualties *= numFought;
-    for (float i = Nums.min(numFought, casualties); i-- > 0;) {
-      Actor lost = (Actor) Rand.pickFrom(recruits);
-      this.toggleRecruit(lost, false);
-    }
-    
-    //
-    //  TODO:  Consider staying to pacify the locals, depending on mission
-    //  parameters, et cetera!
-    
-    I.say("\n"+this+" CONDUCTED ACTION AGAINST "+goes);
-    I.say("  Victorious:    "+victory);
-    I.say("  Casualties:    "+casualties / numFought);
-    I.say("  Home city now: "+goes.relations.get(from)+" of "+goes);
-    
-    stopSecuringPoint();
-    goes.world.beginJourney(goes, from, this);
   }
   
   
