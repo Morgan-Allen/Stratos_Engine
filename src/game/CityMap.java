@@ -16,28 +16,20 @@ public class CityMap implements Session.Saveable {
     */
   final static int SCAN_RES = 16;
   
-  final CityMapSettings settings = new CityMapSettings();
-  
   City city;
   int size, scanSize;
   Tile grid[][];
-  CityMapFog fog = new CityMapFog(this);
   
   int time = 0;
   
+  final CityMapSettings settings = new CityMapSettings();
+  final CityMapFog      fog      = new CityMapFog    (this);
+  final CityMapTerrain  terrain  = new CityMapTerrain(this);
+  Table <City, Tile           > transitPoints = new Table();
+  Table <Type, CityMapFlagging> flagging      = new Table();
+  
   List <Building> buildings = new List();
   List <Actor   > actors    = new List();
-  
-  Table <City, Tile> transitPoints = new Table();
-  
-  //  TODO:  Move this into the terrain class!
-  int growScanIndex = 0;
-  static class HabitatScan {
-    int numTiles = 0;
-    int densities[][];
-  }
-  HabitatScan scans[][] = new HabitatScan[2][ALL_TERRAINS.length];
-  Table <Type, CityMapFlagging> flagging = new Table();
   
   String saveName;
   
@@ -50,19 +42,16 @@ public class CityMap implements Session.Saveable {
   public CityMap(Session s) throws Exception {
     s.cacheInstance(this);
     
-    settings.loadState(s);
-    
     city = (City) s.loadObject();
     performSetup(s.loadInt());
     for (Coord c : Visit.grid(0, 0, size, size, 1)) {
       grid[c.x][c.y].loadState(s);
     }
-    fog.loadState(s);
-    
     time = s.loadInt();
     
-    s.loadObjects(buildings);
-    s.loadObjects(actors   );
+    settings.loadState(s);
+    fog     .loadState(s);
+    terrain .loadState(s);
     
     for (int n = s.loadInt(); n-- > 0;) {
       City with = (City) s.loadObject();
@@ -70,10 +59,6 @@ public class CityMap implements Session.Saveable {
       transitPoints.put(with, point);
     }
     
-    growScanIndex = s.loadInt();
-    for (int i = 2; i-- > 0;) for (int h = ALL_TERRAINS.length; h-- > 0;) {
-      scans[i][h] = loadScan(s);
-    }
     for (int n = s.loadInt(); n-- > 0;) {
       Type key = (Type) s.loadObject();
       CityMapFlagging forKey = new CityMapFlagging(this, key, 1);
@@ -82,25 +67,25 @@ public class CityMap implements Session.Saveable {
       flagging.put(key, forKey);
     }
     
+    s.loadObjects(buildings);
+    s.loadObjects(actors   );
+    
     saveName = s.loadString();
   }
   
   
   public void saveState(Session s) throws Exception {
     
-    settings.saveState(s);
-    
     s.saveObject(city);
     s.saveInt(size);
     for (Coord c : Visit.grid(0, 0, size, size, 1)) {
       grid[c.x][c.y].saveState(s);
     }
-    fog.saveState(s);
-    
     s.saveInt(time);
     
-    s.saveObjects(buildings);
-    s.saveObjects(actors   );
+    settings.saveState(s);
+    fog     .saveState(s);
+    terrain .saveState(s);
     
     s.saveInt(transitPoints.size());
     for (City c : transitPoints.keySet()) {
@@ -108,15 +93,14 @@ public class CityMap implements Session.Saveable {
       saveTile(transitPoints.get(c), this, s);
     }
     
-    s.saveInt(growScanIndex);
-    for (int i = 2; i-- > 0;) for (int h = ALL_TERRAINS.length; h-- > 0;) {
-      saveScan(scans[i][h], s);
-    }
     s.saveInt(flagging.size());
     for (Type key : flagging.keySet()) {
       s.saveObject(key);
       flagging.get(key).saveState(s);
     }
+    
+    s.saveObjects(buildings);
+    s.saveObjects(actors   );
     
     s.saveString(saveName);
   }
@@ -375,83 +359,7 @@ public class CityMap implements Session.Saveable {
     time += 1;
     
     fog.updateFog();
-    updateGrowth();
-  }
-  
-  
-  
-  /**  Growth, habitats and fertility:
-    */
-  void updateGrowth() {
-    int totalTiles  = size * size;
-    int targetIndex = (totalTiles * (time % SCAN_PERIOD)) / SCAN_PERIOD;
-    if (targetIndex < growScanIndex) targetIndex = totalTiles;
-    
-    while (++growScanIndex < targetIndex) {
-      int x = growScanIndex / size, y = growScanIndex % size;
-      Element above = grid[x][y].above;
-      if (above != null) above.updateGrowth();
-      scanHabitat(grid[x][y]);
-    }
-    
-    if (targetIndex == totalTiles) {
-      endScan();
-    }
-  }
-  
-  
-  void endScan() {
-    growScanIndex = 0;
-    for (int i = ALL_TERRAINS.length; i-- > 0;) {
-      scans[0][i] = scans[1][i];
-      scans[1][i] = null;
-    }
-  }
-  
-  
-  HabitatScan initHabitatScan() {
-    HabitatScan scan = new HabitatScan();
-    scan.densities = new int[scanSize][scanSize];
-    return scan;
-  }
-  
-  
-  HabitatScan loadScan(Session s) throws Exception {
-    if (! s.loadBool()) return null;
-    
-    HabitatScan scan = initHabitatScan();
-    scan.numTiles = s.loadInt();
-    for (Coord c : Visit.grid(0, 0, scanSize, scanSize, 1)) {
-      scan.densities[c.x][c.y] = s.loadInt();
-    }
-    return scan;
-  }
-  
-  
-  void saveScan(HabitatScan scan, Session s) throws Exception {
-    if (scan == null) { s.saveBool(false); return; }
-    
-    s.saveInt(scan.numTiles);
-    for (Coord c : Visit.grid(0, 0, scanSize, scanSize, 1)) {
-      s.saveInt(scan.densities[c.x][c.y]);
-    }
-  }
-  
-  
-  void scanHabitat(Tile tile) {
-    Terrain t = tile.terrain;
-    if (t == null || tile.paved) {
-      return;
-    }
-    if (tile.above != null && tile.above.type.category != Type.IS_FIXTURE) {
-      return;
-    }
-    
-    HabitatScan scan = scans[1][t.terrainIndex];
-    if (scan == null) scan = scans[1][t.terrainIndex] = initHabitatScan();
-    
-    scan.numTiles += 1;
-    scan.densities[tile.x / SCAN_RES][tile.y / SCAN_RES] += 1;
+    terrain.updateTerrain();
   }
   
   

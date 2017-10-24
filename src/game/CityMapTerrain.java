@@ -10,6 +10,109 @@ import static game.GameConstants.*;
 public class CityMapTerrain implements TileConstants {
   
   
+  final CityMap map;
+  
+  //  TODO:  Move this into the terrain class!
+  int growScanIndex = 0;
+  static class HabitatScan {
+    int numTiles = 0;
+    int densities[][];
+  }
+  HabitatScan scans[][] = new HabitatScan[2][ALL_TERRAINS.length];
+  
+  
+  CityMapTerrain(CityMap map) {
+    this.map = map;
+  }
+  
+  
+  void loadState(Session s) throws Exception {
+    growScanIndex = s.loadInt();
+    for (int i = 2; i-- > 0;) for (int h = ALL_TERRAINS.length; h-- > 0;) {
+      if (! s.loadBool()) { scans[i][h] = null; continue; }
+      
+      HabitatScan scan = initHabitatScan();
+      scan.numTiles = s.loadInt();
+      for (Coord c : Visit.grid(0, 0, map.scanSize, map.scanSize, 1)) {
+        scan.densities[c.x][c.y] = s.loadInt();
+      }
+      scans[i][h] = scan;
+    }
+  }
+  
+  
+  void saveState(Session s) throws Exception {
+    s.saveInt(growScanIndex);
+    for (int i = 2; i-- > 0;) for (int h = ALL_TERRAINS.length; h-- > 0;) {
+      HabitatScan scan = scans[i][h];
+      if (scan == null) { s.saveBool(false); continue; }
+      
+      s.saveInt(scan.numTiles);
+      for (Coord c : Visit.grid(0, 0, map.scanSize, map.scanSize, 1)) {
+        s.saveInt(scan.densities[c.x][c.y]);
+      }
+    }
+  }
+  
+  
+  HabitatScan initHabitatScan() {
+    HabitatScan scan = new HabitatScan();
+    scan.densities = new int[map.scanSize][map.scanSize];
+    return scan;
+  }
+  
+  
+  
+  /**  Regular map updates:
+    */
+  void updateTerrain() {
+    int size        = map.size;
+    int totalTiles  = size * size;
+    int targetIndex = (totalTiles * (map.time % SCAN_PERIOD)) / SCAN_PERIOD;
+    if (targetIndex < growScanIndex) targetIndex = totalTiles;
+    
+    while (++growScanIndex < targetIndex) {
+      int x = growScanIndex / size, y = growScanIndex % size;
+      Element above = map.grid[x][y].above;
+      if (above != null) above.updateGrowth();
+      scanHabitat(map.grid[x][y]);
+    }
+    
+    if (targetIndex == totalTiles) {
+      endScan();
+    }
+  }
+  
+  
+  void endScan() {
+    growScanIndex = 0;
+    for (int i = ALL_TERRAINS.length; i-- > 0;) {
+      scans[0][i] = scans[1][i];
+      scans[1][i] = null;
+    }
+  }
+  
+  
+  void scanHabitat(Tile tile) {
+    Terrain t = tile.terrain;
+    if (t == null || tile.paved) {
+      return;
+    }
+    if (tile.above != null && tile.above.type.category != Type.IS_FIXTURE) {
+      return;
+    }
+    
+    HabitatScan scan = scans[1][t.terrainIndex];
+    if (scan == null) scan = scans[1][t.terrainIndex] = initHabitatScan();
+    
+    scan.numTiles += 1;
+    scan.densities[tile.x / SCAN_RES][tile.y / SCAN_RES] += 1;
+  }
+  
+  
+  
+  
+  
   /**  Initial terrain setup-
     */
   public static CityMap generateTerrain(
@@ -123,9 +226,9 @@ public class CityMapTerrain implements TileConstants {
     if (Visit.empty(species)) species = ALL_ANIMALS;
     
     for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
-      map.scanHabitat(map.grid[c.x][c.y]);
+      map.terrain.scanHabitat(map.grid[c.x][c.y]);
     }
-    map.endScan();
+    map.terrain.endScan();
     
     for (Type s : species) {
       float idealPop = idealPopulation(s, map);
@@ -143,7 +246,7 @@ public class CityMapTerrain implements TileConstants {
   
   
   static float habitatDensity(Tile tile, Terrain t, CityMap map) {
-    HabitatScan scan = map.scans[0][t.terrainIndex];
+    HabitatScan scan = map.terrain.scans[0][t.terrainIndex];
     if (scan == null) return 0;
     float d = scan.densities[tile.x / SCAN_RES][tile.y / SCAN_RES];
     return d / (SCAN_RES * SCAN_RES);
@@ -153,7 +256,7 @@ public class CityMapTerrain implements TileConstants {
   static float idealPopulation(Type species, CityMap map) {
     float numTiles = 0;
     for (Terrain h : species.habitats) {
-      HabitatScan scan = map.scans[0][h.terrainIndex];
+      HabitatScan scan = map.terrain.scans[0][h.terrainIndex];
       numTiles += scan == null ? 0 : scan.numTiles;
     }
     if (species.predator) {
