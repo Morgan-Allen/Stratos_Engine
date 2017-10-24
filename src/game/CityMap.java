@@ -264,8 +264,13 @@ public class CityMap implements Session.Saveable {
   
   public static float distance(Tile a, Tile b) {
     if (a == null || b == null) return 1000000000;
-    float dx = a.x - b.x, dy = a.y - b.y;
-    return Nums.sqrt((dx * dx) + (dy * dy));
+    return distance(a.x, a.y, b.x, b.y);
+  }
+  
+  
+  public static float distance(int ox, int oy, int dx, int dy) {
+    float sx = ox - dx, sy = oy - dy;
+    return Nums.sqrt((sx * sx) + (sy * sy));
   }
   
   
