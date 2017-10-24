@@ -298,20 +298,20 @@ public class Formation implements
     if (map == null) return null;
     Pick <Actor> pick = new Pick();
     
-    //  TODO:  Allow for targeting of anything noticed by other members of the
-    //  team?
-    
-    //  TODO:  This needs to be replaced with personal sight range, I think.
-    
     float seeBonus = type.numFile;
+    float range = member.type.sightRange + seeBonus;
     
-    for (Actor w : map.actors) if (hostile(w, member)) {
-      float distW = CityMap.distance(member.at(), w.at());
-      float distF = CityMap.distance(w.at(), securedPoint);
-      float range = member.type.sightRange + seeBonus;
+    Series <Actor> others = map.actors;
+    if (others.size() > 100 || true) {
+      others = map.actorsInRange(member.at(), range);
+    }
+    
+    for (Actor other : others) if (hostile(other, member)) {
+      float distW = CityMap.distance(other.at(), member.at() );
+      float distF = CityMap.distance(other.at(), securedPoint);
       if (distF > range + 1) continue;
       if (distW > range + 1) continue;
-      pick.compare(w, 0 - distW);
+      pick.compare(other, 0 - distW);
     }
     
     return pick.result();

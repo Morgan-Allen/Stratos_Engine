@@ -12,11 +12,15 @@ public class CityMap implements Session.Saveable {
   
   /**  Data fields and initialisation-
     */
-  final static int SCAN_RES = 16;
+  final static int
+    SCAN_RES = 16,
+    FLAG_RES = 4
+  ;
   
   City city;
-  int size, scanSize;
+  int size, scanSize, flagSize;
   Tile grid[][];
+  List <Actor> actorGrid[][];
   
   int time = 0;
   
@@ -44,6 +48,9 @@ public class CityMap implements Session.Saveable {
     performSetup(s.loadInt());
     for (Coord c : Visit.grid(0, 0, size, size, 1)) {
       grid[c.x][c.y].loadState(s);
+    }
+    for (Coord c : Visit.grid(0, 0, flagSize, flagSize, 1)) {
+      s.loadObjects(actorGrid[c.x][c.y]);
     }
     time = s.loadInt();
     
@@ -78,6 +85,9 @@ public class CityMap implements Session.Saveable {
     s.saveInt(size);
     for (Coord c : Visit.grid(0, 0, size, size, 1)) {
       grid[c.x][c.y].saveState(s);
+    }
+    for (Coord c : Visit.grid(0, 0, flagSize, flagSize, 1)) {
+      s.saveObjects(actorGrid[c.x][c.y]);
     }
     s.saveInt(time);
     
@@ -115,12 +125,18 @@ public class CityMap implements Session.Saveable {
     
     this.size     = size;
     this.scanSize = Nums.round(size * 1f / SCAN_RES, 1, true);
+    this.flagSize = Nums.round(size * 1f / FLAG_RES, 1, true);
     
     this.grid = new Tile[size][size];
     for (Coord c : Visit.grid(0, 0, size, size, 1)) {
       Tile t = grid[c.x][c.y] = new Tile();
       t.x = c.x;
       t.y = c.y;
+    }
+    
+    this.actorGrid = new List[flagSize][flagSize];
+    for (Coord c : Visit.grid(0, 0, flagSize, flagSize, 1)) {
+      actorGrid[c.x][c.y] = new List();
     }
     
     fog.performSetup(size);
@@ -315,6 +331,7 @@ public class CityMap implements Session.Saveable {
   }
   
   
+  //  TODO:  Move this into the planning class.
   public static void applyPaving(
     CityMap map, int x, int y, int w, int h, boolean is
   ) {
@@ -328,6 +345,7 @@ public class CityMap implements Session.Saveable {
   }
   
   
+  //  TODO:  Move this into the planning class.
   public static void demolish(
     CityMap map, int x, int y, int w, int h
   ) {
@@ -370,7 +388,7 @@ public class CityMap implements Session.Saveable {
   
   
   
-  /**  Flagging the presence/absence of specific object-types:
+  /**  Various presence-related queries and updates-
     */
   void flagType(Type key, int x, int y, boolean is) {
     CityMapFlagging forKey = flagging.get(key);
@@ -380,6 +398,34 @@ public class CityMap implements Session.Saveable {
       flagging.put(key, forKey);
     }
     forKey.setFlagVal(x, y, is ? 1 : 0);
+  }
+  
+  
+  void flagActor(Actor a, Tile at, boolean is) {
+    if (at == null || a == null) return;
+    List <Actor> inBigGrid = actorGrid[at.x / FLAG_RES][at.y / FLAG_RES];
+    inBigGrid.toggleMember(a, is);
+    at.setInside(a, is);
+  }
+  
+  
+  Series <Actor> actorsInRange(Tile point, float range) {
+    
+    Box2D area = new Box2D(point.x / FLAG_RES, point.y / FLAG_RES, 0, 0);
+    area.expandBy(Nums.round(range / FLAG_RES, 1, true));
+    
+    Batch <Actor> all = new Batch();
+    for (Coord c : Visit.grid(area)) try {
+      List <Actor> inBigGrid = actorGrid[c.x][c.y];
+      
+      for (Actor a : inBigGrid) {
+        if (distance(a.at(), point) > range) continue;
+        all.add(a);
+      }
+    }
+    catch (ArrayIndexOutOfBoundsException e) {}
+    
+    return all;
   }
 }
 

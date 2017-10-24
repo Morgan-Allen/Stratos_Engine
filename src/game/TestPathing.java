@@ -56,6 +56,11 @@ public class TestPathing extends Test {
       }
       
       for (Actor a : actors) {
+        if (! a.alive()) {
+          I.say("\n"+a+" IS DEAD, SOMEHOW?");
+          pathWrong = true;
+        }
+        
         if (numInside.valueFor(a) != 1) {
           I.say("\n"+a+" NOT REGISTERED IN CORRECT NUMBER OF TILES!");
           I.say("  Inside: "+numInside.valueFor(a)+", expected 1");

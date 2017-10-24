@@ -30,7 +30,7 @@ public class CityMapFlagging {
     while (span > 1) {
       int level[][] = new int[span][span];
       levels.add(level);
-      span = Nums.round(span / 4f, 1, true);
+      span = Nums.round(span * 1f / FLAG_RES, 1, true);
     }
     this.flagVals = (int[][][]) levels.toArray(int[][].class);
   }
@@ -68,8 +68,8 @@ public class CityMapFlagging {
     int l = 0;
     while (l < flagVals.length) {
       flagVals[l][x][y] += inc;
-      x /= 4;
-      y /= 4;
+      x /= FLAG_RES;
+      y /= FLAG_RES;
       l += 1;
     }
   }
@@ -89,7 +89,7 @@ public class CityMapFlagging {
     if (report) I.say("\nGETTING TILE TO LOOK AT...");
     
     Tile from = near.at();
-    int res = (int) Nums.pow(4, flagVals.length - 1);
+    int res = (int) Nums.pow(FLAG_RES, flagVals.length - 1);
     Coord mip = new Coord(0, 0);
     
     //  TODO:  This will need to be converted into a full-blown search to
@@ -99,8 +99,8 @@ public class CityMapFlagging {
       if (report) I.say("  Current level: "+l);
       
       int level[][] = flagVals[l];
-      int sideX = Nums.min(4, level.length - mip.x);
-      int sideY = Nums.min(4, level.length - mip.y);
+      int sideX = Nums.min(FLAG_RES, level.length - mip.x);
+      int sideY = Nums.min(FLAG_RES, level.length - mip.y);
       int maxSum = res * res * range;
       Pick <Coord> pick = new Pick(0);
       
@@ -130,9 +130,9 @@ public class CityMapFlagging {
         break;
       }
       else {
-        mip.x *= 4;
-        mip.y *= 4;
-        res   /= 4;
+        mip.x *= FLAG_RES;
+        mip.y *= FLAG_RES;
+        res   /= FLAG_RES;
       }
     }
     
