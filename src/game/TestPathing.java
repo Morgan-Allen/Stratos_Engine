@@ -10,7 +10,7 @@ import static game.GameConstants.*;
 public class TestPathing extends Test {
   
   
-
+  
   public static void main(String args[]) {
     testPathing(true);
   }
@@ -36,6 +36,7 @@ public class TestPathing extends Test {
     
     boolean insideWrong = false;
     boolean pathWrong   = false;
+    boolean pathingDone = false;
     int numReachedDest = 0;
     
     while (map.time < 1000 || graphics) {
@@ -64,6 +65,8 @@ public class TestPathing extends Test {
         if (a.at() == destinations.get(a)) {
           numReachedDest += 1;
           Tile goes = map.tileAt(Rand.index(map.size), Rand.index(map.size));
+          destinations.put(a, goes);
+          
           a.embarkOnTarget(goes, 0, Task.JOB.WANDERING, null);
           Tile path[] = a.task == null ? null : a.task.path;
           
@@ -80,9 +83,13 @@ public class TestPathing extends Test {
         break;
       }
       
-      if (numReachedDest == actors.size() * 3) {
-        I.say("\nPATHING TEST CONCLUDED SUCCESSFULLY!");
-        if (! graphics) return;
+      if ((! pathingDone) && numReachedDest == actors.size() * 3) {
+        pathingDone = true;
+        
+        if (pathingDone) {
+          I.say("\nPATHING TEST CONCLUDED SUCCESSFULLY!");
+          if (! graphics) return;
+        }
       }
       
       Test.runGameLoop(map, 1, graphics, "saves/test_pathing.tlt");

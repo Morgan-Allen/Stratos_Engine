@@ -213,7 +213,6 @@ public class Actor extends Element implements Session.Saveable, Journeys {
         task.pathIndex = Nums.clamp(task.pathIndex + 1, task.path.length);
         Tile ahead = task.path[task.pathIndex];
         setLocation(ahead);
-        
         if (inside != null) setInside(inside, false);
       }
       //
