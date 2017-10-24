@@ -128,17 +128,17 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     */
   void enterMap(CityMap map, int x, int y, float buildLevel) {
     this.map = map;
-    this.at  = map.tileAt(x, y);
     map.actors.add(this);
+    setLocation(map.tileAt(x, y));
   }
   
   
   void exitMap() {
     if (inside != null) setInside(inside, false);
     
+    setLocation(null);
     map.actors.remove(this);
     map = null;
-    at  = null;
   }
   
   
@@ -179,7 +179,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
       Target   target    = task.target;
       boolean  combat    = inCombat();
       Tile     pathEnd   = (Tile) Visit.last(task.path);
-      float    distance  = CityMap.distance(at, pathEnd);
+      float    distance  = CityMap.distance(at(), pathEnd);
       float    minRange  = 0.1f;
       
       if (combat && ! indoors()) minRange = type.attackRange;
@@ -210,10 +210,9 @@ public class Actor extends Element implements Session.Saveable, Journeys {
       //
       //  Otherwise, close along the path:
       else {
-        
         task.pathIndex = Nums.clamp(task.pathIndex + 1, task.path.length);
         Tile ahead = task.path[task.pathIndex];
-        this.at = ahead;
+        setLocation(ahead);
         
         if (inside != null) setInside(inside, false);
       }
@@ -263,6 +262,15 @@ public class Actor extends Element implements Session.Saveable, Journeys {
       b.visitors.remove(this);
       inside = null;
     }
+  }
+  
+  
+  void setLocation(Tile at) {
+    Tile old = this.at();
+    super.setLocation(at);
+    
+    if (old != null) old.setInside(this, false);
+    if (at  != null) at .setInside(this, true );
   }
   
   

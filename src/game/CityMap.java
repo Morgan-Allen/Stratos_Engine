@@ -1,11 +1,9 @@
 
 
-
 package game;
 import util.*;
 import static game.GameConstants.*;
 import static util.TileConstants.*;
-
 
 
 
@@ -141,8 +139,10 @@ public class CityMap implements Session.Saveable {
     Element above;
     boolean paved;
     
+    List <Actor> inside  = null;
     List <Actor> focused = null;
-    protected Object flag;
+    Object pathFlag;  //  Note- this is used purely during path-searches, and
+                      //  doesn't have to be saved or loaded.
     
     
     void loadState(Session s) throws Exception {
@@ -152,6 +152,7 @@ public class CityMap implements Session.Saveable {
       paved   = s.loadBool();
       
       if (s.loadBool()) s.loadObjects(focused = new List());
+      if (s.loadBool()) s.loadObjects(inside  = new List());
     }
     
     
@@ -162,6 +163,8 @@ public class CityMap implements Session.Saveable {
       
       s.saveBool(focused != null);
       if (focused != null) s.saveObjects(focused);
+      s.saveBool(inside  != null);
+      if (inside  != null) s.saveObjects(inside );
     }
     
     
@@ -176,19 +179,22 @@ public class CityMap implements Session.Saveable {
     
     
     public void setFocused(Actor a, boolean is) {
-      if (is) {
-        if (focused == null) focused = new List();
-        focused.include(a);
-      }
-      else if (focused != null) {
-        focused.remove(a);
-        if (focused.size() == 0) focused = null;
-      }
+      focused = Element.setMember(a, is, focused);
     }
     
     
     public Series <Actor> focused() {
-      return focused == null ? NO_FOCUS : focused;
+      return focused == null ? NO_ACTORS : focused;
+    }
+    
+    
+    public void setInside(Actor a, boolean is) {
+      inside = Element.setMember(a, is, inside);
+    }
+    
+    
+    public Series <Actor> inside() {
+      return inside == null ? NO_ACTORS : inside;
     }
     
     

@@ -48,8 +48,8 @@ public class BuildingForCollect extends BuildingForCrafts {
     
     for (Building b : map.buildings) {
       if (! b.type.hasFeature(IS_HOUSING)) continue;
-      float distW = CityMap.distance(actor.at, b.entrance);
-      float distB = CityMap.distance(entrance , b.entrance);
+      float distW = CityMap.distance(actor.at(), b.entrance);
+      float distB = CityMap.distance(entrance  , b.entrance);
       if (distB > type.maxDeliverRange) continue;
       
       int amount = (int) b.inventory.valueFor(g);

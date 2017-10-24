@@ -34,7 +34,7 @@ public class TaskWander extends Task {
     Batch <Tile> walk = new Batch();
     
     CityMap map    = actor.map;
-    Tile    next   = actor.at;
+    Tile    next   = actor.at();
     int     facing = T_ADJACENT[Rand.index(4)];
     
     while (walk.size() < MAX_WANDER_RANGE) {

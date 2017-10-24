@@ -17,7 +17,7 @@ public class ActorPathSearch extends Search <Tile> {
   
 
   public ActorPathSearch(Actor w, Tile dest) {
-    this(w.map, w.at, dest, -1);
+    this(w.map, w.at(), dest, -1);
   }
   
   
@@ -66,12 +66,12 @@ public class ActorPathSearch extends Search <Tile> {
   
   
   protected void setEntry(Tile spot, Entry flag) {
-    spot.flag = flag;
+    spot.pathFlag = flag;
   }
   
   
   protected Entry entryFor(Tile spot) {
-    return (Entry) spot.flag;
+    return (Entry) spot.pathFlag;
   }
 }
 

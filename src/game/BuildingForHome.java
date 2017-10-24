@@ -100,8 +100,8 @@ public class BuildingForHome extends Building {
         return 0;
       }
       
-      protected void setEntry(Tile spot, Entry flag) { spot.flag = flag; }
-      protected Entry entryFor(Tile spot) { return (Entry) spot.flag; }
+      protected void setEntry(Tile spot, Entry flag) { spot.pathFlag = flag; }
+      protected Entry entryFor(Tile spot) { return (Entry) spot.pathFlag; }
     };
     spread.doSearch();
     

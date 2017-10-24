@@ -64,8 +64,9 @@ public class Test {
   static Actor spawnWalker(Building b, Type type, boolean resident) {
     
     Actor actor = (Actor) type.generate();
+    Tile at = b.at();
     type.initAsMigrant(actor);
-    actor.enterMap(b.map, b.at.x, b.at.y, 1);
+    actor.enterMap(b.map, at.x, at.y, 1);
     actor.inside = b;
     
     if (resident) b.setResident(actor, true);
@@ -154,10 +155,11 @@ public class Test {
     }
     
     for (Actor w : map.actors) if (w.inside == null) {
+      Tile at = w.at();
       int fill = WALKER_COLOR;
       if      (w.work != null) fill = w.work.type.tint;
       else if (w.home != null) fill = w.home.type.tint;
-      graphic[w.at.x][w.at.y] = fill;
+      graphic[at.x][at.y] = fill;
     }
     
     if (placing == ROADS) {
@@ -248,7 +250,8 @@ public class Test {
           
           //  TODO:  Have actors register within nearby tiles themselves.
           for (Actor a : map.actors) {
-            if (a.at.x == hover.x && a.at.y == hover.y) above = a;
+            Tile at = a.at();
+            if (at.x == hover.x && at.y == hover.y) above = a;
           }
         }
         else above = map.city.world.onMap(hover.x, hover.y);

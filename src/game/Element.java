@@ -4,7 +4,6 @@ package game;
 import util.*;
 import static game.CityMap.*;
 import static game.GameConstants.*;
-import static util.TileConstants.*;
 
 
 
@@ -16,10 +15,10 @@ public class Element implements Session.Saveable, Target {
   Type type;
   
   CityMap map;
-  Tile at;
-  float buildLevel = -1;
+  private Tile at;
+  private float buildLevel = -1;
   
-  List <Actor> focused = null;
+  private List <Actor> focused = null;
   
   
   Element(Type type) {
@@ -65,7 +64,7 @@ public class Element implements Session.Saveable, Target {
   
   void enterMap(CityMap map, int x, int y, float buildLevel) {
     this.map = map;
-    this.at  = map.tileAt(x, y);
+    setLocation(map.tileAt(x, y));
     setBuildLevel(buildLevel);
     
     for (Coord c : Visit.grid(x, y, type.wide, type.high, 1)) {
@@ -84,8 +83,14 @@ public class Element implements Session.Saveable, Target {
       Tile t = map.tileAt(c.x, c.y);
       t.above = null;
     }
+    
+    setLocation(null);
     this.map = null;
-    this.at  = null;
+  }
+  
+  
+  void setLocation(Tile at) {
+    this.at = at;
   }
   
   
@@ -117,20 +122,26 @@ public class Element implements Session.Saveable, Target {
   }
   
   
-  public void setFocused(Actor a, boolean is) {
+  static List <Actor> setMember(Actor a, boolean is, List <Actor> l) {
     if (is) {
-      if (focused == null) focused = new List();
-      focused.include(a);
+      if (l == null) l = new List();
+      l.include(a);
     }
-    else if (focused != null) {
-      focused.remove(a);
-      if (focused.size() == 0) focused = null;
+    else if (l != null) {
+      l.remove(a);
+      if (l.size() == 0) l = null;
     }
+    return l;
+  }
+  
+  
+  public void setFocused(Actor a, boolean is) {
+    focused = setMember(a, is, focused);
   }
 
   
   public Series <Actor> focused() {
-    return focused == null ? NO_FOCUS : focused;
+    return focused == null ? NO_ACTORS : focused;
   }
   
   

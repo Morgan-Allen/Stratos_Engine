@@ -276,7 +276,7 @@ public class Formation implements
     if (map == null) return true;
     if (securedPoint == null || ! active) return false;
     for (Actor w : recruits) {
-      if (standLocation(w) != w.at) return false;
+      if (standLocation(w) != w.at()) return false;
     }
     return true;
   }
@@ -306,8 +306,8 @@ public class Formation implements
     float seeBonus = type.numFile;
     
     for (Actor w : map.actors) if (hostile(w, member)) {
-      float distW = CityMap.distance(member.at, w.at);
-      float distF = CityMap.distance(w.at, securedPoint);
+      float distW = CityMap.distance(member.at(), w.at());
+      float distF = CityMap.distance(w.at(), securedPoint);
       float range = member.type.sightRange + seeBonus;
       if (distF > range + 1) continue;
       if (distW > range + 1) continue;

@@ -688,7 +688,7 @@ public class GameConstants {
   
   /**  Commonly used interfaces-
     */
-  final static Series <Actor> NO_FOCUS = new Batch();
+  final static Series <Actor> NO_ACTORS = new Batch();
   
   static interface Target {
     Tile at();

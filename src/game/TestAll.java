@@ -11,6 +11,7 @@ public class TestAll {
     
     long init = System.currentTimeMillis();
     
+    TestPathing  .testPathing  (false);
     TestMilitary .testMilitary (false);
     TestSieging  .testSieging  (false);
     TestCity     .testCity     (false);

@@ -100,6 +100,7 @@ public class Building extends Element implements Session.Saveable, Employer {
   
   
   public CityMap.Tile centre() {
+    Tile at = at();
     return map.tileAt(
       at.x + (type.wide / 2),
       at.y + (type.high / 2)
@@ -113,6 +114,7 @@ public class Building extends Element implements Session.Saveable, Employer {
   
   
   void selectEntrance() {
+    Tile at = at();
     Pick <Tile> pick = new Pick();
     
     for (Coord c : Visit.perimeter(at.x, at.y, type.wide, type.high)) {
@@ -284,6 +286,7 @@ public class Building extends Element implements Session.Saveable, Employer {
   
   
   private float sightLevel(boolean max) {
+    Tile at = at();
     float avg = 0;
     for (int x = 2; x-- > 0;) for (int y = 2; y-- > 0;) {
       Tile t = map.tileAt(at.x + (x * type.wide), at.y + (y * type.high));

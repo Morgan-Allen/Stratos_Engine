@@ -214,6 +214,7 @@ public class ActorAsAnimal extends Actor {
         pregnancy = 0;
         
         Actor child = (ActorAsAnimal) type.generate();
+        Tile at = this.at();
         child.enterMap(map, at.x, at.y, 1);
         if (reportCycle) I.say(this+" GAVE BIRTH");
       }

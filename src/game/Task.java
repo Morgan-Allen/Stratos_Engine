@@ -203,7 +203,7 @@ public class Task implements Session.Saveable {
     boolean report = actor.reports();
     if (report) I.say(this+" pathing toward "+(visiting ? visits : target));
     
-    Tile from  = (inside == null) ? actor.at : inside.entrance;
+    Tile from  = (inside == null) ? actor.at() : inside.entrance;
     Tile heads = pathTarget();
     
     if (from == null || heads == null) {
@@ -228,6 +228,20 @@ public class Task implements Session.Saveable {
       if (report) I.say("  Path is: "+path.length+" tiles long...");
       return path;
     }
+  }
+  
+  
+  static boolean verifyPath(Tile path[], Tile start, Tile end) {
+    if (Visit.empty(path)      ) return false;
+    if (path[0] != start       ) return false;
+    if (Visit.last(path) != end) return false;
+    
+    Tile prior = path[0];
+    for (Tile t : path) {
+      if (CityMap.distance(prior, t) > 1.5f) return false;
+      prior = t;
+    }
+    return true;
   }
   
   
