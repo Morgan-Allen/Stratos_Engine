@@ -147,6 +147,37 @@ public class CityMapDemands {
   
   
   
+  /**  Common/basic query and update methods:
+    */
+  float amountAt(int x, int y) {
+    Entry e = findEntryFor(x, y, false);
+    return e == null ? 0 : e.amount;
+  }
+  
+  
+  float totalAmount() {
+    return root.amount;
+  }
+  
+  
+  void setAmount(float amount, Object source, int x, int y) {
+    if (amount == 0) {
+      Entry e = findEntryFor(x, y, false);
+      if (e == null) return;
+      e.amount = 0;
+      updateTotalsFrom(e.parent);
+      deleteEntry(e);
+    }
+    else {
+      Entry e = findEntryFor(x, y, true);
+      e.amount = amount;
+      e.source = source;
+      updateTotalsFrom(e.parent);
+    }
+  }
+  
+  
+  
   /**  More complex proximity-queries:
     */
   Iterable <Entry> nearbyEntries(final int x, final int y) {
@@ -193,37 +224,6 @@ public class CityMapDemands {
     iteration i = new iteration();
     i.addEntry(root);
     return i;
-  }
-  
-  
-  
-  /**  Common/basic query and update methods:
-    */
-  float amountAt(int x, int y) {
-    Entry e = findEntryFor(x, y, false);
-    return e == null ? 0 : e.amount;
-  }
-  
-  
-  float totalAmount() {
-    return root.amount;
-  }
-  
-  
-  void setAmount(float amount, Object source, int x, int y) {
-    if (amount == 0) {
-      Entry e = findEntryFor(x, y, false);
-      if (e == null) return;
-      e.amount = 0;
-      updateTotalsFrom(e.parent);
-      deleteEntry(e);
-    }
-    else {
-      Entry e = findEntryFor(x, y, true);
-      e.amount = amount;
-      e.source = source;
-      updateTotalsFrom(e.parent);
-    }
   }
   
 }

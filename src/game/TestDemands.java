@@ -2,7 +2,7 @@
 
 package game;
 import util.*;
-
+import static game.GameConstants.*;
 
 
 
@@ -16,48 +16,97 @@ public class TestDemands {
     CityMap map = Test.setupTestCity(32);
     CityMapDemands demands = new CityMapDemands(map, "AAA");
     
+    
+    class TestItem {
+      int x, y, amount;
+      public String toString() { return x+"|"+y; }
+    }
+    
+    List <TestItem> items = new List();
+    int trueSum = 0;
+    
+    for (int n = 16; n-- > 0;) {
+      TestItem i = new TestItem();
+      i.x = Rand.index(32);
+      i.y = Rand.index(32);
+      
+      if (map.above(i.x, i.y) != null) continue;
+      Element e = new Element(JUNGLE_TREE1);
+      e.enterMap(map, i.x, i.y, 1);
+      
+      i.amount = 1 + Rand.index(4);
+      trueSum += i.amount;
+      items.add(i);
+      
+    }
+    
     //
     //  Test insertion-
-    demands.setAmount(5 , "<source 1>", 3 , 3 );
-    demands.setAmount(2 , "<source 2>", 11, 1 );
-    demands.setAmount(12, "<source 3>", 14, 7 );
-    demands.setAmount(6 , "<source 4>", 2 , 16);
+    for (TestItem i : items) {
+      demands.setAmount(i.amount, i, i.x, i.y);
+    }
     
     boolean allOkay = true;
-    float amountOut = 0;
     
-    amountOut = demands.amountAt(3, 3);
-    if (amountOut != 5) {
-      I.say("\nWRONG AT 3|3, IS "+amountOut+", SHOULD BE 5");
+    for (TestItem i : items) {
+      float amount = demands.amountAt(i.x, i.y);
+      if (amount != i.amount) {
+        I.say("\nWRONG AT "+i+" IS "+amount+", SHOULD BE "+i.amount);
+        allOkay = false;
+      }
+    }
+    
+    float demandSum = demands.totalAmount();
+    if (demandSum != trueSum) {
+      I.say("\nWRONG TOTAL, IS "+demandSum+", SHOULD BE "+trueSum);
       allOkay = false;
     }
     
-    amountOut = demands.totalAmount();
-    if (amountOut != 25) {
-      I.say("\nWRONG TOTAL, IS "+amountOut+", SHOULD BE 25");
+    //
+    //  Test deletion-
+    for (int n = 4; n-- > 0;) {
+      if (items.empty()) break;
+      TestItem i = (TestItem) Rand.pickFrom(items);
+      items.remove(i);
+      
+      demands.setAmount(0, null, i.x, i.y);
+      float amount = demands.amountAt(i.x, i.y);
+      
+      if (amount != 0) {
+        I.say("\nWRONG AT "+i+" IS "+amount+", SHOULD BE 0");
+        allOkay = false;
+      }
+      
+      trueSum -= i.amount;
+    }
+    
+    demandSum = demands.totalAmount();
+    if (demandSum != trueSum) {
+      I.say("\nWRONG TOTAL, IS "+demandSum+", SHOULD BE "+trueSum);
       allOkay = false;
     }
     
     //
     //  Test basic and proximity queries-
-    I.say("Listing in order of proximity to 5/15...");
-    for (CityMapDemands.Entry e : demands.nearbyEntries(5, 15)) {
-      float dist = CityMap.distance(5, 15, e.x, e.y);
-      I.say("  "+e.source+" -> "+e.x+"|"+e.y+", distance: "+dist);
+    int fromX = Rand.index(32), fromY = Rand.index(32);
+    float lastDist = 0;
+    int numIters = 0;
+    
+    for (CityMapDemands.Entry e : demands.nearbyEntries(fromX, fromY)) {
+      float dist = CityMap.distance(fromX, fromY, e.x, e.y);
+      
+      if (dist < lastDist) {
+        I.say("\nDID NOT SORT ENTRIES BY DISTANCE:");
+        I.say("  "+e.source+" -> "+e.x+"|"+e.y+", distance: "+dist);
+        allOkay = false;
+      }
+      lastDist = dist;
+      numIters += 1;
     }
     
-    //
-    //  Test deletion-
-    demands.setAmount(0, null, 11, 1);
-    amountOut = demands.amountAt(11, 1);
-    if (amountOut != 0) {
-      I.say("\nWRONG AT 11|1, IS "+amountOut+", SHOULD BE 0");
-      allOkay = false;
-    }
-    
-    amountOut = demands.totalAmount();
-    if (amountOut != 23) {
-      I.say("\nWRONG TOTAL, IS "+amountOut+", SHOULD BE 23");
+    if (numIters != items.size()) {
+      I.say("\nDID NOT ITERATE OVER ALL MEMBERS");
+      I.say("  Expected: "+items.size()+", covered: "+numIters);
       allOkay = false;
     }
     
