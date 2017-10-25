@@ -26,14 +26,15 @@ public class City implements Session.Saveable, Trader {
   
   CityEvents events = new CityEvents(this);
   Table <City, Integer> distances = new Table();
+  Table <City, RELATION> relations = new Table();
   
   int currentFunds = 0;
   Tally <Good> tradeLevel = new Tally();
   Tally <Good> inventory  = new Tally();
   
-  Table <City, RELATION> relations = new Table();
   List <Formation> formations = new List();
-  int armyPower = 0;
+  int population = AVG_POPULATION;
+  int armyPower  = AVG_ARMY_POWER;
   
   boolean active;
   CityMap map;
@@ -61,18 +62,19 @@ public class City implements Session.Saveable, Trader {
     for (int n = s.loadInt(); n-- > 0;) {
       distances.put((City) s.loadObject(), s.loadInt());
     }
-    
-    currentFunds = s.loadInt();
-    s.loadTally(tradeLevel);
-    s.loadTally(inventory);
-    
     for (int n = s.loadInt(); n-- > 0;) {
       City     c = (City) s.loadObject();
       RELATION r = RELATION.values()[s.loadInt()];
       relations.put(c, r);
     }
+    
+    currentFunds = s.loadInt();
+    s.loadTally(tradeLevel);
+    s.loadTally(inventory);
+    
     s.loadObjects(formations);
-    armyPower = s.loadInt();
+    population = s.loadInt();
+    armyPower  = s.loadInt();
     
     active = s.loadBool();
     map    = (CityMap) s.loadObject();
@@ -96,18 +98,19 @@ public class City implements Session.Saveable, Trader {
       s.saveObject(c);
       s.saveInt(distances.get(c));
     }
-    
-    s.saveInt(currentFunds);
-    s.saveTally(tradeLevel);
-    s.saveTally(inventory);
-    
     s.saveInt(relations.size());
     for (City c : relations.keySet()) {
       s.saveObject(c);
       s.saveInt(relations.get(c).ordinal());
     }
+    
+    s.saveInt(currentFunds);
+    s.saveTally(tradeLevel);
+    s.saveTally(inventory);
+    
     s.saveObjects(formations);
-    s.saveInt(armyPower);
+    s.saveInt(population);
+    s.saveInt(armyPower );
     
     s.saveBool(active);
     s.saveObject(map);

@@ -108,12 +108,6 @@ public class GameConstants {
     //  That's enough to support 1 predator eating half of available prey (1
     //  food/month, just like humans.)
     //
-    //  Buildings and manufacture-
-    AVG_UPDATE_GAP   = 50  ,  //  seconds between updates
-    AVG_CRAFT_TIME   = 20  ,
-    AVG_MAX_STOCK    = 10  ,
-    MAX_TRADER_RANGE = 100 ,
-    //
     //  Life cycle constants-
     AVG_INFANCY      = 4   ,
     AVG_PUBERTY      = 12  ,
@@ -130,18 +124,22 @@ public class GameConstants {
     //  Health and survival-
     STARVE_INTERVAL  = MONTH_LENGTH * 2,
     FATIGUE_INTERVAL = MONTH_LENGTH * 2,
-    HUNGER_REGEN     = 5,
-    FOOD_UNIT_PER_HP = 2,
+    HUNGER_REGEN     = 5   ,
+    FOOD_UNIT_PER_HP = 2   ,
     FECES_UNIT_TIME  = MONTH_LENGTH * 3,
     FATIGUE_REGEN    = MONTH_LENGTH / 4,
     HEALTH_REGEN     = MONTH_LENGTH / 2,
-    AVG_MAX_HEALTH   = 5,
+    AVG_MAX_HEALTH   = 5   ,
     //
-    //  Commerce and amenities-
+    //  Building-update, commerce and manufacture-
+    AVG_UPDATE_GAP   = 60  ,  //  seconds between updates
+    AVG_CRAFT_TIME   = YEAR_LENGTH / 6,
+    AVG_MAX_STOCK    = 10  ,
+    MAX_TRADER_RANGE = 100 ,
     MAX_WANDER_RANGE = 20  ,
     AVG_VISIT_TIME   = 20  ,
     MAX_SHOP_RANGE   = 50  ,
-    AVG_CONSUME_TIME = YEAR_LENGTH,
+    HOME_USE_TIME    = YEAR_LENGTH * 2,
     AVG_SERVICE_GIVE = 10  , //  value of education, diversion, etc.
     AVG_MAX_VISITORS = 4   ,
     //
@@ -165,10 +163,15 @@ public class GameConstants {
     CLASS_TRADER   = 2,
     CLASS_NOBLE    = 3,
     ALL_CLASSES[]  = { 0, 1, 2, 3 },
-    TAX_VALUES []  = { 0, 10, 25, 100 },
-    AVG_TAX_VALUE  = 10,
+    TAX_VALUES []  = { 0, 25, 75, 250 },
+    AVG_TAX_VALUE  = 25,
     AVG_GOOD_VALUE = 25,
-    TAX_INTERVAL   = YEAR_LENGTH
+    TAX_INTERVAL   = YEAR_LENGTH,
+    //
+    //  City constants-
+    POP_PER_CITIZEN = 25,
+    AVG_POPULATION  = 1000,
+    AVG_ARMY_POWER  = AVG_RANKS * AVG_FILE * POP_PER_CITIZEN
   ;
   
   
@@ -270,7 +273,7 @@ public class GameConstants {
     Good(String name, int price, int ID) {
       super("good_"+ID, IS_GOOD);
       
-      GOODS_LIST.add(this);
+      if (price != -1) GOODS_LIST.add(this);
       this.name   = name ;
       this.price  = price;
       this.blocks = false;
@@ -490,20 +493,20 @@ public class GameConstants {
     HOUSE.setBuildMaterials(WOOD, 2, CLAY, 1);
     HOUSE.setWorkerTypes(CITIZEN);
     HOUSE.maxResidents = 4;
-    HOUSE.maxStock     = 2;
+    HOUSE.maxStock     = 1;
     HOUSE.buildsWith   = new Good[] { WOOD, CLAY };
     HOUSE.features     = new Good[] { IS_HOUSING };
     HOUSE.setUpgradeTiers(HOUSE, HOUSE_T1, HOUSE_T2);
     
     HOUSE_T1.name = "Improved House";
     HOUSE_T1.setBuildMaterials(WOOD, 4, CLAY, 2);
-    HOUSE_T1.consumed = new Good[] { POTTERY };
+    HOUSE_T1.homeUsed = new Good[] { POTTERY };
     HOUSE_T1.maxStock = 2;
     HOUSE_T1.setUpgradeNeeds(DIVERSION, 10);
     
     HOUSE_T2.name = "Fancy House";
     HOUSE_T2.setBuildMaterials(WOOD, 6, CLAY, 3);
-    HOUSE_T2.consumed = new Good[] { POTTERY, COTTON };
+    HOUSE_T2.homeUsed = new Good[] { POTTERY, COTTON };
     HOUSE_T2.maxStock = 2;
     HOUSE_T2.setUpgradeNeeds(DIVERSION, 15, SCHOOL, 1);
     
@@ -582,7 +585,7 @@ public class GameConstants {
     KILN.setWorkerTypes(WORKER);
     KILN.needed   = new Good[] { CLAY };
     KILN.produced = new Good[] { POTTERY };
-    KILN.craftTime *= 2;
+    KILN.maxStock = 3;
     
     WEAVER.name = "Weaver";
     WEAVER.tint = TINT_INDUSTRIAL;
@@ -591,7 +594,7 @@ public class GameConstants {
     WEAVER.setWorkerTypes(WORKER);
     WEAVER.needed   = new Good[] { RAW_COTTON };
     WEAVER.produced = new Good[] { COTTON };
-    WEAVER.craftTime *= 2;
+    WEAVER.maxStock = 3;
     
     //
     //  Commercial structures:
@@ -730,21 +733,31 @@ public class GameConstants {
     City  cityB = new City(world);
     
     cityA.name = "Xochimilco";
-    cityB.name = "Tlacopan"  ;
     cityA.setWorldCoords(1, 1);
-    cityB.setWorldCoords(3, 3);
-    City.setupRoute(cityA, cityB, 2);
-    
+    cityA.tradeLevel.setWith(
+      POTTERY, 5f,
+      COTTON , 10f
+    );
+    cityA.population = AVG_POPULATION;
+    cityA.armyPower  = AVG_ARMY_POWER * 2;
     world.addCity(cityA);
+    
+    cityB.name = "Tlacopan";
+    cityB.setWorldCoords(3, 3);
+    cityB.tradeLevel.setWith(
+      MAIZE, 5f,
+      CLAY, 10f
+    );
+    cityB.population = AVG_POPULATION / 2;
+    cityB.armyPower  = (int) (AVG_ARMY_POWER * 0.75f);
     world.addCity(cityB);
+    
+    City.setupRoute(cityA, cityB, 2);
     world.mapWide = world.mapHigh = 10;
     
     return world;
   }
 }
-
-
-
 
 
 

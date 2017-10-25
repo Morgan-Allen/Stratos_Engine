@@ -73,7 +73,7 @@ public class CityEvents {
       float consVal = 0 - a.attackC.tradeLevel.valueFor(g);
       consVal      -= 5 + a.attackC.inventory .valueFor(g);
       
-      float grabVal = Nums.max(prodVal, consVal);
+      float grabVal = (prodVal + consVal) / 2f;// Nums.min(prodVal, consVal);
       if (grabVal <= 0) continue;
       
       grabVal *= AVG_TRIBUTE_PERCENT / 100f;
@@ -139,9 +139,10 @@ public class CityEvents {
     }
     //
     //  We also weight the value of hostility, roughly speaking, based on the
-    //  cost of retaliation by the opponent's army:
+    //  cost of retaliation by the opponent:
     float loseChance = 1 - a.winChance;
-    float angerValue = a.defendC.armyPower * (casValueA + casValueD) / 4;
+    float angerValue = a.defendC.population * (casValueA + casValueD) / 2f;
+    angerValue /= 4 * POP_PER_CITIZEN;
     //
     //  Then simply tally up the pros and cons, and return:
     a.costs    += a.winChance   * a.winKillsA  * casValueA;
@@ -160,8 +161,8 @@ public class CityEvents {
     InvasionAssessment IA = new InvasionAssessment();
     IA.attackC     = attack;
     IA.defendC     = defend;
-    IA.attackPower = attack.armyPower * commitLevel;
-    IA.defendPower = defend.armyPower;
+    IA.attackPower = attack.armyPower * commitLevel / POP_PER_CITIZEN;
+    IA.defendPower = defend.armyPower               / POP_PER_CITIZEN;
     calculateTribute(IA);
     calculateChances(IA);
     calculateAppeal (IA);
@@ -184,6 +185,7 @@ public class CityEvents {
       float appeal = 0;
       appeal += Rand.avgNums(2) * IA.benefits;
       appeal -= Rand.avgNums(2) * IA.costs;
+      appeal /= (IA.benefits + IA.costs) / 2;
       
       IA.evaluatedAppeal = appeal;
       choices.add(IA);

@@ -61,11 +61,15 @@ public class TestCity extends Test {
       return;
     }
     
-    
-    
-    for (Building b : map.buildings) if (b.type == HOUSE) {
-      b.inventory.set(SOIL, 2 );
-      b.inventory.set(CASH    , 20);
+    for (Building b : map.buildings) {
+      if (b.type == HOUSE) {
+        b.inventory.set(SOIL, 2 );
+        b.inventory.set(CASH, 20);
+      }
+      if (b.type == KILN) {
+        b.inventory.set(CLAY   , 1);
+        b.inventory.set(POTTERY, 1);
+      }
     }
     
     try {
@@ -78,9 +82,10 @@ public class TestCity extends Test {
       return;
     }
     
+    final int RUN_TIME = YEAR_LENGTH;
     boolean housesOkay = false;
     
-    while (map.time < 1000 || graphics) {
+    while (map.time < RUN_TIME || graphics) {
       runGameLoop(map, 10, graphics, "saves/test_city.tlt");
       
       if (! housesOkay) {
@@ -120,11 +125,11 @@ public class TestCity extends Test {
       I.say("    Inventory: "+house.inventory);
     }
     I.say("\nTotal goods produced:");
-    for (Good g : HOUSE_T2.consumed) {
+    for (Good g : HOUSE_T2.homeUsed) {
       I.say("  "+g+": "+map.city.makeTotals.valueFor(g));
     }
     I.say("\nTotal goods consumed:");
-    for (Good g : HOUSE_T2.consumed) {
+    for (Good g : HOUSE_T2.homeUsed) {
       I.say("  "+g+": "+map.city.usedTotals.valueFor(g));
     }
   }

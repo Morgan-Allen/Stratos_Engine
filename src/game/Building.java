@@ -164,6 +164,11 @@ public class Building extends Element implements Session.Saveable, Employer {
   }
   
   
+  float maxStock(Good g) {
+    return type.maxStock;
+  }
+  
+  
   Good[] needed  () { return type.needed  ; }
   Good[] produced() { return type.produced; }
   
@@ -172,7 +177,7 @@ public class Building extends Element implements Session.Saveable, Employer {
   float stockLimit (Good made) { return type.maxStock; }
   
   
-  Tally <Good> homeConsumption() {
+  Tally <Good> homeUsed() {
     return new Tally();
   }
   

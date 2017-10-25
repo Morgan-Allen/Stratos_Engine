@@ -15,8 +15,8 @@ public class TestCityEvents extends Test {
   }
   
   static void testCityEvents(boolean graphics) {
-    World world = setupDefaultWorld();
     
+    World world = setupDefaultWorld();
     I.say("\nUpdating invasion choices:");
     
     for (City city : world.cities) {
@@ -24,7 +24,7 @@ public class TestCityEvents extends Test {
       choices = city.events.updateInvasionChoices();
       
       for (CityEvents.InvasionAssessment a : choices) {
-        I.say("  "+a.attackC+" -> "+a.defendC);
+        I.say("\n  "+a.attackC+" -> "+a.defendC);
         for (Field f : a.getClass().getDeclaredFields()) try {
           I.say("    "+f.getName()+": "+f.get(a));
         }

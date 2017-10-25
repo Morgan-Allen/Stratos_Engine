@@ -432,7 +432,7 @@ public class Test {
     
     //
     //  Finally, present a tally of goods in demand:
-    Tally <Good> homeCons = b.homeConsumption();
+    Tally <Good> homeCons = b.homeUsed();
     List <String> goodRep = new List();
     
     for (Good g : ALL_GOODS) {

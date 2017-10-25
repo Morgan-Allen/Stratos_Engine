@@ -7,6 +7,8 @@ import static game.Task.*;
 import static game.GameConstants.*;
 import static util.TileConstants.*;
 
+import game.GameConstants.Good;
+
 
 
 public class BuildingForHome extends Building {
@@ -136,15 +138,6 @@ public class BuildingForHome extends Building {
   }
   
   
-  boolean performConsumerCheck(Type tier, Tally <Type> access) {
-    for (Good g : tier.consumed) {
-      float amount = inventory.valueFor(g);
-      if (amount < tier.maxStock) return false;
-    }
-    return true;
-  }
-  
-  
   Type tierOffset(int off) {
     Type tiers[] = type.upgradeTiers;
     int index = Visit.indexOf(currentTier, tiers);
@@ -153,20 +146,38 @@ public class BuildingForHome extends Building {
   }
   
   
-  Batch <Good> consumedBy(Type tier) {
+  
+  /**  Stock and consumption-related checks:
+    */
+  boolean performConsumerCheck(Type tier, Tally <Type> access) {
+    for (Good g : tier.homeUsed) {
+      float amount = inventory.valueFor(g);
+      if (amount < maxStock(g)) return false;
+    }
+    return true;
+  }
+  
+  
+  float maxStock(Good g) {
+    if (Visit.arrayIncludes(FOOD_TYPES, g)) return 5;
+    return type.maxStock;
+  }
+  
+  
+  Batch <Good> usedBy(Type tier) {
     Batch <Good> consumes = new Batch();
     consumes.add(WATER);
     for (Good g : FOOD_TYPES   ) consumes.add(g);
-    for (Good g : tier.consumed) consumes.add(g);
+    for (Good g : tier.homeUsed) consumes.add(g);
     return consumes;
   }
   
   
-  Tally <Good> homeConsumption() {
+  Tally <Good> homeUsed() {
     Type tier = tierOffset(1);
-    Batch <Good> consumed = consumedBy(tier);
+    Batch <Good> consumed = usedBy(tier);
     Tally <Good> cons = new Tally();
-    for (Good g : consumed) cons.set(g, tier.maxStock);
+    for (Good g : consumed) cons.set(g, maxStock(g));
     return cons;
   }
   
@@ -194,17 +205,17 @@ public class BuildingForHome extends Building {
       currentTier = nextTier;
     }
     
-    advanceWear(nextTier);
+    advanceHomeUse (nextTier);
     generateOutputs(nextTier);
   }
   
   
-  void advanceWear(Type tier) {
-    float conLevel = 1 + (residents.size() * 1f / type.maxResidents);
+  void advanceHomeUse(Type tier) {
+    float conLevel = (1 + (residents.size() * 1f / type.maxResidents)) / 2;
     conLevel *= type.updateTime;
-    conLevel /= tier.consumeTime;
+    conLevel /= tier.homeUseTime;
     
-    for (Good cons : tier.consumed) {
+    for (Good cons : tier.homeUsed) {
       float amount = inventory.valueFor(cons);
       amount = Nums.max(0, amount - conLevel);
       inventory.set(cons, amount);
@@ -265,8 +276,8 @@ public class BuildingForHome extends Building {
     class Order { Building b; Good g; }
     Pick <Order> pickS = new Pick();
     
-    for (Good cons : consumedBy(tier)) {
-      float need = tier.maxStock + 1 - inventory.valueFor(cons);
+    for (Good cons : usedBy(tier)) {
+      float need = maxStock(cons) + 1 - inventory.valueFor(cons);
       if (need <= 0) continue;
       
       for (Building b : map.buildings) {
@@ -326,14 +337,13 @@ public class BuildingForHome extends Building {
         actor.offloadGood(actor.carried, this);
       }
       
-      else for (Good cons : consumedBy(tier)) {
-        int maxStock = tier.maxStock + 1;
-        if (this.inventory.valueFor(cons) >= maxStock) continue;
+      else for (Good cons : usedBy(tier)) {
+        float maxStock = maxStock(cons) + 1;
+        if (inventory.valueFor(cons) >= maxStock) continue;
         
         float stock = enters.inventory.valueFor(cons);
         if (stock <= 0) continue;
         
-        if (Visit.arrayIncludes(FOOD_TYPES, cons)) maxStock *= 2;
         float taken = Nums.min(maxStock, stock / 2);
         
         TaskDelivery d = new TaskDelivery(actor);

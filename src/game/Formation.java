@@ -16,7 +16,20 @@ public class Formation implements
   
   /**  Data fields, setup and save/load methods-
     */
-  Type type;
+  public static enum OBJECTIVE {
+    RAZE_ENEMY   ,
+    BATTLE_ENEMY ,
+    CAPTURE_ENEMY,  // war-ish objectives
+    ESCORT_ENVOY ,
+    ESCORT_TRADER,
+    PATROL_AREA  ,  // peace-ish objectives
+  };
+  
+  Type type;  //  TODO:  This might not be required!
+  OBJECTIVE object;
+  List <Object> demands = new List();
+  
+  List <Actor> escorted = new List();
   List <Actor> recruits = new List();
   
   boolean away   = false;
@@ -38,7 +51,8 @@ public class Formation implements
   public Formation(Session s) throws Exception {
     s.cacheInstance(this);
     
-    type = (Type) s.loadObject();
+    type   = (Type) s.loadObject();
+    object = (OBJECTIVE) s.loadEnum(OBJECTIVE.values());
     s.loadObjects(recruits);
     
     away         = s.loadBool();
@@ -56,6 +70,7 @@ public class Formation implements
   public void saveState(Session s) throws Exception {
     
     s.saveObject(type);
+    s.saveEnum(object);
     s.saveObjects(recruits);
     
     s.saveBool(away  );
@@ -247,9 +262,10 @@ public class Formation implements
       if (w.state >= Actor.STATE_DEAD) continue;
       float stats = w.type.attackScore + w.type.defendScore;
       stats *= 1 - ((w.injury + w.hunger) / w.type.maxHealth);
+      stats *= (AVG_ATTACK + AVG_DEFEND) * AVG_MAX_HEALTH;
       sumStats += stats;
     }
-    return (int) sumStats;
+    return (int) (sumStats * POP_PER_CITIZEN);
   }
   
   

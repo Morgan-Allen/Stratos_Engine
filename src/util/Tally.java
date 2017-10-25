@@ -15,6 +15,14 @@ public class Tally <K> {
   final Table <K, Float> store = new Table <K, Float> ();
   
   
+  public void setWith(Object... args) {
+    Object split[][] = Visit.splitByModulus(args, 2);
+    for (int i = split[0].length; i-- > 0;) {
+      set((K) split[0][i], (Float) split[1][i]);
+    }
+  }
+  
+  
   public float valueFor(K key) {
     final Float val = store.get(key);
     return val == null ? 0 : val;

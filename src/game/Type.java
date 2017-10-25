@@ -132,7 +132,7 @@ public class Type extends Index.Entry implements Session.Saveable {
   
   Good needed  [] = NO_GOODS;
   Good produced[] = NO_GOODS;
-  Good consumed[] = NO_GOODS;
+  Good homeUsed[] = NO_GOODS;
   Good features[] = NO_GOODS;
   Type gatherFlag = null;
   
@@ -141,7 +141,7 @@ public class Type extends Index.Entry implements Session.Saveable {
   int gatherRange     = AVG_GATHER_RANGE;
   int maxDeliverRange = MAX_TRADER_RANGE;
   int maxStock        = AVG_MAX_STOCK   ;
-  int consumeTime     = AVG_CONSUME_TIME;
+  int homeUseTime     = HOME_USE_TIME   ;
   int featureAmount   = AVG_SERVICE_GIVE;
   
   Type workerTypes[] = NO_WALKERS;
@@ -149,8 +149,8 @@ public class Type extends Index.Entry implements Session.Saveable {
   int maxResidents = 0;
   int maxVisitors  = AVG_MAX_VISITORS;
   int maxRecruits  = AVG_ARMY_SIZE;
-  int numRanks     = AVG_RANKS    ;
-  int numFile      = AVG_FILE     ;
+  int numRanks     = AVG_RANKS;
+  int numFile      = AVG_FILE ;
   
   
   void setUpgradeTiers(Type... tiers) {
