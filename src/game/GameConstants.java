@@ -169,6 +169,7 @@ public class GameConstants {
     TAX_INTERVAL   = YEAR_LENGTH,
     //
     //  City constants-
+    AVG_CITY_DIST   = 5,
     POP_PER_CITIZEN = 25,
     AVG_POPULATION  = 1000,
     AVG_ARMY_POWER  = AVG_RANKS * AVG_FILE * POP_PER_CITIZEN
@@ -752,7 +753,7 @@ public class GameConstants {
     cityB.armyPower  = (int) (AVG_ARMY_POWER * 0.75f);
     world.addCity(cityB);
     
-    City.setupRoute(cityA, cityB, 2);
+    City.setupRoute(cityA, cityB, AVG_CITY_DIST / 2);
     world.mapWide = world.mapHigh = 10;
     
     return world;

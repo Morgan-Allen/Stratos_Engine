@@ -6,19 +6,6 @@ import static game.City.*;
 import static game.GameConstants.*;
 
 
-/*
-  The baseline chance of invasion, for a city of 1000 pop (40 walkers) in one
-  year, by another bordering city with a city of 1000 people, assuming that the
-  latter has a standing military of 200 people and the former is defenceless,
-  when both have equal wealth, is 100%.
-  
-  If your militaries are equal, the chance drops to maybe 25%.  If you have
-  double their strength, then the chance of invasion drops very low.
-  
-  If one city is especially wealthy in something the other needs, then the
-  temptation to invade increases.
-//*/
-
 
 public class CityEvents {
   
@@ -175,17 +162,18 @@ public class CityEvents {
     //
     //  TODO:  Allow for multiple levels of force-commitment, since you don't
     //  want your own city to be vulnerable.
-    //  TODO:  Also, take travel times into account- that attenuates the
-    //  benefit to be gained.
     
     for (City other : city.world.cities) {
-      if (other == city) continue;
+      Integer distance = city.distances.get(other);
+      if (distance == null || other == city) continue;
+      
       InvasionAssessment IA = performAssessment(city, other, 0.5f);
       
       float appeal = 0;
       appeal += Rand.avgNums(2) * IA.benefits;
       appeal -= Rand.avgNums(2) * IA.costs;
       appeal /= (IA.benefits + IA.costs) / 2;
+      appeal *= CityBorders.distanceRating(city, other);
       
       IA.evaluatedAppeal = appeal;
       choices.add(IA);

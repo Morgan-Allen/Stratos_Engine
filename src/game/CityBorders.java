@@ -187,7 +187,7 @@ public class CityBorders {
     
     City fromC = from.tradeOrigin(), goesC = goes.tradeOrigin();
     Integer distance = fromC.distances.get(goesC);
-    float distRating = distance == null ? MAX_TRADER_RANGE : (1 + distance);
+    float distRating = distance == null ? MAX_TRADER_RANGE : distance;
     
     if (
       from instanceof Building &&
@@ -199,7 +199,7 @@ public class CityBorders {
       distRating += mapDist / MAX_WANDER_RANGE;
     }
     
-    return distRating;
+    return AVG_CITY_DIST / (AVG_CITY_DIST + distRating);
   }
   
   

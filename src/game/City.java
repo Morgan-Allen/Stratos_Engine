@@ -25,7 +25,7 @@ public class City implements Session.Saveable, Trader {
   float mapX, mapY;
   
   CityEvents events = new CityEvents(this);
-  Table <City, Integer> distances = new Table();
+  Table <City, Integer > distances = new Table();
   Table <City, RELATION> relations = new Table();
   
   int currentFunds = 0;

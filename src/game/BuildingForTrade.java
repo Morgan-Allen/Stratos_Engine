@@ -130,12 +130,12 @@ public class BuildingForTrade extends BuildingForCrafts implements Trader {
       
       if (cargoAway.size() > 0) {
         for (Good good : cargoAway.keys()) {
-          rating += cargoAway.valueFor(good) / distRating;
+          rating += cargoAway.valueFor(good) * distRating;
         }
       }
       if (cargoBack.size() > 0) {
         for (Good good : cargoBack.keys()) {
-          rating += cargoBack.valueFor(good) / distRating;
+          rating += cargoBack.valueFor(good) * distRating;
         }
       }
       if (rating > 0) {
