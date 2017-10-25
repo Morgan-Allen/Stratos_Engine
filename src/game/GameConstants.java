@@ -159,6 +159,17 @@ public class GameConstants {
     TRADE_DIST_TIME  = 50  ,
     MIGRANTS_PER_1KM = 10     //  per month per 1000 foreign citizens
   ;
+  final static int
+    CLASS_SLAVE    = 0,
+    CLASS_COMMON   = 1,
+    CLASS_TRADER   = 2,
+    CLASS_NOBLE    = 3,
+    ALL_CLASSES[]  = { 0, 1, 2, 3 },
+    TAX_VALUES []  = { 0, 10, 25, 100 },
+    AVG_TAX_VALUE  = 10,
+    AVG_GOOD_VALUE = 25,
+    TAX_INTERVAL   = YEAR_LENGTH
+  ;
   
   
 
@@ -352,15 +363,6 @@ public class GameConstants {
       this.mobile      = true;
     }
   }
-  final static int
-    CLASS_SLAVE   = 0,
-    CLASS_COMMON  = 1,
-    CLASS_TRADER  = 2,
-    CLASS_NOBLE   = 3,
-    ALL_CLASSES[] = { 0, 1, 2, 3 },
-    TAX_VALUES [] = { 0, 10, 25, 100 },
-    TAX_INTERVAL  = YEAR_LENGTH
-  ;
   final static WalkerType
     NO_WALKERS[] = new WalkerType[0],
     

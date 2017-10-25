@@ -69,8 +69,8 @@ public class TestCity extends Test {
     }
     
     try {
-      Session.saveSession("test_save.tlt", map);
-      Session loaded = Session.loadSession("test_save.tlt", true);
+      Session.saveSession("saves/test_save.tlt", map);
+      Session loaded = Session.loadSession("saves/test_save.tlt", true);
       map = (CityMap) loaded.loaded()[0];
     }
     catch(Exception e) {
