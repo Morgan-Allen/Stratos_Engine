@@ -201,9 +201,14 @@ public class ActorAsAnimal extends Actor {
           pregnancy = 1;
         }
         
-        if (actualPop < idealPop / 2) {
-          pregnancy = -1;
+        if (pregnancy == 0) {
+          pregnancy = (actualPop < idealPop / 2) ? -1 : 0;
         }
+      }
+      //
+      //  But if you're too damned old, just die-
+      if (ageSeconds > type.lifespan) {
+        setAsKilled("Old age");
       }
     }
     //
@@ -218,11 +223,6 @@ public class ActorAsAnimal extends Actor {
         child.enterMap(map, at.x, at.y, 1);
         if (reportCycle) I.say(this+" GAVE BIRTH");
       }
-    }
-    //
-    //  And if you're too damned old, just die-
-    if (ageSeconds > type.lifespan) {
-      setAsKilled("Old age");
     }
   }
   

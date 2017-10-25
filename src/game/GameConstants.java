@@ -244,17 +244,26 @@ public class GameConstants {
     LAKE.blocks = true;
     
     //  TODO:  UNIFY WITH WALKER-TYPES BELOW!
-    TAPIR.name     = "Tapir";
-    TAPIR.habitats = new Terrain[] { JUNGLE, MEADOW };
-    TAPIR.predator = false;
+    TAPIR .name        = "Tapir";
+    TAPIR .habitats    = new Terrain[] { JUNGLE, MEADOW };
+    TAPIR .predator    = false;
+    TAPIR .attackScore = 1;
+    TAPIR .defendScore = 3;
+    TAPIR .maxHealth   = 9;
     
-    QUAIL.name     = "Quail";
-    QUAIL.habitats = new Terrain[] { MEADOW, DESERT };
-    QUAIL.predator = false;
+    QUAIL .name        = "Quail";
+    QUAIL .habitats    = new Terrain[] { MEADOW, DESERT };
+    QUAIL .predator    = false;
+    QUAIL .attackScore = 1;
+    QUAIL .defendScore = 1;
+    QUAIL .maxHealth   = 2;
     
-    JAGUAR.name     = "Jaguar";
-    JAGUAR.habitats = new Terrain[] { JUNGLE };
-    JAGUAR.predator = true;
+    JAGUAR.name        = "Jaguar";
+    JAGUAR.habitats    = new Terrain[] { JUNGLE };
+    JAGUAR.predator    = true;
+    JAGUAR.attackScore = 5;
+    JAGUAR.defendScore = 3;
+    JAGUAR.maxHealth   = 8;
     
     for (Type s : ALL_ANIMALS) {
       s.lifespan = s.predator ? HUNTER_LIFESPAN : GRAZER_LIFESPAN;
