@@ -83,15 +83,15 @@ public class CityEvents {
   }
   
   
-  void calculateChances(InvasionAssessment a) {
+  void calculateChances(InvasionAssessment a, boolean random) {
     //
     //  First, we calculate a rule-of-thumb calculation for how likely you are
     //  to win or lose, and average casualties for both sides:
     float chance = 0, lossA = 0, lossD = 0;
     chance = a.attackPower / (a.attackPower + a.defendPower);
     chance = Nums.clamp((chance * 2) - 0.5f, 0, 1);
-    lossA  = (0.5f + 1 - chance) / 2;
-    lossD  = (0.5f +     chance) / 2;
+    lossA  = ((random ? Rand.num() : 0.5f) + 1 - chance) / 2;
+    lossD  = ((random ? Rand.num() : 0.5f) +     chance) / 2;
     //
     //  And then calculate probable casualties for both sides in each case:
     a.winChance   = chance;
@@ -164,7 +164,7 @@ public class CityEvents {
     IA.attackPower = attack.armyPower * commitLevel / POP_PER_CITIZEN;
     IA.defendPower = defend.armyPower               / POP_PER_CITIZEN;
     calculateTribute(IA);
-    calculateChances(IA);
+    calculateChances(IA, false);
     calculateAppeal (IA);
     return IA;
   }
@@ -200,34 +200,43 @@ public class CityEvents {
   static void handleInvasion(
     Formation formation, City goes, World.Journey journey
   ) {
-    City  from      = journey.from;
-    float power     = formation.formationPower();
-    float cityPower = goes.armyPower;
+    InvasionAssessment IA = new InvasionAssessment();
+    City from = journey.from;
+    IA.attackC     = from;
+    IA.defendC     = goes;
+    IA.attackPower = formation.formationPower() / POP_PER_CITIZEN;
+    IA.defendPower = goes.armyPower / POP_PER_CITIZEN;
     
-    float chance = 0, casualties = 0;
+    //  TODO:  You might calculate tribute here as well, if the formation
+    //  doesn't have that info already.
+    
+    goes.events.calculateChances(IA, true);
+    
+    float chance = IA.winChance, fromLost = 0, goesLost = 0;
     boolean victory = false;
-    chance     = power / (power + cityPower);
-    chance     = Nums.clamp((chance * 2) - 0.5f, 0, 1);
-    casualties = (Rand.num() + (1 - chance)) / 2;
     
     if (Rand.num() < chance) {
       setRelations(from, RELATION.LORD, goes, RELATION.VASSAL);
-      casualties -= 0.25f;
-      victory = true;
+      fromLost = IA.winKillsA;
+      goesLost = IA.winKillsD;
+      victory  = true;
     }
     else {
-      casualties += 0.25f;
-      victory = false;
+      fromLost = IA.lossKillsA;
+      goesLost = IA.winKillsD;
+      victory  = false;
     }
     
-    int numLost = inflictCasualties(formation, casualties);
+    fromLost = inflictCasualties(formation, fromLost);
+    goesLost = inflictCasualties(goes     , goesLost);
     
     I.say("\n"+formation+" CONDUCTED ACTION AGAINST "+goes);
-    I.say("  Victorious:    "+victory);
-    I.say("  Casualties:    "+numLost / formation.recruits.size());
-    I.say("  Home city now: "+goes.relations.get(from)+" of "+goes);
+    I.say("  Victorious:       "+victory );
+    I.say("  Took losses:      "+fromLost);
+    I.say("  Inflicted losses: "+goesLost);
+    I.say("  Home city now:    "+goes.relations.get(from)+" of "+goes);
     
-    //  TODO:  Handle recall of forces in a separate decision-pass...
+    //  TODO:  Handle recall of forces in a separate decision-pass?
     
     formation.stopSecuringPoint();
     goes.world.beginJourney(goes, from, formation);
@@ -238,11 +247,18 @@ public class CityEvents {
     int numFought = formation.recruits.size();
     if (numFought == 0) return 0;
     
-    casualties *= numFought;
     for (float i = Nums.min(numFought, casualties); i-- > 0;) {
       Actor lost = (Actor) Rand.pickFrom(formation.recruits);
       formation.toggleRecruit(lost, false);
     }
+    return (int) casualties;
+  }
+  
+  
+  static int inflictCasualties(City defends, float casualties) {
+    casualties = Nums.min(casualties, defends.armyPower);
+    defends.armyPower  -= casualties * POP_PER_CITIZEN;
+    defends.population -= casualties * POP_PER_CITIZEN;
     return (int) casualties;
   }
 }

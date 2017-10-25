@@ -45,12 +45,12 @@ public class TestMilitary extends Test {
     
     Formation enemies = new Formation();
     enemies.setupFormation(GARRISON, cityB);
-    
     for (int n = 4; n-- > 0;) {
       Actor fights = (Actor) ((n == 0) ? SOLDIER : CITIZEN).generate();
       fights.assignHomeCity(cityB);
       enemies.toggleRecruit(fights, true);
     }
+    cityB.armyPower = AVG_ARMY_POWER / 4;
     
     boolean recruited = false;
     boolean invaded   = false;

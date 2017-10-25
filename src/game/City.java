@@ -176,10 +176,17 @@ public class City implements Session.Saveable, Trader {
   /**  Regular updates-
     */
   void updateFrom(CityMap map) {
+    //  TODO:  Power will have to be updated whenever a formation leaves or
+    //  rejoins the city instead.
+    /*
     armyPower = 0;
     for (Formation f : formations) {
       f.update();
       armyPower += f.formationPower();
+    }
+    //*/
+    for (Formation f : formations) {
+      f.update();
     }
     return;
   }

@@ -261,8 +261,8 @@ public class Formation implements
     for (Actor w : recruits) {
       if (w.state >= Actor.STATE_DEAD) continue;
       float stats = w.type.attackScore + w.type.defendScore;
+      stats /= AVG_ATTACK + AVG_DEFEND;
       stats *= 1 - ((w.injury + w.hunger) / w.type.maxHealth);
-      stats *= (AVG_ATTACK + AVG_DEFEND) * AVG_MAX_HEALTH;
       sumStats += stats;
     }
     return (int) (sumStats * POP_PER_CITIZEN);
