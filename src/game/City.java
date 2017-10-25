@@ -11,12 +11,23 @@ public class City implements Session.Saveable, Trader {
   
   /**  Data fields, construction and save/load methods-
     */
-  public static enum RELATION {
-    ENEMY ,
-    VASSAL,
-    ALLY  ,
-    LORD  ,
+  public static enum ATTITUDE {
+    ENEMY  ,
+    VASSAL ,
+    ALLY   ,
+    LORD   ,
+    NEUTRAL,
   };
+  
+  static class Relation {
+    City with;
+    ATTITUDE attitude;
+    
+    Tally <Good> tributeDue    = new Tally();
+    Tally <Good> goodsSent     = new Tally();
+    Tally <Good> goodsFrom = new Tally();
+    //  Note:  The sums above are reset each year.
+  }
   
   String name = "City";
   int tint = CITY_COLOR;
@@ -26,7 +37,7 @@ public class City implements Session.Saveable, Trader {
   
   CityEvents events = new CityEvents(this);
   Table <City, Integer > distances = new Table();
-  Table <City, RELATION> relations = new Table();
+  Table <City, Relation> relations = new Table();
   
   int currentFunds = 0;
   Tally <Good> tradeLevel = new Tally();
@@ -63,9 +74,13 @@ public class City implements Session.Saveable, Trader {
       distances.put((City) s.loadObject(), s.loadInt());
     }
     for (int n = s.loadInt(); n-- > 0;) {
-      City     c = (City) s.loadObject();
-      RELATION r = RELATION.values()[s.loadInt()];
-      relations.put(c, r);
+      Relation r = new Relation();
+      r.with     = (City) s.loadObject();
+      r.attitude = ATTITUDE.values()[s.loadInt()];
+      s.loadTally(r.tributeDue);
+      s.loadTally(r.goodsSent );
+      s.loadTally(r.goodsFrom );
+      relations.put(r.with, r);
     }
     
     currentFunds = s.loadInt();
@@ -99,9 +114,12 @@ public class City implements Session.Saveable, Trader {
       s.saveInt(distances.get(c));
     }
     s.saveInt(relations.size());
-    for (City c : relations.keySet()) {
-      s.saveObject(c);
-      s.saveInt(relations.get(c).ordinal());
+    for (Relation r : relations.values()) {
+      s.saveObject(r.with);
+      s.saveInt(r.attitude.ordinal());
+      s.saveTally(r.tributeDue);
+      s.saveTally(r.goodsSent );
+      s.saveTally(r.goodsFrom );
     }
     
     s.saveInt(currentFunds);
@@ -150,16 +168,38 @@ public class City implements Session.Saveable, Trader {
   }
   
   
-  static void setRelations(City a, RELATION RA, City b, RELATION RB) {
-    a.relations.put(b, RB);
-    b.relations.put(a, RA);
+  Relation relationWith(City other) {
+    Relation r = relations.get(other);
+    if (r == null) {
+      relations.put(other, r = new Relation());
+      r.with     = other;
+      r.attitude = ATTITUDE.NEUTRAL;
+    }
+    return r;
   }
   
   
-  boolean hasVassal(City o) { return relations.get(o) == RELATION.VASSAL; }
-  boolean hasLord  (City o) { return relations.get(o) == RELATION.LORD  ; }
-  boolean hasEnemy (City o) { return relations.get(o) == RELATION.ENEMY ; }
-  boolean hasAlly  (City o) { return relations.get(o) == RELATION.ALLY  ; }
+  ATTITUDE attitude(City other) {
+    Relation r = relations.get(other);
+    return r == null ? ATTITUDE.NEUTRAL : r.attitude;
+  }
+  
+  
+  static void setRelations(City a, ATTITUDE RA, City b, ATTITUDE RB) {
+    a.relationWith(b).attitude = RB;
+    b.relationWith(a).attitude = RA;
+  }
+  
+  
+  static void setTribute(City a, City b, Tally <Good> tributeDue) {
+    a.relationWith(b).tributeDue = tributeDue;
+  }
+  
+  
+  boolean hasVassal(City o) { return attitude(o) == ATTITUDE.VASSAL; }
+  boolean hasLord  (City o) { return attitude(o) == ATTITUDE.LORD  ; }
+  boolean hasEnemy (City o) { return attitude(o) == ATTITUDE.ENEMY ; }
+  boolean hasAlly  (City o) { return attitude(o) == ATTITUDE.ALLY  ; }
   
   
   void setArmyPower(int power) {

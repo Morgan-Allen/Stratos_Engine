@@ -204,7 +204,7 @@ public class CityEvents {
     boolean victory = false;
     
     if (Rand.num() < chance) {
-      setRelations(from, RELATION.LORD, goes, RELATION.VASSAL);
+      setRelations(from, ATTITUDE.LORD, goes, ATTITUDE.VASSAL);
       fromLost = IA.winKillsA;
       goesLost = IA.winKillsD;
       victory  = true;

@@ -240,8 +240,8 @@ public class Formation implements
     if (CA == null) CA = map.city;
     if (CB == null) CB = map.city;
     if (CA == CB  ) return false;
-    RELATION r = CA.relations.get(CB);
-    if (r == RELATION.ENEMY) return true;
+    ATTITUDE r = CA.attitude(CB);
+    if (r == ATTITUDE.ENEMY) return true;
     return false;
   }
   
@@ -388,7 +388,7 @@ public class Formation implements
     else {
       City sieges = securedCity;
       if (sieges != null) {
-        City.setRelations(belongs, RELATION.LORD, sieges, RELATION.VASSAL);
+        City.setRelations(belongs, ATTITUDE.LORD, sieges, ATTITUDE.VASSAL);
       }
       beginSecuring(belongs);
       return true;

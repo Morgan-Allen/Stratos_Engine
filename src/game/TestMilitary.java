@@ -26,7 +26,7 @@ public class TestMilitary extends Test {
     map.settings.toggleFog = false;
     
     City.setupRoute(cityA, cityB, 1);
-    City.setRelations(cityA, City.RELATION.ENEMY, cityB, City.RELATION.ENEMY);
+    City.setRelations(cityA, City.ATTITUDE.ENEMY, cityB, City.ATTITUDE.ENEMY);
     
     
     BuildingForArmy fort = (BuildingForArmy) GARRISON.generate();

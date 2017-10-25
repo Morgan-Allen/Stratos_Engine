@@ -27,7 +27,7 @@ public class TestSieging extends Test {
     cityB.name = "Away City";
     
     City.setupRoute(cityA, cityB, 1);
-    City.setRelations(cityA, City.RELATION.ENEMY, cityB, City.RELATION.ENEMY);
+    City.setRelations(cityA, City.ATTITUDE.ENEMY, cityB, City.ATTITUDE.ENEMY);
     
     BuildingForArmy fort = (BuildingForArmy) GARRISON.generate();
     fort.enterMap(map, 10, 10, 1);
