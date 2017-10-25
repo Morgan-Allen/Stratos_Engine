@@ -13,7 +13,6 @@ public class Formation implements
   Session.Saveable, Journeys, TileConstants, Employer
 {
   
-  
   /**  Data fields, setup and save/load methods-
     */
   public static enum OBJECTIVE {
@@ -25,9 +24,11 @@ public class Formation implements
     PATROL_AREA  ,  // peace-ish objectives
   };
   
-  Type type;  //  TODO:  This might not be required!
-  OBJECTIVE object;
-  List <Object> demands = new List();
+  Type type;  //  TODO:  This might not be required?
+  OBJECTIVE object = OBJECTIVE.BATTLE_ENEMY;
+  City.POSTURE postureDemand = null;
+  Formation    actionDemand  = null;
+  Tally <Good> tributeDemand = new Tally();
   
   List <Actor> escorted = new List();
   List <Actor> recruits = new List();
@@ -51,8 +52,13 @@ public class Formation implements
   public Formation(Session s) throws Exception {
     s.cacheInstance(this);
     
-    type   = (Type) s.loadObject();
-    object = (OBJECTIVE) s.loadEnum(OBJECTIVE.values());
+    type          = (Type        ) s.loadObject();
+    object        = (OBJECTIVE   ) s.loadEnum(OBJECTIVE   .values());
+    postureDemand = (City.POSTURE) s.loadEnum(City.POSTURE.values());
+    actionDemand  = (Formation   ) s.loadObject();
+    s.loadTally(tributeDemand);
+    
+    s.loadObjects(escorted);
     s.loadObjects(recruits);
     
     away         = s.loadBool();
@@ -69,11 +75,16 @@ public class Formation implements
   
   public void saveState(Session s) throws Exception {
     
-    s.saveObject(type);
-    s.saveEnum(object);
+    s.saveObject(type         );
+    s.saveEnum  (object       );
+    s.saveEnum  (postureDemand);
+    s.saveObject(actionDemand );
+    s.saveTally (tributeDemand);
+    
+    s.saveObjects(escorted);
     s.saveObjects(recruits);
     
-    s.saveBool(away  );
+    s.saveBool  (away       );
     s.saveObject(belongs    );
     s.saveObject(securedCity);
     s.saveObject(map        );
@@ -152,6 +163,17 @@ public class Formation implements
     else {
       beginJourney(belongs, securedCity);
     }
+  }
+  
+  
+  void assignDemands(
+    City.POSTURE posture,
+    Formation actionTaken,
+    Tally <Good> tribute
+  ) {
+    this.postureDemand = posture;
+    this.actionDemand  = actionTaken;
+    this.tributeDemand = tribute == null ? new Tally() : tribute;
   }
   
   
@@ -240,8 +262,8 @@ public class Formation implements
     if (CA == null) CA = map.city;
     if (CB == null) CB = map.city;
     if (CA == CB  ) return false;
-    ATTITUDE r = CA.attitude(CB);
-    if (r == ATTITUDE.ENEMY) return true;
+    POSTURE r = CA.posture(CB);
+    if (r == POSTURE.ENEMY) return true;
     return false;
   }
   
@@ -388,7 +410,8 @@ public class Formation implements
     else {
       City sieges = securedCity;
       if (sieges != null) {
-        City.setRelations(belongs, ATTITUDE.LORD, sieges, ATTITUDE.VASSAL);
+        setPosture(sieges, belongs, postureDemand);
+        setTribute(sieges, belongs, tributeDemand);
       }
       beginSecuring(belongs);
       return true;

@@ -333,7 +333,7 @@ public class Test {
     
     List <String> borderRep = new List();
     for (City other : c.world.cities) {
-      City.ATTITUDE r = c.attitude(other);
+      City.POSTURE r = c.posture(other);
       if (other == c || r == null) continue;
       borderRep.add("\n  "+other+": "+r);
     }

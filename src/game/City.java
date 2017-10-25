@@ -11,7 +11,7 @@ public class City implements Session.Saveable, Trader {
   
   /**  Data fields, construction and save/load methods-
     */
-  public static enum ATTITUDE {
+  public static enum POSTURE {
     ENEMY  ,
     VASSAL ,
     ALLY   ,
@@ -21,11 +21,11 @@ public class City implements Session.Saveable, Trader {
   
   static class Relation {
     City with;
-    ATTITUDE attitude;
+    POSTURE posture;
     
-    Tally <Good> tributeDue    = new Tally();
-    Tally <Good> goodsSent     = new Tally();
-    Tally <Good> goodsFrom = new Tally();
+    Tally <Good> tributeDue = new Tally();
+    Tally <Good> goodsSent  = new Tally();
+    Tally <Good> goodsFrom  = new Tally();
     //  Note:  The sums above are reset each year.
   }
   
@@ -76,7 +76,7 @@ public class City implements Session.Saveable, Trader {
     for (int n = s.loadInt(); n-- > 0;) {
       Relation r = new Relation();
       r.with     = (City) s.loadObject();
-      r.attitude = ATTITUDE.values()[s.loadInt()];
+      r.posture = POSTURE.values()[s.loadInt()];
       s.loadTally(r.tributeDue);
       s.loadTally(r.goodsSent );
       s.loadTally(r.goodsFrom );
@@ -116,7 +116,7 @@ public class City implements Session.Saveable, Trader {
     s.saveInt(relations.size());
     for (Relation r : relations.values()) {
       s.saveObject(r.with);
-      s.saveInt(r.attitude.ordinal());
+      s.saveInt(r.posture.ordinal());
       s.saveTally(r.tributeDue);
       s.saveTally(r.goodsSent );
       s.saveTally(r.goodsFrom );
@@ -173,33 +173,42 @@ public class City implements Session.Saveable, Trader {
     if (r == null) {
       relations.put(other, r = new Relation());
       r.with     = other;
-      r.attitude = ATTITUDE.NEUTRAL;
+      r.posture = POSTURE.NEUTRAL;
     }
     return r;
   }
   
   
-  ATTITUDE attitude(City other) {
+  POSTURE posture(City other) {
     Relation r = relations.get(other);
-    return r == null ? ATTITUDE.NEUTRAL : r.attitude;
+    return r == null ? POSTURE.NEUTRAL : r.posture;
   }
   
   
-  static void setRelations(City a, ATTITUDE RA, City b, ATTITUDE RB) {
-    a.relationWith(b).attitude = RB;
-    b.relationWith(a).attitude = RA;
+  static void setPosture(City a, City b, POSTURE p) {
+    if (p == null) p = POSTURE.NEUTRAL;
+    POSTURE reverse  = POSTURE.NEUTRAL;
+    
+    if (p == POSTURE.VASSAL) reverse = POSTURE.LORD  ;
+    if (p == POSTURE.LORD  ) reverse = POSTURE.VASSAL;
+    if (p == POSTURE.ALLY  ) reverse = POSTURE.ALLY  ;
+    if (p == POSTURE.ENEMY ) reverse = POSTURE.ENEMY ;
+    
+    a.relationWith(b).posture = p;
+    b.relationWith(a).posture = reverse;
   }
   
   
   static void setTribute(City a, City b, Tally <Good> tributeDue) {
+    if (tributeDue == null) tributeDue = new Tally();
     a.relationWith(b).tributeDue = tributeDue;
   }
   
   
-  boolean hasVassal(City o) { return attitude(o) == ATTITUDE.VASSAL; }
-  boolean hasLord  (City o) { return attitude(o) == ATTITUDE.LORD  ; }
-  boolean hasEnemy (City o) { return attitude(o) == ATTITUDE.ENEMY ; }
-  boolean hasAlly  (City o) { return attitude(o) == ATTITUDE.ALLY  ; }
+  boolean isVassal(City o) { return posture(o) == POSTURE.VASSAL; }
+  boolean isLord  (City o) { return posture(o) == POSTURE.LORD  ; }
+  boolean isEnemy (City o) { return posture(o) == POSTURE.ENEMY ; }
+  boolean isAlly  (City o) { return posture(o) == POSTURE.ALLY  ; }
   
   
   void setArmyPower(int power) {
@@ -225,9 +234,18 @@ public class City implements Session.Saveable, Trader {
       armyPower += f.formationPower();
     }
     //*/
+    
     for (Formation f : formations) {
       f.update();
     }
+    
+    if (map.time % YEAR_LENGTH == 0) {
+      for (Relation r : relations.values()) {
+        r.goodsFrom.clear();
+        r.goodsSent.clear();
+      }
+    }
+    
     return;
   }
   

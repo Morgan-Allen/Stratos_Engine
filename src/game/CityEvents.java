@@ -195,16 +195,15 @@ public class CityEvents {
     IA.attackPower = formation.formationPower() / POP_PER_CITIZEN;
     IA.defendPower = goes.armyPower / POP_PER_CITIZEN;
     
-    //  TODO:  You might calculate tribute here as well, if the formation
-    //  doesn't have that info already.
-    
     goes.events.calculateChances(IA, true);
     
     float chance = IA.winChance, fromLost = 0, goesLost = 0;
     boolean victory = false;
     
     if (Rand.num() < chance) {
-      setRelations(from, ATTITUDE.LORD, goes, ATTITUDE.VASSAL);
+      setPosture(goes, from, formation.postureDemand);
+      setTribute(goes, from, formation.tributeDemand);
+      
       fromLost = IA.winKillsA;
       goesLost = IA.winKillsD;
       victory  = true;
@@ -222,7 +221,7 @@ public class CityEvents {
     I.say("  Victorious:       "+victory );
     I.say("  Took losses:      "+fromLost);
     I.say("  Inflicted losses: "+goesLost);
-    I.say("  Home city now:    "+goes.relations.get(from)+" of "+goes);
+    I.say("  Home city now:    "+from.posture(goes)+" of "+goes);
     
     //  TODO:  Handle recall of forces in a separate decision-pass?
     

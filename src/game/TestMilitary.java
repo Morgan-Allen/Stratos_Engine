@@ -26,7 +26,7 @@ public class TestMilitary extends Test {
     map.settings.toggleFog = false;
     
     City.setupRoute(cityA, cityB, 1);
-    City.setRelations(cityA, City.ATTITUDE.ENEMY, cityB, City.ATTITUDE.ENEMY);
+    City.setPosture(cityA, cityB, City.POSTURE.ENEMY);
     
     
     BuildingForArmy fort = (BuildingForArmy) GARRISON.generate();
@@ -85,10 +85,11 @@ public class TestMilitary extends Test {
       
       if (homeWin && troops.recruits.size() >= 12 && ! invading) {
         troops.beginSecuring(cityB);
+        troops.assignDemands(City.POSTURE.VASSAL, null, null);
         invading = true;
       }
       
-      if (invading && cityA.hasVassal(cityB)) {
+      if (invading && cityA.isLord(cityB)) {
         awayWin = true;
       }
       

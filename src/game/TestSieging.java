@@ -27,7 +27,7 @@ public class TestSieging extends Test {
     cityB.name = "Away City";
     
     City.setupRoute(cityA, cityB, 1);
-    City.setRelations(cityA, City.ATTITUDE.ENEMY, cityB, City.ATTITUDE.ENEMY);
+    City.setPosture(cityA, cityB, City.POSTURE.ENEMY);
     
     BuildingForArmy fort = (BuildingForArmy) GARRISON.generate();
     fort.enterMap(map, 10, 10, 1);
@@ -43,13 +43,14 @@ public class TestSieging extends Test {
       enemies.toggleRecruit(fights, true);
     }
     enemies.beginSecuring(cityA);
+    enemies.assignDemands(City.POSTURE.VASSAL, null, null);
     
     boolean victorious = false;
     
     while (map.time < 1000 || graphics) {
       map = runGameLoop(map, 10, graphics, "saves/test_sieging.tlt");
       
-      if (cityA.hasLord(cityB) && (! enemies.away) && ! victorious) {
+      if (cityA.isVassal(cityB) && (! enemies.away) && ! victorious) {
         victorious = true;
         I.say("\nSIEGING TEST CONCLUDED SUCCESSFULLY!");
         if (! graphics) return;
