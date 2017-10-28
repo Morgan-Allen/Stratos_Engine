@@ -140,7 +140,7 @@ public class CityMap implements Session.Saveable {
     }
     
     fog.performSetup(size);
-    city.assignMap(this);
+    city.attachMap(this);
   }
   
   

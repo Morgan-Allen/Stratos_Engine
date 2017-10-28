@@ -164,15 +164,16 @@ public class City implements Session.Saveable, Trader {
   }
   
   
-  public Tally <Good> tradeLevel() { return tradeLevel; }
-  public Tally <Good> inventory () { return inventory ; }
-  
-  
-  public City tradeOrigin() {
-    return this;
+  void initBuildLevels(Object... buildLevelArgs) {
+    this.buildLevels.setWith(buildLevelArgs);
+    this.population = buildLevels.valueFor(HOUSE   ) * AVG_HOUSE_POP;
+    this.armyPower  = buildLevels.valueFor(GARRISON) * AVG_ARMY_POWER;
   }
   
   
+  
+  /**  Setting up basic relations-
+    */
   Relation relationWith(City other) {
     Relation r = relations.get(other);
     if (r == null) {
@@ -204,6 +205,15 @@ public class City implements Session.Saveable, Trader {
   }
   
   
+  boolean isVassal(City o) { return posture(o) == POSTURE.VASSAL; }
+  boolean isLord  (City o) { return posture(o) == POSTURE.LORD  ; }
+  boolean isEnemy (City o) { return posture(o) == POSTURE.ENEMY ; }
+  boolean isAlly  (City o) { return posture(o) == POSTURE.ALLY  ; }
+  
+  
+  
+  /**  Setting and accessing tribute and trade levels-
+    */
   static void setTribute(City a, City b, Tally <Good> tributeDue, int timeDue) {
     if (tributeDue == null) tributeDue = new Tally();
     Relation r = a.relationWith(b);
@@ -212,14 +222,12 @@ public class City implements Session.Saveable, Trader {
   }
   
   
-  boolean isVassal(City o) { return posture(o) == POSTURE.VASSAL; }
-  boolean isLord  (City o) { return posture(o) == POSTURE.LORD  ; }
-  boolean isEnemy (City o) { return posture(o) == POSTURE.ENEMY ; }
-  boolean isAlly  (City o) { return posture(o) == POSTURE.ALLY  ; }
+  public Tally <Good> tradeLevel() { return tradeLevel; }
+  public Tally <Good> inventory () { return inventory ; }
   
   
-  void assignMap(CityMap map) {
-    this.map = map;
+  public City tradeOrigin() {
+    return this;
   }
   
   

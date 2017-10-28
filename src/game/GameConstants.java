@@ -749,7 +749,7 @@ public class GameConstants {
       POTTERY, 5f,
       COTTON , 10f
     );
-    cityA.buildLevels.setWith(
+    cityA.initBuildLevels(
       GARRISON, 2,
       HOUSE   , 10
     );
@@ -761,7 +761,7 @@ public class GameConstants {
       MAIZE, 5f,
       CLAY, 10f
     );
-    cityA.buildLevels.setWith(
+    cityA.initBuildLevels(
       GARRISON, 0.75f,
       HOUSE   , 5
     );
