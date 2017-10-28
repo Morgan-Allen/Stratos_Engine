@@ -60,7 +60,7 @@ public class CityEvents {
       float consVal = 0 - a.attackC.tradeLevel.valueFor(g);
       consVal      -= 5 + a.attackC.inventory .valueFor(g);
       
-      float grabVal = (prodVal + consVal) / 2f;// Nums.min(prodVal, consVal);
+      float grabVal = (prodVal + consVal) / 2f;
       if (grabVal <= 0) continue;
       
       grabVal *= AVG_TRIBUTE_PERCENT / 100f;

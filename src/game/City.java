@@ -18,15 +18,23 @@ public class City implements Session.Saveable, Trader {
     LORD   ,
     NEUTRAL,
   };
+  final static float
+    LOY_DEVOTED  =  1.0F,
+    LOY_FRIENDLY =  0.5F,
+    LOY_NEUTRAL  =  0.0F,
+    LOY_STRAINED = -0.5f,
+    LOY_NEMESIS  = -1.0F
+  ;
   
   static class Relation {
-    City with;
+    City    with;
     POSTURE posture;
+    float   loyalty;
+    int lastRebelDate = -1;
     
     Tally <Good> tributeDue = new Tally();
     Tally <Good> goodsSent  = new Tally();
-    Tally <Good> goodsFrom  = new Tally();
-    int nextTributeDue = -1;
+    int nextTributeDate = -1;
   }
   
   String name = "City";
@@ -78,10 +86,11 @@ public class City implements Session.Saveable, Trader {
       Relation r = new Relation();
       r.with    = (City) s.loadObject();
       r.posture = POSTURE.values()[s.loadInt()];
+      r.loyalty = s.loadFloat();
+      r.lastRebelDate = s.loadInt();
       s.loadTally(r.tributeDue);
       s.loadTally(r.goodsSent );
-      s.loadTally(r.goodsFrom );
-      r.nextTributeDue = s.loadInt();
+      r.nextTributeDate = s.loadInt();
       relations.put(r.with, r);
     }
     
@@ -120,10 +129,11 @@ public class City implements Session.Saveable, Trader {
     for (Relation r : relations.values()) {
       s.saveObject(r.with);
       s.saveInt(r.posture.ordinal());
+      s.saveFloat(r.loyalty);
+      s.saveInt(r.lastRebelDate);
       s.saveTally(r.tributeDue);
       s.saveTally(r.goodsSent );
-      s.saveTally(r.goodsFrom );
-      s.saveInt(r.nextTributeDue);
+      s.saveInt(r.nextTributeDate);
     }
     
     s.saveInt(currentFunds);
@@ -178,8 +188,9 @@ public class City implements Session.Saveable, Trader {
     Relation r = relations.get(other);
     if (r == null) {
       relations.put(other, r = new Relation());
-      r.with     = other;
+      r.with    = other;
       r.posture = POSTURE.NEUTRAL;
+      r.loyalty = LOY_NEUTRAL;
     }
     return r;
   }
@@ -217,8 +228,8 @@ public class City implements Session.Saveable, Trader {
   static void setTribute(City a, City b, Tally <Good> tributeDue, int timeDue) {
     if (tributeDue == null) tributeDue = new Tally();
     Relation r = a.relationWith(b);
-    r.tributeDue     = tributeDue;
-    r.nextTributeDue = timeDue   ;
+    r.tributeDue      = tributeDue;
+    r.nextTributeDate = timeDue   ;
   }
   
   
@@ -300,10 +311,11 @@ public class City implements Session.Saveable, Trader {
       f.update();
     }
     for (Relation r : relations.values()) {
-      if (map.time == r.nextTributeDue) {
-        r.goodsFrom.clear();
+      
+      boolean paysTribute = r.nextTributeDate != -1;
+      if (paysTribute && map.time == r.nextTributeDate) {
         r.goodsSent.clear();
-        r.nextTributeDue += YEAR_LENGTH;
+        r.nextTributeDate += YEAR_LENGTH;
         //
         //  TODO:  Update relations based on success/failure in meeting
         //  tribute.

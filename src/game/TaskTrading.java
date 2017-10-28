@@ -134,8 +134,26 @@ public class TaskTrading extends Task {
 
   /**  Other utility methods:
     */
+  City.Relation cityRelation(Trader trades, Trader with) {
+    return trades.tradeOrigin().relationWith(with.tradeOrigin());
+  }
+  
+  
+  float tributeQuantityRemaining(City.Relation r, Good good) {
+    if (r == null) return 0;
+    float demand = r.tributeDue.valueFor(good);
+    float paid   = r.goodsSent .valueFor(good);
+    return demand - paid;
+  }
+  
+  
   void takeOnGoods(Trader store, Tally <Good> taken, boolean doPayment) {
     if (store == null) return;
+    
+    //  You don't have to pay for goods if the city you're taking them from
+    //  owes them as tribute!
+    City.Relation r = cityRelation(store, homeCity);
+    boolean tributeDue = r != null && r.nextTributeDate != -1;
     
     Tally <Good> cargo = actor.cargo == null ? new Tally() : actor.cargo;
     Tally <Good> stock = store.inventory();
@@ -145,7 +163,16 @@ public class TaskTrading extends Task {
       float amount = Nums.min(taken.valueFor(g), stock.valueFor(g));
       cargo.add(    amount, g);
       stock.add(0 - amount, g);
-      totalCost += amount * g.price;
+      
+      if (tributeDue) {
+        float tribLeft = tributeQuantityRemaining(r, g);
+        float paysFor  = Nums.max(0, amount - tribLeft);
+        totalCost += paysFor * g.price;
+        r.goodsSent.add(amount, g);
+      }
+      else {
+        totalCost += amount * g.price;
+      }
     }
     
     cargo.add(doPayment ? (0 - totalCost) : 0, CASH);
@@ -162,6 +189,11 @@ public class TaskTrading extends Task {
   void offloadGoods(Trader store, boolean doPayment) {
     if (store == null) return;
     
+    //  You don't receive money for goods if the city you deliver to is owed
+    //  them as tribute.
+    City.Relation r = cityRelation(homeCity, store);
+    boolean tributeDue = r != null && r.nextTributeDate != -1;
+    
     float cash = actor.cargo.valueFor(CASH);
     int totalValue = 0;
     
@@ -169,7 +201,16 @@ public class TaskTrading extends Task {
       if (g == CASH) continue;
       float amount = actor.cargo.valueFor(g);
       store.inventory().add(amount, g);
-      totalValue += amount * g.price;
+      
+      if (tributeDue) {
+        float tribLeft = tributeQuantityRemaining(r, g);
+        float paysFor  = Nums.max(0, amount - tribLeft);
+        totalValue += paysFor * g.price;
+        r.goodsSent.add(amount, g);
+      }
+      else {
+        totalValue += amount * g.price;
+      }
     }
     
     actor.cargo.clear();
