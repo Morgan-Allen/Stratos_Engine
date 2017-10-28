@@ -202,12 +202,6 @@ public class CityEvents {
   
   void updateEvents() {
     //
-    //  We don't update for cities that currently have an active map- i.e, are
-    //  player-controlled.
-    if (city.active) {
-      return;
-    }
-    //
     //  Once per month, otherwise, evaluate any likely prospects for invasion:
     if (city.world.time % MONTH_LENGTH == 0) {
       Pick <InvasionAssessment> pick = new Pick(0);

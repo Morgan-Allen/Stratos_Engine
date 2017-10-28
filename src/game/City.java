@@ -235,10 +235,40 @@ public class City implements Session.Saveable, Trader {
   /**  Regular updates-
     */
   void updateFrom(CityMap map) {
-    
-    events.updateEvents();
-    
-    if (map.time % MONTH_LENGTH == 0) {
+    boolean updateStats = world.time % MONTH_LENGTH == 0;
+    //
+    //  Local player-owned cities (i.e, with their own map), must derive their
+    //  vitual statistics from that small-scale city map:
+    if (updateStats && map != null) {
+      
+      int citizens = 0;
+      for (Actor a : map.actors) if (a.homeCity == this) {
+        citizens += 1;
+      }
+      this.population = citizens * POP_PER_CITIZEN;
+      
+      float armyPower = 0;
+      for (Formation f : formations) armyPower += f.formationPower();
+      this.armyPower = armyPower;
+      
+      this.inventory  .clear();
+      this.buildLevels.clear();
+      for (Building b : map.buildings) {
+        if (b.type.category == Type.IS_TRADE_BLD) {
+          BuildingForTrade post = (BuildingForTrade) b;
+          for (Good g : post.inventory.keys()) {
+            this.inventory.add(post.inventory.valueFor(g), g);
+          }
+        }
+        this.buildLevels.add(1, b.type);
+      }
+    }
+    //
+    //  Foreign off-map cities must update their internal ratings somewhat
+    //  differently-
+    if (updateStats && map == null) {
+      events.updateEvents();
+      
       float popRegen  = LIFESPAN_LENGTH / MONTH_LENGTH;
       float usageInc  = YEAR_LENGTH / MONTH_LENGTH;
       float idealPop  = buildLevels.valueFor(HOUSE   ) * AVG_HOUSE_POP ;
@@ -264,11 +294,11 @@ public class City implements Session.Saveable, Trader {
         inventory.set(g, Nums.max(0, amount));
       }
     }
-    
+    //
+    //  But formations and relationships get updated similarly either way-
     for (Formation f : formations) {
       f.update();
     }
-
     for (Relation r : relations.values()) {
       if (map.time == r.nextTributeDue) {
         r.goodsFrom.clear();
@@ -279,7 +309,6 @@ public class City implements Session.Saveable, Trader {
         //  tribute.
       }
     }
-    
     return;
   }
   
