@@ -42,6 +42,7 @@ public class CityEvents {
     float winChance, angerChance;
     float winKillsA, lossKillsA;
     float winKillsD, lossKillsD;
+    float hateBonus, lovePenalty;
     
     float costs, benefits;
     float evaluatedAppeal;
@@ -129,19 +130,26 @@ public class CityEvents {
     float angerValue = a.defendC.population * (casValueA + casValueD) / 2f;
     angerValue /= 4 * POP_PER_CITIZEN;
     //
-    //  Then simply tally up the pros and cons, and return:
+    //  And account for pre-existing hostility/loyalty:
+    City.Relation r = a.attackC.relationWith(a.defendC);
+    a.hateBonus   = Nums.min(0, r.loyalty) * angerValue;
+    a.lovePenalty = Nums.max(0, r.loyalty) * angerValue;
+    //
+    //  Then simply tally up the pros and cons-
     a.costs    += a.winChance   * a.winKillsA  * casValueA;
     a.costs    += loseChance    * a.lossKillsA * casValueA;
     a.costs    += a.angerChance * angerValue;
+    a.costs    += a.winChance   * a.lovePenalty;
     a.benefits += a.winChance   * a.winKillsD  * casValueD;
     a.benefits += loseChance    * a.lossKillsD * casValueD;
     a.benefits += a.winChance   * tribValue;
+    a.benefits += a.winChance   * a.hateBonus;
   }
   
   
   InvasionAssessment performAssessment(
     City attack, City defend,
-    float commitLevel
+    float commitLevel, boolean random
   ) {
     InvasionAssessment IA = new InvasionAssessment();
     IA.attackC     = attack;
@@ -151,6 +159,14 @@ public class CityEvents {
     calculateTribute(IA);
     calculateChances(IA, false);
     calculateAppeal(IA);
+    
+    float appeal = 0;
+    appeal += (random ? Rand.avgNums(2) : 0.5f) * IA.benefits;
+    appeal -= (random ? Rand.avgNums(2) : 0.5f) * IA.costs;
+    appeal /= (IA.benefits + IA.costs) / 2;
+    appeal *= CityBorders.distanceRating(IA.attackC, IA.defendC);
+    IA.evaluatedAppeal = appeal;
+    
     return IA;
   }
   
@@ -167,14 +183,7 @@ public class CityEvents {
       if (other.isLoyalVassalOf   (city)   ) continue;
       if (other.isVassalOfSameLord(city)   ) continue;
       
-      InvasionAssessment IA = performAssessment(city, other, 0.5f);
-      float appeal = 0;
-      appeal += Rand.avgNums(2) * IA.benefits;
-      appeal -= Rand.avgNums(2) * IA.costs;
-      appeal /= (IA.benefits + IA.costs) / 2;
-      appeal *= CityBorders.distanceRating(city, other);
-      
-      IA.evaluatedAppeal = appeal;
+      InvasionAssessment IA = performAssessment(city, other, 0.5f, true);
       choices.add(IA);
     }
     return choices;
@@ -195,6 +204,12 @@ public class CityEvents {
     }
     
     return force;
+  }
+  
+  
+  boolean considerRevolt(City lord) {
+    InvasionAssessment IA = performAssessment(city, lord, 0.5f, true);
+    return IA.evaluatedAppeal > 0 && Rand.index(AVG_TRIBUTE_YEARS) == 0;
   }
   
   

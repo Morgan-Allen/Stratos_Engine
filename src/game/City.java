@@ -306,38 +306,43 @@ public class City implements Session.Saveable, Trader {
   /**  Regular updates-
     */
   void updateFrom(CityMap map) {
-    boolean updateStats = world.time % MONTH_LENGTH == 0;
+    boolean  updateStats = world.time % MONTH_LENGTH == 0;
+    boolean  activeMap   = map != null;
+    City     lord        = currentLord();
+    Relation fealty      = relationWith(lord);
+    boolean  supplyDue   = isLoyalVassalOf(lord);
+    supplyDue &= fealty.nextSupplyDate == world.time;
     //
     //  Local player-owned cities (i.e, with their own map), must derive their
     //  vitual statistics from that small-scale city map:
-    if (updateStats && map != null) {
+    if (updateStats && activeMap) {
       
       int citizens = 0;
       for (Actor a : map.actors) if (a.homeCity == this) {
         citizens += 1;
       }
-      this.population = citizens * POP_PER_CITIZEN;
+      population = citizens * POP_PER_CITIZEN;
       
       float armyPower = 0;
       for (Formation f : formations) armyPower += f.formationPower();
       this.armyPower = armyPower;
       
-      this.inventory  .clear();
-      this.buildLevels.clear();
+      inventory  .clear();
+      buildLevels.clear();
       for (Building b : map.buildings) {
         if (b.type.category == Type.IS_TRADE_BLD) {
           BuildingForTrade post = (BuildingForTrade) b;
           for (Good g : post.inventory.keys()) {
-            this.inventory.add(post.inventory.valueFor(g), g);
+            inventory.add(post.inventory.valueFor(g), g);
           }
         }
-        this.buildLevels.add(1, b.type);
+        buildLevels.add(1, b.type);
       }
     }
     //
     //  Foreign off-map cities must update their internal ratings somewhat
     //  differently-
-    if (updateStats && map == null) {
+    if (updateStats && ! activeMap) {
       events.updateEvents();
       
       float popRegen  = LIFESPAN_LENGTH / MONTH_LENGTH;
@@ -364,6 +369,11 @@ public class City implements Session.Saveable, Trader {
         amount -= usageInc * tradeLevel.valueFor(g);
         inventory.set(g, Nums.max(0, amount));
       }
+      
+      if (lord != null) for (Good g : fealty.suppliesDue.keys()) {
+        float sent = fealty.suppliesDue.valueFor(g) * usageInc * 1.1f;
+        fealty.suppliesSent.add(sent, g);
+      }
     }
     //
     //  But formations and relationships get updated similarly either way-
@@ -373,15 +383,13 @@ public class City implements Session.Saveable, Trader {
     //
     //  Once per year, check to see if tribute-requirements have been met with
     //  you lord (if any.)
-    City lord = currentLord();
-    Relation r = relationWith(lord);
     
-    if (isLoyalVassalOf(lord) && r.nextSupplyDate == world.time) {
-      
+    if (supplyDue && activeMap) {
       boolean failedSupply = false;
-      for (Good g : r.suppliesDue.keys()) {
-        float sent = r.suppliesSent.valueFor(g);
-        float due  = r.suppliesDue .valueFor(g);
+      
+      for (Good g : fealty.suppliesDue.keys()) {
+        float sent = fealty.suppliesSent.valueFor(g);
+        float due  = fealty.suppliesDue .valueFor(g);
         if (sent < due) failedSupply = true;
       }
       
@@ -389,8 +397,21 @@ public class City implements Session.Saveable, Trader {
         enterRevoltAgainst(lord);
       }
       else {
-        r.suppliesSent.clear();
-        r.nextSupplyDate += YEAR_LENGTH;
+        fealty.suppliesSent.clear();
+        fealty.nextSupplyDate += YEAR_LENGTH;
+        incLoyalty(lord, this, LOY_TRIBUTE_BONUS);
+      }
+    }
+    //
+    //  In the case of AI-controlled cities, you need to check the appeal of
+    //  rebellion-
+    if (supplyDue && ! activeMap) {
+      if (events.considerRevolt(lord)) {
+        enterRevoltAgainst(lord);
+      }
+      else {
+        fealty.suppliesSent.clear();
+        fealty.nextSupplyDate += YEAR_LENGTH;
         incLoyalty(lord, this, LOY_TRIBUTE_BONUS);
       }
     }
