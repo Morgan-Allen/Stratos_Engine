@@ -161,7 +161,7 @@ public class CityEvents {
     List <InvasionAssessment> choices = new List();
     //
     //  TODO:  Allow for multiple levels of force-commitment, since you don't
-    //  want your own city to be vulnerable.
+    //  want your own city to be vulnerable?
     
     for (City other : city.world.cities) {
       Integer distance = city.distances.get(other);
@@ -182,14 +182,68 @@ public class CityEvents {
   }
   
   
+  Formation spawnInvasion(InvasionAssessment IA) {
+    //  TODO:  This.
+    
+    Formation force = new Formation();
+    force.setupFormation(GARRISON, city);
+    
+    int n = 0;
+    while (force.formationPower() < city.armyPower / 2) {
+      Type  type   = (n++ % 4 == 0) ? SOLDIER : CITIZEN;
+      Actor fights = (Actor) type.generate();
+      fights.assignHomeCity(IA.attackC);
+      force.toggleRecruit(fights, true);
+    }
+    
+    return force;
+  }
+  
+  
+  void updateEvents() {
+    //
+    //  We don't update for cities that currently have an active map- i.e, are
+    //  player-controlled.
+    if (city.active) {
+      return;
+    }
+    //
+    //  Once per month, otherwise, evaluate any likely prospects for invasion:
+    if (city.world.time % MONTH_LENGTH == 0) {
+      Pick <InvasionAssessment> pick = new Pick(0);
+      for (InvasionAssessment IA : updateInvasionChoices()) {
+        pick.compare(IA, IA.evaluatedAppeal);
+      }
+      //
+      //  If any have positive appeal, launch the enterprise:
+      InvasionAssessment IA = pick.result();
+      if (IA != null) {
+        Formation force = spawnInvasion(IA);
+        World.Journey j = force.beginJourney(IA.attackC, IA.defendC);
+        handleDeparture(force, IA.defendC, j);
+      }
+    }
+  }
+  
+  
   
   /**  Handling end-stage events:
     */
+  static void handleDeparture(
+    Formation formation, City goes, World.Journey journey
+  ) {
+    City belongs = formation.belongs;
+    belongs.armyPower -= formation.formationPower();
+    belongs.formations.add(formation);
+  }
+  
+  
   static void handleInvasion(
     Formation formation, City goes, World.Journey journey
   ) {
     InvasionAssessment IA = new InvasionAssessment();
-    City from = journey.from;
+    World world = goes.world;
+    City  from  = journey.from;
     IA.attackC     = from;
     IA.defendC     = goes;
     IA.attackPower = formation.formationPower() / POP_PER_CITIZEN;
@@ -202,7 +256,7 @@ public class CityEvents {
     
     if (Rand.num() < chance) {
       setPosture(goes, from, formation.postureDemand);
-      setTribute(goes, from, formation.tributeDemand);
+      setTribute(goes, from, formation.tributeDemand, world.time);
       
       fromLost = IA.winKillsA;
       goesLost = IA.winKillsD;
@@ -247,6 +301,15 @@ public class CityEvents {
     defends.armyPower  -= casualties * POP_PER_CITIZEN;
     defends.population -= casualties * POP_PER_CITIZEN;
     return (int) casualties;
+  }
+  
+  
+  static void handleReturn(
+    Formation formation, City from, World.Journey journey
+  ) {
+    City belongs = formation.belongs;
+    belongs.armyPower += formation.formationPower();
+    belongs.formations.remove(formation);
   }
 }
 

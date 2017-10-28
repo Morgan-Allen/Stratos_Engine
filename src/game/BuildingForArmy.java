@@ -68,6 +68,7 @@ public class BuildingForArmy extends BuildingForCrafts {
     */
   boolean eligible(Actor actor) {
     if (workers.includes(actor)) return false;
+    if (actor.woman()          ) return false;
     return actor.formation == null;
   }
   

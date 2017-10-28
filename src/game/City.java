@@ -26,7 +26,7 @@ public class City implements Session.Saveable, Trader {
     Tally <Good> tributeDue = new Tally();
     Tally <Good> goodsSent  = new Tally();
     Tally <Good> goodsFrom  = new Tally();
-    //  Note:  The sums above are reset each year.
+    int nextTributeDue = -1;
   }
   
   String name = "City";
@@ -39,13 +39,14 @@ public class City implements Session.Saveable, Trader {
   Table <City, Integer > distances = new Table();
   Table <City, Relation> relations = new Table();
   
-  int currentFunds = 0;
-  Tally <Good> tradeLevel = new Tally();
-  Tally <Good> inventory  = new Tally();
+  int   currentFunds = 0;
+  float population   = 0;
+  float armyPower    = 0;
+  Tally <Good> tradeLevel  = new Tally();
+  Tally <Good> inventory   = new Tally();
+  Tally <Type> buildLevels = new Tally();
   
   List <Formation> formations = new List();
-  int population = AVG_POPULATION;
-  int armyPower  = AVG_ARMY_POWER;
   
   boolean active;
   CityMap map;
@@ -75,21 +76,23 @@ public class City implements Session.Saveable, Trader {
     }
     for (int n = s.loadInt(); n-- > 0;) {
       Relation r = new Relation();
-      r.with     = (City) s.loadObject();
+      r.with    = (City) s.loadObject();
       r.posture = POSTURE.values()[s.loadInt()];
       s.loadTally(r.tributeDue);
       s.loadTally(r.goodsSent );
       s.loadTally(r.goodsFrom );
+      r.nextTributeDue = s.loadInt();
       relations.put(r.with, r);
     }
     
     currentFunds = s.loadInt();
-    s.loadTally(tradeLevel);
-    s.loadTally(inventory);
+    population   = s.loadFloat();
+    armyPower    = s.loadFloat();
+    s.loadTally(tradeLevel );
+    s.loadTally(inventory  );
+    s.loadTally(buildLevels);
     
     s.loadObjects(formations);
-    population = s.loadInt();
-    armyPower  = s.loadInt();
     
     active = s.loadBool();
     map    = (CityMap) s.loadObject();
@@ -120,15 +123,17 @@ public class City implements Session.Saveable, Trader {
       s.saveTally(r.tributeDue);
       s.saveTally(r.goodsSent );
       s.saveTally(r.goodsFrom );
+      s.saveInt(r.nextTributeDue);
     }
     
     s.saveInt(currentFunds);
-    s.saveTally(tradeLevel);
-    s.saveTally(inventory);
+    s.saveFloat(population);
+    s.saveFloat(armyPower );
+    s.saveTally(tradeLevel );
+    s.saveTally(inventory  );
+    s.saveTally(buildLevels);
     
     s.saveObjects(formations);
-    s.saveInt(population);
-    s.saveInt(armyPower );
     
     s.saveBool(active);
     s.saveObject(map);
@@ -199,9 +204,11 @@ public class City implements Session.Saveable, Trader {
   }
   
   
-  static void setTribute(City a, City b, Tally <Good> tributeDue) {
+  static void setTribute(City a, City b, Tally <Good> tributeDue, int timeDue) {
     if (tributeDue == null) tributeDue = new Tally();
-    a.relationWith(b).tributeDue = tributeDue;
+    Relation r = a.relationWith(b);
+    r.tributeDue     = tributeDue;
+    r.nextTributeDue = timeDue   ;
   }
   
   
@@ -209,11 +216,6 @@ public class City implements Session.Saveable, Trader {
   boolean isLord  (City o) { return posture(o) == POSTURE.LORD  ; }
   boolean isEnemy (City o) { return posture(o) == POSTURE.ENEMY ; }
   boolean isAlly  (City o) { return posture(o) == POSTURE.ALLY  ; }
-  
-  
-  void setArmyPower(int power) {
-    this.armyPower = power;
-  }
   
   
   void assignMap(CityMap map) {
@@ -225,24 +227,48 @@ public class City implements Session.Saveable, Trader {
   /**  Regular updates-
     */
   void updateFrom(CityMap map) {
-    //  TODO:  Power will have to be updated whenever a formation leaves or
-    //  rejoins the city instead.
-    /*
-    armyPower = 0;
-    for (Formation f : formations) {
-      f.update();
-      armyPower += f.formationPower();
+    
+    events.updateEvents();
+    
+    if (map.time % MONTH_LENGTH == 0) {
+      float popRegen  = LIFESPAN_LENGTH / MONTH_LENGTH;
+      float usageInc  = YEAR_LENGTH / MONTH_LENGTH;
+      float idealPop  = buildLevels.valueFor(HOUSE   ) * AVG_HOUSE_POP ;
+      float idealArmy = buildLevels.valueFor(GARRISON) * AVG_ARMY_POWER;
+      
+      if (population < idealPop) {
+        population = Nums.min(idealPop , population + popRegen);
+      }
+      
+      idealArmy -= formations.size() * AVG_ARMY_POWER;
+      if (idealArmy < 0) idealArmy = 0;
+      
+      if (armyPower < idealArmy) {
+        armyPower  = Nums.min(idealArmy, armyPower + popRegen);
+      }
+      
+      for (Good g : tradeLevel.keys()) {
+        float demand = tradeLevel.valueFor(g);
+        float amount = inventory .valueFor(g);
+        if (demand <= 0) continue;
+        
+        amount -= usageInc * tradeLevel.valueFor(g);
+        inventory.set(g, Nums.max(0, amount));
+      }
     }
-    //*/
     
     for (Formation f : formations) {
       f.update();
     }
-    
-    if (map.time % YEAR_LENGTH == 0) {
-      for (Relation r : relations.values()) {
+
+    for (Relation r : relations.values()) {
+      if (map.time == r.nextTributeDue) {
         r.goodsFrom.clear();
         r.goodsSent.clear();
+        r.nextTributeDue += YEAR_LENGTH;
+        //
+        //  TODO:  Update relations based on success/failure in meeting
+        //  tribute.
       }
     }
     

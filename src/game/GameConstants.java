@@ -172,7 +172,8 @@ public class GameConstants {
     AVG_CITY_DIST   = 5,
     POP_PER_CITIZEN = 25,
     AVG_POPULATION  = 1000,
-    AVG_ARMY_POWER  = AVG_RANKS * AVG_FILE * POP_PER_CITIZEN
+    AVG_HOUSE_POP   = 4 * POP_PER_CITIZEN,
+    AVG_ARMY_POWER  = AVG_ARMY_SIZE * POP_PER_CITIZEN
   ;
   
   
@@ -748,8 +749,10 @@ public class GameConstants {
       POTTERY, 5f,
       COTTON , 10f
     );
-    cityA.population = AVG_POPULATION;
-    cityA.armyPower  = AVG_ARMY_POWER * 2;
+    cityA.buildLevels.setWith(
+      GARRISON, 2,
+      HOUSE   , 10
+    );
     world.addCity(cityA);
     
     cityB.name = "Tlacopan";
@@ -758,8 +761,10 @@ public class GameConstants {
       MAIZE, 5f,
       CLAY, 10f
     );
-    cityB.population = AVG_POPULATION / 2;
-    cityB.armyPower  = (int) (AVG_ARMY_POWER * 0.75f);
+    cityA.buildLevels.setWith(
+      GARRISON, 0.75f,
+      HOUSE   , 5
+    );
     world.addCity(cityB);
     
     City.setupRoute(cityA, cityB, AVG_CITY_DIST / 2);

@@ -177,15 +177,15 @@ public class Formation implements
   }
   
   
-  void beginJourney(City from, City goes) {
+  World.Journey beginJourney(City from, City goes) {
     if (reports()) I.say("\nREADY TO BEGIN FOREIGN MISSION!");
     for (Actor w : recruits) if (w.onMap(map)) {
       w.exitMap();
     }
-    goes.world.beginJourney(from, goes, this);
     away = true;
     map  = null;
     securedPoint = null;
+    return goes.world.beginJourney(from, goes, this);
   }
   
   
@@ -222,6 +222,7 @@ public class Formation implements
       if (home) {
         if (reports()) I.say("\nARRIVED HOME: "+goes+" FROM "+journey.from);
         this.away = false;
+        CityEvents.handleReturn(this, journey.from, journey);
       }
       else {
         if (reports()) I.say("\nARRIVED AT: "+goes+" FROM "+journey.from);
@@ -411,7 +412,7 @@ public class Formation implements
       City sieges = securedCity;
       if (sieges != null) {
         setPosture(sieges, belongs, postureDemand);
-        setTribute(sieges, belongs, tributeDemand);
+        setTribute(sieges, belongs, tributeDemand, map.time + YEAR_LENGTH);
       }
       beginSecuring(belongs);
       return true;

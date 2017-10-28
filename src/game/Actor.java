@@ -490,6 +490,16 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   }
   
   
+  boolean man() {
+    return false;
+  }
+  
+  
+  boolean woman() {
+    return false;
+  }
+  
+  
   void updateAging() {
     ageSeconds += 1;
   }
