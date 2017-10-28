@@ -37,7 +37,6 @@ public class CityEvents {
     
     City attackC, defendC;
     float attackPower, defendPower;
-    boolean alreadyVassal;
     Tally <Good> tribute = new Tally();
     
     float winChance, angerChance;
@@ -54,7 +53,6 @@ public class CityEvents {
     //  We establish *reasonable* levels of tribute across a variety of goods,
     //  based on what the attacker is hungry for and the defender seems to have
     //  plenty of-
-    final int AVG_TRIBUTE_PERCENT = 25;
     for (Good g : ALL_GOODS) {
       float prodVal = 5 + a.defendC.inventory .valueFor(g);
       prodVal      += 0 + a.defendC.tradeLevel.valueFor(g);
@@ -106,7 +104,6 @@ public class CityEvents {
     //
     //  The value of tribute is calculated based on relative supply/demand
     //  levels for a particular good:
-    final int AVG_TRIBUTE_YEARS = 10;
     float value = 1;
     if (city.tradeLevel.valueFor(good) > 0) value /= 2;
     if (city.tradeLevel.valueFor(good) < 0) value *= 2;
@@ -251,7 +248,7 @@ public class CityEvents {
     
     if (Rand.num() < chance) {
       setPosture(goes, from, formation.postureDemand);
-      setTribute(goes, from, formation.tributeDemand, world.time);
+      setSuppliesDue(goes, from, formation.tributeDemand, world.time);
       
       fromLost = IA.winKillsA;
       goesLost = IA.winKillsD;

@@ -173,7 +173,11 @@ public class GameConstants {
     POP_PER_CITIZEN = 25,
     AVG_POPULATION  = 1000,
     AVG_HOUSE_POP   = 4 * POP_PER_CITIZEN,
-    AVG_ARMY_POWER  = AVG_ARMY_SIZE * POP_PER_CITIZEN
+    AVG_ARMY_POWER  = AVG_ARMY_SIZE * POP_PER_CITIZEN,
+    //
+    //  Inter-city constants-
+    AVG_TRIBUTE_PERCENT = 25,
+    AVG_TRIBUTE_YEARS   = 10
   ;
   
   

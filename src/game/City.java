@@ -23,7 +23,12 @@ public class City implements Session.Saveable, Trader {
     LOY_FRIENDLY =  0.5F,
     LOY_NEUTRAL  =  0.0F,
     LOY_STRAINED = -0.5F,
-    LOY_NEMESIS  = -1.0F
+    LOY_NEMESIS  = -1.0F,
+    LOY_ATTACK_PENALTY  = -0.25f,
+    LOY_CONQUER_PENALTY = -0.50f,
+    LOY_REBEL_PENALTY   = -0.25f,
+    LOY_TRIBUTE_BONUS   =  0.05f,
+    LOY_FADEOUT_TIME    = AVG_TRIBUTE_YEARS * 2
   ;
   
   static class Relation {
@@ -32,9 +37,9 @@ public class City implements Session.Saveable, Trader {
     float   loyalty;
     int lastRebelDate = -1;
     
-    Tally <Good> tributeDue = new Tally();
-    Tally <Good> goodsSent  = new Tally();
-    int nextTributeDate = -1;
+    Tally <Good> suppliesDue  = new Tally();
+    Tally <Good> suppliesSent = new Tally();
+    int nextSupplyDate = -1;
   }
   
   String name = "City";
@@ -88,9 +93,9 @@ public class City implements Session.Saveable, Trader {
       r.posture = POSTURE.values()[s.loadInt()];
       r.loyalty = s.loadFloat();
       r.lastRebelDate = s.loadInt();
-      s.loadTally(r.tributeDue);
-      s.loadTally(r.goodsSent );
-      r.nextTributeDate = s.loadInt();
+      s.loadTally(r.suppliesDue);
+      s.loadTally(r.suppliesSent );
+      r.nextSupplyDate = s.loadInt();
       relations.put(r.with, r);
     }
     
@@ -131,9 +136,9 @@ public class City implements Session.Saveable, Trader {
       s.saveInt(r.posture.ordinal());
       s.saveFloat(r.loyalty);
       s.saveInt(r.lastRebelDate);
-      s.saveTally(r.tributeDue);
-      s.saveTally(r.goodsSent );
-      s.saveInt(r.nextTributeDate);
+      s.saveTally(r.suppliesDue);
+      s.saveTally(r.suppliesSent );
+      s.saveInt(r.nextSupplyDate);
     }
     
     s.saveInt(currentFunds);
@@ -185,6 +190,7 @@ public class City implements Session.Saveable, Trader {
   /**  Setting up basic relations-
     */
   Relation relationWith(City other) {
+    if (other == null) return null;
     Relation r = relations.get(other);
     if (r == null) {
       relations.put(other, r = new Relation());
@@ -223,6 +229,13 @@ public class City implements Session.Saveable, Trader {
   }
   
   
+  static void incLoyalty(City a, City b, float inc) {
+    Relation r = a.relationWith(b);
+    float loyalty = Nums.clamp(r.loyalty + inc, -1, 1);
+    r.loyalty = loyalty;
+  }
+  
+  
   boolean isVassal(City o) { return posture(o) == POSTURE.VASSAL; }
   boolean isLord  (City o) { return posture(o) == POSTURE.LORD  ; }
   boolean isEnemy (City o) { return posture(o) == POSTURE.ENEMY ; }
@@ -245,19 +258,38 @@ public class City implements Session.Saveable, Trader {
   
   boolean isLoyalVassalOf(City o) {
     Relation r = relationWith(o);
-    if (r.posture != POSTURE.LORD) return false;
+    if (r == null || r.posture != POSTURE.LORD) return false;
     return r.lastRebelDate == -1;
+  }
+  
+  
+  void enterRevoltAgainst(City lord) {
+    Relation r = relationWith(lord);
+    r.lastRebelDate  = world.time;
+    r.nextSupplyDate = -1;
+    r.suppliesDue .clear();
+    r.suppliesSent.clear();
+    incLoyalty(lord, this, LOY_REBEL_PENALTY);
+  }
+  
+  
+  float yearsSinceRevolt(City lord) {
+    Relation r = relationWith(lord);
+    if (r == null || r.lastRebelDate == -1) return -1;
+    return (world.time - r.lastRebelDate) * 1f / YEAR_LENGTH;
   }
   
   
   
   /**  Setting and accessing tribute and trade levels-
     */
-  static void setTribute(City a, City b, Tally <Good> tributeDue, int timeDue) {
-    if (tributeDue == null) tributeDue = new Tally();
+  static void setSuppliesDue(
+    City a, City b, Tally <Good> suppliesDue, int timeDue
+  ) {
+    if (suppliesDue == null) suppliesDue = new Tally();
     Relation r = a.relationWith(b);
-    r.tributeDue      = tributeDue;
-    r.nextTributeDate = timeDue   ;
+    r.suppliesDue      = suppliesDue;
+    r.nextSupplyDate = timeDue   ;
   }
   
   
@@ -338,18 +370,30 @@ public class City implements Session.Saveable, Trader {
     for (Formation f : formations) {
       f.update();
     }
-    for (Relation r : relations.values()) {
+    //
+    //  Once per year, check to see if tribute-requirements have been met with
+    //  you lord (if any.)
+    City lord = currentLord();
+    Relation r = relationWith(lord);
+    
+    if (isLoyalVassalOf(lord) && r.nextSupplyDate == world.time) {
       
-      boolean paysTribute = r.nextTributeDate != -1;
-      if (paysTribute && map.time == r.nextTributeDate) {
-        r.goodsSent.clear();
-        r.nextTributeDate += YEAR_LENGTH;
-        //
-        //  TODO:  Update relations based on success/failure in meeting
-        //  tribute.
+      boolean failedSupply = false;
+      for (Good g : r.suppliesDue.keys()) {
+        float sent = r.suppliesSent.valueFor(g);
+        float due  = r.suppliesDue .valueFor(g);
+        if (sent < due) failedSupply = true;
+      }
+      
+      if (failedSupply) {
+        enterRevoltAgainst(lord);
+      }
+      else {
+        r.suppliesSent.clear();
+        r.nextSupplyDate += YEAR_LENGTH;
+        incLoyalty(lord, this, LOY_TRIBUTE_BONUS);
       }
     }
-    return;
   }
   
   
@@ -360,9 +404,6 @@ public class City implements Session.Saveable, Trader {
     return name;
   }
 }
-
-
-
 
 
 

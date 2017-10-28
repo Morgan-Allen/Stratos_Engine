@@ -141,8 +141,8 @@ public class TaskTrading extends Task {
   
   float tributeQuantityRemaining(City.Relation r, Good good) {
     if (r == null) return 0;
-    float demand = r.tributeDue.valueFor(good);
-    float paid   = r.goodsSent .valueFor(good);
+    float demand = r.suppliesDue .valueFor(good);
+    float paid   = r.suppliesSent.valueFor(good);
     return demand - paid;
   }
   
@@ -168,7 +168,7 @@ public class TaskTrading extends Task {
         float tribLeft = tributeQuantityRemaining(r, g);
         float paysFor  = Nums.max(0, amount - tribLeft);
         totalCost += paysFor * g.price;
-        r.goodsSent.add(amount, g);
+        r.suppliesSent.add(amount, g);
       }
       else {
         totalCost += amount * g.price;
@@ -206,7 +206,7 @@ public class TaskTrading extends Task {
         float tribLeft = tributeQuantityRemaining(r, g);
         float paysFor  = Nums.max(0, amount - tribLeft);
         totalValue += paysFor * g.price;
-        r.goodsSent.add(amount, g);
+        r.suppliesSent.add(amount, g);
       }
       else {
         totalValue += amount * g.price;

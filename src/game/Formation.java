@@ -412,7 +412,7 @@ public class Formation implements
       City sieges = securedCity;
       if (sieges != null) {
         setPosture(sieges, belongs, postureDemand);
-        setTribute(sieges, belongs, tributeDemand, map.time + YEAR_LENGTH);
+        setSuppliesDue(sieges, belongs, tributeDemand, map.time + YEAR_LENGTH);
       }
       beginSecuring(belongs);
       return true;
