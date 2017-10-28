@@ -152,8 +152,8 @@ public class TaskTrading extends Task {
     
     //  You don't have to pay for goods if the city you're taking them from
     //  owes them as tribute!
+    boolean tributeDue = store.tradeOrigin().isLoyalVassalOf(homeCity);
     City.Relation r = cityRelation(store, homeCity);
-    boolean tributeDue = r != null && r.nextTributeDate != -1;
     
     Tally <Good> cargo = actor.cargo == null ? new Tally() : actor.cargo;
     Tally <Good> stock = store.inventory();
@@ -191,8 +191,8 @@ public class TaskTrading extends Task {
     
     //  You don't receive money for goods if the city you deliver to is owed
     //  them as tribute.
+    boolean tributeDue = homeCity.isLoyalVassalOf(store.tradeOrigin());
     City.Relation r = cityRelation(homeCity, store);
-    boolean tributeDue = r != null && r.nextTributeDate != -1;
     
     float cash = actor.cargo.valueFor(CASH);
     int totalValue = 0;

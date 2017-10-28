@@ -37,6 +37,7 @@ public class CityEvents {
     
     City attackC, defendC;
     float attackPower, defendPower;
+    boolean alreadyVassal;
     Tally <Good> tribute = new Tally();
     
     float winChance, angerChance;
@@ -49,11 +50,11 @@ public class CityEvents {
   
   
   void calculateTribute(InvasionAssessment a) {
-    final int AVG_TRIBUTE_PERCENT = 25;
     //
     //  We establish *reasonable* levels of tribute across a variety of goods,
     //  based on what the attacker is hungry for and the defender seems to have
     //  plenty of-
+    final int AVG_TRIBUTE_PERCENT = 25;
     for (Good g : ALL_GOODS) {
       float prodVal = 5 + a.defendC.inventory .valueFor(g);
       prodVal      += 0 + a.defendC.tradeLevel.valueFor(g);
@@ -152,7 +153,7 @@ public class CityEvents {
     IA.defendPower = defend.armyPower               / POP_PER_CITIZEN;
     calculateTribute(IA);
     calculateChances(IA, false);
-    calculateAppeal (IA);
+    calculateAppeal(IA);
     return IA;
   }
   
@@ -166,9 +167,10 @@ public class CityEvents {
     for (City other : city.world.cities) {
       Integer distance = city.distances.get(other);
       if (distance == null || other == city) continue;
+      if (other.isLoyalVassalOf   (city)   ) continue;
+      if (other.isVassalOfSameLord(city)   ) continue;
       
       InvasionAssessment IA = performAssessment(city, other, 0.5f);
-      
       float appeal = 0;
       appeal += Rand.avgNums(2) * IA.benefits;
       appeal -= Rand.avgNums(2) * IA.costs;
@@ -183,7 +185,6 @@ public class CityEvents {
   
   
   Formation spawnInvasion(InvasionAssessment IA) {
-    //  TODO:  This.
     
     Formation force = new Formation();
     force.setupFormation(GARRISON, city);

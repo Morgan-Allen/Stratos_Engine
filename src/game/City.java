@@ -22,7 +22,7 @@ public class City implements Session.Saveable, Trader {
     LOY_DEVOTED  =  1.0F,
     LOY_FRIENDLY =  0.5F,
     LOY_NEUTRAL  =  0.0F,
-    LOY_STRAINED = -0.5f,
+    LOY_STRAINED = -0.5F,
     LOY_NEMESIS  = -1.0F
   ;
   
@@ -205,11 +205,18 @@ public class City implements Session.Saveable, Trader {
   static void setPosture(City a, City b, POSTURE p) {
     if (p == null) p = POSTURE.NEUTRAL;
     POSTURE reverse  = POSTURE.NEUTRAL;
+    City formerLord = a.currentLord();
     
     if (p == POSTURE.VASSAL) reverse = POSTURE.LORD  ;
     if (p == POSTURE.LORD  ) reverse = POSTURE.VASSAL;
     if (p == POSTURE.ALLY  ) reverse = POSTURE.ALLY  ;
     if (p == POSTURE.ENEMY ) reverse = POSTURE.ENEMY ;
+    
+    //  TODO:  You might consider flagging this as a form of rebellion?
+    //  You cannot have more than one Lord at a time:
+    if (p == POSTURE.LORD && formerLord != null) {
+      setPosture(a, formerLord, POSTURE.NEUTRAL);
+    }
     
     a.relationWith(b).posture = p;
     b.relationWith(a).posture = reverse;
@@ -220,6 +227,27 @@ public class City implements Session.Saveable, Trader {
   boolean isLord  (City o) { return posture(o) == POSTURE.LORD  ; }
   boolean isEnemy (City o) { return posture(o) == POSTURE.ENEMY ; }
   boolean isAlly  (City o) { return posture(o) == POSTURE.ALLY  ; }
+  
+  
+  City currentLord() {
+    for (Relation r : relations.values()) {
+      if (r.posture == POSTURE.LORD) return r.with;
+    }
+    return null;
+  }
+  
+  
+  boolean isVassalOfSameLord(City o) {
+    City lord = currentLord();
+    return lord != null && o.currentLord() == lord;
+  }
+  
+  
+  boolean isLoyalVassalOf(City o) {
+    Relation r = relationWith(o);
+    if (r.posture != POSTURE.LORD) return false;
+    return r.lastRebelDate == -1;
+  }
   
   
   
