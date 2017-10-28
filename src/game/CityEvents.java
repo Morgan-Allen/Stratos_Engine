@@ -73,12 +73,16 @@ public class CityEvents {
   void calculateChances(InvasionAssessment a, boolean random) {
     //
     //  First, we calculate a rule-of-thumb calculation for how likely you are
-    //  to win or lose, and average casualties for both sides:
-    float chance = 0, lossA = 0, lossD = 0;
-    chance = a.attackPower / (a.attackPower + a.defendPower);
-    chance = Nums.clamp((chance * 2) - 0.5f, 0, 1);
-    lossA  = ((random ? Rand.num() : 0.5f) + 1 - chance) / 2;
-    lossD  = ((random ? Rand.num() : 0.5f) +     chance) / 2;
+    //  to win or lose, and average casualties for both sides.  (We include
+    //  the prestige of each city in this calculation, as a reputation for
+    //  victory can intimidate opponents.)
+    float chance = 0, lossA = 0, lossD = 0, presDiff = 0;
+    presDiff = (a.attackC.prestige - a.defendC.prestige) / PRESTIGE_MAX;
+    chance   = a.attackPower / (a.attackPower + a.defendPower);
+    chance   = chance + (presDiff / 4);
+    chance   = Nums.clamp((chance * 2) - 0.5f, 0, 1);
+    lossA    = ((random ? Rand.num() : 0.5f) + 1 - chance) / 2;
+    lossD    = ((random ? Rand.num() : 0.5f) +     chance) / 2;
     //
     //  And then calculate probable casualties for both sides in each case:
     a.winChance   = chance;
@@ -280,6 +284,7 @@ public class CityEvents {
     I.say("  Inflicted losses: "+goesLost);
     I.say("  Home city now:    "+from.posture(goes)+" of "+goes);
     
+    incLoyalty(from, goes, victory ? LOY_CONQUER_PENALTY : LOY_ATTACK_PENALTY);
     //
     //  We assume/pretend that barbarian factions won't set up political ties-
     if (victory && from.government != GOVERNMENT.BARBARIAN) {
@@ -318,6 +323,8 @@ public class CityEvents {
     int tributeTime = defends.world.time + YEAR_LENGTH;
     setPosture(defends, attacks, formation.postureDemand);
     setSuppliesDue(defends, attacks, formation.tributeDemand, tributeTime);
+    incPrestige(attacks, PRES_VICTORY_GAIN);
+    incPrestige(defends, PRES_DEFEAT_LOSS );
   }
   
   

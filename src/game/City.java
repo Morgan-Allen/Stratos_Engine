@@ -27,11 +27,18 @@ public class City implements Session.Saveable, Trader {
     LOY_NEUTRAL  =  0.0F,
     LOY_STRAINED = -0.5F,
     LOY_NEMESIS  = -1.0F,
+    PRESTIGE_MAX =  100,
+    PRESTIGE_AVG =  50,
+    PRESTIGE_MIN =  0,
+    
     LOY_ATTACK_PENALTY  = -0.25f,
     LOY_CONQUER_PENALTY = -0.50f,
     LOY_REBEL_PENALTY   = -0.25f,
     LOY_TRIBUTE_BONUS   =  0.05f,
-    LOY_FADEOUT_TIME    = AVG_TRIBUTE_YEARS * 2
+    LOY_FADEOUT_TIME    =  AVG_TRIBUTE_YEARS * 2,
+    PRES_VICTORY_GAIN   =  25,
+    PRES_DEFEAT_LOSS    = -15,
+    PRES_REBEL_LOSS     = -10
   ;
   
   static class Relation {
@@ -52,6 +59,7 @@ public class City implements Session.Saveable, Trader {
   float mapX, mapY;
   
   GOVERNMENT government = GOVERNMENT.FEUDAL;
+  float prestige = PRESTIGE_AVG;
   CityEvents events = new CityEvents(this);
   Table <City, Integer > distances = new Table();
   Table <City, Relation> relations = new Table();
@@ -88,6 +96,7 @@ public class City implements Session.Saveable, Trader {
     mapY  = s.loadFloat();
     
     government = GOVERNMENT.values()[s.loadInt()];
+    prestige = s.loadFloat();
     events.loadState(s);
     for (int n = s.loadInt(); n-- > 0;) {
       distances.put((City) s.loadObject(), s.loadInt());
@@ -130,6 +139,7 @@ public class City implements Session.Saveable, Trader {
     s.saveFloat(mapY);
     
     s.saveInt(government.ordinal());
+    s.saveFloat(prestige);
     events.saveState(s);
     s.saveInt(distances.size());
     for (City c : distances.keySet()) {
@@ -242,6 +252,11 @@ public class City implements Session.Saveable, Trader {
   }
   
   
+  static void incPrestige(City c, float inc) {
+    c.prestige = Nums.clamp(c.prestige, PRESTIGE_MIN, PRESTIGE_MAX);
+  }
+  
+  
   boolean isVassal(City o) { return posture(o) == POSTURE.VASSAL; }
   boolean isLord  (City o) { return posture(o) == POSTURE.LORD  ; }
   boolean isEnemy (City o) { return posture(o) == POSTURE.ENEMY ; }
@@ -279,8 +294,18 @@ public class City implements Session.Saveable, Trader {
   }
   
   
+  Batch <City> vassalsInRevolt() {
+    Batch <City> all = new Batch();
+    for (Relation r : relations.values()) {
+      if (r.with.yearsSinceRevolt(this) > 0) all.add(r.with);
+    }
+    return all;
+  }
+  
+  
   float yearsSinceRevolt(City lord) {
     Relation r = relationWith(lord);
+    if (r.posture != POSTURE.LORD         ) return -1;
     if (r == null || r.lastRebelDate == -1) return -1;
     return (world.time - r.lastRebelDate) * 1f / YEAR_LENGTH;
   }
@@ -382,14 +407,8 @@ public class City implements Session.Saveable, Trader {
       }
     }
     //
-    //  But formations and relationships get updated similarly either way-
-    for (Formation f : formations) {
-      f.update();
-    }
-    //
     //  Once per year, check to see if tribute-requirements have been met with
     //  you lord (if any.)
-    
     if (supplyDue && activeMap) {
       boolean failedSupply = false;
       
@@ -420,6 +439,22 @@ public class City implements Session.Saveable, Trader {
         fealty.nextSupplyDate += YEAR_LENGTH;
         incLoyalty(lord, this, LOY_TRIBUTE_BONUS);
       }
+    }
+    //
+    //  And, finally, lose prestige based on any vassals in recent revolt:
+    for (City revolts : vassalsInRevolt()) {
+      Relation r = relationWith(revolts);
+      int timeGone = world.time - r.lastRebelDate, maxT = AVG_TRIBUTE_YEARS;
+      float years = revolts.yearsSinceRevolt(this);
+      
+      if (timeGone % YEAR_LENGTH == 0 && years <= AVG_TRIBUTE_YEARS) {
+        incPrestige(this, PRES_REBEL_LOSS * (maxT - years) / maxT);
+      }
+    }
+    //
+    //  But formations and relationships get updated similarly either way-
+    for (Formation f : formations) {
+      f.update();
     }
   }
   
