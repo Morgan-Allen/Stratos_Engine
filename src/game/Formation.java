@@ -410,10 +410,11 @@ public class Formation implements
     //  If there are no targets left here, turn around and go home.
     else {
       City sieges = securedCity;
-      if (sieges != null) {
-        setPosture(sieges, belongs, postureDemand);
-        setSuppliesDue(sieges, belongs, tributeDemand, map.time + YEAR_LENGTH);
+      if (sieges != null && belongs.government != GOVERNMENT.BARBARIAN) {
+        CityEvents.inflictVassalStatus(sieges, belongs, this);
       }
+      //
+      //  TODO:  Handle recall of forces in a separate decision-pass?
       beginSecuring(belongs);
       return true;
     }

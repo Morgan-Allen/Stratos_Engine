@@ -11,6 +11,9 @@ public class City implements Session.Saveable, Trader {
   
   /**  Data fields, construction and save/load methods-
     */
+  public static enum GOVERNMENT {
+    IMPERIAL, FEUDAL, BARBARIAN
+  }
   public static enum POSTURE {
     ENEMY  ,
     VASSAL ,
@@ -48,6 +51,7 @@ public class City implements Session.Saveable, Trader {
   World world;
   float mapX, mapY;
   
+  GOVERNMENT government = GOVERNMENT.FEUDAL;
   CityEvents events = new CityEvents(this);
   Table <City, Integer > distances = new Table();
   Table <City, Relation> relations = new Table();
@@ -83,6 +87,7 @@ public class City implements Session.Saveable, Trader {
     mapX  = s.loadFloat();
     mapY  = s.loadFloat();
     
+    government = GOVERNMENT.values()[s.loadInt()];
     events.loadState(s);
     for (int n = s.loadInt(); n-- > 0;) {
       distances.put((City) s.loadObject(), s.loadInt());
@@ -124,6 +129,7 @@ public class City implements Session.Saveable, Trader {
     s.saveFloat(mapX);
     s.saveFloat(mapY);
     
+    s.saveInt(government.ordinal());
     events.saveState(s);
     s.saveInt(distances.size());
     for (City c : distances.keySet()) {

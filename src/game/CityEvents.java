@@ -207,12 +207,6 @@ public class CityEvents {
   }
   
   
-  boolean considerRevolt(City lord) {
-    InvasionAssessment IA = performAssessment(city, lord, 0.5f, true);
-    return IA.evaluatedAppeal > 0 && Rand.index(AVG_TRIBUTE_YEARS) == 0;
-  }
-  
-  
   void updateEvents() {
     //
     //  Once per month, otherwise, evaluate any likely prospects for invasion:
@@ -233,6 +227,12 @@ public class CityEvents {
   }
   
   
+  boolean considerRevolt(City lord) {
+    InvasionAssessment IA = performAssessment(city, lord, 0.5f, true);
+    return IA.evaluatedAppeal > 0 && Rand.index(AVG_TRIBUTE_YEARS) == 0;
+  }
+  
+  
   
   /**  Handling end-stage events:
     */
@@ -249,7 +249,6 @@ public class CityEvents {
     Formation formation, City goes, World.Journey journey
   ) {
     InvasionAssessment IA = new InvasionAssessment();
-    World world = goes.world;
     City  from  = journey.from;
     IA.attackC     = from;
     IA.defendC     = goes;
@@ -262,9 +261,6 @@ public class CityEvents {
     boolean victory = false;
     
     if (Rand.num() < chance) {
-      setPosture(goes, from, formation.postureDemand);
-      setSuppliesDue(goes, from, formation.tributeDemand, world.time);
-      
       fromLost = IA.winKillsA;
       goesLost = IA.winKillsD;
       victory  = true;
@@ -284,8 +280,13 @@ public class CityEvents {
     I.say("  Inflicted losses: "+goesLost);
     I.say("  Home city now:    "+from.posture(goes)+" of "+goes);
     
+    //
+    //  We assume/pretend that barbarian factions won't set up political ties-
+    if (victory && from.government != GOVERNMENT.BARBARIAN) {
+      inflictVassalStatus(goes, from, formation);
+    }
+    //
     //  TODO:  Handle recall of forces in a separate decision-pass?
-    
     formation.stopSecuringPoint();
     goes.world.beginJourney(goes, from, formation);
   }
@@ -308,6 +309,15 @@ public class CityEvents {
     defends.armyPower  -= casualties * POP_PER_CITIZEN;
     defends.population -= casualties * POP_PER_CITIZEN;
     return (int) casualties;
+  }
+  
+  
+  static void inflictVassalStatus(
+    City defends, City attacks, Formation formation
+  ) {
+    int tributeTime = defends.world.time + YEAR_LENGTH;
+    setPosture(defends, attacks, formation.postureDemand);
+    setSuppliesDue(defends, attacks, formation.tributeDemand, tributeTime);
   }
   
   
