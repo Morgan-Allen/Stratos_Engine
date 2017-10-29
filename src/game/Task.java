@@ -5,8 +5,6 @@ import util.*;
 import static game.CityMap.*;
 import static game.GameConstants.*;
 
-import game.GameConstants.Target;
-
 
 
 public class Task implements Session.Saveable {

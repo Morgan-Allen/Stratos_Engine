@@ -20,12 +20,19 @@ public class World implements Session.Saveable {
     Batch <Journeys> going = new Batch();
   }
   
+  static class Event {
+    String label;
+    int time;
+    Object[] involved;
+  }
+  
   
   /**  Data fields, setup and save/load methods-
     */
   int time = 0;
   List <City> cities = new List();
   List <Journey> journeys = new List();
+  List <Event> history = new List();
   
   //  Only used for graphical reference...
   int mapWide = 10, mapHigh = 10;
@@ -51,6 +58,14 @@ public class World implements Session.Saveable {
       s.loadObjects(j.going);
       journeys.add(j);
     }
+
+    for (int n = s.loadInt(); n-- > 0;) {
+      Event e = new Event();
+      e.time     = s.loadInt();
+      e.label    = s.loadString();
+      e.involved = s.loadObjectArray(Object.class);
+      history.add(e);
+    }
     
     mapWide = s.loadInt();
     mapHigh = s.loadInt();
@@ -69,6 +84,13 @@ public class World implements Session.Saveable {
       s.saveInt(j.startTime );
       s.saveInt(j.arriveTime);
       s.saveObjects(j.going);
+    }
+    
+    s.saveInt(history.size());
+    for (Event e : history) {
+      s.saveString(e.label);
+      s.saveInt(e.time);
+      s.saveObjectArray(e.involved);
     }
     
     s.saveInt(mapWide);
@@ -138,12 +160,11 @@ public class World implements Session.Saveable {
   
   /**  Regular updates-
     */
-  void updateFrom(CityMap map) {
-    
-    this.time = map.time;
+  void updateWithTime(int time) {
+    this.time = time;
     
     for (City city : cities) {
-      city.updateFrom(map);
+      city.updateCity();
     }
     
     for (Journey j : journeys) {
@@ -160,6 +181,30 @@ public class World implements Session.Saveable {
   
   
   
+  /**  Recording events:
+    */
+  void recordEvent(String label, Object... involved) {
+    Event e = new Event();
+    e.label    = label;
+    e.time     = time;
+    e.involved = involved;
+    history.add(e);
+  }
+  
+  
+  void clearHistory() {
+    history.clear();
+  }
+  
+  
+  Batch <Event> eventsWithLabel(String label) {
+    Batch <Event> matches = new Batch();
+    for (Event e : history) if (e.label.equals(label)) matches.add(e);
+    return matches;
+  }
+  
+  
+  
   /**  Graphical, debug and interface methods-
     */
   boolean reports(Journey j) {
@@ -167,6 +212,11 @@ public class World implements Session.Saveable {
       if (k == I.talkAbout) return true;
     }
     return false;
+  }
+  
+  
+  String descFor(Event e) {
+    return e.label+" at time "+e.time+": "+I.list(e.involved);
   }
   
   

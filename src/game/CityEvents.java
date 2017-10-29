@@ -89,8 +89,8 @@ public class CityEvents {
     a.angerChance = 1;
     a.winKillsA   = a.attackPower * Nums.clamp(lossA - 0.25f, 0, 1);
     a.lossKillsA  = a.attackPower * Nums.clamp(lossA + 0.25f, 0, 1);
-    a.winKillsD   = a.attackPower * Nums.clamp(lossD + 0.25f, 0, 1);
-    a.lossKillsD  = a.attackPower * Nums.clamp(lossD - 0.25f, 0, 1);
+    a.winKillsD   = a.defendPower * Nums.clamp(lossD + 0.25f, 0, 1);
+    a.lossKillsD  = a.defendPower * Nums.clamp(lossD - 0.25f, 0, 1);
   }
   
   
@@ -198,6 +198,7 @@ public class CityEvents {
     
     Formation force = new Formation();
     force.setupFormation(GARRISON, city);
+    force.assignDemands(City.POSTURE.VASSAL, null, IA.tribute);
     
     int n = 0;
     while (force.formationPower() < city.armyPower / 2) {
@@ -252,8 +253,13 @@ public class CityEvents {
   static void handleInvasion(
     Formation formation, City goes, World.Journey journey
   ) {
+    //
+    //  We use the same math that estimates the appeal of invasion to play out
+    //  the real event:
     InvasionAssessment IA = new InvasionAssessment();
     City  from  = journey.from;
+    World world = from.world;
+    int   time  = world.time;
     IA.attackC     = from;
     IA.defendC     = goes;
     IA.attackPower = formation.formationPower() / POP_PER_CITIZEN;
@@ -271,25 +277,37 @@ public class CityEvents {
     }
     else {
       fromLost = IA.lossKillsA;
-      goesLost = IA.winKillsD;
+      goesLost = IA.lossKillsD;
       victory  = false;
     }
     
+    I.say("\n"+formation+" CONDUCTED ACTION AGAINST "+goes+", time "+time);
+    I.say("  Victorious:    "+victory );
+    I.say("  Attack power:  "+IA.attackPower);
+    I.say("  Defend power:  "+IA.defendPower);
+    I.say("  Taken losses:  "+fromLost);
+    I.say("  Dealt losses:  "+goesLost);
+    
+    //
+    //  We inflict the estimated casualties upon each party accordingly:
     fromLost = inflictCasualties(formation, fromLost);
     goesLost = inflictCasualties(goes     , goesLost);
+    world.recordEvent("attacked", from, goes);
     
-    I.say("\n"+formation+" CONDUCTED ACTION AGAINST "+goes);
-    I.say("  Victorious:       "+victory );
-    I.say("  Took losses:      "+fromLost);
-    I.say("  Inflicted losses: "+goesLost);
-    I.say("  Home city now:    "+from.posture(goes)+" of "+goes);
-    
-    incLoyalty(from, goes, victory ? LOY_CONQUER_PENALTY : LOY_ATTACK_PENALTY);
     //
-    //  We assume/pretend that barbarian factions won't set up political ties-
+    //  We assume/pretend that barbarian factions won't set up political ties.
+    //  In either case, modify relations between the two cities accordingly-
     if (victory && from.government != GOVERNMENT.BARBARIAN) {
       inflictVassalStatus(goes, from, formation);
     }
+    else {
+      becomeEnemies(goes, from);
+    }
+    incLoyalty(from, goes, victory ? LOY_CONQUER_PENALTY : LOY_ATTACK_PENALTY);
+    
+    I.say("  Adjusted loss: "+fromLost+"/"+goesLost);
+    I.say("  "+from+" now: "+from.posture(goes)+" of "+goes);
+    
     //
     //  TODO:  Handle recall of forces in a separate decision-pass?
     formation.stopSecuringPoint();
@@ -298,14 +316,15 @@ public class CityEvents {
   
   
   static int inflictCasualties(Formation formation, float casualties) {
-    int numFought = formation.recruits.size();
+    int numFought = formation.recruits.size(), numLost = 0;
     if (numFought == 0) return 0;
     
     for (float i = Nums.min(numFought, casualties); i-- > 0;) {
       Actor lost = (Actor) Rand.pickFrom(formation.recruits);
       formation.toggleRecruit(lost, false);
+      numLost += 1;
     }
-    return (int) casualties;
+    return numLost;
   }
   
   
@@ -328,6 +347,11 @@ public class CityEvents {
   }
   
   
+  static void becomeEnemies(City defends, City attacks) {
+    setPosture(attacks, defends, POSTURE.ENEMY);
+  }
+  
+  
   static void handleReturn(
     Formation formation, City from, World.Journey journey
   ) {
@@ -336,13 +360,6 @@ public class CityEvents {
     belongs.formations.remove(formation);
   }
 }
-
-
-
-
-
-
-
 
 
 

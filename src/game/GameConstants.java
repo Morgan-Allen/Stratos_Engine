@@ -754,8 +754,8 @@ public class GameConstants {
       COTTON , 10f
     );
     cityA.initBuildLevels(
-      GARRISON, 2,
-      HOUSE   , 10
+      GARRISON, 2f,
+      HOUSE   , 10f
     );
     world.addCity(cityA);
     
@@ -767,7 +767,7 @@ public class GameConstants {
     );
     cityA.initBuildLevels(
       GARRISON, 0.75f,
-      HOUSE   , 5
+      HOUSE   , 5f
     );
     world.addCity(cityB);
     

@@ -368,7 +368,7 @@ public class CityMap implements Session.Saveable {
     */
   void update() {
     if (city != null) {
-      city.world.updateFrom(this);
+      city.world.updateWithTime(time);
     }
     for (Building b : buildings) {
       b.update();

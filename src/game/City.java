@@ -27,15 +27,17 @@ public class City implements Session.Saveable, Trader {
     LOY_NEUTRAL  =  0.0F,
     LOY_STRAINED = -0.5F,
     LOY_NEMESIS  = -1.0F,
-    PRESTIGE_MAX =  100,
-    PRESTIGE_AVG =  50,
-    PRESTIGE_MIN =  0,
     
     LOY_ATTACK_PENALTY  = -0.25f,
     LOY_CONQUER_PENALTY = -0.50f,
     LOY_REBEL_PENALTY   = -0.25f,
     LOY_TRIBUTE_BONUS   =  0.05f,
     LOY_FADEOUT_TIME    =  AVG_TRIBUTE_YEARS * 2,
+    
+    PRESTIGE_MAX =  100,
+    PRESTIGE_AVG =  50,
+    PRESTIGE_MIN =  0,
+    
     PRES_VICTORY_GAIN   =  25,
     PRES_DEFEAT_LOSS    = -15,
     PRES_REBEL_LOSS     = -10
@@ -336,13 +338,13 @@ public class City implements Session.Saveable, Trader {
   
   /**  Regular updates-
     */
-  void updateFrom(CityMap map) {
+  void updateCity() {
     boolean  updateStats = world.time % MONTH_LENGTH == 0;
     boolean  activeMap   = map != null;
     City     lord        = currentLord();
-    Relation fealty      = relationWith(lord);
+    Relation lordR       = relationWith(lord);
     boolean  supplyDue   = isLoyalVassalOf(lord);
-    supplyDue &= fealty.nextSupplyDate == world.time;
+    if (supplyDue) supplyDue = lordR.nextSupplyDate == world.time;
     //
     //  Local player-owned cities (i.e, with their own map), must derive their
     //  vitual statistics from that small-scale city map:
@@ -401,9 +403,9 @@ public class City implements Session.Saveable, Trader {
         inventory.set(g, Nums.max(0, amount));
       }
       
-      if (lord != null) for (Good g : fealty.suppliesDue.keys()) {
-        float sent = fealty.suppliesDue.valueFor(g) * usageInc * 1.1f;
-        fealty.suppliesSent.add(sent, g);
+      if (lord != null) for (Good g : lordR.suppliesDue.keys()) {
+        float sent = lordR.suppliesDue.valueFor(g) * usageInc * 1.1f;
+        lordR.suppliesSent.add(sent, g);
       }
     }
     //
@@ -412,9 +414,9 @@ public class City implements Session.Saveable, Trader {
     if (supplyDue && activeMap) {
       boolean failedSupply = false;
       
-      for (Good g : fealty.suppliesDue.keys()) {
-        float sent = fealty.suppliesSent.valueFor(g);
-        float due  = fealty.suppliesDue .valueFor(g);
+      for (Good g : lordR.suppliesDue.keys()) {
+        float sent = lordR.suppliesSent.valueFor(g);
+        float due  = lordR.suppliesDue .valueFor(g);
         if (sent < due) failedSupply = true;
       }
       
@@ -422,8 +424,8 @@ public class City implements Session.Saveable, Trader {
         enterRevoltAgainst(lord);
       }
       else {
-        fealty.suppliesSent.clear();
-        fealty.nextSupplyDate += YEAR_LENGTH;
+        lordR.suppliesSent.clear();
+        lordR.nextSupplyDate += YEAR_LENGTH;
         incLoyalty(lord, this, LOY_TRIBUTE_BONUS);
       }
     }
@@ -435,8 +437,8 @@ public class City implements Session.Saveable, Trader {
         enterRevoltAgainst(lord);
       }
       else {
-        fealty.suppliesSent.clear();
-        fealty.nextSupplyDate += YEAR_LENGTH;
+        lordR.suppliesSent.clear();
+        lordR.nextSupplyDate += YEAR_LENGTH;
         incLoyalty(lord, this, LOY_TRIBUTE_BONUS);
       }
     }
