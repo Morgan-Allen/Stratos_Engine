@@ -14,15 +14,36 @@ public class TestCityEvents extends Test {
     testCityEvents(true);
   }
   
+  
+  static void reportOnWorld(World world) {
+    I.say("\nReporting world state:");
+    for (City c : world.cities) {
+      I.say("  "+c+":");
+      I.say("    Pop: "+c.population);
+      I.say("    Arm: "+c.armyPower );
+      I.say("    Prs: "+c.prestige  );
+      I.say("    Trd: "+c.tradeLevel);
+      I.say("    Bld: "+c.buildLevel);
+      I.say("    Inv: "+c.inventory );
+      I.say("    Relations-");
+      for (City o : world.cities) if (o != c) {
+        City.Relation r = c.relationWith(o);
+        I.add(" "+o+": "+r.posture+" "+r.loyalty);
+      }
+    }
+  }
+  
+  
   static void testCityEvents(boolean graphics) {
     
     World world = new World();
     
+    final String names[] = { "Tollan", "Texcoco", "Tlacopan", "Tlaxcala" };
     final Good goods[] = { CLAY, MAIZE, WOOD, RAW_COTTON, POTTERY, COTTON };
     
-    for (int n = 5; n-- > 0;) {
+    for (int n = 0; n < 4; n++) {
       City city = new City(world);
-      city.name = "City "+n;
+      city.name = names[n];
       world.addCity(city);
       city.setWorldCoords(n, 0);
       
@@ -62,15 +83,20 @@ public class TestCityEvents extends Test {
           I.say("  "+world.descFor(e));
         }
         world.clearHistory();
+        reportOnWorld(world);
       }
     }
-
     
-    //  You'll also need a way to test that failure-to-pay-tribute results
-    //  in retaliation, and so forth.  For that, you'll need flags to force
-    //  attitudes.
     
     //  And you'll want to test a variety of single-city interactions.
+    //    Clash-and-victory
+    //    Clash-and-defeat
+    //    Clash-and-victory for barbarian
+    //    Failure to pay tribute
+    //    Revolt
+    //    Victory over another lord's vassal
+    //    Consumption of goods
+    //    Regeneration of reputation & loyalty
     
     
     /*

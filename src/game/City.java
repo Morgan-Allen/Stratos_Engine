@@ -47,11 +47,12 @@ public class City implements Session.Saveable, Trader {
     City    with;
     POSTURE posture;
     float   loyalty;
-    int lastRebelDate = -1;
+    
+    int madeVassalDate = -1;
+    int lastRebelDate  = -1;
     
     Tally <Good> suppliesDue  = new Tally();
     Tally <Good> suppliesSent = new Tally();
-    int nextSupplyDate = -1;
   }
   
   String name = "City";
@@ -69,9 +70,9 @@ public class City implements Session.Saveable, Trader {
   int   currentFunds = 0;
   float population   = 0;
   float armyPower    = 0;
-  Tally <Good> tradeLevel  = new Tally();
-  Tally <Good> inventory   = new Tally();
-  Tally <Type> buildLevels = new Tally();
+  Tally <Good> tradeLevel = new Tally();
+  Tally <Good> inventory  = new Tally();
+  Tally <Type> buildLevel = new Tally();
   
   List <Formation> formations = new List();
   
@@ -108,19 +109,19 @@ public class City implements Session.Saveable, Trader {
       r.with    = (City) s.loadObject();
       r.posture = POSTURE.values()[s.loadInt()];
       r.loyalty = s.loadFloat();
-      r.lastRebelDate = s.loadInt();
-      s.loadTally(r.suppliesDue);
-      s.loadTally(r.suppliesSent );
-      r.nextSupplyDate = s.loadInt();
+      r.madeVassalDate = s.loadInt();
+      r.lastRebelDate  = s.loadInt();
+      s.loadTally(r.suppliesDue );
+      s.loadTally(r.suppliesSent);
       relations.put(r.with, r);
     }
     
     currentFunds = s.loadInt();
     population   = s.loadFloat();
     armyPower    = s.loadFloat();
-    s.loadTally(tradeLevel );
-    s.loadTally(inventory  );
-    s.loadTally(buildLevels);
+    s.loadTally(tradeLevel);
+    s.loadTally(inventory );
+    s.loadTally(buildLevel);
     
     s.loadObjects(formations);
     
@@ -153,18 +154,18 @@ public class City implements Session.Saveable, Trader {
       s.saveObject(r.with);
       s.saveInt(r.posture.ordinal());
       s.saveFloat(r.loyalty);
-      s.saveInt(r.lastRebelDate);
-      s.saveTally(r.suppliesDue);
-      s.saveTally(r.suppliesSent );
-      s.saveInt(r.nextSupplyDate);
+      s.saveInt(r.madeVassalDate);
+      s.saveInt(r.lastRebelDate );
+      s.saveTally(r.suppliesDue );
+      s.saveTally(r.suppliesSent);
     }
     
     s.saveInt(currentFunds);
     s.saveFloat(population);
     s.saveFloat(armyPower );
-    s.saveTally(tradeLevel );
-    s.saveTally(inventory  );
-    s.saveTally(buildLevels);
+    s.saveTally(tradeLevel);
+    s.saveTally(inventory );
+    s.saveTally(buildLevel);
     
     s.saveObjects(formations);
     
@@ -198,9 +199,9 @@ public class City implements Session.Saveable, Trader {
   
   
   void initBuildLevels(Object... buildLevelArgs) {
-    this.buildLevels.setWith(buildLevelArgs);
-    this.population = buildLevels.valueFor(HOUSE   ) * AVG_HOUSE_POP;
-    this.armyPower  = buildLevels.valueFor(GARRISON) * AVG_ARMY_POWER;
+    this.buildLevel.setWith(buildLevelArgs);
+    this.population = buildLevel.valueFor(HOUSE   ) * AVG_HOUSE_POP;
+    this.armyPower  = buildLevel.valueFor(GARRISON) * AVG_ARMY_POWER;
   }
   
   
@@ -238,8 +239,10 @@ public class City implements Session.Saveable, Trader {
     
     //  TODO:  You might consider flagging this as a form of rebellion?
     //  You cannot have more than one Lord at a time:
-    if (p == POSTURE.LORD && formerLord != null) {
-      setPosture(a, formerLord, POSTURE.NEUTRAL);
+    if (p == POSTURE.LORD) {
+      if (formerLord == b   ) return;
+      if (formerLord != null) setPosture(a, formerLord, POSTURE.NEUTRAL);
+      a.relationWith(b).madeVassalDate = a.world.time;
     }
     
     a.relationWith(b).posture = p;
@@ -255,7 +258,7 @@ public class City implements Session.Saveable, Trader {
   
   
   static void incPrestige(City c, float inc) {
-    c.prestige = Nums.clamp(c.prestige, PRESTIGE_MIN, PRESTIGE_MAX);
+    c.prestige = Nums.clamp(c.prestige + inc, PRESTIGE_MIN, PRESTIGE_MAX);
   }
   
   
@@ -288,8 +291,8 @@ public class City implements Session.Saveable, Trader {
   
   void enterRevoltAgainst(City lord) {
     Relation r = relationWith(lord);
+    r.madeVassalDate = -1;
     r.lastRebelDate  = world.time;
-    r.nextSupplyDate = -1;
     r.suppliesDue .clear();
     r.suppliesSent.clear();
     incLoyalty(lord, this, LOY_REBEL_PENALTY);
@@ -316,13 +319,16 @@ public class City implements Session.Saveable, Trader {
   
   /**  Setting and accessing tribute and trade levels-
     */
-  static void setSuppliesDue(
-    City a, City b, Tally <Good> suppliesDue, int timeDue
-  ) {
+  static void setSuppliesDue(City a, City b, Tally <Good> suppliesDue) {
     if (suppliesDue == null) suppliesDue = new Tally();
     Relation r = a.relationWith(b);
-    r.suppliesDue      = suppliesDue;
-    r.nextSupplyDate = timeDue   ;
+    r.suppliesDue = suppliesDue;
+  }
+  
+  
+  static float goodsSent(City a, City b, Good g) {
+    Relation r = a.relationWith(b);
+    return r == null ? 0 : r.suppliesSent.valueFor(g);
   }
   
   
@@ -342,9 +348,6 @@ public class City implements Session.Saveable, Trader {
     boolean  updateStats = world.time % MONTH_LENGTH == 0;
     boolean  activeMap   = map != null;
     City     lord        = currentLord();
-    Relation lordR       = relationWith(lord);
-    boolean  supplyDue   = isLoyalVassalOf(lord);
-    if (supplyDue) supplyDue = lordR.nextSupplyDate == world.time;
     //
     //  Local player-owned cities (i.e, with their own map), must derive their
     //  vitual statistics from that small-scale city map:
@@ -360,8 +363,9 @@ public class City implements Session.Saveable, Trader {
       for (Formation f : formations) armyPower += f.formationPower();
       this.armyPower = armyPower;
       
-      inventory  .clear();
-      buildLevels.clear();
+      inventory.clear();
+      buildLevel.clear();
+      
       for (Building b : map.buildings) {
         if (b.type.category == Type.IS_TRADE_BLD) {
           BuildingForTrade post = (BuildingForTrade) b;
@@ -369,7 +373,7 @@ public class City implements Session.Saveable, Trader {
             inventory.add(post.inventory.valueFor(g), g);
           }
         }
-        buildLevels.add(1, b.type);
+        buildLevel.add(1, b.type);
       }
     }
     //
@@ -380,8 +384,8 @@ public class City implements Session.Saveable, Trader {
       
       float popRegen  = LIFESPAN_LENGTH / MONTH_LENGTH;
       float usageInc  = YEAR_LENGTH / MONTH_LENGTH;
-      float idealPop  = buildLevels.valueFor(HOUSE   ) * AVG_HOUSE_POP ;
-      float idealArmy = buildLevels.valueFor(GARRISON) * AVG_ARMY_POWER;
+      float idealPop  = buildLevel.valueFor(HOUSE   ) * AVG_HOUSE_POP ;
+      float idealArmy = buildLevel.valueFor(GARRISON) * AVG_ARMY_POWER;
       
       if (population < idealPop) {
         population = Nums.min(idealPop , population + popRegen);
@@ -396,50 +400,54 @@ public class City implements Session.Saveable, Trader {
       
       for (Good g : tradeLevel.keys()) {
         float demand = tradeLevel.valueFor(g);
+        float supply = 0 - demand;
         float amount = inventory .valueFor(g);
-        if (demand <= 0) continue;
+        if (demand > 0) amount -= usageInc * demand;
+        if (supply > 0) amount += usageInc * supply;
+        inventory.set(g, Nums.clamp(amount, 0, Nums.abs(demand)));
+      }
+      
+      if (isLoyalVassalOf(lord)) {
+        if (events.considerRevolt(lord, MONTH_LENGTH)) {
+          enterRevoltAgainst(lord);
+        }
+        else {
+          Relation r = relationWith(lord);
+          for (Good g : r.suppliesDue.keys()) {
+            float sent = r.suppliesDue.valueFor(g) * usageInc * 1.1f;
+            r.suppliesSent.add(sent, g);
+          }
+        }
+      }
+    }
+    //
+    //  And, once per year, tally up any supply obligations to your current
+    //  lord (with the possibility of entering a state of revolt if those are
+    //  failed.)
+    if (world.time % YEAR_LENGTH == 0) {
+      if (isLoyalVassalOf(lord)) {
+        Relation r = relationWith(lord);
+        int timeAsVassal = world.time - r.madeVassalDate;
+        boolean failedSupply = false, doCheck = timeAsVassal >= YEAR_LENGTH;
         
-        amount -= usageInc * tradeLevel.valueFor(g);
-        inventory.set(g, Nums.max(0, amount));
+        if (doCheck) for (Good g : r.suppliesDue.keys()) {
+          float sent = r.suppliesSent.valueFor(g);
+          float due  = r.suppliesDue .valueFor(g);
+          if (sent < due) failedSupply = true;
+        }
+        r.suppliesSent.clear();
+        
+        if (failedSupply) {
+          enterRevoltAgainst(lord);
+        }
+        else {
+          incLoyalty(lord, this, LOY_TRIBUTE_BONUS);
+        }
       }
-      
-      if (lord != null) for (Good g : lordR.suppliesDue.keys()) {
-        float sent = lordR.suppliesDue.valueFor(g) * usageInc * 1.1f;
-        lordR.suppliesSent.add(sent, g);
-      }
-    }
-    //
-    //  Once per year, check to see if tribute-requirements have been met with
-    //  you lord (if any.)
-    if (supplyDue && activeMap) {
-      boolean failedSupply = false;
-      
-      for (Good g : lordR.suppliesDue.keys()) {
-        float sent = lordR.suppliesSent.valueFor(g);
-        float due  = lordR.suppliesDue .valueFor(g);
-        if (sent < due) failedSupply = true;
-      }
-      
-      if (failedSupply) {
-        enterRevoltAgainst(lord);
-      }
-      else {
-        lordR.suppliesSent.clear();
-        lordR.nextSupplyDate += YEAR_LENGTH;
-        incLoyalty(lord, this, LOY_TRIBUTE_BONUS);
-      }
-    }
-    //
-    //  In the case of AI-controlled cities, you need to check the appeal of
-    //  rebellion-
-    if (supplyDue && ! activeMap) {
-      if (events.considerRevolt(lord)) {
-        enterRevoltAgainst(lord);
-      }
-      else {
-        lordR.suppliesSent.clear();
-        lordR.nextSupplyDate += YEAR_LENGTH;
-        incLoyalty(lord, this, LOY_TRIBUTE_BONUS);
+      //
+      //  Wipe the slate clean for all other relations:
+      for (Relation r : relations.values()) if (r.with != lord) {
+        r.suppliesSent.clear();
       }
     }
     //

@@ -166,13 +166,13 @@ public class TaskTrading extends Task {
       
       if (tributeDue) {
         float tribLeft = tributeQuantityRemaining(r, g);
-        float paysFor  = Nums.max(0, amount - tribLeft);
-        totalCost += paysFor * g.price;
-        r.suppliesSent.add(amount, g);
+        float payFor   = Nums.max(0, amount - tribLeft);
+        totalCost += payFor * g.price;
       }
       else {
         totalCost += amount * g.price;
       }
+      r.suppliesSent.add(amount, g);
     }
     
     cargo.add(doPayment ? (0 - totalCost) : 0, CASH);
@@ -204,13 +204,13 @@ public class TaskTrading extends Task {
       
       if (tributeDue) {
         float tribLeft = tributeQuantityRemaining(r, g);
-        float paysFor  = Nums.max(0, amount - tribLeft);
-        totalValue += paysFor * g.price;
-        r.suppliesSent.add(amount, g);
+        float payFor   = Nums.max(0, amount - tribLeft);
+        totalValue += payFor * g.price;
       }
       else {
         totalValue += amount * g.price;
       }
+      r.suppliesSent.add(amount, g);
     }
     
     actor.cargo.clear();

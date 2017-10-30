@@ -232,9 +232,10 @@ public class CityEvents {
   }
   
   
-  boolean considerRevolt(City lord) {
+  boolean considerRevolt(City lord, int period) {
     InvasionAssessment IA = performAssessment(city, lord, 0.5f, true);
-    return IA.evaluatedAppeal > 0 && Rand.index(AVG_TRIBUTE_YEARS) == 0;
+    float chance = period * 1f / AVG_TRIBUTE_YEARS;
+    return IA.evaluatedAppeal > 0 && Rand.num() < chance;
   }
   
   
@@ -303,15 +304,22 @@ public class CityEvents {
     else {
       becomeEnemies(goes, from);
     }
+    if (victory) {
+      signalVictory(from, goes, formation);
+      //
+      //  TODO:  Handle recall of forces in a separate decision-pass?
+      formation.stopSecuringPoint();
+      world.beginJourney(goes, from, formation);
+    }
+    else {
+      signalVictory(goes, from, formation);
+      formation.stopSecuringPoint();
+      world.beginJourney(goes, from, formation);
+    }
     incLoyalty(from, goes, victory ? LOY_CONQUER_PENALTY : LOY_ATTACK_PENALTY);
     
     I.say("  Adjusted loss: "+fromLost+"/"+goesLost);
     I.say("  "+from+" now: "+from.posture(goes)+" of "+goes);
-    
-    //
-    //  TODO:  Handle recall of forces in a separate decision-pass?
-    formation.stopSecuringPoint();
-    goes.world.beginJourney(goes, from, formation);
   }
   
   
@@ -336,14 +344,27 @@ public class CityEvents {
   }
   
   
+  
+  /**  Note- these methods can also be called by formations on the map, so
+    *  don't delete!
+    */
   static void inflictVassalStatus(
     City defends, City attacks, Formation formation
   ) {
-    int tributeTime = defends.world.time + YEAR_LENGTH;
+    if (defends == null || attacks == null || formation == null) return;
     setPosture(defends, attacks, formation.postureDemand);
-    setSuppliesDue(defends, attacks, formation.tributeDemand, tributeTime);
+    setSuppliesDue(defends, attacks, formation.tributeDemand);
     incPrestige(attacks, PRES_VICTORY_GAIN);
     incPrestige(defends, PRES_DEFEAT_LOSS );
+  }
+  
+  
+  static void signalVictory(
+    City victor, City losing, Formation formation
+  ) {
+    if (victor == null || losing == null || formation == null) return;
+    incPrestige(victor, PRES_VICTORY_GAIN);
+    incPrestige(losing, PRES_DEFEAT_LOSS );
   }
   
   

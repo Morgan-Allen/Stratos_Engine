@@ -4,8 +4,6 @@ package game;
 import util.*;
 import static game.GameConstants.*;
 
-import game.GameConstants.Good;
-
 
 
 public class TestTrading extends Test {
@@ -40,10 +38,10 @@ public class TestTrading extends Test {
     BuildingForTrade post1 = (BuildingForTrade) PORTER_HOUSE.generate();
     post1.enterMap(map, 1, 6, 1);
     post1.ID = "(Does Trading)";
-    post1.tradeLevel.set(RAW_COTTON,  2);
-    post1.tradeLevel.set(CLAY      ,  2);
-    post1.tradeLevel.set(COTTON    , -5);
-    post1.tradeLevel.set(POTTERY   , -5);
+    post1.tradeLevel.set(RAW_COTTON,  2 );
+    post1.tradeLevel.set(CLAY      ,  2 );
+    post1.tradeLevel.set(COTTON    , -5 );
+    post1.tradeLevel.set(POTTERY   , -5 );
     post1.tradePartner = cityB;
     
     CityMap.applyPaving(map, 1, 5, 8, 1, true);
@@ -73,42 +71,38 @@ public class TestTrading extends Test {
       
       if (! tradeOkay) {
         boolean check = true;
-        check &= cityB.inventory.valueFor(POTTERY) > 1;
-        check &= cityB.inventory.valueFor(COTTON ) > 1;
+        check &= City.goodsSent(cityA, cityB, POTTERY) > 1;
+        check &= City.goodsSent(cityA, cityB, COTTON ) > 1;
         check &= cityA.currentFunds > 100;
         tradeOkay = check;
         
         if (tradeOkay) {
           I.say("\nTRADING TEST CONCLUDED SUCCESSFULLY!");
-          reportOnMap(map, true);
+          reportOnMap(cityA, cityB, true);
           if (! graphics) return;
         }
       }
     }
     
     I.say("\nTRADING TEST FAILED!");
-    I.say("  Pottery sold:  "+cityB.inventory.valueFor(POTTERY));
-    I.say("  Cotton  sold:  "+cityB.inventory.valueFor(COTTON ));
-    reportOnMap(map, false);
+    reportOnMap(cityA, cityB, false);
   }
   
   
-  static void reportOnMap(CityMap map, boolean okay) {
+  static void reportOnMap(City a, City b, boolean okay) {
     final Good GOODS[] = { CLAY, RAW_COTTON, POTTERY, COTTON };
     
     I.say("\nTotal goods produced:");
     for (Good g : GOODS) {
-      I.say("  "+g+": "+map.city.makeTotals.valueFor(g));
+      I.say("  "+g+": "+a.makeTotals.valueFor(g));
     }
-    I.say("  Current funds: "+map.city.currentFunds);
-    I.say("  Current time:  "+map.time);
+    I.say("  Pottery sold:  "+City.goodsSent(a, b, POTTERY));
+    I.say("  Cotton  sold:  "+City.goodsSent(a, b, COTTON ));
+    I.say("  Current funds: "+a.currentFunds);
+    I.say("  Current time:  "+a.world.time);
   }
 
 }
-
-
-
-
 
 
 

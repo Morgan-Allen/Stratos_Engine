@@ -374,6 +374,8 @@ public class Formation implements
     }
     
     if (formationPower() == 0) {
+      City sieges = securedCity;
+      CityEvents.signalVictory(sieges, belongs, this);
       beginSecuring(belongs);
       return true;
     }
@@ -413,6 +415,7 @@ public class Formation implements
       if (sieges != null && belongs.government != GOVERNMENT.BARBARIAN) {
         CityEvents.inflictVassalStatus(sieges, belongs, this);
       }
+      CityEvents.signalVictory(belongs, sieges, this);
       //
       //  TODO:  Handle recall of forces in a separate decision-pass?
       beginSecuring(belongs);
