@@ -13,10 +13,10 @@ public class CityEvents {
   /**  Handling end-stage events:
     */
   static void handleDeparture(Formation formation, City from, City goes) {
-    City belongs = formation.belongs;
+    City belongs = formation.homeCity();
     belongs.armyPower -= formation.formationPower();
     belongs.formations.include(formation);
-    formation.beginJourney(formation.belongs, goes);
+    formation.beginJourney(belongs, goes);
   }
   
   
@@ -145,7 +145,7 @@ public class CityEvents {
   static void handleReturn(
     Formation formation, City from, World.Journey journey
   ) {
-    City belongs = formation.belongs;
+    City belongs = formation.homeCity();
     belongs.armyPower += formation.formationPower();
     belongs.formations.remove(formation);
   }

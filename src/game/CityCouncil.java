@@ -14,6 +14,7 @@ public class CityCouncil {
   /**  Data fields, construction and save/load methods-
     */
   final City city;
+  boolean toggleAI = true;
   
   
   CityCouncil(City city) {
@@ -22,12 +23,12 @@ public class CityCouncil {
   
   
   void loadState(Session s) throws Exception {
-    return;
+    toggleAI = s.loadBool();
   }
   
   
   void saveState(Session s) throws Exception {
-    return;
+    s.saveBool(toggleAI);
   }
   
   
@@ -35,6 +36,9 @@ public class CityCouncil {
   /**  Regular updates-
     */
   void updateCouncil() {
+    //
+    //  We annul any independent decision-making if AI is toggled off-
+    if (! toggleAI) return;
     //
     //  Once per month, otherwise, evaluate any likely prospects for invasion:
     if (city.world.time % MONTH_LENGTH == 0) {

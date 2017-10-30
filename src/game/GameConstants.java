@@ -726,6 +726,7 @@ public class GameConstants {
   
   static interface Journeys {
     void onArrival(City goes, World.Journey journey);
+    City homeCity();
   }
   
   static interface Employer {

@@ -207,18 +207,29 @@ public class Test {
   
   private static void updateWorldMapView(CityMap map) {
     World world = map.city.world;
-    configGraphic(world.mapWide, world.mapHigh);
+    int wide = world.mapWide * 2, high = world.mapHigh * 2;
+    configGraphic(wide, high);
     
     //  Note- you could just calculate a bounding-box for the map based on the
     //  coordinates of all cities, plus a certain margin.
     
-    for (Coord c : Visit.grid(0, 0, world.mapWide, world.mapHigh, 1)) {
+    for (Coord c : Visit.grid(0, 0, wide, high, 1)) {
       graphic[c.x][c.y] = BLANK_COLOR;
     }
-    for (City city : world.cities) {
-      int x = (int) city.mapX, y = (int) city.mapY;
-      graphic[x][y] = city.tint;
+    
+    for (World.Journey j : world.journeys) {
+      Vec2D c = world.journeyPos(j);
+      int x = 1 + (int) (c.x * 2), y = 1 + (int) (c.y * 2);
+      graphic[x][y] = j.going.first().homeCity().tint;
     }
+    
+    for (City city : world.cities) {
+      City lord = city.currentLord();
+      int x = (int) city.mapX * 2, y = (int) city.mapY * 2;
+      for (Coord c : Visit.grid(x, y, 2, 2, 1)) graphic[c.x][c.y] = city.tint;
+      if (lord != null) graphic[x + 1][y] = lord.tint;
+    }
+    
     try { graphic[hover.x][hover.y] = WHITE_COLOR; }
     catch (Exception e) {}
   }
@@ -253,7 +264,9 @@ public class Test {
             if (at.x == hover.x && at.y == hover.y) above = a;
           }
         }
-        else above = map.city.world.onMap(hover.x, hover.y);
+        else {
+          above = map.city.world.onMap(hover.x / 2, hover.y / 2);
+        }
         I.talkAbout = above;
         I.used60Frames = (frames++ % 60) == 0;
         

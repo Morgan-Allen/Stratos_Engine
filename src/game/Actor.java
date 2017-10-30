@@ -415,6 +415,11 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   }
   
   
+  public City homeCity() {
+    return homeCity;
+  }
+  
+  
   
   /**  Combat and survival-related code:
     */

@@ -157,26 +157,16 @@ public class World implements Session.Saveable {
   }
   
   
+  boolean isComplete(Journey j) {
+    return time >= j.arriveTime;
+  }
   
-  /**  Regular updates-
-    */
-  void updateWithTime(int time) {
-    this.time = time;
-    
-    for (City city : cities) {
-      city.updateCity();
-    }
-    
+  
+  Journey journeyFor(Journeys on) {
     for (Journey j : journeys) {
-      if (time >= j.arriveTime) {
-        if (reports(j)) {
-          I.say("\nCompleted journey: "+j.from+" to "+j.goes);
-          I.say("  Embarked: "+j.going);
-          I.say("  Time: "+time+", arrival: "+j.arriveTime);
-        }
-        completeJourney(j);
-      }
+      if (j.going.includes(on)) return j;
     }
+    return null;
   }
   
   
@@ -205,6 +195,29 @@ public class World implements Session.Saveable {
   
   
   
+  /**  Regular updates-
+    */
+  void updateWithTime(int time) {
+    this.time = time;
+    
+    for (City city : cities) {
+      city.updateCity();
+    }
+    
+    for (Journey j : journeys) {
+      if (time >= j.arriveTime) {
+        if (reports(j)) {
+          I.say("\nCompleted journey: "+j.from+" to "+j.goes);
+          I.say("  Embarked: "+j.going);
+          I.say("  Time: "+time+", arrival: "+j.arriveTime);
+        }
+        completeJourney(j);
+      }
+    }
+  }
+  
+  
+  
   /**  Graphical, debug and interface methods-
     */
   boolean reports(Journey j) {
@@ -212,6 +225,20 @@ public class World implements Session.Saveable {
       if (k == I.talkAbout) return true;
     }
     return false;
+  }
+  
+  
+  Vec2D journeyPos(Journey j) {
+    float timeGone = time - j.startTime;
+    float a = timeGone / (j.arriveTime - j.startTime), i = 1 - a;
+    
+    float initX = j.from.mapX, initY = j.from.mapY;
+    float destX = j.goes.mapX, destY = j.goes.mapY;
+    
+    Vec2D c = new Vec2D();
+    c.x = (destX * a) + (initX * i);
+    c.y = (destY * a) + (initY * i);
+    return c;
   }
   
   
@@ -229,6 +256,9 @@ public class World implements Session.Saveable {
   }
   
 }
+
+
+
 
 
 

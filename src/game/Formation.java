@@ -34,7 +34,7 @@ public class Formation implements
   List <Actor> recruits = new List();
   
   boolean away   = false;
-  City    belongs     ;
+  City    homeCity    ;
   City    securedCity ;
   CityMap map         ;
 
@@ -62,7 +62,7 @@ public class Formation implements
     s.loadObjects(recruits);
     
     away         = s.loadBool();
-    belongs      = (City   ) s.loadObject();
+    homeCity     = (City   ) s.loadObject();
     securedCity  = (City   ) s.loadObject();
     map          = (CityMap) s.loadObject();
     
@@ -85,7 +85,7 @@ public class Formation implements
     s.saveObjects(recruits);
     
     s.saveBool  (away       );
-    s.saveObject(belongs    );
+    s.saveObject(homeCity   );
     s.saveObject(securedCity);
     s.saveObject(map        );
     
@@ -101,7 +101,7 @@ public class Formation implements
     */
   void setupFormation(Type type, City belongs) {
     this.type    = type;
-    this.belongs = belongs;
+    this.homeCity = belongs;
     this.map     = belongs.map;
     belongs.formations.add(this);
   }
@@ -161,7 +161,7 @@ public class Formation implements
       beginSecuring(exits, 0, city); //  Make this face the border!
     }
     else {
-      beginJourney(belongs, securedCity);
+      beginJourney(homeCity, securedCity);
     }
   }
   
@@ -193,7 +193,7 @@ public class Formation implements
     //
     //  There are 4 cases here: arriving home or away, and arriving on a map or
     //  not.
-    boolean home  = goes == belongs;
+    boolean home  = goes == homeCity;
     boolean onMap = goes.map != null;
     
     if (onMap) {
@@ -230,6 +230,11 @@ public class Formation implements
         CityEvents.handleInvasion(this, goes, journey);
       }
     }
+  }
+  
+  
+  public City homeCity() {
+    return homeCity;
   }
   
   
@@ -375,8 +380,8 @@ public class Formation implements
     
     if (formationPower() == 0) {
       City sieges = securedCity;
-      CityEvents.signalVictory(sieges, belongs, this);
-      beginSecuring(belongs);
+      CityEvents.signalVictory(sieges, homeCity, this);
+      beginSecuring(homeCity);
       return true;
     }
     
@@ -412,13 +417,13 @@ public class Formation implements
     //  If there are no targets left here, turn around and go home.
     else {
       City sieges = securedCity;
-      if (sieges != null && belongs.government != GOVERNMENT.BARBARIAN) {
-        CityEvents.inflictDemands(sieges, belongs, this);
+      if (sieges != null && homeCity.government != GOVERNMENT.BARBARIAN) {
+        CityEvents.inflictDemands(sieges, homeCity, this);
       }
-      CityEvents.signalVictory(belongs, sieges, this);
+      CityEvents.signalVictory(homeCity, sieges, this);
       //
       //  TODO:  Handle recall of forces in a separate decision-pass?
-      beginSecuring(belongs);
+      beginSecuring(homeCity);
       return true;
     }
   }
@@ -496,7 +501,7 @@ public class Formation implements
   
   
   public String toString() {
-    return "Formation ("+belongs+")";
+    return "Formation ("+homeCity+")";
   }
 }
 

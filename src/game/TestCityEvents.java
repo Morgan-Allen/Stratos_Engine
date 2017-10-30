@@ -17,27 +17,55 @@ public class TestCityEvents extends Test {
   
   
   static void testCityEvents(boolean graphics) {
+    
+
     //
-    //  First, set up random cities with random troops and resources, placed at
-    //  each of the compass-points on the map, and 
+    //  And you'll want to test a variety of single-city interactions.
+    //    Clash-and-victory for barbarian
+    //    Failure to pay tribute
+    //    Revolt
+    //    Victory over another lord's vassal
+    //    Consumption of goods
+    //    Regeneration of reputation & loyalty
+    
+    //  This tests for the basic outcomes of a single invasion attempt:
+    {
+      City pair[] = configWeakStrongCityPair();
+      float oldPower = pair[0].armyPower;
+      runCompleteInvasion(pair);
+      float newPower = pair[0].armyPower;
+      
+      if (newPower >= oldPower) {
+        I.say("\nInvasion inflicted no casualties!");
+        return;
+      }
+      if (! pair[0].isVassalOf(pair[1])) {
+        I.say("\nInvasion did not impose vassal status!");
+        return;
+      }
+    }
+    
+    
+    //
+    //  Now we set up random cities with random troops and resources, placed at
+    //  each of the compass-points on the map, and run the simulation for a
+    //  while to ensure that invasions do take place.
     
     World world = new World();
     
     final String names[] = { "Tollan", "Texcoco", "Tlacopan", "Tlaxcala" };
     final Good goods[] = { CLAY, MAIZE, WOOD, RAW_COTTON, POTTERY, COTTON };
     final int tints[] = {
-      colour(10, 0 , 0 ),
-      colour(0 , 0 , 0 ),
-      colour(0 , 0 , 10),
-      colour(10, 10, 8 )
+      colour(9, 0, 0),
+      colour(2, 2, 2),
+      colour(0, 0, 9),
+      colour(9, 9, 8)
     };
     
     for (int n = 0; n < 4; n++) {
       City city = new City(world);
       city.name = names[n];
       city.tint = tints[n];
-      //
-      //I.say("Tint is "+city.tint);
       
       city.setWorldCoords(
         2 + (2 * TileConstants.T_X[n * 2]),
@@ -70,7 +98,7 @@ public class TestCityEvents extends Test {
     CityMap map = new CityMap(mapCity);
     map.performSetup(8);
     map.settings.worldView = true;
-    map.settings.speedUp   = true;
+    //map.settings.speedUp   = true;
     
     
     int MAX_TIME = LIFESPAN_LENGTH;
@@ -79,8 +107,7 @@ public class TestCityEvents extends Test {
     
     I.say("\nRunning world simulation...");
     while (map.time < MAX_TIME) {
-      Test.runGameLoop(map, 10, graphics, "saves/test_city_events.tlt");
-      //world.updateWithTime(world.time + 1);
+      runGameLoop(map, 1, graphics, "saves/test_city_events.tlt");
       
       if (! world.history.empty()) {
         I.say("\nEvents:");
@@ -103,20 +130,49 @@ public class TestCityEvents extends Test {
       }
     }
     
-    //
-    //  And you'll want to test a variety of single-city interactions.
-    //    Clash-and-victory
-    //    Clash-and-defeat
-    //    Clash-and-victory for barbarian
-    //    Failure to pay tribute
-    //    Revolt
-    //    Victory over another lord's vassal
-    //    Consumption of goods
-    //    Regeneration of reputation & loyalty
+    //  Note:  There's a problem where the cities wind up completely exhausting
+    //  eachother's armies in skirmishes, which isn't completely realistic.
+    //  Try to add a 'war weariness' factor or something to balance that?
+    
+    
+    
     
     I.say("\nCITY EVENTS TESTING CONCLUDED...");
     I.say("  Total battles: "+totalBattles);
     reportOnWorld(world);
+  }
+  
+  
+  static City[] configWeakStrongCityPair() {
+    World world = new World();
+    City a = new City(world);
+    City b = new City(world);
+    world.cities.add(a);
+    world.cities.add(b);
+    setupRoute(a, b, 1);
+    a.initBuildLevels(HOUSE, 1f, GARRISON, 1f);
+    b.initBuildLevels(HOUSE, 9f, GARRISON, 4f);
+    a.council.toggleAI = false;
+    b.council.toggleAI = false;
+    return new City[] { a, b };
+  }
+  
+  
+  static void runCompleteInvasion(City... pair) {
+    City goes = pair[0], from = pair[1];
+    World world = from.world;
+    
+    CityCouncil.InvasionAssessment IA = from.council.performAssessment(
+      from, goes, 0.5f, false
+    );
+    Formation force = from.council.spawnInvasion(IA);
+    CityEvents.handleDeparture(force, from, goes);
+    
+    int time = 0;
+    World.Journey j = world.journeyFor(force);
+    while (! world.isComplete(j)) {
+      world.updateWithTime(time++);
+    }
   }
   
   
