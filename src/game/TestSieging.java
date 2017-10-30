@@ -27,7 +27,7 @@ public class TestSieging extends Test {
     cityB.name = "Away City";
     
     City.setupRoute(cityA, cityB, 1);
-    City.setPosture(cityA, cityB, City.POSTURE.ENEMY);
+    City.setPosture(cityA, cityB, City.POSTURE.ENEMY, true);
     
     BuildingForArmy fort = (BuildingForArmy) GARRISON.generate();
     fort.enterMap(map, 10, 10, 1);

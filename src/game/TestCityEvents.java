@@ -2,6 +2,7 @@
 
 package game;
 import util.*;
+import static game.City.*;
 import static game.GameConstants.*;
 import java.lang.reflect.*;
 
@@ -31,6 +32,25 @@ public class TestCityEvents extends Test {
         I.add(" "+o+": "+r.posture+" "+r.loyalty);
       }
     }
+  }
+  
+  
+  static boolean testRelationsOkay(City city) {
+    int numLords = 0;
+    
+    for (City o : city.world.cities) {
+      POSTURE p = city.posture(o);
+      POSTURE i = o.posture(city);
+      if (p == POSTURE.LORD) numLords++;
+      if (p == POSTURE.VASSAL  && i != POSTURE.LORD   ) return false;
+      if (p == POSTURE.LORD    && i != POSTURE.VASSAL ) return false;
+      if (p == POSTURE.ENEMY   && i != POSTURE.ENEMY  ) return false;
+      if (p == POSTURE.ALLY    && i != POSTURE.ALLY   ) return false;
+      if (p == POSTURE.NEUTRAL && i != POSTURE.NEUTRAL) return false;
+    }
+    
+    if (numLords > 1) return false;
+    return true;
   }
   
   
@@ -65,15 +85,14 @@ public class TestCityEvents extends Test {
     }
     
     
-    
-    
     //  Set up random cities with random troops and resources at various
     //  distances and sample/record the events that take place.
     
     int MAX_TIME = LIFESPAN_LENGTH;
+    boolean relationsOkay = true;
+    
     
     I.say("\nRunning world simulation...");
-    
     while (world.time < MAX_TIME) {
       world.updateWithTime(world.time + 1);
       
@@ -83,7 +102,17 @@ public class TestCityEvents extends Test {
           I.say("  "+world.descFor(e));
         }
         world.clearHistory();
+        
         reportOnWorld(world);
+        
+        for (City c : world.cities) {
+          if (! testRelationsOkay(c)) relationsOkay = false;
+        }
+        
+        if (! relationsOkay) {
+          I.say("\nINCONSISTENT CITY RELATIONS, WILL QUIT");
+          break;
+        }
       }
     }
     

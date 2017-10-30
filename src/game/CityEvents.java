@@ -121,7 +121,7 @@ public class CityEvents {
     City defends, City attacks, Formation formation
   ) {
     if (defends == null || attacks == null || formation == null) return;
-    setPosture(attacks, defends, formation.postureDemand);
+    setPosture(attacks, defends, formation.postureDemand, true);
     setSuppliesDue(defends, attacks, formation.tributeDemand);
     incPrestige(attacks, PRES_VICTORY_GAIN);
     incPrestige(defends, PRES_DEFEAT_LOSS );
@@ -138,7 +138,7 @@ public class CityEvents {
   
   
   static void becomeEnemies(City defends, City attacks) {
-    setPosture(attacks, defends, POSTURE.ENEMY);
+    setPosture(attacks, defends, POSTURE.ENEMY, true);
   }
   
   

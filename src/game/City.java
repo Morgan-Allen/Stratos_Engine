@@ -227,26 +227,30 @@ public class City implements Session.Saveable, Trader {
   }
   
   
-  static void setPosture(City a, City b, POSTURE p) {
+  static void setPosture(City a, City b, POSTURE p, boolean symmetric) {
     if (p == null) p = POSTURE.NEUTRAL;
-    POSTURE reverse  = POSTURE.NEUTRAL;
-    City formerLord = a.currentLord();
     
-    if (p == POSTURE.VASSAL) reverse = POSTURE.LORD  ;
-    if (p == POSTURE.LORD  ) reverse = POSTURE.VASSAL;
-    if (p == POSTURE.ALLY  ) reverse = POSTURE.ALLY  ;
-    if (p == POSTURE.ENEMY ) reverse = POSTURE.ENEMY ;
-    
+    //
+    //  You cannot have more than one Lord at a time, so break relations with
+    //  any former master-
     //  TODO:  You might consider flagging this as a form of rebellion?
-    //  You cannot have more than one Lord at a time:
     if (p == POSTURE.LORD) {
+      City formerLord = a.currentLord();
       if (formerLord == b   ) return;
-      if (formerLord != null) setPosture(a, formerLord, POSTURE.NEUTRAL);
+      if (formerLord != null) setPosture(a, formerLord, POSTURE.NEUTRAL, true);
       a.relationWith(b).madeVassalDate = a.world.time;
     }
     
     a.relationWith(b).posture = p;
-    b.relationWith(a).posture = reverse;
+    
+    if (symmetric) {
+      POSTURE reverse = POSTURE.NEUTRAL;
+      if (p == POSTURE.VASSAL) reverse = POSTURE.LORD  ;
+      if (p == POSTURE.LORD  ) reverse = POSTURE.VASSAL;
+      if (p == POSTURE.ALLY  ) reverse = POSTURE.ALLY  ;
+      if (p == POSTURE.ENEMY ) reverse = POSTURE.ENEMY ;
+      setPosture(b, a, reverse, false);
+    }
   }
   
   
