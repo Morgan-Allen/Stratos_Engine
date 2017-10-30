@@ -299,7 +299,7 @@ public class CityEvents {
     //  We assume/pretend that barbarian factions won't set up political ties.
     //  In either case, modify relations between the two cities accordingly-
     if (victory && from.government != GOVERNMENT.BARBARIAN) {
-      inflictVassalStatus(goes, from, formation);
+      inflictDemands(goes, from, formation);
     }
     else {
       becomeEnemies(goes, from);
@@ -319,7 +319,7 @@ public class CityEvents {
     incLoyalty(from, goes, victory ? LOY_CONQUER_PENALTY : LOY_ATTACK_PENALTY);
     
     I.say("  Adjusted loss: "+fromLost+"/"+goesLost);
-    I.say("  "+from+" now: "+from.posture(goes)+" of "+goes);
+    I.say("  "+from+" now: "+goes.posture(from)+" of "+goes);
   }
   
   
@@ -348,11 +348,11 @@ public class CityEvents {
   /**  Note- these methods can also be called by formations on the map, so
     *  don't delete!
     */
-  static void inflictVassalStatus(
+  static void inflictDemands(
     City defends, City attacks, Formation formation
   ) {
     if (defends == null || attacks == null || formation == null) return;
-    setPosture(defends, attacks, formation.postureDemand);
+    setPosture(attacks, defends, formation.postureDemand);
     setSuppliesDue(defends, attacks, formation.tributeDemand);
     incPrestige(attacks, PRES_VICTORY_GAIN);
     incPrestige(defends, PRES_DEFEAT_LOSS );

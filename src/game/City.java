@@ -250,6 +250,25 @@ public class City implements Session.Saveable, Trader {
   }
   
   
+  void enterRevoltAgainst(City lord) {
+    Relation r = relationWith(lord);
+    r.madeVassalDate = -1;
+    r.lastRebelDate  = world.time;
+    r.suppliesDue .clear();
+    r.suppliesSent.clear();
+    incLoyalty(lord, this, LOY_REBEL_PENALTY);
+  }
+  
+  
+  boolean isVassalOf(City o) { return posture(o) == POSTURE.LORD  ; }
+  boolean isLordOf  (City o) { return posture(o) == POSTURE.VASSAL; }
+  boolean isEnemyOf (City o) { return posture(o) == POSTURE.ENEMY ; }
+  boolean isAllyOf  (City o) { return posture(o) == POSTURE.ALLY  ; }
+  
+  
+  //  TODO:  Reconsider the 'static' tags here?
+  
+  
   static void incLoyalty(City a, City b, float inc) {
     Relation r = a.relationWith(b);
     float loyalty = Nums.clamp(r.loyalty + inc, -1, 1);
@@ -260,12 +279,6 @@ public class City implements Session.Saveable, Trader {
   static void incPrestige(City c, float inc) {
     c.prestige = Nums.clamp(c.prestige + inc, PRESTIGE_MIN, PRESTIGE_MAX);
   }
-  
-  
-  boolean isVassal(City o) { return posture(o) == POSTURE.VASSAL; }
-  boolean isLord  (City o) { return posture(o) == POSTURE.LORD  ; }
-  boolean isEnemy (City o) { return posture(o) == POSTURE.ENEMY ; }
-  boolean isAlly  (City o) { return posture(o) == POSTURE.ALLY  ; }
   
   
   City currentLord() {
@@ -286,16 +299,6 @@ public class City implements Session.Saveable, Trader {
     Relation r = relationWith(o);
     if (r == null || r.posture != POSTURE.LORD) return false;
     return r.lastRebelDate == -1;
-  }
-  
-  
-  void enterRevoltAgainst(City lord) {
-    Relation r = relationWith(lord);
-    r.madeVassalDate = -1;
-    r.lastRebelDate  = world.time;
-    r.suppliesDue .clear();
-    r.suppliesSent.clear();
-    incLoyalty(lord, this, LOY_REBEL_PENALTY);
   }
   
   

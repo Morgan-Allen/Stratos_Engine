@@ -90,7 +90,7 @@ public class TestMilitary extends Test {
         invading = true;
       }
       
-      if (invading && cityA.isLord(cityB)) {
+      if (invading && cityA.isLordOf(cityB)) {
         awayWin = true;
       }
       

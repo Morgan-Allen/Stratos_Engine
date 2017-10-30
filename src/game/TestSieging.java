@@ -50,7 +50,7 @@ public class TestSieging extends Test {
     while (map.time < 1000 || graphics) {
       map = runGameLoop(map, 10, graphics, "saves/test_sieging.tlt");
       
-      if (cityA.isVassal(cityB) && (! enemies.away) && ! victorious) {
+      if (cityA.isVassalOf(cityB) && (! enemies.away) && ! victorious) {
         victorious = true;
         I.say("\nSIEGING TEST CONCLUDED SUCCESSFULLY!");
         if (! graphics) return;

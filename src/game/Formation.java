@@ -413,7 +413,7 @@ public class Formation implements
     else {
       City sieges = securedCity;
       if (sieges != null && belongs.government != GOVERNMENT.BARBARIAN) {
-        CityEvents.inflictVassalStatus(sieges, belongs, this);
+        CityEvents.inflictDemands(sieges, belongs, this);
       }
       CityEvents.signalVictory(belongs, sieges, this);
       //
