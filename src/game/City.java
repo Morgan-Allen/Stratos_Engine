@@ -63,7 +63,7 @@ public class City implements Session.Saveable, Trader {
   
   GOVERNMENT government = GOVERNMENT.FEUDAL;
   float prestige = PRESTIGE_AVG;
-  CityEvents events = new CityEvents(this);
+  CityCouncil council = new CityCouncil(this);
   Table <City, Integer > distances = new Table();
   Table <City, Relation> relations = new Table();
   
@@ -100,7 +100,7 @@ public class City implements Session.Saveable, Trader {
     
     government = GOVERNMENT.values()[s.loadInt()];
     prestige = s.loadFloat();
-    events.loadState(s);
+    council.loadState(s);
     for (int n = s.loadInt(); n-- > 0;) {
       distances.put((City) s.loadObject(), s.loadInt());
     }
@@ -143,7 +143,7 @@ public class City implements Session.Saveable, Trader {
     
     s.saveInt(government.ordinal());
     s.saveFloat(prestige);
-    events.saveState(s);
+    council.saveState(s);
     s.saveInt(distances.size());
     for (City c : distances.keySet()) {
       s.saveObject(c);
@@ -383,7 +383,7 @@ public class City implements Session.Saveable, Trader {
     //  Foreign off-map cities must update their internal ratings somewhat
     //  differently-
     if (updateStats && ! activeMap) {
-      events.updateEvents();
+      council.updateCouncil();
       
       float popRegen  = LIFESPAN_LENGTH / MONTH_LENGTH;
       float usageInc  = YEAR_LENGTH / MONTH_LENGTH;
@@ -411,7 +411,7 @@ public class City implements Session.Saveable, Trader {
       }
       
       if (isLoyalVassalOf(lord)) {
-        if (events.considerRevolt(lord, MONTH_LENGTH)) {
+        if (council.considerRevolt(lord, MONTH_LENGTH)) {
           enterRevoltAgainst(lord);
         }
         else {
