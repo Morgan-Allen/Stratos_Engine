@@ -18,8 +18,10 @@ public class CityMapSettings {
     toggleFatigue = true,
     toggleInjury  = true,
     
-    slowed = false,
-    paused = false;
+    slowed    = false,
+    speedUp   = false,
+    paused    = false,
+    worldView = false;
   
   
   void loadState(Session s) throws Exception {

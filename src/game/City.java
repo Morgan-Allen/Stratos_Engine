@@ -27,7 +27,12 @@ public class City implements Session.Saveable, Trader {
     LOY_NEUTRAL  =  0.0F,
     LOY_STRAINED = -0.5F,
     LOY_NEMESIS  = -1.0F,
-    
+    LOYALTIES[]  = { 1f, 0.5f, 0, -0.5f, -1 }
+  ;
+  final static String LOYALTY_DESC[] = {
+    "Devoted", "Friendly", "Civil", "Strained", "Nemesis"
+  };
+  final static float
     LOY_ATTACK_PENALTY  = -0.25f,
     LOY_CONQUER_PENALTY = -0.50f,
     LOY_REBEL_PENALTY   = -0.25f,
@@ -222,8 +227,12 @@ public class City implements Session.Saveable, Trader {
   
   
   POSTURE posture(City other) {
-    Relation r = relations.get(other);
-    return r == null ? POSTURE.NEUTRAL : r.posture;
+    return relationWith(other).posture;
+  }
+  
+  
+  float loyalty(City other) {
+    return relationWith(other).loyalty;
   }
   
   
@@ -479,10 +488,26 @@ public class City implements Session.Saveable, Trader {
   
   /**  Graphical, debug and interface methods-
     */
+  static String descLoyalty(float l) {
+    Pick <String> pick = new Pick();
+    for (int i = LOYALTIES.length; i-- > 0;) {
+      float dist = Nums.abs(l - LOYALTIES[i]);
+      pick.compare(LOYALTY_DESC[i], 0 - dist);
+    }
+    return pick.result();
+  }
+  
+  
   public String toString() {
     return name;
   }
 }
+
+
+
+
+
+
 
 
 

@@ -105,7 +105,6 @@ public class Test {
   static int[][]  graphic   = null;
   static int[][]  fogLayer  = null;
   static int      frames    = 0   ;
-  static boolean  cityView  = true;
   static Coord    hover     = new Coord(-1, -1);
   static boolean  doBuild   = false;
   static Object   buildMenu = null;
@@ -233,7 +232,7 @@ public class Test {
     while (true) {
       
       if (graphics) {
-        if (cityView) {
+        if (! map.settings.worldView) {
           updateCityMapView(map);
           updateCityFogLayer(map);
           I.present(VIEW_NAME, 400, 400, graphic, fogLayer);
@@ -245,7 +244,7 @@ public class Test {
         hover   = I.getDataCursor(VIEW_NAME, false);
         pressed = I.getKeysPressed(VIEW_NAME);
         
-        if (cityView) {
+        if (! map.settings.worldView) {
           above = map.above(hover.x, hover.y);
           
           //  TODO:  Have actors register within nearby tiles themselves.
@@ -282,7 +281,9 @@ public class Test {
       }
       
       if (skipUpdate <= 0 && ! map.settings.paused) {
-        map.update();
+        int iterUpdates = map.settings.speedUp ? 10 : 1;
+        for (int i = iterUpdates; i-- > 0;) map.update();
+        
         skipUpdate = map.settings.slowed ? 10 : 1;
         if (numUpdates > 0 && --numUpdates == 0) break;
       }
@@ -331,14 +332,18 @@ public class Test {
   private static String reportFor(City c) {
     StringBuffer report = new StringBuffer(""+c);
     
+    report.append("\n  Population: "+c.population);
+    report.append("\n  Military: "+c.armyPower);
+    report.append("\n  Prestige: "+c.prestige);
+    
     List <String> borderRep = new List();
-    for (City other : c.world.cities) {
+    for (City other : c.world.cities) if (other != c) {
       City.POSTURE r = c.posture(other);
-      if (other == c || r == null) continue;
-      borderRep.add("\n  "+other+": "+r);
+      float loyalty = c.loyalty(other);
+      borderRep.add("\n  "+other+": "+r+", "+City.descLoyalty(loyalty));
     }
     if (! borderRep.empty()) {
-      report.append("\nRelations:");
+      report.append("\n\nRelations:");
       for (String s : borderRep) report.append(s);
     }
     
@@ -358,6 +363,14 @@ public class Test {
     if (! goodRep.empty()) {
       report.append("\n\nTrading:");
       for (String s : goodRep) report.append(s);
+    }
+    
+    if (! c.buildLevel.empty()) {
+      report.append("\n\nBuilt:");
+      for (Type t : c.buildLevel.keys()) {
+        int level = (int) c.buildLevel.valueFor(t);
+        report.append("\n  "+level+"x "+t);
+      }
     }
     
     return report.toString();
@@ -597,11 +610,11 @@ public class Test {
     
     report.append("\n(C) city view");
     if (pressed.includes('c')) {
-      cityView = true;
+      map.settings.worldView = false;
     }
     report.append("\n(W) world view");
     if (pressed.includes('w')) {
-      cityView = false;
+      map.settings.worldView = true;
     }
     report.append("\n(B) build menu");
     if (pressed.includes('b')) {
@@ -626,9 +639,6 @@ public class Test {
   }
   
 }
-
-
-
 
 
 
