@@ -2,7 +2,6 @@
 
 package game;
 import util.*;
-//import static game.City.PRESTIGE_MAX;
 import static game.GameConstants.*;
 
 
@@ -13,8 +12,17 @@ public class CityCouncil {
   
   /**  Data fields, construction and save/load methods-
     */
+  final static int
+    AI_OFF       = -1,
+    AI_NORMAL    =  0,
+    AI_COMPLIANT =  1,
+    AI_DEFIANT   =  2,
+    AI_PACIFIST  =  3,
+    AI_WARLIKE   =  4
+  ;
+  
   final City city;
-  boolean toggleAI = true;
+  int typeAI = AI_NORMAL;
   
   
   CityCouncil(City city) {
@@ -23,12 +31,12 @@ public class CityCouncil {
   
   
   void loadState(Session s) throws Exception {
-    toggleAI = s.loadBool();
+    typeAI = s.loadInt();
   }
   
   
   void saveState(Session s) throws Exception {
-    s.saveBool(toggleAI);
+    s.saveInt(typeAI);
   }
   
   
@@ -38,7 +46,7 @@ public class CityCouncil {
   void updateCouncil() {
     //
     //  We annul any independent decision-making if AI is toggled off-
-    if (! toggleAI) return;
+    if (typeAI == AI_OFF) return;
     //
     //  Once per month, otherwise, evaluate any likely prospects for invasion:
     if (city.world.time % MONTH_LENGTH == 0) {
@@ -240,9 +248,16 @@ public class CityCouncil {
   
   
   boolean considerRevolt(City lord, int period) {
+    if (typeAI == AI_DEFIANT  ) return true;
+    if (typeAI == AI_COMPLIANT) return false;
+    
     InvasionAssessment IA = performAssessment(city, lord, 0.5f, true);
     float chance = period * 1f / AVG_TRIBUTE_YEARS;
     return IA.evaluatedAppeal > 0 && Rand.num() < chance;
   }
   
 }
+
+
+
+

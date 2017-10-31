@@ -4,7 +4,6 @@ package game;
 import util.*;
 import static game.City.*;
 import static game.GameConstants.*;
-import java.lang.reflect.*;
 
 
 
@@ -18,55 +17,54 @@ public class TestCityEvents extends Test {
   
   static void testCityEvents(boolean graphics) {
     
-    //
-    //  TODO:  you'll want to test a variety of single-city interactions-
-    //    Failure to pay tribute
-    //    Revolt
-    
     //  This tests for regeneration/consumption of goods, and normalisation of
     //  prestige and loyalty over time:
     {
       City pair[] = configWeakStrongCityPair();
-      City consumer = pair[0], fighter = pair[1];
-      World world = consumer.world;
+      City vassal = pair[0], lord = pair[1];
+      World world = vassal.world;
       
-      consumer.tradeLevel.setWith(MAIZE, 10f, COTTON, -5f);
-      for (Good g : consumer.tradeLevel.keys()) {
-        float demand = consumer.tradeLevel.valueFor(g);
-        if (demand > 0) consumer.inventory.set(g, demand);
+      vassal.tradeLevel.setWith(MAIZE, 10f, COTTON, -5f);
+      for (Good g : vassal.tradeLevel.keys()) {
+        float demand = vassal.tradeLevel.valueFor(g);
+        if (demand > 0) vassal.inventory.set(g, demand);
       }
       
-      float initPrestige = 85, initLoyalty = 0.45f;
-      fighter.prestige = 85;
-      City.incLoyalty(consumer, fighter, 0.45f);
+      float AVG_P = City.PRESTIGE_AVG, AVG_L = City.LOY_NEUTRAL;
+      float initPrestige = AVG_P + ((Rand.yes() ? 1 : -1) * 10);
+      float initLoyalty  = AVG_L + ((Rand.yes() ? 1 : -1) / 2f);
+      lord.prestige = initPrestige;
+      City.incLoyalty(vassal, lord, initLoyalty);
       
       int time = 0;
       while (time < YEAR_LENGTH) {
         world.updateWithTime(time++);
       }
       
-      for (Good g : consumer.tradeLevel.keys()) {
-        float demand = consumer.tradeLevel.valueFor(g);
+      for (Good g : vassal.tradeLevel.keys()) {
+        float demand = vassal.tradeLevel.valueFor(g);
         if (demand > 0) {
-          if (consumer.inventory.valueFor(g) > 1) {
+          if (vassal.inventory.valueFor(g) > 1) {
             I.say("\nCity did not consume goods over time!");
             return;
           }
         }
         if (demand < 0) {
           float supply = 0 - demand;
-          if (consumer.inventory.valueFor(g) < supply - 1) {
+          if (vassal.inventory.valueFor(g) < supply - 1) {
             I.say("\nCity did not generate goods over time!");
             return;
           }
         }
       }
       
-      if (fighter.prestige >= initPrestige) {
+      float endP = lord.prestige, endL = vassal.loyalty(lord);
+      
+      if (Nums.abs(endP - AVG_P) >= Nums.abs(initPrestige - AVG_P)) {
         I.say("\nCity prestige did not decay over time!");
         return;
       }
-      if (consumer.loyalty(fighter) >= initLoyalty) {
+      if (Nums.abs(endL - AVG_L) >= Nums.abs(initLoyalty  - AVG_L)) {
         I.say("\nCity loyalty did not decay over time!");
         return;
       }
@@ -120,6 +118,79 @@ public class TestCityEvents extends Test {
       }
     }
     
+    //  This tests to ensure that rebellion has the expected effects upon a
+    //  lord and vassal-
+    {
+      City pair[] = configWeakStrongCityPair();
+      City vassal = pair[0], lord = pair[1];
+      World world = vassal.world;
+      setPosture(vassal, lord, POSTURE.LORD, true);
+      vassal.council.typeAI = CityCouncil.AI_DEFIANT;
+      
+      float initPrestige = lord.prestige;
+      
+      int time = 0;
+      while (time < YEAR_LENGTH * (AVG_TRIBUTE_YEARS + 1)) {
+        world.updateWithTime(time++);
+      }
+      
+      if (vassal.isLoyalVassalOf(lord)) {
+        I.say("\nDefiant vassal did not rebel!");
+        return;
+      }
+      if (vassal.isVassalOf(lord)) {
+        I.say("\nCity in rebellion did not break relations!");
+        return;
+      }
+      if (lord.prestige >= initPrestige) {
+        I.say("\nLord's prestige did not suffer from rebellion!");
+      }
+    }
+    
+    //  This tests for revolt-suppression-
+    {
+      City pair[] = configWeakStrongCityPair();
+      City vassal = pair[0], lord = pair[1];
+      World world = vassal.world;
+      setPosture(vassal, lord, POSTURE.LORD, true);
+      vassal.council.typeAI = CityCouncil.AI_DEFIANT;
+      
+      int time = 0;
+      while (vassal.isLoyalVassalOf(lord)) {
+        world.updateWithTime(time++);
+      }
+      vassal.council.typeAI = CityCouncil.AI_OFF;
+
+      runCompleteInvasion(pair);
+      
+      if (! vassal.isLoyalVassalOf(lord)) {
+        I.say("\nRevolt suppression did not occur!");
+        return;
+      }
+    }
+    
+    //  And this tests to ensure that proper tribute is sent between foreign
+    //  cities-
+    {
+      City pair[] = configWeakStrongCityPair();
+      City vassal = pair[0], lord = pair[1];
+      World world = vassal.world;
+      setPosture(vassal, lord, POSTURE.LORD, true);
+      setSuppliesDue(vassal, lord, new Tally().setWith(ADOBE, 10));
+      vassal.council.typeAI = CityCouncil.AI_COMPLIANT;
+      
+      int time = 0;
+      while (time < YEAR_LENGTH * 0.8f) {
+        world.updateWithTime(time++);
+      }
+      
+      Relation r = vassal.relationWith(lord);
+      float tributeSent = r.suppliesSent.valueFor(ADOBE);
+      if (tributeSent < 5) {
+        I.say("\nInsufficient tribute dispatched!");
+        return;
+      }
+    }
     
     //
     //  Now we set up random cities with random troops and resources, placed at
@@ -205,11 +276,15 @@ public class TestCityEvents extends Test {
       }
     }
     
+    //  TODO:  Actually test something here!
+    //  TODO:  Also, toggle verbosity for battle reports...
+    
     //  Note:  There's a problem where the cities wind up completely exhausting
     //  eachother's armies in skirmishes, which isn't completely realistic.
     //  Try to add a 'war weariness' factor or something to balance that?
-    
-    
+
+    //  TODO:  Also, attacks on your vassals should probably be considered an
+    //  act of war by the third party.
     
     
     I.say("\nCITY EVENTS TESTING CONCLUDED...");
@@ -229,8 +304,8 @@ public class TestCityEvents extends Test {
     setupRoute(a, b, 1);
     a.initBuildLevels(HOUSE, 1f, GARRISON, 1f);
     b.initBuildLevels(HOUSE, 9f, GARRISON, 6f);
-    a.council.toggleAI = false;
-    b.council.toggleAI = false;
+    a.council.typeAI = CityCouncil.AI_OFF;
+    b.council.typeAI = CityCouncil.AI_OFF;
     return new City[] { a, b };
   }
   

@@ -37,7 +37,7 @@ public class City implements Session.Saveable, Trader {
     LOY_CONQUER_PENALTY = -0.50f,
     LOY_REBEL_PENALTY   = -0.25f,
     LOY_TRIBUTE_BONUS   =  0.05f,
-    LOY_FADEOUT_TIME    =  AVG_TRIBUTE_YEARS * 2,
+    LOY_FADEOUT_TIME    =  AVG_TRIBUTE_YEARS * YEAR_LENGTH * 2,
     
     PRESTIGE_MAX =  100,
     PRESTIGE_AVG =  50,
@@ -46,7 +46,7 @@ public class City implements Session.Saveable, Trader {
     PRES_VICTORY_GAIN   =  25,
     PRES_DEFEAT_LOSS    = -15,
     PRES_REBEL_LOSS     = -10,
-    PRES_FADEOUT_TIME   =  AVG_TRIBUTE_YEARS * 2
+    PRES_FADEOUT_TIME   =  AVG_TRIBUTE_YEARS * YEAR_LENGTH * 2
   ;
   
   static class Relation {
@@ -243,16 +243,18 @@ public class City implements Session.Saveable, Trader {
     //
     //  You cannot have more than one Lord at a time, so break relations with
     //  any former master-
-    //  TODO:  You might consider flagging this as a form of rebellion?
     if (p == POSTURE.LORD) {
       City formerLord = a.currentLord();
-      if (formerLord == b   ) return;
+      if (formerLord == b) return;
       if (formerLord != null) setPosture(a, formerLord, POSTURE.NEUTRAL, true);
       a.relationWith(b).madeVassalDate = a.world.time;
     }
     
     a.relationWith(b).posture = p;
     
+    //
+    //  If you're enforcing symmetry, make sure the appropriate posture is
+    //  reflected in the other city-
     if (symmetric) {
       POSTURE reverse = POSTURE.NEUTRAL;
       if (p == POSTURE.VASSAL) reverse = POSTURE.LORD  ;
@@ -264,13 +266,18 @@ public class City implements Session.Saveable, Trader {
   }
   
   
-  void enterRevoltAgainst(City lord) {
+  void toggleRebellion(City lord, boolean is) {
     Relation r = relationWith(lord);
-    r.madeVassalDate = -1;
-    r.lastRebelDate  = world.time;
-    r.suppliesDue .clear();
-    r.suppliesSent.clear();
-    incLoyalty(lord, this, LOY_REBEL_PENALTY);
+    if (r.posture != POSTURE.LORD) return;
+    
+    if (is) {
+      r.lastRebelDate = world.time;
+      r.suppliesSent.clear();
+      incLoyalty(lord, this, LOY_REBEL_PENALTY / 2);
+    }
+    else {
+      r.lastRebelDate = -1;
+    }
   }
   
   
@@ -426,7 +433,7 @@ public class City implements Session.Saveable, Trader {
       
       if (isLoyalVassalOf(lord)) {
         if (council.considerRevolt(lord, MONTH_LENGTH)) {
-          enterRevoltAgainst(lord);
+          toggleRebellion(lord, true);
         }
         else {
           Relation r = relationWith(lord);
@@ -441,7 +448,7 @@ public class City implements Session.Saveable, Trader {
     //  Either way, we allow prestige and loyalty to return gradually to
     //  defaults over time:
     if (updateStats) {
-      float presDrift = MONTH_LENGTH * 1f / PRES_FADEOUT_TIME;
+      float presDrift = MONTH_LENGTH * PRESTIGE_AVG * 1f / PRES_FADEOUT_TIME;
       float presDiff = PRESTIGE_AVG - prestige;
       if (Nums.abs(presDiff) > presDrift) {
         presDiff = presDrift * (presDiff > 0 ? 1 : -1);
@@ -472,7 +479,7 @@ public class City implements Session.Saveable, Trader {
         r.suppliesSent.clear();
         
         if (failedSupply) {
-          enterRevoltAgainst(lord);
+          toggleRebellion(lord, true);
         }
         else {
           incLoyalty(lord, this, LOY_TRIBUTE_BONUS);
@@ -483,16 +490,20 @@ public class City implements Session.Saveable, Trader {
       for (Relation r : relations.values()) if (r.with != lord) {
         r.suppliesSent.clear();
       }
-    }
-    //
-    //  And, finally, lose prestige based on any vassals in recent revolt:
-    for (City revolts : vassalsInRevolt()) {
-      Relation r = relationWith(revolts);
-      int timeGone = world.time - r.lastRebelDate, maxT = AVG_TRIBUTE_YEARS;
-      float years = revolts.yearsSinceRevolt(this);
-      
-      if (timeGone % YEAR_LENGTH == 0 && years <= AVG_TRIBUTE_YEARS) {
-        incPrestige(this, PRES_REBEL_LOSS * (maxT - years) / maxT);
+      //
+      //  And, finally, lose prestige based on any vassals in recent revolt-
+      //  and if the time gone exceeds a certain threshold, end vassal status.
+      for (City revolts : vassalsInRevolt()) {
+        float years = revolts.yearsSinceRevolt(this);
+        float maxT = AVG_TRIBUTE_YEARS, timeMult = (maxT - years) / maxT;
+        
+        if (years < AVG_TRIBUTE_YEARS) {
+          incPrestige(this, PRES_REBEL_LOSS * timeMult);
+          incLoyalty(this, revolts, LOY_REBEL_PENALTY * 0.5f * timeMult);
+        }
+        else {
+          setPosture(this, revolts, POSTURE.ENEMY, true);
+        }
       }
     }
     //

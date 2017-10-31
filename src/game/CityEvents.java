@@ -123,6 +123,8 @@ public class CityEvents {
     if (defends == null || attacks == null || formation == null) return;
     setPosture(attacks, defends, formation.postureDemand, true);
     setSuppliesDue(defends, attacks, formation.tributeDemand);
+    defends.toggleRebellion(attacks, false);
+    
     incPrestige(attacks, PRES_VICTORY_GAIN);
     incPrestige(defends, PRES_DEFEAT_LOSS );
   }
