@@ -21,10 +21,8 @@ public class TestCityEvents extends Test {
 
     //
     //  And you'll want to test a variety of single-city interactions.
-    //    Clash-and-victory for barbarian
     //    Failure to pay tribute
     //    Revolt
-    //    Victory over another lord's vassal
     //    Consumption of goods
     //    Regeneration of reputation & loyalty
     
@@ -41,6 +39,37 @@ public class TestCityEvents extends Test {
       }
       if (! pair[0].isVassalOf(pair[1])) {
         I.say("\nInvasion did not impose vassal status!");
+        return;
+      }
+    }
+    
+    //  This tests for the effect of 'barbarian' invasions-
+    {
+      City pair[] = configWeakStrongCityPair();
+      pair[1].government = City.GOVERNMENT.BARBARIAN;
+      runCompleteInvasion(pair);
+      
+      if (! pair[0].isEnemyOf(pair[1])) {
+        I.say("\nBarbarian invasion did not prompt correct posture!");
+        return;
+      }
+    }
+    
+    //  This tests for victory over another lord's vassal-
+    {
+      City pair[] = configWeakStrongCityPair();
+      World world = pair[0].world;
+      City lord = new City(world);
+      world.addCity(lord);
+      City.setPosture(lord, pair[0], City.POSTURE.VASSAL, true);
+      runCompleteInvasion(pair);
+      
+      if (lord.isLordOf(pair[0])) {
+        I.say("\nInvasion of vassal did not revoke lord's claim!");
+        return;
+      }
+      if (! pair[0].isVassalOf(pair[1])) {
+        I.say("\nInvasion of vassal did not impose vassal status!");
         return;
       }
     }
@@ -98,7 +127,7 @@ public class TestCityEvents extends Test {
     CityMap map = new CityMap(mapCity);
     map.performSetup(8);
     map.settings.worldView = true;
-    //map.settings.speedUp   = true;
+    map.settings.speedUp   = true;
     
     
     int MAX_TIME = LIFESPAN_LENGTH;

@@ -239,8 +239,9 @@ public class Test {
     CityMap map, int numUpdates, boolean graphics, String filename
   ) {
     int skipUpdate = 0;
+    boolean doQuit = false;
     
-    while (true) {
+    while (! doQuit) {
       
       if (graphics) {
         if (! map.settings.worldView) {
@@ -298,7 +299,7 @@ public class Test {
         for (int i = iterUpdates; i-- > 0;) map.update();
         
         skipUpdate = map.settings.slowed ? 10 : 1;
-        if (numUpdates > 0 && --numUpdates == 0) break;
+        if (numUpdates > 0 && --numUpdates == 0) doQuit = true;
       }
       
       if (graphics) {
