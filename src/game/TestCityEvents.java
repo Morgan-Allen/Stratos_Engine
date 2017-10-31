@@ -18,13 +18,59 @@ public class TestCityEvents extends Test {
   
   static void testCityEvents(boolean graphics) {
     
-
     //
-    //  And you'll want to test a variety of single-city interactions.
+    //  TODO:  you'll want to test a variety of single-city interactions-
     //    Failure to pay tribute
     //    Revolt
-    //    Consumption of goods
-    //    Regeneration of reputation & loyalty
+    
+    //  This tests for regeneration/consumption of goods, and normalisation of
+    //  prestige and loyalty over time:
+    {
+      City pair[] = configWeakStrongCityPair();
+      City consumer = pair[0], fighter = pair[1];
+      World world = consumer.world;
+      
+      consumer.tradeLevel.setWith(MAIZE, 10f, COTTON, -5f);
+      for (Good g : consumer.tradeLevel.keys()) {
+        float demand = consumer.tradeLevel.valueFor(g);
+        if (demand > 0) consumer.inventory.set(g, demand);
+      }
+      
+      float initPrestige = 85, initLoyalty = 0.45f;
+      fighter.prestige = 85;
+      City.incLoyalty(consumer, fighter, 0.45f);
+      
+      int time = 0;
+      while (time < YEAR_LENGTH) {
+        world.updateWithTime(time++);
+      }
+      
+      for (Good g : consumer.tradeLevel.keys()) {
+        float demand = consumer.tradeLevel.valueFor(g);
+        if (demand > 0) {
+          if (consumer.inventory.valueFor(g) > 1) {
+            I.say("\nCity did not consume goods over time!");
+            return;
+          }
+        }
+        if (demand < 0) {
+          float supply = 0 - demand;
+          if (consumer.inventory.valueFor(g) < supply - 1) {
+            I.say("\nCity did not generate goods over time!");
+            return;
+          }
+        }
+      }
+      
+      if (fighter.prestige >= initPrestige) {
+        I.say("\nCity prestige did not decay over time!");
+        return;
+      }
+      if (consumer.loyalty(fighter) >= initLoyalty) {
+        I.say("\nCity loyalty did not decay over time!");
+        return;
+      }
+    }
     
     //  This tests for the basic outcomes of a single invasion attempt:
     {
@@ -176,11 +222,13 @@ public class TestCityEvents extends Test {
     World world = new World();
     City a = new City(world);
     City b = new City(world);
+    a.name = "Victim City" ;
+    b.name = "Invader City";
     world.cities.add(a);
     world.cities.add(b);
     setupRoute(a, b, 1);
     a.initBuildLevels(HOUSE, 1f, GARRISON, 1f);
-    b.initBuildLevels(HOUSE, 9f, GARRISON, 4f);
+    b.initBuildLevels(HOUSE, 9f, GARRISON, 6f);
     a.council.toggleAI = false;
     b.council.toggleAI = false;
     return new City[] { a, b };

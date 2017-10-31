@@ -45,7 +45,8 @@ public class City implements Session.Saveable, Trader {
     
     PRES_VICTORY_GAIN   =  25,
     PRES_DEFEAT_LOSS    = -15,
-    PRES_REBEL_LOSS     = -10
+    PRES_REBEL_LOSS     = -10,
+    PRES_FADEOUT_TIME   =  AVG_TRIBUTE_YEARS * 2
   ;
   
   static class Relation {
@@ -434,6 +435,23 @@ public class City implements Session.Saveable, Trader {
             r.suppliesSent.add(sent, g);
           }
         }
+      }
+    }
+    //
+    //  Either way, we allow prestige and loyalty to return gradually to
+    //  defaults over time:
+    if (updateStats) {
+      float presDrift = MONTH_LENGTH * 1f / PRES_FADEOUT_TIME;
+      float presDiff = PRESTIGE_AVG - prestige;
+      if (Nums.abs(presDiff) > presDrift) {
+        presDiff = presDrift * (presDiff > 0 ? 1 : -1);
+      }
+      prestige += presDiff;
+      
+      for (Relation r : relations.values()) {
+        float diff = LOY_NEUTRAL - r.loyalty;
+        diff *= MONTH_LENGTH * 1f / LOY_FADEOUT_TIME;
+        r.loyalty += diff;
       }
     }
     //
