@@ -11,7 +11,7 @@ public class TestCityEvents extends Test {
   
   
   public static void main(String args[]) {
-    testCityEvents(true);
+    testCityEvents(false);
   }
   
   
@@ -217,8 +217,7 @@ public class TestCityEvents extends Test {
     //
     //  Now we set up random cities with random troops and resources, placed at
     //  each of the compass-points on the map, and run the simulation for a
-    //  while to ensure that invasions do take place.
-    
+    //  while to ensure that invasions take place at reasonable frequency-
     World world = new World();
     
     final String names[] = { "Tollan", "Texcoco", "Tlacopan", "Tlaxcala" };
@@ -269,7 +268,7 @@ public class TestCityEvents extends Test {
     map.settings.speedUp      = true;
     map.settings.reportBattle = graphics;
     
-    int MAX_TIME = LIFESPAN_LENGTH;
+    int MAX_TIME = LIFESPAN_LENGTH, NUM_YEARS = MAX_TIME / YEAR_LENGTH;
     boolean relationsOkay = true;
     int totalBattles = 0;
     
@@ -277,15 +276,28 @@ public class TestCityEvents extends Test {
     while (map.time < MAX_TIME) {
       runGameLoop(map, 1, graphics, "saves/test_city_events.tlt");
       
+      for (World.Journey j : world.journeys) {
+        Object goes = j.going.first();
+        if (goes instanceof Formation) {
+          Formation force = (Formation) goes;
+          City home = force.homeCity();
+          if (j.goes == home) continue;
+          
+          if (force.formationPower() < AVG_ARMY_POWER / 4) {
+            I.say("\n"+home+" is fighting with inadequate forces:");
+            I.say("  Formation power: "+force.formationPower());
+            I.say("  Average power:   "+AVG_ARMY_POWER);
+            I.say("  Time: "+world.time+", going to: "+j.goes);
+            return;
+          }
+        }
+      }
+      
       if (! world.history.empty()) {
-        I.say("\nEvents:");
         for (World.Event e : world.history) {
-          I.say("  "+world.descFor(e));
           if (e.label.equals("attacked")) totalBattles += 1;
         }
         world.clearHistory();
-        
-        reportOnWorld(world);
         
         for (City c : world.cities) {
           if (! testRelationsOkay(c)) relationsOkay = false;
@@ -298,18 +310,46 @@ public class TestCityEvents extends Test {
       }
     }
     
-    //  TODO:  Actually test something here!
+    //
+    //  Afterwards, check to see whether an empire has formed.  (This is isn't
+    //  actually required, but it might account for a lull in hostilities.)
+    boolean empireExists = false;
+    City withEmpire = null;
     
-    //  Battles should occur, at least.
-    //  They shouldn't be excessively frequent (no more than 2x per city per
-    //  year, on average.)
-    //  They should be conducted at a reasonable fraction of a city's
-    //  full strength.
+    for (City c : world.cities) {
+      boolean hasEmpire = true;
+      for (City o : world.cities) {
+        if (o == mapCity || o == c) continue;
+        if (o.capitalLord() != c) hasEmpire = false;
+      }
+      empireExists |= hasEmpire;
+      if (hasEmpire) withEmpire = c;
+    }
     
+    //  TODO:  Allow for diplomatic missions to form alliances or broker peace.
     
-    I.say("\nCITY EVENTS TESTING CONCLUDED...");
-    I.say("  Total battles: "+totalBattles);
-    reportOnWorld(world);
+    //
+    //  Finally, check to see whether total battles fall within reasonable
+    //  bounds for the world in question:
+    int minBattles = NUM_YEARS / 2;
+    int maxBattles = NUM_YEARS * world.cities.size() * 2;
+    
+    if (totalBattles < minBattles && ! empireExists) {
+      I.say("\nToo few battles occurred: "+totalBattles+"/"+minBattles);
+      reportOnWorld(world);
+      return;
+    }
+    if (totalBattles > maxBattles) {
+      I.say("\nToo many battles occurred: "+totalBattles+"/"+maxBattles);
+      reportOnWorld(world);
+      return;
+    }
+    
+    I.say("\nCITY EVENTS TESTING CONCLUDED SUCCESSFULLY!");
+    I.say("  Total years simulated: "+NUM_YEARS);
+    I.say("  Battles: "+totalBattles+", min/max "+minBattles+"/"+maxBattles);
+    I.say("  Empire: "+(empireExists ? withEmpire : "None"));
+    if (graphics) reportOnWorld(world);
   }
   
   

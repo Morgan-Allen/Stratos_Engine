@@ -321,8 +321,8 @@ public class City implements Session.Saveable, Trader {
   
   
   boolean isVassalOfSameLord(City o) {
-    City lord = currentLord();
-    return lord != null && o.currentLord() == lord;
+    City lord = capitalLord();
+    return lord != null && o.capitalLord() == lord;
   }
   
   
