@@ -15,7 +15,7 @@ public class TestExploring extends Test {
   }
   
   
-  static void testExploring(boolean graphics) {
+  static boolean testExploring(boolean graphics) {
     
     CityMap map = Test.setupTestCity(32, JUNGLE, MEADOW);
     
@@ -51,12 +51,13 @@ public class TestExploring extends Test {
       
       if (explored && didHunting) {
         I.say("\nEXPLORING TEST CONCLUDED SUCCESSFULLY!");
-        if (! graphics) return;
+        if (! graphics) return true;
       }
     }
     
     I.say("\nEXPLORING TEST FAILED!");
     I.say("  Total tiles seen: "+tilesSeen+"/"+tilesOpen);
+    return false;
   }
   
 }

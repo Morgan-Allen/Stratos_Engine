@@ -15,7 +15,7 @@ public class TestWorld extends Test {
   }
   
   
-  static void testWorld(boolean graphics) {
+  static boolean testWorld(boolean graphics) {
     
     //  This tests for regeneration/consumption of goods, and normalisation of
     //  prestige and loyalty over time:
@@ -46,14 +46,14 @@ public class TestWorld extends Test {
         if (demand > 0) {
           if (vassal.inventory.valueFor(g) > 1) {
             I.say("\nCity did not consume goods over time!");
-            return;
+            return false;
           }
         }
         if (demand < 0) {
           float supply = 0 - demand;
           if (vassal.inventory.valueFor(g) < supply - 1) {
             I.say("\nCity did not generate goods over time!");
-            return;
+            return false;
           }
         }
       }
@@ -62,11 +62,11 @@ public class TestWorld extends Test {
       
       if (Nums.abs(endP - AVG_P) >= Nums.abs(initPrestige - AVG_P)) {
         I.say("\nCity prestige did not decay over time!");
-        return;
+        return false;
       }
       if (Nums.abs(endL - AVG_L) >= Nums.abs(initLoyalty  - AVG_L)) {
         I.say("\nCity loyalty did not decay over time!");
-        return;
+        return false;
       }
     }
     
@@ -79,15 +79,15 @@ public class TestWorld extends Test {
       
       if (newPower >= oldPower) {
         I.say("\nInvasion inflicted no casualties!");
-        return;
+        return false;
       }
       if (! pair[0].isVassalOf(pair[1])) {
         I.say("\nInvasion did not impose vassal status!");
-        return;
+        return false;
       }
       if (pair[0].loyalty(pair[1]) >= City.LOY_NEUTRAL) {
         I.say("\nInvasion did not sour relations!");
-        return;
+        return false;
       }
     }
     
@@ -99,7 +99,7 @@ public class TestWorld extends Test {
       
       if (! pair[0].isEnemyOf(pair[1])) {
         I.say("\nBarbarian invasion did not prompt correct posture!");
-        return;
+        return false;
       }
     }
     
@@ -117,26 +117,26 @@ public class TestWorld extends Test {
       
       if (capital != pair[0].capitalLord()) {
         I.say("\nDid not calculate capital correctly!");
-        return;
+        return false;
       }
       
       runCompleteInvasion(pair);
       
       if (lord.isLordOf(pair[0])) {
         I.say("\nInvasion of vassal did not revoke lord's claim!");
-        return;
+        return false;
       }
       if (! pair[0].isVassalOf(pair[1])) {
         I.say("\nInvasion of vassal did not impose vassal status!");
-        return;
+        return false;
       }
       if (! capital.isEnemyOf(pair[1])) {
         I.say("\nInvasion of vassal did not provoke war!");
-        return;
+        return false;
       }
       if (capital.loyalty(pair[1]) >= City.LOY_NEUTRAL) {
         I.say("\nInvasion of vassal did not sour relations with capital!");
-        return;
+        return false;
       }
     }
     
@@ -158,11 +158,11 @@ public class TestWorld extends Test {
       
       if (vassal.isLoyalVassalOf(lord)) {
         I.say("\nDefiant vassal did not rebel!");
-        return;
+        return false;
       }
       if (vassal.isVassalOf(lord)) {
         I.say("\nCity in rebellion did not break relations!");
-        return;
+        return false;
       }
       if (lord.prestige >= initPrestige) {
         I.say("\nLord's prestige did not suffer from rebellion!");
@@ -187,7 +187,7 @@ public class TestWorld extends Test {
       
       if (! vassal.isLoyalVassalOf(lord)) {
         I.say("\nRevolt suppression did not occur!");
-        return;
+        return false;
       }
     }
     
@@ -210,7 +210,7 @@ public class TestWorld extends Test {
       float tributeSent = r.suppliesSent.valueFor(ADOBE);
       if (tributeSent < 5) {
         I.say("\nInsufficient tribute dispatched!");
-        return;
+        return false;
       }
     }
     
@@ -288,7 +288,7 @@ public class TestWorld extends Test {
             I.say("  Formation power: "+force.formationPower());
             I.say("  Average power:   "+AVG_ARMY_POWER);
             I.say("  Time: "+world.time+", going to: "+j.goes);
-            return;
+            return false;
           }
         }
       }
@@ -337,12 +337,12 @@ public class TestWorld extends Test {
     if (totalBattles < minBattles && ! empireExists) {
       I.say("\nToo few battles occurred: "+totalBattles+"/"+minBattles);
       reportOnWorld(world);
-      return;
+      return false;
     }
     if (totalBattles > maxBattles) {
       I.say("\nToo many battles occurred: "+totalBattles+"/"+maxBattles);
       reportOnWorld(world);
-      return;
+      return false;
     }
     
     I.say("\nCITY EVENTS TESTING CONCLUDED SUCCESSFULLY!");
@@ -350,6 +350,7 @@ public class TestWorld extends Test {
     I.say("  Battles: "+totalBattles+", min/max "+minBattles+"/"+maxBattles);
     I.say("  Empire: "+(empireExists ? withEmpire : "None"));
     if (graphics) reportOnWorld(world);
+    return true;
   }
   
   

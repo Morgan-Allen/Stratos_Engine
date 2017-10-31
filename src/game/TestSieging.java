@@ -14,7 +14,7 @@ public class TestSieging extends Test {
   }
   
   
-  static void testSieging(boolean graphics) {
+  static boolean testSieging(boolean graphics) {
     
     World   world = GameConstants.setupDefaultWorld();
     City    cityA = world.cities.atIndex(0);
@@ -77,12 +77,12 @@ public class TestSieging extends Test {
         
         if (cityA.currentFunds > 0) {
           I.say("\nShould not receive payment for tribute!");
-          return;
+          return false;
         }
         
         if (tributePaid) {
           I.say("\nSIEGING TEST CONCLUDED SUCCESSFULLY!");
-          if (! graphics) return;
+          if (! graphics) return true;
         }
       }
     }
@@ -90,6 +90,7 @@ public class TestSieging extends Test {
     I.say("\nSIEGE TEST FAILED!");
     I.say("  Victorious:   "+victorious);
     I.say("  Tribute paid: "+tributePaid);
+    return false;
   }
   
   

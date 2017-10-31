@@ -14,7 +14,7 @@ public class TestCity extends Test {
   }
   
   
-  static void testCity(boolean graphics) {
+  static boolean testCity(boolean graphics) {
     
     CityMap map = setupTestCity(32);
     
@@ -58,7 +58,7 @@ public class TestCity extends Test {
     CityMapFlagging forRock = map.flagging.get(IS_STONE);
     if (forRock.totalSum() != 4) {
       I.say("NO ROCKS FLAGGED: "+forRock.totalSum());
-      return;
+      return false;
     }
     
     for (Building b : map.buildings) {
@@ -79,7 +79,7 @@ public class TestCity extends Test {
     }
     catch(Exception e) {
       I.report(e);
-      return;
+      return false;
     }
     
     final int RUN_TIME = YEAR_LENGTH;
@@ -107,13 +107,14 @@ public class TestCity extends Test {
         if (housesOkay) {
           I.say("\nCITY SERVICES TEST CONCLUDED SUCCESSFULLY!");
           reportOnMap(map, true);
-          if (! graphics) return;
+          if (! graphics) return true;
         }
       }
     }
 
     I.say("\nCITY SERVICES TEST FAILED!");
     reportOnMap(map, false);
+    return false;
   }
   
   

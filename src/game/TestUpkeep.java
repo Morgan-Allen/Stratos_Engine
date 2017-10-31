@@ -13,7 +13,7 @@ public class TestUpkeep extends Test {
     testUpkeep(true);
   }
   
-  static void testUpkeep(boolean graphics) {
+  static boolean testUpkeep(boolean graphics) {
     
     CityMap map = setupTestCity(16);
     map.settings.toggleFog = false;
@@ -54,12 +54,13 @@ public class TestUpkeep extends Test {
         
         if (upkeepOkay) {
           I.say("\nUPKEEP TEST CONCLUDED SUCCESSFULLY!");
-          if (! graphics) return;
+          if (! graphics) return true;
         }
       }
     }
     
     I.say("\nUPKEEP TEST FAILED!");
+    return false;
   }
   
 }

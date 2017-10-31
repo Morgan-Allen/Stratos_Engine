@@ -6,23 +6,40 @@ import util.*;
 
 public class TestAll {
   
+  
+  static int numTests = 0;
+  static int numPass  = 0;
+  static int numFail  = 0;
+  
+  static void record(boolean result) {
+    numTests += 1;
+    numPass  += result ? 1 : 0;
+    numFail  += result ? 0 : 1;
+  }
+  
+  
   public static void main(String args[]) {
     
     long init = System.currentTimeMillis();
     
-    TestDemands  .testDemands  (false);
-    TestPathing  .testPathing  (false);
-    TestMilitary .testMilitary (false);
-    TestSieging  .testSieging  (false);
-    TestCity     .testCity     (false);
-    TestGathering.testGathering(false);
-    TestTrading  .testTrading  (false);
-    TestUpkeep   .testUpkeep   (false);
-    TestExploring.testExploring(false);
-    TestWorld    .testWorld    (false);
+    record(TestDemands  .testDemands  (false));
+    record(TestPathing  .testPathing  (false));
+    record(TestMilitary .testMilitary (false));
+    record(TestSieging  .testSieging  (false));
+    record(TestCity     .testCity     (false));
+    record(TestGathering.testGathering(false));
+    record(TestTrading  .testTrading  (false));
+    record(TestUpkeep   .testUpkeep   (false));
+    record(TestExploring.testExploring(false));
+    record(TestWorld    .testWorld    (false));
     
     long taken = System.currentTimeMillis() - init;
     
     I.say("\nTOTAL TIME TO RUN TESTS: "+taken);
+    I.say("  Pass/Fail: "+numPass+"/"+numFail);
+    I.say("  Pass rate: "+I.percent(numPass * 1f / numTests));
   }
 }
+
+
+

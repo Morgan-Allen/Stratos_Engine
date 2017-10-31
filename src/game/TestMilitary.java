@@ -13,7 +13,7 @@ public class TestMilitary extends Test {
     testMilitary(true);
   }
   
-  static void testMilitary(boolean graphics) {
+  static boolean testMilitary(boolean graphics) {
     
     World   world = GameConstants.setupDefaultWorld();
     City    cityA = world.cities.atIndex(0);
@@ -107,7 +107,7 @@ public class TestMilitary extends Test {
         
         if (backHome) {
           I.say("\nMILITARY TEST CONCLUDED SUCCESSFULLY!");
-          if (! graphics) return;
+          if (! graphics) return true;
         }
       }
     }
@@ -119,6 +119,7 @@ public class TestMilitary extends Test {
     I.say("  Invading:  "+invading );
     I.say("  Away win:  "+awayWin  );
     I.say("  Back home: "+backHome );
+    return false;
   }
   
 }

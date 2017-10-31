@@ -12,7 +12,7 @@ public class TestDemands {
     testDemands(true);
   }
   
-  static void testDemands(boolean graphics) {
+  static boolean testDemands(boolean graphics) {
     CityMap map = Test.setupTestCity(32);
     CityMapDemands demands = new CityMapDemands(map, "AAA");
     
@@ -114,7 +114,9 @@ public class TestDemands {
     //  If that works out, return okay-
     if (allOkay) {
       I.say("\nALL DEMAND-MAP TESTS SUCCESSFUL!");
+      return true;
     }
+    return false;
   }
 }
 

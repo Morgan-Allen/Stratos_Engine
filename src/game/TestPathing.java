@@ -16,7 +16,7 @@ public class TestPathing extends Test {
   }
   
   
-  static void testPathing(boolean graphics) {
+  static boolean testPathing(boolean graphics) {
     CityMap map = setupTestCity(32);
     
     Batch <Actor> actors = new Batch();
@@ -85,6 +85,8 @@ public class TestPathing extends Test {
       }
       
       if (insideWrong || pathWrong) {
+        I.say("Inside wrong: "+insideWrong);
+        I.say("Path wrong:   "+pathWrong  );
         break;
       }
       
@@ -93,7 +95,7 @@ public class TestPathing extends Test {
         
         if (pathingDone) {
           I.say("\nPATHING TEST CONCLUDED SUCCESSFULLY!");
-          if (! graphics) return;
+          if (! graphics) return true;
         }
       }
       
@@ -101,6 +103,10 @@ public class TestPathing extends Test {
     }
     
     I.say("\nPATHING TEST FAILED!");
+    I.say("  Current time: "+map.time);
+    I.say("  Reached destination: "+numReachedDest+"/"+actors.size());
+    
+    return false;
   }
   
 }

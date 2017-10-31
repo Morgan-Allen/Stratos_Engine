@@ -15,7 +15,7 @@ public class TestGathering extends Test {
   }
   
   
-  static void testGathering(boolean graphics) {
+  static boolean testGathering(boolean graphics) {
     
     CityMap map = setupTestCity(20, DESERT, MEADOW, JUNGLE);
     map.settings.toggleFog = false;
@@ -34,7 +34,7 @@ public class TestGathering extends Test {
     if (plantTiles.length != forCrops.totalSum()) {
       I.say("\nGATHER TEST FAILED- NOT ALL PLANTED TILES WERE FLAGGED");
       I.say("  Flagged: "+forCrops.totalSum()+"/"+plantTiles.length);
-      return;
+      return false;
     }
     
     boolean planted  = false;
@@ -108,13 +108,14 @@ public class TestGathering extends Test {
         
         if (harvest) {
           I.say("\nGATHER TEST CONCLUDED SUCCESSFULLY!");
-          if (! graphics) return;
+          if (! graphics) return true;
         }
       }
     }
     
     I.say("\nGATHER TEST FAILED!");
     I.say("  Total gathered: "+farm.inventory);
+    return false;
   }
   
 }

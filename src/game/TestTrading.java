@@ -14,7 +14,7 @@ public class TestTrading extends Test {
   }
   
   
-  static void testTrading(boolean graphics) {
+  static boolean testTrading(boolean graphics) {
     
     World world = new World();
     City  homeC = new City(world);
@@ -101,7 +101,7 @@ public class TestTrading extends Test {
           I.say("  Expected: "+funds    );
           I.say("  Actual:   "+homeC.currentFunds);
           projectedEarnings(homeC, awayC, initFunds, true);
-          return;
+          return false;
         }
         moneyOkay = true;
       }
@@ -124,12 +124,13 @@ public class TestTrading extends Test {
       if (tradeOkay && supplyOkay && moneyOkay) {
         I.say("\nTRADING TEST CONCLUDED SUCCESSFULLY!");
         reportOnMap(homeC, awayC, true);
-        if (! graphics) return;
+        if (! graphics) return true;
       }
     }
     
     I.say("\nTRADING TEST FAILED!");
     reportOnMap(homeC, awayC, false);
+    return false;
   }
   
   
