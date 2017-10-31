@@ -109,10 +109,10 @@ public class TestWorld extends Test {
       World world = pair[0].world;
       
       City lord = new City(world);
-      world.addCity(lord);
+      world.addCities(lord);
       City.setPosture(lord, pair[0], City.POSTURE.VASSAL, true);
       City capital = new City(world);
-      world.addCity(capital);
+      world.addCities(capital);
       City.setPosture(capital, lord, City.POSTURE.VASSAL, true);
       
       if (capital != pair[0].capitalLord()) {
@@ -247,7 +247,7 @@ public class TestWorld extends Test {
         GARRISON, 2f + Rand.index(3),
         HOUSE   , 6f + Rand.index(10)
       );
-      world.addCity(city);
+      world.addCities(city);
     }
     world.mapHigh = 5;
     world.mapWide = 5;

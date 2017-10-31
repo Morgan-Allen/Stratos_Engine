@@ -23,6 +23,7 @@ public class TestMilitary extends Test {
     );
     cityA.name = "Home City";
     cityB.name = "Away City";
+    cityB.council.typeAI = CityCouncil.AI_OFF;
     map.settings.toggleFog = false;
     
     City.setupRoute(cityA, cityB, 1);
@@ -81,7 +82,10 @@ public class TestMilitary extends Test {
           if (w.state < Actor.STATE_DEAD) survivors = true;
         }
         homeWin = ! survivors;
-        if (homeWin) fort.formation.stopSecuringPoint();
+        if (homeWin) {
+          fort.formation.stopSecuringPoint();
+          fillAllVacancies(map);
+        }
       }
       
       if (homeWin && troops.recruits.size() >= 12 && ! invading) {

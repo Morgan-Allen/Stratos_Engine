@@ -294,7 +294,7 @@ public class GameConstants {
       this.blocks = false;
     }
   }
-  final static Good
+  final public static Good
     WATER      = new Good("Water"       , 0 , 0 ),
     MAIZE      = new Good("Maize"       , 10, 1 ),
     FRUIT      = new Good("Fruit"       , 12, 2 ),
@@ -758,7 +758,7 @@ public class GameConstants {
       GARRISON, 2f,
       HOUSE   , 10f
     );
-    world.addCity(cityA);
+    world.addCities(cityA);
     
     cityB.name = "Tlacopan";
     cityB.setWorldCoords(3, 3);
@@ -770,7 +770,7 @@ public class GameConstants {
       GARRISON, 0.75f,
       HOUSE   , 5f
     );
-    world.addCity(cityB);
+    world.addCities(cityB);
     
     City.setupRoute(cityA, cityB, AVG_CITY_DIST / 2);
     world.mapWide = world.mapHigh = 10;

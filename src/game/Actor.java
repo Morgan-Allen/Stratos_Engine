@@ -359,6 +359,11 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   }
   
   
+  public Target jobFocus() {
+    return Task.focusTarget(task);
+  }
+  
+  
   public boolean idle() {
     return task == null;
   }

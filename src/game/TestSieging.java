@@ -25,6 +25,7 @@ public class TestSieging extends Test {
     map.settings.toggleFog = false;
     cityA.name = "Home City";
     cityB.name = "Away City";
+    cityB.council.typeAI = CityCouncil.AI_OFF;
     
     City.setupRoute(cityA, cityB, 1);
     City.setPosture(cityA, cityB, City.POSTURE.ENEMY, true);

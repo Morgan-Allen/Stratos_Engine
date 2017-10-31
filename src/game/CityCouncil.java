@@ -255,6 +255,7 @@ public class CityCouncil {
   boolean considerRevolt(City lord, int period) {
     if (typeAI == AI_DEFIANT  ) return true;
     if (typeAI == AI_COMPLIANT) return false;
+    if (typeAI == AI_OFF      ) return false;
     
     InvasionAssessment IA = performAssessment(city, lord, 0.5f, true);
     float chance = period * 1f / AVG_TRIBUTE_YEARS;

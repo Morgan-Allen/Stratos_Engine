@@ -374,6 +374,12 @@ public class City implements Session.Saveable, Trader {
   }
   
   
+  static float suppliesDue(City a, City b, Good g) {
+    Relation r = a.relationWith(b);
+    return r == null ? 0 : r.suppliesDue.valueFor(g);
+  }
+  
+  
   public Tally <Good> tradeLevel() { return tradeLevel; }
   public Tally <Good> inventory () { return inventory ; }
   public City homeCity() { return this; }
@@ -420,8 +426,8 @@ public class City implements Session.Saveable, Trader {
     if (updateStats && ! activeMap) {
       council.updateCouncil();
       
-      float popRegen  = LIFESPAN_LENGTH / MONTH_LENGTH;
-      float usageInc  = YEAR_LENGTH / MONTH_LENGTH;
+      float popRegen  = MONTH_LENGTH * 1f / LIFESPAN_LENGTH;
+      float usageInc  = MONTH_LENGTH * 1f / YEAR_LENGTH;
       float idealPop  = buildLevel.valueFor(HOUSE   ) * AVG_HOUSE_POP ;
       float idealArmy = buildLevel.valueFor(GARRISON) * AVG_ARMY_POWER;
       
@@ -450,7 +456,8 @@ public class City implements Session.Saveable, Trader {
         if (council.considerRevolt(lord, MONTH_LENGTH)) {
           toggleRebellion(lord, true);
         }
-        else {
+        //  TODO:  You may have to generate caravans for player cities...
+        else if (lord.map == null) {
           Relation r = relationWith(lord);
           for (Good g : r.suppliesDue.keys()) {
             float sent = r.suppliesDue.valueFor(g) * usageInc * 1.1f;

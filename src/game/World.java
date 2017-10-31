@@ -101,8 +101,8 @@ public class World implements Session.Saveable {
   
   /**  Managing cities:
     */
-  void addCity(City c) {
-    this.cities.add(c);
+  void addCities(City... cities) {
+    Visit.appendTo(this.cities, cities);
   }
   
   

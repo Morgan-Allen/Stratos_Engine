@@ -39,17 +39,16 @@ public class Tally <K> {
   }
   
   
-  public void set(K key, float value) {
+  public float set(K key, float value) {
     if (value == 0) store.remove(key);
     else store.put(key, value);
+    return value;
   }
   
   
   public float add(float value, K key) {
     final float oldVal = valueFor(key), newVal = oldVal + value;
-    if (newVal == 0) store.remove(key);
-    else store.put(key, newVal);
-    return newVal;
+    return set(key, newVal);
   }
   
   

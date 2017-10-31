@@ -121,6 +121,7 @@ public class BuildingForTrade extends BuildingForCrafts implements Trader {
       targets.add(tradePartner);
     }
     else for (City c : world.cities) {
+      if (c == homeCity              ) continue;
       if (c.isEnemyOf(homeCity)      ) continue;
       if (c.distance (homeCity) == -1) continue;
       targets.add(c);

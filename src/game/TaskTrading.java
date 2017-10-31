@@ -65,7 +65,7 @@ public class TaskTrading extends Task {
         I.say("\nSETTING OFF FROM "+visits);
       }
       City city = tradeGoes.homeCity();
-      takeOnGoods(tradeFrom, taken, false);
+      takeOnGoods(tradeFrom, taken);
       
       if (tradeGoes != city) {
         Building goes = (Building) tradeGoes;
@@ -83,7 +83,7 @@ public class TaskTrading extends Task {
       if (reports()) {
         I.say("\nREACHED "+tradeGoes);
       }
-      offloadGoods(tradeGoes, false);
+      offloadGoods(tradeGoes);
     }
     //
     //  If you've returned from a journey, offload any goods you might have
@@ -96,7 +96,7 @@ public class TaskTrading extends Task {
         I.say("\nRETURNED TO "+visits);
         I.say("  ADDING TRADE PROFITS: "+profits);
       }
-      offloadGoods(tradeFrom, false);
+      offloadGoods(tradeFrom);
       actor.assignCargo(null);
     }
   }
@@ -118,8 +118,8 @@ public class TaskTrading extends Task {
     //  fresh goods, and record any profits in the process:
     if (goes != homeCity) {
       Tally <Good> taken = configureCargo(goes, tradeFrom, false);
-      offloadGoods(goes,        true);
-      takeOnGoods (goes, taken, true);
+      offloadGoods(goes       );
+      takeOnGoods (goes, taken);
       homeCity.world.beginJourney(journey.goes, homeCity, actor);
     }
     //
@@ -134,8 +134,10 @@ public class TaskTrading extends Task {
 
   /**  Other utility methods:
     */
-  City.Relation cityRelation(Trader trades, Trader with) {
-    return trades.homeCity().relationWith(with.homeCity());
+  City oppositeCity(Trader point) {
+    if (point == tradeFrom) return tradeGoes.homeCity();
+    if (point == tradeGoes) return tradeFrom.homeCity();
+    return null;
   }
   
   
@@ -143,17 +145,18 @@ public class TaskTrading extends Task {
     if (r == null) return 0;
     float demand = r.suppliesDue .valueFor(good);
     float paid   = r.suppliesSent.valueFor(good);
-    return demand - paid;
+    return Nums.max(0, demand - paid);
   }
   
   
-  void takeOnGoods(Trader store, Tally <Good> taken, boolean doPayment) {
+  void takeOnGoods(Trader store, Tally <Good> taken) {
     if (store == null) return;
     
     //  You don't have to pay for goods if the city you're taking them from
     //  owes them as tribute!
-    boolean tributeDue = store.homeCity().isLoyalVassalOf(homeCity);
-    City.Relation r = cityRelation(store, homeCity);
+    City city = store.homeCity(), opposite = oppositeCity(store);
+    boolean tributeDue = city.isLoyalVassalOf(opposite);
+    City.Relation r = city.relationWith(opposite);
     
     Tally <Good> cargo = actor.cargo == null ? new Tally() : actor.cargo;
     Tally <Good> stock = store.inventory();
@@ -172,9 +175,9 @@ public class TaskTrading extends Task {
       else {
         totalCost += amount * g.price;
       }
-      r.suppliesSent.add(amount, g);
     }
     
+    boolean doPayment = city != homeCity;
     cargo.add(doPayment ? (0 - totalCost) : 0, CASH);
     actor.assignCargo(cargo);
     
@@ -186,13 +189,14 @@ public class TaskTrading extends Task {
   }
   
   
-  void offloadGoods(Trader store, boolean doPayment) {
+  void offloadGoods(Trader store) {
     if (store == null) return;
     
     //  You don't receive money for goods if the city you deliver to is owed
     //  them as tribute.
-    boolean tributeDue = homeCity.isLoyalVassalOf(store.homeCity());
-    City.Relation r = cityRelation(homeCity, store);
+    City city = store.homeCity(), opposite = oppositeCity(store);
+    boolean tributeDue = opposite.isLoyalVassalOf(city);
+    City.Relation r = opposite.relationWith(city);
     
     float cash = actor.cargo.valueFor(CASH);
     int totalValue = 0;
@@ -210,9 +214,11 @@ public class TaskTrading extends Task {
       else {
         totalValue += amount * g.price;
       }
+      
       r.suppliesSent.add(amount, g);
     }
     
+    boolean doPayment = city != homeCity;
     actor.cargo.clear();
     actor.cargo.add(cash + (doPayment ? totalValue : 0), CASH);
     
