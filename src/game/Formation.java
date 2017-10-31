@@ -153,6 +153,17 @@ public class Formation implements
   
   /**  Methods for handling treatment of foreign cities-
     */
+  void assignDemands(
+    City.POSTURE posture,
+    Formation actionTaken,
+    Tally <Good> tribute
+  ) {
+    this.postureDemand = posture;
+    this.actionDemand  = actionTaken;
+    this.tributeDemand = tribute == null ? new Tally() : tribute;
+  }
+  
+  
   void beginSecuring(City city) {
     this.securedCity = city;
     
@@ -163,17 +174,6 @@ public class Formation implements
     else {
       beginJourney(homeCity, securedCity);
     }
-  }
-  
-  
-  void assignDemands(
-    City.POSTURE posture,
-    Formation actionTaken,
-    Tally <Good> tribute
-  ) {
-    this.postureDemand = posture;
-    this.actionDemand  = actionTaken;
-    this.tributeDemand = tribute == null ? new Tally() : tribute;
   }
   
   
@@ -349,11 +349,13 @@ public class Formation implements
       pick.compare(best, 0 - dist);
     }
     
-    if (! (pick.result().above instanceof Building)) {
+    Tile point = pick.result();
+    if (point == null) return null;
+    
+    if (! (point.above instanceof Building)) {
       I.complain("PROBLEMMMM");
     }
-    
-    return pick.result();
+    return point;
   }
   
   
@@ -378,6 +380,9 @@ public class Formation implements
       return false;
     }
     
+    //
+    //  If you're beaten, turn around and go home:
+    //  TODO:  Allow for retreat at partial strength!
     if (formationPower() == 0) {
       City sieges = securedCity;
       CityEvents.enterHostility(sieges, homeCity, false, 1);

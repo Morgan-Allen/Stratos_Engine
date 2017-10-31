@@ -16,52 +16,70 @@ public class TestSieging extends Test {
   
   static boolean testSieging(boolean graphics) {
     
-    World   world = GameConstants.setupDefaultWorld();
-    City    cityA = world.cities.atIndex(0);
-    City    cityB = world.cities.atIndex(1);
+    World   world = new World();
+    City    homeC = new City(world);
+    City    awayC = new City(world);
     CityMap map   = CityMapTerrain.generateTerrain(
-      cityA, 32, MEADOW, JUNGLE
+      homeC, 32, MEADOW, JUNGLE
     );
     map.settings.toggleFog = false;
-    cityA.name = "Home City";
-    cityB.name = "Away City";
-    cityB.council.typeAI = CityCouncil.AI_OFF;
+    homeC.name = "Home City";
+    awayC.name = "Away City";
+    world.addCities(homeC, awayC);
     
-    City.setupRoute(cityA, cityB, 1);
-    City.setPosture(cityA, cityB, City.POSTURE.ENEMY, true);
+    awayC.initBuildLevels(GARRISON, 5, HOUSE, 1);
+    awayC.council.typeAI = CityCouncil.AI_OFF;
+    
+    City.setupRoute(homeC, awayC, 1);
+    City.setPosture(homeC, awayC, City.POSTURE.ENEMY, true);
     
     
     BuildingForArmy fort = (BuildingForArmy) GARRISON.generate();
     fort.enterMap(map, 10, 10, 1);
+    fillWorkVacancies(fort);
     CityMap.applyPaving(map, 10, 9, 40, 1, true);
     
     Building store = (Building) PORTER_HOUSE.generate();
     store.enterMap(map, 10, 6, 1);
+    store.inventory.setWith(COTTON, 10);
     
     
-    Formation enemies = new Formation();
-    enemies.setupFormation(GARRISON, cityB);
+    float initPrestige = awayC.prestige;
+    float initLoyalty  = homeC.loyalty(awayC);
+    Formation enemy = null;
+    Tally <Good> tribute = null;
     
-    for (int n = 8; n-- > 0;) {
-      Actor fights = (Actor) ((n < 3) ? SOLDIER : CITIZEN).generate();
-      fights.assignHomeCity(cityB);
-      enemies.toggleRecruit(fights, true);
-    }
-    enemies.beginSecuring(cityA);
-    Tally <Good> tribute = new Tally().setWith(COTTON, 10);
-    enemies.assignDemands(City.POSTURE.VASSAL, null, tribute);
-    
-    float initPrestige = cityB.prestige;
-    float initLoyalty  = cityA.loyalty(cityB);
-    
-    
+    boolean evalDone    = false;
+    boolean siegeComing = false;
     boolean victorious  = false;
     boolean tributePaid = false;
     
     while (map.time < 1000 || graphics) {
       map = runGameLoop(map, 10, graphics, "saves/test_sieging.tlt");
       
-      if (cityA.isVassalOf(cityB) && (! enemies.away) && ! victorious) {
+      if (! evalDone) {
+        boolean checked = true;
+        if (homeC.armyPower <= 0   ) checked = false;
+        if (homeC.inventory.empty()) checked = false;
+        
+        if (checked) {
+          evalDone = true;
+          awayC.council.typeAI = CityCouncil.AI_WARLIKE;
+        }
+      }
+      
+      if (evalDone && ! siegeComing) {
+        for (World.Journey j : map.city.world.journeys) {
+          Object goes = j.going.first();
+          if (goes instanceof Formation) {
+            enemy = (Formation) goes;
+            tribute = enemy.tributeDemand;
+            siegeComing = true;
+          }
+        }
+      }
+      
+      if (siegeComing && homeC.isVassalOf(awayC) && ! victorious) {
         victorious = true;
         store.inventory.add(tribute);
         fillWorkVacancies(store);
@@ -69,26 +87,26 @@ public class TestSieging extends Test {
       
       if (victorious && ! tributePaid) {
         
-        City.Relation r = cityA.relationWith(cityB);
+        City.Relation r = homeC.relationWith(awayC);
         boolean allSent = true;
         for (Good g : tribute.keys()) {
           float need = tribute.valueFor(g);
           float sent = r.suppliesSent.valueFor(g);
-          if (need < sent) allSent = false;
+          if (sent < need) allSent = false;
         }
         tributePaid = allSent;
         
-        if (cityA.currentFunds > 0) {
+        if (homeC.currentFunds > 0) {
           I.say("\nShould not receive payment for tribute!");
           break;
         }
         
-        if (cityB.prestige <= initPrestige) {
+        if (awayC.prestige <= initPrestige) {
           I.say("\nPrestige should be boosted by conquest!");
           break;
         }
         
-        if (cityA.loyalty(cityB) >= initLoyalty) {
+        if (homeC.loyalty(awayC) >= initLoyalty) {
           I.say("\nLoyalty should be reduced by conquest!");
           break;
         }
@@ -101,12 +119,29 @@ public class TestSieging extends Test {
     }
     
     I.say("\nSIEGE TEST FAILED!");
-    I.say("  Victorious:   "+victorious);
+    I.say("  Siege coming: "+siegeComing);
+    I.say("  Victorious:   "+victorious );
     I.say("  Tribute paid: "+tributePaid);
     return false;
   }
   
   
+  
+  //  Older invasion-setup code, kept for posterity.
+  /*
+    Formation enemies = new Formation();
+    enemies.setupFormation(GARRISON, cityB);
+    
+    for (int n = 8; n-- > 0;) {
+      Actor fights = (Actor) ((n < 3) ? SOLDIER : CITIZEN).generate();
+      fights.assignHomeCity(cityB);
+      enemies.toggleRecruit(fights, true);
+    }
+    enemies.beginSecuring(cityA);
+    Tally <Good> tribute = new Tally().setWith(COTTON, 10);
+    enemies.assignDemands(City.POSTURE.VASSAL, null, tribute);
+
+  //*/
   
 }
 

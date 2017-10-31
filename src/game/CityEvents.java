@@ -16,7 +16,7 @@ public class CityEvents {
     City belongs = formation.homeCity();
     belongs.armyPower -= formation.formationPower();
     belongs.formations.include(formation);
-    formation.beginJourney(belongs, goes);
+    formation.beginSecuring(goes);
   }
   
   

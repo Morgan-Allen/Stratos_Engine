@@ -199,6 +199,9 @@ public class CityCouncil {
     calculateChances(IA, false);
     calculateAppeal(IA);
     
+    if (typeAI == AI_WARLIKE ) IA.costs    = 0;
+    if (typeAI == AI_PACIFIST) IA.benefits = 0;
+    
     float appeal = 0;
     appeal += (random ? Rand.avgNums(2) : 0.5f) * IA.benefits;
     appeal -= (random ? Rand.avgNums(2) : 0.5f) * IA.costs;

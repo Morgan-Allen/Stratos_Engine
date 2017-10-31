@@ -247,7 +247,6 @@ public class City implements Session.Saveable, Trader {
   
   static void setPosture(City a, City b, POSTURE p, boolean symmetric) {
     if (p == null) p = POSTURE.NEUTRAL;
-    
     //
     //  You cannot have more than one Lord at a time, so break relations with
     //  any former master-
