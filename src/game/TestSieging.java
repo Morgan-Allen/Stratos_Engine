@@ -51,6 +51,9 @@ public class TestSieging extends Test {
     Tally <Good> tribute = new Tally().setWith(COTTON, 10);
     enemies.assignDemands(City.POSTURE.VASSAL, null, tribute);
     
+    float initPrestige = cityB.prestige;
+    float initLoyalty  = cityA.loyalty(cityB);
+    
     
     boolean victorious  = false;
     boolean tributePaid = false;
@@ -77,7 +80,17 @@ public class TestSieging extends Test {
         
         if (cityA.currentFunds > 0) {
           I.say("\nShould not receive payment for tribute!");
-          return false;
+          break;
+        }
+        
+        if (cityB.prestige <= initPrestige) {
+          I.say("\nPrestige should be boosted by conquest!");
+          break;
+        }
+        
+        if (cityA.loyalty(cityB) >= initLoyalty) {
+          I.say("\nLoyalty should be reduced by conquest!");
+          break;
         }
         
         if (tributePaid) {

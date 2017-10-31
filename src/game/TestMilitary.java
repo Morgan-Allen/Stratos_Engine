@@ -13,6 +13,7 @@ public class TestMilitary extends Test {
     testMilitary(true);
   }
   
+  
   static boolean testMilitary(boolean graphics) {
     
     World   world = GameConstants.setupDefaultWorld();
@@ -43,6 +44,9 @@ public class TestMilitary extends Test {
       fillHomeVacancies(house, CITIZEN);
     }
     
+    float initPrestige = cityA.prestige;
+    float initLoyalty  = cityB.loyalty(cityA);
+    
     
     Formation enemies = new Formation();
     enemies.setupFormation(GARRISON, cityB);
@@ -52,6 +56,7 @@ public class TestMilitary extends Test {
       enemies.toggleRecruit(fights, true);
     }
     cityB.armyPower = AVG_ARMY_POWER / 4;
+    
     
     boolean recruited = false;
     boolean invaded   = false;
@@ -105,6 +110,16 @@ public class TestMilitary extends Test {
         }
         backHome = troops.recruits.size() > 8 && ! someAway;
         
+        if (cityA.prestige <= initPrestige) {
+          I.say("\nPrestige should be boosted by conquest!");
+          break;
+        }
+        
+        if (cityB.loyalty(cityA) >= initLoyalty) {
+          I.say("\nLoyalty should be reduced by conquest!");
+          break;
+        }
+        
         if (backHome) {
           I.say("\nMILITARY TEST CONCLUDED SUCCESSFULLY!");
           if (! graphics) return true;
@@ -119,6 +134,8 @@ public class TestMilitary extends Test {
     I.say("  Invading:  "+invading );
     I.say("  Away win:  "+awayWin  );
     I.say("  Back home: "+backHome );
+    I.say("  Current recuits: "+troops.recruits.size());
+    
     return false;
   }
   

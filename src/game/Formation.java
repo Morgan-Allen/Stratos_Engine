@@ -380,6 +380,7 @@ public class Formation implements
     
     if (formationPower() == 0) {
       City sieges = securedCity;
+      CityEvents.enterHostility(sieges, homeCity, false, 1);
       CityEvents.signalVictory(sieges, homeCity, this);
       beginSecuring(homeCity);
       return true;
@@ -417,6 +418,7 @@ public class Formation implements
     //  If there are no targets left here, turn around and go home.
     else {
       City sieges = securedCity;
+      CityEvents.enterHostility(sieges, homeCity, true, 1);
       if (sieges != null && homeCity.government != GOVERNMENT.BARBARIAN) {
         CityEvents.inflictDemands(sieges, homeCity, this);
       }
