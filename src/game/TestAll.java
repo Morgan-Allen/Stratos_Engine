@@ -11,15 +11,16 @@ public class TestAll {
     
     long init = System.currentTimeMillis();
     
-    TestDemands  .testDemands  (false);
-    TestPathing  .testPathing  (false);
-    TestMilitary .testMilitary (false);
-    TestSieging  .testSieging  (false);
-    TestCity     .testCity     (false);
-    TestGathering.testGathering(false);
-    TestTrading  .testTrading  (false);
-    TestUpkeep   .testUpkeep   (false);
-    TestExploring.testExploring(false);
+    TestDemands   .testDemands   (false);
+    TestPathing   .testPathing   (false);
+    TestMilitary  .testMilitary  (false);
+    TestSieging   .testSieging   (false);
+    TestCity      .testCity      (false);
+    TestGathering .testGathering (false);
+    TestTrading   .testTrading   (false);
+    TestUpkeep    .testUpkeep    (false);
+    TestExploring .testExploring (false);
+    TestCityEvents.testCityEvents(false);
     
     long taken = System.currentTimeMillis() - init;
     

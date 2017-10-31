@@ -213,9 +213,14 @@ public class CityCouncil {
   List <InvasionAssessment> updateInvasionChoices() {
     List <InvasionAssessment> choices = new List();
     //
+    //  This is something of a hack at the moment, but it helps prevent some
+    //  of the more bitty exchanges...
+    if (city.armyPower < AVG_ARMY_POWER / 2) {
+      return choices;
+    }
+    //
     //  TODO:  Allow for multiple levels of force-commitment, since you don't
     //  want your own city to be vulnerable?
-    
     for (City other : city.world.cities) {
       Integer distance = city.distances.get(other);
       if (distance == null || other == city) continue;

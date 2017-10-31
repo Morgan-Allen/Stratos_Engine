@@ -184,7 +184,7 @@ public class City implements Session.Saveable, Trader {
   
   
   
-  /**  Supplemental setup methods for trade and geography-
+  /**  Supplemental setup methods for economy, trade and geography-
     */
   static void setupRoute(City a, City b, int distance) {
     a.distances.put(b, distance);
@@ -424,8 +424,9 @@ public class City implements Session.Saveable, Trader {
       if (population < idealPop) {
         population = Nums.min(idealPop , population + popRegen);
       }
-      
-      idealArmy -= formations.size() * AVG_ARMY_POWER;
+      for (Formation f : formations) {
+        idealArmy -= f.formationPower();
+      }
       if (idealArmy < 0) idealArmy = 0;
       
       if (armyPower < idealArmy) {
