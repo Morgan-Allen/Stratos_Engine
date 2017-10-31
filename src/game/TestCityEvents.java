@@ -85,6 +85,10 @@ public class TestCityEvents extends Test {
         I.say("\nInvasion did not impose vassal status!");
         return;
       }
+      if (pair[0].loyalty(pair[1]) >= City.LOY_NEUTRAL) {
+        I.say("\nInvasion did not sour relations!");
+        return;
+      }
     }
     
     //  This tests for the effect of 'barbarian' invasions-
@@ -103,9 +107,19 @@ public class TestCityEvents extends Test {
     {
       City pair[] = configWeakStrongCityPair();
       World world = pair[0].world;
+      
       City lord = new City(world);
       world.addCity(lord);
       City.setPosture(lord, pair[0], City.POSTURE.VASSAL, true);
+      City capital = new City(world);
+      world.addCity(capital);
+      City.setPosture(capital, lord, City.POSTURE.VASSAL, true);
+      
+      if (capital != pair[0].capitalLord()) {
+        I.say("\nDid not calculate capital correctly!");
+        return;
+      }
+      
       runCompleteInvasion(pair);
       
       if (lord.isLordOf(pair[0])) {
@@ -114,6 +128,14 @@ public class TestCityEvents extends Test {
       }
       if (! pair[0].isVassalOf(pair[1])) {
         I.say("\nInvasion of vassal did not impose vassal status!");
+        return;
+      }
+      if (! capital.isEnemyOf(pair[1])) {
+        I.say("\nInvasion of vassal did not provoke war!");
+        return;
+      }
+      if (capital.loyalty(pair[1]) >= City.LOY_NEUTRAL) {
+        I.say("\nInvasion of vassal did not sour relations with capital!");
         return;
       }
     }
@@ -243,9 +265,9 @@ public class TestCityEvents extends Test {
     City mapCity = new City(world);
     CityMap map = new CityMap(mapCity);
     map.performSetup(8);
-    map.settings.worldView = true;
-    map.settings.speedUp   = true;
-    
+    map.settings.worldView    = true;
+    map.settings.speedUp      = true;
+    map.settings.reportBattle = graphics;
     
     int MAX_TIME = LIFESPAN_LENGTH;
     boolean relationsOkay = true;
@@ -277,14 +299,12 @@ public class TestCityEvents extends Test {
     }
     
     //  TODO:  Actually test something here!
-    //  TODO:  Also, toggle verbosity for battle reports...
     
-    //  Note:  There's a problem where the cities wind up completely exhausting
-    //  eachother's armies in skirmishes, which isn't completely realistic.
-    //  Try to add a 'war weariness' factor or something to balance that?
-
-    //  TODO:  Also, attacks on your vassals should probably be considered an
-    //  act of war by the third party.
+    //  Battles should occur, at least.
+    //  They shouldn't be excessively frequent (no more than 2x per city per
+    //  year, on average.)
+    //  They should be conducted at a reasonable fraction of a city's
+    //  full strength.
     
     
     I.say("\nCITY EVENTS TESTING CONCLUDED...");

@@ -310,6 +310,16 @@ public class City implements Session.Saveable, Trader {
   }
   
   
+  City capitalLord() {
+    City c = this;
+    while (true) {
+      City l = c.currentLord();
+      if (l == null) return c;
+      else c = l;
+    }
+  }
+  
+  
   boolean isVassalOfSameLord(City o) {
     City lord = currentLord();
     return lord != null && o.currentLord() == lord;

@@ -112,6 +112,12 @@ public class World implements Session.Saveable {
   }
   
   
+  CityMap activeCityMap() {
+    for (City c : cities) if (c.map != null) return c.map;
+    return null;
+  }
+  
+  
   
   /**  Registering and updating journeys:
     */

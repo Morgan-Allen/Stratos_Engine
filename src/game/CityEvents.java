@@ -24,13 +24,17 @@ public class CityEvents {
     Formation formation, City goes, World.Journey journey
   ) {
     //
+    //  Gather some details first:
+    City    from   = journey.from;
+    World   world  = from.world;
+    int     time   = world.time;
+    CityMap map    = world.activeCityMap();
+    boolean report = map != null && map.settings.reportBattle;
+    //
     //  We use the same math that estimates the appeal of invasion to play out
-    //  the real event:
-    //  TODO:  Consider where this should be placed, however?
+    //  the real event, and report accordingly:
+    //  TODO:  Use separate math for the purpose?
     CityCouncil.InvasionAssessment IA = new CityCouncil.InvasionAssessment();
-    City  from  = journey.from;
-    World world = from.world;
-    int   time  = world.time;
     IA.attackC     = from;
     IA.defendC     = goes;
     IA.attackPower = formation.formationPower() / POP_PER_CITIZEN;
@@ -51,32 +55,29 @@ public class CityEvents {
       victory  = false;
     }
     
-    I.say("\n"+formation+" CONDUCTED ACTION AGAINST "+goes+", time "+time);
-    I.say("  Victorious:    "+victory );
-    I.say("  Attack power:  "+IA.attackPower);
-    I.say("  Defend power:  "+IA.defendPower);
-    I.say("  Taken losses:  "+fromLost);
-    I.say("  Dealt losses:  "+goesLost);
-    
+    if (report) {
+      I.say("\n"+formation+" CONDUCTED ACTION AGAINST "+goes+", time "+time);
+      I.say("  Victorious:    "+victory );
+      I.say("  Attack power:  "+IA.attackPower);
+      I.say("  Defend power:  "+IA.defendPower);
+      I.say("  Taken losses:  "+fromLost);
+      I.say("  Dealt losses:  "+goesLost);
+    }
     //
-    //  We inflict the estimated casualties upon each party accordingly:
+    //  We inflict the estimated casualties upon each party, and adjust posture
+    //  and relations.  (We assume/pretend that 'barbarian' factions won't set
+    //  up political ties.
+    //  TODO:  Handle recall of forces in a separate decision-pass?
     fromLost = inflictCasualties(formation, fromLost);
     goesLost = inflictCasualties(goes     , goesLost);
     world.recordEvent("attacked", from, goes);
+    enterHostility(goes, from, victory, 1);
     
-    //
-    //  We assume/pretend that barbarian factions won't set up political ties.
-    //  In either case, modify relations between the two cities accordingly-
     if (victory && from.government != GOVERNMENT.BARBARIAN) {
       inflictDemands(goes, from, formation);
     }
-    else {
-      becomeEnemies(goes, from);
-    }
     if (victory) {
       signalVictory(from, goes, formation);
-      //
-      //  TODO:  Handle recall of forces in a separate decision-pass?
       formation.stopSecuringPoint();
       world.beginJourney(goes, from, formation);
     }
@@ -85,10 +86,12 @@ public class CityEvents {
       formation.stopSecuringPoint();
       world.beginJourney(goes, from, formation);
     }
-    incLoyalty(from, goes, victory ? LOY_CONQUER_PENALTY : LOY_ATTACK_PENALTY);
-    
-    I.say("  Adjusted loss: "+fromLost+"/"+goesLost);
-    I.say("  "+from+" now: "+goes.posture(from)+" of "+goes);
+    //
+    //  Either way, report the final outcome:
+    if (report) {
+      I.say("  Adjusted loss: "+fromLost+"/"+goesLost);
+      I.say("  "+from+" now: "+goes.posture(from)+" of "+goes);
+    }
   }
   
   
@@ -139,8 +142,18 @@ public class CityEvents {
   }
   
   
-  static void becomeEnemies(City defends, City attacks) {
+  static void enterHostility(
+    City defends, City attacks, boolean victory, float weight
+  ) {
+    if (defends == null) return;
+    
     setPosture(attacks, defends, POSTURE.ENEMY, true);
+    float hate = (victory ? LOY_CONQUER_PENALTY : LOY_ATTACK_PENALTY) * weight;
+    incLoyalty(defends, attacks, hate);
+    
+    //  TODO:  It should ideally take time for the news of a given assault to
+    //  reach more distant cities?
+    enterHostility(defends.currentLord(), attacks, victory, weight / 2);
   }
   
   

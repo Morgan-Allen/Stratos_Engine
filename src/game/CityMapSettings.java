@@ -21,7 +21,9 @@ public class CityMapSettings {
     slowed    = false,
     speedUp   = false,
     paused    = false,
-    worldView = false;
+    worldView = false,
+    
+    reportBattle = true;
   
   
   void loadState(Session s) throws Exception {
@@ -38,3 +40,5 @@ public class CityMapSettings {
   }
   
 }
+
+
