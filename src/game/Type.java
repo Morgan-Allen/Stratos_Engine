@@ -189,7 +189,8 @@ public class Type extends Index.Entry implements Session.Saveable {
   
   /**  Walker-specific stats and setup methods-
     */
-  int socialClass = CLASS_COMMON;
+  int  socialClass  = CLASS_COMMON;
+  Type patronGods[] = null;
   String names[] = {};
   
   int maxHealth   = AVG_MAX_HEALTH;

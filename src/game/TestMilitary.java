@@ -107,13 +107,18 @@ public class TestMilitary extends Test {
         }
       }
     }
-    
+
     I.say("\nMILITARY TEST FAILED!");
+    I.say("  Recruited: "+recruited);
+    I.say("  Invaded:   "+invaded  );
+    I.say("  Home win:  "+homeWin  );
+    I.say("  Invading:  "+invading );
+    I.say("  Away win:  "+awayWin  );
+    I.say("  Back home: "+backHome );
   }
   
-  
-  
 }
+
 
 
 

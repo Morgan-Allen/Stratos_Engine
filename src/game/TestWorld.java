@@ -7,15 +7,15 @@ import static game.GameConstants.*;
 
 
 
-public class TestCityEvents extends Test {
+public class TestWorld extends Test {
   
   
   public static void main(String args[]) {
-    testCityEvents(false);
+    testWorld(true);
   }
   
   
-  static void testCityEvents(boolean graphics) {
+  static void testWorld(boolean graphics) {
     
     //  This tests for regeneration/consumption of goods, and normalisation of
     //  prestige and loyalty over time:

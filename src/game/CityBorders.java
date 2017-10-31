@@ -155,21 +155,34 @@ public class CityBorders {
   
   /**  Trading utilities-
     */
+  //  TODO:  MOVE THIS TO THE TASK-TRADING CLASS!
+  
+  
   static Tally <Good> configureCargo(
     Trader from, Trader goes, boolean cityOnly
   ) {
     Tally <Good> cargo = new Tally();
-    boolean fromCity = from.tradeOrigin() == from;
-    boolean goesCity = goes.tradeOrigin() == goes;
+    boolean fromCity = from.homeCity() == from;
+    boolean goesCity = goes.homeCity() == goes;
     
     if (from == null || goes == null        ) return cargo;
     if (cityOnly && ! (fromCity || goesCity)) return cargo;
+    City.Relation fromR = goes.homeCity().relationWith(from.homeCity());
+    City.Relation goesR = from.homeCity().relationWith(goes.homeCity());
     
     for (Good good : ALL_GOODS) {
-      float amountO  = from.inventory ().valueFor(good);
-      float demandO  = from.tradeLevel().valueFor(good);
-      float amountD  = goes.inventory ().valueFor(good);
-      float demandD  = goes.tradeLevel().valueFor(good);
+      float amountO = from.inventory ().valueFor(good);
+      float demandO = from.tradeLevel().valueFor(good);
+      float amountD = goes.inventory ().valueFor(good);
+      float demandD = goes.tradeLevel().valueFor(good);
+      
+      if (fromCity) {
+        demandO = Nums.max(demandO, fromR.suppliesDue.valueFor(good));
+      }
+      if (goesCity) {
+        demandD = Nums.max(demandD, goesR.suppliesDue.valueFor(good));
+      }
+      
       float surplus  = amountO - Nums.max(0, demandO);
       float shortage = Nums.max(0, demandD) - amountD;
       
@@ -185,7 +198,7 @@ public class CityBorders {
   
   static float distanceRating(Trader from, Trader goes) {
     
-    City fromC = from.tradeOrigin(), goesC = goes.tradeOrigin();
+    City fromC = from.homeCity(), goesC = goes.homeCity();
     Integer distance = fromC.distances.get(goesC);
     float distRating = distance == null ? MAX_TRADER_RANGE : distance;
     

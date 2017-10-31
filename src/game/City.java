@@ -184,7 +184,7 @@ public class City implements Session.Saveable, Trader {
   
   
   
-  /**  Supplemental setup methods for economy, trade and geography-
+  /**  Supplemental setup/query methods for economy, trade and geography-
     */
   static void setupRoute(City a, City b, int distance) {
     a.distances.put(b, distance);
@@ -211,6 +211,12 @@ public class City implements Session.Saveable, Trader {
   }
   
   
+  float distance(City other) {
+    Integer dist = distances.get(other);
+    return dist == null ? -1 : (float) dist;
+  }
+  
+  
   
   /**  Setting up basic relations-
     */
@@ -228,11 +234,13 @@ public class City implements Session.Saveable, Trader {
   
   
   POSTURE posture(City other) {
+    if (other == null) return null;
     return relationWith(other).posture;
   }
   
   
   float loyalty(City other) {
+    if (other == null) return -100;
     return relationWith(other).loyalty;
   }
   
@@ -368,11 +376,7 @@ public class City implements Session.Saveable, Trader {
   
   public Tally <Good> tradeLevel() { return tradeLevel; }
   public Tally <Good> inventory () { return inventory ; }
-  
-  
-  public City tradeOrigin() {
-    return this;
-  }
+  public City homeCity() { return this; }
   
   
   

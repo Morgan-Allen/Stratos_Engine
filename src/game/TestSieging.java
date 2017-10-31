@@ -29,9 +29,13 @@ public class TestSieging extends Test {
     City.setupRoute(cityA, cityB, 1);
     City.setPosture(cityA, cityB, City.POSTURE.ENEMY, true);
     
+    
     BuildingForArmy fort = (BuildingForArmy) GARRISON.generate();
     fort.enterMap(map, 10, 10, 1);
     CityMap.applyPaving(map, 10, 9, 40, 1, true);
+    
+    Building store = (Building) PORTER_HOUSE.generate();
+    store.enterMap(map, 10, 6, 1);
     
     
     Formation enemies = new Formation();
@@ -43,26 +47,59 @@ public class TestSieging extends Test {
       enemies.toggleRecruit(fights, true);
     }
     enemies.beginSecuring(cityA);
-    enemies.assignDemands(City.POSTURE.VASSAL, null, null);
+    Tally <Good> tribute = new Tally().setWith(COTTON, 10);
+    enemies.assignDemands(City.POSTURE.VASSAL, null, tribute);
     
-    boolean victorious = false;
+    
+    boolean victorious  = false;
+    boolean tributePaid = false;
     
     while (map.time < 1000 || graphics) {
       map = runGameLoop(map, 10, graphics, "saves/test_sieging.tlt");
       
       if (cityA.isVassalOf(cityB) && (! enemies.away) && ! victorious) {
         victorious = true;
-        I.say("\nSIEGING TEST CONCLUDED SUCCESSFULLY!");
-        if (! graphics) return;
+        store.inventory.add(tribute);
+        fillWorkVacancies(store);
+      }
+      
+      if (victorious && ! tributePaid) {
+        
+        City.Relation r = cityA.relationWith(cityB);
+        boolean allSent = true;
+        for (Good g : tribute.keys()) {
+          float need = tribute.valueFor(g);
+          float sent = r.suppliesSent.valueFor(g);
+          if (need < sent) allSent = false;
+        }
+        tributePaid = allSent;
+        
+        if (cityA.currentFunds > 0) {
+          I.say("\nShould not receive payment for tribute!");
+          return;
+        }
+        
+        if (tributePaid) {
+          I.say("\nSIEGING TEST CONCLUDED SUCCESSFULLY!");
+          if (! graphics) return;
+        }
       }
     }
     
     I.say("\nSIEGE TEST FAILED!");
+    I.say("  Victorious:   "+victorious);
+    I.say("  Tribute paid: "+tributePaid);
   }
   
   
   
 }
+
+
+
+
+
+
 
 
 

@@ -721,7 +721,7 @@ public class GameConstants {
   static interface Trader {
     Tally <Good> tradeLevel();
     Tally <Good> inventory ();
-    City tradeOrigin();
+    City homeCity();
   }
   
   static interface Journeys {

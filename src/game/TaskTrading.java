@@ -64,7 +64,7 @@ public class TaskTrading extends Task {
       if (reports()) {
         I.say("\nSETTING OFF FROM "+visits);
       }
-      City city = tradeGoes.tradeOrigin();
+      City city = tradeGoes.homeCity();
       takeOnGoods(tradeFrom, taken, false);
       
       if (tradeGoes != city) {
@@ -106,7 +106,7 @@ public class TaskTrading extends Task {
     //
     //  If you've arrived at the edge of the map, begin your journey to a
     //  foreign city-
-    City city = tradeGoes.tradeOrigin();
+    City city = tradeGoes.homeCity();
     city.world.beginJourney(city, (City) tradeGoes, actor);
     actor.exitMap();
   }
@@ -135,7 +135,7 @@ public class TaskTrading extends Task {
   /**  Other utility methods:
     */
   City.Relation cityRelation(Trader trades, Trader with) {
-    return trades.tradeOrigin().relationWith(with.tradeOrigin());
+    return trades.homeCity().relationWith(with.homeCity());
   }
   
   
@@ -152,7 +152,7 @@ public class TaskTrading extends Task {
     
     //  You don't have to pay for goods if the city you're taking them from
     //  owes them as tribute!
-    boolean tributeDue = store.tradeOrigin().isLoyalVassalOf(homeCity);
+    boolean tributeDue = store.homeCity().isLoyalVassalOf(homeCity);
     City.Relation r = cityRelation(store, homeCity);
     
     Tally <Good> cargo = actor.cargo == null ? new Tally() : actor.cargo;
@@ -191,7 +191,7 @@ public class TaskTrading extends Task {
     
     //  You don't receive money for goods if the city you deliver to is owed
     //  them as tribute.
-    boolean tributeDue = homeCity.isLoyalVassalOf(store.tradeOrigin());
+    boolean tributeDue = homeCity.isLoyalVassalOf(store.homeCity());
     City.Relation r = cityRelation(homeCity, store);
     
     float cash = actor.cargo.valueFor(CASH);

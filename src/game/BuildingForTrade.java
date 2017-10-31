@@ -81,8 +81,7 @@ public class BuildingForTrade extends BuildingForCrafts implements Trader {
     return;
   }
   
-  
-  public City tradeOrigin() {
+  public City homeCity() {
     return map.city;
   }
   
@@ -110,18 +109,25 @@ public class BuildingForTrade extends BuildingForCrafts implements Trader {
     class Order { Tally <Good> cargo; Trader goes; float rating; }
     List <Trader> targets = new List();
     List <Order> orders = new List();
+    City homeCity = map.city;
+    World world = homeCity.world;
     
     for (Building b : map.buildings) {
       if (b == this || ! (b instanceof Trader)) continue;
       targets.add((Trader) b);
     }
     
-    //  TODO:  Allow iteration over any and all neighbouring cities.
     if (tradePartner != null) {
       targets.add(tradePartner);
     }
+    else for (City c : world.cities) {
+      if (c.isEnemyOf(homeCity)      ) continue;
+      if (c.distance (homeCity) == -1) continue;
+      targets.add(c);
+    }
     
     for (Trader t : targets) {
+      City c = (t == t.homeCity()) ? ((City) t) : null;
       Tally <Good> cargoAway = configureCargo(this, t, false);
       Tally <Good> cargoBack = configureCargo(t, this, true );
       
@@ -138,8 +144,15 @@ public class BuildingForTrade extends BuildingForCrafts implements Trader {
           rating += cargoBack.valueFor(good) * distRating;
         }
       }
+      
+      if (homeCity.isVassalOf(c)) {
+        rating *= 2.5f;
+      }
+      if (homeCity.isLordOf(c)) {
+        rating *= 1.5f;
+      }
       if (rating > 0) {
-        Order order = new Order();
+        Order order  = new Order();
         order.cargo  = cargoAway;
         order.goes   = t;
         order.rating = rating;

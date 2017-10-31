@@ -53,6 +53,11 @@ public class Tally <K> {
   }
   
   
+  public void add(Tally <K> other) {
+    for (K k : other.keys()) add(other.valueFor(k), k);
+  }
+  
+  
   public void clear() {
     store.clear();
   }
