@@ -43,12 +43,9 @@ public class BuildingForTrade extends BuildingForCrafts implements Trader {
   /**  Updating demands-
     */
   public void setTradeLevels(boolean matchStock, Object... args) {
-    Object split[][] = Visit.splitByModulus(args, 2);
-    for (int i = split[0].length; i-- > 0;) {
-      Good  g = (Good   ) split[0][i];
-      float a = (Integer) split[1][i];
-      tradeLevel.set(g, a);
-      if (matchStock) inventory.set(g, Nums.abs(a));
+    tradeLevel.setWith(args);
+    if (matchStock) for (Good g : tradeLevel.keys()) {
+      inventory.set(g, Nums.abs(tradeLevel.valueFor(g)));
     }
   }
   

@@ -16,15 +16,16 @@ public class Building extends Element implements Session.Saveable, Employer {
   
   String ID;
   
-  Tile entrance;
-  int updateGap = 0;
+  private Tile entrance;
+  private int updateGap = 0;
   
   List <Actor> workers   = new List();
   List <Actor> residents = new List();
   List <Actor> visitors  = new List();
   
-  Tally <Good> materials = new Tally();
+  Tally <Type> materials = new Tally();
   Tally <Good> inventory = new Tally();
+  boolean complete = false;
   
   
   Building(Type type) {
@@ -46,6 +47,7 @@ public class Building extends Element implements Session.Saveable, Employer {
     
     s.loadTally(materials);
     s.loadTally(inventory);
+    complete = s.loadBool();
   }
   
   
@@ -62,6 +64,7 @@ public class Building extends Element implements Session.Saveable, Employer {
     
     s.saveTally(materials);
     s.saveTally(inventory);
+    s.saveBool(complete);
   }
   
   
@@ -70,9 +73,6 @@ public class Building extends Element implements Session.Saveable, Employer {
     */
   void enterMap(CityMap map, int x, int y, float buildLevel) {
     super.enterMap(map, x, y, buildLevel);
-    map.buildings.add(this);
-    selectEntrance();
-    updateOnPeriod(0);
     
     for (Good g : type.builtFrom) {
       int need = type.materialNeed(g);
@@ -108,27 +108,34 @@ public class Building extends Element implements Session.Saveable, Employer {
   }
   
   
-  public CityMap.Tile entrance() {
-    return entrance;
+  
+  /**  Construction and upgrade-related methods:
+    */
+  void onCompletion() {
+    complete = true;
+    map.buildings.add(this);
+    selectEntrance();
+    updateOnPeriod(0);
   }
   
   
-  void selectEntrance() {
-    Tile at = at();
-    Pick <Tile> pick = new Pick();
-    
-    for (Coord c : Visit.perimeter(at.x, at.y, type.wide, type.high)) {
-      boolean outx = c.x == at.x - 1 || c.x == at.x + type.wide;
-      boolean outy = c.y == at.y - 1 || c.y == at.y + type.high;
-      if (outx && outy  ) continue;
-      if (map.blocked(c)) continue;
-      
-      float rating = 1;
-      if (! map.paved(c.x, c.y)) rating /= 2;
-      pick.compare(map.tileAt(c), rating);
-    }
-    
-    entrance = pick.result();
+  boolean complete() {
+    return complete;
+  }
+  
+  
+  float setBuildLevel(float level) {
+    float oldLevel = buildLevel();
+    level = super.setBuildLevel(level);
+    if (level >= 1 && level > oldLevel && ! complete) onCompletion();
+    return level;
+  }
+  
+  
+  void beginTeardown() {
+    complete = false;
+    map.buildings.remove(this);
+    entrance = null;
   }
   
   
@@ -150,6 +157,31 @@ public class Building extends Element implements Session.Saveable, Employer {
   
   void updateOnPeriod(int period) {
     return;
+  }
+  
+  
+  public CityMap.Tile entrance() {
+    if (! complete) return null;
+    return entrance;
+  }
+  
+  
+  void selectEntrance() {
+    Tile at = at();
+    Pick <Tile> pick = new Pick();
+    
+    for (Coord c : Visit.perimeter(at.x, at.y, type.wide, type.high)) {
+      boolean outx = c.x == at.x - 1 || c.x == at.x + type.wide;
+      boolean outy = c.y == at.y - 1 || c.y == at.y + type.high;
+      if (outx && outy  ) continue;
+      if (map.blocked(c)) continue;
+      
+      float rating = 1;
+      if (! map.paved(c.x, c.y)) rating /= 2;
+      pick.compare(map.tileAt(c), rating);
+    }
+    
+    entrance = pick.result();
   }
   
   

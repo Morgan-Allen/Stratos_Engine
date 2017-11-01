@@ -81,7 +81,7 @@ public class Element implements Session.Saveable, Target {
     
     for (Coord c : Visit.grid(at.x, at.y, type.wide, type.high, 1)) {
       Tile t = map.tileAt(c.x, c.y);
-      t.above = null;
+      if (t.above == this) t.above = null;
     }
     
     setLocation(null);
@@ -160,6 +160,12 @@ public class Element implements Session.Saveable, Target {
   }
   
   
+  void setFlagging(boolean is, Type key) {
+    if (key == null || type.mobile) return;
+    map.flagType(key, at.x, at.y, is);
+  }
+  
+  
   void takeDamage(float damage) {
     if (incBuildLevel(0 - damage / type.maxHealth) <= 0) {
       exitMap(map);
@@ -192,12 +198,6 @@ public class Element implements Session.Saveable, Target {
       setFlagging(buildLevel == -1, NEED_PLANT);
     }
     return buildLevel;
-  }
-  
-  
-  void setFlagging(boolean is, Type key) {
-    if (key == null || type.mobile) return;
-    map.flagType(key, at.x, at.y, is);
   }
   
   

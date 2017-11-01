@@ -127,6 +127,8 @@ public class Type extends Index.Entry implements Session.Saveable {
   Type    upgradeTiers[] = NO_TIERS;
   Type    upgradeNeeds[] = NO_NEEDS;
   Integer needAmounts [] = {};
+  boolean worksBeforeBuilt = false;
+  
   int homeSocialClass  = CLASS_COMMON;
   int homeAmbienceNeed = AMBIENCE_MIN;
   

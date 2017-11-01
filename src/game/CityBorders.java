@@ -113,7 +113,7 @@ public class CityBorders {
         int space = b.maxWorkers(t) - b.numWorkers(t);
         if (space <= 0) continue;
 
-        float near = 10 / (10f + CityMap.distance(from, b.entrance));
+        float near = 10 / (10f + CityMap.distance(from, b.entrance()));
         Opening o = new Opening();
         o.b = b;
         o.position = t;
@@ -143,7 +143,7 @@ public class CityBorders {
       int space = max - b.numResidents(socialClass);
       if (space <= 0) continue;
       
-      float near = 10 / (10f + CityMap.distance(from, b.entrance));
+      float near = 10 / (10f + CityMap.distance(from, b.entrance()));
       pick.compare(b, space * near);
     }
     
@@ -208,7 +208,7 @@ public class CityBorders {
       fromC == goesC
     ) {
       Building fromB = (Building) from, goesB = (Building) goes;
-      float mapDist = CityMap.distance(fromB.entrance, goesB.entrance);
+      float mapDist = CityMap.distance(fromB.entrance(), goesB.entrance());
       distRating += mapDist / MAX_WANDER_RANGE;
     }
     

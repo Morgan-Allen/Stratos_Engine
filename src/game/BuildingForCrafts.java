@@ -157,7 +157,7 @@ public class BuildingForCrafts extends Building {
         int   need       = b.type.materialNeed(w);
         float amountDone = b.materials.valueFor(w);
         float amountGot  = b.inventory.valueFor(w);
-        float dist       = CityMap.distance(from.entrance, b.entrance);
+        float dist       = CityMap.distance(from.entrance(), b.entrance());
         float distRating = CityMap.distancePenalty(dist);
         if (amountDone >= need || amountGot <= 0) continue;
         if (dist > maxRange) continue;

@@ -162,7 +162,7 @@ public class Task implements Session.Saveable {
   
   Tile pathTarget() {
     Tile t = null;
-    if (t == null && visits != null) t = visits.entrance;
+    if (t == null && visits != null) t = visits.entrance();
     if (t == null && target != null) t = target.at();
     if (t == null && path   != null) t = (Tile) Visit.last(path);
     return t;
@@ -201,7 +201,7 @@ public class Task implements Session.Saveable {
     boolean report = actor.reports();
     if (report) I.say(this+" pathing toward "+(visiting ? visits : target));
     
-    Tile from  = (inside == null) ? actor.at() : inside.entrance;
+    Tile from  = (inside == null) ? actor.at() : inside.entrance();
     Tile heads = pathTarget();
     
     if (from == null || heads == null) {

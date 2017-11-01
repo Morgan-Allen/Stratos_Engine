@@ -45,7 +45,7 @@ public class BuildingForHome extends Building {
     //  This methods checks for the presence of all required amenities within
     //  a given wander-range.
     Tally <Type> access = new Tally();
-    if (entrance == null) return access;
+    if (entrance() == null) return access;
     int maxRange = MAX_WANDER_RANGE;
     
     //  TODO:  Include information about the number of *distinct* venues
@@ -55,11 +55,11 @@ public class BuildingForHome extends Building {
       for (Building b : map.buildings) {
         if (! Visit.arrayIncludes(b.type.features, service)) continue;
         
-        float dist = CityMap.distance(b.entrance, entrance);
+        float dist = CityMap.distance(b.entrance(), entrance());
         if (dist > maxRange) continue;
         
         ActorPathSearch search = new ActorPathSearch(
-          map, b.entrance, entrance, maxRange
+          map, b.entrance(), entrance(), maxRange
         );
         search.doSearch();
         if (! search.success()) continue;
@@ -75,13 +75,13 @@ public class BuildingForHome extends Building {
   boolean performAmbienceCheck(Type tier, Tally <Type> access) {
     //
     //  This method checks the surrounding tiles out to a distance of 6 tiles:
-    if (entrance == null) return false;
+    if (entrance() == null) return false;
     final int MAX_AMBIENCE_DIST = 6;
     
     final Tally <Tile> costs = new Tally();
     final Tile temp[] = new Tile[8];
     
-    Search <Tile> spread = new Search <Tile> (entrance, -1) {
+    Search <Tile> spread = new Search <Tile> (entrance(), -1) {
       
       protected Tile[] adjacent(Tile spot) {
         return CityMap.adjacent(spot, temp, map, true);
@@ -283,7 +283,7 @@ public class BuildingForHome extends Building {
       for (Building b : map.buildings) {
         if (! b.type.hasFeature(IS_MARKET)) continue;
         
-        float dist = CityMap.distance(entrance, b.entrance);
+        float dist = CityMap.distance(entrance(), b.entrance());
         if (dist > 50) continue;
         
         float amount = b.inventory.valueFor(cons);

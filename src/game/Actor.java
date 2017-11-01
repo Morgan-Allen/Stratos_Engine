@@ -319,7 +319,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   
   void returnTo(Building origin) {
-    if (origin == null || origin.entrance == null || inside == origin) return;
+    if (origin == null || origin.entrance() == null || inside == origin) return;
     if (reports()) I.say(this+" will return to "+origin);
     
     Task t = new Task(this);
