@@ -139,6 +139,12 @@ public class Building extends Element implements Session.Saveable, Employer {
   }
   
   
+  float ambience() {
+    if (! complete) return 0;
+    return type.ambience;
+  }
+  
+  
   
   /**  Regular updates:
     */

@@ -39,7 +39,7 @@ public class TestSieging extends Test {
     fillWorkVacancies(fort);
     CityMap.applyPaving(map, 10, 9, 40, 1, true);
     
-    Building store = (Building) PORTER_HOUSE.generate();
+    Building store = (Building) PORTER_POST.generate();
     store.enterMap(map, 10, 6, 1);
     store.inventory.setWith(COTTON, 10);
     

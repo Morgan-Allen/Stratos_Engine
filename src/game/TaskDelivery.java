@@ -149,18 +149,35 @@ public class TaskDelivery extends Task {
     this.goes    = goes;
     this.carried = carried;
     this.amount  = amount;
-    return (TaskDelivery) configTask(e, from, null, jobType, 0);
+    configTravel(from, jobType, e);
+    return this;
+  }
+  
+  
+  void configTravel(Building site, Task.JOB jobType, Employer e) {
+    if (site.complete()) {
+      configTask(e, site, null, jobType, 0);
+    }
+    else {
+      configTask(e, null, site.at(), jobType, 0);
+    }
   }
   
   
   protected void onVisit(Building visits) {
     if (visits == from) {
       actor.pickupGood(carried, amount, from);
-      this.configTask(origin, goes, null, type, 0);
+      configTravel(goes, type, origin);
     }
     if (visits == goes) {
       actor.offloadGood(carried, goes);
     }
+  }
+  
+  
+  protected void onTarget(Target targets) {
+    if (targets == from.at()) onVisit(from);
+    if (targets == goes.at()) onVisit(goes);
   }
   
 }

@@ -49,7 +49,10 @@ public class BuildingForHome extends Building {
     int maxRange = MAX_WANDER_RANGE;
     
     //  TODO:  Include information about the number of *distinct* venues
-    //  providing a given service (like religious access?)
+    //         providing a given service (like religious access?)
+    
+    //  TODO:  The efficiency of this needs to be drastically improved for
+    //         larger cities to work.
     
     for (Good service : SERVICE_TYPES) {
       for (Building b : map.buildings) {
@@ -117,7 +120,7 @@ public class BuildingForHome extends Building {
       for (int dir : AMB_DIRS) {
         Tile n = map.tileAt(tile.x + T_X[dir], tile.y + T_Y[dir]);
         if (n == null || n.above == null) continue;
-        sumAmb     += n.above.type.ambience / (1 + cost);
+        sumAmb     += n.above.ambience() / (1 + cost);
         sumWeights += 1f / (1 + cost);
       }
     }
@@ -303,6 +306,8 @@ public class BuildingForHome extends Building {
     }
     //
     //  Failing that, select a leisure behaviour to perform:
+    
+    //  TODO:  Move this out to the basic AI for citizens.
     //  TODO:  Compare all nearby amenities!
     Pick <Building> pickV = new Pick();
     

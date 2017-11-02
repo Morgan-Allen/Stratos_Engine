@@ -16,15 +16,16 @@ public class City implements Session.Saveable, Trader {
   }
   public static enum POSTURE {
     ENEMY  ,
-    VASSAL ,
     ALLY   ,
+    VASSAL ,
     LORD   ,
     NEUTRAL,
+    TRADING,
   };
   final static float
     LOY_DEVOTED  =  1.0F,
     LOY_FRIENDLY =  0.5F,
-    LOY_NEUTRAL  =  0.0F,
+    LOY_CIVIL    =  0.0F,
     LOY_STRAINED = -0.5F,
     LOY_NEMESIS  = -1.0F,
     LOYALTIES[]  = { 1f, 0.5f, 0, -0.5f, -1 }
@@ -39,9 +40,9 @@ public class City implements Session.Saveable, Trader {
     LOY_TRIBUTE_BONUS   =  0.05f,
     LOY_FADEOUT_TIME    =  AVG_TRIBUTE_YEARS * YEAR_LENGTH * 2,
     
-    PRESTIGE_MAX =  100,
-    PRESTIGE_AVG =  50,
-    PRESTIGE_MIN =  0,
+    PRESTIGE_MAX        =  100,
+    PRESTIGE_AVG        =  50,
+    PRESTIGE_MIN        =  0,
     
     PRES_VICTORY_GAIN   =  25,
     PRES_DEFEAT_LOSS    = -15,
@@ -227,7 +228,7 @@ public class City implements Session.Saveable, Trader {
       relations.put(other, r = new Relation());
       r.with    = other;
       r.posture = POSTURE.NEUTRAL;
-      r.loyalty = LOY_NEUTRAL;
+      r.loyalty = LOY_CIVIL;
     }
     return r;
   }
@@ -455,7 +456,7 @@ public class City implements Session.Saveable, Trader {
         if (council.considerRevolt(lord, MONTH_LENGTH)) {
           toggleRebellion(lord, true);
         }
-        //  TODO:  You may have to generate caravans for player cities...
+        //  TODO:  You may have to generate caravans to visit player cities...
         else if (lord.map == null) {
           Relation r = relationWith(lord);
           for (Good g : r.suppliesDue.keys()) {
@@ -477,7 +478,7 @@ public class City implements Session.Saveable, Trader {
       prestige += presDiff;
       
       for (Relation r : relations.values()) {
-        float diff = LOY_NEUTRAL - r.loyalty;
+        float diff = LOY_CIVIL - r.loyalty;
         diff *= MONTH_LENGTH * 1f / LOY_FADEOUT_TIME;
         r.loyalty += diff;
       }
@@ -528,7 +529,7 @@ public class City implements Session.Saveable, Trader {
       }
     }
     //
-    //  But formations and relationships get updated similarly either way-
+    //  And update any formations active-
     for (Formation f : formations) {
       f.update();
     }

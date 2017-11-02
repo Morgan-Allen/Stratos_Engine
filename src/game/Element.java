@@ -203,6 +203,11 @@ public class Element implements Session.Saveable, Target {
   }
   
   
+  float ambience() {
+    return type.ambience;
+  }
+  
+  
   
   /**  Graphical, debug and interface methods-
     */

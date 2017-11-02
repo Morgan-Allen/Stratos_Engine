@@ -18,6 +18,9 @@ public class TestPathing extends Test {
   
   static boolean testPathing(boolean graphics) {
     CityMap map = setupTestCity(32);
+    map.settings.toggleFog    = false;
+    map.settings.toggleHunger = false;
+    map.settings.toggleHunger = false;
     
     Batch <Actor> actors = new Batch();
     Table <Actor, Tile> destinations = new Table();
@@ -105,6 +108,7 @@ public class TestPathing extends Test {
     I.say("\nPATHING TEST FAILED!");
     I.say("  Current time: "+map.time);
     I.say("  Reached destination: "+numReachedDest+"/"+actors.size());
+    for (Actor a : actors) if (a.dead()) I.say("  "+a+" is dead!");
     
     return false;
   }

@@ -256,7 +256,7 @@ public class CityCouncil {
   
   
   boolean considerRevolt(City lord, int period) {
-    if (typeAI == AI_DEFIANT  ) return true;
+    if (typeAI == AI_DEFIANT  ) return true ;
     if (typeAI == AI_COMPLIANT) return false;
     if (typeAI == AI_OFF      ) return false;
     

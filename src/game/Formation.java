@@ -195,7 +195,10 @@ public class Formation implements
     //  not.
     boolean home  = goes == homeCity;
     boolean onMap = goes.map != null;
-    
+    //
+    //  In the event that a formation arrives on the map, either it's a foreign
+    //  invader threatening the city, or one of the player's legions returning
+    //  home.
     if (onMap) {
       if (reports()) I.say("\nARRIVED ON MAP: "+goes+" FROM "+journey.from);
       
@@ -216,8 +219,8 @@ public class Formation implements
       }
     }
     //
-    //  In the event that this happens off-map, either a foreign army has
-    //  returned home, or your own army has hit a foreign city:
+    //  In the event that this happens off-map, either an army has returned
+    //  home to a foreign city, or an army has assaulted a foreign city:
     else {
       if (home) {
         if (reports()) I.say("\nARRIVED HOME: "+goes+" FROM "+journey.from);

@@ -19,19 +19,23 @@ public class TestUpkeep extends Test {
     CityMap map = setupTestCity(16);
     map.settings.toggleFog = false;
     
+    
     //  TODO:  Now do this without the starting warehouse.
     
-    //  If a building isn't done yet, then you cannot:
-    //  Enter the building
-    //  Use the building for services
-    //  Have the building update regularly.
+    //  Buildings that allow assignment before construction must be capable of
+    //  hiring recruits and assigning (certain) tasks in an unfinished state.
     
-    //  You can only deliver goods to the building-site, up to it's current
-    //  stock-limit.
+    //  They will also have different stock capacities and other traits (like
+    //  a 'null upgrade' as it were.)
     
-    /*
-    BuildingForTrade post = (BuildingForTrade) PORTER_HOUSE.generate();
-    post.enterMap(map, 2, 2, 1);
+    //  This means the delivery, gather and building-tasks have to be updated
+    //  to behave differently- you deliver to and pick up within the building-
+    //  grounds instead of entering/exiting the structure.  (And some of the
+    //  scripting for craft, gather and trade-buildings needs to be updated.)
+    
+    
+    BuildingForTrade post = (BuildingForTrade) PORTER_POST.generate();
+    post.enterMap(map, 2, 2, 0);
     post.ID = "(Stock of Goods)";
     post.setTradeLevels(true,
       CLAY  , 40,
@@ -39,9 +43,6 @@ public class TestUpkeep extends Test {
       WOOD  , 60,
       COTTON, 20
     );
-    //*/
-    
-    //  Wait a second.  That's not supposed to happen.  My test is broken!
     
     Building home   = (Building) HOUSE .generate();
     Building palace = (Building) PALACE.generate();

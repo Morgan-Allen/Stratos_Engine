@@ -30,7 +30,7 @@ public class TestWorld extends Test {
         if (demand > 0) vassal.inventory.set(g, demand);
       }
       
-      float AVG_P = City.PRESTIGE_AVG, AVG_L = City.LOY_NEUTRAL;
+      float AVG_P = City.PRESTIGE_AVG, AVG_L = City.LOY_CIVIL;
       float initPrestige = AVG_P + ((Rand.yes() ? 1 : -1) * 10);
       float initLoyalty  = AVG_L + ((Rand.yes() ? 1 : -1) / 2f);
       lord.prestige = initPrestige;
@@ -85,7 +85,7 @@ public class TestWorld extends Test {
         I.say("\nInvasion did not impose vassal status!");
         return false;
       }
-      if (pair[0].loyalty(pair[1]) >= City.LOY_NEUTRAL) {
+      if (pair[0].loyalty(pair[1]) >= City.LOY_CIVIL) {
         I.say("\nInvasion did not sour relations!");
         return false;
       }
@@ -134,7 +134,7 @@ public class TestWorld extends Test {
         I.say("\nInvasion of vassal did not provoke war!");
         return false;
       }
-      if (capital.loyalty(pair[1]) >= City.LOY_NEUTRAL) {
+      if (capital.loyalty(pair[1]) >= City.LOY_CIVIL) {
         I.say("\nInvasion of vassal did not sour relations with capital!");
         return false;
       }

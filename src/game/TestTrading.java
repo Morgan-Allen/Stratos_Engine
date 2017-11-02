@@ -51,7 +51,7 @@ public class TestTrading extends Test {
     map.settings.toggleHunger  = false;
     map.settings.toggleFatigue = false;
     
-    BuildingForTrade post1 = (BuildingForTrade) PORTER_HOUSE.generate();
+    BuildingForTrade post1 = (BuildingForTrade) PORTER_POST.generate();
     post1.enterMap(map, 1, 6, 1);
     post1.ID = "(Does Trading)";
     post1.tradeLevel.setWith(
@@ -61,7 +61,7 @@ public class TestTrading extends Test {
       POTTERY   , -5 
     );
     
-    BuildingForTrade post2 = (BuildingForTrade) PORTER_HOUSE.generate();
+    BuildingForTrade post2 = (BuildingForTrade) PORTER_POST.generate();
     post2.enterMap(map, 5, 6, 1);
     post2.ID = "(Gets Supplies)";
     post2.tradeLevel.setWith(

@@ -18,7 +18,9 @@ public class TestGathering extends Test {
   static boolean testGathering(boolean graphics) {
     
     CityMap map = setupTestCity(20, DESERT, MEADOW, JUNGLE);
-    map.settings.toggleFog = false;
+    map.settings.toggleFog    = false;
+    map.settings.toggleHunger = false;
+    map.settings.toggleHunger = false;
     
     BuildingForGather farm = (BuildingForGather) FARM_PLOT.generate();
     farm.enterMap(map, 9, 9, 1);
@@ -50,7 +52,13 @@ public class TestGathering extends Test {
         
         Tile t = map.tileAt(c);
         
-        if (t.focused().size() > 1) {
+        int numF = 0;
+        for (Actor a : t.focused()) {
+          if (a.jobType() == Task.JOB.PLANTING) numF++;
+          if (a.jobType() == Task.JOB.HARVEST ) numF++;
+        }
+        
+        if (numF > 1) {
           I.say("\nGATHER TEST FAILED- MULTIPLE ACTORS FOCUSED ON POINT:");
           I.say("  "+t+" -> "+t.focused());
           badFocus = true;

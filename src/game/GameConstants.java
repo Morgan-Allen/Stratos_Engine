@@ -458,9 +458,9 @@ public class GameConstants {
     INDUSTRIAL_BUILDINGS[] = { FARM_PLOT, QUARRY_PIT, KILN, WEAVER, MASON },
     
     MARKET        = new BuildType("type_market"       , IS_CRAFTS_BLD ),
-    PORTER_HOUSE  = new BuildType("type_porter_house" , IS_TRADE_BLD  ),
+    PORTER_POST   = new BuildType("type_porter_post"  , IS_TRADE_BLD  ),
     COLLECTOR     = new BuildType("type_collector"    , IS_COLLECT_BLD),
-    ECONOMIC_BUILDINGS[] = { MARKET, PORTER_HOUSE, COLLECTOR },
+    ECONOMIC_BUILDINGS[] = { MARKET, PORTER_POST, COLLECTOR },
     
     HUNTER_LODGE  = new BuildType("type_hunter_lodge" , IS_HUNTS_BLD  ),
     GARRISON      = new BuildType("type_garrison"     , IS_ARMY_BLD   ),
@@ -507,6 +507,7 @@ public class GameConstants {
     HOUSE.setDimensions(2, 2, 1);
     HOUSE.setBuildMaterials(WOOD, 2, CLAY, 1);
     HOUSE.setWorkerTypes(CITIZEN);
+    HOUSE.worksBeforeBuilt = true;
     HOUSE.maxResidents = 4;
     HOUSE.maxStock     = 1;
     HOUSE.buildsWith   = new Good[] { WOOD, CLAY };
@@ -559,6 +560,7 @@ public class GameConstants {
     MASON.setDimensions(2, 2, 1);
     MASON.setBuildMaterials(ADOBE, 2, WOOD, 2, CLAY, 2);
     MASON.setWorkerTypes(WORKER);
+    MASON.worksBeforeBuilt = true;
     MASON.craftTime *= 2;
     MASON.maxWorkers = 2;
     MASON.buildsWith = new Good[] { WOOD, CLAY, ADOBE };
@@ -568,6 +570,7 @@ public class GameConstants {
     FARM_PLOT.setDimensions(2, 2, 1);
     FARM_PLOT.setBuildMaterials(WOOD, 5, CLAY, 2);
     FARM_PLOT.setWorkerTypes(WORKER);
+    FARM_PLOT.worksBeforeBuilt = true;
     FARM_PLOT.gatherFlag = IS_CROP;
     FARM_PLOT.produced   = CROP_TYPES;
     FARM_PLOT.maxStock   = 25;
@@ -578,6 +581,7 @@ public class GameConstants {
     LOGGER.setDimensions(2, 2, 1);
     LOGGER.setBuildMaterials(WOOD, 5, CLAY, 2);
     LOGGER.setWorkerTypes(WORKER);
+    LOGGER.worksBeforeBuilt = true;
     LOGGER.gatherFlag = IS_TREE;
     LOGGER.maxStock   = 25;
     LOGGER.produced   = new Good[] { WOOD };
@@ -588,6 +592,7 @@ public class GameConstants {
     QUARRY_PIT.setDimensions(2, 2, 1);
     QUARRY_PIT.setBuildMaterials(WOOD, 5, CLAY, 2);
     QUARRY_PIT.setWorkerTypes(WORKER);
+    QUARRY_PIT.worksBeforeBuilt = true;
     QUARRY_PIT.gatherFlag = IS_STONE;
     QUARRY_PIT.maxStock   = 25;
     QUARRY_PIT.produced   = new Good[] { CLAY, ADOBE };
@@ -621,12 +626,13 @@ public class GameConstants {
     MARKET.needed   = MARKET_GOODS;
     MARKET.features = new Good[] { IS_MARKET };
     
-    PORTER_HOUSE.name = "Porter Post";
-    PORTER_HOUSE.tint = TINT_COMMERCIAL;
-    PORTER_HOUSE.setDimensions(3, 3, 1);
-    PORTER_HOUSE.setBuildMaterials(WOOD, 4, ADOBE, 2, POTTERY, 2);
-    PORTER_HOUSE.setWorkerTypes(PORTER, WORKER);
-    PORTER_HOUSE.features = new Good[] { IS_TRADER };
+    PORTER_POST.name = "Porter Post";
+    PORTER_POST.tint = TINT_COMMERCIAL;
+    PORTER_POST.setDimensions(3, 3, 1);
+    PORTER_POST.setBuildMaterials(WOOD, 4, ADOBE, 2, POTTERY, 2);
+    PORTER_POST.setWorkerTypes(PORTER, WORKER);
+    PORTER_POST.worksBeforeBuilt = true;
+    PORTER_POST.features = new Good[] { IS_TRADER };
     
     //  TODO:  You could make this into more of a 'governor's post', since the
     //  tax-collectors basically functioned that way.
@@ -645,6 +651,7 @@ public class GameConstants {
     HUNTER_LODGE.setDimensions(4, 4, 1);
     HUNTER_LODGE.setBuildMaterials(WOOD, 10, COTTON, 5);
     HUNTER_LODGE.setWorkerTypes(HUNTER);
+    HUNTER_LODGE.worksBeforeBuilt = true;
     HUNTER_LODGE.maxWorkers = 2;
     HUNTER_LODGE.maxHealth  = 100;
     HUNTER_LODGE.produced   = new Good[] { MEAT };

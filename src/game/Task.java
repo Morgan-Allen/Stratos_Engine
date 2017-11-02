@@ -102,6 +102,11 @@ public class Task implements Session.Saveable {
   Task configTask(
     Employer origin, Building visits, Target target, JOB jobType, int maxTime
   ) {
+    //  Note- the un/assign task calls are needed to ensure that current focus
+    //  for the actor is updated correctly.
+    boolean active = actor.task == this;
+    if (active) actor.assignTask(null);
+    
     this.origin    = origin ;
     this.type      = jobType;
     this.timeSpent = 0      ;
@@ -114,7 +119,7 @@ public class Task implements Session.Saveable {
     path = updatePathing();
     
     if (Visit.empty(path)) return null;
-    
+    if (active) actor.assignTask(this);
     return this;
   }
   
@@ -180,7 +185,8 @@ public class Task implements Session.Saveable {
   
   
   boolean checkPathing() {
-    if (path == null || Visit.last(path) != pathTarget()) return false;
+    Target target = pathTarget();
+    if (path == null || Visit.last(path) != target) return false;
     
     for (int i = 0; i < actor.type.sightRange; i++) {
       if (i >= path.length) break;

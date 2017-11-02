@@ -36,8 +36,9 @@ public class TaskWander extends Task {
     CityMap map    = actor.map;
     Tile    next   = actor.at();
     int     facing = T_ADJACENT[Rand.index(4)];
+    int     range  = Nums.max(4, Rand.index(MAX_WANDER_RANGE));
     
-    while (walk.size() < MAX_WANDER_RANGE) {
+    while (walk.size() < range) {
       boolean prefPave = map.paved(next.x, next.y);
       int nx, ny, numDirs = 0;
       int backDir = (facing + 4) % 8;
@@ -48,11 +49,12 @@ public class TaskWander extends Task {
         ny = next.y + T_Y[dir];
         if (prefPave && ! map.paved(nx, ny)) continue;
         if (map.blocked(nx, ny)) continue;
+        if (map.tileAt(nx, ny).pathFlag != null) continue;
         dirs[numDirs] = dir;
         numDirs++;
       }
       if (numDirs == 0) {
-        facing = backDir;
+        break;
       }
       else if (numDirs > 1) {
         facing = dirs[Rand.index(numDirs)];
@@ -65,8 +67,10 @@ public class TaskWander extends Task {
         next.y + T_Y[facing]
       );
       walk.add(next);
+      next.pathFlag = walk;
     }
     
+    for (Tile t : walk) t.pathFlag = null;
     return walk.toArray(Tile.class);
   }
   
