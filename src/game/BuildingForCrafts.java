@@ -102,16 +102,13 @@ public class BuildingForCrafts extends Building {
     */
   public void selectActorBehaviour(Actor actor) {
     //
+    //  Go here if you aren't already:
+    if (! actorIsHereWithPrompt(actor)) return;
+    //
     //  Try and find a nearby building to construct:
     Building builds = selectBuildTarget(this, type.buildsWith, map.buildings);
     if (builds != null) {
       actor.embarkOnVisit(builds, 10, JOB.BUILDING, this);
-      return;
-    }
-    //
-    //  Failing that, go here if you aren't already:
-    if (actor.inside != this) {
-      actor.returnTo(this);
       return;
     }
     //
@@ -144,6 +141,9 @@ public class BuildingForCrafts extends Building {
   
   /**  Supplementary methods for building construction-
     */
+  //  TODO:  Move this into a TaskBuilding class.
+  
+  
   static Building selectBuildTarget(
     Building from, Good buildsWith[], Series <Building> buildings
   ) {

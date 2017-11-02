@@ -226,7 +226,7 @@ public class Building extends Element implements Session.Saveable, Employer {
   
   
   
-  /**  Spawning walkers and customising actor behaviour:
+  /**  Moderating and udpating recruitment and residency:
     */
   protected int numWorkers(Type type) {
     int sum = 0;
@@ -275,8 +275,42 @@ public class Building extends Element implements Session.Saveable, Employer {
   }
   
   
+  
+  /**  Customising actor behaviour-
+    */
   public void selectActorBehaviour(Actor actor) {
-    actor.returnTo(this);
+    returnActorHere(actor);
+  }
+  
+  
+  boolean actorIsHereWithPrompt(Actor actor) {
+    if (actorIsHere(actor)) return true;
+    returnActorHere(actor);
+    return false;
+  }
+  
+  
+  void returnActorHere(Actor actor) {
+    if (actorIsHere(actor)) return;
+    Task t = new Task(actor);
+    if (complete) {
+      t.configTask(this, this, null, Task.JOB.RETURNING, 0);
+    }
+    else {
+      t.configTask(this, null, at(), Task.JOB.RETURNING, 0);
+    }
+    actor.assignTask(t);
+  }
+  
+  
+  boolean actorIsHere(Actor actor) {
+    if (complete) {
+      return actor.inside == this;
+    }
+    else {
+      Tile at = actor.at();
+      return at.above == this;
+    }
   }
   
   

@@ -92,14 +92,14 @@ public class BuildingForCollect extends BuildingForCrafts {
         actor.pickupGood(g, amount, visits);
         
         if (actor.carryAmount >= carryLimit) {
-          actor.returnTo(this);
+          returnActorHere(actor);
           return;
         }
         else if (pickNextCollection(actor, g)) {
           return;
         }
         else {
-          actor.returnTo(this);
+          returnActorHere(actor);
           return;
         }
       }

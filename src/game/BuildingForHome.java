@@ -262,7 +262,7 @@ public class BuildingForHome extends Building {
     //
     //  Non-adults don't do much-
     if (! actor.adult()) {
-      actor.returnTo(this);
+      returnActorHere(actor);
     }
     //
     //  See if you can repair your own home:

@@ -318,15 +318,6 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   }
   
   
-  void returnTo(Building origin) {
-    if (origin == null || origin.entrance() == null || inside == origin) return;
-    if (reports()) I.say(this+" will return to "+origin);
-    
-    Task t = new Task(this);
-    assignTask(t.configTask(origin, origin, null, JOB.RETURNING, 0));
-  }
-  
-  
   void beginAttack(Target target, JOB jobType, Employer e) {
     if (target == null) return;
     if (reports()) I.say(this+" will attack "+target);

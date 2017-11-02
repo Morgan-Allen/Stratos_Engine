@@ -98,10 +98,7 @@ public class BuildingForTrade extends BuildingForCrafts implements Trader {
   
   void selectTraderBehaviour(Actor trader) {
     
-    if (trader.inside != this) {
-      trader.returnTo(this);
-      return;
-    }
+    if (! actorIsHereWithPrompt(trader)) return;
     
     class Order { Tally <Good> cargo; Trader goes; float rating; }
     List <Trader> targets = new List();

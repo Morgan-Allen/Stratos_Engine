@@ -63,15 +63,11 @@ public class BuildingForGather extends Building {
     */
   public void selectActorBehaviour(Actor actor) {
     
+    if (! actorIsHereWithPrompt(actor)) return;
+    
     Task delivery = TaskDelivery.pickNextDelivery(actor, this, produced());
     if (delivery != null) {
       actor.assignTask(delivery);
-      return;
-    }
-    
-    //  TODO:  This may not be appropriate if the venue isn't complete yet:
-    if (actor.inside != this) {
-      actor.returnTo(this);
       return;
     }
     

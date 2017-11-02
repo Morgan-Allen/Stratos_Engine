@@ -34,7 +34,7 @@ public class TestFarming extends Test {
     
     CityMapFlagging forCrops = map.flagging.get(NEED_PLANT);
     if (plantTiles.length != forCrops.totalSum()) {
-      I.say("\nGATHER TEST FAILED- NOT ALL PLANTED TILES WERE FLAGGED");
+      I.say("\nFARMING TEST FAILED- NOT ALL PLANTED TILES WERE FLAGGED");
       I.say("  Flagged: "+forCrops.totalSum()+"/"+plantTiles.length);
       return false;
     }
@@ -59,7 +59,7 @@ public class TestFarming extends Test {
         }
         
         if (numF > 1) {
-          I.say("\nGATHER TEST FAILED- MULTIPLE ACTORS FOCUSED ON POINT:");
+          I.say("\nFARMING TEST FAILED- MULTIPLE ACTORS FOCUSED ON POINT:");
           I.say("  "+t+" -> "+t.focused());
           badFocus = true;
           break;
@@ -70,7 +70,7 @@ public class TestFarming extends Test {
         
         Target mainFocus = Task.focusTarget(a.task);
         if (mainFocus != t) {
-          I.say("\nGATHER TEST FAILED- ACTOR-FOCUS WAS NOT REMOVED FROM:");
+          I.say("\nFARMING TEST FAILED- ACTOR-FOCUS WAS NOT REMOVED FROM:");
           I.say("  "+t+", focused by "+a+", now focused on "+mainFocus);
           badFocus = true;
           break;
@@ -115,13 +115,13 @@ public class TestFarming extends Test {
         harvest = enough;
         
         if (harvest) {
-          I.say("\nGATHER TEST CONCLUDED SUCCESSFULLY!");
+          I.say("\nFARMING TEST CONCLUDED SUCCESSFULLY!");
           if (! graphics) return true;
         }
       }
     }
     
-    I.say("\nGATHER TEST FAILED!");
+    I.say("\nFARMING TEST FAILED!");
     I.say("  Total gathered: "+farm.inventory);
     return false;
   }
