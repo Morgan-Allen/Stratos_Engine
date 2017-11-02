@@ -19,12 +19,6 @@ public class TestUpkeep extends Test {
     CityMap map = setupTestCity(16);
     map.settings.toggleFog = false;
     
-    //  Oh, also, small problem- buildings need to not block pathing until
-    //  construction is complete.
-    //  They should also have different stock capacities and other traits (like
-    //  a 'null upgrade' as it were.)
-    
-    
     BuildingForTrade post = (BuildingForTrade) PORTER_POST.generate();
     post.enterMap(map, 2, 2, 0);
     post.ID = "(Stock of Goods)";

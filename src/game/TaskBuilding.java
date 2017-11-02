@@ -5,8 +5,6 @@ import util.*;
 import static game.CityMap.*;
 import static game.GameConstants.*;
 
-import game.Task.JOB;
-
 
 
 
@@ -162,6 +160,13 @@ public class TaskBuilding extends Task {
     if (didWork) {
       b.setBuildLevel(1.1f * (totalDone / totalNeed));
     }
+  }
+  
+  
+  void updateTileOccupation(Building b) {
+    
+    
+    
   }
   
   
