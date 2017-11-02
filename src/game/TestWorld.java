@@ -11,7 +11,7 @@ public class TestWorld extends Test {
   
   
   public static void main(String args[]) {
-    testWorld(true);
+    testWorld(false);
   }
   
   
@@ -270,12 +270,13 @@ public class TestWorld extends Test {
     
     int MAX_TIME = LIFESPAN_LENGTH, NUM_YEARS = MAX_TIME / YEAR_LENGTH;
     boolean relationsOkay = true;
-    int totalBattles = 0;
+    int totalBattles = 0, timeWithEmpire = 0;
     
     I.say("\nRunning world simulation...");
     while (map.time < MAX_TIME) {
-      runGameLoop(map, 1, graphics, "saves/test_city_events.tlt");
-      
+      runGameLoop(map, 10, graphics, "saves/test_city_events.tlt");
+      //
+      //  Ensure that any forces being sent are of reasonable size:
       for (World.Journey j : world.journeys) {
         Object goes = j.going.first();
         if (goes instanceof Formation) {
@@ -292,7 +293,8 @@ public class TestWorld extends Test {
           }
         }
       }
-      
+      //
+      //  If anything big has happened, make sure relations stay consistent.
       if (! world.history.empty()) {
         for (World.Event e : world.history) {
           if (e.label.equals("attacked")) totalBattles += 1;
@@ -308,22 +310,25 @@ public class TestWorld extends Test {
           break;
         }
       }
-    }
-    
-    //
-    //  Afterwards, check to see whether an empire has formed.  (This is isn't
-    //  actually required, but it might account for a lull in hostilities.)
-    boolean empireExists = false;
-    City withEmpire = null;
-    
-    for (City c : world.cities) {
-      boolean hasEmpire = true;
-      for (City o : world.cities) {
-        if (o == mapCity || o == c) continue;
-        if (o.capitalLord() != c) hasEmpire = false;
+      //
+      //  We also check to see whether an empire has formed.  (This is isn't
+      //  actually required, but it might account for a lull in hostilities.)
+      boolean empireExists = false;
+      City withEmpire = null;
+      
+      for (City c : world.cities) {
+        boolean hasEmpire = true;
+        for (City o : world.cities) {
+          if (o == mapCity || o == c) continue;
+          if (o.capitalLord() != c) hasEmpire = false;
+        }
+        empireExists |= hasEmpire;
+        if (hasEmpire) withEmpire = c;
       }
-      empireExists |= hasEmpire;
-      if (hasEmpire) withEmpire = c;
+      
+      if (empireExists) {
+        timeWithEmpire += map.settings.speedUp ? 100 : 10;
+      }
     }
     
     //  TODO:  Allow for diplomatic missions to form alliances or broker peace.
@@ -331,26 +336,34 @@ public class TestWorld extends Test {
     //
     //  Finally, check to see whether total battles fall within reasonable
     //  bounds for the world in question:
-    int minBattles = NUM_YEARS / 2;
+    timeWithEmpire /= YEAR_LENGTH;
+    int minBattles = (NUM_YEARS - timeWithEmpire) / 2;
     int maxBattles = NUM_YEARS * world.cities.size() * 2;
+    boolean testOkay = true;
     
-    if (totalBattles < minBattles && ! empireExists) {
+    if (totalBattles < minBattles) {
       I.say("\nToo few battles occurred: "+totalBattles+"/"+minBattles);
       reportOnWorld(world);
-      return false;
+      testOkay = false;
     }
     if (totalBattles > maxBattles) {
       I.say("\nToo many battles occurred: "+totalBattles+"/"+maxBattles);
       reportOnWorld(world);
-      return false;
+      testOkay = false;
+    }
+    if (testOkay) {
+      I.say("\nWORLD-EVENTS TESTING CONCLUDED SUCCESSFULLY!");
+    }
+    else {
+      I.say("\nWORLD-EVENTS TESTING FAILED.");
     }
     
-    I.say("\nCITY EVENTS TESTING CONCLUDED SUCCESSFULLY!");
     I.say("  Total years simulated: "+NUM_YEARS);
     I.say("  Battles: "+totalBattles+", min/max "+minBattles+"/"+maxBattles);
-    I.say("  Empire: "+(empireExists ? withEmpire : "None"));
+    I.say("  Years of empire: "+timeWithEmpire);
+    
     if (graphics) reportOnWorld(world);
-    return true;
+    return testOkay;
   }
   
   
