@@ -7,15 +7,15 @@ import static game.GameConstants.*;
 
 
 
-public class TestGathering extends Test {
+public class TestFarming extends Test {
   
   
   public static void main(String args[]) {
-    testGathering(true);
+    testFarming(true);
   }
   
   
-  static boolean testGathering(boolean graphics) {
+  static boolean testFarming(boolean graphics) {
     
     CityMap map = setupTestCity(20, DESERT, MEADOW, JUNGLE);
     map.settings.toggleFog    = false;

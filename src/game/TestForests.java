@@ -15,7 +15,7 @@ public class TestForests extends Test {
   }
   
   
-  static void testForests(boolean graphics) {
+  static boolean testForests(boolean graphics) {
     
     CityMap map = setupTestCity(32, JUNGLE, MEADOW);
     map.settings.toggleFog = false;
@@ -35,12 +35,13 @@ public class TestForests extends Test {
       
       if (loggingDone) {
         I.say("\nFOREST TEST CONCLUDED SUCCESSFULLY!");
-        if (! graphics) return;
+        if (! graphics) return true;
       }
     }
     
     I.say("\nFORESTS TEST FAILED!");
     I.say("  Total gathered: "+logs.inventory);
+    return false;
   }
   
 }
