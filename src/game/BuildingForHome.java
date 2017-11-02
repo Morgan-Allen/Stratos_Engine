@@ -266,11 +266,7 @@ public class BuildingForHome extends Building {
     }
     //
     //  See if you can repair your own home:
-    Building repairs = BuildingForCrafts.selectBuildTarget(
-      this, type.buildsWith, new Batch(this)
-    );
-    if (repairs != null) {
-      actor.embarkOnVisit(repairs, 10, JOB.BUILDING, this);
+    if (TaskBuilding.pickBuildTask(actor, this, new Batch(this))) {
       return;
     }
     //
@@ -357,13 +353,6 @@ public class BuildingForHome extends Building {
         
         break;
       }
-    }
-  }
-  
-  
-  public void actorVisits(Actor actor, Building visits) {
-    if (actor.jobType() == JOB.BUILDING) {
-      BuildingForCrafts.advanceBuilding(actor, type.buildsWith, visits);
     }
   }
   

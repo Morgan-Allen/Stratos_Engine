@@ -61,10 +61,10 @@ public class ActorAsPerson extends Actor {
     if (idle() && formation != null && formation.active) {
       formation.selectActorBehaviour(this);
     }
-    if (idle() && work != null) {
+    if (idle() && work != null && work.accessible()) {
       work.selectActorBehaviour(this);
     }
-    if (idle() && home != null) {
+    if (idle() && home != null && home.accessible()) {
       home.selectActorBehaviour(this);
     }
     if (idle() && (hurtRating >= 1 || injury > 0)) {

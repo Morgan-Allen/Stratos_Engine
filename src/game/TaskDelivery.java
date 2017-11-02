@@ -114,7 +114,7 @@ public class TaskDelivery extends Task {
     Pick <Building> pick = new Pick();
     boolean trades = from.type.isTradeBuilding();
     
-    for (Building b : from.map.buildings) {
+    for (Building b : from.map.buildings) if (b != from) {
       if (type != null && b.type != type) continue;
       
       boolean otherTrades = b.type.isTradeBuilding();

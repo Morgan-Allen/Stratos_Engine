@@ -108,7 +108,7 @@ public class CityBorders {
     //  TODO:  You'll want a more sophisticated measure of which jobs you
     //  could reasonably fill.
     
-    for (Building b : map.buildings) {
+    for (Building b : map.buildings) if (b.accessible()) {
       for (Type t : b.type.workerTypes) {
         int space = b.maxWorkers(t) - b.numWorkers(t);
         if (space <= 0) continue;
@@ -138,7 +138,7 @@ public class CityBorders {
     Tile from = migrant.at();
     final Pick <Building> pick = new Pick();
     
-    for (Building b : map.buildings) {
+    for (Building b : map.buildings) if (b.accessible()) {
       int max   = b.maxResidents(socialClass);
       int space = max - b.numResidents(socialClass);
       if (space <= 0) continue;

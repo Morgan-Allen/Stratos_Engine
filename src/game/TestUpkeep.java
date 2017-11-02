@@ -10,7 +10,7 @@ public class TestUpkeep extends Test {
   
   
   public static void main(String args[]) {
-    testUpkeep(false);
+    testUpkeep(true);
   }
   
   
@@ -19,19 +19,10 @@ public class TestUpkeep extends Test {
     CityMap map = setupTestCity(16);
     map.settings.toggleFog = false;
     
-    
-    //  TODO:  Now do this without the starting warehouse.
-    
-    //  Buildings that allow assignment before construction must be capable of
-    //  hiring recruits and assigning (certain) tasks in an unfinished state.
-    
-    //  They will also have different stock capacities and other traits (like
+    //  Oh, also, small problem- buildings need to not block pathing until
+    //  construction is complete.
+    //  They should also have different stock capacities and other traits (like
     //  a 'null upgrade' as it were.)
-    
-    //  This means the delivery, gather and building-tasks have to be updated
-    //  to behave differently- you deliver to and pick up within the building-
-    //  grounds instead of entering/exiting the structure.  (And some of the
-    //  scripting for craft, gather and trade-buildings needs to be updated.)
     
     
     BuildingForTrade post = (BuildingForTrade) PORTER_POST.generate();
@@ -76,6 +67,10 @@ public class TestUpkeep extends Test {
     }
     
     I.say("\nUPKEEP TEST FAILED!");
+    for (Building b : map.buildings) {
+      I.say("  "+b+": "+I.percent(b.buildLevel()));
+    }
+    
     return false;
   }
   

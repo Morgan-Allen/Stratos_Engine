@@ -73,6 +73,9 @@ public class Building extends Element implements Session.Saveable, Employer {
     */
   void enterMap(CityMap map, int x, int y, float buildLevel) {
     super.enterMap(map, x, y, buildLevel);
+    map.buildings.add(this);
+    selectEntrance();
+    updateOnPeriod(0);
     
     for (Good g : type.builtFrom) {
       int need = type.materialNeed(g);
@@ -113,14 +116,16 @@ public class Building extends Element implements Session.Saveable, Employer {
     */
   void onCompletion() {
     complete = true;
-    map.buildings.add(this);
-    selectEntrance();
-    updateOnPeriod(0);
   }
   
   
   boolean complete() {
     return complete;
+  }
+  
+  
+  boolean accessible() {
+    return complete || type.worksBeforeBuilt;
   }
   
   
@@ -149,6 +154,10 @@ public class Building extends Element implements Session.Saveable, Employer {
   /**  Regular updates:
     */
   void update() {
+    if (! accessible()) {
+      return;
+    }
+    
     if (entrance == null || map.blocked(entrance.x, entrance.y)) {
       selectEntrance();
     }
@@ -167,7 +176,6 @@ public class Building extends Element implements Session.Saveable, Employer {
   
   
   public CityMap.Tile entrance() {
-    if (! complete) return null;
     return entrance;
   }
   
@@ -297,7 +305,7 @@ public class Building extends Element implements Session.Saveable, Employer {
       t.configTask(this, this, null, Task.JOB.RETURNING, 0);
     }
     else {
-      t.configTask(this, null, at(), Task.JOB.RETURNING, 0);
+      t.configTask(this, null, entrance, Task.JOB.RETURNING, 0);
     }
     actor.assignTask(t);
   }
@@ -308,8 +316,10 @@ public class Building extends Element implements Session.Saveable, Employer {
       return actor.inside == this;
     }
     else {
-      Tile at = actor.at();
-      return at.above == this;
+      Tile at = actor.at(), t = this.at();
+      boolean adjX = at.x >= t.x - 1 && at.x <= t.x + type.wide;
+      boolean adjY = at.y >= t.y - 1 && at.y <= t.y + type.high;
+      return adjX && adjY;
     }
   }
   

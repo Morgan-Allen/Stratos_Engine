@@ -36,7 +36,7 @@ public class Test {
   
   
   static void fillAllVacancies(CityMap map) {
-    for (Building b : map.buildings) {
+    for (Building b : map.buildings) if (b.accessible()) {
       fillWorkVacancies(b);
       for (Actor w : b.workers) CityBorders.findHome(map, w);
     }
@@ -66,12 +66,19 @@ public class Test {
     Actor actor = (Actor) type.generate();
     Tile at = b.at();
     type.initAsMigrant(actor);
-    actor.enterMap(b.map, at.x, at.y, 1);
-    actor.inside = b;
     
     if (resident) b.setResident(actor, true);
     else          b.setWorker  (actor, true);
-    b.visitors.add(actor);
+    
+    if (b.complete()) {
+      actor.enterMap(b.map, at.x, at.y, 1);
+      actor.inside = b;
+      b.visitors.add(actor);
+    }
+    else {
+      Tile t = b.entrance();
+      actor.enterMap(b.map, t.x, t.y, 1);
+    }
     
     return actor;
   }

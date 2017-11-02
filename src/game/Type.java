@@ -162,8 +162,8 @@ public class Type extends Index.Entry implements Session.Saveable {
   
   void setUpgradeNeeds(Object... args) {
     Object split[][] = Visit.splitByModulus(args, 2);
-    upgradeNeeds = (Type[]) castArray(split[0], Type.class);
-    needAmounts  = (Integer   []) castArray(split[1], Integer   .class);
+    upgradeNeeds = (Type   []) castArray(split[0], Type   .class);
+    needAmounts  = (Integer[]) castArray(split[1], Integer.class);
   }
   
   
@@ -180,6 +180,11 @@ public class Type extends Index.Entry implements Session.Saveable {
   
   boolean hasFeature(Good feature) {
     return Visit.arrayIncludes(features, feature);
+  }
+  
+  
+  boolean isBuilding() {
+    return category >= IS_BUILDING && category < IS_ACTOR;
   }
   
   

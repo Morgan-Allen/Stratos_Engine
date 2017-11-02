@@ -507,7 +507,7 @@ public class GameConstants {
     HOUSE.setDimensions(2, 2, 1);
     HOUSE.setBuildMaterials(WOOD, 2, CLAY, 1);
     HOUSE.setWorkerTypes(CITIZEN);
-    HOUSE.worksBeforeBuilt = true;
+    //HOUSE.worksBeforeBuilt = true;
     HOUSE.maxResidents = 4;
     HOUSE.maxStock     = 1;
     HOUSE.buildsWith   = new Good[] { WOOD, CLAY };

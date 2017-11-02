@@ -50,7 +50,8 @@ public class BuildingForCrafts extends Building {
   
   
   float demandFor(Good g) {
-    float need = Visit.arrayIncludes(needed(), g) ? stockNeeded(g) : 0;
+    boolean consumes = accessible() && Visit.arrayIncludes(needed(), g);
+    float need = consumes ? stockNeeded(g) : 0;
     return super.demandFor(g) + need;
   }
   
@@ -102,15 +103,13 @@ public class BuildingForCrafts extends Building {
     */
   public void selectActorBehaviour(Actor actor) {
     //
-    //  Go here if you aren't already:
-    if (! actorIsHereWithPrompt(actor)) return;
-    //
     //  Try and find a nearby building to construct:
-    Building builds = selectBuildTarget(this, type.buildsWith, map.buildings);
-    if (builds != null) {
-      actor.embarkOnVisit(builds, 10, JOB.BUILDING, this);
+    if (TaskBuilding.pickBuildTask(actor, this, map.buildings)) {
       return;
     }
+    //
+    //  Go here if you aren't already:
+    if (! actorIsHereWithPrompt(actor)) return;
     //
     //  If you're already home, see if any deliveries are required:
     Task delivery = TaskDelivery.pickNextDelivery(actor, this, produced());
@@ -126,95 +125,6 @@ public class BuildingForCrafts extends Building {
   }
   
   
-  public void actorEnters(Actor actor, Building enters) {
-    return;
-  }
-  
-  
-  public void actorVisits(Actor actor, Building visits) {
-    if (actor.jobType() == JOB.BUILDING) {
-      advanceBuilding(actor, type.buildsWith, visits);
-    }
-  }
-  
-  
-  
-  /**  Supplementary methods for building construction-
-    */
-  //  TODO:  Move this into a TaskBuilding class.
-  
-  
-  static Building selectBuildTarget(
-    Building from, Good buildsWith[], Series <Building> buildings
-  ) {
-    int maxRange = MAX_WANDER_RANGE;
-    Pick <Building> pickB = new Pick();
-    
-    for (Good w : buildsWith) {
-      for (Building b : buildings) {
-        if (b.buildLevel() >= 1) continue;
-        
-        int   need       = b.type.materialNeed(w);
-        float amountDone = b.materials.valueFor(w);
-        float amountGot  = b.inventory.valueFor(w);
-        float dist       = CityMap.distance(from.entrance(), b.entrance());
-        float distRating = CityMap.distancePenalty(dist);
-        if (amountDone >= need || amountGot <= 0) continue;
-        if (dist > maxRange) continue;
-        
-        pickB.compare(b, (need - amountDone) * distRating);
-      }
-    }
-    return pickB.result();
-  }
-  
-  
-  static void advanceBuilding(Actor builds, Good buildsWith[], Building b) {
-    float totalNeed = 0, totalDone = 0;
-    boolean didWork = false;
-    
-    for (Good g : buildsWith) {
-      int   need       = b.type.materialNeed(g);
-      float amountDone = b.materials.valueFor(g);
-      float amountGot  = b.inventory.valueFor(g);
-      
-      totalNeed += need;
-      totalDone += amountDone;
-      
-      if (amountDone >= need || amountGot <= 0) continue;
-      
-      float puts = Nums.min(0.1f, amountGot);
-      b.materials.add(puts    , g);
-      b.inventory.add(0 - puts, g);
-      didWork = true;
-    }
-    
-    if (didWork) {
-      b.setBuildLevel(1.1f * (totalDone / totalNeed));
-      
-      if (builds.reports()) {
-        I.say("\nBuilding "+b+"...");
-        I.say("  Did: "+totalDone+"/"+totalNeed);
-        I.say("  Build level: "+b.buildLevel());
-      }
-    }
-  }
-  
-  
-  //  TODO:  Take building-tiers into account for this...
-  /*
-  static void updateBuildLevel(Building b) {
-    float totalNeed = 0, totalDone = 0;
-    for (Good g : b.type.builtFrom) {
-      int   need       = b.type.materialNeed(g);
-      float amountDone = b.materials.valueFor(g);
-      
-      totalNeed += need;
-      totalDone += amountDone;
-    }
-    b.buildLevel = 1.5f * (totalDone / totalNeed);
-  }
-  //*/
 }
 
 

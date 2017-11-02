@@ -52,10 +52,12 @@ public class TaskGathering extends Task {
     if (goes == null) return false;
     
     TaskGathering task = new TaskGathering(actor, store);
-    task.configTask(store, null, goes, JOB.PLANTING, 2);
-    actor.assignTask(task);
+    if (task.configTask(store, null, goes, JOB.PLANTING, 2) != null) {
+      actor.assignTask(task);
+      return true;
+    }
     
-    return true;
+    return false;
   }
   
   
@@ -82,10 +84,12 @@ public class TaskGathering extends Task {
     if (! Visit.arrayIncludes(cropTypes, above.type.yields)) return false;
     
     TaskGathering task = new TaskGathering(actor, store);
-    task.configTask(store, null, goes, JOB.HARVEST, 2);
-    actor.assignTask(task);
+    if (task.configTask(store, null, goes, JOB.HARVEST, 2) != null) {
+      actor.assignTask(task);
+      return true;
+    }
     
-    return true;
+    return false;
   }
   
   

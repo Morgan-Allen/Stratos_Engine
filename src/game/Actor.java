@@ -169,6 +169,13 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   /**  Regular updates-
     */
   void update() {
+    
+    /*
+    if (jobType() == Task.JOB.RETURNING) {
+      I.say("?");
+    }
+    //*/
+    
     //
     //  TODO:  Don't allow another job to be assigned while this one is in
     //  the middle of an update!
