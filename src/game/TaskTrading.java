@@ -49,13 +49,25 @@ public class TaskTrading extends Task {
     this.tradeFrom = from ;
     this.tradeGoes = goes ;
     this.homeCity  = from.map.city;
-    return (TaskTrading) configTask(from, from, null, Task.JOB.TRADING, 0);
+    
+    configTravel(from, JOB.TRADING, from);
+    return this;
   }
   
   
   
   /**  Handling actor events-
     */
+  void configTravel(Building site, Task.JOB jobType, Employer e) {
+    if (site.complete()) {
+      configTask(e, site, null, jobType, 0);
+    }
+    else {
+      configTask(e, null, site.at(), jobType, 0);
+    }
+  }
+  
+  
   protected void onVisit(Building visits) {
     //
     //  If you're embarking on a fresh journey, take on your assigned cargo,
@@ -69,7 +81,7 @@ public class TaskTrading extends Task {
       
       if (tradeGoes != city) {
         Building goes = (Building) tradeGoes;
-        configTask(origin, goes, null, Task.JOB.TRADING, 0);
+        configTravel(goes, Task.JOB.TRADING, origin);
       }
       else {
         Tile exits = findTransitPoint(visits.map, city);
@@ -104,6 +116,16 @@ public class TaskTrading extends Task {
   
   protected void onTarget(Target target) {
     //
+    //  We might be visiting an incomplete structure:
+    if (target.at().above == tradeFrom) {
+      onVisit((Building) tradeFrom);
+      return;
+    }
+    if (target.at().above == tradeGoes) {
+      onVisit((Building) tradeGoes);
+      return;
+    }
+    //
     //  If you've arrived at the edge of the map, begin your journey to a
     //  foreign city-
     City city = tradeGoes.homeCity();
@@ -126,7 +148,7 @@ public class TaskTrading extends Task {
     //  If you're arrived back on your home map, return to your post-
     else {
       Building store = (Building) tradeFrom;
-      configTask(origin, store, null, Task.JOB.TRADING, 0);
+      configTravel(store, Task.JOB.TRADING, origin);
     }
   }
   
