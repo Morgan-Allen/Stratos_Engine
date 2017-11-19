@@ -6,6 +6,12 @@ import static game.CityMap.*;
 
 
 
+
+//  TODO:  It would be convenient if this shared a common interface with
+//  CityMapDemands?
+
+
+
 public class CityMapFlagging {
   
   
@@ -14,7 +20,8 @@ public class CityMapFlagging {
   CityMap map;
   Object  key;
   int range;
-  int flagVals[][][];
+  
+  Object flagLevels[];
   
   
   CityMapFlagging(CityMap map, Object key, int range) {
@@ -25,19 +32,26 @@ public class CityMapFlagging {
   
   
   void setupWithSize(int size) {
-    Batch <int[][]> levels = new Batch();
-    int span = size;
+    Batch levels = new Batch();
+    int span = size, dim = 1;
     while (span > 1) {
-      int level[][] = new int[span][span];
+      Object level = dim == 1 ?
+        new byte[span][span] :
+        new int [span][span]
+      ;
       levels.add(level);
       span = Nums.round(span * 1f / FLAG_RES, 1, true);
+      dim *= FLAG_RES;
     }
-    this.flagVals = (int[][][]) levels.toArray(int[][].class);
+    this.flagLevels = levels.toArray(Object.class);
   }
   
   
   void loadState(Session s) throws Exception {
-    for (int[][] level : flagVals) {
+    s.loadByteArray(baseLevel());
+    
+    for (int i = 1; i < flagLevels.length; i++) {
+      int level[][] = upperLevel(i);
       for (Coord c : Visit.grid(0, 0, level.length, level.length, 1)) {
         level[c.x][c.y] = s.loadInt();
       }
@@ -46,7 +60,10 @@ public class CityMapFlagging {
   
   
   void saveState(Session s) throws Exception {
-    for (int[][] level : flagVals) {
+    s.saveByteArray(baseLevel());
+    
+    for (int i = 1; i < flagLevels.length; i++) {
+      int level[][] = upperLevel(i);
       for (Coord c : Visit.grid(0, 0, level.length, level.length, 1)) {
         s.saveInt(level[c.x][c.y]);
       }
@@ -57,8 +74,18 @@ public class CityMapFlagging {
   
   /**  Common updates and basic queries:
     */
+  byte[][] baseLevel() {
+    return (byte[][]) flagLevels[0];
+  }
+  
+  
+  int[][] upperLevel(int l) {
+    return (int[][]) flagLevels[l];
+  }
+  
+  
   void setFlagVal(int x, int y, int val) {
-    int old = flagVals[0][x][y];
+    int old = baseLevel()[x][y];
     if (old == val) return;
     incFlagVal(x, y, val - old);
   }
@@ -66,8 +93,10 @@ public class CityMapFlagging {
   
   void incFlagVal(int x, int y, int inc) {
     int l = 0;
-    while (l < flagVals.length) {
-      flagVals[l][x][y] += inc;
+    while (l < flagLevels.length) {
+      if (l == 0) ((byte[][]) flagLevels[0])[x][y] += inc;
+      else        ((int [][]) flagLevels[l])[x][y] += inc;
+      
       x /= FLAG_RES;
       y /= FLAG_RES;
       l += 1;
@@ -76,7 +105,7 @@ public class CityMapFlagging {
   
   
   int flagVal(int x, int y) {
-    return flagVals[0][x][y];
+    return baseLevel()[x][y];
   }
   
   
@@ -89,23 +118,28 @@ public class CityMapFlagging {
     if (report) I.say("\nGETTING TILE TO LOOK AT...");
     
     Tile from = near.at();
-    int res = (int) Nums.pow(FLAG_RES, flagVals.length - 1);
+    int res = (int) Nums.pow(FLAG_RES, flagLevels.length - 1);
     Coord mip = new Coord(0, 0);
     
     //  TODO:  This will need to be converted into a full-blown search to
     //  handle some of the nuances of complex queries.
     
-    for (int l = flagVals.length; l-- > 0;) {
+    for (int l = flagLevels.length; l-- > 0;) {
       if (report) I.say("  Current level: "+l);
       
-      int level[][] = flagVals[l];
-      int sideX = Nums.min(FLAG_RES, level.length - mip.x);
-      int sideY = Nums.min(FLAG_RES, level.length - mip.y);
+      boolean base = l == 0;
+      byte levelB[][] = base ? baseLevel() : null;
+      int  levelI[][] = base ? null : upperLevel(l);
+      int levelSize = base ? levelB.length : levelI.length;
+      
+      int sideX = Nums.min(FLAG_RES, levelSize - mip.x);
+      int sideY = Nums.min(FLAG_RES, levelSize - mip.y);
       int maxSum = res * res * range;
       Pick <Coord> pick = new Pick(0);
       
       for (Coord c : Visit.grid(mip.x, mip.y, sideX, sideY, 1)) {
-        float rating = level[c.x][c.y] * 1f / maxSum, dist = 0;
+        float val = base ? levelB[c.x][c.y] : levelI[c.x][c.y];
+        float rating = val * 1f / maxSum, dist = 0;
         dist += Nums.abs(from.x - ((c.x + 0.5f) * res));
         dist += Nums.abs(from.y - ((c.y + 0.5f) * res));
         
@@ -151,13 +185,14 @@ public class CityMapFlagging {
     Tile from = near.at();
     int minX = from.x - range, minY = from.y - range;
     Pick <Tile> pick = new Pick();
+    byte vals[][] = (byte[][]) flagLevels[0];
     
     for (Coord c : Visit.grid(minX, minY, range * 2, range * 2, 1)) {
       Tile t = map.tileAt(c.x, c.y);
       if (t == null || t.hasFocus()) continue;
       
       float dist = CityMap.distance(from, t);
-      if (dist > range || flagVals[0][t.x][t.y] == 0) continue;
+      if (dist > range || vals[t.x][t.y] == 0) continue;
       
       pick.compare(t, 0 - dist);
     }
@@ -168,12 +203,17 @@ public class CityMapFlagging {
   
   int totalSum() {
     int sum = 0;
-    int l = flagVals.length - 1;
-    for (int[] r : flagVals[l]) for (int v : r) sum += v;
+    int l = flagLevels.length - 1;
+    for (int[] r : upperLevel(l)) for (int v : r) sum += v;
     return sum;
   }
   
 }
+
+
+
+
+
 
 
 
