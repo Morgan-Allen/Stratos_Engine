@@ -35,7 +35,7 @@ public class TestBuilding extends Test {
     home  .enterMap(map, 6, 6, 0);
     palace.enterMap(map, 6, 0, 0);
     mason .enterMap(map, 9, 6, 0);
-    CityMap.applyPaving(map, 2, 5, 15, 1, true);
+    CityMapPlanning.applyPaving(map, 2, 5, 15, 1, true);
     
     for (Building b : map.buildings) fillWorkVacancies(b);
     

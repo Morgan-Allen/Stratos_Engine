@@ -43,7 +43,7 @@ public class TaskBuilding2 extends Task {
   
   static TaskBuilding2 configBuilding2(Building store, Actor a) {
     TaskBuilding2 task = new TaskBuilding2(a, store);
-    Tile target = task.pickNextTarget();
+    Tile target = task.pickNextTarget(false);
     if (target == null) {
       return null;
     }
@@ -54,15 +54,20 @@ public class TaskBuilding2 extends Task {
   }
   
   
-  Tile pickNextTarget() {
+  Tile pickNextTarget(boolean near) {
     CityMap map = actor.map;
     CityMapFlagging flagging = map.flagging.get(NEED_BUILD);
-    if (flagging == null) return null;
-    
-    int maxRange = store.type.maxDeliverRange;
-    Tile goes = flagging.pickRandomPoint(store, maxRange);
-    
-    return goes;
+    if (flagging == null) {
+      return null;
+    }
+    if (near) {
+      int range = actor.type.sightRange;
+      return flagging.findNearbyPoint(actor, range);
+    }
+    else {
+      int maxRange = store.type.maxDeliverRange;
+      return flagging.pickRandomPoint(store, maxRange);
+    }
   }
   
   
@@ -95,7 +100,7 @@ public class TaskBuilding2 extends Task {
     if (map.planning.checkNeedForBuilding(t)) {
       configTask(store, null, t, JOB.BUILDING, 1);
     }
-    else if ((t = pickNextTarget()) != null) {
+    else if ((t = pickNextTarget(true)) != null) {
       configTask(store, null, t, JOB.BUILDING, 1);
     }
   }

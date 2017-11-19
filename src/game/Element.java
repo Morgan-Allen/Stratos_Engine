@@ -58,7 +58,7 @@ public class Element implements Session.Saveable, Target {
   boolean canPlace(CityMap map, int x, int y) {
     for (Coord c : Visit.grid(x, y, type.wide, type.high, 1)) {
       Tile t = map.tileAt(c.x, c.y);
-      if (t == null || t.paved || t.above != null) return false;
+      if (t == null || t.above != null) return false;
     }
     return true;
   }

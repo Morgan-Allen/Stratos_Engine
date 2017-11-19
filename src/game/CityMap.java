@@ -157,7 +157,6 @@ public class CityMap implements Session.Saveable {
     
     Terrain terrain;
     Element above;
-    boolean paved;
     
     List <Actor> inside  = null;
     List <Actor> focused = null;
@@ -169,7 +168,6 @@ public class CityMap implements Session.Saveable {
       int terrID = s.loadInt();
       terrain = terrID == -1 ? null : ALL_TERRAINS[terrID];
       above   = (Element) s.loadObject();
-      paved   = s.loadBool();
       
       if (s.loadBool()) s.loadObjects(focused = new List());
       if (s.loadBool()) s.loadObjects(inside  = new List());
@@ -179,7 +177,6 @@ public class CityMap implements Session.Saveable {
     void saveState(Session s) throws Exception {
       s.saveInt(terrain == null ? -1 : terrain.terrainIndex);
       s.saveObject(above);
-      s.saveBool(paved);
       
       s.saveBool(focused != null);
       if (focused != null) s.saveObjects(focused);
@@ -190,6 +187,11 @@ public class CityMap implements Session.Saveable {
     
     public CityMap.Tile at() {
       return this;
+    }
+    
+    
+    public Type aboveType() {
+      return above == null ? null : above.type;
     }
     
     
@@ -331,39 +333,13 @@ public class CityMap implements Session.Saveable {
   
   boolean paved(int x, int y) {
     Tile under = tileAt(x, y);
-    return under == null ? false : under.paved;
+    if (under == null || under.above == null) return false;
+    return under.above.type.paved;
   }
   
   
   boolean paved(Coord c) {
     return paved(c.x, c.y);
-  }
-  
-  
-  //  TODO:  Move this into the planning class.
-  public static void applyPaving(
-    CityMap map, int x, int y, int w, int h, boolean is
-  ) {
-    for (Coord c : Visit.grid(x, y, w, h, 1)) {
-      Tile t = map.tileAt(c.x, c.y);
-      if (t == null) continue;
-      t.paved = is;
-      if (t.above == null) continue;
-      t.above.exitMap(map);
-    }
-  }
-  
-  
-  //  TODO:  Move this into the planning class.
-  public static void demolish(
-    CityMap map, int x, int y, int w, int h
-  ) {
-    for (Coord c : Visit.grid(x, y, w, h, 1)) {
-      Tile t = map.tileAt(c.x, c.y);
-      if (t       == null) continue;
-      if (t.paved        ) t.paved = false;
-      if (t.above != null) t.above.exitMap(map);
-    }
   }
   
   

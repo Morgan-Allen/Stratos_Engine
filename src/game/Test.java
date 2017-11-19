@@ -151,9 +151,6 @@ public class Test {
         if (at.above.buildLevel() == -1) fill = MISSED_COLOR;
         else fill = at.above.type.tint;
       }
-      else if (at.paved) {
-        fill = PAVE_COLOR;
-      }
       else if (at.terrain != null) {
         fill = at.terrain.tint;
       }
@@ -504,7 +501,8 @@ public class Test {
         if (pressed.includes('e')) {
           for (Coord c : Visit.grid(drawnBox(map))) {
             if (map.blocked(c.x, c.y)) continue;
-            map.tileAt(c.x, c.y).paved = true;
+            Element road = (Element) ROAD.generate();
+            road.enterMap(map, c.x, c.y, 1);
           }
           drawnTile = null;
         }
@@ -531,7 +529,6 @@ public class Test {
           for (Coord c : Visit.grid(drawnBox(map))) {
             Element above = map.above(c.x, c.y);
             if (above != null) above.exitMap(map);
-            if (map.paved(c.x, c.y)) map.tileAt(c.x, c.y).paved = false;
           }
           drawnTile = null;
         }

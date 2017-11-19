@@ -18,8 +18,8 @@ public class TestCity extends Test {
     
     CityMap map = setupTestCity(32);
     
-    CityMap.applyPaving(map, 3, 8, 25, 1 , true);
-    CityMap.applyPaving(map, 8, 2, 1 , 25, true);
+    CityMapPlanning.applyPaving(map, 3, 8, 25, 1 , true);
+    CityMapPlanning.applyPaving(map, 8, 2, 1 , 25, true);
     
     Building palace  = (Building) PALACE    .generate();
     Building school  = (Building) SCHOOL    .generate();

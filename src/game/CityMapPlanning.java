@@ -66,6 +66,37 @@ public class CityMapPlanning {
   }
   
   
+  
+
+  
+  /**  Some helper methods for dealing with infrastructure:
+    */
+  public static void applyPaving(
+    CityMap map, int x, int y, int w, int h, boolean is
+  ) {
+    for (Coord c : Visit.grid(x, y, w, h, 1)) {
+      Tile t = map.tileAt(c.x, c.y);
+      if (t == null) continue;
+      if (is) {
+        Element e = (Element) ROAD.generate();
+        e.enterMap(map, x, y, 1);
+      }
+      else if (t.aboveType() == ROAD) {
+        t.above.exitMap(map);
+      }
+    }
+  }
+  
+  
+  public static void demolish(
+    CityMap map, int x, int y, int w, int h
+  ) {
+    for (Coord c : Visit.grid(x, y, w, h, 1)) {
+      Tile t = map.tileAt(c.x, c.y);
+      if (t       == null) continue;
+      if (t.above != null) t.above.exitMap(map);
+    }
+  }
 }
 
 

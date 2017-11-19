@@ -95,11 +95,12 @@ public class CityMapTerrain implements TileConstants {
   
   void scanHabitat(Tile tile) {
     Terrain t = tile.terrain;
-    if (t == null || tile.paved) {
-      return;
-    }
-    if (tile.above != null && tile.above.type.category != Type.IS_FIXTURE) {
-      return;
+    Type above = tile.aboveType();
+
+    if (t == null) return;
+    if (above != null) {
+      if (above.paved) return;
+      if (above.category != Type.IS_FIXTURE) return;
     }
     
     HabitatScan scan = scans[1][t.terrainIndex];

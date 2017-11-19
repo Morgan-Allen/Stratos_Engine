@@ -34,7 +34,7 @@ public class TestMilitary extends Test {
     BuildingForArmy fort = (BuildingForArmy) GARRISON.generate();
     fort.enterMap(map, 10, 10, 1);
     fillWorkVacancies(fort);
-    CityMap.applyPaving(map, 2, 9, 30, 1, true);
+    CityMapPlanning.applyPaving(map, 2, 9, 30, 1, true);
     
     Formation troops = fort.formation;
     

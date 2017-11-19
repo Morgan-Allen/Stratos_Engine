@@ -38,7 +38,7 @@ public class BuildingForGather extends Building {
     for (Coord c : Visit.grid(x, y, w, h, 1)) {
       
       Tile t = map.tileAt(c);
-      if (t == null || t.paved) continue;
+      if (t == null) continue;
       if (t.above != null && t.above.type.growRate == 0) continue;
       
       Good seed = seedType(t, crops);
