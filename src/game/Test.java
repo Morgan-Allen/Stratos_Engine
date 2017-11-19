@@ -105,7 +105,7 @@ public class Test {
     "Residential", "Military"  , "Religious"
   };
   final static String
-    ROADS      = "Roads",
+    ROADS0      = "Roads",
     DEMOLITION = "Demolition"
   ;
   
@@ -168,7 +168,7 @@ public class Test {
       graphic[at.x][at.y] = fill;
     }
     
-    if (placing == ROADS) {
+    if (placing == ROADS0) {
       for (Coord c : Visit.grid(drawnBox(map))) {
         if (map.blocked(c.x, c.y)) continue;
         graphic[c.x][c.y] = PAVE_COLOR;
@@ -491,7 +491,7 @@ public class Test {
   private static String reportForBuildMenu(CityMap map) {
     StringBuffer report = new StringBuffer("");
     
-    if (placing == ROADS) {
+    if (placing == ROADS0) {
       report.append("Place Roads");
       if (drawnTile == null) {
         report.append("\n  (S) select start");
@@ -573,7 +573,7 @@ public class Test {
       
       report.append("\n  (R) roads");
       if (pressed.includes('r')) {
-        placing = ROADS;
+        placing = ROADS0;
       }
       
       report.append("\n  (D) demolish");

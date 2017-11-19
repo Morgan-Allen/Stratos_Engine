@@ -83,7 +83,7 @@ public class CityMapFlagging {
   
   /**  More complex queries-
     */
-  Tile pickRandomPoint(Element near, int maxRange) {
+  Tile pickDistantPoint(Element near, int maxRange, float randomness) {
     
     boolean report = near.reports();
     if (report) I.say("\nGETTING TILE TO LOOK AT...");
@@ -112,7 +112,8 @@ public class CityMapFlagging {
         if (maxRange > 0 && dist > maxRange + res) continue;
         if (l == 0 && map.tileAt(c).hasFocus()   ) continue;
         
-        rating *= res * Rand.num() / (dist + res);
+        float roll = (1f + randomness) + (Rand.num() * randomness);
+        rating *= res * roll / (dist + res);
         pick.compare(new Coord(c), rating);
         
         if (report) I.say("    "+c+" -> "+rating);
@@ -140,16 +141,18 @@ public class CityMapFlagging {
   }
   
   
+  Tile pickRandomPoint(Element near, int range) {
+    return pickDistantPoint(near, range, 1);
+  }
+  
+  
   Tile findNearbyPoint(Element near, int range) {
     
     Tile from = near.at();
     int minX = from.x - range, minY = from.y - range;
     Pick <Tile> pick = new Pick();
     
-    //  TODO:  Randomise this a little?
-    
     for (Coord c : Visit.grid(minX, minY, range * 2, range * 2, 1)) {
-      
       Tile t = map.tileAt(c.x, c.y);
       if (t == null || t.hasFocus()) continue;
       
@@ -171,13 +174,6 @@ public class CityMapFlagging {
   }
   
 }
-
-
-
-
-
-
-
 
 
 

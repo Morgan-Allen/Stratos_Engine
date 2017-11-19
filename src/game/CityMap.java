@@ -24,9 +24,10 @@ public class CityMap implements Session.Saveable {
   
   int time = 0;
   
-  final CityMapSettings settings = new CityMapSettings();
-  final CityMapFog      fog      = new CityMapFog    (this);
-  final CityMapTerrain  terrain  = new CityMapTerrain(this);
+  final CityMapSettings settings = new CityMapSettings(this);
+  final CityMapPlanning planning = new CityMapPlanning(this);
+  final CityMapFog      fog      = new CityMapFog     (this);
+  final CityMapTerrain  terrain  = new CityMapTerrain (this);
   Table <City, Tile           > transitPoints = new Table();
   Table <Type, CityMapFlagging> flagging      = new Table();
   
@@ -55,6 +56,7 @@ public class CityMap implements Session.Saveable {
     time = s.loadInt();
     
     settings.loadState(s);
+    planning.loadState(s);
     fog     .loadState(s);
     terrain .loadState(s);
     
@@ -92,6 +94,7 @@ public class CityMap implements Session.Saveable {
     s.saveInt(time);
     
     settings.saveState(s);
+    planning.saveState(s);
     fog     .saveState(s);
     terrain .saveState(s);
     
@@ -139,6 +142,7 @@ public class CityMap implements Session.Saveable {
       actorGrid[c.x][c.y] = new List();
     }
     
+    planning.performSetup(size);
     fog.performSetup(size);
     city.attachMap(this);
   }
@@ -286,8 +290,8 @@ public class CityMap implements Session.Saveable {
   
   
   Tile tileAt(int x, int y) {
-    try { return grid[x][y]; }
-    catch (Exception e) { return null; }
+    if (x < 0 || x >= size || y < 0 || y >= size) return null;
+    return grid[x][y];
   }
   
   

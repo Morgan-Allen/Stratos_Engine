@@ -48,7 +48,7 @@ public class TaskBuilding extends Task {
     return sumNeeds;
   }
   
-
+  
   static Building selectBuildTarget(
     Building from, Good buildsWith[], Series <Building> buildings
   ) {
@@ -188,3 +188,18 @@ public class TaskBuilding extends Task {
   
   
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

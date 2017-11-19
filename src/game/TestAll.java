@@ -30,7 +30,7 @@ public class TestAll {
     record(TestFarming  .testFarming  (false));
     record(TestForests  .testForests  (false));
     record(TestTrading  .testTrading  (false));
-    record(TestUpkeep   .testUpkeep   (false));
+    record(TestBuilding .testBuilding (false));
     record(TestExploring.testExploring(false));
     record(TestWorld    .testWorld    (false));
     

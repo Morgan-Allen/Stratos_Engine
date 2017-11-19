@@ -12,6 +12,8 @@ public class CityMapSettings {
   
   /**  Global toggle-settings used for debugging:
     */
+  final CityMap map;
+  
   public boolean
     toggleFog     = true,
     toggleHunger  = true,
@@ -24,6 +26,11 @@ public class CityMapSettings {
     worldView = false,
     
     reportBattle = true;
+  
+  
+  CityMapSettings(CityMap map) {
+    this.map = map;
+  }
   
   
   void loadState(Session s) throws Exception {

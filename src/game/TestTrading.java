@@ -28,7 +28,7 @@ public class TestTrading extends Test {
     City.setupRoute(homeC, awayC, 1);
     City.setPosture(homeC, awayC, City.POSTURE.VASSAL, true);
     
-    Tally <Good> supplies = new Tally().setWith(FRUIT, 10, ADOBE, 5);
+    Tally <Good> supplies = new Tally().setWith(FRUIT, 10, STONE, 5);
     City.setSuppliesDue(awayC, homeC, supplies);
     
     awayC.tradeLevel.setWith(
@@ -41,7 +41,7 @@ public class TestTrading extends Test {
       RAW_COTTON,  20,
       CLAY      ,  20,
       FRUIT     ,  15,
-      ADOBE     ,  5 
+      STONE     ,  5 
     );
     
     
@@ -66,7 +66,7 @@ public class TestTrading extends Test {
     post2.ID = "(Gets Supplies)";
     post2.tradeLevel.setWith(
       FRUIT     , 15,
-      ADOBE     , 5 
+      STONE     , 5 
     );
     
     Building kiln = (Building) KILN.generate();
@@ -116,7 +116,7 @@ public class TestTrading extends Test {
       
       if (! supplyOkay) {
         boolean check = true;
-        check &= post2.inventory.valueFor(ADOBE) >= 5;
+        check &= post2.inventory.valueFor(STONE) >= 5;
         check &= post2.inventory.valueFor(FRUIT) >= 15;
         supplyOkay = check;
       }
@@ -161,7 +161,7 @@ public class TestTrading extends Test {
   
   
   static void reportOnMap(City a, City b, boolean okay) {
-    final Good GOODS[] = { CLAY, RAW_COTTON, POTTERY, COTTON, FRUIT, ADOBE };
+    final Good GOODS[] = { CLAY, RAW_COTTON, POTTERY, COTTON, FRUIT, STONE };
     
     I.say("\nGoods report:");
     for (Good g : GOODS) {

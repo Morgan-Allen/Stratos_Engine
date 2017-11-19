@@ -6,15 +6,15 @@ import static game.GameConstants.*;
 
 
 
-public class TestUpkeep extends Test {
+public class TestBuilding extends Test {
   
   
   public static void main(String args[]) {
-    testUpkeep(true);
+    testBuilding(true);
   }
   
   
-  static boolean testUpkeep(boolean graphics) {
+  static boolean testBuilding(boolean graphics) {
     
     CityMap map = setupTestCity(16);
     map.settings.toggleFog = false;
@@ -24,7 +24,7 @@ public class TestUpkeep extends Test {
     post.ID = "(Stock of Goods)";
     post.setTradeLevels(true,
       CLAY  , 40,
-      ADOBE , 40,
+      STONE , 40,
       WOOD  , 60,
       COTTON, 20
     );
@@ -40,27 +40,27 @@ public class TestUpkeep extends Test {
     for (Building b : map.buildings) fillWorkVacancies(b);
     
     
-    boolean upkeepOkay = false;
+    boolean buildingOkay = false;
     
     while (map.time < 1000 || graphics) {
-      runGameLoop(map, 10, graphics, "saves/test_upkeep.tlt");
+      runGameLoop(map, 10, graphics, "saves/test_building.tlt");
       
-      if (! upkeepOkay) {
+      if (! buildingOkay) {
         boolean allBuilt = true;
         for (Building b : map.buildings) {
           if (b.buildLevel() < 1) allBuilt = false;
         }
         
-        upkeepOkay = allBuilt && map.buildings.size() > 0;
+        buildingOkay = allBuilt && map.buildings.size() > 0;
         
-        if (upkeepOkay) {
-          I.say("\nUPKEEP TEST CONCLUDED SUCCESSFULLY!");
+        if (buildingOkay) {
+          I.say("\nBUILDING TEST CONCLUDED SUCCESSFULLY!");
           if (! graphics) return true;
         }
       }
     }
     
-    I.say("\nUPKEEP TEST FAILED!");
+    I.say("\nBUILDING TEST FAILED!");
     for (Building b : map.buildings) {
       I.say("  "+b+": "+I.percent(b.buildLevel()));
     }

@@ -103,6 +103,13 @@ public class BuildingForCrafts extends Building {
     */
   public void selectActorBehaviour(Actor actor) {
     //
+    //  Different construction approach...
+    Task building2 = TaskBuilding2.configBuilding2(this, actor);
+    if (building2 != null) {
+      actor.assignTask(building2);
+      return;
+    }
+    //
     //  Try and find a nearby building to construct:
     if (TaskBuilding.pickBuildTask(actor, this, map.buildings)) {
       return;

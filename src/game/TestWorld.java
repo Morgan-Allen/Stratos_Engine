@@ -198,7 +198,7 @@ public class TestWorld extends Test {
       City vassal = pair[0], lord = pair[1];
       World world = vassal.world;
       setPosture(vassal, lord, POSTURE.LORD, true);
-      setSuppliesDue(vassal, lord, new Tally().setWith(ADOBE, 10));
+      setSuppliesDue(vassal, lord, new Tally().setWith(STONE, 10));
       vassal.council.typeAI = CityCouncil.AI_COMPLIANT;
       
       int time = 0;
@@ -207,7 +207,7 @@ public class TestWorld extends Test {
       }
       
       Relation r = vassal.relationWith(lord);
-      float tributeSent = r.suppliesSent.valueFor(ADOBE);
+      float tributeSent = r.suppliesSent.valueFor(STONE);
       if (tributeSent < 5) {
         I.say("\nInsufficient tribute dispatched!");
         return false;

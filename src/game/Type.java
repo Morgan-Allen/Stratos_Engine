@@ -98,6 +98,7 @@ public class Type extends Index.Entry implements Session.Saveable {
   Integer builtAmount[] = {};
   
   boolean blocks   = true ;
+  boolean paved    = false;
   boolean mobile   = false;
   float   growRate = 0;
   int     ambience = 0;

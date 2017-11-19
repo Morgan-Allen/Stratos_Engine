@@ -107,7 +107,7 @@ public class Element implements Session.Saveable, Target {
   
   
   
-  /**  Handling focus for actor activities-
+  /**  Support methods for sight and fog-levels:
     */
   public float sightLevel() {
     return map.fog.sightLevel(at);
@@ -118,12 +118,10 @@ public class Element implements Session.Saveable, Target {
     return map.fog.maxSightLevel(at);
   }
   
+
   
-  public void targetedBy(Actor w) {
-    return;
-  }
-  
-  
+  /**  Handling focus for actor activities-
+    */
   static List <Actor> setMember(Actor a, boolean is, List <Actor> l) {
     if (is) {
       if (l == null) l = new List();
@@ -150,7 +148,12 @@ public class Element implements Session.Saveable, Target {
   public boolean hasFocus() {
     return focused != null;
   }
-
+  
+  
+  public void targetedBy(Actor w) {
+    return;
+  }
+  
   
   
   /**  Life cycle, combat and survival methods-

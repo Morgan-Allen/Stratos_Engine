@@ -2,30 +2,75 @@
 
 package game;
 import util.*;
+import static game.CityMap.*;
+import static game.GameConstants.*;
 
 
 
 public class CityMapPlanning {
   
   
-  CityMap map;
+  final CityMap map;
   Type grid[][];
-  List <Element> toPlace = new List();
-  List <Element> toRaze  = new List();
   
   
   
   CityMapPlanning(CityMap map) {
     this.map  = map;
+  }
+  
+  
+  void loadState(Session s) throws Exception {
+    for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
+      grid[c.x][c.y] = (Type) s.loadObject();
+    }
+  }
+  
+  
+  void saveState(Session s) throws Exception {
+    for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
+      s.saveObject(grid[c.x][c.y]);
+    }
+  }
+  
+  
+  void performSetup(int size) {
     this.grid = new Type[map.size][map.size];
   }
   
   
-  void placeObject(Type t, int x, int y) {
-    for (Coord c : Visit.grid(x, y, t.wide, t.high, 1)) {
-      grid[c.x][c.y] = t;
+  void placeObject(Type type, Tile t) {
+    for (Coord c : Visit.grid(t.x, t.y, type.wide, type.high, 1)) {
+      grid[c.x][c.y] = type;
+      checkNeedForBuilding(t);
+    }
+  }
+  
+  
+  Type objectAt(Tile t) {
+    return grid[t.x][t.y];
+  }
+  
+  
+  boolean checkNeedForBuilding(Tile t) {
+    Type type = objectAt(t);
+    Element above = t.above;
+    if (above == null || above.type != type || above.buildLevel() < 1) {
+      map.flagType(NEED_BUILD, t.x, t.y, true);
+      return true;
+    }
+    else {
+      map.flagType(NEED_BUILD, t.x, t.y, false);
+      return false;
     }
   }
   
   
 }
+
+
+
+
+
+
+

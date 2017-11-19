@@ -1,4 +1,4 @@
-
+  
 
 package game;
 import util.*;
@@ -302,7 +302,7 @@ public class GameConstants {
     RAW_COTTON = new Good("Raw Cotton"  , 15, 4 ),
     WOOD       = new Good("Wood"        , 10, 5 ),
     CLAY       = new Good("Clay"        , 10, 6 ),
-    ADOBE      = new Good("Adobe"       , 20, 7 ),
+    STONE      = new Good("Stone"       , 20, 7 ),
     
     POTTERY    = new Good("Pottery"     , 50, 9 ),
     COTTON     = new Good("Cotton"      , 75, 10),
@@ -330,8 +330,8 @@ public class GameConstants {
     
     CROP_TYPES  [] = { MAIZE, FRUIT, RAW_COTTON },
     FOOD_TYPES  [] = { MAIZE, FRUIT, MEAT },
-    STONE_TYPES [] = { CLAY, ADOBE  },
-    BUILD_GOODS [] = { WOOD, CLAY, ADOBE },
+    STONE_TYPES [] = { CLAY, STONE  },
+    BUILD_GOODS [] = { WOOD, CLAY, STONE },
     HOME_GOODS  [] = { POTTERY, COTTON },
     MARKET_GOODS[] = (Good[]) Visit.compose(Good.class, FOOD_TYPES, HOME_GOODS),
     ALL_GOODS   [] = (Good[]) GOODS_LIST.toArray(Good.class),
@@ -360,7 +360,7 @@ public class GameConstants {
     for (Type r : ALL_ROCKS) {
       r.name = "Rocks";
       r.flagKey     = IS_STONE;
-      r.yields      = ADOBE;
+      r.yields      = STONE;
       r.yieldAmount = 1f;
     }
     for (Type c : ALL_CLAYS) {
@@ -432,6 +432,10 @@ public class GameConstants {
     AMBIENCE_PAD =  2 ,
     AMBIENCE_MAX =  20
   ;
+  final static Type
+    ROAD     = new Type("type_road"    , IS_FIXTURE),
+    AQUEDUCT = new Type("type_aqueduct", IS_FIXTURE)
+  ;
   final static BuildType  
     
     NO_TIERS[] = new BuildType[0],
@@ -487,12 +491,23 @@ public class GameConstants {
     )
   ;
   static {
+    
+    //
+    //  1x1 infrastructure:
+    ROAD.name = "Road";
+    ROAD.tint = PAVE_COLOR;
+    ROAD.blocks = false;
+    ROAD.paved  = true ;
+    ROAD.setDimensions(1, 1, 0);
+    ROAD.setBuildMaterials(STONE, 1);
+    
+    
     //
     //  Palace structures:
     PALACE.name = "Palace";
     PALACE.tint = TINT_RESIDENTIAL;
     PALACE.setDimensions(5, 5, 2);
-    PALACE.setBuildMaterials(WOOD, 15, ADOBE, 25, COTTON, 10, POTTERY, 5);
+    PALACE.setBuildMaterials(WOOD, 15, STONE, 25, COTTON, 10, POTTERY, 5);
     PALACE.setWorkerTypes(NOBLE, SERVANT);
     PALACE.homeSocialClass = CLASS_NOBLE;
     PALACE.maxResidents = 2;
@@ -529,7 +544,7 @@ public class GameConstants {
     BASIN.name = "Basin";
     BASIN.tint = TINT_HEALTH_ED;
     BASIN.setDimensions(2, 2, 0);
-    BASIN.setBuildMaterials(ADOBE, 2, CLAY, 2);
+    BASIN.setBuildMaterials(STONE, 2, CLAY, 2);
     BASIN.features = new Good[] { IS_WATER, IS_MARKET };
     
     SWEEPER.name = "Sweeper";
@@ -542,14 +557,14 @@ public class GameConstants {
     SCHOOL.name = "Public School";
     SCHOOL.tint = TINT_HEALTH_ED;
     SCHOOL.setDimensions(2, 2, 1);
-    SCHOOL.setBuildMaterials(WOOD, 5, CLAY, 2, ADOBE, 3);
+    SCHOOL.setBuildMaterials(WOOD, 5, CLAY, 2, STONE, 3);
     SCHOOL.setWorkerTypes(CITIZEN);
     SCHOOL.features = new Good[] { EDUCATION };
     
     BALL_COURT.name = "Ball Court";
     BALL_COURT.tint = TINT_AMENITY;
     BALL_COURT.setDimensions(3, 3, 1);
-    BALL_COURT.setBuildMaterials(ADOBE, 10);
+    BALL_COURT.setBuildMaterials(STONE, 10);
     BALL_COURT.features = new Good[] { DIVERSION };
     BALL_COURT.featureAmount = 15;
 
@@ -558,12 +573,12 @@ public class GameConstants {
     MASON.name = "Mason";
     MASON.tint = TINT_LITE_INDUSTRIAL;
     MASON.setDimensions(2, 2, 1);
-    MASON.setBuildMaterials(ADOBE, 2, WOOD, 2, CLAY, 2);
+    MASON.setBuildMaterials(STONE, 2, WOOD, 2, CLAY, 2);
     MASON.setWorkerTypes(WORKER);
     MASON.worksBeforeBuilt = true;
     MASON.craftTime *= 2;
     MASON.maxWorkers = 2;
-    MASON.buildsWith = new Good[] { WOOD, CLAY, ADOBE };
+    MASON.buildsWith = new Good[] { WOOD, CLAY, STONE };
     
     FARM_PLOT.name = "Farm Plot";
     FARM_PLOT.tint = TINT_LITE_INDUSTRIAL;
@@ -595,13 +610,13 @@ public class GameConstants {
     QUARRY_PIT.worksBeforeBuilt = true;
     QUARRY_PIT.gatherFlag = IS_STONE;
     QUARRY_PIT.maxStock   = 25;
-    QUARRY_PIT.produced   = new Good[] { CLAY, ADOBE };
+    QUARRY_PIT.produced   = new Good[] { CLAY, STONE };
     QUARRY_PIT.maxWorkers = 2;
     
     KILN.name = "Kiln";
     KILN.tint = TINT_INDUSTRIAL;
     KILN.setDimensions(2, 2, 1);
-    KILN.setBuildMaterials(ADOBE, 2, WOOD, 2, CLAY, 1);
+    KILN.setBuildMaterials(STONE, 2, WOOD, 2, CLAY, 1);
     KILN.setWorkerTypes(WORKER);
     KILN.needed   = new Good[] { CLAY };
     KILN.produced = new Good[] { POTTERY };
@@ -621,7 +636,7 @@ public class GameConstants {
     MARKET.name = "Marketplace";
     MARKET.tint = TINT_COMMERCIAL;
     MARKET.setDimensions(4, 4, 1);
-    MARKET.setBuildMaterials(WOOD, 4, COTTON, 2, ADOBE, 2);
+    MARKET.setBuildMaterials(WOOD, 4, COTTON, 2, STONE, 2);
     MARKET.setWorkerTypes(MERCHANT);
     MARKET.needed   = MARKET_GOODS;
     MARKET.features = new Good[] { IS_MARKET };
@@ -629,7 +644,7 @@ public class GameConstants {
     PORTER_POST.name = "Porter Post";
     PORTER_POST.tint = TINT_COMMERCIAL;
     PORTER_POST.setDimensions(3, 3, 1);
-    PORTER_POST.setBuildMaterials(WOOD, 4, ADOBE, 2, POTTERY, 2);
+    PORTER_POST.setBuildMaterials(WOOD, 4, STONE, 2, POTTERY, 2);
     PORTER_POST.setWorkerTypes(PORTER, WORKER);
     PORTER_POST.worksBeforeBuilt = true;
     PORTER_POST.features = new Good[] { IS_TRADER };
@@ -639,7 +654,7 @@ public class GameConstants {
     COLLECTOR.name = "Collector";
     COLLECTOR.tint = TINT_COMMERCIAL;
     COLLECTOR.setDimensions(2, 2, 1);
-    COLLECTOR.setBuildMaterials(ADOBE, 2, WOOD, 2, CLAY, 2);
+    COLLECTOR.setBuildMaterials(STONE, 2, WOOD, 2, CLAY, 2);
     COLLECTOR.setWorkerTypes(MERCHANT);
     COLLECTOR.produced = new Good[] { CASH };
     COLLECTOR.features = new Good[] { IS_ADMIN };
@@ -659,7 +674,7 @@ public class GameConstants {
     GARRISON.name = "Garrison";
     GARRISON.tint = TINT_MILITARY;
     GARRISON.setDimensions(6, 6, 2);
-    GARRISON.setBuildMaterials(ADOBE, 10, WOOD, 5);
+    GARRISON.setBuildMaterials(STONE, 10, WOOD, 5);
     GARRISON.setWorkerTypes(SOLDIER);
     GARRISON.maxWorkers = 2;
     GARRISON.maxHealth  = 250;
@@ -686,7 +701,7 @@ public class GameConstants {
     for (Type t : ALL_TEMPLES) {
       t.tint = TINT_RELIGIOUS;
       t.setDimensions(6, 6, 3);
-      t.setBuildMaterials(ADOBE, 15, POTTERY, 5);
+      t.setBuildMaterials(STONE, 15, POTTERY, 5);
       t.setWorkerTypes(PRIEST);
       t.maxWorkers      = 1;
       t.maxHealth       = 100;
@@ -696,17 +711,35 @@ public class GameConstants {
     }
     
     //
-    //  NOTE- there's a bunch of other shrines/upgrades I might add later, but
-    //  I want to work those out in due time.  Later.
+    //  NOTE- there's a bunch of other shrines/upgrades I might add
+    //  later, but I want to work those out in due time.  Later.
+    
+    //  Quetzalcoatl:
+    //    Aspects for healing & knowledge, travel & wind
+    //  Tezcatlipoca:
+    //    Aspects for discord, beauty, sin & confession
+    //  Tlaloc:
+    //    Aspects for rivers & oceans, growth & monsters
+    //  Huitzilipochtli:
+    //    Aspects for warfare & lordship, fire & hearth
+    //  Mictlantecuhtli:
+    //    Aspects for transmigration, ancestry & eclipse
+    //  Xipe Totec:
+    //    Aspects of decay & abundance, factional tension
+    //  
+    //  Ometeotl:     Synergy bonus based on factional balance
+    //  The Toci:     Synergy bonus for earth-goddesses
+    //  400 Rabbits:  Synergy bonus for regular festivals
+    
     for (Type t : ALL_SHRINES) {
       t.tint = TINT_RELIGIOUS;
       if (t == SHRINE_OMC || t == SHRINE_OMT) {
         t.setDimensions(2, 2, 1);
-        t.setBuildMaterials(ADOBE, 8);
+        t.setBuildMaterials(STONE, 8);
       }
       else {
         t.setDimensions(1, 1, 1);
-        t.setBuildMaterials(ADOBE, 2);
+        t.setBuildMaterials(STONE, 2);
       }
     }
   }
@@ -758,11 +791,11 @@ public class GameConstants {
     cityA.name = "Xochimilco";
     cityA.setWorldCoords(1, 1);
     cityA.tradeLevel.setWith(
-      POTTERY, 5f,
+      POTTERY, 5f ,
       COTTON , 10f
     );
     cityA.initBuildLevels(
-      GARRISON, 2f,
+      GARRISON, 2f ,
       HOUSE   , 10f
     );
     world.addCities(cityA);
@@ -770,8 +803,8 @@ public class GameConstants {
     cityB.name = "Tlacopan";
     cityB.setWorldCoords(3, 3);
     cityB.tradeLevel.setWith(
-      MAIZE, 5f,
-      CLAY, 10f
+      MAIZE, 5f ,
+      CLAY , 10f
     );
     cityA.initBuildLevels(
       GARRISON, 0.75f,
