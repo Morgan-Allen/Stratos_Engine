@@ -7,11 +7,6 @@ import static game.CityMap.*;
 
 
 
-//  TODO:  It would be convenient if this shared a common interface with
-//  CityMapDemands?
-
-
-
 public class CityMapFlagging {
   
   

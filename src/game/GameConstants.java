@@ -331,7 +331,7 @@ public class GameConstants {
     CROP_TYPES  [] = { MAIZE, FRUIT, RAW_COTTON },
     FOOD_TYPES  [] = { MAIZE, FRUIT, MEAT },
     STONE_TYPES [] = { CLAY, STONE  },
-    BUILD_GOODS [] = { WOOD, CLAY, STONE },
+    BUILD_GOODS [] = { CLAY, WOOD, STONE },
     HOME_GOODS  [] = { POTTERY, COTTON },
     MARKET_GOODS[] = (Good[]) Visit.compose(Good.class, FOOD_TYPES, HOME_GOODS),
     ALL_GOODS   [] = (Good[]) GOODS_LIST.toArray(Good.class),
@@ -757,6 +757,20 @@ public class GameConstants {
     Series <Actor> focused();
     boolean hasFocus();
   }
+  
+  /*
+  static interface Flagging {
+    
+    Object flagKey();
+    int amountAt(Tile t);
+    void setAmount(Tile t, int amount);
+    
+    static interface Filter { boolean filter(Tile t); }
+    Tile pickNearest(
+      Element from, int maxRange, float randomness, Filter filter
+    );
+  }
+  //*/
   
   static interface Trader {
     Tally <Good> tradeLevel();

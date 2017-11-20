@@ -264,11 +264,13 @@ public class BuildingForHome extends Building {
     if (! actor.adult()) {
       returnActorHere(actor);
     }
+    /*
     //
     //  See if you can repair your own home:
     if (TaskBuilding.pickBuildTask(actor, this, new Batch(this))) {
       return;
     }
+    //*/
     //
     //  Failing that, see if you can go shopping:
     Type tier = tierOffset(1);

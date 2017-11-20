@@ -35,8 +35,8 @@ public class CityMapDemands {
   }
   
   
-  CityMap map;
-  Object key;
+  final CityMap map;
+  final Object key;
   
   Node root;
   int total;
@@ -50,6 +50,69 @@ public class CityMapDemands {
     Vec2D c = root.area.centre();
     root.x  = (int) c.x;
     root.y  = (int) c.y;
+  }
+  
+  
+  void loadState(Session s) throws Exception {
+    root = (Node) loadEntry(s);
+    total = s.loadInt();
+  }
+  
+  
+  void saveState(Session s) throws Exception {
+    saveEntry(root, s);
+    s.saveInt(total);
+  }
+  
+  
+  Entry loadEntry(Session s) throws Exception {
+    int t = s.loadInt();
+    if (t == -1) return null;
+    
+    Entry e = t == 0 ? new Entry() : new Node();
+    e.x = s.loadInt();
+    e.y = s.loadInt();
+    e.amount = s.loadFloat();
+    e.source = s.loadObject();
+    
+    if (t == 1) {
+      Node n = (Node) e;
+      n.size = s.loadInt();
+      n.area.loadFrom(s.input());
+      
+      for (int k = s.loadInt(); k-- > 0;) {
+        Entry kid = loadEntry(s);
+        kid.parent = n;
+        n.kids.add(kid);
+      }
+    }
+    
+    return e;
+  }
+  
+  
+  void saveEntry(Entry e, Session s) throws Exception {
+    if (e == null) {
+      s.saveInt(-1);
+      return;
+    }
+    
+    s.saveInt(e.leaf() ? 0 : 1);
+    s.saveInt(e.x);
+    s.saveInt(e.y);
+    s.saveFloat (e.amount);
+    s.saveObject(e.source);
+    
+    if (! e.leaf()) {
+      Node n = (Node) e;
+      s.saveInt(n.size);
+      n.area.saveTo(s.output());
+      
+      s.saveInt(n.kids.size());
+      for (Entry kid : n.kids) {
+        saveEntry(kid, s);
+      }
+    }
   }
   
   

@@ -30,6 +30,7 @@ public class CityMap implements Session.Saveable {
   final CityMapTerrain  terrain  = new CityMapTerrain (this);
   Table <City, Tile           > transitPoints = new Table();
   Table <Type, CityMapFlagging> flagging      = new Table();
+  Table <String, CityMapDemands> demands = new Table();
   
   List <Building> buildings = new List();
   List <Actor   > actors    = new List();
@@ -74,6 +75,13 @@ public class CityMap implements Session.Saveable {
       flagging.put(key, forKey);
     }
     
+    for (int n = s.loadInt(); n-- > 0;) {
+      String key = s.loadString();
+      CityMapDemands forKey = new CityMapDemands(this, key);
+      forKey.loadState(s);
+      demands.put(key, forKey);
+    }
+    
     s.loadObjects(buildings);
     s.loadObjects(actors   );
     
@@ -108,6 +116,12 @@ public class CityMap implements Session.Saveable {
     for (Type key : flagging.keySet()) {
       s.saveObject(key);
       flagging.get(key).saveState(s);
+    }
+    
+    s.saveInt(demands.size());
+    for (String key : demands.keySet()) {
+      s.saveString(key);
+      demands.get(key).saveState(s);
     }
     
     s.saveObjects(buildings);

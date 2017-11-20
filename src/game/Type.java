@@ -184,8 +184,18 @@ public class Type extends Index.Entry implements Session.Saveable {
   }
   
   
+  boolean isFixture() {
+    return category == IS_FIXTURE;
+  }
+  
+  
   boolean isBuilding() {
     return category >= IS_BUILDING && category < IS_ACTOR;
+  }
+  
+  
+  boolean isActor() {
+    return category >= IS_ACTOR;
   }
   
   

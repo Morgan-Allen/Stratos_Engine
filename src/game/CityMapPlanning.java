@@ -12,6 +12,7 @@ public class CityMapPlanning {
   
   final CityMap map;
   Type grid[][];
+  List <Element> toPlace = new List();
   
   
   
@@ -21,6 +22,7 @@ public class CityMapPlanning {
   
   
   void loadState(Session s) throws Exception {
+    s.loadObjects(toPlace);
     for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
       grid[c.x][c.y] = (Type) s.loadObject();
     }
@@ -28,6 +30,7 @@ public class CityMapPlanning {
   
   
   void saveState(Session s) throws Exception {
+    s.saveObjects(toPlace);
     for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
       s.saveObject(grid[c.x][c.y]);
     }
@@ -42,7 +45,15 @@ public class CityMapPlanning {
   void placeObject(Type type, Tile t) {
     for (Coord c : Visit.grid(t.x, t.y, type.wide, type.high, 1)) {
       grid[c.x][c.y] = type;
-      checkNeedForBuilding(t);
+    }
+    
+    Element e = (Element) type.generate();
+    e.setLocation(t);
+    toPlace.add(e);
+    
+    for (Good m : type.builtFrom) {
+      CityMapDemands d = TaskBuilding2.demandsFor(m, map);
+      TaskBuilding2.checkNeedForBuilding(e, m, d);
     }
   }
   
@@ -52,18 +63,21 @@ public class CityMapPlanning {
   }
   
   
+  
+  /*
   boolean checkNeedForBuilding(Tile t) {
     Type type = objectAt(t);
     Element above = t.above;
     if (above == null || above.type != type || above.buildLevel() < 1) {
-      map.flagType(NEED_BUILD, t.x, t.y, true);
+      //map.flagType(NEED_BUILD, t.x, t.y, true);
       return true;
     }
     else {
-      map.flagType(NEED_BUILD, t.x, t.y, false);
+      //map.flagType(NEED_BUILD, t.x, t.y, false);
       return false;
     }
   }
+  //*/
   
   
   

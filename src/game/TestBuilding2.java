@@ -20,11 +20,9 @@ public class TestBuilding2 extends Test {
     CityMap map = setupTestCity(16);
     map.settings.toggleFog = false;
     
-    //*
     Building mason = (Building) MASON.generate();
     mason.enterMap(map, 9, 6, 1);
     fillWorkVacancies(mason);
-    //*/
     
     Batch <Tile> toPave = new Batch();
     for (Coord c : Visit.grid(2, 2, 10, 1, 1)) {

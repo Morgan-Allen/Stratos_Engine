@@ -16,7 +16,6 @@ public class TestDemands {
     CityMap map = Test.setupTestCity(32);
     CityMapDemands demands = new CityMapDemands(map, "AAA");
     
-    
     class TestItem {
       int x, y, amount;
       public String toString() { return x+"|"+y; }

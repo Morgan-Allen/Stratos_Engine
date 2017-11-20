@@ -19,7 +19,7 @@ public class Element implements Session.Saveable, Target {
   private float buildLevel = -1;
   
   private List <Actor> focused = null;
-  Object pathFlag;  //  Note- this is used purely during path-searches, and
+  Object pathFlag;  //  Note- this is used purely during path-searches,
                     //  doesn't have to be saved or loaded.
   
   

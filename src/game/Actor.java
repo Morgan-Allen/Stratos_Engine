@@ -407,6 +407,12 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   }
   
   
+  float carried(Good g) {
+    if (this.carried == g) return carryAmount;
+    return 0;
+  }
+  
+  
   public void onArrival(City goes, World.Journey journey) {
     if (goes.map != null) {
       Tile entry = CityBorders.findTransitPoint(goes.map, journey.from);

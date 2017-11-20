@@ -109,11 +109,13 @@ public class BuildingForCrafts extends Building {
       actor.assignTask(building2);
       return;
     }
+    /*
     //
     //  Try and find a nearby building to construct:
     if (TaskBuilding.pickBuildTask(actor, this, map.buildings)) {
       return;
     }
+    //*/
     //
     //  Go here if you aren't already:
     if (! actorIsHereWithPrompt(actor)) return;
