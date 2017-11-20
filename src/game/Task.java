@@ -160,6 +160,7 @@ public class Task implements Session.Saveable {
   
   
   static boolean hasTaskFocus(Target t, JOB type) {
+    if (t.focused().empty()) return false;
     for (Actor a : t.focused()) if (a.jobType() == type) return true;
     return false;
   }

@@ -380,7 +380,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     if (store == null || carried == null || amount <= 0) return;
     
     store.inventory.add(0 - amount, carried);
-    setCarried(carried, amount);
+    incCarried(carried, amount);
   }
   
   
@@ -395,7 +395,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   }
   
   
-  void setCarried(Good carried, float amount) {
+  void incCarried(Good carried, float amount) {
     if (this.carried != carried) this.carryAmount = 0;
     this.carried      = carried;
     this.carryAmount += amount ;

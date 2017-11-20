@@ -26,12 +26,18 @@ public class TestBuilding2 extends Test {
     mason.inventory.set(STONE, 10);
     
     Batch <Tile> toPave = new Batch();
+    float stoneLeft = mason.inventory.valueFor(STONE);
     for (Coord c : Visit.grid(2, 2, 10, 1, 1)) {
       Tile t = map.tileAt(c);
       map.planning.placeObject(ROAD, t);
       toPave.add(t);
+      stoneLeft -= ROAD.materialNeed(STONE);
     }
+    
+    float matDiff = -1;
     boolean buildingOkay = false;
+    boolean materialOkay = false;
+    boolean testOkay     = false;
     
     
     while (map.time < 1000 || graphics) {
@@ -44,20 +50,35 @@ public class TestBuilding2 extends Test {
             allBuilt = false;
           }
         }
-        
-        if (allBuilt) {
-          I.say("\nBUILDING TEST CONCLUDED SUCCESSFULLY!");
-          buildingOkay = true;
-          if (! graphics) return true;
-        }
+        buildingOkay = allBuilt;
+      }
+      
+      if (! materialOkay) {
+        matDiff = mason.inventory.valueFor(STONE) - stoneLeft;
+        for (Actor a : mason.workers) matDiff += a.carried(STONE);
+        if (Nums.abs(matDiff) < 0.1f) materialOkay = true;
+      }
+      
+      if (buildingOkay && materialOkay && ! testOkay) {
+        I.say("\nBUILDING TEST CONCLUDED SUCCESSFULLY!");
+        testOkay = true;
+        if (! graphics) return true;
       }
     }
     
     I.say("\nBUILDING TEST FAILED!");
+    I.say("  Building okay: "+buildingOkay);
+    I.say("  Material okay: "+materialOkay);
+    I.say("  Material diff: "+matDiff);
+    
     return false;
   }
   
 }
+
+
+
+
 
 
 

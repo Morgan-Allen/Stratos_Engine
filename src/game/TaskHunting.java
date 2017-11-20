@@ -76,7 +76,7 @@ public class TaskHunting extends Task {
     }
     else {
       float yield = ActorAsAnimal.meatYield(prey);
-      actor.setCarried(MEAT, yield);
+      actor.incCarried(MEAT, yield);
       configTask(store, store, null, JOB.DELIVER, 0);
     }
   }
