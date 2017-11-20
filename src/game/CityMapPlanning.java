@@ -63,24 +63,6 @@ public class CityMapPlanning {
   }
   
   
-  
-  /*
-  boolean checkNeedForBuilding(Tile t) {
-    Type type = objectAt(t);
-    Element above = t.above;
-    if (above == null || above.type != type || above.buildLevel() < 1) {
-      //map.flagType(NEED_BUILD, t.x, t.y, true);
-      return true;
-    }
-    else {
-      //map.flagType(NEED_BUILD, t.x, t.y, false);
-      return false;
-    }
-  }
-  //*/
-  
-  
-  
 
   
   /**  Some helper methods for dealing with infrastructure:

@@ -51,7 +51,12 @@ public class TaskBuilding2 extends Task {
     */
   static CityMapDemands demandsFor(Good m, CityMap map) {
     String key = "need_build_"+m.name;
-    return map.demands.get(key);
+    CityMapDemands d = map.demands.get(key);
+    if (d == null) {
+      d = new CityMapDemands(map, key);
+      map.demands.put(key, d);
+    }
+    return d;
   }
   
   
@@ -76,7 +81,7 @@ public class TaskBuilding2 extends Task {
       float need = b.type.materialNeed(m);
       if (need == 0) return 0;
       if (a != 0) b.incBuildLevel(a / need);
-      return b.buildLevel() * need;
+      return Nums.clamp(b.buildLevel(), 0, 1) * need;
     }
     if (b.type.isBuilding()) {
       Building site = (Building) b;
@@ -95,8 +100,10 @@ public class TaskBuilding2 extends Task {
   
   /**  Setup and config methods exclusive to the task itself:
     */
-  static TaskBuilding2 configBuilding2(Building store, Actor a) {
-    TaskBuilding2 task = new TaskBuilding2(a, store, null);
+  static TaskBuilding2 configBuilding2(
+    Building store, Actor a, Good material
+  ) {
+    TaskBuilding2 task = new TaskBuilding2(a, store, material);
     return task.pickNextTarget(false) ? task : null;
   }
   
@@ -169,17 +176,22 @@ public class TaskBuilding2 extends Task {
   
   /**  Methods invoked once you arrive at the site:
     */
-  protected void onTarget(Target target) {
-    if (target == store) {
+  protected void onVisit(Building visits) {
+    //  TODO:  This might not work if the store isn't built yet!
+    if (visits == store) {
       //
       //  Pick up some of the material, then go on to the site-
       float amount = Nums.min(5, store.inventory.valueFor(material));
       actor.pickupGood(material, amount, store);
       configTask(store, null, site, JOB.BUILDING, 1);
     }
-    else if (target == site) {
+  }
+  
+  
+  protected void onTarget(Target target) {
+    if (target == site) {
       CityMapDemands demands = demandsFor(material, actor.map);
-      advanceBuilding(site);
+      advanceBuilding(site, demands);
       
       if (checkNeedForBuilding(site, material, demands) != 0) {
         configTask(store, null, site, JOB.BUILDING, 1);
@@ -191,17 +203,24 @@ public class TaskBuilding2 extends Task {
   }
   
   
-  void advanceBuilding(Element b) {
+  void advanceBuilding(Element b, CityMapDemands demands) {
     
-    CityMapDemands demands = demandsFor(material, actor.map);
+    CityMap map = demands.map;
+    Tile at = b.at();
+    
     float totalNeed = 0, totalDone = 0;
     boolean didWork = false;
     
-    for (Good g : b.type.buildsWith) {
+    
+    for (Good g : b.type.builtFrom) {
+      
       float amountGap = checkNeedForBuilding(b, g, demands);
       float amountGot = getCarryAmount(g, b, false);
-      
       if (amountGap <= 0 || amountGot <= 0) continue;
+      
+      if (amountGap > 0 && ! b.onMap()) {
+        b.enterMap(map, at.x, at.y, 0);
+      }
       
       if (g == material) {
         float puts = Nums.clamp(amountGap, -0.1f, 0.1f);
@@ -213,6 +232,10 @@ public class TaskBuilding2 extends Task {
       
       totalNeed += b.type.materialNeed(g);
       totalDone += getBuildAmount(b, g);
+      
+      if (amountGap < 0 && b.onMap()) {
+        b.exitMap(map);
+      }
     }
     
     if (actor.reports()) {

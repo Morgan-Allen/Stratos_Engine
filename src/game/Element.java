@@ -101,6 +101,11 @@ public class Element implements Session.Saveable, Target {
   }
   
   
+  boolean onMap() {
+    return map != null;
+  }
+  
+  
   public Tile at() {
     return at;
   }

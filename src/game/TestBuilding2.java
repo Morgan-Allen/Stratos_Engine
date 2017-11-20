@@ -23,6 +23,7 @@ public class TestBuilding2 extends Test {
     Building mason = (Building) MASON.generate();
     mason.enterMap(map, 9, 6, 1);
     fillWorkVacancies(mason);
+    mason.inventory.set(STONE, 10);
     
     Batch <Tile> toPave = new Batch();
     for (Coord c : Visit.grid(2, 2, 10, 1, 1)) {

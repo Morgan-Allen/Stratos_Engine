@@ -501,7 +501,6 @@ public class GameConstants {
     ROAD.setDimensions(1, 1, 0);
     ROAD.setBuildMaterials(STONE, 1);
     
-    
     //
     //  Palace structures:
     PALACE.name = "Palace";

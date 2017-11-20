@@ -187,18 +187,9 @@ public class CityMapDemands {
   
   
   void deleteEntry(Entry e) {
-    //
-    //  Delete this entry from its parent:
-    Node par = e.parent;
-    par.kids.remove(e);
-    //
-    //  If this means the parent is empty, delete that in turn, and so on up
-    //  the tree-
-    while (par != null && par.kids.empty()) {
-      Node above = par.parent;
-      above.kids.remove(par);
-      par = above;
-    }
+    if (e.parent == null) return;
+    e.parent.kids.remove(e);
+    if (e.parent.kids.size() == 0) deleteEntry(e.parent);
   }
   
   
@@ -269,6 +260,7 @@ public class CityMapDemands {
       }
       
       public Entry next() {
+        
         while (sorting.size() > 0) {
           Entry e = sorting.removeLeast();
           if (e.leaf()) {
@@ -285,7 +277,7 @@ public class CityMapDemands {
       public Iterator<Entry> iterator() { return this; }
     }
     iteration i = new iteration();
-    i.addEntry(root);
+    if (root.kids.size() > 0) i.addEntry(root);
     return i;
   }
   
