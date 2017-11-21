@@ -272,6 +272,10 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   
   void setLocation(Tile at) {
+    if (! onMap()) {
+      super.setLocation(at);
+      return;
+    }
     Tile old = this.at();
     super.setLocation(at);
     map.flagActor(this, old, false);

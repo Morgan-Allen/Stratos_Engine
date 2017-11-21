@@ -64,6 +64,11 @@ public class Element implements Session.Saveable, Target {
   }
   
   
+  void setLocation(Tile at) {
+    this.at = at;
+  }
+  
+  
   void enterMap(CityMap map, int x, int y, float buildLevel) {
     this.map = map;
     setLocation(map.tileAt(x, y));
@@ -88,11 +93,6 @@ public class Element implements Session.Saveable, Target {
     
     setLocation(null);
     this.map = null;
-  }
-  
-  
-  void setLocation(Tile at) {
-    this.at = at;
   }
   
   

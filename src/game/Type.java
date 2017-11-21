@@ -94,8 +94,8 @@ public class Type extends Index.Entry implements Session.Saveable {
   
   Good    yields      = null;
   float   yieldAmount = 0;
-  Good    builtFrom  [] = NO_GOODS;
-  Integer builtAmount[] = {};
+  Good    builtFrom  [] = EMPTY_MATERIAL;
+  Integer builtAmount[] = { 1 };
   
   boolean blocks   = true ;
   boolean paved    = false;

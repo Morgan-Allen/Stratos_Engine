@@ -104,12 +104,10 @@ public class BuildingForCrafts extends Building {
   public void selectActorBehaviour(Actor actor) {
     //
     //  Different construction approach...
-    for (Good g : type.buildsWith) {
-      Task building = TaskBuilding2.configBuilding2(this, actor, g);
-      if (building != null) {
-        actor.assignTask(building);
-        return;
-      }
+    Task building = TaskBuilding2.nextBuildingTask(this, actor);
+    if (building != null) {
+      actor.assignTask(building);
+      return;
     }
     //
     //  Go here if you aren't already:

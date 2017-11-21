@@ -181,6 +181,71 @@ public class GameConstants {
   ;
   
   
+  
+  /**  Economic constants-
+    */
+  private static List <Good> GOODS_LIST = new List();
+  static class Good extends Type {
+    
+    int price;
+    
+    Good(String name, int price) {
+      super("good_"+name.toLowerCase().replace(' ', '_'), IS_GOOD);
+      if (price != -1) GOODS_LIST.add(this);
+      this.name   = name ;
+      this.price  = price;
+      this.blocks = false;
+    }
+  }
+  final public static Good
+    WATER      = new Good("Water"       , 0  ),
+    MAIZE      = new Good("Maize"       , 10 ),
+    FRUIT      = new Good("Fruit"       , 12 ),
+    MEAT       = new Good("Meat"        , 35 ),
+    RAW_COTTON = new Good("Raw Cotton"  , 15 ),
+    WOOD       = new Good("Wood"        , 10 ),
+    CLAY       = new Good("Clay"        , 10 ),
+    STONE      = new Good("Stone"       , 20 ),
+    
+    POTTERY    = new Good("Pottery"     , 50 ),
+    COTTON     = new Good("Cotton"      , 75 ),
+    
+    CASH       = new Good("Cash"        , 1  ),
+    SOIL       = new Good("Soil"        , 5  ),
+    NOTHING    = new Good("Nothing"     , 0  ),
+    
+    NEED_BUILD = new Good("Need Build"  , -1),
+    NEED_PLANT = new Good("Need Plant"  , -1),
+    
+    IS_CROP    = new Good("Is Crop"     , -1),
+    IS_TREE    = new Good("Is Tree"     , -1),
+    IS_WATER   = new Good("Is Water"    , -1),
+    IS_STONE   = new Good("Is Stone"    , -1),
+    
+    IS_ADMIN   = new Good("Is Admin"    , -1),
+    IS_MARKET  = new Good("Is Market"   , -1),
+    IS_TRADER  = new Good("Is Trader"   , -1),
+    IS_HOUSING = new Good("Is Housing"  , -1),
+    
+    DIVERSION  = new Good("Diversion"   , -1),
+    EDUCATION  = new Good("Education"   , -1),
+    HEALTHCARE = new Good("Healthcare"  , -1),
+    RELIGION   = new Good("Religion"    , -1),
+    
+    CROP_TYPES  [] = { MAIZE, FRUIT, RAW_COTTON },
+    FOOD_TYPES  [] = { MAIZE, FRUIT, MEAT },
+    STONE_TYPES [] = { CLAY, STONE  },
+    BUILD_GOODS [] = { CLAY, WOOD, STONE },
+    HOME_GOODS  [] = { POTTERY, COTTON },
+    MARKET_GOODS[] = (Good[]) Visit.compose(Good.class, FOOD_TYPES, HOME_GOODS),
+    ALL_GOODS   [] = (Good[]) GOODS_LIST.toArray(Good.class),
+    
+    COMMERCE_TYPES[] = { IS_ADMIN, IS_TRADER, IS_MARKET, IS_HOUSING },
+    SERVICE_TYPES [] = { DIVERSION, EDUCATION, HEALTHCARE, RELIGION },
+    EMPTY_MATERIAL[] = { NOTHING },
+    NO_GOODS      [] = new Good[0];
+  
+  
 
   private static List <Terrain> TERRAINS_LIST = new List();
   static class Terrain extends Type {
@@ -274,73 +339,7 @@ public class GameConstants {
       s.lifespan = s.predator ? HUNTER_LIFESPAN : GRAZER_LIFESPAN;
       s.mobile   = true;
     }
-  }
-  
-  
-  
-  /**  Economic constants-
-    */
-  private static List <Good> GOODS_LIST = new List();
-  static class Good extends Type {
     
-    int price;
-    
-    Good(String name, int price, int ID) {
-      super("good_"+ID, IS_GOOD);
-      
-      if (price != -1) GOODS_LIST.add(this);
-      this.name   = name ;
-      this.price  = price;
-      this.blocks = false;
-    }
-  }
-  final public static Good
-    WATER      = new Good("Water"       , 0 , 0 ),
-    MAIZE      = new Good("Maize"       , 10, 1 ),
-    FRUIT      = new Good("Fruit"       , 12, 2 ),
-    MEAT       = new Good("Meat"        , 35, 3 ),
-    RAW_COTTON = new Good("Raw Cotton"  , 15, 4 ),
-    WOOD       = new Good("Wood"        , 10, 5 ),
-    CLAY       = new Good("Clay"        , 10, 6 ),
-    STONE      = new Good("Stone"       , 20, 7 ),
-    
-    POTTERY    = new Good("Pottery"     , 50, 9 ),
-    COTTON     = new Good("Cotton"      , 75, 10),
-    
-    CASH       = new Good("Cash"        , 1 , 11),
-    SOIL       = new Good("Soil"        , 5 , 12),
-    
-    NEED_BUILD = new Good("Need Build"  , -1, 16),
-    NEED_PLANT = new Good("Need Plant"  , -1, 17),
-    
-    IS_CROP    = new Good("Is Crop"     , -1, 18),
-    IS_TREE    = new Good("Is Tree"     , -1, 19),
-    IS_WATER   = new Good("Is Water"    , -1, 20),
-    IS_STONE   = new Good("Is Stone"    , -1, 21),
-    
-    IS_ADMIN   = new Good("Is Admin"    , -1, 22),
-    IS_MARKET  = new Good("Is Market"   , -1, 23),
-    IS_TRADER  = new Good("Is Trader"   , -1, 24),
-    IS_HOUSING = new Good("Is Housing"  , -1, 25),
-    
-    DIVERSION  = new Good("Diversion"   , -1, 30),
-    EDUCATION  = new Good("Education"   , -1, 31),
-    HEALTHCARE = new Good("Healthcare"  , -1, 32),
-    RELIGION   = new Good("Religion"    , -1, 33),
-    
-    CROP_TYPES  [] = { MAIZE, FRUIT, RAW_COTTON },
-    FOOD_TYPES  [] = { MAIZE, FRUIT, MEAT },
-    STONE_TYPES [] = { CLAY, STONE  },
-    BUILD_GOODS [] = { CLAY, WOOD, STONE },
-    HOME_GOODS  [] = { POTTERY, COTTON },
-    MARKET_GOODS[] = (Good[]) Visit.compose(Good.class, FOOD_TYPES, HOME_GOODS),
-    ALL_GOODS   [] = (Good[]) GOODS_LIST.toArray(Good.class),
-    
-    COMMERCE_TYPES[] = { IS_ADMIN, IS_TRADER, IS_MARKET, IS_HOUSING },
-    SERVICE_TYPES [] = { DIVERSION, EDUCATION, HEALTHCARE, RELIGION },
-    NO_GOODS      [] = new Good[0];
-  
-  static {
     int i = 0;
     for (Good c : CROP_TYPES) {
       c.tint = TINT_CROPS[i++ % 3];
@@ -370,6 +369,7 @@ public class GameConstants {
       c.yieldAmount = 1f;
     }
   }
+  
   
   
   /**  Walker types-
@@ -721,7 +721,7 @@ public class GameConstants {
     //    Aspects for rivers & oceans, growth & monsters
     //  Huitzilipochtli:
     //    Aspects for warfare & lordship, fire & hearth
-    //  Mictlantecuhtli:
+    //  Mictecacehuatl:
     //    Aspects for transmigration, ancestry & eclipse
     //  Xipe Totec:
     //    Aspects of decay & abundance, factional tension

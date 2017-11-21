@@ -4,7 +4,6 @@ package game;
 import util.*;
 import static game.CityMap.*;
 import static game.GameConstants.*;
-import game.GameConstants.Target;
 
 
 
@@ -50,7 +49,7 @@ public class TaskBuilding2 extends Task {
     *  structures that need attention:
     */
   static CityMapDemands demandsFor(Good m, CityMap map) {
-    String key = "need_build_"+m.name;
+    String key = "build_"+m.name;
     CityMapDemands d = map.demands.get(key);
     if (d == null) {
       d = new CityMapDemands(map, key);
@@ -61,9 +60,9 @@ public class TaskBuilding2 extends Task {
   
   
   static float checkNeedForBuilding(Element b, Good w, CityMapDemands map) {
-    
+    if (! b.onMap()) return 0;
     Tile at = b.at();
-    boolean raze = map.map.planning.objectAt(at) != b.type;
+    boolean raze = map.map.planning.objectAt(at) != b;
     
     int   need       = raze ? 0 : b.type.materialNeed(w);
     float amountDone = getBuildAmount(b, w);
@@ -100,7 +99,21 @@ public class TaskBuilding2 extends Task {
   
   /**  Setup and config methods exclusive to the task itself:
     */
-  static TaskBuilding2 configBuilding2(
+  static Task nextBuildingTask(Building store, Actor a) {
+    
+    Task razing = TaskBuilding2.configBuilding(store, a, NOTHING);
+    if (razing != null) return razing;
+    
+    for (Good g : store.type.buildsWith) {
+      Task building = TaskBuilding2.configBuilding(store, a, g);
+      if (building != null) return building;
+    }
+    
+    return null;
+  }
+  
+  
+  static TaskBuilding2 configBuilding(
     Building store, Actor a, Good material
   ) {
     TaskBuilding2 task = new TaskBuilding2(a, store, material);
@@ -225,72 +238,83 @@ public class TaskBuilding2 extends Task {
   
   
   void advanceBuilding(Element b, CityMapDemands demands) {
-    
+    //
+    //  First, we ascertain how much raw material we have, and how much
+    //  building needs to be done-
     CityMap map = demands.map;
     Tile at = b.at();
-    float totalNeed = 0, totalDone = 0;
-    boolean didWork = false;
-    
+    float amountPut = 0;
+    float amountGap = checkNeedForBuilding(b, material, demands);
+    float amountGot = getCarryAmount(material, b, false);
     //
-    //  We iterate over all building-materials to see how many must be
-    //  delivered to complete the building, and increment in the case of
-    //  our current working-material.
-    //  NOTE:  Fixtures are assumed to only use one material!
+    //  We do some basic sanity checks to ensure our effort isn't
+    //  wasted, and introduce the structure if required:
+    if (amountGap == 0 || (amountGap > 0 && amountGot <= 0)) {
+      return;
+    }
+    if (amountGap > 0 && ! b.onMap()) {
+      b.enterMap(map, at.x, at.y, 0);
+    }
+    //
+    //  We see how much work we can do in this action, either to raze or
+    //  to build, and adjust progress/stocks accordingly-
+    float puts = Nums.clamp(amountGap, -0.1f, 0.1f);
+    puts = Nums.min(puts, amountGot);
+    incBuildAmount(puts, material, b);
+    incCarryAmount(0 - puts, material, b, false);
+    amountPut = puts;
+    //
+    //  Buildings get some special treatment, since their level of
+    //  completion may be a function of multiple materials-
+    float totalNeed = 0, totalDone = 0;
     for (Good g : b.type.builtFrom) {
-      float amountGap = checkNeedForBuilding(b, g, demands);
-      float amountGot = getCarryAmount(g, b, false);
-      if (amountGap == 0 || amountGot <= 0) continue;
-      
-      if (g == material) {
-        if (amountGap > 0 && ! b.onMap()) {
-          b.enterMap(map, at.x, at.y, 0);
-        }
-        
-        float puts = Nums.clamp(amountGap, -0.1f, 0.1f);
-        puts = Nums.min(puts, amountGot);
-        incBuildAmount(puts, g, b);
-        incCarryAmount(0 - puts, g, b, false);
-        didWork = true;
-        
-        if (amountGap < 0 && b.onMap()) {
-          b.exitMap(map);
-        }
-      }
-      
       totalNeed += b.type.materialNeed(g);
       totalDone += getBuildAmount(b, g);
     }
-    
-    //  Buildings get some special treatment, since their level of
-    //  completion may be a function of multiple materials:
-    if (didWork && b.type.isBuilding()) {
+    if (amountPut != 0 && b.type.isBuilding()) {
       b.setBuildLevel(1f * (totalDone / totalNeed));
     }
-    
+    //
+    //  If we've depleted the structure entirely, remove it from the
+    //  world, report and exit:
+    if (b.buildLevel() <= 0 && b.onMap() && amountPut <= 0) {
+      checkNeedForBuilding(b, material, demands);
+      b.exitMap(map);
+    }
     if (actor.reports()) {
       I.say("Trying to build "+b);
-      I.say("  Progress? "+didWork+" "+I.percent(b.buildLevel()));
+      I.say("  Progress? "+amountPut+" "+I.percent(b.buildLevel()));
       I.say("  Did:      "+totalDone+"/"+totalNeed);
     }
   }
   
   
   float incCarryAmount(float a, Good m, Element b, boolean siteOnly) {
+    //
+    //  The default 'nothing' material gets special treatment:
+    if (m == NOTHING) return 100;
+    //
+    //  If we're recovering material, the actor keeps it:
     float total = 0;
-    
+    if (a > 0) {
+      actor.incCarried(material, a);
+      a = 0;
+    }
+    //
+    //  If we're depleting the material, take it from the actor first:
     if (actor.carried(m) > 0 && a < 0 && ! siteOnly) {
       float sub = Nums.min(actor.carryAmount, 0 - a);
       actor.incCarried(material, 0 - sub);
       a += sub;
     }
     total += actor.carried(m);
-    
+    //
+    //  And take from the building's stock as necessary:
     if (b.type.isBuilding()) {
       Building site = (Building) b;
       if (a != 0) site.inventory.add(a, m);
       total += site.inventory.valueFor(m);
     }
-    
     return total;
   }
   
