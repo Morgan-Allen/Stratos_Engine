@@ -5,6 +5,8 @@ import util.*;
 import static game.CityMap.*;
 import static game.GameConstants.*;
 
+import game.GameConstants.Good;
+
 
 
 public class Building extends Element implements Session.Saveable, Employer {
@@ -25,7 +27,6 @@ public class Building extends Element implements Session.Saveable, Employer {
   
   Tally <Type> materials = new Tally();
   Tally <Good> inventory = new Tally();
-  boolean complete = false;
   
   
   Building(Type type) {
@@ -47,7 +48,6 @@ public class Building extends Element implements Session.Saveable, Employer {
     
     s.loadTally(materials);
     s.loadTally(inventory);
-    complete = s.loadBool();
   }
   
   
@@ -64,7 +64,6 @@ public class Building extends Element implements Session.Saveable, Employer {
     
     s.saveTally(materials);
     s.saveTally(inventory);
-    s.saveBool(complete);
   }
   
   
@@ -76,11 +75,6 @@ public class Building extends Element implements Session.Saveable, Employer {
     map.buildings.add(this);
     selectEntrance();
     updateOnPeriod(0);
-    
-    for (Good g : type.builtFrom) {
-      int need = type.materialNeed(g);
-      materials.set(g, need * buildLevel);
-    }
   }
   
 
@@ -93,6 +87,16 @@ public class Building extends Element implements Session.Saveable, Employer {
     for (Actor w : residents) if (w.home == this) {
       w.home = null;
     }
+    for (Actor a : visitors) if (a.inside == this) {
+      a.setInside(this, false);
+      a.setLocation(entrance);
+    }
+    
+    if (! inventory.empty()) {
+      I.say(this+" exited with goods!");
+      I.say("  "+inventory);
+    }
+    
     entrance = null;
   }
   
@@ -115,37 +119,25 @@ public class Building extends Element implements Session.Saveable, Employer {
   /**  Construction and upgrade-related methods:
     */
   void onCompletion() {
-    complete = true;
-  }
-  
-  
-  boolean complete() {
-    return complete;
+    //
+    //  Absorb any actors within the site:
+    Tile at = at();
+    for (Coord c : Visit.grid(at.x, at.y, type.wide, type.high, 1)) {
+      Tile t = map.tileAt(c);
+      for (Actor a : t.inside()) {
+        a.setInside(this, true);
+      }
+    }
   }
   
   
   boolean accessible() {
-    return complete || type.worksBeforeBuilt;
-  }
-  
-  
-  float setBuildLevel(float level) {
-    float oldLevel = buildLevel();
-    level = super.setBuildLevel(level);
-    if (level >= 1 && level > oldLevel && ! complete) onCompletion();
-    return level;
-  }
-  
-  
-  void beginTeardown() {
-    complete = false;
-    map.buildings.remove(this);
-    entrance = null;
+    return complete() || type.worksBeforeBuilt;
   }
   
   
   float ambience() {
-    if (! complete) return 0;
+    if (! complete()) return 0;
     return type.ambience;
   }
   
@@ -203,10 +195,22 @@ public class Building extends Element implements Session.Saveable, Employer {
   /**  Utility methods for finding points of supply/demand:
     */
   float demandFor(Good g) {
-    int   need = type.materialNeed(g);
-    float hasB = materials.valueFor(g);
+    float need = razing() ? 0 : materialNeed(g);
+    float hasB = materialLevel(g);
     float hasG = inventory.valueFor(g);
     return need - (hasB + hasG);
+  }
+  
+  
+  float setMaterialLevel(Good material, float level) {
+    if (level == -1) {
+      return materials.valueFor(material);
+    }
+    else {
+      level = materials.set(material, level);
+      updateBuildState();
+      return level;
+    }
   }
   
   
@@ -301,7 +305,7 @@ public class Building extends Element implements Session.Saveable, Employer {
   void returnActorHere(Actor actor) {
     if (actorIsHere(actor)) return;
     Task t = new Task(actor);
-    if (complete) {
+    if (complete()) {
       t.configTask(this, this, null, Task.JOB.RETURNING, 0);
     }
     else {
@@ -312,7 +316,7 @@ public class Building extends Element implements Session.Saveable, Employer {
   
   
   boolean actorIsHere(Actor actor) {
-    if (complete) {
+    if (complete()) {
       return actor.inside == this;
     }
     else {

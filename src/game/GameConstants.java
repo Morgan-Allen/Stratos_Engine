@@ -212,8 +212,10 @@ public class GameConstants {
     
     CASH       = new Good("Cash"        , 1  ),
     SOIL       = new Good("Soil"        , 5  ),
-    NOTHING    = new Good("Nothing"     , 0  ),
     
+    //  Note- 'void' is used to mark foundations for clearing during
+    //  construction, and as a default build-material.
+    VOID       = new Good("Void"        ,  0),
     NEED_BUILD = new Good("Need Build"  , -1),
     NEED_PLANT = new Good("Need Plant"  , -1),
     
@@ -242,7 +244,7 @@ public class GameConstants {
     
     COMMERCE_TYPES[] = { IS_ADMIN, IS_TRADER, IS_MARKET, IS_HOUSING },
     SERVICE_TYPES [] = { DIVERSION, EDUCATION, HEALTHCARE, RELIGION },
-    EMPTY_MATERIAL[] = { NOTHING },
+    EMPTY_MATERIAL[] = { VOID },
     NO_GOODS      [] = new Good[0];
   
   
@@ -433,8 +435,8 @@ public class GameConstants {
     AMBIENCE_MAX =  20
   ;
   final static Type
-    ROAD     = new Type("type_road"    , IS_FIXTURE),
-    AQUEDUCT = new Type("type_aqueduct", IS_FIXTURE)
+    ROAD     = new Type("type_road"    , IS_STRUCTURAL),
+    AQUEDUCT = new Type("type_aqueduct", IS_STRUCTURAL)
   ;
   final static BuildType  
     
@@ -506,7 +508,8 @@ public class GameConstants {
     PALACE.name = "Palace";
     PALACE.tint = TINT_RESIDENTIAL;
     PALACE.setDimensions(5, 5, 2);
-    PALACE.setBuildMaterials(WOOD, 15, STONE, 25, COTTON, 10, POTTERY, 5);
+    PALACE.setBuildMaterials(CLAY, 5, WOOD, 15, STONE, 25);
+    PALACE.setHomeUsage(POTTERY, 5, COTTON, 10);
     PALACE.setWorkerTypes(NOBLE, SERVANT);
     PALACE.homeSocialClass = CLASS_NOBLE;
     PALACE.maxResidents = 2;
@@ -521,7 +524,6 @@ public class GameConstants {
     HOUSE.setDimensions(2, 2, 1);
     HOUSE.setBuildMaterials(WOOD, 2, CLAY, 1);
     HOUSE.setWorkerTypes(CITIZEN);
-    //HOUSE.worksBeforeBuilt = true;
     HOUSE.maxResidents = 4;
     HOUSE.maxStock     = 1;
     HOUSE.buildsWith   = new Good[] { WOOD, CLAY };
@@ -530,13 +532,13 @@ public class GameConstants {
     
     HOUSE_T1.name = "Improved House";
     HOUSE_T1.setBuildMaterials(WOOD, 4, CLAY, 2);
-    HOUSE_T1.homeUsed = new Good[] { POTTERY };
+    HOUSE_T1.setHomeUsage(POTTERY, 1);
     HOUSE_T1.maxStock = 2;
     HOUSE_T1.setUpgradeNeeds(DIVERSION, 10);
     
     HOUSE_T2.name = "Fancy House";
     HOUSE_T2.setBuildMaterials(WOOD, 6, CLAY, 3);
-    HOUSE_T2.homeUsed = new Good[] { POTTERY, COTTON };
+    HOUSE_T2.setHomeUsage(POTTERY, 1, COTTON, 1);
     HOUSE_T2.maxStock = 2;
     HOUSE_T2.setUpgradeNeeds(DIVERSION, 15, SCHOOL, 1);
     
@@ -578,6 +580,8 @@ public class GameConstants {
     MASON.craftTime *= 2;
     MASON.maxWorkers = 2;
     MASON.buildsWith = new Good[] { WOOD, CLAY, STONE };
+    MASON.needed     = MASON.buildsWith;
+    MASON.maxStock   = 10;
     
     FARM_PLOT.name = "Farm Plot";
     FARM_PLOT.tint = TINT_LITE_INDUSTRIAL;
@@ -624,7 +628,7 @@ public class GameConstants {
     WEAVER.name = "Weaver";
     WEAVER.tint = TINT_INDUSTRIAL;
     WEAVER.setDimensions(2, 2, 1);
-    WEAVER.setBuildMaterials(WOOD, 2, RAW_COTTON, 2, CLAY, 1);
+    WEAVER.setBuildMaterials(WOOD, 2, CLAY, 1);
     WEAVER.setWorkerTypes(WORKER);
     WEAVER.needed   = new Good[] { RAW_COTTON };
     WEAVER.produced = new Good[] { COTTON };
@@ -635,7 +639,7 @@ public class GameConstants {
     MARKET.name = "Marketplace";
     MARKET.tint = TINT_COMMERCIAL;
     MARKET.setDimensions(4, 4, 1);
-    MARKET.setBuildMaterials(WOOD, 4, COTTON, 2, STONE, 2);
+    MARKET.setBuildMaterials(WOOD, 4, STONE, 2);
     MARKET.setWorkerTypes(MERCHANT);
     MARKET.needed   = MARKET_GOODS;
     MARKET.features = new Good[] { IS_MARKET };
@@ -643,7 +647,7 @@ public class GameConstants {
     PORTER_POST.name = "Porter Post";
     PORTER_POST.tint = TINT_COMMERCIAL;
     PORTER_POST.setDimensions(3, 3, 1);
-    PORTER_POST.setBuildMaterials(WOOD, 4, STONE, 2, POTTERY, 2);
+    PORTER_POST.setBuildMaterials(WOOD, 4, STONE, 2);
     PORTER_POST.setWorkerTypes(PORTER, WORKER);
     PORTER_POST.worksBeforeBuilt = true;
     PORTER_POST.features = new Good[] { IS_TRADER };
@@ -663,7 +667,7 @@ public class GameConstants {
     HUNTER_LODGE.name = "Hunter Lodge";
     HUNTER_LODGE.tint = TINT_MILITARY;
     HUNTER_LODGE.setDimensions(4, 4, 1);
-    HUNTER_LODGE.setBuildMaterials(WOOD, 10, COTTON, 5);
+    HUNTER_LODGE.setBuildMaterials(WOOD, 10);
     HUNTER_LODGE.setWorkerTypes(HUNTER);
     HUNTER_LODGE.worksBeforeBuilt = true;
     HUNTER_LODGE.maxWorkers = 2;
@@ -700,7 +704,7 @@ public class GameConstants {
     for (Type t : ALL_TEMPLES) {
       t.tint = TINT_RELIGIOUS;
       t.setDimensions(6, 6, 3);
-      t.setBuildMaterials(STONE, 15, POTTERY, 5);
+      t.setBuildMaterials(STONE, 15);
       t.setWorkerTypes(PRIEST);
       t.maxWorkers      = 1;
       t.maxHealth       = 100;
@@ -751,6 +755,7 @@ public class GameConstants {
   
   static interface Target {
     Tile at();
+    boolean onMap();
     void targetedBy(Actor a);
     void setFocused(Actor a, boolean is);
     Series <Actor> focused();

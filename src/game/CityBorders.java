@@ -75,6 +75,7 @@ public class CityBorders {
   
   
   static void spawnMigrants(CityMap map, int period) {
+    if (! map.settings.toggleMigrate) return;
     Assessment a = new Assessment(map);
     
     float crowding = Nums.max(a.jobsCrowding, a.homeCrowding);

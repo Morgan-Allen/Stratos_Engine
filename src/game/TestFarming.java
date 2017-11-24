@@ -102,7 +102,7 @@ public class TestFarming extends Test {
         //  If that's true, we bump up maturation to speed up harvest:
         if (crops.size() > (numT * 0.9f)) {
           planted = true;
-          for (Element c : crops) c.setBuildLevel((3 + Rand.num()) / 4);
+          for (Element c : crops) c.setGrowLevel((3 + Rand.num()) / 4);
         }
       }
       //

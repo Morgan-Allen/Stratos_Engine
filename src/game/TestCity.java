@@ -126,11 +126,11 @@ public class TestCity extends Test {
       I.say("    Inventory: "+house.inventory);
     }
     I.say("\nTotal goods produced:");
-    for (Good g : HOUSE_T2.homeUsed) {
+    for (Good g : HOUSE_T2.homeUseGoods) {
       I.say("  "+g+": "+map.city.makeTotals.valueFor(g));
     }
     I.say("\nTotal goods consumed:");
-    for (Good g : HOUSE_T2.homeUsed) {
+    for (Good g : HOUSE_T2.homeUseGoods) {
       I.say("  "+g+": "+map.city.usedTotals.valueFor(g));
     }
   }

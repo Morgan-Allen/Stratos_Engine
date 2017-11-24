@@ -107,7 +107,7 @@ public class TaskGathering extends Task {
     if (actor.jobType() == JOB.PLANTING) {
       //
       //  First, initialise the crop:
-      above.setBuildLevel(0);
+      above.setGrowLevel(0);
       //
       //  Then pick another point to sow:
       if (! pickPlantPoint(store, actor, true, false)) {
@@ -117,8 +117,8 @@ public class TaskGathering extends Task {
     
     if (actor.jobType() == JOB.HARVEST) {
       
-      if      (above.type.isCrop      ) above.setBuildLevel(-1);
-      else if (above.type.growRate > 0) above.setBuildLevel( 0);
+      if      (above.type.isCrop      ) above.setGrowLevel(-1);
+      else if (above.type.growRate > 0) above.setGrowLevel( 0);
       
       actor.carried      = above.type.yields;
       actor.carryAmount += above.type.yieldAmount;

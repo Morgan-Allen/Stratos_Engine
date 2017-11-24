@@ -12,15 +12,24 @@ public class Element implements Session.Saveable, Target {
   
   /**  Data fields, construction and save/load methods-
     */
+  final static int
+    FLAG_SITED  = 1 << 0,
+    FLAG_BUILT  = 1 << 1,
+    FLAG_RAZING = 1 << 2,
+    FLAG_EXIT   = 1 << 3
+  ;
+  
   Type type;
   
   CityMap map;
   private Tile at;
-  private float buildLevel = -1;
+  private float growLevel = -1;
+  private int buildBits = 0;
+  int stateFlag = 0;
   
   private List <Actor> focused = null;
   Object pathFlag;  //  Note- this is used purely during path-searches,
-                    //  doesn't have to be saved or loaded.
+                    //  and doesn't have to be saved or loaded.
   
   
   Element(Type type) {
@@ -34,7 +43,9 @@ public class Element implements Session.Saveable, Target {
     type   = (Type) s.loadObject();
     map    = (CityMap) s.loadObject();
     at     = loadTile(map, s);
-    buildLevel = s.loadFloat();
+    growLevel = s.loadFloat();
+    buildBits = s.loadInt();
+    stateFlag = s.loadInt();
     
     if (s.loadBool()) s.loadObjects(focused = new List());
   }
@@ -45,7 +56,9 @@ public class Element implements Session.Saveable, Target {
     s.saveObject(type);
     s.saveObject(map);
     saveTile(at, map, s);
-    s.saveFloat(buildLevel);
+    s.saveFloat(growLevel);
+    s.saveInt(buildBits);
+    s.saveInt(stateFlag);
     
     s.saveBool(focused != null);
     if (focused != null) s.saveObjects(focused);
@@ -72,7 +85,11 @@ public class Element implements Session.Saveable, Target {
   void enterMap(CityMap map, int x, int y, float buildLevel) {
     this.map = map;
     setLocation(map.tileAt(x, y));
-    setBuildLevel(buildLevel);
+    
+    for (Good g : materials()) {
+      float need = materialNeed(g);
+      setMaterialLevel(g, need * buildLevel);
+    }
     
     for (Coord c : Visit.grid(x, y, type.wide, type.high, 1)) {
       Tile t = map.tileAt(c.x, c.y);
@@ -93,6 +110,7 @@ public class Element implements Session.Saveable, Target {
     
     setLocation(null);
     this.map = null;
+    stateFlag |= FLAG_EXIT;
   }
   
   
@@ -101,13 +119,168 @@ public class Element implements Session.Saveable, Target {
   }
   
   
-  boolean onMap() {
+  public boolean onMap() {
     return map != null;
   }
   
   
   public Tile at() {
     return at;
+  }
+  
+  
+  
+  /**  Growth and construction methods-
+    */
+  void updateGrowth() {
+    if (type.growRate > 0 && growLevel != -1) {
+      growLevel += SCAN_PERIOD * type.growRate / RIPEN_PERIOD;
+      growLevel = Nums.clamp(growLevel, 0, 1);
+    }
+  }
+  
+  
+  void setGrowLevel(float level) {
+    this.growLevel = level;
+  }
+  
+  
+  float growLevel() {
+    return growLevel;
+  }
+  
+  
+  void setFlagging(boolean is, Type key) {
+    if (key == null || type.mobile) return;
+    map.flagType(key, at.x, at.y, is);
+  }
+  
+  
+  Good[] materials() {
+    return type.builtFrom;
+  }
+  
+  
+  float materialNeed(Good g) {
+    int index = Visit.indexOf(g, type.builtFrom);
+    return index == -1 ? 0 : type.builtAmount[index];
+  }
+  
+  
+  void takeDamage(float damage) {
+    
+    float totalNeed = 0, totalHave = 0;
+    for (Good g : materials()) {
+      totalNeed += materialNeed(g);
+      totalHave += materialLevel(g);
+    }
+    float totalHealth = type.maxHealth * totalHave / totalNeed;
+    
+    for (Good g : materials()) {
+      float level = materialLevel(g);
+      float sub = level;
+      sub *= damage / totalHealth;
+      sub *= level / totalHave;
+      setMaterialLevel(g, level - sub);
+    }
+    
+    if (buildLevel() <= 0) {
+      exitMap(map);
+      setDestroyed();
+    }
+  }
+  
+  
+  float buildLevel() {
+    float totalNeed = 0, totalHave = 0;
+    for (Good g : materials()) {
+      totalNeed += materialNeed(g);
+      totalHave += materialLevel(g);
+    }
+    return totalHave / Nums.max(1, totalNeed);
+  }
+  
+  
+  float setMaterialLevel(Good material, float level) {
+    int index = Visit.indexOf(material, materials());
+    if (index == -1) return 0;
+    
+    int amount, shift = index * 8;
+    if (level == -1) {
+      amount = (buildBits >> shift) & 0xff;
+      return amount / 10f;
+    }
+    
+    amount = (int) (Nums.clamp(level, 0, 10) * 10);
+    buildBits &= ~(0xff   << shift);
+    buildBits |=  (amount << shift);
+    
+    updateBuildState();
+    return amount / 10f;
+  }
+  
+  
+  float materialLevel(Good material) {
+    return setMaterialLevel(material, -1);
+  }
+  
+  
+  float incMaterialLevel(Good material, float inc) {
+    float level = materialLevel(material) + inc;
+    return setMaterialLevel(material, level);
+  }
+  
+  
+  void updateBuildState() {
+    float buildLevel = buildLevel();
+    boolean wasBuilt = (stateFlag & FLAG_BUILT) != 0;
+    if (buildLevel >= 1) {
+      stateFlag |= FLAG_BUILT;
+      if (! wasBuilt) onCompletion();
+    }
+  }
+  
+  
+  void flagTeardown(boolean yes) {
+    if (yes) stateFlag |= FLAG_RAZING;
+    else stateFlag &= ~ FLAG_RAZING;
+  }
+  
+  
+  boolean complete() {
+    return (stateFlag & FLAG_BUILT) != 0;
+  }
+  
+  
+  boolean razing() {
+    return (stateFlag & FLAG_RAZING) != 0;
+  }
+  
+  
+  void onCompletion() {
+    if (at.inside().empty()) return;
+    //
+    //  Try and find a free spot to move any actors to:
+    Tile free = null;
+    for (Tile t : CityMap.adjacent(at, null, map, false)) {
+      if (! map.blocked(t.x, t.y)) { free = t; break; }
+    }
+    if (free == null) return;
+    //
+    //  Then shunt them over:
+    for (Actor a : at.inside()) {
+      a.setLocation(free);
+    }
+  }
+  
+  
+  boolean blocksPath() {
+    return complete() ? type.blocks : false;
+  }
+  
+  
+  float ambience() {
+    return type.ambience;
   }
   
   
@@ -157,62 +330,6 @@ public class Element implements Session.Saveable, Target {
   
   public void targetedBy(Actor w) {
     return;
-  }
-  
-  
-  
-  /**  Life cycle, combat and survival methods-
-    */
-  void updateGrowth() {
-    if (type.growRate > 0 && buildLevel != -1) {
-      incBuildLevel(SCAN_PERIOD * type.growRate / RIPEN_PERIOD);
-    }
-  }
-  
-  
-  void setFlagging(boolean is, Type key) {
-    if (key == null || type.mobile) return;
-    map.flagType(key, at.x, at.y, is);
-  }
-  
-  
-  void takeDamage(float damage) {
-    if (incBuildLevel(0 - damage / type.maxHealth) <= 0) {
-      exitMap(map);
-      setDestroyed();
-    }
-  }
-  
-  
-  float buildLevel() {
-    return buildLevel;
-  }
-  
-  
-  float incBuildLevel(float inc) {
-    return setBuildLevel(buildLevel + inc);
-  }
-  
-  
-  float setBuildLevel(float level) {
-    if (level == -1) {
-      buildLevel = -1;
-    }
-    else {
-      buildLevel = Nums.clamp(level, 0, 1.1f);
-    }
-    if (true) {
-      setFlagging(buildLevel >= 1, type.flagKey);
-    }
-    if (type.isCrop) {
-      setFlagging(buildLevel == -1, NEED_PLANT);
-    }
-    return buildLevel;
-  }
-  
-  
-  float ambience() {
-    return type.ambience;
   }
   
   

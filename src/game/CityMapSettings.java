@@ -19,6 +19,7 @@ public class CityMapSettings {
     toggleHunger  = true,
     toggleFatigue = true,
     toggleInjury  = true,
+    toggleMigrate = true,
     
     slowed    = false,
     speedUp   = false,

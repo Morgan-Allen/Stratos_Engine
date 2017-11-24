@@ -11,8 +11,6 @@ public class TaskBuilding2 extends Task {
   
   
   
-  final static int MAX_TRIES = 100;
-  
   Building store;
   Good material;
   Element site;
@@ -49,6 +47,9 @@ public class TaskBuilding2 extends Task {
     *  structures that need attention:
     */
   static CityMapDemands demandsFor(Good m, CityMap map) {
+    
+    //  TODO:  Improve the lookup speed here?
+    
     String key = "build_"+m.name;
     CityMapDemands d = map.demands.get(key);
     if (d == null) {
@@ -59,40 +60,27 @@ public class TaskBuilding2 extends Task {
   }
   
   
-  static float checkNeedForBuilding(Element b, Good w, CityMapDemands map) {
-    if (! b.onMap()) return 0;
+  static float checkNeedForBuilding(Element b, Good w, CityMap map) {
     Tile at = b.at();
-    boolean raze = map.map.planning.objectAt(at) != b;
+    if (at == null) return 0;
     
-    int   need       = raze ? 0 : b.type.materialNeed(w);
-    float amountDone = getBuildAmount(b, w);
+    Element onPlan  = map.planning.objectAt(at);
+    boolean natural = b.type.isNatural();
+    boolean raze    = onPlan != b && (onPlan != null || ! natural);
+    
+    b.flagTeardown(raze);
+    
+    float need       = raze ? 0 : b.materialNeed(w);
+    float amountDone = b.materialLevel(w);
     float amountGap  = need - amountDone;
     
+    if (natural && ! raze           ) amountGap = 0;
     if (need == 0 && amountDone <= 0) amountGap = 0;
-    map.setAmount(amountGap, b, at.x, at.y);
+    
+    CityMapDemands demands = demandsFor(w, map);
+    demands.setAmount(amountGap, b, at.x, at.y);
     
     return amountGap;
-  }
-  
-  
-  static float incBuildAmount(float a, Good m, Element b) {
-    if (b.type.isFixture()) {
-      float need = b.type.materialNeed(m);
-      if (need == 0) return 0;
-      if (a != 0) b.incBuildLevel(a / need);
-      return Nums.clamp(b.buildLevel(), 0, 1) * need;
-    }
-    if (b.type.isBuilding()) {
-      Building site = (Building) b;
-      if (a != 0) site.materials.add(a, m);
-      return site.materials.valueFor(m);
-    }
-    return 0;
-  }
-  
-  
-  static float getBuildAmount(Element b, Good m) {
-    return incBuildAmount(0, m, b);
   }
   
   
@@ -100,9 +88,10 @@ public class TaskBuilding2 extends Task {
   /**  Setup and config methods exclusive to the task itself:
     */
   static Task nextBuildingTask(Building store, Actor a) {
+    if (Visit.empty(store.type.buildsWith)) return null;
     
-    Task razing = TaskBuilding2.configBuilding(store, a, NOTHING);
-    if (razing != null) return razing;
+    Task clearing = TaskBuilding2.configBuilding(store, a, VOID);
+    if (clearing != null) return clearing;
     
     for (Good g : store.type.buildsWith) {
       Task building = TaskBuilding2.configBuilding(store, a, g);
@@ -124,7 +113,6 @@ public class TaskBuilding2 extends Task {
   boolean pickNextTarget(boolean near) {
     CityMap map = actor.map;
     Tile at = actor.at();
-    
     //
     //  Iterate over any structures demanding your attention and see if
     //  they're close enough to attend to:
@@ -138,9 +126,8 @@ public class TaskBuilding2 extends Task {
       Element source = (Element) e.source;
       if (CityMap.distance(source.at(), at) > maxRange  ) break;
       if (CityMap.distance(store .at(), at) > storeRange) continue;
-      if (decideNextAction(source, demands)) return true;
+      if (decideNextAction(source, map)) return true;
     }
-    
     //
     //  If there's no target to attend to, but you have surplus material
     //  left over, return it to your store:
@@ -150,31 +137,29 @@ public class TaskBuilding2 extends Task {
       razing = false;
       return true;
     }
-    
     return false;
   }
   
   
-  boolean decideNextAction(Element b, CityMapDemands d) {
+  boolean decideNextAction(Element b, CityMap map) {
     //
     //  Avoid piling up on the same target:
-    if (
-      b != site && b.type.isFixture() &&
-      Task.hasTaskFocus(b, JOB.BUILDING)
-    ) {
+    if (b != site && b.type.isFixture() && (
+      Task.hasTaskFocus(b, JOB.BUILDING) ||
+      Task.hasTaskFocus(b, JOB.SALVAGE )
+    )) {
       return false;
     }
     
-    boolean onSite = actor.inside == store;
-    float atStore = store.inventory.valueFor(material);
-    float needBuild = checkNeedForBuilding(b, material, d);
+    float atStore   = store.inventory.valueFor(material);
+    float needBuild = checkNeedForBuilding(b, material, map);
     
     if (needBuild > 0) {
       //  Decide whether to obtain the materials from your store, based
       //  on whether they're available and not already present on-site.
       float carried = getCarryAmount(material, b, false);
       
-      if (carried <= 0 && atStore > 0 && onSite) {
+      if (carried <= 0 && atStore > 0) {
         //  Go to the store and pick up the material!
         configTask(store, store, null, JOB.RETURNING, 1);
         site   = b;
@@ -186,15 +171,17 @@ public class TaskBuilding2 extends Task {
         return false;
       }
       else {
-        //  Begin your visit.
-        configTask(store, null, b, JOB.BUILDING, 1);
+        //  Begin your visit.  (Note that we cannot target the site
+        //  directly, as it may not yet be in the world.)
+        configTask(store, null, b.at(), JOB.BUILDING, 1);
         site   = b;
         razing = false;
         return true;
       }
     }
     else if (needBuild < 0) {
-      configTask(store, null, b, JOB.BUILDING, 1);
+      //  If there's salvage to be done, start that:
+      configTask(store, null, b.at(), JOB.SALVAGE, 1);
       site   = b;
       razing = true;
       return true;
@@ -226,25 +213,21 @@ public class TaskBuilding2 extends Task {
   
   
   protected void onTarget(Target target) {
-    if (target == site) {
-      CityMapDemands demands = demandsFor(material, actor.map);
-      advanceBuilding(site, demands);
-      
-      if (! decideNextAction(site, demands)) {
+    if (target == site.at()) {
+      advanceBuilding(site, actor.map);
+      if (! decideNextAction(site, actor.map)) {
         pickNextTarget(true);
       }
     }
   }
   
   
-  void advanceBuilding(Element b, CityMapDemands demands) {
+  void advanceBuilding(Element b, CityMap map) {
     //
     //  First, we ascertain how much raw material we have, and how much
     //  building needs to be done-
-    CityMap map = demands.map;
     Tile at = b.at();
-    float amountPut = 0;
-    float amountGap = checkNeedForBuilding(b, material, demands);
+    float amountGap = checkNeedForBuilding(b, material, map);
     float amountGot = getCarryAmount(material, b, false);
     //
     //  We do some basic sanity checks to ensure our effort isn't
@@ -258,33 +241,16 @@ public class TaskBuilding2 extends Task {
     //
     //  We see how much work we can do in this action, either to raze or
     //  to build, and adjust progress/stocks accordingly-
+    float oldM = b.materialLevel(material);
     float puts = Nums.clamp(amountGap, -0.1f, 0.1f);
     puts = Nums.min(puts, amountGot);
-    incBuildAmount(puts, material, b);
+    puts = b.incMaterialLevel(material, puts) - oldM;
     incCarryAmount(0 - puts, material, b, false);
-    amountPut = puts;
-    //
-    //  Buildings get some special treatment, since their level of
-    //  completion may be a function of multiple materials-
-    float totalNeed = 0, totalDone = 0;
-    for (Good g : b.type.builtFrom) {
-      totalNeed += b.type.materialNeed(g);
-      totalDone += getBuildAmount(b, g);
-    }
-    if (amountPut != 0 && b.type.isBuilding()) {
-      b.setBuildLevel(1f * (totalDone / totalNeed));
-    }
     //
     //  If we've depleted the structure entirely, remove it from the
     //  world, report and exit:
-    if (b.buildLevel() <= 0 && b.onMap() && amountPut <= 0) {
-      checkNeedForBuilding(b, material, demands);
+    if (b.buildLevel() <= 0 && b.onMap() && puts <= 0) {
       b.exitMap(map);
-    }
-    if (actor.reports()) {
-      I.say("Trying to build "+b);
-      I.say("  Progress? "+amountPut+" "+I.percent(b.buildLevel()));
-      I.say("  Did:      "+totalDone+"/"+totalNeed);
     }
   }
   
@@ -292,7 +258,7 @@ public class TaskBuilding2 extends Task {
   float incCarryAmount(float a, Good m, Element b, boolean siteOnly) {
     //
     //  The default 'nothing' material gets special treatment:
-    if (m == NOTHING) return 100;
+    if (m == VOID) return 100;
     //
     //  If we're recovering material, the actor keeps it:
     float total = 0;

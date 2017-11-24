@@ -39,7 +39,7 @@ public class BuildingForGather extends Building {
       
       Tile t = map.tileAt(c);
       if (t == null) continue;
-      if (t.above != null && t.above.type.growRate == 0) continue;
+      if (t.above != null && t.above.type.isFlora()) continue;
       
       Good seed = seedType(t, crops);
       Element crop = new Element(seed);

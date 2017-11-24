@@ -25,6 +25,7 @@ public class Task implements Session.Saveable {
     HARVEST  ,
     CRAFTING ,
     BUILDING ,
+    SALVAGE  ,
     MILITARY ,
     FORAGING ,
     HUNTING  ,
@@ -182,17 +183,26 @@ public class Task implements Session.Saveable {
   
   
   boolean checkAndUpdatePathing() {
-    if (checkPathing()) return true;
-    
+    Target focus = focusTarget(this);
+    if (focus == null || ! focus.onMap()) {
+      return false;
+    }
+    Target target = pathTarget();
+    if (target == null || ! target.onMap()) {
+      return false;
+    }
+    if (checkPathing(target)) {
+      return true;
+    }
     path = updatePathing();
-    if (path != null) return true;
-    
-    return false;
+    if (path == null) {
+      return false;
+    }
+    return true;
   }
   
   
-  boolean checkPathing() {
-    Target target = pathTarget();
+  boolean checkPathing(Target target) {
     if (path == null || Visit.last(path) != target) return false;
     
     for (int i = 0; i < actor.type.sightRange; i++) {
@@ -226,7 +236,6 @@ public class Task implements Session.Saveable {
     }
     
     ActorPathSearch search = new ActorPathSearch(map, from, heads, -1);
-    ///search.setPaveOnly(visiting && map.paved(from.x, from.y));
     search.doSearch();
     Tile path[] = search.fullPath(Tile.class);
     

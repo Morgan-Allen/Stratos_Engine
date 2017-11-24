@@ -169,16 +169,6 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   /**  Regular updates-
     */
   void update() {
-    
-    /*
-    if (jobType() == Task.JOB.RETURNING) {
-      I.say("?");
-    }
-    //*/
-    
-    //
-    //  TODO:  Don't allow another job to be assigned while this one is in
-    //  the middle of an update!
     if (task != null && task.checkAndUpdatePathing()) {
       Task     task      = this.task;
       Employer origin    = task.origin;
@@ -217,10 +207,16 @@ public class Actor extends Element implements Session.Saveable, Journeys {
       //
       //  Otherwise, close along the path:
       else {
-        task.pathIndex = Nums.clamp(task.pathIndex + 1, task.path.length);
-        Tile ahead = task.path[task.pathIndex];
-        setLocation(ahead);
-        if (inside != null) setInside(inside, false);
+        int index = Nums.clamp(task.pathIndex + 1, task.path.length);
+        if (index != -1) {
+          Tile ahead = task.path[task.pathIndex = index];
+          setLocation(ahead);
+          if (inside != null) setInside(inside, false);
+        }
+        else {
+          task.path = null;
+          task.pathIndex = -1;
+        }
       }
       //
       //  Either way, allow the employer to monitor yourself:
@@ -254,8 +250,9 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   /**  Pathing and visitation utilities:
     */
-  private void setInside(Building b, boolean yes) {
-    if (b == null) return;
+  void setInside(Building b, boolean yes) {
+    if (b == null || ! b.onMap()) return;
+    
     Employer origin = task == null ? null : task.origin;
     
     if (yes && b != inside) {
@@ -540,7 +537,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   public String jobDesc() {
     if (task == null) return "Idle";
-    return jobType().toString();
+    return task.toString();
   }
 }
 

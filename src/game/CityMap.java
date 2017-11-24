@@ -204,6 +204,11 @@ public class CityMap implements Session.Saveable {
     }
     
     
+    public boolean onMap() {
+      return true;
+    }
+    
+    
     public Type aboveType() {
       return above == null ? null : above.type;
     }
@@ -333,10 +338,13 @@ public class CityMap implements Session.Saveable {
   boolean blocked(int x, int y) {
     Tile under = tileAt(x, y);
     if (under == null) return true;
-    
-    Terrain terr = under.terrain;
-    if (under.above != null) return under.above.type.blocks;
-    else return terr == null ? false : terr.blocks;
+    if (under.above != null) {
+      return under.above.blocksPath();
+    }
+    if (under.terrain != null) {
+      return under.terrain.blocks;
+    }
+    return false;
   }
   
   
@@ -383,6 +391,7 @@ public class CityMap implements Session.Saveable {
     
     fog.updateFog();
     terrain.updateTerrain();
+    planning.updatePlanning();
   }
   
   

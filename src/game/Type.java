@@ -16,22 +16,23 @@ public class Type extends Index.Entry implements Session.Saveable {
   final static int
     IS_TERRAIN     = 0,
     IS_FIXTURE     = 1,
-    IS_GOOD        = 2,
-    IS_BUILDING    = 3,
-    IS_UPGRADE     = 4,
-    IS_CRAFTS_BLD  = 5,
-    IS_GATHER_BLD  = 6,
-    IS_WATER_BLD   = 7,
-    IS_TRADE_BLD   = 8,
-    IS_HOME_BLD    = 9,
-    IS_AMENITY_BLD = 10,
-    IS_COLLECT_BLD = 11,
-    IS_HUNTS_BLD   = 12,
-    IS_ARMY_BLD    = 13,
-    IS_FAITH_BLD   = 14,
-    IS_ACTOR       = 15,
-    IS_PERSON_ACT  = 16,
-    IS_ANIMAL_ACT  = 17
+    IS_STRUCTURAL  = 2,
+    IS_GOOD        = 3,
+    IS_BUILDING    = 4,
+    IS_UPGRADE     = 5,
+    IS_CRAFTS_BLD  = 6,
+    IS_GATHER_BLD  = 7,
+    IS_WATER_BLD   = 8,
+    IS_TRADE_BLD   = 9,
+    IS_HOME_BLD    = 10,
+    IS_AMENITY_BLD = 11,
+    IS_COLLECT_BLD = 12,
+    IS_HUNTS_BLD   = 13,
+    IS_ARMY_BLD    = 14,
+    IS_FAITH_BLD   = 15,
+    IS_ACTOR       = 16,
+    IS_PERSON_ACT  = 17,
+    IS_ANIMAL_ACT  = 18
   ;
   
   final static Index <Type> INDEX = new Index();
@@ -56,6 +57,7 @@ public class Type extends Index.Entry implements Session.Saveable {
   Object generate() {
     switch (category) {
       case(IS_FIXTURE    ): return new Element(this);
+      case(IS_STRUCTURAL ): return new Element(this);
       case(IS_BUILDING   ): return new Building          (this);
       case(IS_CRAFTS_BLD ): return new BuildingForCrafts (this);
       case(IS_GATHER_BLD ): return new BuildingForGather (this);
@@ -115,6 +117,12 @@ public class Type extends Index.Entry implements Session.Saveable {
   
   
   void setBuildMaterials(Object... args) {
+    //
+    //  Note:  1 unit of 'nothing' is always included in the list of
+    //  build-materials so that a foundation can be laid and allow
+    //  other materials to arrive.
+    Object ground[] = { VOID, 1 };
+    args = Visit.compose(Object.class, ground, args);
     Object split[][] = Visit.splitByModulus(args, 2);
     builtFrom   = (Good   []) castArray(split[0], Good   .class);
     builtAmount = (Integer[]) castArray(split[1], Integer.class);
@@ -127,7 +135,9 @@ public class Type extends Index.Entry implements Session.Saveable {
   Good    buildsWith  [] = NO_GOODS;
   Type    upgradeTiers[] = NO_TIERS;
   Type    upgradeNeeds[] = NO_NEEDS;
-  Integer needAmounts [] = {};
+  Integer upgradeUsage[] = {};
+  Good    homeUseGoods[] = NO_GOODS;
+  Integer homeUsage   [] = {};
   boolean worksBeforeBuilt = false;
   
   int homeSocialClass  = CLASS_COMMON;
@@ -135,7 +145,6 @@ public class Type extends Index.Entry implements Session.Saveable {
   
   Good needed  [] = NO_GOODS;
   Good produced[] = NO_GOODS;
-  Good homeUsed[] = NO_GOODS;
   Good features[] = NO_GOODS;
   Type gatherFlag = null;
   
@@ -164,13 +173,14 @@ public class Type extends Index.Entry implements Session.Saveable {
   void setUpgradeNeeds(Object... args) {
     Object split[][] = Visit.splitByModulus(args, 2);
     upgradeNeeds = (Type   []) castArray(split[0], Type   .class);
-    needAmounts  = (Integer[]) castArray(split[1], Integer.class);
+    upgradeUsage = (Integer[]) castArray(split[1], Integer.class);
   }
   
   
-  int materialNeed(Good buildFrom) {
-    int index = Visit.indexOf(buildFrom, this.builtFrom);
-    return index == -1 ? 0 : builtAmount[index];
+  void setHomeUsage(Object... args) {
+    Object split[][] = Visit.splitByModulus(args, 2);
+    homeUseGoods = (Good   []) castArray(split[0], Good   .class);
+    homeUsage    = (Integer[]) castArray(split[1], Integer.class);
   }
   
   
@@ -184,8 +194,27 @@ public class Type extends Index.Entry implements Session.Saveable {
   }
   
   
+  boolean isNatural() {
+    return
+      category == IS_FIXTURE ||
+      category == IS_TERRAIN ||
+      category == IS_ANIMAL_ACT
+    ;
+  }
+  
+  
+  boolean isFlora() {
+    return category == IS_FIXTURE && growRate > 0;
+  }
+  
+  
+  boolean isFauna() {
+    return category == IS_ANIMAL_ACT;
+  }
+  
+  
   boolean isFixture() {
-    return category == IS_FIXTURE;
+    return category == IS_FIXTURE || category == IS_STRUCTURAL;
   }
   
   

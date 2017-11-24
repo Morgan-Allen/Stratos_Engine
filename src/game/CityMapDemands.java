@@ -29,6 +29,7 @@ public class CityMapDemands {
   
   static class Node extends Entry {
     int size;
+    float absAmount;
     Box2D area = new Box2D();
     List <Entry> kids = new List();
     boolean leaf() { return false; }
@@ -39,7 +40,6 @@ public class CityMapDemands {
   final Object key;
   
   Node root;
-  int total;
   
   
   CityMapDemands(CityMap map, Object key) {
@@ -55,13 +55,11 @@ public class CityMapDemands {
   
   void loadState(Session s) throws Exception {
     root = (Node) loadEntry(s);
-    total = s.loadInt();
   }
   
   
   void saveState(Session s) throws Exception {
     saveEntry(root, s);
-    s.saveInt(total);
   }
   
   
@@ -78,6 +76,7 @@ public class CityMapDemands {
     if (t == 1) {
       Node n = (Node) e;
       n.size = s.loadInt();
+      n.absAmount = s.loadFloat();
       n.area.loadFrom(s.input());
       
       for (int k = s.loadInt(); k-- > 0;) {
@@ -106,6 +105,7 @@ public class CityMapDemands {
     if (! e.leaf()) {
       Node n = (Node) e;
       s.saveInt(n.size);
+      s.saveFloat(n.absAmount);
       n.area.saveTo(s.output());
       
       s.saveInt(n.kids.size());
@@ -194,8 +194,12 @@ public class CityMapDemands {
   
   
   void updateTotalsFrom(Node n) {
-    n.amount = 0;
-    for (Entry k : n.kids) n.amount += k.amount;
+    n.amount = n.absAmount = 0;
+    for (Entry k : n.kids) {
+      n.amount += k.amount;
+      if (k.leaf()) n.absAmount += Nums.abs(k.amount);
+      else          n.absAmount += ((Node) k).absAmount;
+    }
     if (n.parent != null) updateTotalsFrom(n.parent);
   }
   
