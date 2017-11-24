@@ -177,6 +177,7 @@ public class BuildingForHome extends Building {
   
   float maxTierStock(Good g, Type tier) {
     if (Visit.arrayIncludes(FOOD_TYPES, g)) return 5;
+    if (g == WATER) return 1;
     int index = Visit.indexOf(g, tier.homeUseGoods);
     if (index == -1) return 0;
     return tier.homeUsage[index];
@@ -248,11 +249,11 @@ public class BuildingForHome extends Building {
     conLevel /= tier.homeUseTime;
     
     for (Good cons : tier.homeUseGoods) {
-      float amount = inventory.valueFor(cons);
-      float used = maxTierStock(cons, tier) * conLevel;
-      amount = Nums.max(0, amount - used);
+      float oldAmount = inventory.valueFor(cons);
+      float used      = maxTierStock(cons, tier) * conLevel;
+      float amount    = Nums.max(0, oldAmount - used);
       inventory.set(cons, amount);
-      map.city.usedTotals.add(conLevel, cons);
+      map.city.usedTotals.add(oldAmount - amount, cons);
     }
   }
   
@@ -294,22 +295,16 @@ public class BuildingForHome extends Building {
     if (! actor.adult()) {
       returnActorHere(actor);
     }
-    /*
-    //
-    //  See if you can repair your own home:
-    if (TaskBuilding.pickBuildTask(actor, this, new Batch(this))) {
-      return;
-    }
-    //*/
     //
     //  Failing that, see if you can go shopping:
     Type tier = tierOffset(1);
-    class Order { Building b; Good g; }
+    class Order { Building b; Good g; float amount; }
     Pick <Order> pickS = new Pick();
     
     for (Good cons : usedBy(tier)) {
-      float need = maxTierStock(cons, tier);
-      need += 1 - inventory.valueFor(cons);
+      float need = 1 + maxTierStock(cons, tier);
+      need -= inventory.valueFor(cons);
+      need -= totalFetchedFor(this, cons);
       if (need <= 0) continue;
       
       for (Building b : map.buildings) {
@@ -319,19 +314,26 @@ public class BuildingForHome extends Building {
         if (dist > 50) continue;
         
         float amount = b.inventory.valueFor(cons);
+        amount -= totalFetchedFrom(b, cons);
         if (amount < 1) continue;
         
         float rating = need * amount * CityMap.distancePenalty(dist);
         Order o = new Order();
         o.b = b;
         o.g = cons;
+        o.amount = need;
         pickS.compare(o, rating);
       }
     }
     if (! pickS.empty()) {
       Order o = pickS.result();
-      actor.embarkOnVisit(o.b, 5, JOB.SHOPPING, this);
-      return;
+      TaskDelivery d = new TaskDelivery(actor);
+      d.configDelivery(o.b, this, JOB.SHOPPING, o.g, o.amount, this);
+      if (d != null) {
+        //I.say("Delivering "+o.amount+" "+o.g+" from "+o.b+" to "+this);
+        actor.assignTask(d);
+        return;
+      }
     }
     //
     //  Failing that, select a leisure behaviour to perform:
@@ -348,7 +350,7 @@ public class BuildingForHome extends Building {
     goes = pickV.result();
     
     if (goes != this && goes != null) {
-      actor.embarkOnVisit(goes, 25, JOB.VISITING, this);
+      actor.embarkOnVisit(goes, 10, JOB.VISITING, this);
     }
     else if (goes == this && Rand.yes()) {
       actor.embarkOnVisit(this, 10, JOB.RESTING, this);
@@ -362,31 +364,25 @@ public class BuildingForHome extends Building {
   }
   
   
-  public void actorEnters(Actor actor, Building enters) {
-    Type tier = tierOffset(1);
-    
-    if (actor.jobType() == JOB.SHOPPING) {
-      
-      if (enters == this) {
-        actor.offloadGood(actor.carried, this);
-      }
-      
-      else for (Good cons : usedBy(tier)) {
-        float maxStock = maxTierStock(cons, tier) + 1;
-        if (inventory.valueFor(cons) >= maxStock) continue;
-        
-        float stock = enters.inventory.valueFor(cons);
-        if (stock <= 0) continue;
-        
-        float taken = Nums.min(maxStock, stock / 2);
-        
-        TaskDelivery d = new TaskDelivery(actor);
-        d.configDelivery(enters, this, JOB.SHOPPING, cons, taken, this);
-        if (d != null) actor.assignTask(d);
-        
-        break;
-      }
+  float totalFetchedFor(Building home, Good good) {
+    float total = 0;
+    for (Actor a : home.residents) {
+      if (! (a.task instanceof TaskDelivery)) continue;
+      TaskDelivery fetch = (TaskDelivery) a.task;
+      if (fetch.carried == good) total += fetch.amount;
     }
+    return total;
+  }
+  
+  
+  float totalFetchedFrom(Building store, Good good) {
+    float total = 0;
+    for (Actor a : store.focused()) {
+      if (! (a.task instanceof TaskDelivery)) continue;
+      TaskDelivery fetch = (TaskDelivery) a.task;
+      if (fetch.carried == good) total += fetch.amount;
+    }
+    return total;
   }
   
   
@@ -398,11 +394,6 @@ public class BuildingForHome extends Building {
     return currentTier.name+" "+ID;
   }
 }
-
-
-
-
-
 
 
 

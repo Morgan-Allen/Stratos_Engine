@@ -156,7 +156,7 @@ public class CityMapPlanning {
       if (t == null) continue;
       if (is) {
         Element e = (Element) ROAD.generate();
-        e.enterMap(map, x, y, 1);
+        e.enterMap(map, t.x, t.y, 1);
       }
       else if (t.aboveType() == ROAD) {
         t.above.exitMap(map);

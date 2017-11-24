@@ -10,30 +10,31 @@ public class TestCity extends Test {
   
   
   public static void main(String args[]) {
-    testCity(true);
+    testCity(false);
   }
   
   
   static boolean testCity(boolean graphics) {
     
     CityMap map = setupTestCity(32);
+    map.settings.toggleFog = false;
     
     CityMapPlanning.applyPaving(map, 3, 8, 25, 1 , true);
     CityMapPlanning.applyPaving(map, 8, 2, 1 , 25, true);
     
-    Building palace  = (Building) PALACE    .generate();
     Building school  = (Building) SCHOOL    .generate();
     Building court   = (Building) BALL_COURT.generate();
     Building basin   = (Building) BASIN     .generate();
     Building sweeper = (Building) SWEEPER   .generate();
     Building admin   = (Building) COLLECTOR .generate();
+    Building mason   = (Building) MASON     .generate();
     
-    palace .enterMap(map, 3 , 3 , 1);
     court  .enterMap(map, 9 , 9 , 1);
     school .enterMap(map, 9 , 3 , 1);
     basin  .enterMap(map, 13, 9 , 1);
     sweeper.enterMap(map, 16, 9 , 1);
     admin  .enterMap(map, 18, 9 , 1);
+    mason  .enterMap(map, 5 , 5 , 1);
     
     for (int n = 4; n-- > 0;) {
       Building house = (Building) HOUSE.generate();
@@ -70,6 +71,7 @@ public class TestCity extends Test {
         b.inventory.set(CLAY   , 1);
         b.inventory.set(POTTERY, 1);
       }
+      map.planning.placeObject(b);
     }
     
     try {
@@ -84,9 +86,24 @@ public class TestCity extends Test {
     
     final int RUN_TIME = YEAR_LENGTH;
     boolean housesOkay = false;
+    boolean goodsOkay  = true ;
+    boolean testOkay   = false;
     
     while (map.time < RUN_TIME || graphics) {
       runGameLoop(map, 10, graphics, "saves/test_city.tlt");
+      
+      if (goodsOkay) {
+        for (Building b : map.buildings) {
+          if (b.type == HOUSE) {
+            BuildingForHome home = (BuildingForHome) b;
+            for (Good g : home.usedBy(home.currentTier)) {
+              float need = home.maxStock(g) + 1;
+              float have = home.inventory.valueFor(g);
+              if (have > need + 1) goodsOkay = false;
+            }
+          }
+        }
+      }
       
       if (! housesOkay) {
         boolean allNeeds = true;
@@ -94,6 +111,10 @@ public class TestCity extends Test {
           if (b.type == MARKET) {
             b.inventory.set(COTTON, 10);
             b.inventory.set(MAIZE , 10);
+          }
+          if (b.type == MASON) {
+            b.inventory.set(STONE, 10);
+            b.inventory.set(WOOD , 10);
           }
           if (b.type == HOUSE) {
             BuildingForHome home = (BuildingForHome) b;
@@ -103,15 +124,16 @@ public class TestCity extends Test {
           }
         }
         housesOkay = allNeeds;
-        
-        if (housesOkay) {
-          I.say("\nCITY SERVICES TEST CONCLUDED SUCCESSFULLY!");
-          reportOnMap(map, true);
-          if (! graphics) return true;
-        }
+      }
+      
+      if (housesOkay && goodsOkay && ! testOkay) {
+        I.say("\nCITY SERVICES TEST CONCLUDED SUCCESSFULLY!");
+        testOkay = true;
+        reportOnMap(map, true);
+        if (! graphics) return true;
       }
     }
-
+    
     I.say("\nCITY SERVICES TEST FAILED!");
     reportOnMap(map, false);
     return false;
@@ -119,11 +141,13 @@ public class TestCity extends Test {
   
   
   static void reportOnMap(CityMap map, boolean okay) {
-    if (! okay) for (Building b : map.buildings) if (b.type == HOUSE) {
-      BuildingForHome house = (BuildingForHome) b;
-      I.say("  "+house);
-      I.say("    Tier:      "+house.currentTier);
-      I.say("    Inventory: "+house.inventory);
+    if (! okay) for (Building b : map.buildings) {
+      if (b.type.isHomeBuilding()) {
+        BuildingForHome house = (BuildingForHome) b;
+        I.say("  "+house);
+        I.say("    Tier:      "+house.currentTier);
+        I.say("    Inventory: "+house.inventory);
+      }
     }
     I.say("\nTotal goods produced:");
     for (Good g : HOUSE_T2.homeUseGoods) {

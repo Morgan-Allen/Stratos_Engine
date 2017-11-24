@@ -228,6 +228,11 @@ public class Type extends Index.Entry implements Session.Saveable {
   }
   
   
+  boolean isHomeBuilding() {
+    return category == IS_HOME_BLD;
+  }
+  
+  
   boolean isTradeBuilding() {
     return category == IS_TRADE_BLD;
   }

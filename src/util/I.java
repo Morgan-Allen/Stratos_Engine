@@ -323,6 +323,8 @@ public class I {
       
       pane.addKeyListener(this);
       info.addKeyListener(this);
+      
+      setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
     
     

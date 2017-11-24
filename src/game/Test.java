@@ -433,21 +433,21 @@ public class Test {
     if (b.workers.size() > 0) {
       report.append("\nWorkers:");
       for (Actor w : b.workers) {
-        report.append("\n  "+w+" ("+w.jobDesc()+")");
+        report.append("\n  "+w+" ("+w.jobType()+")");
       }
     }
     
     if (b.residents.size() > 0) {
       report.append("\nResidents:");
       for (Actor w : b.residents) {
-        report.append("\n  "+w+" ("+w.jobDesc()+")");
+        report.append("\n  "+w+" ("+w.jobType()+")");
       }
     }
     
     if (b.visitors.size() > 0) {
       report.append("\nVisitors:");
       for (Actor w : b.visitors) {
-        report.append("\n  "+w+" ("+w.jobDesc()+")");
+        report.append("\n  "+w+" ("+w.jobType()+")");
       }
     }
     
