@@ -457,7 +457,7 @@ public class GameConstants {
     RESIDENTIAL_BUILDINGS[] = { HOUSE, SWEEPER, BASIN, SCHOOL, BALL_COURT },
     
     FARM_PLOT     = new BuildType("type_farm_plot"    , IS_GATHER_BLD ),
-    LOGGER        = new BuildType("type_logger"       , IS_GATHER_BLD ),
+    SAWYER        = new BuildType("type_sawyer"       , IS_GATHER_BLD ),
     QUARRY_PIT    = new BuildType("type_quarry_pit"   , IS_GATHER_BLD ),
     KILN          = new BuildType("type_kiln"         , IS_CRAFTS_BLD ),
     WEAVER        = new BuildType("type_weaver"       , IS_CRAFTS_BLD ),
@@ -595,16 +595,16 @@ public class GameConstants {
     FARM_PLOT.maxStock   = 25;
     FARM_PLOT.maxWorkers = 2;
     
-    LOGGER.name = "Logger";
-    LOGGER.tint = TINT_LITE_INDUSTRIAL;
-    LOGGER.setDimensions(2, 2, 1);
-    LOGGER.setBuildMaterials(WOOD, 5, CLAY, 2);
-    LOGGER.setWorkerTypes(WORKER);
-    LOGGER.worksBeforeBuilt = true;
-    LOGGER.gatherFlag = IS_TREE;
-    LOGGER.maxStock   = 25;
-    LOGGER.produced   = new Good[] { WOOD };
-    LOGGER.maxWorkers = 2;
+    SAWYER.name = "Logger";
+    SAWYER.tint = TINT_LITE_INDUSTRIAL;
+    SAWYER.setDimensions(2, 2, 1);
+    SAWYER.setBuildMaterials(WOOD, 5, CLAY, 2);
+    SAWYER.setWorkerTypes(WORKER);
+    SAWYER.worksBeforeBuilt = true;
+    SAWYER.gatherFlag = IS_TREE;
+    SAWYER.maxStock   = 25;
+    SAWYER.produced   = new Good[] { WOOD };
+    SAWYER.maxWorkers = 2;
     
     QUARRY_PIT.name = "Quarry Pit";
     QUARRY_PIT.tint = TINT_LITE_INDUSTRIAL;

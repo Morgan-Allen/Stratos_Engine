@@ -20,7 +20,7 @@ public class TestForests extends Test {
     CityMap map = setupTestCity(32, JUNGLE, MEADOW);
     map.settings.toggleFog = false;
     
-    Building logs = (Building) LOGGER.generate();
+    Building logs = (Building) SAWYER.generate();
     logs.enterMap(map, 5, 5, 1);
     fillWorkVacancies(logs);
     
@@ -31,11 +31,11 @@ public class TestForests extends Test {
       
       if (! loggingDone) {
         loggingDone = logs.inventory.valueFor(WOOD) >= logs.type.maxStock;
-      }
-      
-      if (loggingDone) {
-        I.say("\nFOREST TEST CONCLUDED SUCCESSFULLY!");
-        if (! graphics) return true;
+        
+        if (loggingDone) {
+          I.say("\nFOREST TEST CONCLUDED SUCCESSFULLY!");
+          if (! graphics) return true;
+        }
       }
     }
     

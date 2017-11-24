@@ -149,8 +149,8 @@ public class CityMapTerrain implements TileConstants {
       Tile    tile = map.tileAt(c.x, c.y);
       Terrain terr = tile.terrain;
       
-      //  TODO:  You also need to mark these tiles for regeneration later, if
-      //  the trees are cut down.
+      //  TODO:  You also need to mark these tiles for regeneration
+      //  later, if the trees are cut down.
       
       for (int i = terr.fixtures.length; i-- > 0;) {
         Type t = terr.fixtures[i];
@@ -159,7 +159,8 @@ public class CityMapTerrain implements TileConstants {
         if (Rand.num() < w && checkPlacingOkay(tile, t, map)) {
           Element f = (Element) t.generate();
           float level = t.growRate > 0 ? (Rand.num() + 0.5f) : 1;
-          f.enterMap(map, tile.x, tile.y, level);
+          f.enterMap(map, tile.x, tile.y, 1);
+          f.setGrowLevel(level);
         }
       }
     }
