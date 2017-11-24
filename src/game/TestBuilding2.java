@@ -18,10 +18,11 @@ public class TestBuilding2 extends Test {
   static boolean testBuilding2(boolean graphics) {
     
     CityMap map = setupTestCity(16);
-    map.settings.toggleFog     = false;
-    map.settings.toggleMigrate = false;
-    map.settings.toggleFatigue = false;
-    map.settings.toggleHunger  = false;
+    map.settings.toggleFog         = false;
+    map.settings.toggleFatigue     = false;
+    map.settings.toggleHunger      = false;
+    map.settings.toggleMigrate     = false;
+    map.settings.toggleBuildEvolve = false;
     
     
     Building farm = (Building) FARM_PLOT.generate();
@@ -30,8 +31,9 @@ public class TestBuilding2 extends Test {
     tree.enterMap(map, 6, 2, 1);
     Element toRaze[] = { farm, tree };
     
-    Building home   = (Building) map.planning.placeObject(HOUSE , 6, 3);
-    Building palace = (Building) map.planning.placeObject(PALACE, 1, 3);
+    BuildingForHome home, palace;
+    home   = (BuildingForHome) map.planning.placeObject(HOUSE , 6, 3);
+    palace = (BuildingForHome) map.planning.placeObject(PALACE, 1, 3);
     
     BuildingForTrade post = (BuildingForTrade) PORTER_POST.generate();
     post.enterMap(map, 2, 10, 1);
@@ -67,8 +69,6 @@ public class TestBuilding2 extends Test {
     
     //  TODO:  And finally, you need to ensure that building can take
     //  place even if the store itself is unfinished.
-    
-    //  TODO:  Test that housing-upgrades work?
     
     //  TODO:  You've got a general problem of ensuring that actors
     //  can always access a site, even if it's an opaque element with
@@ -136,7 +136,10 @@ public class TestBuilding2 extends Test {
       if (setupOkay && ! didDamage) {
         
         for (Building b : toBuild) {
-          for (Good m : b.type.builtFrom) {
+          if (b == home) {
+            home.setCurrentTier(HOUSE_T1);
+          }
+          else for (Good m : b.type.builtFrom) {
             float level = b.materialLevel(m);
             b.setMaterialLevel(m, level * 0.75f);
           }

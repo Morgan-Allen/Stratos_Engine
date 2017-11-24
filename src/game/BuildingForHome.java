@@ -7,8 +7,6 @@ import static game.Task.*;
 import static game.GameConstants.*;
 import static util.TileConstants.*;
 
-import game.GameConstants.Good;
-
 
 
 public class BuildingForHome extends Building {
@@ -134,7 +132,7 @@ public class BuildingForHome extends Building {
     boolean allOK = true;
     for (int i = tier.upgradeNeeds.length; i-- > 0;) {
       Type need   = tier.upgradeNeeds[i];
-      int        amount = tier.upgradeUsage [i];
+      int  amount = tier.upgradeUsage[i];
       if (access.valueFor(need) < amount) allOK = false;
     }
     return allOK;
@@ -209,6 +207,10 @@ public class BuildingForHome extends Building {
   void updateOnPeriod(int period) {
     super.updateOnPeriod(period);
     
+    if (! map.settings.toggleBuildEvolve) {
+      return;
+    }
+    
     Type nextTier = tierOffset(1), lastTier = tierOffset(-1);
     Tally <Type> access = checkServiceAccess();
     
@@ -228,6 +230,15 @@ public class BuildingForHome extends Building {
     
     advanceHomeUse (nextTier);
     generateOutputs(nextTier);
+  }
+  
+  
+  void setCurrentTier(Type tier) {
+    if (Visit.arrayIncludes(type.upgradeTiers, tier)) return;
+    currentTier = tier;
+    
+    //  TODO:  Create a distinction between the current and target
+    //  tiers!
   }
   
   
