@@ -124,7 +124,7 @@ public class CityMapPlanning {
     //  TODO:  Migrate the 'check build need' function in here?
     
     for (Good m : e.type.builtFrom) {
-      TaskBuilding2.checkNeedForBuilding(e, m, map);
+      TaskBuilding.checkNeedForBuilding(e, m, map);
     }
   }
   

@@ -148,7 +148,7 @@ public class Test {
       CityMap.Tile at = map.tileAt(c.x, c.y);
       
       if (at.above != null) {
-        if (at.above.buildLevel() == -1) fill = MISSED_COLOR;
+        if (at.above.growLevel() == -1) fill = MISSED_COLOR;
         else fill = at.above.type.tint;
       }
       else if (at.terrain != null) {
@@ -414,7 +414,12 @@ public class Test {
       }
     }
     else {
-      report.append("\n  Build level: "+I.percent(e.buildLevel()));
+      if (e.type.growRate > 0) {
+        report.append("\n  Growth: "+I.percent(e.growLevel()));
+      }
+      else {
+        report.append("\n  Health: "+I.percent(e.buildLevel()));
+      }
     }
     
     return report.toString();

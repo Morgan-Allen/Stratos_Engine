@@ -119,15 +119,7 @@ public class Building extends Element implements Session.Saveable, Employer {
   /**  Construction and upgrade-related methods:
     */
   void onCompletion() {
-    //
-    //  Absorb any actors within the site:
-    Tile at = at();
-    for (Coord c : Visit.grid(at.x, at.y, type.wide, type.high, 1)) {
-      Tile t = map.tileAt(c);
-      for (Actor a : t.inside()) {
-        a.setInside(this, true);
-      }
-    }
+    super.onCompletion();
   }
   
   

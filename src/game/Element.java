@@ -23,9 +23,9 @@ public class Element implements Session.Saveable, Target {
   
   CityMap map;
   private Tile at;
-  private float growLevel = -1;
-  private int buildBits = 0;
-  int stateFlag = 0;
+  private float growLevel = 0;
+  private int   buildBits = 0;
+  private int   stateBits = 0;
   
   private List <Actor> focused = null;
   Object pathFlag;  //  Note- this is used purely during path-searches,
@@ -45,7 +45,7 @@ public class Element implements Session.Saveable, Target {
     at     = loadTile(map, s);
     growLevel = s.loadFloat();
     buildBits = s.loadInt();
-    stateFlag = s.loadInt();
+    stateBits = s.loadInt();
     
     if (s.loadBool()) s.loadObjects(focused = new List());
   }
@@ -58,7 +58,7 @@ public class Element implements Session.Saveable, Target {
     saveTile(at, map, s);
     s.saveFloat(growLevel);
     s.saveInt(buildBits);
-    s.saveInt(stateFlag);
+    s.saveInt(stateBits);
     
     s.saveBool(focused != null);
     if (focused != null) s.saveObjects(focused);
@@ -110,7 +110,7 @@ public class Element implements Session.Saveable, Target {
     
     setLocation(null);
     this.map = null;
-    stateFlag |= FLAG_EXIT;
+    stateBits |= FLAG_EXIT;
   }
   
   
@@ -134,25 +134,25 @@ public class Element implements Session.Saveable, Target {
     */
   void updateGrowth() {
     if (type.growRate > 0 && growLevel != -1) {
-      growLevel += SCAN_PERIOD * type.growRate / RIPEN_PERIOD;
-      growLevel = Nums.clamp(growLevel, 0, 1);
+      float inc = SCAN_PERIOD * type.growRate / RIPEN_PERIOD;
+      setGrowLevel(Nums.clamp(growLevel + inc, 0, 1));
     }
   }
   
   
   void setGrowLevel(float level) {
     this.growLevel = level;
+    if (type.growRate > 0) {
+      setFlagging(growLevel >= 1, type.flagKey);
+    }
+    if (type.isCrop) {
+      setFlagging(growLevel == -1, NEED_PLANT);
+    }
   }
   
   
   float growLevel() {
     return growLevel;
-  }
-  
-  
-  void setFlagging(boolean is, Type key) {
-    if (key == null || type.mobile) return;
-    map.flagType(key, at.x, at.y, is);
   }
   
   
@@ -220,6 +220,21 @@ public class Element implements Session.Saveable, Target {
   }
   
   
+  void updateBuildState() {
+    float buildLevel = buildLevel();
+    boolean wasBuilt = complete();
+    
+    if (type.growRate == 0) {
+      setFlagging(buildLevel >= 1, type.flagKey);
+    }
+    
+    if (buildLevel >= 1) {
+      stateBits |= FLAG_BUILT;
+      if (! wasBuilt) onCompletion();
+    }
+  }
+  
+  
   float materialLevel(Good material) {
     return setMaterialLevel(material, -1);
   }
@@ -231,56 +246,35 @@ public class Element implements Session.Saveable, Target {
   }
   
   
-  void updateBuildState() {
-    float buildLevel = buildLevel();
-    boolean wasBuilt = (stateFlag & FLAG_BUILT) != 0;
-    if (buildLevel >= 1) {
-      stateFlag |= FLAG_BUILT;
-      if (! wasBuilt) onCompletion();
-    }
-  }
-  
-  
   void flagTeardown(boolean yes) {
-    if (yes) stateFlag |= FLAG_RAZING;
-    else stateFlag &= ~ FLAG_RAZING;
+    if (yes) stateBits |= FLAG_RAZING;
+    else stateBits &= ~ FLAG_RAZING;
   }
   
   
   boolean complete() {
-    return (stateFlag & FLAG_BUILT) != 0;
+    return (stateBits & FLAG_BUILT) != 0;
   }
   
   
   boolean razing() {
-    return (stateFlag & FLAG_RAZING) != 0;
+    return (stateBits & FLAG_RAZING) != 0;
   }
   
   
   void onCompletion() {
-    if (at.inside().empty()) return;
-    //
-    //  Try and find a free spot to move any actors to:
-    Tile free = null;
-    for (Tile t : CityMap.adjacent(at, null, map, false)) {
-      if (! map.blocked(t.x, t.y)) { free = t; break; }
-    }
-    if (free == null) return;
-    //
-    //  Then shunt them over:
-    for (Actor a : at.inside()) {
-      a.setLocation(free);
-    }
+    return;
+  }
+  
+  
+  void setFlagging(boolean is, Type key) {
+    if (key == null || type.mobile) return;
+    map.flagType(key, at.x, at.y, is);
   }
   
   
   boolean blocksPath() {
     return complete() ? type.blocks : false;
-  }
-  
-  
-  float ambience() {
-    return type.ambience;
   }
   
   
@@ -294,6 +288,11 @@ public class Element implements Session.Saveable, Target {
   
   public float maxSightLevel() {
     return map.fog.maxSightLevel(at);
+  }
+  
+  
+  float ambience() {
+    return type.ambience;
   }
   
 

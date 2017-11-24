@@ -169,6 +169,23 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   /**  Regular updates-
     */
   void update() {
+    //
+    //  Some checks to assist in case of blockage...
+    Tile at = at();
+    if (inside == null && map.blocked(at.x, at.y)) {
+      if (at.above != null && at.above.type.isBuilding()) {
+        setInside((Building) at.above, true);
+      }
+      else {
+        Tile free = null;
+        for (Tile t : CityMap.adjacent(at, null, map, false)) {
+          if (! map.blocked(t.x, t.y)) { free = t; break; }
+        }
+        if (free != null) setLocation(free);
+      }
+    }
+    //
+    //  Task updates-
     if (task != null && task.checkAndUpdatePathing()) {
       Task     task      = this.task;
       Employer origin    = task.origin;
@@ -400,6 +417,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     if (this.carried != carried) this.carryAmount = 0;
     this.carried      = carried;
     this.carryAmount += amount ;
+    if (this.carryAmount < 0) this.carryAmount = 0;
   }
   
   

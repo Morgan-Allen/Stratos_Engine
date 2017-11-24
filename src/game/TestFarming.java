@@ -94,7 +94,7 @@ public class TestFarming extends Test {
           Type above = t.above == null ? null : t.above.type;
           if (above == null || above.growRate == 0) continue;
           numT += 1;
-          if (Visit.arrayIncludes(needed, above) && t.above.buildLevel() >= 0) {
+          if (Visit.arrayIncludes(needed, above) && t.above.growLevel() >= 0) {
             crops.add(t.above);
           }
         }

@@ -337,7 +337,9 @@ public class CityMap implements Session.Saveable {
   
   boolean blocked(int x, int y) {
     Tile under = tileAt(x, y);
-    if (under == null) return true;
+    if (under == null) {
+      return true;
+    }
     if (under.above != null) {
       return under.above.blocksPath();
     }

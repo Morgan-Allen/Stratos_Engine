@@ -238,7 +238,7 @@ public class BuildingForHome extends Building {
     currentTier = tier;
     
     //  TODO:  Create a distinction between the current and target
-    //  tiers!
+    //  tiers...
   }
   
   

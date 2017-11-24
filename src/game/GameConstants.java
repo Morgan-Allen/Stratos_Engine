@@ -198,6 +198,33 @@ public class GameConstants {
     }
   }
   final public static Good
+    
+    //  Note- 'void' is used to mark foundations for clearing during
+    //  construction, and as a default build-material.
+    VOID       = new Good("Void"        ,  0 ),
+    NEED_BUILD = new Good("Need Build"  , -1 ),
+    NEED_PLANT = new Good("Need Plant"  , -1 ),
+        
+    IS_CROP    = new Good("Is Crop"     , -1 ),
+    IS_TREE    = new Good("Is Tree"     , -1 ),
+    IS_WATER   = new Good("Is Water"    , -1 ),
+    IS_STONE   = new Good("Is Stone"    , -1 ),
+    
+    IS_ADMIN   = new Good("Is Admin"    , -1 ),
+    IS_MARKET  = new Good("Is Market"   , -1 ),
+    IS_TRADER  = new Good("Is Trader"   , -1 ),
+    IS_HOUSING = new Good("Is Housing"  , -1 ),
+    
+    DIVERSION  = new Good("Diversion"   , -1 ),
+    EDUCATION  = new Good("Education"   , -1 ),
+    HEALTHCARE = new Good("Healthcare"  , -1 ),
+    RELIGION   = new Good("Religion"    , -1 ),
+    
+    EMPTY_MATERIAL[] = { VOID },
+    NO_GOODS      [] = new Good[0],
+    COMMERCE_TYPES[] = { IS_ADMIN, IS_TRADER, IS_MARKET, IS_HOUSING },
+    SERVICE_TYPES [] = { DIVERSION, EDUCATION, HEALTHCARE, RELIGION },
+    
     WATER      = new Good("Water"       , 0  ),
     MAIZE      = new Good("Maize"       , 10 ),
     FRUIT      = new Good("Fruit"       , 12 ),
@@ -213,39 +240,13 @@ public class GameConstants {
     CASH       = new Good("Cash"        , 1  ),
     SOIL       = new Good("Soil"        , 5  ),
     
-    //  Note- 'void' is used to mark foundations for clearing during
-    //  construction, and as a default build-material.
-    VOID       = new Good("Void"        ,  0),
-    NEED_BUILD = new Good("Need Build"  , -1),
-    NEED_PLANT = new Good("Need Plant"  , -1),
-    
-    IS_CROP    = new Good("Is Crop"     , -1),
-    IS_TREE    = new Good("Is Tree"     , -1),
-    IS_WATER   = new Good("Is Water"    , -1),
-    IS_STONE   = new Good("Is Stone"    , -1),
-    
-    IS_ADMIN   = new Good("Is Admin"    , -1),
-    IS_MARKET  = new Good("Is Market"   , -1),
-    IS_TRADER  = new Good("Is Trader"   , -1),
-    IS_HOUSING = new Good("Is Housing"  , -1),
-    
-    DIVERSION  = new Good("Diversion"   , -1),
-    EDUCATION  = new Good("Education"   , -1),
-    HEALTHCARE = new Good("Healthcare"  , -1),
-    RELIGION   = new Good("Religion"    , -1),
-    
     CROP_TYPES  [] = { MAIZE, FRUIT, RAW_COTTON },
     FOOD_TYPES  [] = { MAIZE, FRUIT, MEAT },
     STONE_TYPES [] = { CLAY, STONE  },
     BUILD_GOODS [] = { CLAY, WOOD, STONE },
     HOME_GOODS  [] = { POTTERY, COTTON },
     MARKET_GOODS[] = (Good[]) Visit.compose(Good.class, FOOD_TYPES, HOME_GOODS),
-    ALL_GOODS   [] = (Good[]) GOODS_LIST.toArray(Good.class),
-    
-    COMMERCE_TYPES[] = { IS_ADMIN, IS_TRADER, IS_MARKET, IS_HOUSING },
-    SERVICE_TYPES [] = { DIVERSION, EDUCATION, HEALTHCARE, RELIGION },
-    EMPTY_MATERIAL[] = { VOID },
-    NO_GOODS      [] = new Good[0];
+    ALL_GOODS   [] = (Good[]) GOODS_LIST.toArray(Good.class);
   
   
 
