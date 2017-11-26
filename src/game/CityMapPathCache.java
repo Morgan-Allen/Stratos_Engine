@@ -55,6 +55,7 @@ public class CityMapPathCache {
   List <AreaGroup> groups = new List();
   
   List <Area> needRefresh = new List();
+  List <Area> needDelete  = new List();
   private Tile temp[] = new Tile[8];
   
   
@@ -151,6 +152,9 @@ public class CityMapPathCache {
     //  If possible, don't flag the area for deletion.  Just add or
     //  remove a single tile.  (Note that in the case of deleting a
     //  tile, there must not be a potential bottleneck.)
+    
+    ///multiArea = true;
+    
     if (edge != null && ! (multiArea || edge.flagDeletion)) {
       if (blocked && numGaps < 2) {
         areaLookup[at.x][at.y] = null;
@@ -183,6 +187,7 @@ public class CityMapPathCache {
   private void markForDeletion(Area area) {
     if (area.flagDeletion) return;
     area.flagDeletion = true;
+    needDelete.add(area);
     if (map.settings.reportPathCache) {
       I.say("\n  Flag To Delete: "+area);
     }
@@ -200,6 +205,7 @@ public class CityMapPathCache {
   
   
   private void refreshTiling(Area area) {
+    if (area.flagDeletion) return;
     if (area.toAdd.empty() && area.toRem.empty()) return;
     
     Batch <Tile> tiles = new Batch();
@@ -216,39 +222,35 @@ public class CityMapPathCache {
   
   void updatePathCache() {
     for (Area a : needRefresh) refreshTiling(a);
-    
-    //  Delete all redundant areas before you create new ones!
-    
+    needRefresh.clear();
+    for (Area a : needDelete) deleteArea(a);
+    needDelete.clear();
+    for (Area a : areas) groupFor(a);
   }
   
   
   
   /**  Querying and generating area-ownership:
     */
+  Area rawArea(Tile t) {
+    if (t == null) return null;
+    return areaLookup[t.x][t.y];
+  }
+  
+  
   Area areaFor(Tile t) {
     Area area = areaLookup[t.x][t.y];
-    if (area != null && ! area.flagDeletion) return area;
     
+    if (area != null && ! area.flagDeletion) {
+      return area;
+    }
     if (area != null && area.flagDeletion) {
-      if (map.settings.reportPathCache) {
-        I.say("\n  Deleting Area "+area);
-      }
-      
-      refreshTiling(area);
-      for (Tile c : area.tiles) if (areaLookup[c.x][c.y] == area) {
-        areaLookup[c.x][c.y] = null;
-      }
-      for (Area b : area.borders) {
-        toggleBorders(area, b, false);
-      }
-      area.group.flagDeletion = true;
-      area.group.areas.remove(area);
-      area.tiles = null;
-      areas.remove(area);
+      deleteArea(area);
       area = null;
     }
-    
-    if (map.blocked(t.x, t.y)) return null;
+    if (map.blocked(t.x, t.y)) {
+      return null;
+    }
     
     int aX = t.x / AREA_SIZE, aY = t.y / AREA_SIZE;
     Batch <Tile> covered  = new Batch();
@@ -292,7 +294,8 @@ public class CityMapPathCache {
       e.pathFlag = null;
     }
     for (Tile e : edging) {
-      bordering.include(areaFor(e));
+      Area b = areaFor(e);
+      if (b != null) bordering.include(b);
     }
     for (Area b : bordering) {
       toggleBorders(area, b, true);
@@ -310,6 +313,27 @@ public class CityMapPathCache {
   }
   
   
+  private void deleteArea(Area area) {
+    if (map.settings.reportPathCache) {
+      I.say("\n  Deleting Area "+area);
+    }
+    
+    refreshTiling(area);
+    for (Tile c : area.tiles) if (areaLookup[c.x][c.y] == area) {
+      areaLookup[c.x][c.y] = null;
+    }
+    for (Area b : area.borders) {
+      toggleBorders(area, b, false);
+    }
+    if (area.group != null) {
+      deleteGroup(area.group);
+    }
+    
+    area.tiles = null;
+    areas.remove(area);
+  }
+  
+  
   private void toggleBorders(Area a, Area b, boolean yes) {
     a.borders.toggleMember(b, yes);
     b.borders.toggleMember(a, yes);
@@ -324,13 +348,7 @@ public class CityMapPathCache {
     if (group != null && ! group.flagDeletion) return group;
     
     if (group != null && group.flagDeletion) {
-      if (map.settings.reportPathCache) {
-        I.say("\n  Deleting Group "+group);
-      }
-      for (Area a : group.areas) if (a.group == group) {
-        a.group = null;
-      }
-      groups.remove(group);
+      deleteGroup(group);
       group = null;
     }
 
@@ -367,6 +385,17 @@ public class CityMapPathCache {
     }
     
     return group;
+  }
+  
+  
+  private void deleteGroup(AreaGroup group) {
+    if (map.settings.reportPathCache) {
+      I.say("\n  Deleting Group "+group);
+    }
+    for (Area a : group.areas) if (a.group == group) {
+      a.group = null;
+    }
+    groups.remove(group);
   }
   
 }
