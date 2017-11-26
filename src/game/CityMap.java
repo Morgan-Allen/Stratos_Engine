@@ -28,12 +28,14 @@ public class CityMap implements Session.Saveable {
   final CityMapPlanning planning = new CityMapPlanning(this);
   final CityMapFog      fog      = new CityMapFog     (this);
   final CityMapTerrain  terrain  = new CityMapTerrain (this);
+  
   Table <City, Tile           > transitPoints = new Table();
   Table <Type, CityMapFlagging> flagging      = new Table();
   Table <String, CityMapDemands> demands = new Table();
   
   List <Building> buildings = new List();
   List <Actor   > actors    = new List();
+  CityMapPathCache pathCache = new CityMapPathCache(this);
   
   String saveName;
   
@@ -84,6 +86,7 @@ public class CityMap implements Session.Saveable {
     
     s.loadObjects(buildings);
     s.loadObjects(actors   );
+    pathCache.loadState(s);
     
     saveName = s.loadString();
   }
@@ -126,6 +129,7 @@ public class CityMap implements Session.Saveable {
     
     s.saveObjects(buildings);
     s.saveObjects(actors   );
+    pathCache.saveState(s);
     
     s.saveString(saveName);
   }
@@ -159,6 +163,8 @@ public class CityMap implements Session.Saveable {
     planning.performSetup(size);
     fog.performSetup(size);
     city.attachMap(this);
+    
+    pathCache.performSetup(size);
   }
   
   
@@ -371,6 +377,7 @@ public class CityMap implements Session.Saveable {
   /**  Active updates:
     */
   void update() {
+    
     if (city != null) {
       city.world.updateWithTime(time);
     }
@@ -384,7 +391,6 @@ public class CityMap implements Session.Saveable {
     if (time % SCAN_PERIOD == 0) {
       transitPoints.clear();
     }
-    
     if (time % MONTH_LENGTH == 0) {
       CityBorders.spawnMigrants(this, MONTH_LENGTH);
     }
@@ -394,6 +400,8 @@ public class CityMap implements Session.Saveable {
     fog.updateFog();
     terrain.updateTerrain();
     planning.updatePlanning();
+    
+    pathCache.updatePathCache();
   }
   
   

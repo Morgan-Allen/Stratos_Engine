@@ -16,6 +16,7 @@ public class TestForests extends Test {
   
   
   static boolean testForests(boolean graphics) {
+    Test test = new TestForests();
     
     CityMap map = setupTestCity(32, JUNGLE, MEADOW);
     map.settings.toggleFog = false;
@@ -27,7 +28,7 @@ public class TestForests extends Test {
     boolean loggingDone = false;
     
     while (map.time < 1000 || graphics) {
-      runGameLoop(map, 10, graphics, "saves/test_forests.tlt");
+      map = test.runLoop(map, 10, graphics, "saves/test_forests.tlt");
       
       if (! loggingDone) {
         loggingDone = logs.inventory.valueFor(WOOD) >= logs.type.maxStock;

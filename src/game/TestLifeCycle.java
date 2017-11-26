@@ -15,6 +15,7 @@ public class TestLifeCycle extends Test {
   
   
   static void testLifeCycle(boolean graphics) {
+    Test test = new TestLifeCycle();
     
     CityMap map = setupTestCity(10);
     map.settings.toggleFog = false;
@@ -40,7 +41,7 @@ public class TestLifeCycle extends Test {
     I.say("\nTOTAL LIFE CYCLE RUN TIME: "+RUN_TIME);
     
     while (map.time < RUN_TIME || graphics) {
-      runGameLoop(map, 100, graphics, "saves/test_life_cycle.tlt");
+      map = test.runLoop(map, 100, graphics, "saves/test_cycle.tlt");
       
       if (map.time % 1000 == 0) {
         I.say("  Time: "+map.time);

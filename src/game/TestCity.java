@@ -15,6 +15,7 @@ public class TestCity extends Test {
   
   
   static boolean testCity(boolean graphics) {
+    Test test = new TestCity();
     
     CityMap map = setupTestCity(32);
     map.settings.toggleFog = false;
@@ -90,7 +91,7 @@ public class TestCity extends Test {
     boolean testOkay   = false;
     
     while (map.time < RUN_TIME || graphics) {
-      runGameLoop(map, 10, graphics, "saves/test_city.tlt");
+      map = test.runLoop(map, 10, graphics, "saves/test_city.tlt");
       
       if (goodsOkay) {
         for (Building b : map.buildings) {

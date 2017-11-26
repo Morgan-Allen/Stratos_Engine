@@ -17,6 +17,8 @@ public class TestPathing extends Test {
   
   
   static boolean testPathing(boolean graphics) {
+    Test test = new TestPathing();
+    
     CityMap map = setupTestCity(32);
     map.settings.toggleFog    = false;
     map.settings.toggleHunger = false;
@@ -102,7 +104,7 @@ public class TestPathing extends Test {
         }
       }
       
-      Test.runGameLoop(map, 1, graphics, "saves/test_pathing.tlt");
+      map = test.runLoop(map, 1, graphics, "saves/test_pathing.tlt");
     }
     
     I.say("\nPATHING TEST FAILED!");

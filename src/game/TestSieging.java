@@ -15,6 +15,7 @@ public class TestSieging extends Test {
   
   
   static boolean testSieging(boolean graphics) {
+    Test test = new TestSieging();
     
     World   world = new World();
     City    homeC = new City(world);
@@ -55,7 +56,7 @@ public class TestSieging extends Test {
     boolean tributePaid = false;
     
     while (map.time < 1000 || graphics) {
-      map = runGameLoop(map, 10, graphics, "saves/test_sieging.tlt");
+      map = test.runLoop(map, 10, graphics, "saves/test_sieging.tlt");
       
       if (! evalDone) {
         boolean checked = true;

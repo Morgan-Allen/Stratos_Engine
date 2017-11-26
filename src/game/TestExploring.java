@@ -16,6 +16,7 @@ public class TestExploring extends Test {
   
   
   static boolean testExploring(boolean graphics) {
+    Test test = new TestExploring();
     
     CityMap map = Test.setupTestCity(32, JUNGLE, MEADOW);
     
@@ -30,7 +31,7 @@ public class TestExploring extends Test {
     boolean didHunting = false;
     
     while (map.time < 1000 || graphics) {
-      runGameLoop(map, 10, graphics, "saves/test_gathering.tlt");
+      map = test.runLoop(map, 10, graphics, "saves/test_gathering.tlt");
       
       if (! explored) {
         tilesSeen = 0;

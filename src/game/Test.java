@@ -109,19 +109,19 @@ public class Test {
     DEMOLITION = "Demolition"
   ;
   
-  static int[][]  graphic   = null;
-  static int[][]  fogLayer  = null;
-  static int      frames    = 0   ;
-  static Coord    hover     = new Coord(-1, -1);
-  static boolean  doBuild   = false;
-  static Object   buildMenu = null;
-  static Coord    drawnTile = null;
-  static Object   placing   = null;
-  static Object   above     = null;
-  static Series <Character> pressed = new Batch();
+  int[][]  graphic   = null;
+  int[][]  fogLayer  = null;
+  int      frames    = 0   ;
+  Coord    hover     = new Coord(-1, -1);
+  boolean  doBuild   = false;
+  Object   buildMenu = null;
+  Coord    drawnTile = null;
+  Object   placing   = null;
+  Object   above     = null;
+  Series <Character> pressed = new Batch();
   
   
-  static void configGraphic(int w, int h) {
+  void configGraphic(int w, int h) {
     if (graphic == null || graphic.length != w || graphic[0].length != h) {
       graphic  = new int[w][h];
       fogLayer = new int[w][h];
@@ -129,7 +129,7 @@ public class Test {
   }
   
   
-  static Box2D drawnBox(CityMap map) {
+  Box2D drawnBox(CityMap map) {
     Box2D b = new Box2D(hover.x, hover.y, 0, 0);
     if (drawnTile != null) b.include(drawnTile.x, drawnTile.y, 0);
     b.incHigh(1);
@@ -140,7 +140,7 @@ public class Test {
   }
   
   
-  static void updateCityMapView(CityMap map) {
+  void updateCityMapView(CityMap map) {
     configGraphic(map.size, map.size);
     
     for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
@@ -197,7 +197,7 @@ public class Test {
   }
   
   
-  private static void updateCityFogLayer(CityMap map) {
+  private void updateCityFogLayer(CityMap map) {
     for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
       Tile t = map.tileAt(c.x, c.y);
       float sight = 0;
@@ -209,7 +209,7 @@ public class Test {
   }
   
   
-  private static void updateWorldMapView(CityMap map) {
+  private void updateWorldMapView(CityMap map) {
     World world = map.city.world;
     int wide = world.mapWide * 2, high = world.mapHigh * 2;
     configGraphic(wide, high);
@@ -239,7 +239,7 @@ public class Test {
   }
   
   
-  static CityMap runGameLoop(
+  CityMap runLoop(
     CityMap map, int numUpdates, boolean graphics, String filename
   ) {
     int skipUpdate = 0;
@@ -347,7 +347,7 @@ public class Test {
   
   /**  UI outputs-
     */
-  private static String reportFor(City c) {
+  private String reportFor(City c) {
     StringBuffer report = new StringBuffer(""+c);
     
     report.append("\n  Population: "+c.population);
@@ -395,7 +395,7 @@ public class Test {
   }
   
   
-  private static String reportFor(Element e) {
+  private String reportFor(Element e) {
     StringBuffer report = new StringBuffer(""+e+"\n");
     
     if (e instanceof Actor) {
@@ -426,7 +426,7 @@ public class Test {
   }
   
   
-  private static String reportFor(Building b) {
+  private String reportFor(Building b) {
     
     StringBuffer report = new StringBuffer(""+b+"\n");
     
@@ -490,7 +490,7 @@ public class Test {
   }
   
   
-  private static String reportForBuildMenu(CityMap map) {
+  private String reportForBuildMenu(CityMap map) {
     StringBuffer report = new StringBuffer("");
     
     if (placing == ROADS0) {
@@ -611,7 +611,7 @@ public class Test {
   }
   
   
-  private static String baseReport(Vars.Ref <CityMap> ref, String filename) {
+  private String baseReport(Vars.Ref <CityMap> ref, String filename) {
     CityMap map = ref.value;
     StringBuffer report = new StringBuffer("Home City: "+map.city);
     

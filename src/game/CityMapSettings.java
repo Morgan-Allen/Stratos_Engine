@@ -28,7 +28,8 @@ public class CityMapSettings {
     paused    = false,
     worldView = false,
     
-    reportBattle = true;
+    reportBattle    = false,
+    reportPathCache = false;
   
   
   CityMapSettings(CityMap map) {

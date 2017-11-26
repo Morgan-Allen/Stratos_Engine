@@ -15,6 +15,7 @@ public class TestMilitary extends Test {
   
   
   static boolean testMilitary(boolean graphics) {
+    Test test = new TestMilitary();
     
     World   world = GameConstants.setupDefaultWorld();
     City    cityA = world.cities.atIndex(0);
@@ -66,7 +67,7 @@ public class TestMilitary extends Test {
     boolean backHome  = false;
     
     while (map.time < 1000 || graphics) {
-      map = runGameLoop(map, 10, graphics, "saves/test_military.tlt");
+      map = test.runLoop(map, 10, graphics, "saves/test_military.tlt");
       
       if (troops.recruits.size() >= 8 && ! recruited) {
         troops.beginSecuring(map.tileAt(25, 25), TileConstants.E, null);

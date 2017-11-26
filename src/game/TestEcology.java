@@ -16,6 +16,7 @@ public class TestEcology extends Test {
   
   
   static void testAnimals(boolean graphics) {
+    Test test = new TestEcology();
     
     CityMap map = Test.setupTestCity(64, JUNGLE, MEADOW);
     ActorAsAnimal.reportCycle = graphics;
@@ -71,7 +72,7 @@ public class TestEcology extends Test {
         break;
       }
       
-      Test.runGameLoop(map, 100, graphics, "saves/test_animals.tlt");
+      map = test.runLoop(map, 100, graphics, "saves/test_animals.tlt");
     }
     
     int grazeFail = (int) ActorAsAnimal.grazeFail;

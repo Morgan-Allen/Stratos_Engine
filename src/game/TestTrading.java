@@ -15,6 +15,7 @@ public class TestTrading extends Test {
   
   
   static boolean testTrading(boolean graphics) {
+    Test test = new TestTrading();
     
     World world = new World();
     City  homeC = new City(world);
@@ -88,7 +89,7 @@ public class TestTrading extends Test {
     boolean moneyOkay  = false;
     
     while (map.time < RUN_TIME || graphics) {
-      runGameLoop(map, 100, graphics, "saves/test_trading.tlt");
+      map = test.runLoop(map, 100, graphics, "saves/test_trading.tlt");
       
       boolean allHome = true;
       for (Building b : map.buildings) for (Actor a : b.workers) {

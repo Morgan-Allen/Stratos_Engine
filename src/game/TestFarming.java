@@ -16,6 +16,7 @@ public class TestFarming extends Test {
   
   
   static boolean testFarming(boolean graphics) {
+    Test test = new TestFarming();
     
     CityMap map = setupTestCity(20, DESERT, MEADOW, JUNGLE);
     map.settings.toggleFog    = false;
@@ -44,7 +45,7 @@ public class TestFarming extends Test {
     boolean badFocus = false;
     
     while (map.time < 1000 || graphics) {
-      runGameLoop(map, 10, graphics, "saves/test_gathering.tlt");
+      map = test.runLoop(map, 10, graphics, "saves/test_farming.tlt");
       
       //
       //  Ensure that every actor has exactly one focus-target:

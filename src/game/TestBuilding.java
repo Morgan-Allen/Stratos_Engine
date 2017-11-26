@@ -16,6 +16,7 @@ public class TestBuilding extends Test {
   
   
   static boolean testBuilding(boolean graphics) {
+    Test test = new TestBuilding();
     
     CityMap map = setupTestCity(16);
     map.settings.toggleFog         = false;
@@ -79,7 +80,7 @@ public class TestBuilding extends Test {
     final int RUN_TIME = YEAR_LENGTH;
     
     while (map.time < RUN_TIME || graphics) {
-      runGameLoop(map, 10, graphics, "saves/test_building.tlt");
+      map = test.runLoop(map, 10, graphics, "saves/test_building.tlt");
       
       if (! razingOkay) {
         boolean allRazed = true;
@@ -113,8 +114,9 @@ public class TestBuilding extends Test {
       
       if (setupOkay && ! testMaterial) {
         endMaterials = totalMaterials(map);
-        float diff = reportDiffs(
-          startingMaterials, endMaterials, BUILD_GOODS
+        float diff = getDiffs(
+          startingMaterials, endMaterials,
+          false, BUILD_GOODS
         );
         materialOkay = diff < 1.0f;
         testMaterial = true;
@@ -205,15 +207,16 @@ public class TestBuilding extends Test {
   }
   
   
-  static float reportDiffs(
-    Tally <Good> before, Tally <Good> after, Good... compared
+  static float getDiffs(
+    Tally <Good> before, Tally <Good> after,
+    boolean report, Good... compared
   ) {
-    I.say("\nReporting differences in goods:");
+    if (report) I.say("\nReporting differences in goods:");
     float diffs = 0;
     for (Good g : compared) {
       float bef = before.valueFor(g), aft = after.valueFor(g);
       if (bef == 0 && aft == 0) continue;
-      I.say("  "+g+": "+bef+" -> "+aft+": "+(aft - bef));
+      if (report) I.say("  "+g+": "+bef+" -> "+aft+": "+(aft - bef));
       diffs += Nums.abs(aft - bef);
     }
     return diffs;

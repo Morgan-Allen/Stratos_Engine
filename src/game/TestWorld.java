@@ -16,6 +16,7 @@ public class TestWorld extends Test {
   
   
   static boolean testWorld(boolean graphics) {
+    Test test = new TestWorld();
     
     //  This tests for regeneration/consumption of goods, and normalisation of
     //  prestige and loyalty over time:
@@ -274,7 +275,7 @@ public class TestWorld extends Test {
     
     I.say("\nRunning world simulation...");
     while (map.time < MAX_TIME) {
-      runGameLoop(map, 10, graphics, "saves/test_city_events.tlt");
+      map = test.runLoop(map, 10, graphics, "saves/test_world.tlt");
       //
       //  Ensure that any forces being sent are of reasonable size:
       for (World.Journey j : world.journeys) {
