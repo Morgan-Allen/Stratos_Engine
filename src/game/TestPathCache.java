@@ -125,9 +125,9 @@ public class TestPathCache extends Test {
     
     CityMapTerrain.populateFixtures(map);
     
-    Tile land1   = map.tileAt(7 * div, 0 * div);
-    Tile land2   = map.tileAt(7 * div, 2 * div);
-    Tile island0 = map.tileAt(1 * div, 1 * div);
+    Tile land1   = map.tileAt(7.5f * div, 0.5f * div);
+    Tile land2   = map.tileAt(7.5f * div, 2.5f * div);
+    Tile island0 = map.tileAt(1.5f * div, 1.5f * div);
     
     boolean landLinked = map.pathCache.pathConnects(land1, land2);
     if (! landLinked) {
@@ -137,7 +137,7 @@ public class TestPathCache extends Test {
       for (AreaGroup g : map.pathCache.groups) {
         I.say("    Group areas: ");
         for (Area a : g.areas) {
-          I.say("      "+a.numTiles+" tiles: "+a.area);
+          I.say("      "+a.numTiles+" tiles: "+a.aX+"|"+a.aY);
         }
       }
       return false;

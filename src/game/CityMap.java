@@ -274,7 +274,17 @@ public class CityMap implements Session.Saveable {
   }
   
   
-  public static Tile[] adjacent(
+  public static Tile[] adjacent(Tile spot, Tile temp[], CityMap map) {
+    if (temp == null) temp = new Tile[8];
+    for (int dir : T_INDEX) {
+      int x = spot.x + T_X[dir], y = spot.y + T_Y[dir];
+      temp[dir] = map.tileAt(x, y);
+    }
+    return temp;
+  }
+  
+  
+  public static Tile[] pathAdjacent(
     Tile spot, Tile temp[], CityMap map, boolean paveOnly
   ) {
     if (temp == null) temp = new Tile[8];
@@ -319,6 +329,11 @@ public class CityMap implements Session.Saveable {
   Tile tileAt(int x, int y) {
     if (x < 0 || x >= size || y < 0 || y >= size) return null;
     return grid[x][y];
+  }
+  
+  
+  Tile tileAt(float x, float y) {
+    return tileAt((int) x, (int) y);
   }
   
   

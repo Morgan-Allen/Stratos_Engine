@@ -177,10 +177,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
         setInside((Building) at.above, true);
       }
       else {
-        Tile free = null;
-        for (Tile t : CityMap.adjacent(at, null, map, false)) {
-          if (! map.blocked(t.x, t.y)) { free = t; break; }
-        }
+        Tile free = CityMapTerrain.nearestOpenTile(at, map);
         if (free != null) setLocation(free);
       }
     }

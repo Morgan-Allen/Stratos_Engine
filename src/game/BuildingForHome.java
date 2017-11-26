@@ -85,7 +85,7 @@ public class BuildingForHome extends Building {
     Search <Tile> spread = new Search <Tile> (entrance(), -1) {
       
       protected Tile[] adjacent(Tile spot) {
-        return CityMap.adjacent(spot, temp, map, true);
+        return CityMap.pathAdjacent(spot, temp, map, true);
       }
       
       protected boolean endSearch(Tile best) {

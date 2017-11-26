@@ -36,7 +36,7 @@ public class ActorPathSearch extends Search <Tile> {
   
   
   protected Tile[] adjacent(Tile spot) {
-    return CityMap.adjacent(spot, temp, map, paveOnly);
+    return CityMap.pathAdjacent(spot, temp, map, paveOnly);
   }
   
   

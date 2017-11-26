@@ -70,7 +70,7 @@ public class BuildingForWater extends Building {
           adding.tryAddingFrom(map.tileAt(c));
         }
       }
-      else for (Tile t : CityMap.adjacent(at, temp, map, false)) {
+      else for (Tile t : CityMap.adjacent(at, temp, map)) {
         adding.tryAddingFrom(t);
       }
     }

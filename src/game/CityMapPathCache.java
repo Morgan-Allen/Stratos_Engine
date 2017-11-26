@@ -30,11 +30,12 @@ public class CityMapPathCache {
     
     int numTiles;
     Tile tiles[];
-    Batch <Tile> toAdd = new Batch();
-    Batch <Tile> toRem = new Batch();
+    Batch <Tile> toAdd = new Batch(4);
+    Batch <Tile> toRem = new Batch(4);
     boolean flagTiling = false;
     
-    Box2D area = new Box2D();
+    //Box2D area = new Box2D();
+    int aX, aY;
     AreaGroup group;
     List <Area> borders = new List();
     boolean flagDeletion = false;
@@ -92,64 +93,88 @@ public class CityMapPathCache {
   /**  Methods for flagging changes and regular updates:
     */
   void flagPathingChanged(Tile at) {
-    //
+    
     //  First, make sure there's some change to merit an update:
     Area core = areaLookup[at.x][at.y];
     boolean blocked = map.blocked(at.x, at.y);
     if (blocked == (core == null)) return;
-    if (core != null) markForDeletion(core);
-    //
-    //  Then determine what areas this tile impinges upon, and whether
-    //  there's more than one:
-    Area near = core;
-    boolean multiArea = false;
-    for (Tile n : CityMap.adjacent(at, temp, map, false)) {
+    
+    //  Then set up some tracking variables....
+    final int aX = at.x / AREA_SIZE;
+    final int aY = at.y / AREA_SIZE;
+    Area tail = null, head = null, edge = core;
+    int numGaps = 0, gapFlag = -1;
+    boolean multiArea = false, didRefresh = false;
+    
+    //  The plan is to circle this tile, checking how many areas it
+    //  impinges on and whether there are multiple 'gaps' in area-
+    //  adjacency- the latter might indicate a bottleneck in pathing
+    //  that could potentially require a more comprehensive update (see
+    //  below.)
+    for (Tile n : CityMap.adjacent(at, temp, map)) {
       if (n == null) continue;
-      Area a = areaLookup[n.x][n.y];
-      if (a == null) continue;
-      if (near != null && near != a) multiArea = true;
-      near = a;
-      markForDeletion(a);
+      tail = areaLookup[n.x][n.y];
+      
+      //  We don't merge with areas outside a given 16x16 unit:
+      if (tail != null && (tail.aX != aX || tail.aY != aY)) {
+        multiArea = true;
+        tail = null;
+      }
+      //  Record the first area on the perimeter, null or otherwise-
+      if (gapFlag == -1) {
+        head = tail;
+      }
+      //  And check whether more than one area is bumped into, or any
+      //  gaps in adjacency-
+      if (tail != null && gapFlag != 1) {
+        if (edge == null) {
+          edge = tail;
+        }
+        else if (tail != edge) {
+          multiArea = true;
+          markForDeletion(tail);
+        }
+        gapFlag = 1;
+      }
+      if (tail == null && gapFlag != 0) {
+        gapFlag = 0;
+        numGaps += 1;
+      }
+    }
+    //  Literal corner-case- if the perimeter starts and ends in a gap,
+    //  don't count it twice.
+    if (tail == head && head == null) {
+      numGaps -= 1;
     }
     
-    //  TODO:  Test this later.
-    if (true) return;
-    
-    //  TODO:  Unfortunately, this will not detect cases where removing
-    //  a tile splits a region in two.  In fact there's no simple way
-    //  to detect those.
-    
-    //  Best you can allow for is blocking a tile such that there is a
-    //  clear gap in the encircling area.  Okay.
-    
-    //
-    //  In this case, don't flag the area for deletion.  Just add or
-    //  remove a single tile.
-    if (near != null && ! multiArea) {
-      if (blocked && near == core) {
+    //  If possible, don't flag the area for deletion.  Just add or
+    //  remove a single tile.  (Note that in the case of deleting a
+    //  tile, there must not be a potential bottleneck.)
+    if (edge != null && ! (multiArea || edge.flagDeletion)) {
+      if (blocked && numGaps < 2) {
         areaLookup[at.x][at.y] = null;
-        //near.tiles.remove(at);
-        List <Tile> tiles = new List();
-        Visit.appendTo(tiles, near.tiles);
-        tiles.remove(at);
-        near.tiles = tiles.toArray(Tile.class);
-        
-        //near.toRem.add(at);
-        //markForRefresh(near);
-        near.flagDeletion = false;
+        edge.toRem.add(at);
+        markForRefresh(edge);
+        didRefresh = true;
+        if (map.settings.reportPathCache) {
+          I.say("Removed single tile: "+at+" from "+edge);
+        }
       }
-      if (near != core && ! blocked) {
-        areaLookup[at.x][at.y] = near;
-        //near.tiles.add(at);
-        List <Tile> tiles = new List();
-        Visit.appendTo(tiles, near.tiles);
-        tiles.add(at);
-        near.tiles = tiles.toArray(Tile.class);
-        
-        //near.toAdd.add(at);
-        //markForRefresh(near);
-        near.flagDeletion = false;
+      if (core == null && ! blocked) {
+        areaLookup[at.x][at.y] = edge;
+        edge.toAdd.add(at);
+        markForRefresh(edge);
+        didRefresh = true;
+        if (map.settings.reportPathCache) {
+          I.say("Added single tile: "+at+" to "+edge);
+        }
       }
+    }
+    
+    //  If a simple merge/delete operation wasn't possible, tear down
+    //  and start over-
+    if (edge != null && ! didRefresh) {
+      markForDeletion(edge);
     }
   }
   
@@ -167,6 +192,9 @@ public class CityMapPathCache {
     if (area.flagTiling) return;
     area.flagTiling = true;
     needRefresh.add(area);
+    if (map.settings.reportPathCache) {
+      I.say("\n  Flag To Refresh: "+area);
+    }
   }
   
   
@@ -231,7 +259,7 @@ public class CityMapPathCache {
     
     while (! frontier.empty()) {
       Tile front = frontier.removeFirst();
-      for (Tile n : CityMap.adjacent(front, temp, map, false)) {
+      for (Tile n : CityMap.adjacent(front, temp, map)) {
         if (n == null || n.pathFlag != null) continue;
         if (map.blocked(n.x, n.y)) continue;
         if (n.x / AREA_SIZE != aX || n.y / AREA_SIZE != aY) {
@@ -246,10 +274,11 @@ public class CityMapPathCache {
     }
     
     area = new Area();
-    area.ID = nextAreaID++;
+    area.ID       = nextAreaID++;
     area.numTiles = covered.size();
-    area.tiles = covered.toArray(Tile.class);
-    area.area.set(aX * AREA_SIZE, aY * AREA_SIZE, AREA_SIZE, AREA_SIZE);
+    area.tiles    = covered.toArray(Tile.class);
+    area.aX       = aX;
+    area.aY       = aY;
     areas.add(area);
     
     for (Tile c : covered) {
@@ -269,7 +298,7 @@ public class CityMapPathCache {
     }
     
     if (map.settings.reportPathCache) {
-      I.say("\n  Adding Area: "+area+" "+area.area);
+      I.say("\n  Adding Area: "+area+" "+area.aX+"|"+area.aY);
       I.say("    Tiles: "+area.numTiles+"  Borders: ");
       for (Area b : area.borders) I.add(b.ID+" ");
       if (area.borders.empty()) I.add("none");
