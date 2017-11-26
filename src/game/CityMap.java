@@ -351,6 +351,11 @@ public class CityMap implements Session.Saveable {
   }
   
   
+  Element above(Tile t) {
+    return above(t.x, t.y);
+  }
+  
+  
   Element above(Coord c) {
     return above(c.x, c.y);
   }
@@ -371,6 +376,11 @@ public class CityMap implements Session.Saveable {
   }
   
   
+  boolean blocked(Tile t) {
+    return blocked(t.x, t.y);
+  }
+  
+  
   boolean blocked(Coord c) {
     return blocked(c.x, c.y);
   }
@@ -383,8 +393,27 @@ public class CityMap implements Session.Saveable {
   }
   
   
+  boolean paved(Tile t) {
+    return paved(t.x, t.y);
+  }
+  
+  
   boolean paved(Coord c) {
     return paved(c.x, c.y);
+  }
+  
+  
+  public void setTerrain(Tile t, Terrain terr) {
+    Terrain old = t.terrain;
+    t.terrain = terr;
+    if (terr != old) pathCache.checkPathingChanged(t);
+  }
+  
+  
+  public void setAbove(Tile t, Element above) {
+    Element old = t.above;
+    t.above = above;
+    if (old != above) pathCache.checkPathingChanged(t);
   }
   
   

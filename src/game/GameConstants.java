@@ -40,6 +40,7 @@ public class GameConstants {
     TINT_LITE_INDUSTRIAL  = colour(6, 3, 3),
     TINT_INDUSTRIAL       = colour(5, 2, 2),
     //  Military in red.
+    TINT_LITE_MILITARY    = colour(8, 1, 1),
     TINT_MILITARY         = colour(7, 0, 0),
     //  Economic in blue.
     TINT_LITE_COMMERCIAL  = colour(3, 1, 8),
@@ -437,6 +438,7 @@ public class GameConstants {
   ;
   final static Type
     ROAD     = new Type("type_road"    , IS_STRUCTURAL),
+    WALL     = new Type("type_wall"    , IS_STRUCTURAL),
     AQUEDUCT = new Type("type_aqueduct", IS_STRUCTURAL)
   ;
   final static BuildType  
@@ -503,6 +505,15 @@ public class GameConstants {
     ROAD.paved  = true ;
     ROAD.setDimensions(1, 1, 0);
     ROAD.setBuildMaterials(STONE, 1);
+    
+    WALL.name = "Wall";
+    WALL.tint = TINT_LITE_MILITARY;
+    WALL.blocks = true ;
+    WALL.paved  = false;
+    WALL.setDimensions(1, 1, 2);
+    WALL.setBuildMaterials(STONE, 2);
+    
+    //  TODO:  Fractional material-costs should be possible here!
     
     //
     //  Palace structures:

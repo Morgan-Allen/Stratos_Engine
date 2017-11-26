@@ -95,6 +95,7 @@ public class Element implements Session.Saveable, Target {
       Tile t = map.tileAt(c.x, c.y);
       if (t.above != null) t.above.exitMap(map);
       t.above = this;
+      map.pathCache.checkPathingChanged(t);
     }
   }
   
@@ -105,7 +106,10 @@ public class Element implements Session.Saveable, Target {
     
     for (Coord c : Visit.grid(at.x, at.y, type.wide, type.high, 1)) {
       Tile t = map.tileAt(c.x, c.y);
-      if (t.above == this) t.above = null;
+      if (t.above == this) {
+        t.above = null;
+        map.pathCache.checkPathingChanged(t);
+      }
     }
     
     setLocation(null);

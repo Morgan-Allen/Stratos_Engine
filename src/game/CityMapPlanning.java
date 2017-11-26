@@ -148,17 +148,17 @@ public class CityMapPlanning {
   
   /**  Some helper methods for dealing with infrastructure:
     */
-  public static void applyPaving(
-    CityMap map, int x, int y, int w, int h, boolean is
+  public static void applyStructure(
+    Type s, CityMap map, int x, int y, int w, int h, boolean is
   ) {
     for (Coord c : Visit.grid(x, y, w, h, 1)) {
       Tile t = map.tileAt(c.x, c.y);
       if (t == null) continue;
       if (is) {
-        Element e = (Element) ROAD.generate();
+        Element e = (Element) s.generate();
         e.enterMap(map, t.x, t.y, 1);
       }
-      else if (t.aboveType() == ROAD) {
+      else if (t.aboveType() == s) {
         t.above.exitMap(map);
       }
     }

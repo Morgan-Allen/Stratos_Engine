@@ -79,6 +79,7 @@ public class CityMapPathCache {
   /**  Query methods for distance and connection-
     */
   boolean pathConnects(Tile from, Tile goes) {
+    if (from == null || goes == null) return false;
     Area fromA = areaFor(from);
     Area goesA = areaFor(goes);
     if (fromA == null || goesA == null) return false;
@@ -92,7 +93,7 @@ public class CityMapPathCache {
   
   /**  Methods for flagging changes and regular updates:
     */
-  void flagPathingChanged(Tile at) {
+  void checkPathingChanged(Tile at) {
     
     //  First, make sure there's some change to merit an update:
     Area core = areaLookup[at.x][at.y];

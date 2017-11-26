@@ -8,6 +8,25 @@ import static game.CityMapPathCache.*;
 
 
 
+//  TODO:  Include effects of fog...
+
+//  And you have to hook this up to the flagging-maps.  That will
+//  let you ensure that only accessible sources are visited, on a
+//  tile-by-tile basis.
+
+
+//  This is probably good enough for now.  If you wanted to optimise
+//  further, you could keep a table of the the IDs of groups in each
+//  16x16 unit, and use that filter any quad-tree descent that tries to
+//  explore within.
+
+//  As an even longer-term project, you could try to cache distance-
+//  estimates between both tiles and regions, so that you can rank
+//  possible flag-targets more accurately.  That is down the road a bit
+//  though.
+
+
+
 public class TestPathCache extends Test {
   
 
@@ -36,7 +55,7 @@ public class TestPathCache extends Test {
     for (Coord c : Visit.grid(0, 0, miniSize, miniSize, 1)) {
       byte l = layout[c.x][c.y];
       Tile t = miniMap.tileAt(c);
-      t.terrain = l == 0 ? LAKE : MEADOW;
+      miniMap.setTerrain(t, l == 0 ? LAKE : MEADOW);
     }
     //
     //  First, verify that an area's tiles conform to an expected shape:
@@ -67,7 +86,7 @@ public class TestPathCache extends Test {
     }
     //
     //  Connect a few old areas and partition others:
-    layout = new byte[][] {
+    byte newLayout[][] = {
       { 0, 1, 0, 0, 1, 1, 0, 1 },
       { 1, 1, 0, 0, 1, 1, 0, 1 },
       { 1, 1, 1, 1, 1, 1, 0, 1 },
@@ -78,10 +97,10 @@ public class TestPathCache extends Test {
       { 1, 1, 0, 1, 1, 1, 1, 1 },
     };
     for (Coord c : Visit.grid(0, 0, miniSize, miniSize, 1)) {
-      byte l = layout[c.x][c.y];
+      byte l = newLayout[c.x][c.y];
       Tile t = miniMap.tileAt(c);
-      t.terrain = l == 0 ? LAKE : MEADOW;
-      miniMap.pathCache.flagPathingChanged(t);
+      miniMap.setTerrain(t, l == 0 ? LAKE : MEADOW);
+      miniMap.pathCache.checkPathingChanged(t);
     }
     miniMap.pathCache.updatePathCache();
     if (! verifyConnectionQueries(miniMap)) {
@@ -93,8 +112,8 @@ public class TestPathCache extends Test {
     for (Coord c : Visit.grid(0, 0, miniSize, miniSize, 1)) {
       if (Rand.yes()) {
         Tile t = miniMap.tileAt(c);
-        t.terrain = miniMap.blocked(t.x, t.y) ? MEADOW : LAKE;
-        miniMap.pathCache.flagPathingChanged(t);
+        miniMap.setTerrain(t, miniMap.blocked(t) ? MEADOW : LAKE);
+        miniMap.pathCache.checkPathingChanged(t);
       }
     }
     miniMap.pathCache.updatePathCache();
@@ -108,8 +127,7 @@ public class TestPathCache extends Test {
     CityMap map = setupTestCity(128);
     map.settings.toggleFog = false;
     
-    int div = map.size / layout.length, rand = div / 4;
-    
+    final int div = map.size / layout.length, rand = div / 4;
     for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
       int x = c.x, y = c.y;
       
@@ -120,19 +138,21 @@ public class TestPathCache extends Test {
       
       byte l = layout[x / div][y / div];
       Tile t = map.tileAt(c);
-      t.terrain = l == 0 ? LAKE : MEADOW;
+      map.setTerrain(t, l == 0 ? LAKE : MEADOW);
     }
     
     CityMapTerrain.populateFixtures(map);
     
     Tile land1   = map.tileAt(7.5f * div, 0.5f * div);
-    Tile land2   = map.tileAt(7.5f * div, 2.5f * div);
+    Tile land2   = map.tileAt(0.5f * div, 7.5f * div);
     Tile island0 = map.tileAt(1.5f * div, 1.5f * div);
+    land1   = CityMapTerrain.nearestOpenTile(land1  , map);
+    land2   = CityMapTerrain.nearestOpenTile(land2  , map);
+    island0 = CityMapTerrain.nearestOpenTile(island0, map);
     
     boolean landLinked = map.pathCache.pathConnects(land1, land2);
     if (! landLinked) {
       I.say("\nNearby regions not linked!");
-      
       I.say("  Total groups: "+map.pathCache.groups.size());
       for (AreaGroup g : map.pathCache.groups) {
         I.say("    Group areas: ");
@@ -149,25 +169,28 @@ public class TestPathCache extends Test {
       return false;
     }
     
+    CityMapPlanning.applyStructure(WALL, map, 88, 20, 48, 8, true);
+    landLinked = map.pathCache.pathConnects(land1, land2);
+    if (landLinked) {
+      I.say("\nWall should have partitioned mainland!");
+      landLinked = map.pathCache.pathConnects(land1, land2);
+      return false;
+    }
+    
+    CityMapPlanning.applyStructure(ROAD, map, 24, 20, 8, 48, true);
+    islandLinked = map.pathCache.pathConnects(land1, island0);
+    if (! islandLinked) {
+      I.say("\nRoad should have connected island to mainland!");
+      return false;
+    }
+    
+    
+    //  TODO:  Do some reasonably thorough random sampling- say, x100
+    //  between random map points.
+    
     if (true) {
       I.say("Tests so far okay...");
     }
-    
-    //  TODO:  And include effects of fog.
-    
-    //  And you have to hook this up to the flagging-maps.  That will
-    //  let you ensure that only accessible sources are visited, on a
-    //  tile-by-tile basis.
-    
-    //  That's probably good enough for now.  If you wanted to optimise
-    //  further, you could keep a table of the the IDs of groups in
-    //  each 16x16 unit, and use that filter any quad-tree descent that
-    //  tries to explore within.
-    
-    //  As an even longer-term project, you could try to cache distance-
-    //  estimates between both tiles and regions, so that you can rank
-    //  possible flag-targets more accurately.  That is down the road a
-    //  bit though.
     
     
     map.settings.paused = true;
