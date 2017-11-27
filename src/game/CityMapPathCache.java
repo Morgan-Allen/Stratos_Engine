@@ -16,46 +16,48 @@ public class CityMapPathCache {
     AREA_SIZE = 16
   ;
   
-  static class AreaGroup {
-    List <Area> areas = new List();
-    boolean flagDeletion = false;
-    int ID;
-    
-    public String toString() { return "G_"+ID; }
-  }
-  
   static class Area {
     
     int ID;
+    boolean flagTiling   = false;
+    boolean flagDeletion = false;
     
+    int aX, aY;
     int numTiles;
     Tile tiles[];
     Batch <Tile> toAdd = new Batch(4);
     Batch <Tile> toRem = new Batch(4);
-    boolean flagTiling = false;
     
-    //Box2D area = new Box2D();
-    int aX, aY;
-    AreaGroup group;
     List <Area> borders = new List();
-    boolean flagDeletion = false;
+    AreaGroup group;
     
     Object pathFlag = null;
     
     public String toString() { return "A_"+ID; }
   }
   
+  static class AreaGroup {
+    
+    int ID;
+    boolean flagDeletion = false;
+    List <Area> areas = new List();
+    
+    public String toString() { return "G_"+ID; }
+  }
+  
   
   final CityMap map;
   Area areaLookup[][];
+  boolean flagDirty[][];
   
-  int nextAreaID = 0;
+  int nextAreaID  = 0;
   int nextGroupID = 0;
-  List <Area> areas = new List();
+  List <Area     > areas  = new List();
   List <AreaGroup> groups = new List();
   
   List <Area> needRefresh = new List();
   List <Area> needDelete  = new List();
+  
   private Tile temp[] = new Tile[8];
   
   
@@ -63,16 +65,21 @@ public class CityMapPathCache {
     this.map = map;
   }
   
+  
   void performSetup(int size) {
+    int dirtyGS = Nums.round(map.size * 1f / AREA_SIZE, 1, true);
     areaLookup = new Area[size][size];
+    flagDirty  = new boolean[dirtyGS][dirtyGS];
   }
+  
   
   void loadState(Session s) throws Exception {
-    
+    return;
   }
   
+  
   void saveState(Session s) throws Exception {
-    
+    return;
   }
   
   
@@ -101,12 +108,15 @@ public class CityMapPathCache {
     boolean blocked = map.blocked(at.x, at.y);
     if (blocked == (core == null)) return;
     
-    //  Then set up some tracking variables....
+    //  Then set up some tracking variables, and flag the general area
+    //  as dirty for later-
     final int aX = at.x / AREA_SIZE;
     final int aY = at.y / AREA_SIZE;
     Area tail = null, head = null, edge = core;
     int numGaps = 0, gapFlag = -1;
     boolean multiArea = false, didRefresh = false;
+    
+    flagDirty[aX][aY] = true;
     
     //  The plan is to circle this tile, checking how many areas it
     //  impinges on and whether there are multiple 'gaps' in area-
@@ -152,8 +162,6 @@ public class CityMapPathCache {
     //  If possible, don't flag the area for deletion.  Just add or
     //  remove a single tile.  (Note that in the case of deleting a
     //  tile, there must not be a potential bottleneck.)
-    
-    ///multiArea = true;
     
     if (edge != null && ! (multiArea || edge.flagDeletion)) {
       if (blocked && numGaps < 2) {
@@ -205,7 +213,6 @@ public class CityMapPathCache {
   
   
   private void refreshTiling(Area area) {
-    if (area.flagDeletion) return;
     if (area.toAdd.empty() && area.toRem.empty()) return;
     
     Batch <Tile> tiles = new Batch();
@@ -220,12 +227,38 @@ public class CityMapPathCache {
   }
   
   
+  private void updateDirtyBounds() {
+    int dirtyGS = flagDirty.length;
+    for (Coord c : Visit.grid(0, 0, dirtyGS, dirtyGS, 1)) {
+      if (! flagDirty[c.x][c.y]) continue;
+      int aX = c.x * AREA_SIZE;
+      int aY = c.y * AREA_SIZE;
+      for (Coord t : Visit.grid(aX, aY, AREA_SIZE, AREA_SIZE, 1)) {
+        Tile u = map.tileAt(t);
+        if (u != null) areaFor(u);
+      }
+      flagDirty[c.x][c.y] = false;
+    }
+  }
+  
+  
   void updatePathCache() {
-    for (Area a : needRefresh) refreshTiling(a);
+    
+    for (Area a : needRefresh) {
+      refreshTiling(a);
+    }
     needRefresh.clear();
-    for (Area a : needDelete) deleteArea(a);
+    
+    for (Area a : needDelete) {
+      deleteArea(a);
+    }
     needDelete.clear();
-    for (Area a : areas) groupFor(a);
+    
+    updateDirtyBounds();
+    
+    for (Area a : areas) {
+      groupFor(a);
+    }
   }
   
   
@@ -254,7 +287,7 @@ public class CityMapPathCache {
     
     int aX = t.x / AREA_SIZE, aY = t.y / AREA_SIZE;
     Batch <Tile> covered  = new Batch();
-    List  <Tile> frontier = new List();
+    List  <Tile> frontier = new List ();
     Batch <Tile> edging   = new Batch();
     frontier.add(t);
     covered.add(t);

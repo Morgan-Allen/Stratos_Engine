@@ -134,19 +134,16 @@ public class TestPathCache extends Test {
     for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
       int x = c.x, y = c.y;
       
-      /*
       x += Rand.range(-rand, rand);
       y += Rand.range(-rand, rand);
       x = Nums.clamp(x, map.size);
       y = Nums.clamp(y, map.size);
-      //*/
       
       byte l = layout[x / div][y / div];
       Tile t = map.tileAt(c);
       map.setTerrain(t, l == 0 ? LAKE : MEADOW);
     }
-    
-    //CityMapTerrain.populateFixtures(map);
+    CityMapTerrain.populateFixtures(map);
     
     Tile land1   = map.tileAt(0.5f * div, 7.5f * div);
     Tile land2   = map.tileAt(7.5f * div, 0.5f * div);
@@ -175,37 +172,38 @@ public class TestPathCache extends Test {
       return false;
     }
     
-    //map.settings.reportPathCache = true;
-    
     CityMapPlanning.applyStructure(WALL, map, 88, 20, 48, 8, true);
     map.pathCache.updatePathCache();
     landLinked = map.pathCache.pathConnects(land1, land2);
     if (landLinked) {
       I.say("\nWall should have partitioned mainland!");
-      //landLinked = map.pathCache.pathConnects(land1, land2);
-      //return false;
+      return false;
     }
     
-    CityMapPlanning.applyStructure(ROAD, map, 24, 20, 8, 48, true);
+    CityMapPlanning.applyStructure(ROAD, map, 20, 24, 8, 48, true);
     map.pathCache.updatePathCache();
     islandLinked = map.pathCache.pathConnects(land1, island0);
     if (! islandLinked) {
       I.say("\nRoad should have connected island to mainland!");
-      islandLinked = map.pathCache.pathConnects(land1, island0);
-      //return false;
+      return false;
     }
     
-    
-    //  TODO:  Do some reasonably thorough random sampling- say, x100
-    //  between random map points.
-    
-    if (true) {
-      //I.say("Tests so far okay...");
+    for (int n = 100; n-- > 0;) {
+      Tile from, goes;
+      from = map.tileAt(Rand.index(map.size), Rand.index(map.size));
+      goes = map.tileAt(Rand.index(map.size), Rand.index(map.size));
+      from = CityMapTerrain.nearestOpenTile(from, map);
+      goes = CityMapTerrain.nearestOpenTile(goes, map);
+      if (from == null || goes == null || from == goes) continue;
+      if (! verifyConnection(from, goes, map)) {
+        return false;
+      }
     }
     
+    I.say("\nCompleted all pathing tests...");
     
     map.settings.paused = true;
-    while (map.time < 1000 || graphics) {
+    while (map.time < 10 || graphics) {
       map = test.runLoop(map, 1, graphics, "saves/test_path_cache.tlt");
     }
     
@@ -224,22 +222,31 @@ public class TestPathCache extends Test {
         Tile goes = map.tileAt(o);
         if (from == goes) continue;
         
-        boolean connects = map.pathCache.pathConnects(from, goes);
-        ActorPathSearch search;
-        search = new ActorPathSearch(map, from, goes, -1);
-        search.doSearch();
-        
-        if (search.success() && ! connects) {
-          I.say("\nFound path between "+from+" and "+goes);
-          I.add("- no area connection!");
-          return false;
-        }
-        if (connects && ! search.success()) {
-          I.say("\nFound area connection between "+from+" and "+goes);
-          I.add("- no path search!");
+        if (! verifyConnection(from, goes, map)) {
           return false;
         }
       }
+    }
+    return true;
+  }
+  
+  
+  static boolean verifyConnection(Tile from, Tile goes, CityMap map) {
+    
+    boolean connects = map.pathCache.pathConnects(from, goes);
+    ActorPathSearch search;
+    search = new ActorPathSearch(map, from, goes, -1);
+    search.doSearch();
+    
+    if (search.success() && ! connects) {
+      I.say("\nFound path between "+from+" and "+goes);
+      I.add("- no area connection!");
+      return false;
+    }
+    if (connects && ! search.success()) {
+      I.say("\nFound area connection between "+from+" and "+goes);
+      I.add("- no path search!");
+      return false;
     }
     return true;
   }
