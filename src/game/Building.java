@@ -5,8 +5,6 @@ import util.*;
 import static game.CityMap.*;
 import static game.GameConstants.*;
 
-import game.GameConstants.Good;
-
 
 
 public class Building extends Element implements Session.Saveable, Employer {
@@ -77,7 +75,7 @@ public class Building extends Element implements Session.Saveable, Employer {
     updateOnPeriod(0);
   }
   
-
+  
   void exitMap(CityMap map) {
     super.exitMap(map);
     map.buildings.remove(this);

@@ -105,7 +105,7 @@ public class Type extends Index.Entry implements Session.Saveable {
   float   growRate = 0;
   int     ambience = 0;
   boolean isCrop   = false;
-  boolean aqueduct = false;
+  boolean isWater  = false;
   
   
   void setDimensions(int w, int h, int d) {

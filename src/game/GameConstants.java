@@ -35,10 +35,12 @@ public class GameConstants {
     BLACK_COLOR  = colour(0 , 0 , 0 ),
     CLEAR_COLOR  = colour(0 , 0 , 0 , 0),
     
-    //  Brown, Grey, White, Red, Green, Blue, Orange, Purple, Yellow.
-    //  Industrial and sanitation in brown.
+    //  Industrial in brown.
     TINT_LITE_INDUSTRIAL  = colour(6, 3, 3),
     TINT_INDUSTRIAL       = colour(5, 2, 2),
+    //  Aquatic in cyan.
+    TINT_LITE_AQUATIC     = colour(1, 6, 8),
+    TINT_AQUATIC          = colour(0, 5, 7),
     //  Military in red.
     TINT_LITE_MILITARY    = colour(8, 1, 1),
     TINT_MILITARY         = colour(7, 0, 0),
@@ -49,8 +51,10 @@ public class GameConstants {
     TINT_LITE_RESIDENTIAL = colour(8, 8, 1),
     TINT_RESIDENTIAL      = colour(7, 7, 0),
     //  Entertainment in purple.
+    TINT_LITE_AMENITY     = colour(8, 1, 8),
     TINT_AMENITY          = colour(7, 0, 7),
     //  Health/education in white.
+    TINT_LITE_HEALTH_ED   = colour(8, 8, 8),
     TINT_HEALTH_ED        = colour(7, 7, 7),
     //  Religious in orange.
     TINT_LITE_RELIGIOUS   = colour(8, 4, 1),
@@ -436,15 +440,16 @@ public class GameConstants {
     AMBIENCE_PAD =  2 ,
     AMBIENCE_MAX =  20
   ;
-  final static Type
-    ROAD     = new Type("type_road"    , IS_STRUCTURAL),
-    WALL     = new Type("type_wall"    , IS_STRUCTURAL),
-    AQUEDUCT = new Type("type_aqueduct", IS_STRUCTURAL)
-  ;
   final static BuildType  
     
     NO_TIERS[] = new BuildType[0],
     NO_NEEDS[] = new BuildType[0],
+    
+    ROAD          = new BuildType("type_road"    , IS_STRUCTURAL),
+    WALL          = new BuildType("type_wall"    , IS_STRUCTURAL),
+    AQUEDUCT      = new BuildType("type_aqueduct", IS_STRUCTURAL),
+    CISTERN       = new BuildType("type_cistern" , IS_WATER_BLD ),
+    INFRASTRUCTURE_BUILDINGS[] = { ROAD, WALL, AQUEDUCT, CISTERN },
     
     PALACE        = new BuildType("type_palace"       , IS_HOME_BLD   ),
     PALACE_BUILDINGS[] = { PALACE },
@@ -513,7 +518,21 @@ public class GameConstants {
     WALL.setDimensions(1, 1, 2);
     WALL.setBuildMaterials(STONE, 2);
     
+    AQUEDUCT.name = "Aqueduct";
+    AQUEDUCT.tint = TINT_LITE_AQUATIC;
+    AQUEDUCT.blocks   = true;
+    AQUEDUCT.isWater = true;
+    AQUEDUCT.setDimensions(1, 1, 1);
+    AQUEDUCT.setBuildMaterials(CLAY, 1, STONE, 2);
+    
     //  TODO:  Fractional material-costs should be possible here!
+    
+    CISTERN.name = "Cistern";
+    CISTERN.tint = TINT_AQUATIC;
+    CISTERN.blocks   = true;
+    CISTERN.isWater = true;
+    CISTERN.setDimensions(3, 3, 1);
+    CISTERN.setBuildMaterials(CLAY, 4, STONE, 10);
     
     //
     //  Palace structures:
@@ -555,7 +574,7 @@ public class GameConstants {
     HOUSE_T2.setUpgradeNeeds(DIVERSION, 15, SCHOOL, 1);
     
     BASIN.name = "Basin";
-    BASIN.tint = TINT_HEALTH_ED;
+    BASIN.tint = TINT_AQUATIC;
     BASIN.setDimensions(2, 2, 0);
     BASIN.setBuildMaterials(STONE, 2, CLAY, 2);
     BASIN.features = new Good[] { IS_WATER, IS_MARKET };
@@ -606,7 +625,7 @@ public class GameConstants {
     FARM_PLOT.maxStock   = 25;
     FARM_PLOT.maxWorkers = 2;
     
-    SAWYER.name = "Logger";
+    SAWYER.name = "Sawyer";
     SAWYER.tint = TINT_LITE_INDUSTRIAL;
     SAWYER.setDimensions(2, 2, 1);
     SAWYER.setBuildMaterials(WOOD, 5, CLAY, 2);

@@ -32,7 +32,22 @@ public class BuildingForWater extends Building {
     */
   void update() {
     super.update();
-    inventory.set(WATER, 10);
+    
+    //  TODO:  Obtain water from either rainfall or adjacent open fresh-
+    //  water sources.
+    
+    Tile at = at();
+    for (Coord c : Visit.perimeter(at.x, at.y, type.wide, type.high)) {
+      Tile t = map.tileAt(c);
+      if (t == null) continue;
+      
+      
+    }
+    
+    //  TODO:  Propagate water to any downhill aqueduct-structures that
+    //  need it.
+    
+    ///inventory.set(WATER, 10);
   }
   
   
@@ -50,7 +65,7 @@ public class BuildingForWater extends Building {
         if (t == null || t.above == null) return;
         Element e = t.above;
         if (e.pathFlag == inFlow) return;
-        if (! e.type.aqueduct   ) return;
+        if (! e.type.isWater   ) return;
         frontier.add(e);
       }
     }

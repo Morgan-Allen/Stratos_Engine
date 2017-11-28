@@ -22,7 +22,7 @@ public class Test {
       map.performSetup(size);
     }
     else {
-      map = CityMapTerrain.generateTerrain(city, size, gradient);
+      map = CityMapTerrain.generateTerrain(city, size, 0, gradient);
       CityMapTerrain.populateFixtures(map);
     }
     
@@ -31,6 +31,26 @@ public class Test {
     city.mapX = 5;
     city.mapY = 5;
     world.cities.add(city);
+    return map;
+  }
+  
+  
+  static CityMap setupTestCity(
+    byte layout[][], byte elevation[][], Terrain... gradient
+  ) {
+    World   world = new World();
+    City    city  = new City(world);
+    CityMap map   = new CityMap(city);
+    
+    int wide = layout.length, high = layout[0].length;
+    map.performSetup(Nums.max(wide, high));
+    
+    for (Tile t : map.allTiles()) {
+      Terrain terr = gradient[layout[t.x][t.y]];
+      int elev = elevation[t.x][t.y];
+      map.setTerrain(t, terr, elev);
+    }
+    
     return map;
   }
   
@@ -87,8 +107,14 @@ public class Test {
   
   /**  Graphical display and loop-execution:
     */
-  final static int FOG_SCALE[] = new int[10];
-  static { for (int i = 10; i-- > 0;) FOG_SCALE[i] = colour(0, 0, 0, i); }
+  final static int FOG_SCALE[][] = new int[10][10];
+  static {
+    for (int f = 10; f-- > 0;) {
+      for (int e = 10; e-- > 0;) {
+        FOG_SCALE[f][e] = colour(e, e, 0, Nums.min(10, e + f));
+      }
+    }
+  }
   
   final static String
     VIEW_NAME = "Tlatoani";
@@ -198,13 +224,14 @@ public class Test {
   
   
   private void updateCityFogLayer(CityMap map) {
-    for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
-      Tile t = map.tileAt(c.x, c.y);
+    for (Tile t : map.allTiles()) {
       float sight = 0;
       sight += map.fog.sightLevel(t);
       sight += map.fog.maxSightLevel(t);
-      float fog = 1 - (sight / 2);
-      fogLayer[c.x][c.y] = FOG_SCALE[Nums.clamp((int) (fog * 10), 10)];
+      
+      int fog  = Nums.clamp((int) ((1 - (sight / 2)) * 10), 10);
+      int high = Nums.clamp(t.elevation, 10);
+      fogLayer[t.x][t.y] = FOG_SCALE[fog][high];
     }
   }
   

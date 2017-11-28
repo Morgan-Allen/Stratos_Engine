@@ -9,6 +9,12 @@ import static game.CityMapPathCache.*;
 
 
 //  TODO:  Include effects of fog...
+//  ...More generally, you need to have a consistent interface for
+//  pathability-checks with the ActorPathSearch class, and reference
+//  that.
+
+//  
+
 
 //  And you have to hook this up to the flagging-maps.  That will
 //  let you ensure that only accessible sources are visited, on a
@@ -58,7 +64,7 @@ public class TestPathCache extends Test {
     for (Coord c : Visit.grid(0, 0, miniSize, miniSize, 1)) {
       byte l = layout[c.x][c.y];
       Tile t = miniMap.tileAt(c);
-      miniMap.setTerrain(t, l == 0 ? LAKE : MEADOW);
+      miniMap.setTerrain(t, l == 0 ? LAKE : MEADOW, 0);
     }
     //
     //  First, verify that an area's tiles conform to an expected shape:
@@ -102,7 +108,7 @@ public class TestPathCache extends Test {
     for (Coord c : Visit.grid(0, 0, miniSize, miniSize, 1)) {
       byte l = newLayout[c.x][c.y];
       Tile t = miniMap.tileAt(c);
-      miniMap.setTerrain(t, l == 0 ? LAKE : MEADOW);
+      miniMap.setTerrain(t, l == 0 ? LAKE : MEADOW, 0);
       miniMap.pathCache.checkPathingChanged(t);
     }
     miniMap.pathCache.updatePathCache();
@@ -115,7 +121,7 @@ public class TestPathCache extends Test {
     for (Coord c : Visit.grid(0, 0, miniSize, miniSize, 1)) {
       if (Rand.yes()) {
         Tile t = miniMap.tileAt(c);
-        miniMap.setTerrain(t, miniMap.blocked(t) ? MEADOW : LAKE);
+        miniMap.setTerrain(t, miniMap.blocked(t) ? MEADOW : LAKE, 0);
         miniMap.pathCache.checkPathingChanged(t);
       }
     }
@@ -141,7 +147,7 @@ public class TestPathCache extends Test {
       
       byte l = layout[x / div][y / div];
       Tile t = map.tileAt(c);
-      map.setTerrain(t, l == 0 ? LAKE : MEADOW);
+      map.setTerrain(t, l == 0 ? LAKE : MEADOW, 0);
     }
     CityMapTerrain.populateFixtures(map);
     

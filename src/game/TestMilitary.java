@@ -21,7 +21,7 @@ public class TestMilitary extends Test {
     City    cityA = world.cities.atIndex(0);
     City    cityB = world.cities.atIndex(1);
     CityMap map   = CityMapTerrain.generateTerrain(
-      cityA, 32, MEADOW, JUNGLE
+      cityA, 32, 0, MEADOW, JUNGLE
     );
     cityA.name = "Home City";
     cityB.name = "Away City";

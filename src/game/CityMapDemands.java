@@ -239,6 +239,7 @@ public class CityMapDemands {
   /**  More complex proximity-queries:
     */
   Iterable <Entry> nearbyEntries(final int x, final int y) {
+    //final Tile from = map.tileAt(x, y);
     
     class iteration implements Iterable <Entry>, Iterator <Entry> {
       
@@ -249,11 +250,21 @@ public class CityMapDemands {
       };
       
       void addEntry(Entry e) {
-        float dist = CityMap.distance(x, y, e.x, e.y);
         if (e.leaf()) {
+          
+          //  TODO:  This might not work.  Flagged tiles will typically
+          //  be inside a blocked structure, and entrances are not
+          //  always unique.  You'll need to vary the check, depending
+          //  on the source object.
+          
+          //Tile goes = map.tileAt(e.x, e.y);
+          //if (! map.pathCache.pathConnects(from, goes)) return;
+          
+          float dist = CityMap.distance(x, y, e.x, e.y);
           e.tempDist = dist - 0.5f;
         }
         else {
+          float dist = CityMap.distance(x, y, e.x, e.y);
           e.tempDist = dist - (((Node) e).size / 2f);
         }
         sorting.add(e);

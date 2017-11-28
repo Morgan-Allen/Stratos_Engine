@@ -139,7 +139,18 @@ public class CityMapFlagging {
         dist += Nums.abs(from.y - ((c.y + 0.5f) * res));
         
         if (maxRange > 0 && dist > maxRange + res) continue;
-        if (l == 0 && map.tileAt(c).hasFocus()   ) continue;
+        
+        if (base) {
+          Tile t = map.tileAt(c);
+          if (t.hasFocus()) continue;
+          
+          //  TODO:  This might not work.  Flagged tiles will typically
+          //  be inside a blocked structure, and entrances are not
+          //  always unique.  You'll need to vary the check, depending
+          //  on the object above a given tile.
+          
+          //if (! map.pathCache.pathConnects(t, from)) continue;
+        }
         
         float roll = (1f + randomness) + (Rand.num() * randomness);
         rating *= res * roll / (dist + res);

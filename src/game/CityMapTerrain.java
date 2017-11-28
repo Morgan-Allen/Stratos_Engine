@@ -117,26 +117,25 @@ public class CityMapTerrain implements TileConstants {
   /**  Initial terrain setup-
     */
   public static CityMap generateTerrain(
-    City city, int size, Terrain... gradient
+    City city, int size, int maxHigh, Terrain... gradient
   ) {
     CityMap map = new CityMap(city);
     map.performSetup(size);
-    populateTerrain(map, gradient);
+    populateTerrain(map, maxHigh, gradient);
     return map;
   }
   
   
-  public static void populateTerrain(CityMap map, Terrain... gradient) {
-    
+  public static void populateTerrain(
+    CityMap map, int maxHigh, Terrain... gradient
+  ) {
     HeightMap mapH = new HeightMap(map.size, 1, 0.5f);
     int numG = gradient.length;
     
-    for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
-      Tile    tile = map.tileAt(c.x, c.y);
-      float   high = mapH.value()[c.x][c.y];
+    for (Tile tile : map.allTiles()) {
+      float   high = mapH.value()[tile.x][tile.y];
       Terrain terr = gradient[Nums.clamp((int) (high * numG), numG)];
-      
-      tile.terrain = terr;
+      map.setTerrain(tile, terr, (int) (high * maxHigh));
     }
   }
   

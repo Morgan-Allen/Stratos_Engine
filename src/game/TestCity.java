@@ -109,6 +109,9 @@ public class TestCity extends Test {
       if (! housesOkay) {
         boolean allNeeds = true;
         for (Building b : map.buildings) {
+          if (b.type == BASIN) {
+            b.inventory.set(WATER, 10);
+          }
           if (b.type == MARKET) {
             b.inventory.set(COTTON, 10);
             b.inventory.set(MAIZE , 10);

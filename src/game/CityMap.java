@@ -175,8 +175,9 @@ public class CityMap implements Session.Saveable {
     
     int x, y;
     
-    Terrain terrain;
-    Element above;
+    int     elevation = 0   ;
+    Terrain terrain   = null;
+    Element above     = null;
     
     List <Actor> inside  = null;
     List <Actor> focused = null;
@@ -185,6 +186,7 @@ public class CityMap implements Session.Saveable {
     
     
     void loadState(Session s) throws Exception {
+      elevation = s.loadInt();
       int terrID = s.loadInt();
       terrain = terrID == -1 ? null : ALL_TERRAINS[terrID];
       above   = (Element) s.loadObject();
@@ -195,6 +197,7 @@ public class CityMap implements Session.Saveable {
     
     
     void saveState(Session s) throws Exception {
+      s.saveInt(elevation);
       s.saveInt(terrain == null ? -1 : terrain.terrainIndex);
       s.saveObject(above);
       
@@ -342,6 +345,21 @@ public class CityMap implements Session.Saveable {
   }
   
   
+  Visit <Tile> allTiles() {
+    return tilesUnder(0, 0, size, size);
+  }
+  
+  
+  Visit <Tile> tilesUnder(int x, int y, int w, int h) {
+    final Visit <Coord> VC = Visit.grid(x, y, w, h, 1);
+    Visit <Tile> VT = new Visit <Tile> () {
+      public boolean hasNext() { return VC.hasNext(); }
+      public Tile next() { return tileAt(VC.next()); }
+    };
+    return VT;
+  }
+  
+  
   
   /**  Blockage and paving methods-
     */
@@ -403,17 +421,38 @@ public class CityMap implements Session.Saveable {
   }
   
   
-  public void setTerrain(Tile t, Terrain terr) {
+  void setTerrain(Tile t, Terrain ter, int elevation) {
     Terrain old = t.terrain;
-    t.terrain = terr;
-    if (terr != old) pathCache.checkPathingChanged(t);
+    t.terrain   = ter;
+    t.elevation = elevation;
+    if (ter != old) pathCache.checkPathingChanged(t);
   }
   
   
-  public void setAbove(Tile t, Element above) {
+  void setTerrain(Coord c, Terrain ter, int elevation) {
+    setTerrain(tileAt(c), ter, elevation);
+  }
+  
+  
+  void setTerrain(int x, int y, Terrain ter, int elevation) {
+    setTerrain(tileAt(x, y), ter, elevation);
+  }
+  
+  
+  void setAbove(Tile t, Element above) {
     Element old = t.above;
     t.above = above;
     if (old != above) pathCache.checkPathingChanged(t);
+  }
+  
+  
+  void setAbove(Coord c, Element above) {
+    setAbove(tileAt(c), above);
+  }
+  
+  
+  void setAbove(int x, int y, Element above) {
+    setAbove(tileAt(x, y), above);
   }
   
   

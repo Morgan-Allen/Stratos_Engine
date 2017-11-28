@@ -21,7 +21,7 @@ public class TestSieging extends Test {
     City    homeC = new City(world);
     City    awayC = new City(world);
     CityMap map   = CityMapTerrain.generateTerrain(
-      homeC, 32, MEADOW, JUNGLE
+      homeC, 32, 0, MEADOW, JUNGLE
     );
     map.settings.toggleFog = false;
     homeC.name = "Home City";
