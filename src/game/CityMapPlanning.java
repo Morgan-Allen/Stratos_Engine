@@ -87,20 +87,13 @@ public class CityMapPlanning {
   }
   
   
-  Element placeObject(Type type, int x, int y) {
-    return placeObject(type, map.tileAt(x, y));
-  }
-  
-  
-  Element placeObject(Type type, Tile t) {
-    Element e = (Element) type.generate();
-    e.setLocation(t);
-    placeObject(e);
-    return e;
-  }
-  
-  
   void placeObject(Element e) {
+    toBuild.add(e);
+  }
+  
+  
+  void placeObject(Element e, int x, int y) {
+    e.setLocation(map.tileAt(x, y));
     toBuild.add(e);
   }
   
@@ -148,20 +141,24 @@ public class CityMapPlanning {
   
   /**  Some helper methods for dealing with infrastructure:
     */
-  public static void applyStructure(
-    Type s, CityMap map, int x, int y, int w, int h, boolean is
+  public static Series <Element> placeStructure(
+    Type s, CityMap map, int x, int y, int w, int h, boolean built
   ) {
+    Batch <Element> placed = new Batch();
     for (Coord c : Visit.grid(x, y, w, h, 1)) {
       Tile t = map.tileAt(c.x, c.y);
       if (t == null) continue;
-      if (is) {
-        Element e = (Element) s.generate();
+      Element e = (Element) s.generate();
+      if (built) {
         e.enterMap(map, t.x, t.y, 1);
       }
-      else if (t.aboveType() == s) {
-        t.above.exitMap(map);
+      else {
+        e.setLocation(t);
+        map.planning.placeObject(e);
       }
+      placed.add(e);
     }
+    return placed;
   }
   
   

@@ -38,7 +38,7 @@ public class TestSieging extends Test {
     BuildingForArmy fort = (BuildingForArmy) GARRISON.generate();
     fort.enterMap(map, 10, 10, 1);
     fillWorkVacancies(fort);
-    CityMapPlanning.applyStructure(ROAD, map, 10, 9, 40, 1, true);
+    CityMapPlanning.placeStructure(ROAD, map, 10, 9, 40, 1, true);
     
     Building store = (Building) PORTER_POST.generate();
     store.enterMap(map, 10, 6, 1);

@@ -41,7 +41,6 @@ public class BuildingForWater extends Building {
     fillLevel = inventory.valueFor(WATER) / 10f;
     
     //  TODO:  Obtain water from rainfall?
-    
     boolean hasSource = false;
     
     Tile at = at();
@@ -83,12 +82,9 @@ public class BuildingForWater extends Building {
         }
       }.floodFrom(this);
       
-      //I.say("\nPerformed flood from "+this);
-      
       for (Element e : fills) if (e.type.isBuilding()) {
         Building b = (Building) e;
         b.inventory.set(WATER, 10);
-        //I.say("  Filling: "+b);
       }
     }
   }

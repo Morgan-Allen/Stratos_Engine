@@ -178,7 +178,7 @@ public class TestPathCache extends Test {
       return false;
     }
     
-    CityMapPlanning.applyStructure(WALL, map, 88, 20, 48, 8, true);
+    CityMapPlanning.placeStructure(WALL, map, 88, 20, 48, 8, true);
     map.pathCache.updatePathCache();
     landLinked = map.pathCache.pathConnects(land1, land2);
     if (landLinked) {
@@ -186,7 +186,7 @@ public class TestPathCache extends Test {
       return false;
     }
     
-    CityMapPlanning.applyStructure(ROAD, map, 20, 24, 8, 48, true);
+    CityMapPlanning.placeStructure(ROAD, map, 20, 24, 8, 48, true);
     map.pathCache.updatePathCache();
     islandLinked = map.pathCache.pathConnects(land1, island0);
     if (! islandLinked) {

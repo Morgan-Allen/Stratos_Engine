@@ -21,6 +21,13 @@ public class TestBuildPaths extends Test {
     //  Okay.  I need terrain-elevation.  Deep water.  Shallow water.
     //  Bridge-building to an island.  Aqueducts.
     
+    CityMap map = setupTestCity(16);
+    map.settings.toggleFog     = false;
+    map.settings.toggleFatigue = false;
+    map.settings.toggleHunger  = false;
+    
+    //
+    //  Configure some artificially partitioned terrain:
     Terrain terrTypes[] = { LAKE, MEADOW, JUNGLE };
     byte terrIDs[] = {
       1, 1, 1, 1,   2, 2, 0, 0,   0, 0, 2, 2,   2, 2, 2, 2
@@ -28,9 +35,6 @@ public class TestBuildPaths extends Test {
     byte elevation[] = {
       1, 1, 1, 1,   0, 0, 0, 0,   0, 0, 0, 0,   0, 0, 0, 0
     };
-    CityMap map = setupTestCity(16);
-    map.settings.toggleFog = false;
-    
     for (Tile t : map.allTiles()) {
       Terrain ter = terrTypes[terrIDs[t.y]];
       int high = elevation[t.y];
@@ -41,37 +45,57 @@ public class TestBuildPaths extends Test {
     }
     
     //
-    //  Test to ensure that water can flow along connected aqueducts,
-    //  but not uphill:
-    Building cistern1 = (Building) CISTERN.generate();
-    cistern1.enterMap(map, 1, 0, 1);
-    
-    Building cistern2 = (Building) CISTERN.generate();
-    cistern2.enterMap(map, 12, 10, 1);
-    
-    Building basin1 = (Building) BASIN.generate();
-    basin1.enterMap(map, 1, 13, 1);
-
-    Building basin2 = (Building) BASIN.generate();
-    basin2.enterMap(map, 14, 0, 1);
-    
-    CityMapPlanning.applyStructure(AQUEDUCT, map, 2 , 3, 1, 10, true);
-    CityMapPlanning.applyStructure(AQUEDUCT, map, 15, 2, 1, 10, true);
+    //  Set up some essential construction facilities:
+    Building mason = (Building) MASON.generate();
+    mason.enterMap(map, 8, 12, 1);
+    fillWorkVacancies(mason);
     
     //
     //  Test to ensure that water does not collect in cisterns away
     //  from a water-source:
     Building cistern0 = (Building) CISTERN.generate();
-    cistern0.enterMap(map, 8, 0, 1);
+    map.planning.placeObject(cistern0, 8, 0);
+    
+    //
+    //  Test to ensure that water can flow along connected aqueducts,
+    //  but not uphill:
+    Building cistern1 = (Building) CISTERN.generate();
+    map.planning.placeObject(cistern1, 1, 0);
+    
+    Building cistern2 = (Building) CISTERN.generate();
+    map.planning.placeObject(cistern2, 12, 10);
+    
+    Building basin1 = (Building) BASIN.generate();
+    map.planning.placeObject(basin1, 1, 13);
+    
+    Building basin2 = (Building) BASIN.generate();
+    map.planning.placeObject(basin2, 14, 0);
+    
+    CityMapPlanning.placeStructure(AQUEDUCT, map, 2 , 3, 1, 10, true);
+    CityMapPlanning.placeStructure(AQUEDUCT, map, 15, 2, 1, 10, true);
     
     //
     //  Run simulation:
+    boolean buildOkay = false;
     boolean waterOkay = false;
     
     while (map.time < 1000 || graphics) {
       map = test.runLoop(map, 1, graphics, "saves/test_build_path.tlt");
       
-      if (! waterOkay) {
+      for (Good g : mason.type.buildsWith) {
+        mason.inventory.set(g, 10);
+      }
+      
+      if (! buildOkay) {
+        boolean buildDone = true;
+        for (Tile t : map.allTiles()) {
+          if (t.above == null || t.above.type.isNatural()) continue;
+          if (t.above.buildLevel() < 1) buildDone = false;
+        }
+        buildOkay = buildDone;
+      }
+      
+      if (buildOkay && ! waterOkay) {
         boolean fillsOkay = true;
         fillsOkay &= basin1  .inventory.valueFor(WATER) >= 5;
         fillsOkay &= basin2  .inventory.valueFor(WATER) == 0;

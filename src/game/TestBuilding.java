@@ -32,9 +32,10 @@ public class TestBuilding extends Test {
     tree.enterMap(map, 6, 2, 1);
     Element toRaze[] = { farm, tree };
     
-    BuildingForHome home, palace;
-    home   = (BuildingForHome) map.planning.placeObject(HOUSE , 6, 3);
-    palace = (BuildingForHome) map.planning.placeObject(PALACE, 1, 3);
+    BuildingForHome home = (BuildingForHome) HOUSE.generate();
+    map.planning.placeObject(home, 6, 3);
+    BuildingForHome palace = (BuildingForHome) PALACE.generate();
+    map.planning.placeObject(palace, 1, 3);
     
     BuildingForTrade post = (BuildingForTrade) PORTER_POST.generate();
     post.enterMap(map, 2, 10, 0);
@@ -55,13 +56,9 @@ public class TestBuilding extends Test {
     map.planning.placeObject(mason);
     
     Building toBuild[] = { post, home, palace, mason };
-    
-    Batch <Tile> toPave = new Batch();
-    for (Coord c : Visit.grid(2, 2, 10, 1, 1)) {
-      Tile t = map.tileAt(c);
-      toPave.add(t);
-      map.planning.placeObject(ROAD, t);
-    }
+    Series <Element> road = CityMapPlanning.placeStructure(
+      ROAD, map, 2, 2, 10, 1, false
+    );
     
     Tally <Good> startingMaterials = totalMaterials(map);
     Tally <Good> endMaterials = null;
@@ -101,11 +98,9 @@ public class TestBuilding extends Test {
       if (! pavingOkay) {
         boolean allPaved = true;
         numPaved = 0;
-        for (Tile t : toPave) {
-          if (t.above == null || t.above.type != ROAD) {
-            allPaved = false;
-          }
-          else numPaved += 1;
+        for (Element e : road) {
+          if (e.complete()) numPaved += 1;
+          else allPaved = false;
         }
         pavingOkay = allPaved;
       }

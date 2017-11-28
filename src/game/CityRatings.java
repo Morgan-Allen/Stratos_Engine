@@ -19,8 +19,9 @@ public class CityRatings {
   //       Fire / Water
   //      Earth / Air
   
-  //  Jobs available/filled.
-  //  Home available/filled.
+  //  Jobs/Homes available/filled.
+  //  Slaves/Commoners/Merchants/Nobles.
+  //  Men & Women.
   
   
   Tally <Type> supply = new Tally();
