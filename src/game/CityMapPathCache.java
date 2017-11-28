@@ -16,7 +16,7 @@ public class CityMapPathCache {
     AREA_SIZE = 16
   ;
   
-  static class Area {
+  static class Area implements Flood.Fill {
     
     int ID;
     boolean flagTiling   = false;
@@ -33,6 +33,8 @@ public class CityMapPathCache {
     
     Object pathFlag = null;
     
+    public void flagWith(Object o) { pathFlag = o; }
+    public Object flaggedWith() { return pathFlag; }
     public String toString() { return "A_"+ID; }
   }
   
@@ -108,15 +110,12 @@ public class CityMapPathCache {
     boolean blocked = map.blocked(at.x, at.y);
     if (blocked == (core == null)) return;
     
-    //  Then set up some tracking variables, and flag the general area
-    //  as dirty for later-
+    //  Then set up some tracking variables-
     final int aX = at.x / AREA_SIZE;
     final int aY = at.y / AREA_SIZE;
     Area tail = null, head = null, edge = core;
     int numGaps = 0, gapFlag = -1;
     boolean multiArea = false, didRefresh = false;
-    
-    flagDirty[aX][aY] = true;
     
     //  The plan is to circle this tile, checking how many areas it
     //  impinges on and whether there are multiple 'gaps' in area-
@@ -188,6 +187,9 @@ public class CityMapPathCache {
     //  and start over-
     if (edge != null && ! didRefresh) {
       markForDeletion(edge);
+    }
+    if (! didRefresh) {
+      flagDirty[aX][aY] = true;
     }
   }
   
@@ -285,29 +287,23 @@ public class CityMapPathCache {
       return null;
     }
     
-    int aX = t.x / AREA_SIZE, aY = t.y / AREA_SIZE;
-    Batch <Tile> covered  = new Batch();
-    List  <Tile> frontier = new List ();
-    Batch <Tile> edging   = new Batch();
-    frontier.add(t);
-    covered.add(t);
-    t.pathFlag = covered;
+    final int aX = t.x / AREA_SIZE, aY = t.y / AREA_SIZE;
+    final Batch <Tile> edging = new Batch();
     
-    while (! frontier.empty()) {
-      Tile front = frontier.removeFirst();
-      for (Tile n : CityMap.adjacent(front, temp, map)) {
-        if (n == null || n.pathFlag != null) continue;
-        if (map.blocked(n.x, n.y)) continue;
-        if (n.x / AREA_SIZE != aX || n.y / AREA_SIZE != aY) {
-          edging.add(n);
-          n.pathFlag = edging;
-          continue;
+    Series <Tile> covered = new Flood <Tile> () {
+      void addSuccessors(Tile front) {
+        for (Tile n : CityMap.adjacent(front, temp, map)) {
+          if (n == null || n.flaggedWith() != null) continue;
+          if (map.blocked(n.x, n.y)) continue;
+          if (n.x / AREA_SIZE != aX || n.y / AREA_SIZE != aY) {
+            edging.add(n);
+            n.pathFlag = edging;
+            continue;
+          }
+          tryAdding(n);
         }
-        frontier.addLast(n);
-        covered.add(n);
-        n.pathFlag = covered;
       }
-    }
+    }.floodFrom(t);
     
     area = new Area();
     area.ID       = nextAreaID++;
@@ -318,7 +314,6 @@ public class CityMapPathCache {
     areas.add(area);
     
     for (Tile c : covered) {
-      c.pathFlag = null;
       areaLookup[c.x][c.y] = area;
     }
     
@@ -384,23 +379,15 @@ public class CityMapPathCache {
       deleteGroup(group);
       group = null;
     }
-
-    Batch <Area> covered  = new Batch();
-    List  <Area> frontier = new List();
-    frontier.add(area);
-    covered.add(area);
-    area.pathFlag = covered;
     
-    while (! frontier.empty()) {
-      Area front = frontier.removeFirst();
-      for (Area n : front.borders) {
-        if (n.pathFlag != null) continue;
-        if (n.tiles == null) I.complain("Hit deleted area!");
-        frontier.add(n);
-        covered.add(n);
-        n.pathFlag = covered;
+    Series <Area> covered = new Flood <Area> () {
+      void addSuccessors(Area front) {
+        for (Area n : front.borders) {
+          if (n.flaggedWith() != null) continue;
+          tryAdding(n);
+        }
       }
-    }
+    }.floodFrom(area);
     
     group = new AreaGroup();
     group.ID = nextGroupID++;

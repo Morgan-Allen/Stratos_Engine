@@ -194,6 +194,13 @@ public class TestPathCache extends Test {
       return false;
     }
     
+    for (Tile t : map.allTiles()) {
+      if (map.pathCache.rawArea(t) == null && ! map.blocked(t)) {
+        I.say("\nUnblocked tile has no area: "+t);
+        return false;
+      }
+    }
+    
     for (int n = 100; n-- > 0;) {
       Tile from, goes;
       from = map.tileAt(Rand.index(map.size), Rand.index(map.size));
@@ -262,6 +269,8 @@ public class TestPathCache extends Test {
     configGraphic(map.size, map.size);
     
     Tile hovered = map.tileAt(hover.x, hover.y);
+    hovered = CityMapTerrain.nearestOpenTile(hovered, map);
+    
     Area area = map.pathCache.rawArea(hovered), around[] = null;
     AreaGroup group = null;
     if (area != null) around = area.borders.toArray(Area.class);

@@ -171,7 +171,7 @@ public class CityMap implements Session.Saveable {
   
   /**  Tiles and related setup/query methods-
     */
-  public static class Tile implements Target {
+  public static class Tile implements Target, Flood.Fill {
     
     int x, y;
     
@@ -215,6 +215,16 @@ public class CityMap implements Session.Saveable {
     
     public boolean onMap() {
       return true;
+    }
+    
+    
+    public void flagWith(Object o) {
+      pathFlag = o;
+    }
+    
+    
+    public Object flaggedWith() {
+      return pathFlag;
     }
     
     

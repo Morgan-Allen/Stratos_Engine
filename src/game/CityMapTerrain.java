@@ -210,10 +210,10 @@ public class CityMapTerrain implements TileConstants {
   
   
   static Tile nearestOpenTile(Tile from, CityMap map) {
-    if (! map.blocked(from.x, from.y)) return from;
+    if (from == null || ! map.blocked(from)) return from;
     
     for (Tile t : CityMap.adjacent(from, null, map)) {
-      if (t == null || map.blocked(t.x, t.y)) continue;
+      if (t == null || map.blocked(t)) continue;
       return t;
     }
     return null;

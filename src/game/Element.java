@@ -7,7 +7,7 @@ import static game.GameConstants.*;
 
 
 
-public class Element implements Session.Saveable, Target {
+public class Element implements Session.Saveable, Target, Flood.Fill {
   
   
   /**  Data fields, construction and save/load methods-
@@ -130,6 +130,16 @@ public class Element implements Session.Saveable, Target {
   
   public Tile at() {
     return at;
+  }
+  
+  
+  public void flagWith(Object o) {
+    pathFlag = o;
+  }
+  
+  
+  public Object flaggedWith() {
+    return pathFlag;
   }
   
   
@@ -346,6 +356,11 @@ public class Element implements Session.Saveable, Target {
   
   public String toString() {
     return type.name;
+  }
+  
+
+  public int debugTint() {
+    return type.tint;
   }
 }
 

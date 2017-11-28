@@ -12,6 +12,9 @@ public class BuildingForWater extends Building {
   
   /**  Data fields, construction and save/load methods-
     */
+  float fillLevel = 0;
+  
+  
   BuildingForWater(Type type) {
     super(type);
   }
@@ -19,11 +22,13 @@ public class BuildingForWater extends Building {
   
   public BuildingForWater(Session s) throws Exception {
     super(s);
+    fillLevel = s.loadFloat();
   }
   
   
   public void saveState(Session s) throws Exception {
     super.saveState(s);
+    s.saveFloat(fillLevel);
   }
   
   
@@ -33,84 +38,71 @@ public class BuildingForWater extends Building {
   void update() {
     super.update();
     
-    //  TODO:  Obtain water from either rainfall or adjacent open fresh-
-    //  water sources.
+    fillLevel = inventory.valueFor(WATER) / 10f;
+    
+    //  TODO:  Obtain water from rainfall?
+    
+    boolean hasSource = false;
     
     Tile at = at();
+    int high = at.elevation;
+    
     for (Coord c : Visit.perimeter(at.x, at.y, type.wide, type.high)) {
       Tile t = map.tileAt(c);
-      if (t == null) continue;
+      if (t == null || t.terrain == null) continue;
       
-      
-    }
-    
-    //  TODO:  Propagate water to any downhill aqueduct-structures that
-    //  need it.
-    
-    ///inventory.set(WATER, 10);
-  }
-  
-  
-  static Series <Element> propagateFlow(Element origin) {
-    
-    CityMap map = origin.map;
-    Tile temp[] = new Tile[8];
-    
-    final Batch <Element> inFlow = new Batch();
-    final List <Element> frontier = new List();
-    frontier.add(origin);
-    
-    class Adds {
-      void tryAddingFrom(Tile t) {
-        if (t == null || t.above == null) return;
-        Element e = t.above;
-        if (e.pathFlag == inFlow) return;
-        if (! e.type.isWater   ) return;
-        frontier.add(e);
+      if (t.terrain.isWater && t.elevation >= high) {
+        hasSource = true;
       }
     }
-    Adds adding = new Adds();
     
-    while (frontier.size() > 0) {
-      
-      Element front = frontier.removeFirst();
-      inFlow.add(front);
-      front.pathFlag = inFlow;
-      
-      Tile at = front.at();
-      int w = front.type.wide, h = front.type.high;
-      
-      if (w > 1 || h > 1) {
-        for (Coord c : Visit.perimeter(at.x, at.y, w, h)) {
-          adding.tryAddingFrom(map.tileAt(c));
+    if (hasSource) {
+      Series <Element> fills = new Flood <Element> () {
+        Tile temp[] = new Tile[8];
+        
+        protected void addSuccessors(Element front) {
+          int w = front.type.wide, h = front.type.high;
+          Tile at = front.at();
+          int high = at.elevation;
+          
+          if (w > 1 || h > 1) {
+            for (Coord c : Visit.perimeter(at.x, at.y, w, h)) {
+              tryAddingTile(map.tileAt(c), high);
+            }
+          }
+          else for (Tile t : CityMap.adjacent(at, temp, map)) {
+            tryAddingTile(t, high);
+          }
         }
-      }
-      else for (Tile t : CityMap.adjacent(at, temp, map)) {
-        adding.tryAddingFrom(t);
+        
+        private void tryAddingTile(Tile t, int fromHigh) {
+          if (t == null || t.above == null) return;
+          if (! t.above.type.isWater      ) return;
+          if (t.elevation > fromHigh      ) return;
+          tryAdding(t.above);
+        }
+      }.floodFrom(this);
+      
+      //I.say("\nPerformed flood from "+this);
+      
+      for (Element e : fills) if (e.type.isBuilding()) {
+        Building b = (Building) e;
+        b.inventory.set(WATER, 10);
+        //I.say("  Filling: "+b);
       }
     }
-    
-    for (Element e : inFlow) e.pathFlag = null;
-    return inFlow;
   }
   
   
+  
+  /**  Rendering, debug and interface methods:
+    */
+  public int debugTint() {
+    if (fillLevel > 0) return type.tint;
+    return PAVE_COLOR;
+  }
   
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -38,12 +38,8 @@ public class Test {
   static CityMap setupTestCity(
     byte layout[][], byte elevation[][], Terrain... gradient
   ) {
-    World   world = new World();
-    City    city  = new City(world);
-    CityMap map   = new CityMap(city);
-    
     int wide = layout.length, high = layout[0].length;
-    map.performSetup(Nums.max(wide, high));
+    CityMap map = setupTestCity(Nums.max(wide, high));
     
     for (Tile t : map.allTiles()) {
       Terrain terr = gradient[layout[t.x][t.y]];
@@ -175,7 +171,7 @@ public class Test {
       
       if (at.above != null) {
         if (at.above.growLevel() == -1) fill = MISSED_COLOR;
-        else fill = at.above.type.tint;
+        else fill = at.above.debugTint();
       }
       else if (at.terrain != null) {
         fill = at.terrain.tint;

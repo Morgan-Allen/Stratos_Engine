@@ -308,7 +308,7 @@ public class BuildingForHome extends Building {
       if (need <= 0) continue;
       
       for (Building b : map.buildings) {
-        if (! b.type.hasFeature(IS_MARKET)) continue;
+        if (! b.type.hasFeature(IS_VENDOR)) continue;
         
         float dist = CityMap.distance(entrance(), b.entrance());
         if (dist > 50) continue;

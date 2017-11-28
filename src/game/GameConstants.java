@@ -39,7 +39,7 @@ public class GameConstants {
     TINT_LITE_INDUSTRIAL  = colour(6, 3, 3),
     TINT_INDUSTRIAL       = colour(5, 2, 2),
     //  Aquatic in cyan.
-    TINT_LITE_AQUATIC     = colour(1, 6, 8),
+    TINT_LITE_AQUATIC     = colour(7, 8, 9),
     TINT_AQUATIC          = colour(0, 5, 7),
     //  Military in red.
     TINT_LITE_MILITARY    = colour(8, 1, 1),
@@ -216,7 +216,7 @@ public class GameConstants {
     IS_STONE   = new Good("Is Stone"    , -1 ),
     
     IS_ADMIN   = new Good("Is Admin"    , -1 ),
-    IS_MARKET  = new Good("Is Market"   , -1 ),
+    IS_VENDOR  = new Good("Is Market"   , -1 ),
     IS_TRADER  = new Good("Is Trader"   , -1 ),
     IS_HOUSING = new Good("Is Housing"  , -1 ),
     
@@ -227,7 +227,7 @@ public class GameConstants {
     
     EMPTY_MATERIAL[] = { VOID },
     NO_GOODS      [] = new Good[0],
-    COMMERCE_TYPES[] = { IS_ADMIN, IS_TRADER, IS_MARKET, IS_HOUSING },
+    COMMERCE_TYPES[] = { IS_ADMIN, IS_TRADER, IS_VENDOR, IS_HOUSING },
     SERVICE_TYPES [] = { DIVERSION, EDUCATION, HEALTHCARE, RELIGION },
     
     WATER      = new Good("Water"       , 0  ),
@@ -319,7 +319,8 @@ public class GameConstants {
     JUNGLE_TREE1.growRate = 0.5f;
     DESERT_ROCK1.setDimensions(2, 2, 1);
     CLAY_BANK1  .setDimensions(2, 2, 0);
-    LAKE.blocks = true;
+    LAKE.blocks  = true;
+    LAKE.isWater = true;
     
     //  TODO:  UNIFY WITH WALKER-TYPES BELOW!
     TAPIR .name        = "Tapir";
@@ -520,7 +521,7 @@ public class GameConstants {
     
     AQUEDUCT.name = "Aqueduct";
     AQUEDUCT.tint = TINT_LITE_AQUATIC;
-    AQUEDUCT.blocks   = true;
+    AQUEDUCT.blocks  = true;
     AQUEDUCT.isWater = true;
     AQUEDUCT.setDimensions(1, 1, 1);
     AQUEDUCT.setBuildMaterials(CLAY, 1, STONE, 2);
@@ -529,7 +530,7 @@ public class GameConstants {
     
     CISTERN.name = "Cistern";
     CISTERN.tint = TINT_AQUATIC;
-    CISTERN.blocks   = true;
+    CISTERN.blocks  = true;
     CISTERN.isWater = true;
     CISTERN.setDimensions(3, 3, 1);
     CISTERN.setBuildMaterials(CLAY, 4, STONE, 10);
@@ -575,9 +576,10 @@ public class GameConstants {
     
     BASIN.name = "Basin";
     BASIN.tint = TINT_AQUATIC;
+    BASIN.isWater = true;
     BASIN.setDimensions(2, 2, 0);
     BASIN.setBuildMaterials(STONE, 2, CLAY, 2);
-    BASIN.features = new Good[] { IS_WATER, IS_MARKET };
+    BASIN.features = new Good[] { IS_WATER, IS_VENDOR };
     
     SWEEPER.name = "Sweeper";
     SWEEPER.tint = TINT_LITE_INDUSTRIAL;
@@ -673,7 +675,7 @@ public class GameConstants {
     MARKET.setBuildMaterials(WOOD, 4, STONE, 2);
     MARKET.setWorkerTypes(MERCHANT);
     MARKET.needed   = MARKET_GOODS;
-    MARKET.features = new Good[] { IS_MARKET };
+    MARKET.features = new Good[] { IS_VENDOR };
     
     PORTER_POST.name = "Porter Post";
     PORTER_POST.tint = TINT_COMMERCIAL;
@@ -785,8 +787,10 @@ public class GameConstants {
   final static Series <Actor> NO_ACTORS = new Batch();
   
   static interface Target {
+    
     Tile at();
     boolean onMap();
+    
     void targetedBy(Actor a);
     void setFocused(Actor a, boolean is);
     Series <Actor> focused();
