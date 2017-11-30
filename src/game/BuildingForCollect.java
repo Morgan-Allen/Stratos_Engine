@@ -3,6 +3,7 @@
 package game;
 import util.*;
 import static game.Task.*;
+import static game.CityMap.*;
 import static game.GameConstants.*;
 
 
@@ -45,11 +46,12 @@ public class BuildingForCollect extends BuildingForCrafts {
   
   boolean pickNextCollection(Actor actor, Good g) {
     Pick <Building> pick = new Pick();
+    Tile entrance = mainEntrance();
     
     for (Building b : map.buildings) {
       if (! b.type.hasFeature(IS_HOUSING)) continue;
-      float distW = CityMap.distance(actor.at(), b.entrance());
-      float distB = CityMap.distance(entrance(), b.entrance());
+      float distW = CityMap.distance(actor.at(), b.mainEntrance());
+      float distB = CityMap.distance(entrance  , b.mainEntrance());
       if (distB > type.maxDeliverRange) continue;
       
       int amount = (int) b.inventory.valueFor(g);
@@ -67,6 +69,8 @@ public class BuildingForCollect extends BuildingForCrafts {
   
   
   public void actorVisits(Actor actor, Building visits) {
+    
+    //  TODO:  Replace this with a custom task...
     
     if (visits == this) for (Good made : type.produced) {
       actor.offloadGood(made, this);

@@ -95,16 +95,13 @@ public class CityMapTerrain implements TileConstants {
   
   void scanHabitat(Tile tile) {
     Terrain t = tile.terrain;
-    Type above = tile.aboveType();
-
     if (t == null) return;
-    if (above != null) {
-      if (above.paved) return;
-      if (above.category != Type.IS_FIXTURE) return;
-    }
     
-    HabitatScan scan = scans[1][t.terrainIndex];
-    if (scan == null) scan = scans[1][t.terrainIndex] = initHabitatScan();
+    Type above = tile.above == null ? null : tile.above.type;
+    if (above != null && ! above.isNatural()) return;
+    
+    HabitatScan scan = scans[1][t.terrainID];
+    if (scan == null) scan = scans[1][t.terrainID] = initHabitatScan();
     
     scan.numTiles += 1;
     scan.densities[tile.x / SCAN_RES][tile.y / SCAN_RES] += 1;
@@ -247,7 +244,7 @@ public class CityMapTerrain implements TileConstants {
   
   
   static float habitatDensity(Tile tile, Terrain t, CityMap map) {
-    HabitatScan scan = map.terrain.scans[0][t.terrainIndex];
+    HabitatScan scan = map.terrain.scans[0][t.terrainID];
     if (scan == null) return 0;
     float d = scan.densities[tile.x / SCAN_RES][tile.y / SCAN_RES];
     return d / (SCAN_RES * SCAN_RES);
@@ -257,7 +254,7 @@ public class CityMapTerrain implements TileConstants {
   static float idealPopulation(Type species, CityMap map) {
     float numTiles = 0;
     for (Terrain h : species.habitats) {
-      HabitatScan scan = map.terrain.scans[0][h.terrainIndex];
+      HabitatScan scan = map.terrain.scans[0][h.terrainID];
       numTiles += scan == null ? 0 : scan.numTiles;
     }
     if (species.predator) {

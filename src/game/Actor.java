@@ -32,7 +32,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   Building  home;
   City      homeCity;
   Formation formation;
-  Building  inside;
+  Pathing   inside;
   boolean   guest;
   
   Task task;
@@ -69,7 +69,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     home      = (Building ) s.loadObject();
     homeCity  = (City     ) s.loadObject();
     formation = (Formation) s.loadObject();
-    inside    = (Building ) s.loadObject();
+    inside    = (Pathing  ) s.loadObject();
     guest     = s.loadBool();
     
     task = (Task) s.loadObject();
@@ -184,48 +184,46 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     //
     //  Task updates-
     if (task != null && task.checkAndUpdatePathing()) {
-      Task     task      = this.task;
-      Employer origin    = task.origin;
-      Building visits    = task.visits;
-      Target   target    = task.target;
-      boolean  combat    = inCombat();
-      Tile     pathEnd   = (Tile) Visit.last(task.path);
-      float    distance  = CityMap.distance(at(), pathEnd);
-      float    minRange  = 0.1f;
+      Task     task     = this.task;
+      Employer origin   = task.origin;
+      Building visits   = task.visits;
+      Target   target   = task.target;
+      boolean  combat   = inCombat();
+      Pathing  pathEnd  = (Pathing) Visit.last(task.path);
+      float    distance = CityMap.distance(at(), pathEnd);
+      float    minRange = 0.1f;
       
       if (combat && ! indoors()) minRange = type.attackRange;
-      //
-      //  If you're close enough to start the behaviour, act accordingly:
-      if (distance <= minRange) {
-        if (visits != null && inside != visits) {
-          setInside(visits, true);
-        }
+      
+      if (visits != null && inside == visits) {
         if (task.timeSpent++ <= task.maxTime) {
-          if (visits != null) {
-            onVisit(visits);
-            task.onVisit(visits);
-            visits.visitedBy(this);
-            if (origin != null) origin.actorVisits(this, visits);
-          }
-          if (target != null) {
-            onTarget(target);
-            task.onTarget(target);
-            target.targetedBy(this);
-            if (origin != null) origin.actorTargets(this, target);
-          }
+          onVisit(visits);
+          task.onVisit(visits);
+          visits.visitedBy(this);
+          if (origin != null) origin.actorVisits(this, visits);
         }
         else {
           beginNextBehaviour();
         }
       }
-      //
-      //  Otherwise, close along the path:
+      else if (target != null && distance <= minRange) {
+        if (task.timeSpent++ <= task.maxTime) {
+          onTarget(target);
+          task.onTarget(target);
+          target.targetedBy(this);
+          if (origin != null) origin.actorTargets(this, target);
+        }
+        else {
+          beginNextBehaviour();
+        }
+      }
       else {
         int index = Nums.clamp(task.pathIndex + 1, task.path.length);
         if (index != -1) {
-          Tile ahead = task.path[task.pathIndex = index];
-          setLocation(ahead);
-          if (inside != null) setInside(inside, false);
+          Pathing ahead = task.path[task.pathIndex = index];
+          setLocation(ahead.at());
+          if (ahead.isTile()) setInside(inside, false);
+          else setInside(ahead, true);
         }
         else {
           task.path = null;
@@ -264,19 +262,21 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   /**  Pathing and visitation utilities:
     */
-  void setInside(Building b, boolean yes) {
-    if (b == null || ! b.onMap()) return;
-    
-    Employer origin = task == null ? null : task.origin;
-    
-    if (yes && b != inside) {
-      b.visitors.include(this);
-      inside = b;
-      if (origin != null) origin.actorEnters(this, inside);
+  void setInside(Pathing b, boolean yes) {
+    if (b == null || ! b.onMap()) {
+      if (b == inside) inside = null;
+      return;
     }
-    if (b == inside && ! yes) {
-      if (origin != null) origin.actorExits(this, inside);
-      b.visitors.remove(this);
+    final Pathing old = inside;
+    if (yes && b != old) {
+      if (old != null) {
+        setInside(old, false);
+      }
+      b.setInside(this, true);
+      inside = b;
+    }
+    if (b == old && ! yes) {
+      b.setInside(this, false);
       inside = null;
     }
   }

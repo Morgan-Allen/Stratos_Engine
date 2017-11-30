@@ -20,12 +20,13 @@ public class TestPathing extends Test {
     Test test = new TestPathing();
     
     CityMap map = setupTestCity(32);
-    map.settings.toggleFog    = false;
-    map.settings.toggleHunger = false;
-    map.settings.toggleHunger = false;
+    map.settings.toggleFog     = false;
+    map.settings.toggleHunger  = false;
+    map.settings.toggleHunger  = false;
+    map.settings.toggleMigrate = false;
     
     Batch <Actor> actors = new Batch();
-    Table <Actor, Tile> destinations = new Table();
+    Table <Actor, Pathing> destinations = new Table();
     Tally <Actor> numInside = new Tally();
     
     for (int n = 3; n-- > 0;) {
@@ -34,6 +35,12 @@ public class TestPathing extends Test {
       actors.add(a);
       destinations.put(a, a.at());
     }
+    
+    Building home = (Building) HOUSE.generate();
+    home.enterMap(map, 10, 10, 1);
+    
+    //  TODO:  You also have to test pathing to and from buildings (and
+    //  possibly through gatehouses and over walls, et cetera.)
     
     //  For now, all we want to test is that actors can, in fact, get from
     //  point A to point B, and that they are present in one and only one tile
@@ -72,16 +79,25 @@ public class TestPathing extends Test {
           insideWrong = true;
         }
         
-        if (a.at() == destinations.get(a)) {
+        Pathing dest = destinations.get(a);
+        if (dest == a.at() || dest == a.inside) {
           numReachedDest += 1;
-          Tile goes = map.tileAt(Rand.index(map.size), Rand.index(map.size));
+          
+          Pathing goes;
+          if (a.inside != home && ! home.hasFocus()) {
+            goes = home;
+            a.embarkOnVisit(home, 0, Task.JOB.WANDERING, null);
+          }
+          else {
+            goes = map.tileAt(Rand.index(map.size), Rand.index(map.size));
+            a.embarkOnTarget(goes, 0, Task.JOB.WANDERING, null);
+          }
           destinations.put(a, goes);
           
-          a.embarkOnTarget(goes, 0, Task.JOB.WANDERING, null);
-          Tile path[] = a.task == null ? null : a.task.path;
+          Pathing path[] = a.task == null ? null : a.task.path;
           
-          if (! Task.verifyPath(path, a.at(), goes)) {
-            I.say("\n"+a+"CONSTRUCTED INVALID PATH-");
+          if (! Task.verifyPath(path, dest, goes, map)) {
+            I.say("\n"+a+" CONSTRUCTED INVALID PATH-");
             I.say("  From: "+a.at()+", Goes: "+goes+"\n  ");
             I.add(I.list(path));
             pathWrong = true;
@@ -92,7 +108,7 @@ public class TestPathing extends Test {
       if (insideWrong || pathWrong) {
         I.say("Inside wrong: "+insideWrong);
         I.say("Path wrong:   "+pathWrong  );
-        break;
+        if (! graphics) break;
       }
       
       if ((! pathingDone) && numReachedDest == actors.size() * 3) {

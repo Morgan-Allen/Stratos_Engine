@@ -5,9 +5,11 @@ import util.*;
 import static game.CityMap.*;
 import static game.GameConstants.*;
 
+import game.GameConstants.Pathing;
 
 
-public class Building extends Element implements Session.Saveable, Employer {
+
+public class Building extends Element implements Pathing, Employer {
   
   
   /**  Data fields and setup/initialisation-
@@ -16,7 +18,7 @@ public class Building extends Element implements Session.Saveable, Employer {
   
   String ID;
   
-  private Tile entrance;
+  private Tile entrances[] = new Tile[0];
   private int updateGap = 0;
   
   List <Actor> workers   = new List();
@@ -37,7 +39,9 @@ public class Building extends Element implements Session.Saveable, Employer {
     super(s);
     ID = s.loadString();
     
-    entrance = loadTile(map, s);
+    int numE = s.loadInt();
+    entrances = new Tile[numE];
+    for (int i = 0; i < numE; i++) entrances[i] = loadTile(map, s);
     updateGap = s.loadInt();
     
     s.loadObjects(workers  );
@@ -53,7 +57,8 @@ public class Building extends Element implements Session.Saveable, Employer {
     super.saveState(s);
     s.saveString(ID);
     
-    saveTile(entrance, map, s);
+    s.saveInt(entrances.length);
+    for (Tile e : entrances) saveTile(e, map, s);
     s.saveInt(updateGap);
     
     s.saveObjects(workers  );
@@ -71,7 +76,7 @@ public class Building extends Element implements Session.Saveable, Employer {
   void enterMap(CityMap map, int x, int y, float buildLevel) {
     super.enterMap(map, x, y, buildLevel);
     map.buildings.add(this);
-    selectEntrance();
+    entrances = selectEntrances();
     updateOnPeriod(0);
   }
   
@@ -87,7 +92,6 @@ public class Building extends Element implements Session.Saveable, Employer {
     }
     for (Actor a : visitors) if (a.inside == this) {
       a.setInside(this, false);
-      a.setLocation(entrance);
     }
     
     if (! inventory.empty()) {
@@ -95,7 +99,7 @@ public class Building extends Element implements Session.Saveable, Employer {
       I.say("  "+inventory);
     }
     
-    entrance = null;
+    entrances = null;
   }
   
   
@@ -110,6 +114,43 @@ public class Building extends Element implements Session.Saveable, Employer {
       at.x + (type.wide / 2),
       at.y + (type.high / 2)
     );
+  }
+  
+  
+  
+  /**  Auxiliary pathing-assist methods:
+    */
+  public Pathing[] adjacent(Pathing[] temp, CityMap map) {
+    if (temp == null) temp = new Pathing[1];
+    for (int i = temp.length; i-- > 0;) temp[i] = null;
+    if (entrances == null) return temp;
+    for (int i = entrances.length; i-- > 0;) temp[i] = entrances[i];
+    return temp;
+  }
+  
+  
+  public boolean allowsEntryFrom(Pathing p) {
+    return Visit.arrayIncludes(entrances, p);
+  }
+  
+  
+  public boolean allowsEntry(Actor a) {
+    return true;
+  }
+  
+  
+  public void setInside(Actor a, boolean is) {
+    visitors.toggleMember(a, is);
+  }
+  
+  
+  public Series <Actor> inside() {
+    return visitors;
+  }
+  
+  
+  public boolean isTile() {
+    return false;
   }
   
   
@@ -140,12 +181,16 @@ public class Building extends Element implements Session.Saveable, Employer {
       return;
     }
     
-    if (entrance == null || map.blocked(entrance.x, entrance.y)) {
-      selectEntrance();
+    boolean refreshE = entrances == null;
+    if (entrances != null) for (Tile e : entrances) {
+      if (map.blocked(e)) refreshE = true;
+    }
+    if (refreshE) {
+      entrances = selectEntrances();
     }
     
     if (--updateGap <= 0) {
-      selectEntrance();
+      selectEntrances();
       updateOnPeriod(type.updateTime);
       updateGap = type.updateTime;
     }
@@ -157,12 +202,18 @@ public class Building extends Element implements Session.Saveable, Employer {
   }
   
   
-  public CityMap.Tile entrance() {
-    return entrance;
+  public Tile[] entrances() {
+    return entrances;
   }
   
   
-  void selectEntrance() {
+  public Tile mainEntrance() {
+    if (Visit.empty(entrances)) return null;
+    return entrances[0];
+  }
+  
+  
+  Tile[] selectEntrances() {
     Tile at = at();
     Pick <Tile> pick = new Pick();
     
@@ -173,11 +224,12 @@ public class Building extends Element implements Session.Saveable, Employer {
       if (map.blocked(c)) continue;
       
       float rating = 1;
-      if (! map.paved(c.x, c.y)) rating /= 2;
+      if (map.pathType(c) != PATH_PAVE) rating /= 2;
       pick.compare(map.tileAt(c), rating);
     }
     
-    entrance = pick.result();
+    if (pick.empty()) return new Tile[0];
+    return new Tile[] { pick.result() };
   }
   
   
@@ -299,7 +351,7 @@ public class Building extends Element implements Session.Saveable, Employer {
       t.configTask(this, this, null, Task.JOB.RETURNING, 0);
     }
     else {
-      t.configTask(this, null, entrance, Task.JOB.RETURNING, 0);
+      t.configTask(this, null, mainEntrance(), Task.JOB.RETURNING, 0);
     }
     actor.assignTask(t);
   }
@@ -318,6 +370,11 @@ public class Building extends Element implements Session.Saveable, Employer {
   }
   
   
+  public void visitedBy(Actor actor) {
+    return;
+  }
+  
+  
   public void actorUpdates(Actor w) {
     return;
   }
@@ -333,22 +390,7 @@ public class Building extends Element implements Session.Saveable, Employer {
   }
   
   
-  public void actorEnters(Actor actor, Building enters) {
-    return;
-  }
-  
-  
   public void actorVisits(Actor actor, Building visits) {
-    return;
-  }
-  
-  
-  public void actorExits(Actor actor, Building enters) {
-    return;
-  }
-  
-  
-  public void visitedBy(Actor actor) {
     return;
   }
   

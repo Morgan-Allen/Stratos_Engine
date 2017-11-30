@@ -28,7 +28,7 @@ public class CityBorders {
       
       temp.set(c.x - (map.size / 2), c.y - (map.size / 2)).normalise();
       float rating = 1 + temp.dot(cityDir);
-      if (map.paved(c.x, c.y)) rating *= 2;
+      if (map.pathType(c) == PATH_PAVE) rating *= 2;
       
       Tile u = map.tileAt(c.x, c.y);
       pick.compare(u, rating);
@@ -114,7 +114,7 @@ public class CityBorders {
         int space = b.maxWorkers(t) - b.numWorkers(t);
         if (space <= 0) continue;
 
-        float near = 10 / (10f + CityMap.distance(from, b.entrance()));
+        float near = 10 / (10f + CityMap.distance(from, b));
         Opening o = new Opening();
         o.b = b;
         o.position = t;
@@ -144,7 +144,7 @@ public class CityBorders {
       int space = max - b.numResidents(socialClass);
       if (space <= 0) continue;
       
-      float near = 10 / (10f + CityMap.distance(from, b.entrance()));
+      float near = 10 / (10f + CityMap.distance(from, b));
       pick.compare(b, space * near);
     }
     
@@ -208,8 +208,10 @@ public class CityBorders {
       goes instanceof Building &&
       fromC == goesC
     ) {
-      Building fromB = (Building) from, goesB = (Building) goes;
-      float mapDist = CityMap.distance(fromB.entrance(), goesB.entrance());
+      float mapDist = CityMap.distance(
+        ((Building) from).mainEntrance(),
+        ((Building) goes).mainEntrance()
+      );
       distRating += mapDist / MAX_WANDER_RANGE;
     }
     

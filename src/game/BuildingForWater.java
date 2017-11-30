@@ -90,7 +90,17 @@ public class BuildingForWater extends Building {
   }
   
   
+  Tile[] selectEntrances() {
+    Tile e[] = super.selectEntrances();
+    Tile hatches[] = { map.tileAt(
+      at().x + (type.wide / 2),
+      at().y + (type.high / 2)
+    ) };
+    return (Tile[]) Visit.compose(Tile.class, e, hatches);
+  }
   
+
+
   /**  Rendering, debug and interface methods:
     */
   public int debugTint() {
@@ -99,6 +109,7 @@ public class BuildingForWater extends Building {
   }
   
 }
+
 
 
 

@@ -71,8 +71,11 @@ public class TestBuildPaths extends Test {
     Building basin2 = (Building) BASIN.generate();
     map.planning.placeObject(basin2, 14, 0);
     
-    CityMapPlanning.placeStructure(AQUEDUCT, map, 2 , 3, 1, 10, true);
-    CityMapPlanning.placeStructure(AQUEDUCT, map, 15, 2, 1, 10, true);
+    CityMapPlanning.placeStructure(AQUEDUCT, map, 2 , 3, 1, 10, false);
+    CityMapPlanning.placeStructure(AQUEDUCT, map, 15, 2, 1, 10, false);
+    
+    
+    //  TODO:  Test to ensure that walls can be navigated too.
     
     //
     //  Run simulation:

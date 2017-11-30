@@ -43,7 +43,8 @@ public class BuildingForHome extends Building {
     //  This methods checks for the presence of all required amenities within
     //  a given wander-range.
     Tally <Type> access = new Tally();
-    if (entrance() == null) return access;
+    Tile entrance = mainEntrance();
+    if (entrance == null) return access;
     int maxRange = MAX_WANDER_RANGE;
     
     //  TODO:  Include information about the number of *distinct* venues
@@ -56,14 +57,12 @@ public class BuildingForHome extends Building {
       for (Building b : map.buildings) {
         if (! Visit.arrayIncludes(b.type.features, service)) continue;
         
-        float dist = CityMap.distance(b.entrance(), entrance());
+        float dist = CityMap.distance(b.mainEntrance(), entrance);
         if (dist > maxRange) continue;
         
-        ActorPathSearch search = new ActorPathSearch(
-          map, b.entrance(), entrance(), maxRange
-        );
-        search.doSearch();
-        if (! search.success()) continue;
+        if (! map.pathCache.pathConnects(entrance, b.mainEntrance())) {
+          continue;
+        }
         
         access.add(1, b.type);
         access.add(b.type.featureAmount, service);
@@ -76,45 +75,47 @@ public class BuildingForHome extends Building {
   boolean performAmbienceCheck(Type tier, Tally <Type> access) {
     //
     //  This method checks the surrounding tiles out to a distance of 6 tiles:
-    if (entrance() == null) return false;
     final int MAX_AMBIENCE_DIST = 6;
+    final Tally <Pathing> costs = new Tally();
+    final Pathing temp[] = new Pathing[8];
     
-    final Tally <Tile> costs = new Tally();
-    final Tile temp[] = new Tile[8];
-    
-    Search <Tile> spread = new Search <Tile> (entrance(), -1) {
+    Search <Pathing> spread = new Search <Pathing> (this, -1) {
       
-      protected Tile[] adjacent(Tile spot) {
-        return CityMap.pathAdjacent(spot, temp, map, true);
+      protected Pathing[] adjacent(Pathing spot) {
+        return spot.adjacent(temp, map);
       }
       
-      protected boolean endSearch(Tile best) {
+      protected boolean endSearch(Pathing best) {
         float cost = fullCostEstimate(best);
         if (cost > MAX_AMBIENCE_DIST) return true;
         costs.set(best, cost);
         return false;
       }
       
-      protected float cost(Tile prior, Tile spot) {
+      protected float cost(Pathing prior, Pathing spot) {
         return 1;
       }
       
-      protected float estimate(Tile spot) {
+      protected float estimate(Pathing spot) {
         return 0;
       }
       
-      protected void setEntry(Tile spot, Entry flag) { spot.pathFlag = flag; }
-      protected Entry entryFor(Tile spot) { return (Entry) spot.pathFlag; }
+      protected void setEntry(Pathing spot, Entry flag) {
+        spot.flagWith(flag);
+      }
+      
+      protected Entry entryFor(Pathing spot) {
+        return (Entry) spot.flaggedWith();
+      }
     };
     spread.doSearch();
-    
     
     float sumAmb = 0, sumWeights = 0;
     final int AMB_DIRS[] = { N, E, S, W, CENTRE };
     
-    for (Tile tile : costs.keys()) {
+    for (Pathing p : costs.keys()) if (p.isTile()) {
+      Tile tile = (Tile) p;
       float cost = costs.valueFor(tile);
-      
       for (int dir : AMB_DIRS) {
         Tile n = map.tileAt(tile.x + T_X[dir], tile.y + T_Y[dir]);
         if (n == null || n.above == null) continue;
@@ -310,7 +311,7 @@ public class BuildingForHome extends Building {
       for (Building b : map.buildings) {
         if (! b.type.hasFeature(IS_VENDOR)) continue;
         
-        float dist = CityMap.distance(entrance(), b.entrance());
+        float dist = CityMap.distance(this, b);
         if (dist > 50) continue;
         
         float amount = b.inventory.valueFor(cons);

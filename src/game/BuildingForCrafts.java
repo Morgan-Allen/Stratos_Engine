@@ -71,7 +71,7 @@ public class BuildingForCrafts extends Building {
     stalled = (! allMaterials) || (! anyRoom);
     
     
-    //  TODO:  Move this out into dedicated Tasks...
+    //  TODO:  Move this out into a dedicated Task.
     
     if (! stalled) {
       float prog = 1f / type.craftTime;

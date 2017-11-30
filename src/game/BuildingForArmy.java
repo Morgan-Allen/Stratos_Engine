@@ -1,6 +1,7 @@
 
 
 package game;
+import static game.CityMap.*;
 import util.*;
 
 
@@ -82,12 +83,15 @@ public class BuildingForArmy extends BuildingForCrafts {
   public void selectActorBehaviour(Actor actor) {
     if (formation == null) return;
     Pick <Actor> pick = new Pick();
+    Tile entrance = mainEntrance();
     
     if (formation.recruits.size() < type.maxRecruits) {
       for (Building b : map.buildings) {
         for (Actor w : b.residents) {
           if (eligible(w)) {
-            float rating = CityMap.distancePenalty(b.entrance(), entrance());
+            float rating = CityMap.distancePenalty(
+              b.mainEntrance(), entrance
+            );
             pick.compare(w, rating);
           }
         }

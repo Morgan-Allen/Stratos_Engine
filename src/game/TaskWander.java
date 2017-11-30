@@ -39,7 +39,7 @@ public class TaskWander extends Task {
     int     range  = Nums.max(4, Rand.index(MAX_WANDER_RANGE));
     
     while (walk.size() < range) {
-      boolean prefPave = map.paved(next.x, next.y);
+      boolean prefPave = next.pathType() == PATH_PAVE;
       int nx, ny, numDirs = 0;
       int backDir = (facing + 4) % 8;
       
@@ -47,7 +47,7 @@ public class TaskWander extends Task {
         if (dir == backDir) continue;
         nx = next.x + T_X[dir];
         ny = next.y + T_Y[dir];
-        if (prefPave && ! map.paved(nx, ny)) continue;
+        if (prefPave && map.pathType(nx, ny) == PATH_PAVE) continue;
         if (map.blocked(nx, ny)) continue;
         if (map.tileAt(nx, ny).pathFlag != null) continue;
         dirs[numDirs] = dir;

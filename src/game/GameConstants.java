@@ -197,9 +197,9 @@ public class GameConstants {
     Good(String name, int price) {
       super("good_"+name.toLowerCase().replace(' ', '_'), IS_GOOD);
       if (price != -1) GOODS_LIST.add(this);
-      this.name   = name ;
-      this.price  = price;
-      this.blocks = false;
+      this.name    = name ;
+      this.price   = price;
+      this.pathing = PATH_HINDER;
     }
   }
   final public static Good
@@ -219,6 +219,9 @@ public class GameConstants {
     IS_VENDOR  = new Good("Is Market"   , -1 ),
     IS_TRADER  = new Good("Is Trader"   , -1 ),
     IS_HOUSING = new Good("Is Housing"  , -1 ),
+    IS_TOWER   = new Good("Is Tower"    , -1 ),
+    IS_GATE    = new Good("Is Gate"     , -1 ),
+    IS_CISTERN = new Good("Is Cistern"  , -1 ),
     
     DIVERSION  = new Good("Diversion"   , -1 ),
     EDUCATION  = new Good("Education"   , -1 ),
@@ -258,15 +261,15 @@ public class GameConstants {
   private static List <Terrain> TERRAINS_LIST = new List();
   static class Terrain extends Type {
     
-    int terrainIndex = 0;
+    int terrainID = 0;
     Type  fixtures[] = new Type [0];
     Float weights [] = new Float[0];
     
     Terrain(String name, int index) {
       super("terrain_"+index, IS_TERRAIN);
-      this.name         = name ;
-      this.terrainIndex = index;
-      this.blocks       = false;
+      this.name      = name ;
+      this.terrainID = index;
+      this.pathing   = PATH_FREE;
       TERRAINS_LIST.add(this);
     }
     
@@ -319,7 +322,7 @@ public class GameConstants {
     JUNGLE_TREE1.growRate = 0.5f;
     DESERT_ROCK1.setDimensions(2, 2, 1);
     CLAY_BANK1  .setDimensions(2, 2, 0);
-    LAKE.blocks  = true;
+    LAKE.pathing = PATH_BLOCK;
     LAKE.isWater = true;
     
     //  TODO:  UNIFY WITH WALKER-TYPES BELOW!
@@ -507,22 +510,19 @@ public class GameConstants {
     //  1x1 infrastructure:
     ROAD.name = "Road";
     ROAD.tint = PAVE_COLOR;
-    ROAD.blocks = false;
-    ROAD.paved  = true ;
+    ROAD.pathing = PATH_PAVE;
     ROAD.setDimensions(1, 1, 0);
     ROAD.setBuildMaterials(STONE, 1);
     
     WALL.name = "Wall";
     WALL.tint = TINT_LITE_MILITARY;
-    WALL.blocks = true ;
-    WALL.paved  = false;
+    WALL.pathing = PATH_WALLS;
     WALL.setDimensions(1, 1, 2);
     WALL.setBuildMaterials(STONE, 2);
     
     AQUEDUCT.name = "Aqueduct";
     AQUEDUCT.tint = TINT_LITE_AQUATIC;
-    AQUEDUCT.blocks  = true;
-    AQUEDUCT.isWater = true;
+    AQUEDUCT.pathing = PATH_WALLS;
     AQUEDUCT.setDimensions(1, 1, 1);
     AQUEDUCT.setBuildMaterials(CLAY, 1, STONE, 2);
     
@@ -530,7 +530,7 @@ public class GameConstants {
     
     CISTERN.name = "Cistern";
     CISTERN.tint = TINT_AQUATIC;
-    CISTERN.blocks  = true;
+    CISTERN.pathing = PATH_WALLS;
     CISTERN.isWater = true;
     CISTERN.setDimensions(3, 3, 1);
     CISTERN.setBuildMaterials(CLAY, 4, STONE, 10);
@@ -797,6 +797,23 @@ public class GameConstants {
     boolean hasFocus();
   }
   
+  
+  static interface Pathing extends Target {
+    
+    boolean isTile();
+    int pathType();
+    float pathHeight();
+    Pathing[] adjacent(Pathing temp[], CityMap map);
+    boolean allowsEntryFrom(Pathing p);
+    
+    void flagWith(Object o);
+    Object flaggedWith();
+
+    boolean allowsEntry(Actor a);
+    void setInside(Actor a, boolean is);
+    Series <Actor> inside();
+  }
+  
   /*
   static interface Flagging {
     
@@ -827,9 +844,7 @@ public class GameConstants {
     void actorUpdates(Actor actor);
     void actorPasses (Actor actor, Building other );
     void actorTargets(Actor actor, Target   other );
-    void actorEnters (Actor actor, Building enters);
     void actorVisits (Actor actor, Building visits);
-    void actorExits  (Actor actor, Building enters);
   }
   
   

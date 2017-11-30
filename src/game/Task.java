@@ -40,7 +40,7 @@ public class Task implements Session.Saveable {
   int timeSpent = 0 ;
   int maxTime   = 20;
   
-  Tile path[] = null;
+  Pathing path[] = null;
   int pathIndex = -1;
   boolean  offMap;
   Target   target;
@@ -67,8 +67,11 @@ public class Task implements Session.Saveable {
       path = null;
     }
     else {
-      path = new Tile[PL];
-      for (int i = 0; i < PL; i++) path[i] = loadTile(actor.map, s);
+      path = new Pathing[PL];
+      for (int i = 0; i < PL; i++) {
+        if (s.loadBool()) path[i] = loadTile(actor.map, s);
+        else              path[i] = (Pathing) s.loadObject();
+      }
     }
     pathIndex = s.loadInt();
     offMap    = s.loadBool();
@@ -88,7 +91,16 @@ public class Task implements Session.Saveable {
     if (path == null) s.saveInt(-1);
     else {
       s.saveInt(path.length);
-      for (Tile t : path) saveTile(t, actor.map, s);
+      for (Pathing t : path) {
+        if (t.isTile()) {
+          s.saveBool(true);
+          saveTile((Tile) t, actor.map, s);
+        }
+        else {
+          s.saveBool(false);
+          s.saveObject(t);
+        }
+      }
     }
     s.saveInt(pathIndex);
     s.saveBool(offMap);
@@ -155,7 +167,7 @@ public class Task implements Session.Saveable {
     if (t        == null) return null;
     if (t.target != null) return t.target;
     if (t.visits != null) return t.visits;
-    if (t.path   != null) return (Tile) Visit.last(t.path);
+    if (t.path   != null) return (Pathing) Visit.last(t.path);
     return null;
   }
   
@@ -167,16 +179,16 @@ public class Task implements Session.Saveable {
   }
   
   
-  Tile pathTarget() {
-    Tile t = null;
+  Pathing pathTarget() {
+    Pathing t = null;
     if (t == null && visits != null && visits.complete()) {
-      t = visits.entrance();
+      t = visits;
     }
     if (t == null && target != null) {
       t = target.at();
     }
     if (t == null && path != null) {
-      t = (Tile) Visit.last(path);
+      t = (Pathing) Visit.last(path);
     }
     return t;
   }
@@ -207,19 +219,19 @@ public class Task implements Session.Saveable {
     
     for (int i = 0; i < actor.type.sightRange; i++) {
       if (i >= path.length) break;
-      Tile t = path[i];
-      if (actor.map.blocked(t.x, t.y)) return false;
+      Pathing t = path[i];
+      if (! t.allowsEntry(actor)) return false;
     }
     
     return true;
   }
   
   
-  Tile[] updatePathing() {
+  Pathing[] updatePathing() {
     
-    CityMap  map      = actor.map;
-    Building inside   = actor.inside;
-    boolean  visiting = visits != null;
+    CityMap map      = actor.map;
+    Pathing inside   = actor.inside;
+    boolean visiting = visits != null;
     
     boolean report  = actor.reports();
     boolean verbose = false;
@@ -227,8 +239,8 @@ public class Task implements Session.Saveable {
       I.say(this+" pathing toward "+(visiting ? visits : target));
     }
     
-    Tile from  = (inside == null) ? actor.at() : inside.entrance();
-    Tile heads = pathTarget();
+    Pathing from  = inside == null ? actor.at() : inside;
+    Pathing heads = pathTarget();
     
     if (from == null || heads == null) {
       if (report) I.say("  Bad endpoints: "+from+" -> "+heads);
@@ -237,10 +249,10 @@ public class Task implements Session.Saveable {
     
     ActorPathSearch search = new ActorPathSearch(map, from, heads, -1);
     search.doSearch();
-    Tile path[] = search.fullPath(Tile.class);
+    Pathing path[] = search.fullPath(Pathing.class);
     
     if (path == null) {
-      if (report) I.say("  Could not find path!");
+      if (report) I.say("  Could not find path for "+this);
       return null;
     }
     else if (path.length < (CityMap.distance(from, heads) / 2) - 1) {
@@ -254,15 +266,21 @@ public class Task implements Session.Saveable {
   }
   
   
-  static boolean verifyPath(Tile path[], Tile start, Tile end) {
+  static boolean verifyPath(
+    Pathing path[], Pathing start, Pathing end, CityMap map
+  ) {
     if (Visit.empty(path)      ) return false;
     if (path[0] != start       ) return false;
     if (Visit.last(path) != end) return false;
     
-    Tile prior = path[0];
-    for (Tile t : path) {
-      if (CityMap.distance(prior, t) > 1.5f) return false;
-      prior = t;
+    Pathing temp[] = new Pathing[8];
+    Pathing prior = path[0];
+    for (Pathing p : path) {
+      Pathing a[] = p.adjacent(temp, map);
+      if (p != prior && ! Visit.arrayIncludes(a, prior)) {
+        return false;
+      }
+      prior = p;
     }
     return true;
   }

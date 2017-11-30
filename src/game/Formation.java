@@ -487,17 +487,7 @@ public class Formation implements
   }
   
   
-  public void actorEnters(Actor actor, Building enters) {
-    return;
-  }
-  
-  
   public void actorVisits(Actor actor, Building visits) {
-    return;
-  }
-  
-  
-  public void actorExits(Actor actor, Building enters) {
     return;
   }
   

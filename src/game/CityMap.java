@@ -13,8 +13,16 @@ public class CityMap implements Session.Saveable {
   /**  Data fields and initialisation-
     */
   final static int
-    SCAN_RES = 16,
-    FLAG_RES = 4
+    SCAN_RES    = 16,
+    FLAG_RES    = 4,
+    
+    PATH_NONE   = -1,
+    PATH_WATER  =  0,
+    PATH_PAVE   =  1,
+    PATH_FREE   =  2,
+    PATH_HINDER =  3,
+    PATH_BLOCK  =  4,
+    PATH_WALLS  =  5
   ;
   
   City city;
@@ -137,12 +145,9 @@ public class CityMap implements Session.Saveable {
   
   void performSetup(int size) {
     
-    //  TODO:  This might not be strictly required?
-    //*
     int s = 1;
     while (s < size) s *= 2;
     size = s;
-    //*/
     
     this.size     = size;
     this.scanSize = Nums.round(size * 1f / SCAN_RES, 1, true);
@@ -171,7 +176,7 @@ public class CityMap implements Session.Saveable {
   
   /**  Tiles and related setup/query methods-
     */
-  public static class Tile implements Target, Flood.Fill {
+  public static class Tile implements Pathing, Flood.Fill {
     
     int x, y;
     
@@ -198,7 +203,7 @@ public class CityMap implements Session.Saveable {
     
     void saveState(Session s) throws Exception {
       s.saveInt(elevation);
-      s.saveInt(terrain == null ? -1 : terrain.terrainIndex);
+      s.saveInt(terrain == null ? -1 : terrain.terrainID);
       s.saveObject(above);
       
       s.saveBool(focused != null);
@@ -228,11 +233,6 @@ public class CityMap implements Session.Saveable {
     }
     
     
-    public Type aboveType() {
-      return above == null ? null : above.type;
-    }
-    
-    
     public void targetedBy(Actor w) {
       return;
     }
@@ -248,6 +248,72 @@ public class CityMap implements Session.Saveable {
     }
     
     
+    public boolean hasFocus() {
+      return focused != null;
+    }
+    
+    
+    public boolean isTile() {
+      return true;
+    }
+    
+    
+    public int pathType() {
+      if (above != null) {
+        int pathing = above.pathType();
+        if (pathing != PATH_NONE) return pathing;
+      }
+      if (terrain != null) {
+        return terrain.pathing;
+      }
+      return PATH_FREE;
+    }
+    
+    
+    public float pathHeight() {
+      if (above != null) return elevation + above.pathHeight();
+      return elevation;
+    }
+    
+    
+    public Pathing[] adjacent(Pathing[] temp, CityMap map) {
+      if (temp == null) temp = new Tile[8];
+      
+      float high = pathHeight();
+      
+      for (int dir : T_INDEX) {
+        Tile n = map.tileAt(x + T_X[dir], y + T_Y[dir]);
+        int pathing = map.pathType(n);
+        if (n == null) {
+          temp[dir] = null;
+        }
+        else if (n.above != null && n.above.allowsEntryFrom(this)) {
+          temp[dir] = (Pathing) n.above;
+        }
+        else if (pathing == PATH_WALLS && n.pathHeight() == high) {
+          temp[dir] = (Pathing) n.above;
+        }
+        else if (pathing == PATH_BLOCK || pathing == PATH_WATER) {
+          temp[dir] = null;
+        }
+        else {
+          temp[dir] = n;
+        }
+      }
+      return temp;
+    }
+    
+    
+    public boolean allowsEntryFrom(Pathing p) {
+      return true;
+    }
+    
+    
+    public boolean allowsEntry(Actor a) {
+      return true;
+    }
+    
+    
     public void setInside(Actor a, boolean is) {
       inside = Element.setMember(a, is, inside);
     }
@@ -255,11 +321,6 @@ public class CityMap implements Session.Saveable {
     
     public Series <Actor> inside() {
       return inside == null ? NO_ACTORS : inside;
-    }
-    
-    
-    public boolean hasFocus() {
-      return focused != null;
     }
     
     
@@ -297,28 +358,14 @@ public class CityMap implements Session.Saveable {
   }
   
   
-  public static Tile[] pathAdjacent(
-    Tile spot, Tile temp[], CityMap map, boolean paveOnly
-  ) {
-    if (temp == null) temp = new Tile[8];
-    
-    for (int dir : T_INDEX) {
-      temp[dir] = null;
-      int x = spot.x + T_X[dir], y = spot.y + T_Y[dir];
-      if (paveOnly) {
-        if (map.paved(x, y)) temp[dir] = map.tileAt(x, y);
-      }
-      else {
-        if (! map.blocked(x, y)) temp[dir] = map.tileAt(x, y);
-      }
-    }
-    return temp;
-  }
-  
-  
   public static float distance(Tile a, Tile b) {
     if (a == null || b == null) return 1000000000;
     return distance(a.x, a.y, b.x, b.y);
+  }
+  
+  
+  public static float distance(Target a, Target b) {
+    return distance(a.at(), b.at());
   }
   
   
@@ -389,45 +436,35 @@ public class CityMap implements Session.Saveable {
   }
   
   
-  boolean blocked(int x, int y) {
-    Tile under = tileAt(x, y);
-    if (under == null) {
-      return true;
-    }
-    if (under.above != null) {
-      return under.above.blocksPath();
-    }
-    if (under.terrain != null) {
-      return under.terrain.blocks;
-    }
-    return false;
+  int pathType(Tile t) {
+    if (t == null) return PATH_BLOCK;
+    return t.pathType();
+  }
+  
+  
+  int pathType(Coord c) {
+    return pathType(c.x, c.y);
+  }
+  
+  
+  int pathType(int x, int y) {
+    return pathType(tileAt(x, y));
   }
   
   
   boolean blocked(Tile t) {
-    return blocked(t.x, t.y);
+    int pathing = pathType(t);
+    return pathing == PATH_BLOCK || pathing == PATH_WATER;
   }
   
   
   boolean blocked(Coord c) {
-    return blocked(c.x, c.y);
+    return blocked(tileAt(c));
   }
   
   
-  boolean paved(int x, int y) {
-    Tile under = tileAt(x, y);
-    if (under == null || under.above == null) return false;
-    return under.above.type.paved;
-  }
-  
-  
-  boolean paved(Tile t) {
-    return paved(t.x, t.y);
-  }
-  
-  
-  boolean paved(Coord c) {
-    return paved(c.x, c.y);
+  boolean blocked(int x, int y) {
+    return blocked(tileAt(x, y));
   }
   
   

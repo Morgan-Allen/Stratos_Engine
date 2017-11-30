@@ -2,26 +2,30 @@
 
 package game;
 import static game.CityMap.*;
+import static game.GameConstants.*;
 import util.*;
 
 
 
-public class ActorPathSearch extends Search <Tile> {
+public class ActorPathSearch extends Search <Pathing> {
   
   CityMap map;
-  Tile dest;
-  Tile temp[] = new Tile[8];
+  Pathing dest;
+  Pathing temp[] = new Pathing[8];
+  Actor   client   = null;
   boolean getNear  = false;
-  boolean paveOnly = false;
   boolean stealthy = false;
   
-
-  public ActorPathSearch(Actor w, Tile dest) {
+  
+  public ActorPathSearch(Actor w, Pathing dest) {
     this(w.map, w.at(), dest, -1);
+    this.client = w;
   }
   
   
-  public ActorPathSearch(CityMap map, Tile init, Tile dest, int maxDist) {
+  public ActorPathSearch(
+    CityMap map, Pathing init, Pathing dest, int maxDist
+  ) {
     super(init, -1);
     this.map     = map;
     this.dest    = dest;
@@ -30,48 +34,49 @@ public class ActorPathSearch extends Search <Tile> {
   }
   
   
-  public void setPaveOnly(boolean paveOnly) {
-    this.paveOnly = paveOnly;
+  
+  protected Pathing[] adjacent(Pathing spot) {
+    return spot.adjacent(temp, map);
   }
   
   
-  protected Tile[] adjacent(Tile spot) {
-    return CityMap.pathAdjacent(spot, temp, map, paveOnly);
-  }
-  
-  
-  protected boolean endSearch(Tile best) {
+  protected boolean endSearch(Pathing best) {
     if (getNear) return distance(best, dest) <= 1.5f;
     return best == dest;
   }
   
   
-  protected boolean canEnter(Tile spot) {
-    if (map.blocked(spot.x, spot.y)) return false;
+  protected boolean canEnter(Pathing spot) {
+    if (spot.isTile() && map.blocked((Tile) spot)) {
+      return false;
+    }
+    if (client != null && ! spot.allowsEntry(client)) {
+      return false;
+    }
     return true;
   }
   
   
-  protected float cost(Tile prior, Tile spot) {
+  protected float cost(Pathing prior, Pathing spot) {
     float dist = distance(prior, spot);
-    if (spot.above != null && spot.above.type.paved) dist *= 0.75f;
-    if (stealthy) dist += map.fog.sightLevel(spot);
+    if (spot.pathType() == PATH_PAVE) dist *= 0.75f;
+    if (stealthy) dist += map.fog.sightLevel(spot.at());
     return dist;
   }
   
   
-  protected float estimate(Tile spot) {
+  protected float estimate(Pathing spot) {
     return distance(spot, dest);
   }
   
   
-  protected void setEntry(Tile spot, Entry flag) {
-    spot.pathFlag = flag;
+  protected void setEntry(Pathing spot, Entry flag) {
+    spot.flagWith(flag);
   }
   
   
-  protected Entry entryFor(Tile spot) {
-    return (Entry) spot.pathFlag;
+  protected Entry entryFor(Pathing spot) {
+    return (Entry) spot.flaggedWith();
   }
 }
 

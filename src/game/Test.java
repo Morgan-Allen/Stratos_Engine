@@ -92,7 +92,7 @@ public class Test {
       b.visitors.add(actor);
     }
     else {
-      Tile t = b.entrance();
+      Tile t = b.mainEntrance();
       actor.enterMap(b.map, t.x, t.y, 1);
     }
     
@@ -196,7 +196,7 @@ public class Test {
     
     else if (placing == DEMOLITION) {
       for (Coord c : Visit.grid(drawnBox(map))) {
-        if (map.above(c.x, c.y) != null || map.paved(c.x, c.y)) {
+        if (map.above(c) != null) {
           graphic[c.x][c.y] = NO_BLD_COLOR;
         }
       }

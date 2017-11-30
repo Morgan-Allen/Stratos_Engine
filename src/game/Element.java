@@ -4,6 +4,7 @@ package game;
 import util.*;
 import static game.CityMap.*;
 import static game.GameConstants.*;
+import game.GameConstants.Pathing;
 
 
 
@@ -132,6 +133,21 @@ public class Element implements Session.Saveable, Target, Flood.Fill {
     return at;
   }
   
+
+  public float pathHeight() {
+    return type.deep;
+  }
+  
+  
+  public int pathType() {
+    return complete() ? type.pathing : PATH_NONE;
+  }
+  
+  
+  public boolean allowsEntryFrom(Pathing p) {
+    return false;
+  }
+  
   
   public void flagWith(Object o) {
     pathFlag = o;
@@ -142,8 +158,8 @@ public class Element implements Session.Saveable, Target, Flood.Fill {
     return pathFlag;
   }
   
-  
-  
+
+
   /**  Growth and construction methods-
     */
   void updateGrowth() {
@@ -284,11 +300,6 @@ public class Element implements Session.Saveable, Target, Flood.Fill {
   void setFlagging(boolean is, Type key) {
     if (key == null || type.mobile) return;
     map.flagType(key, at.x, at.y, is);
-  }
-  
-  
-  boolean blocksPath() {
-    return complete() ? type.blocks : false;
   }
   
   

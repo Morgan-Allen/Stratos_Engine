@@ -65,7 +65,9 @@ public class TaskDelivery extends Task {
       amount = Nums.min(amount, demand);
       if (amount <= 0) continue;
       
-      float penalty = CityMap.distancePenalty(from.entrance(), goes.entrance());
+      float penalty = CityMap.distancePenalty(
+        from.mainEntrance(), goes.mainEntrance()
+      );
       Order o = new Order();
       o.goes   = goes  ;
       o.good   = made  ;
@@ -123,7 +125,9 @@ public class TaskDelivery extends Task {
       boolean featured = b.type.hasFeature(feature);
       if (feature != null && ! featured) continue;
       
-      float dist = CityMap.distance(from.entrance(), b.entrance());
+      float dist = CityMap.distance(
+        from.mainEntrance(), b.mainEntrance()
+      );
       if (maxDist > 0 && dist > maxDist) continue;
       
       float rating = 1;

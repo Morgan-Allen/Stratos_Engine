@@ -75,7 +75,7 @@ public class ActorAsAnimal extends Actor {
     
     Pick <Tile> pick = new Pick();
     for (Tile t : CityMap.adjacent(at(), null, map)) {
-      if (t == null || map.blocked(t.x, t.y)) continue;
+      if (t == null || map.blocked(t)) continue;
       if (! Visit.arrayIncludes(type.habitats, t.terrain)) continue;
       pick.compare(t, Rand.num());
     }

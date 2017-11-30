@@ -29,10 +29,11 @@ public class Type extends Index.Entry implements Session.Saveable {
     IS_COLLECT_BLD = 12,
     IS_HUNTS_BLD   = 13,
     IS_ARMY_BLD    = 14,
-    IS_FAITH_BLD   = 15,
-    IS_ACTOR       = 16,
-    IS_PERSON_ACT  = 17,
-    IS_ANIMAL_ACT  = 18
+    IS_WALLS_BLD   = 15,
+    IS_FAITH_BLD   = 16,
+    IS_ACTOR       = 17,
+    IS_PERSON_ACT  = 18,
+    IS_ANIMAL_ACT  = 19
   ;
   
   final static Index <Type> INDEX = new Index();
@@ -68,6 +69,7 @@ public class Type extends Index.Entry implements Session.Saveable {
       case(IS_COLLECT_BLD): return new BuildingForCollect(this);
       case(IS_HUNTS_BLD  ): return new BuildingForHunt   (this);
       case(IS_ARMY_BLD   ): return new BuildingForArmy   (this);
+      case(IS_WALLS_BLD  ): return new BuildingForWalls  (this);
       case(IS_FAITH_BLD  ): return new BuildingForFaith  (this);
       case(IS_ACTOR      ): return new Actor        (this);
       case(IS_PERSON_ACT ): return new ActorAsPerson(this);
@@ -99,8 +101,7 @@ public class Type extends Index.Entry implements Session.Saveable {
   Good    builtFrom  [] = EMPTY_MATERIAL;
   Integer builtAmount[] = { 1 };
   
-  boolean blocks   = true ;
-  boolean paved    = false;
+  int     pathing  = CityMap.PATH_BLOCK;
   boolean mobile   = false;
   float   growRate = 0;
   int     ambience = 0;

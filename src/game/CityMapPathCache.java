@@ -4,6 +4,8 @@ package game;
 import util.*;
 import static game.CityMap.*;
 
+import game.GameConstants.Pathing;
+
 
 
 
@@ -60,7 +62,9 @@ public class CityMapPathCache {
   List <Area> needRefresh = new List();
   List <Area> needDelete  = new List();
   
-  private Tile temp[] = new Tile[8];
+  private Pathing temp[] = new Pathing[8];
+  private Tile tempForFrom[] = new Tile[8];
+  private Tile tempForGoes[] = new Tile[8];
   
   
   CityMapPathCache(CityMap map) {
@@ -100,6 +104,41 @@ public class CityMapPathCache {
   }
   
   
+  boolean pathConnects(Element from, Element goes) {
+    if (from == null || goes == null) return false;
+    
+    //  TODO:
+    //  You'll also need respectable methods of estimating distance.
+    Tile fromA[] = around(from, tempForFrom);
+    Tile goesA[] = around(goes, tempForGoes);
+    
+    for (Tile f : fromA) for (Tile g : goesA) {
+      if (pathConnects(f, g)) return true;
+    }
+    return false;
+  }
+  
+  
+  private Tile[] around(Element e, Tile temp[]) {
+    Tile at = e.at();
+    Type t  = e.type;
+    
+    if (t.isBuilding()) {
+      return ((Building) e).entrances();
+    }
+    else if (t.wide == 1 && t.high == 1) {
+      return CityMap.adjacent(at, temp, map);
+    }
+    else {
+      Batch <Tile> around = new Batch();
+      for (Coord c : Visit.perimeter(at.x, at.y, t.wide, t.high)) {
+        around.add(map.tileAt(c));
+      }
+      return around.toArray(Tile.class);
+    }
+  }
+  
+  
   
   /**  Methods for flagging changes and regular updates:
     */
@@ -122,8 +161,9 @@ public class CityMapPathCache {
     //  adjacency- the latter might indicate a bottleneck in pathing
     //  that could potentially require a more comprehensive update (see
     //  below.)
-    for (Tile n : CityMap.adjacent(at, temp, map)) {
-      if (n == null) continue;
+    for (Pathing p : at.adjacent(temp, map)) {
+      if (p == null || ! p.isTile()) continue;
+      Tile n = (Tile) p;
       tail = areaLookup[n.x][n.y];
       
       //  We don't merge with areas outside a given 16x16 unit:
@@ -292,9 +332,11 @@ public class CityMapPathCache {
     
     Series <Tile> covered = new Flood <Tile> () {
       void addSuccessors(Tile front) {
-        for (Tile n : CityMap.adjacent(front, temp, map)) {
-          if (n == null || n.flaggedWith() != null) continue;
-          if (map.blocked(n.x, n.y)) continue;
+        for (Pathing p : front.adjacent(temp, map)) {
+          if (p == null || p.flaggedWith() != null || ! p.isTile()) {
+            continue;
+          }
+          Tile n = (Tile) p;
           if (n.x / AREA_SIZE != aX || n.y / AREA_SIZE != aY) {
             edging.add(n);
             n.pathFlag = edging;
