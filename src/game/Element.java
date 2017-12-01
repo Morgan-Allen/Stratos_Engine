@@ -4,7 +4,6 @@ package game;
 import util.*;
 import static game.CityMap.*;
 import static game.GameConstants.*;
-import game.GameConstants.Pathing;
 
 
 
@@ -92,11 +91,9 @@ public class Element implements Session.Saveable, Target, Flood.Fill {
       setMaterialLevel(g, need * buildLevel);
     }
     
-    for (Coord c : Visit.grid(x, y, type.wide, type.high, 1)) {
-      Tile t = map.tileAt(c.x, c.y);
+    for (Tile t : map.tilesUnder(at.x, at.y, type.wide, type.high)) {
       if (t.above != null) t.above.exitMap(map);
-      t.above = this;
-      map.pathCache.checkPathingChanged(t);
+      map.setAbove(t, this);
     }
   }
   
@@ -105,12 +102,8 @@ public class Element implements Session.Saveable, Target, Flood.Fill {
     if (true       ) setFlagging(false, type.flagKey);
     if (type.isCrop) setFlagging(false, NEED_PLANT  );
     
-    for (Coord c : Visit.grid(at.x, at.y, type.wide, type.high, 1)) {
-      Tile t = map.tileAt(c.x, c.y);
-      if (t.above == this) {
-        t.above = null;
-        map.pathCache.checkPathingChanged(t);
-      }
+    for (Tile t : map.tilesUnder(at.x, at.y, type.wide, type.high)) {
+      if (t.above == this) map.setAbove(t, null);
     }
     
     setLocation(null);

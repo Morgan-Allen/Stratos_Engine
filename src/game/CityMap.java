@@ -277,24 +277,27 @@ public class CityMap implements Session.Saveable {
     
     
     public Pathing[] adjacent(Pathing[] temp, CityMap map) {
-      if (temp == null) temp = new Tile[8];
+      if (temp == null) temp = new Pathing[8];
       
+      int pathing = pathType();
       float high = pathHeight();
+      boolean blocked = pathing == PATH_BLOCK || pathing == PATH_WATER;
       
       for (int dir : T_INDEX) {
         Tile n = map.tileAt(x + T_X[dir], y + T_Y[dir]);
-        int pathing = map.pathType(n);
-        if (n == null) {
+        int pathN = map.pathType(n);
+        if (n == null || blocked) {
           temp[dir] = null;
         }
         else if (n.above != null && n.above.allowsEntryFrom(this)) {
           temp[dir] = (Pathing) n.above;
         }
-        else if (pathing == PATH_WALLS && n.pathHeight() == high) {
-          temp[dir] = (Pathing) n.above;
-        }
-        else if (pathing == PATH_BLOCK || pathing == PATH_WATER) {
+        else if (pathN == PATH_BLOCK || pathN == PATH_WATER) {
           temp[dir] = null;
+        }
+        else if (pathN == PATH_WALLS || pathing == PATH_WALLS) {
+          boolean match = n.pathHeight() == high && pathN == pathing;
+          temp[dir] = match ? n : null;
         }
         else {
           temp[dir] = n;
@@ -469,10 +472,10 @@ public class CityMap implements Session.Saveable {
   
   
   void setTerrain(Tile t, Terrain ter, int elevation) {
-    Terrain old = t.terrain;
+    int oldP = t.pathType();
     t.terrain   = ter;
     t.elevation = elevation;
-    if (ter != old) pathCache.checkPathingChanged(t);
+    if (oldP != t.pathType()) pathCache.checkPathingChanged(t);
   }
   
   
@@ -487,9 +490,9 @@ public class CityMap implements Session.Saveable {
   
   
   void setAbove(Tile t, Element above) {
-    Element old = t.above;
+    int oldP = t.pathType();
     t.above = above;
-    if (old != above) pathCache.checkPathingChanged(t);
+    if (oldP != t.pathType()) pathCache.checkPathingChanged(t);
   }
   
   

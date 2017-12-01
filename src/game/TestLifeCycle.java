@@ -26,9 +26,9 @@ public class TestLifeCycle extends Test {
         Building built = (Building) type.generate();
         built.enterMap(map, x, y, 1);
       }
-      CityMapPlanning.placeStructure(ROAD, map, x - 1, 0, 1, 10, true);
+      CityMapPlanning.placeStructure(ROAD, map, true, x - 1, 0, 1, 10);
     }
-    CityMapPlanning.placeStructure(ROAD, map, 0, 0, 10, 1, true);
+    CityMapPlanning.placeStructure(ROAD, map, true, 0, 0, 10, 1);
     
     final int RUN_TIME = LIFESPAN_LENGTH;
     boolean migrated = false;

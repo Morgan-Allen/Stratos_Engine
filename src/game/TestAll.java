@@ -24,6 +24,7 @@ public class TestAll {
     
     record(TestDemands  .testDemands  (false));
     record(TestPathing  .testPathing  (false));
+    record(TestPathCache.testPathCache(false));
     record(TestMilitary .testMilitary (false));
     record(TestSieging  .testSieging  (false));
     record(TestCity     .testCity     (false));
@@ -41,6 +42,5 @@ public class TestAll {
     I.say("  Pass rate: "+I.percent(numPass * 1f / numTests));
   }
 }
-
 
 

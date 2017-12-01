@@ -220,6 +220,7 @@ public class Task implements Session.Saveable {
     for (int i = 0; i < actor.type.sightRange; i++) {
       if (i >= path.length) break;
       Pathing t = path[i];
+      if (t.isTile() && actor.map.blocked((Tile) t)) return false;
       if (! t.allowsEntry(actor)) return false;
     }
     
@@ -269,11 +270,16 @@ public class Task implements Session.Saveable {
   static boolean verifyPath(
     Pathing path[], Pathing start, Pathing end, CityMap map
   ) {
-    if (Visit.empty(path)      ) return false;
-    if (path[0] != start       ) return false;
-    if (Visit.last(path) != end) return false;
-    
+    if (Visit.empty(path) || path[0] != start) return false;
+
     Pathing temp[] = new Pathing[8];
+    Pathing last = (Pathing) Visit.last(path);
+    if (last != end) {
+      if (! Visit.arrayIncludes(end.adjacent(temp, map), last)) {
+        return false;
+      }
+    }
+    
     Pathing prior = path[0];
     for (Pathing p : path) {
       Pathing a[] = p.adjacent(temp, map);

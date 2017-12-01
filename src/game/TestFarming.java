@@ -26,7 +26,7 @@ public class TestFarming extends Test {
     BuildingForGather farm = (BuildingForGather) FARM_PLOT.generate();
     farm.enterMap(map, 9, 9, 1);
     fillWorkVacancies(farm);
-    CityMapPlanning.placeStructure(ROAD, map, 9, 8, 10, 1, true);
+    CityMapPlanning.placeStructure(ROAD, map, true, 9, 8, 10, 1);
     
     Good needed[] = { MAIZE, RAW_COTTON };
     Tile plantTiles[] = BuildingForGather.applyPlanting(

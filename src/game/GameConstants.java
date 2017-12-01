@@ -451,9 +451,14 @@ public class GameConstants {
     
     ROAD          = new BuildType("type_road"    , IS_STRUCTURAL),
     WALL          = new BuildType("type_wall"    , IS_STRUCTURAL),
+    GATE          = new BuildType("type_gate"    , IS_WALLS_BLD ),
+    TOWER         = new BuildType("type_tower"   , IS_WALLS_BLD ),
     AQUEDUCT      = new BuildType("type_aqueduct", IS_STRUCTURAL),
     CISTERN       = new BuildType("type_cistern" , IS_WATER_BLD ),
-    INFRASTRUCTURE_BUILDINGS[] = { ROAD, WALL, AQUEDUCT, CISTERN },
+    
+    INFRASTRUCTURE_BUILDINGS[] = {
+      ROAD, WALL, GATE, TOWER, AQUEDUCT, CISTERN
+    },
     
     PALACE        = new BuildType("type_palace"       , IS_HOME_BLD   ),
     PALACE_BUILDINGS[] = { PALACE },
@@ -520,6 +525,20 @@ public class GameConstants {
     WALL.setDimensions(1, 1, 2);
     WALL.setBuildMaterials(STONE, 2);
     
+    GATE.name = "Gate";
+    GATE.tint = TINT_MILITARY;
+    GATE.pathing = PATH_WALLS;
+    GATE.setDimensions(2, 2, 2);
+    GATE.setBuildMaterials(STONE, 10);
+    GATE.setFeatures(IS_GATE);
+    
+    TOWER.name = "Tower";
+    TOWER.tint = TINT_MILITARY;
+    TOWER.pathing = PATH_BLOCK;
+    TOWER.setDimensions(2, 2, 4);
+    TOWER.setBuildMaterials(STONE, 10);
+    TOWER.setFeatures(IS_TOWER);
+    
     AQUEDUCT.name = "Aqueduct";
     AQUEDUCT.tint = TINT_LITE_AQUATIC;
     AQUEDUCT.pathing = PATH_WALLS;
@@ -547,7 +566,7 @@ public class GameConstants {
     PALACE.maxResidents = 2;
     PALACE.maxWorkers = 2;
     PALACE.maxHealth = 300;
-    PALACE.features = new Good[] { IS_HOUSING };
+    PALACE.setFeatures(IS_HOUSING);
     
     //
     //  Residential structures:
@@ -579,7 +598,7 @@ public class GameConstants {
     BASIN.isWater = true;
     BASIN.setDimensions(2, 2, 0);
     BASIN.setBuildMaterials(STONE, 2, CLAY, 2);
-    BASIN.features = new Good[] { IS_WATER, IS_VENDOR };
+    BASIN.setFeatures(IS_WATER, IS_VENDOR);
     
     SWEEPER.name = "Sweeper";
     SWEEPER.tint = TINT_LITE_INDUSTRIAL;
@@ -593,13 +612,13 @@ public class GameConstants {
     SCHOOL.setDimensions(2, 2, 1);
     SCHOOL.setBuildMaterials(WOOD, 5, CLAY, 2, STONE, 3);
     SCHOOL.setWorkerTypes(CITIZEN);
-    SCHOOL.features = new Good[] { EDUCATION };
+    SCHOOL.setFeatures(EDUCATION);
     
     BALL_COURT.name = "Ball Court";
     BALL_COURT.tint = TINT_AMENITY;
     BALL_COURT.setDimensions(3, 3, 1);
     BALL_COURT.setBuildMaterials(STONE, 10);
-    BALL_COURT.features = new Good[] { DIVERSION };
+    BALL_COURT.setFeatures(DIVERSION);
     BALL_COURT.featureAmount = 15;
 
     //
@@ -752,16 +771,23 @@ public class GameConstants {
     
     //  Quetzalcoatl:
     //    Aspects for healing & knowledge, travel & wind
+    //    Patecatl/Piltzintecuhtli, Yacetecuhtli/Zacatzontli, Ehecatl
     //  Tezcatlipoca:
     //    Aspects for discord, beauty, sin & confession
+    //    Itztli/Itztlacoliuhqui, Huehuecoyotl/Mayahuel, Tlazolteotl
     //  Tlaloc:
     //    Aspects for rivers & oceans, growth & monsters
+    //    Chalchiutlicue/Huixtocihuatl, Xochiquetzal/Xochipilli,
+    //    Cipactli/Coatlicue/Tlaltecuhtli
     //  Huitzilipochtli:
     //    Aspects for warfare & lordship, fire & hearth
+    //    Tonatiuh, Mixcoatl, Xiuhtecuhtli/Chantico
     //  Mictecacehuatl:
     //    Aspects for transmigration, ancestry & eclipse
+    //    Xolotl/Nanahuatzin, Coyolxauhqui/Itzapapalotl/Oxomoco, Quilaztli
     //  Xipe Totec:
     //    Aspects of decay & abundance, factional tension
+    //    Centeotl/Xilonen
     //  
     //  Ometeotl:     Synergy bonus based on factional balance
     //  The Toci:     Synergy bonus for earth-goddesses

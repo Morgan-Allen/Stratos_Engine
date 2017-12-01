@@ -3,8 +3,7 @@
 package game;
 import util.*;
 import static game.CityMap.*;
-
-import game.GameConstants.Pathing;
+import static game.GameConstants.Pathing;
 
 
 
@@ -147,7 +146,7 @@ public class CityMapPathCache {
     //  First, make sure there's some change to merit an update:
     Area core = areaLookup[at.x][at.y];
     boolean blocked = map.blocked(at.x, at.y);
-    if (blocked == (core == null)) return;
+    //if (blocked == (core == null)) return;
     
     //  Then set up some tracking variables-
     final int aX = at.x / AREA_SIZE;
@@ -162,9 +161,10 @@ public class CityMapPathCache {
     //  that could potentially require a more comprehensive update (see
     //  below.)
     for (Pathing p : at.adjacent(temp, map)) {
-      if (p == null || ! p.isTile()) continue;
-      Tile n = (Tile) p;
-      tail = areaLookup[n.x][n.y];
+      Tile n;
+      if (p == null || ! p.isTile()) n = null;
+      else n = (Tile) p;
+      tail = n == null ? null : areaLookup[n.x][n.y];
       
       //  We don't merge with areas outside a given 16x16 unit:
       if (tail != null && (tail.aX != aX || tail.aY != aY)) {
@@ -198,10 +198,9 @@ public class CityMapPathCache {
       numGaps -= 1;
     }
     
-    //  If possible, don't flag the area for deletion.  Just add or
+    //  If possible, don't flag the area for deletion- just add or
     //  remove a single tile.  (Note that in the case of deleting a
     //  tile, there must not be a potential bottleneck.)
-    
     if (edge != null && ! (multiArea || edge.flagDeletion)) {
       if (blocked && numGaps < 2) {
         areaLookup[at.x][at.y] = null;
@@ -323,7 +322,8 @@ public class CityMapPathCache {
       deleteArea(area);
       area = null;
     }
-    if (map.blocked(t.x, t.y)) {
+    
+    if (map.blocked(t)) {
       return null;
     }
     
@@ -333,15 +333,24 @@ public class CityMapPathCache {
     Series <Tile> covered = new Flood <Tile> () {
       void addSuccessors(Tile front) {
         for (Pathing p : front.adjacent(temp, map)) {
-          if (p == null || p.flaggedWith() != null || ! p.isTile()) {
+          if (p == null || p.flaggedWith() != null) continue;
+          
+          if (! p.isTile()) {
+            Building b = (Building) p;
+            for (Tile n : b.entrances()) if (n != p) {
+              edging.add(n);
+              n.pathFlag = edging;
+            }
             continue;
           }
+          
           Tile n = (Tile) p;
           if (n.x / AREA_SIZE != aX || n.y / AREA_SIZE != aY) {
             edging.add(n);
             n.pathFlag = edging;
             continue;
           }
+          
           tryAdding(n);
         }
       }
@@ -365,7 +374,7 @@ public class CityMapPathCache {
     }
     for (Tile e : edging) {
       Area b = areaFor(e);
-      if (b != null) bordering.include(b);
+      if (b != null && b != area) bordering.include(b);
     }
     for (Area b : bordering) {
       toggleBorders(area, b, true);

@@ -76,7 +76,7 @@ public class TestTrading extends Test {
     Building weaver = (Building) WEAVER.generate();
     weaver.enterMap(map, 5, 3, 1);
     
-    CityMapPlanning.placeStructure(ROAD, map, 1, 5, 8, 1, true);
+    CityMapPlanning.placeStructure(ROAD, map, true, 1, 5, 8, 1);
     
     fillAllVacancies(map);
     int initFunds = 100;

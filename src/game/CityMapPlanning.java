@@ -142,7 +142,18 @@ public class CityMapPlanning {
   /**  Some helper methods for dealing with infrastructure:
     */
   public static Series <Element> placeStructure(
-    Type s, CityMap map, int x, int y, int w, int h, boolean built
+    Type s, CityMap map, Box2D area, boolean built
+  ) {
+    return placeStructure(
+      s, map, built,
+      (int) area.xpos(), (int) area.ypos(),
+      (int) area.xdim(), (int) area.ydim()
+    );
+  }
+  
+  
+  public static Series <Element> placeStructure(
+    Type s, CityMap map, boolean built, int x, int y, int w, int h
   ) {
     Batch <Element> placed = new Batch();
     for (Coord c : Visit.grid(x, y, w, h, 1)) {
@@ -162,13 +173,28 @@ public class CityMapPlanning {
   }
   
   
-  public static void demolish(
-    CityMap map, int x, int y, int w, int h
+  public static void markDemolish(
+    CityMap map, boolean now, Box2D area
   ) {
-    for (Coord c : Visit.grid(x, y, w, h, 1)) {
-      Tile t = map.tileAt(c.x, c.y);
-      if (t       == null) continue;
-      if (t.above != null) t.above.exitMap(map);
+    markDemolish(
+      map, now,
+      (int) area.xpos(), (int) area.ypos(),
+      (int) area.xdim(), (int) area.ydim()
+    );
+  }
+  
+  
+  public static void markDemolish(
+    CityMap map, boolean now, int x, int y, int w, int h
+  ) {
+    for (Tile t : map.tilesUnder(x, y, w, h)) if (t != null) {
+      Element plans = map.planning.objectAt(t);
+      if (plans != null) {
+        map.planning.unplaceObject(plans);
+      }
+      if (t.above != null && now) {
+        t.above.exitMap(map);
+      }
     }
   }
 }

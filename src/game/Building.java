@@ -5,8 +5,6 @@ import util.*;
 import static game.CityMap.*;
 import static game.GameConstants.*;
 
-import game.GameConstants.Pathing;
-
 
 
 public class Building extends Element implements Pathing, Employer {
@@ -18,6 +16,7 @@ public class Building extends Element implements Pathing, Employer {
   
   String ID;
   
+  private int facing = TileConstants.N;
   private Tile entrances[] = new Tile[0];
   private int updateGap = 0;
   
@@ -38,7 +37,8 @@ public class Building extends Element implements Pathing, Employer {
   public Building(Session s) throws Exception {
     super(s);
     ID = s.loadString();
-    
+
+    facing = s.loadInt();
     int numE = s.loadInt();
     entrances = new Tile[numE];
     for (int i = 0; i < numE; i++) entrances[i] = loadTile(map, s);
@@ -57,6 +57,7 @@ public class Building extends Element implements Pathing, Employer {
     super.saveState(s);
     s.saveString(ID);
     
+    s.saveInt(facing);
     s.saveInt(entrances.length);
     for (Tile e : entrances) saveTile(e, map, s);
     s.saveInt(updateGap);
@@ -73,6 +74,16 @@ public class Building extends Element implements Pathing, Employer {
   
   /**  World entry and exit-
     */
+  void setFacing(int facing) {
+    this.facing = facing;
+  }
+  
+  
+  int facing() {
+    return facing;
+  }
+  
+  
   void enterMap(CityMap map, int x, int y, float buildLevel) {
     super.enterMap(map, x, y, buildLevel);
     map.buildings.add(this);
@@ -181,16 +192,12 @@ public class Building extends Element implements Pathing, Employer {
       return;
     }
     
-    boolean refreshE = entrances == null;
-    if (entrances != null) for (Tile e : entrances) {
-      if (map.blocked(e)) refreshE = true;
-    }
-    if (refreshE) {
+    if (! checkEntrancesOkay(entrances)) {
       entrances = selectEntrances();
     }
     
     if (--updateGap <= 0) {
-      selectEntrances();
+      entrances = selectEntrances();
       updateOnPeriod(type.updateTime);
       updateGap = type.updateTime;
     }
@@ -210,6 +217,12 @@ public class Building extends Element implements Pathing, Employer {
   public Tile mainEntrance() {
     if (Visit.empty(entrances)) return null;
     return entrances[0];
+  }
+  
+  
+  boolean checkEntrancesOkay(Tile entrances[]) {
+    for (Tile e : entrances) if (map.blocked(e)) return false;
+    return true;
   }
   
   

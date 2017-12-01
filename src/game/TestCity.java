@@ -20,8 +20,8 @@ public class TestCity extends Test {
     CityMap map = setupTestCity(32);
     map.settings.toggleFog = false;
     
-    CityMapPlanning.placeStructure(ROAD, map, 3, 8, 25, 1 , true);
-    CityMapPlanning.placeStructure(ROAD, map, 8, 2, 1 , 25, true);
+    CityMapPlanning.placeStructure(ROAD, map, true, 3, 8, 25 , 1);
+    CityMapPlanning.placeStructure(ROAD, map, true, 8, 2 , 1, 25);
     
     Building school  = (Building) SCHOOL    .generate();
     Building court   = (Building) BALL_COURT.generate();

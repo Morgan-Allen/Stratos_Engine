@@ -127,7 +127,7 @@ public class Test {
     "Residential", "Military"  , "Religious"
   };
   final static String
-    ROADS0      = "Roads",
+    ROADS0     = "Roads",
     DEMOLITION = "Demolition"
   ;
   
@@ -527,11 +527,7 @@ public class Test {
       else {
         report.append("\n  (E) select end");
         if (pressed.includes('e')) {
-          for (Coord c : Visit.grid(drawnBox(map))) {
-            if (map.blocked(c.x, c.y)) continue;
-            Element road = (Element) ROAD.generate();
-            road.enterMap(map, c.x, c.y, 1);
-          }
+          CityMapPlanning.placeStructure(ROAD, map, drawnBox(map), true);
           drawnTile = null;
         }
       }
@@ -554,10 +550,7 @@ public class Test {
       else {
         report.append("\n  (E) select end");
         if (pressed.includes('e')) {
-          for (Coord c : Visit.grid(drawnBox(map))) {
-            Element above = map.above(c.x, c.y);
-            if (above != null) above.exitMap(map);
-          }
+          CityMapPlanning.markDemolish(map, true, drawnBox(map));
           drawnTile = null;
         }
       }

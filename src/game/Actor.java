@@ -172,7 +172,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     //
     //  Some checks to assist in case of blockage...
     Tile at = at();
-    if (inside == null && map.blocked(at.x, at.y)) {
+    if (inside == null && map.blocked(at)) {
       if (at.above != null && at.above.type.isBuilding()) {
         setInside((Building) at.above, true);
       }
@@ -206,8 +206,8 @@ public class Actor extends Element implements Session.Saveable, Journeys {
           beginNextBehaviour();
         }
       }
-      else if (target != null && distance <= minRange) {
-        if (task.timeSpent++ <= task.maxTime) {
+      else if (distance <= minRange) {
+        if (target != null && task.timeSpent++ <= task.maxTime) {
           onTarget(target);
           task.onTarget(target);
           target.targetedBy(this);

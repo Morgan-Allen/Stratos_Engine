@@ -190,6 +190,11 @@ public class Type extends Index.Entry implements Session.Saveable {
   }
   
   
+  void setFeatures(Good... features) {
+    this.features = features;
+  }
+  
+  
   boolean hasFeature(Good feature) {
     return Visit.arrayIncludes(features, feature);
   }

@@ -35,7 +35,7 @@ public class TestMilitary extends Test {
     BuildingForArmy fort = (BuildingForArmy) GARRISON.generate();
     fort.enterMap(map, 10, 10, 1);
     fillWorkVacancies(fort);
-    CityMapPlanning.placeStructure(ROAD, map, 2, 9, 30, 1, true);
+    CityMapPlanning.placeStructure(ROAD, map, true, 2, 9, 30, 1);
     
     Formation troops = fort.formation;
     

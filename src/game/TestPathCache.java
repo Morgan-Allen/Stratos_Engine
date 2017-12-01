@@ -9,17 +9,10 @@ import static game.CityMapPathCache.*;
 
 
 //  TODO:  Include effects of fog...
-//  ...More generally, you need to have a consistent interface for
-//  pathability-checks with the ActorPathSearch class, and reference
-//  that.
-
-//  
-
 
 //  And you have to hook this up to the flagging-maps.  That will
 //  let you ensure that only accessible sources are visited, on a
 //  tile-by-tile basis.
-
 
 //  This is probably good enough for now.  If you wanted to optimise
 //  further, you could keep a table of the the IDs of groups in each
@@ -73,25 +66,25 @@ public class TestPathCache extends Test {
     Area area = miniMap.pathCache.areaFor(miniMap.tileAt(1, 1));
     if (area == null) {
       I.say("\nArea was not generated!");
-      return false;
+      if (! graphics) return false;
     }
     if (area.numTiles != numT) {
       I.say("\nArea has "+area.numTiles+" tiles, expected "+numT);
-      return false;
+      if (! graphics) return false;
     }
     for (int i = 0; i < coords.length;) {
       Tile t = miniMap.tileAt(coords[i++], coords[i++]);
       if (! Visit.arrayIncludes(area.tiles, t)) {
         I.say("\nExpected area to include "+t);
         I.say("  Tiles were: "+I.list(area.tiles));
-        return false;
+        if (! graphics) return false;
       }
     }
     //
     //  More broadly, we verify exhaustively that connection-queries
     //  accurately reflect ability to path between points:
     if (! verifyConnectionQueries(miniMap)) {
-      return false;
+      if (! graphics) return false;
     }
     //
     //  Connect a few old areas and partition others:
@@ -109,25 +102,22 @@ public class TestPathCache extends Test {
       byte l = newLayout[c.x][c.y];
       Tile t = miniMap.tileAt(c);
       miniMap.setTerrain(t, l == 0 ? LAKE : MEADOW, 0);
-      miniMap.pathCache.checkPathingChanged(t);
     }
     miniMap.pathCache.updatePathCache();
     if (! verifyConnectionQueries(miniMap)) {
-      return false;
+      if (! graphics) return false;
     }
     //
     //  And finally, try modifying the map at random to see if the
     //  queries hold:
-    for (Coord c : Visit.grid(0, 0, miniSize, miniSize, 1)) {
+    for (Tile t : miniMap.allTiles()) {
       if (Rand.yes()) {
-        Tile t = miniMap.tileAt(c);
         miniMap.setTerrain(t, miniMap.blocked(t) ? MEADOW : LAKE, 0);
-        miniMap.pathCache.checkPathingChanged(t);
       }
     }
     miniMap.pathCache.updatePathCache();
     if (! verifyConnectionQueries(miniMap)) {
-      return false;
+      if (! graphics) return false;
     }
     
     //
@@ -137,8 +127,8 @@ public class TestPathCache extends Test {
     map.settings.toggleFog = false;
     
     final int div = map.size / layout.length, rand = div / 4;
-    for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
-      int x = c.x, y = c.y;
+    for (Tile t : map.allTiles()) {
+      int x = t.x, y = t.y;
       
       x += Rand.range(-rand, rand);
       y += Rand.range(-rand, rand);
@@ -146,7 +136,6 @@ public class TestPathCache extends Test {
       y = Nums.clamp(y, map.size);
       
       byte l = layout[x / div][y / div];
-      Tile t = map.tileAt(c);
       map.setTerrain(t, l == 0 ? LAKE : MEADOW, 0);
     }
     CityMapTerrain.populateFixtures(map);
@@ -169,35 +158,46 @@ public class TestPathCache extends Test {
           I.say("      "+a.numTiles+" tiles: "+a.aX+"|"+a.aY);
         }
       }
-      return false;
+      if (! graphics) return false;
     }
     
     boolean islandLinked = map.pathCache.pathConnects(land1, island0);
     if (islandLinked) {
       I.say("\nSeparated regions should not be linked!");
-      return false;
+      if (! graphics) return false;
     }
     
-    CityMapPlanning.placeStructure(WALL, map, 88, 20, 48, 8, true);
+    CityMapPlanning.placeStructure(WALL, map, true, 88, 20, 48, 8);
     map.pathCache.updatePathCache();
     landLinked = map.pathCache.pathConnects(land1, land2);
     if (landLinked) {
       I.say("\nWall should have partitioned mainland!");
-      return false;
+      if (! graphics) return false;
     }
     
-    CityMapPlanning.placeStructure(ROAD, map, 20, 24, 8, 48, true);
+    CityMapPlanning.placeStructure(ROAD, map, true, 20, 24, 8, 48);
     map.pathCache.updatePathCache();
     islandLinked = map.pathCache.pathConnects(land1, island0);
     if (! islandLinked) {
       I.say("\nRoad should have connected island to mainland!");
-      return false;
+      if (! graphics) return false;
+    }
+    
+    CityMapPlanning.markDemolish(map, true, 120, 20, 2, 8);
+    Building gate = (Building) GATE.generate();
+    gate.setFacing(TileConstants.N);
+    gate.enterMap(map, 120, 23, 1);
+    map.pathCache.updatePathCache();
+    landLinked = map.pathCache.pathConnects(land1, land2);
+    if (! landLinked) {
+      I.say("\nGate should have bridged partition!");
+      if (! graphics) return false;
     }
     
     for (Tile t : map.allTiles()) {
       if (map.pathCache.rawArea(t) == null && ! map.blocked(t)) {
         I.say("\nUnblocked tile has no area: "+t);
-        return false;
+        if (! graphics) return false;
       }
     }
     
@@ -209,7 +209,7 @@ public class TestPathCache extends Test {
       goes = CityMapTerrain.nearestOpenTile(goes, map);
       if (from == null || goes == null || from == goes) continue;
       if (! verifyConnection(from, goes, map)) {
-        return false;
+        if (! graphics) return false;
       }
     }
     
@@ -276,9 +276,8 @@ public class TestPathCache extends Test {
     if (area != null) around = area.borders.toArray(Area.class);
     if (area != null) group  = area.group;
     
-    for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
-      int fill = BLANK_COLOR;
-      Tile t = map.tileAt(c);
+    for (Tile t : map.allTiles()) {
+      int fill = t.above == null ? BLANK_COLOR : t.above.debugTint();
       if (Visit.arrayIncludes(keyTiles, t)) {
         fill = NO_BLD_COLOR;
       }
@@ -286,12 +285,14 @@ public class TestPathCache extends Test {
         fill = BLACK_COLOR;
       }
       else if (area != null) {
-        Area under = map.pathCache.areaLookup[t.x][t.y];
+        Area under = map.pathCache.rawArea(t);
         if (area == under) {
           fill = WHITE_COLOR;
         }
         else if (Visit.arrayIncludes(around, under)) {
           fill = WALKER_COLOR;
+        }
+        else if (t.above != null) {
         }
         else if (under != null && under.group == group) {
           fill = MISSED_COLOR;

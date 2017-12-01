@@ -57,7 +57,7 @@ public class TestBuilding extends Test {
     
     Building toBuild[] = { post, home, palace, mason };
     Series <Element> road = CityMapPlanning.placeStructure(
-      ROAD, map, 2, 2, 10, 1, false
+      ROAD, map, false, 2, 2, 10, 1
     );
     
     Tally <Good> startingMaterials = totalMaterials(map);

@@ -25,26 +25,106 @@ public class TestPathing extends Test {
     map.settings.toggleHunger  = false;
     map.settings.toggleMigrate = false;
     
-    Batch <Actor> actors = new Batch();
-    Table <Actor, Pathing> destinations = new Table();
-    Tally <Actor> numInside = new Tally();
+    //
+    //  First, place a variety of structures on the map and test to
+    //  ensure that pathing-checks function correctly between various
+    //  points on the ground, walls, between gates, et cetera:
     
-    for (int n = 3; n-- > 0;) {
-      Actor a = (Actor) CITIZEN.generate();
-      a.enterMap(map, Rand.index(map.size), Rand.index(map.size), 1);
-      actors.add(a);
-      destinations.put(a, a.at());
-    }
+    CityMapPlanning.placeStructure(WALL, map, true, 4, 4, 20, 20);
+    CityMapPlanning.markDemolish(map, true, 6, 6, 16, 16);
+    
+    Building gate = (Building) GATE.generate();
+    gate.setFacing(TileConstants.N);
+    gate.enterMap(map, 14, 22, 1);
+    
+    Building tower1 = (Building) TOWER.generate();
+    tower1.setFacing(TileConstants.W);
+    tower1.enterMap(map, 4, 14, 1);
+    
+    Building tower2 = (Building) TOWER.generate();
+    tower2.setFacing(TileConstants.E);
+    tower2.enterMap(map, 22, 14, 1);
     
     Building home = (Building) HOUSE.generate();
     home.enterMap(map, 10, 10, 1);
     
-    //  TODO:  You also have to test pathing to and from buildings (and
-    //  possibly through gatehouses and over walls, et cetera.)
+    Tile cornerWall   = map.tileAt(4 , 4 );
+    Tile endWall      = map.tileAt(20, 4 );
+    Tile cornerGround = map.tileAt(6 , 6 );
+    Tile innerGround  = map.tileAt(9 , 12);
+    Tile outerGround  = map.tileAt(16, 31);
+    Tile oppGround    = map.tileAt(20, 14);
     
-    //  For now, all we want to test is that actors can, in fact, get from
-    //  point A to point B, and that they are present in one and only one tile
-    //  at any given time.
+    Pathing p1[], p2[];
+    p1 = cornerWall  .adjacent(null, map);
+    p2 = cornerGround.adjacent(null, map);
+    
+    for (Pathing n : p1) {
+      if (n != null && ((Tile) n).above == null) {
+        I.say("\nWALL TILES SHOULD ONLY BORDER OTHER WALL TILES!");
+        return false;
+      }
+    }
+    for (Pathing n : p2) {
+      if (n != null && ((Tile) n).above != null) {
+        I.say("\nGROUND TILES SHOULD ONLY BORDER OTHER GROUND TILES!");
+        return false;
+      }
+    }
+    
+    p1 = tower1.entrances()[0].adjacent(null, map);
+    p2 = tower1.entrances()[1].adjacent(null, map);
+    
+    if (! Visit.arrayIncludes(p1, tower1)) {
+      I.say("\nENTRANCES MUST LEAD TO BUILDING");
+      return false;
+    }
+    if (! Visit.arrayIncludes(p2, tower1)) {
+      I.say("\nENTRANCES MUST LEAD TO BUILDING");
+      return false;
+    }
+    
+    p1 = checkPathingOkay(cornerWall, endWall    , map);
+    p2 = checkPathingOkay(cornerWall, innerGround, map);
+    
+    if (p1 == null) {
+      I.say("\nPATHING ALONG WALL WAS NOT POSSIBLE");
+      return false;
+    }
+    if (! Visit.arrayIncludes(p2, tower1)) {
+      I.say("\nWALL-TO-GROUND PATHS SHOULD GO BY TOWER");
+      return false;
+    }
+    
+    p1 = checkPathingOkay(innerGround, outerGround, map);
+    p2 = checkPathingOkay(oppGround  , endWall    , map);
+    
+    if (! Visit.arrayIncludes(p1, gate)) {
+      I.say("\nEXITING COURTYARD SHOULD GO BY GATE");
+      return false;
+    }
+    if (! Visit.arrayIncludes(p2, tower2)) {
+      I.say("\nGROUND-TO-WALL PATHS SHOULD GO BY TOWER");
+      return false;
+    }
+    
+    //
+    //  Next, introduce a number of different actors and ensure they
+    //  can actually travel between a variety of different locations-
+    
+    Batch <Actor> actors = new Batch();
+    Table <Actor, Pathing> destinations = new Table();
+    Tally <Actor> numInside = new Tally();
+    
+    Tile initPoints[] = { cornerWall, innerGround, outerGround };
+    
+    for (int n = 3; n-- > 0;) {
+      Actor a = (Actor) CITIZEN.generate();
+      Tile point = initPoints[n];
+      a.enterMap(map, point.x, point.y, 1);
+      actors.add(a);
+      destinations.put(a, a.at());
+    }
     
     boolean insideWrong = false;
     boolean pathWrong   = false;
@@ -52,7 +132,6 @@ public class TestPathing extends Test {
     int numReachedDest = 0;
     
     while (map.time < 1000 || graphics) {
-      
       numInside.clear();
       
       for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
@@ -68,6 +147,7 @@ public class TestPathing extends Test {
       }
       
       for (Actor a : actors) {
+        
         if (! a.alive()) {
           I.say("\n"+a+" IS DEAD, SOMEHOW?");
           pathWrong = true;
@@ -95,7 +175,6 @@ public class TestPathing extends Test {
           destinations.put(a, goes);
           
           Pathing path[] = a.task == null ? null : a.task.path;
-          
           if (! Task.verifyPath(path, dest, goes, map)) {
             I.say("\n"+a+" CONSTRUCTED INVALID PATH-");
             I.say("  From: "+a.at()+", Goes: "+goes+"\n  ");
@@ -111,9 +190,8 @@ public class TestPathing extends Test {
         if (! graphics) break;
       }
       
-      if ((! pathingDone) && numReachedDest == actors.size() * 3) {
+      if ((! pathingDone) && numReachedDest == actors.size() * 10) {
         pathingDone = true;
-        
         if (pathingDone) {
           I.say("\nPATHING TEST CONCLUDED SUCCESSFULLY!");
           if (! graphics) return true;
@@ -130,6 +208,23 @@ public class TestPathing extends Test {
     
     return false;
   }
+  
+  
+  private static Pathing[] checkPathingOkay(
+    Pathing from, Pathing goes, CityMap map
+  ) {
+    ActorPathSearch search = new ActorPathSearch(map, from, goes, -1);
+    search.doSearch();
+    Pathing path[] = search.fullPath(Pathing.class);
+    if (! Task.verifyPath(path, from, goes, map)) {
+      I.say("\nPATH IS INVALID-");
+      I.say("  From: "+from+", Goes: "+goes+"\n  ");
+      I.add(I.list(path));
+      return null;
+    }
+    return path;
+  }
+  
   
 }
 
