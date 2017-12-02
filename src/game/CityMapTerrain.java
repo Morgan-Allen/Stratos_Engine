@@ -27,12 +27,15 @@ public class CityMapTerrain implements TileConstants {
   
   
   void loadState(Session s) throws Exception {
+    
     growScanIndex = s.loadInt();
     for (int i = 2; i-- > 0;) for (int h = ALL_TERRAINS.length; h-- > 0;) {
-      if (! s.loadBool()) { scans[i][h] = null; continue; }
+      int numT = s.loadInt();
+      if (numT == -1) { scans[i][h] = null; continue; }
       
       HabitatScan scan = initHabitatScan();
-      scan.numTiles = s.loadInt();
+      scan.numTiles = numT;
+      
       for (Coord c : Visit.grid(0, 0, map.scanSize, map.scanSize, 1)) {
         scan.densities[c.x][c.y] = s.loadInt();
       }
@@ -42,10 +45,11 @@ public class CityMapTerrain implements TileConstants {
   
   
   void saveState(Session s) throws Exception {
+    
     s.saveInt(growScanIndex);
     for (int i = 2; i-- > 0;) for (int h = ALL_TERRAINS.length; h-- > 0;) {
       HabitatScan scan = scans[i][h];
-      if (scan == null) { s.saveBool(false); continue; }
+      if (scan == null) { s.saveInt(-1); continue; }
       
       s.saveInt(scan.numTiles);
       for (Coord c : Visit.grid(0, 0, map.scanSize, map.scanSize, 1)) {
