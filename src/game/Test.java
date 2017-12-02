@@ -3,6 +3,7 @@
 package game;
 import util.*;
 import static game.CityMap.*;
+import static game.CityMapPathCache.*;
 import static game.GameConstants.*;
 
 
@@ -142,6 +143,8 @@ public class Test {
   Object   above     = null;
   Series <Character> pressed = new Batch();
   
+  protected Tile keyTiles[];
+  
   
   void configGraphic(int w, int h) {
     if (graphic == null || graphic.length != w || graphic[0].length != h) {
@@ -219,6 +222,45 @@ public class Test {
   }
   
   
+  void updateCityPathingView(CityMap map) {
+    configGraphic(map.size, map.size);
+    
+    Tile hovered = map.tileAt(hover.x, hover.y);
+    hovered = CityMapTerrain.nearestOpenTile(hovered, map);
+    
+    Area area = map.pathCache.rawArea(hovered), around[] = null;
+    AreaGroup group = null;
+    if (area != null) around = area.borders.toArray(Area.class);
+    if (area != null) group  = area.group;
+    
+    for (Tile t : map.allTiles()) {
+      int fill = t.above == null ? BLANK_COLOR : t.above.debugTint();
+      if (Visit.arrayIncludes(keyTiles, t)) {
+        fill = NO_BLD_COLOR;
+      }
+      else if (map.blocked(t)) {
+        fill = BLACK_COLOR;
+      }
+      else if (area != null) {
+        Area under = map.pathCache.rawArea(t);
+        if (area == under) {
+          fill = WHITE_COLOR;
+        }
+        else if (Visit.arrayIncludes(around, under)) {
+          fill = WALKER_COLOR;
+        }
+        else if (t.above != null) {
+        }
+        else if (under != null && under.group == group) {
+          fill = MISSED_COLOR;
+        }
+      }
+      graphic[t.x][t.y] = fill;
+    }
+  }
+  
+  
+  
   private void updateCityFogLayer(CityMap map) {
     for (Tile t : map.allTiles()) {
       float sight = 0;
@@ -272,7 +314,12 @@ public class Test {
       
       if (graphics) {
         if (! map.settings.worldView) {
-          updateCityMapView(map);
+          if (map.settings.viewPathMap) {
+            updateCityPathingView(map);
+          }
+          else {
+            updateCityMapView(map);
+          }
           updateCityFogLayer(map);
           I.present(VIEW_NAME, 400, 400, graphic, fogLayer);
         }
@@ -654,6 +701,10 @@ public class Test {
     report.append("\n(W) world view");
     if (pressed.includes('w')) {
       map.settings.worldView = true;
+    }
+    report.append("\n(T) toggle pathing view");
+    if (pressed.includes('t')) {
+      map.settings.viewPathMap = ! map.settings.viewPathMap;
     }
     report.append("\n(B) build menu");
     if (pressed.includes('b')) {

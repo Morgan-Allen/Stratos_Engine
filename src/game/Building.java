@@ -87,8 +87,6 @@ public class Building extends Element implements Pathing, Employer {
   void enterMap(CityMap map, int x, int y, float buildLevel) {
     super.enterMap(map, x, y, buildLevel);
     map.buildings.add(this);
-    entrances = selectEntrances();
-    updateOnPeriod(0);
   }
   
   
@@ -169,7 +167,10 @@ public class Building extends Element implements Pathing, Employer {
   /**  Construction and upgrade-related methods:
     */
   void onCompletion() {
+    //  TODO:  Updating pathing if entrances have changed!
+    entrances = selectEntrances();
     super.onCompletion();
+    updateOnPeriod(0);
   }
   
   
@@ -193,10 +194,12 @@ public class Building extends Element implements Pathing, Employer {
     }
     
     if (! checkEntrancesOkay(entrances)) {
+      //  TODO:  Updating pathing if entrances have changed!
       entrances = selectEntrances();
     }
     
     if (--updateGap <= 0) {
+      //  TODO:  Updating pathing if entrances have changed!
       entrances = selectEntrances();
       updateOnPeriod(type.updateTime);
       updateGap = type.updateTime;

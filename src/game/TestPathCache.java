@@ -34,9 +34,6 @@ public class TestPathCache extends Test {
   }
   
   
-  Tile keyTiles[] = {};
-  
-  
   static boolean testPathCache(boolean graphics) {
     TestPathCache test = new TestPathCache();
     //
@@ -124,7 +121,8 @@ public class TestPathCache extends Test {
     //  Now, set up a larger map for testing of connections between
     //  more distant areas:
     CityMap map = setupTestCity(128);
-    map.settings.toggleFog = false;
+    map.settings.toggleFog   = false;
+    map.settings.viewPathMap = true ;
     
     final int div = map.size / layout.length, rand = div / 4;
     for (Tile t : map.allTiles()) {
@@ -262,44 +260,6 @@ public class TestPathCache extends Test {
       return false;
     }
     return true;
-  }
-  
-
-  void updateCityMapView(CityMap map) {
-    configGraphic(map.size, map.size);
-    
-    Tile hovered = map.tileAt(hover.x, hover.y);
-    hovered = CityMapTerrain.nearestOpenTile(hovered, map);
-    
-    Area area = map.pathCache.rawArea(hovered), around[] = null;
-    AreaGroup group = null;
-    if (area != null) around = area.borders.toArray(Area.class);
-    if (area != null) group  = area.group;
-    
-    for (Tile t : map.allTiles()) {
-      int fill = t.above == null ? BLANK_COLOR : t.above.debugTint();
-      if (Visit.arrayIncludes(keyTiles, t)) {
-        fill = NO_BLD_COLOR;
-      }
-      else if (map.blocked(t)) {
-        fill = BLACK_COLOR;
-      }
-      else if (area != null) {
-        Area under = map.pathCache.rawArea(t);
-        if (area == under) {
-          fill = WHITE_COLOR;
-        }
-        else if (Visit.arrayIncludes(around, under)) {
-          fill = WALKER_COLOR;
-        }
-        else if (t.above != null) {
-        }
-        else if (under != null && under.group == group) {
-          fill = MISSED_COLOR;
-        }
-      }
-      graphic[t.x][t.y] = fill;
-    }
   }
   
 }
