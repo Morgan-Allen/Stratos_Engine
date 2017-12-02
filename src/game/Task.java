@@ -179,6 +179,12 @@ public class Task implements Session.Saveable {
   }
   
   
+  Pathing pathOrigin() {
+    Pathing inside = actor.inside();
+    return inside == null ? actor.at() : inside;
+  }
+  
+  
   Pathing pathTarget() {
     Pathing t = null;
     if (t == null && visits != null && visits.complete()) {
@@ -207,19 +213,25 @@ public class Task implements Session.Saveable {
       return true;
     }
     path = updatePathing();
-    if (path == null) {
-      return false;
+    if (checkPathing(target)) {
+      return true;
     }
-    return true;
+    return false;
   }
   
   
   boolean checkPathing(Target target) {
-    if (path == null || Visit.last(path) != target) return false;
+    if (path == null || target == null) return false;
     
-    for (int i = 0; i < actor.type.sightRange; i++) {
-      if (i >= path.length) break;
-      Pathing t = path[i];
+    Pathing last = (Pathing) Visit.last(path);
+    if (CityMap.distance(last, target) > 1.5f) return false;
+    
+    int index = Nums.clamp(pathIndex, path.length);
+    if (pathOrigin() != path[index]) return false;
+    
+    for (int i = 0; i < actor.type.sightRange; i++, index++) {
+      if (index >= path.length) break;
+      Pathing t = path[index];
       if (t.isTile() && actor.map.blocked((Tile) t)) return false;
       if (! t.allowsEntry(actor)) return false;
     }
@@ -229,20 +241,17 @@ public class Task implements Session.Saveable {
   
   
   Pathing[] updatePathing() {
-    
-    CityMap map      = actor.map;
-    Pathing inside   = actor.inside;
-    boolean visiting = visits != null;
-    
     boolean report  = actor.reports();
     boolean verbose = false;
+    
+    CityMap map      = actor.map;
+    boolean visiting = visits != null;
+    Pathing from     = pathOrigin();
+    Pathing heads    = pathTarget();
+    
     if (report && verbose) {
       I.say(this+" pathing toward "+(visiting ? visits : target));
     }
-    
-    Pathing from  = inside == null ? actor.at() : inside;
-    Pathing heads = pathTarget();
-    
     if (from == null || heads == null) {
       if (report) I.say("  Bad endpoints: "+from+" -> "+heads);
       return null;

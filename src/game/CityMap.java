@@ -342,6 +342,10 @@ public class CityMap implements Session.Saveable {
   
   
   static void saveTile(Tile t, CityMap map, Session s) throws Exception {
+    if (t != null && map == null) {
+      I.complain("CANNOT SAVE TILE WITHOUT MAP");
+      return;
+    }
     if (t == null) {
       s.saveInt(-1);
       return;
@@ -368,6 +372,7 @@ public class CityMap implements Session.Saveable {
   
   
   public static float distance(Target a, Target b) {
+    if (a == null || b == null) return 1000000000;
     return distance(a.at(), b.at());
   }
   

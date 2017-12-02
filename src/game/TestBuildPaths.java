@@ -48,7 +48,12 @@ public class TestBuildPaths extends Test {
     //  Set up some essential construction facilities:
     Building mason = (Building) MASON.generate();
     mason.enterMap(map, 8, 12, 1);
+    for (Good g : mason.type.buildsWith) {
+      mason.inventory.set(g, 100);
+    }
     fillWorkVacancies(mason);
+    
+    map.settings.reportPathCache = true;
     
     //
     //  Test to ensure that water does not collect in cisterns away
@@ -78,13 +83,27 @@ public class TestBuildPaths extends Test {
     //  Run simulation:
     boolean buildOkay = false;
     boolean waterOkay = false;
+    boolean loadsOkay = false;
+    
     
     while (map.time < 1000 || graphics) {
       map = test.runLoop(map, 1, graphics, "saves/test_build_path.tlt");
       
-      for (Good g : mason.type.buildsWith) {
-        mason.inventory.set(g, 10);
+      /*
+      if (! loadsOkay) {
+        try {
+          Session.saveSession("saves/test_save.tlt", map);
+          Session loaded = Session.loadSession("saves/test_save.tlt", true);
+          CityMap mapLoaded = (CityMap) loaded.loaded()[0];
+          I.say("LOADED MAP: "+mapLoaded);
+        }
+        catch(Exception e) {
+          I.report(e);
+          return false;
+        }
+        loadsOkay = true;
       }
+      //*/
       
       if (! buildOkay) {
         boolean buildDone = true;

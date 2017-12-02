@@ -5,6 +5,8 @@ import util.*;
 import static game.CityMap.*;
 import static game.GameConstants.*;
 
+import game.CityMap.Tile;
+
 
 
 public class BuildingForWater extends Building {
@@ -87,6 +89,16 @@ public class BuildingForWater extends Building {
         b.inventory.set(WATER, 10);
       }
     }
+  }
+  
+  
+  //  TODO:  Wait.  What happens if the entrances for a building change?
+  //  You'll have to flag a possible change in pathing to the pathing-
+  //  cache.
+  
+  
+  boolean checkEntrancesOkay(Tile[] entrances) {
+    return true;
   }
   
   

@@ -25,6 +25,8 @@ public class CityMapPathCache {
     
     int aX, aY;
     int numTiles;
+    boolean grounded;
+    
     Tile tiles[];
     Batch <Tile> toAdd = new Batch(4);
     Batch <Tile> toRem = new Batch(4);
@@ -43,7 +45,10 @@ public class CityMapPathCache {
     
     int ID;
     boolean flagDeletion = false;
-    List <Area> areas = new List();
+    
+    List <Area> areas;
+    boolean hasGroundAccess;
+    int totalTiles;
     
     public String toString() { return "G_"+ID; }
   }
@@ -92,12 +97,8 @@ public class CityMapPathCache {
   /**  Query methods for distance and connection-
     */
   boolean pathConnects(Tile from, Tile goes) {
-    if (from == null || goes == null) return false;
-    Area fromA = areaFor(from);
-    Area goesA = areaFor(goes);
-    if (fromA == null || goesA == null) return false;
-    AreaGroup fromG = groupFor(fromA);
-    AreaGroup goesG = groupFor(goesA);
+    AreaGroup fromG = groupFor(areaFor(from));
+    AreaGroup goesG = groupFor(areaFor(goes));
     if (fromG == null || goesG == null) return false;
     return fromG == goesG;
   }
@@ -105,14 +106,13 @@ public class CityMapPathCache {
   
   boolean pathConnects(Element from, Element goes) {
     if (from == null || goes == null) return false;
-    
-    //  TODO:
-    //  You'll also need respectable methods of estimating distance.
     Tile fromA[] = around(from, tempForFrom);
     Tile goesA[] = around(goes, tempForGoes);
     
-    for (Tile f : fromA) for (Tile g : goesA) {
-      if (pathConnects(f, g)) return true;
+    for (Tile f : fromA) if (f != null) {
+      for (Tile g : goesA) if (g != null) {
+        if (pathConnects(f, g)) return true;
+      }
     }
     return false;
   }
@@ -122,7 +122,23 @@ public class CityMapPathCache {
     Tile at = e.at();
     Type t  = e.type;
     
-    if (t.isBuilding()) {
+    //  In the case of actors, check from either their current tile or
+    //  the exits to the building they're inside:
+    if (t.isActor()) {
+      Actor a = (Actor) e;
+      if (a.inside() != null) {
+        return around((Element) a.inside(), temp);
+      }
+      else {
+        temp[0] = at;
+        for (int i = temp.length; i-- > 1;) temp[i] = null;
+        return temp;
+      }
+    }
+    
+    //  In the case of structures, either check to see if their entrance
+    //  /s can be accessed, or if one of the adjacent tiles can be:
+    else if (t.isBuilding() && e.complete()) {
       return ((Building) e).entrances();
     }
     else if (t.wide == 1 && t.high == 1) {
@@ -135,6 +151,23 @@ public class CityMapPathCache {
       }
       return around.toArray(Tile.class);
     }
+  }
+  
+  
+  boolean hasGroundAccess(Tile at) {
+    AreaGroup group = groupFor(areaFor(at));
+    if (group == null || ! group.hasGroundAccess) return false;
+    return true;
+  }
+  
+  
+  Tile mostOpenNeighbour(Tile at) {
+    Pick <Tile> pick = new Pick();
+    for (Tile t : CityMap.adjacent(at, null, map)) {
+      AreaGroup group = groupFor(areaFor(t));
+      if (group != null) pick.compare(t, group.totalTiles);
+    }
+    return pick.result();
   }
   
   
@@ -202,18 +235,25 @@ public class CityMapPathCache {
     //  remove a single tile.  (Note that in the case of deleting a
     //  tile, there must not be a potential bottleneck.)
     if (edge != null && ! (multiArea || edge.flagDeletion)) {
+      AreaGroup group = groupFor(edge);
+      
       if (blocked && numGaps < 2) {
         areaLookup[at.x][at.y] = null;
         edge.toRem.add(at);
+        edge .numTiles   -= 1;
+        group.totalTiles -= 1;
         markForRefresh(edge);
         didRefresh = true;
         if (map.settings.reportPathCache) {
           I.say("Removed single tile: "+at+" from "+edge);
         }
       }
+      
       if (core == null && ! blocked) {
         areaLookup[at.x][at.y] = edge;
         edge.toAdd.add(at);
+        edge .numTiles   += 1;
+        group.totalTiles += 1;
         markForRefresh(edge);
         didRefresh = true;
         if (map.settings.reportPathCache) {
@@ -313,6 +353,7 @@ public class CityMapPathCache {
   
   
   Area areaFor(Tile t) {
+    if (t == null) return null;
     Area area = areaLookup[t.x][t.y];
     
     if (area != null && ! area.flagDeletion) {
@@ -359,6 +400,7 @@ public class CityMapPathCache {
     area = new Area();
     area.ID       = nextAreaID++;
     area.numTiles = covered.size();
+    area.grounded = t.pathType() != PATH_WALLS;
     area.tiles    = covered.toArray(Tile.class);
     area.aX       = aX;
     area.aY       = aY;
@@ -385,7 +427,12 @@ public class CityMapPathCache {
       I.say("    Tiles: "+area.numTiles+"  Borders: ");
       for (Area b : area.borders) I.add(b.ID+" ");
       if (area.borders.empty()) I.add("none");
-      I.say("    All Tiles: "+I.list(area.tiles));
+      I.say("    Tiles:\n      ");
+      int count = 0;
+      for (Tile a : area.tiles) {
+        I.add(a+" ");
+        if (++count >= 8) { I.add("\n      "); count = 0; }
+      }
     }
     
     return area;
@@ -393,6 +440,8 @@ public class CityMapPathCache {
   
   
   private void deleteArea(Area area) {
+    if (area.tiles == null) return;
+    
     if (map.settings.reportPathCache) {
       I.say("\n  Deleting Area "+area);
     }
@@ -423,6 +472,7 @@ public class CityMapPathCache {
   /**  Querying and generating area-group membership:
     */
   AreaGroup groupFor(Area area) {
+    if (area == null) return null;
     AreaGroup group = area.group;
     if (group != null && ! group.flagDeletion) return group;
     
@@ -442,12 +492,14 @@ public class CityMapPathCache {
     
     group = new AreaGroup();
     group.ID = nextGroupID++;
-    Visit.appendTo(group.areas, covered);
+    Visit.appendTo(group.areas = new List(), covered);
     groups.add(group);
     
     for (Area a : covered) {
       a.pathFlag = null;
       a.group = group;
+      group.hasGroundAccess |= a.grounded;
+      group.totalTiles += a.numTiles;
     }
     
     if (map.settings.reportPathCache) {
@@ -460,12 +512,14 @@ public class CityMapPathCache {
   
   
   private void deleteGroup(AreaGroup group) {
+    if (group.areas == null) return;
     if (map.settings.reportPathCache) {
       I.say("\n  Deleting Group "+group);
     }
     for (Area a : group.areas) if (a.group == group) {
       a.group = null;
     }
+    group.areas = null;
     groups.remove(group);
   }
   

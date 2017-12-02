@@ -121,11 +121,19 @@ public class TaskBuilding extends Task {
     int storeRange = store.type.maxDeliverRange;
     int maxRange = near ? actor.type.sightRange : storeRange;
     
+    //I.say("\nGetting next build-target-");
+    
     for (CityMapDemands.Entry e : demands.nearbyEntries(at.x, at.y)) {
       Element source = (Element) e.source;
+      
+      //I.say("  Evaluating: "+source);
+      
       if (CityMap.distance(source.at(), at) > maxRange  ) break;
       if (CityMap.distance(store .at(), at) > storeRange) continue;
-      if (decideNextAction(source, map)) return true;
+      if (! map.pathCache.pathConnects(actor, source)   ) continue;
+      if (decideNextAction(source, map)) {
+        return true;
+      }
     }
     //
     //  If there's no target to attend to, but you have surplus material

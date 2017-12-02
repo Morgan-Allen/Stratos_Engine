@@ -127,18 +127,15 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   /**  World entry and exit-
     */
   void enterMap(CityMap map, int x, int y, float buildLevel) {
-    this.map = map;
+    setLocation(map.tileAt(x, y), map);
     map.actors.add(this);
-    setLocation(map.tileAt(x, y));
   }
   
   
   void exitMap() {
     if (inside != null) setInside(inside, false);
-    
-    setLocation(null);
     map.actors.remove(this);
-    map = null;
+    setLocation(null, null);
   }
   
   
@@ -172,13 +169,13 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     //
     //  Some checks to assist in case of blockage...
     Tile at = at();
-    if (inside == null && map.blocked(at)) {
+    if (inside == null && ! map.pathCache.hasGroundAccess(at)) {
       if (at.above != null && at.above.type.isBuilding()) {
         setInside((Building) at.above, true);
       }
       else {
-        Tile free = CityMapTerrain.nearestOpenTile(at, map);
-        if (free != null) setLocation(free);
+        Tile free = map.pathCache.mostOpenNeighbour(at);
+        if (free != null) setLocation(free, map);
       }
     }
     //
@@ -190,7 +187,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
       Target   target   = task.target;
       boolean  combat   = inCombat();
       Pathing  pathEnd  = (Pathing) Visit.last(task.path);
-      float    distance = CityMap.distance(at(), pathEnd);
+      float    distance = CityMap.distance(at, pathEnd);
       float    minRange = 0.1f;
       
       if (combat && ! indoors()) minRange = type.attackRange;
@@ -221,7 +218,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
         int index = Nums.clamp(task.pathIndex + 1, task.path.length);
         if (index != -1) {
           Pathing ahead = task.path[task.pathIndex = index];
-          setLocation(ahead.at());
+          setLocation(ahead.at(), map);
           if (ahead.isTile()) setInside(inside, false);
           else setInside(ahead, true);
         }
@@ -282,13 +279,13 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   }
   
   
-  void setLocation(Tile at) {
+  void setLocation(Tile at, CityMap map) {
     if (! onMap()) {
-      super.setLocation(at);
+      super.setLocation(at, map);
       return;
     }
     Tile old = this.at();
-    super.setLocation(at);
+    super.setLocation(at, map);
     map.flagActor(this, old, false);
     map.flagActor(this, at , true );
   }
@@ -301,6 +298,11 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   protected void onTarget(Target target) {
     return;
+  }
+  
+  
+  public Pathing inside() {
+    return inside;
   }
   
   

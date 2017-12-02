@@ -25,7 +25,7 @@ import java.lang.reflect.*;
   */
 public final class Session {
   
-  private static boolean
+  public static boolean
     verbose    = false,
     saveCounts = false;
   

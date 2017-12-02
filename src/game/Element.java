@@ -14,9 +14,10 @@ public class Element implements Session.Saveable, Target, Flood.Fill {
     */
   final static int
     FLAG_SITED  = 1 << 0,
-    FLAG_BUILT  = 1 << 1,
-    FLAG_RAZING = 1 << 2,
-    FLAG_EXIT   = 1 << 3
+    FLAG_ON_MAP = 1 << 1,
+    FLAG_BUILT  = 1 << 2,
+    FLAG_RAZING = 1 << 3,
+    FLAG_EXIT   = 1 << 4
   ;
   
   Type type;
@@ -77,14 +78,21 @@ public class Element implements Session.Saveable, Target, Flood.Fill {
   }
   
   
-  void setLocation(Tile at) {
-    this.at = at;
+  void setLocation(Tile at, CityMap map) {
+    this.at  = at;
+    this.map = map;
+    stateBits |= FLAG_SITED;
+  }
+  
+  
+  boolean sited() {
+    return (stateBits & FLAG_SITED) != 0;
   }
   
   
   void enterMap(CityMap map, int x, int y, float buildLevel) {
-    this.map = map;
-    setLocation(map.tileAt(x, y));
+    stateBits |= FLAG_ON_MAP;
+    setLocation(map.tileAt(x, y), map);
     
     for (Good g : materials()) {
       float need = materialNeed(g);
@@ -106,8 +114,7 @@ public class Element implements Session.Saveable, Target, Flood.Fill {
       if (t.above == this) map.setAbove(t, null);
     }
     
-    setLocation(null);
-    this.map = null;
+    setLocation(null, null);
     stateBits |= FLAG_EXIT;
   }
   
@@ -118,7 +125,7 @@ public class Element implements Session.Saveable, Target, Flood.Fill {
   
   
   public boolean onMap() {
-    return map != null;
+    return (stateBits & FLAG_ON_MAP) != 0;
   }
   
   
@@ -258,6 +265,14 @@ public class Element implements Session.Saveable, Target, Flood.Fill {
   }
   
   
+  void onCompletion() {
+    //  Underlying tiles may have become blocked now-
+    for (Tile t : map.tilesUnder(at.x, at.y, type.wide, type.high)) {
+      map.pathCache.checkPathingChanged(t);
+    }
+  }
+  
+  
   float materialLevel(Good material) {
     return setMaterialLevel(material, -1);
   }
@@ -282,11 +297,6 @@ public class Element implements Session.Saveable, Target, Flood.Fill {
   
   boolean razing() {
     return (stateBits & FLAG_RAZING) != 0;
-  }
-  
-  
-  void onCompletion() {
-    return;
   }
   
   

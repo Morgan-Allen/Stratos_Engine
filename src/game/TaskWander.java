@@ -11,9 +11,6 @@ import static util.TileConstants.*;
 public class TaskWander extends Task {
   
   
-  static int dirs[] = new int[4];
-  
-  
   public TaskWander(Actor actor) {
     super(actor);
   }
@@ -30,49 +27,39 @@ public class TaskWander extends Task {
   
   
   
-  Tile[] updatePathing() {
-    Batch <Tile> walk = new Batch();
+  Pathing[] updatePathing() {
+    Batch <Pathing> walk = new Batch();
     
     CityMap map    = actor.map;
-    Tile    next   = actor.at();
-    int     facing = T_ADJACENT[Rand.index(4)];
+    Pathing next   = pathOrigin();
     int     range  = Nums.max(4, Rand.index(MAX_WANDER_RANGE));
+    Pathing temp[] = new Pathing[8];
+    Pathing adj [] = new Pathing[8];
+    
+    next.flagWith(walk);
+    walk.add(next);
     
     while (walk.size() < range) {
       boolean prefPave = next.pathType() == PATH_PAVE;
-      int nx, ny, numDirs = 0;
-      int backDir = (facing + 4) % 8;
       
-      for (int dir : T_ADJACENT) {
-        if (dir == backDir) continue;
-        nx = next.x + T_X[dir];
-        ny = next.y + T_Y[dir];
-        if (prefPave && map.pathType(nx, ny) == PATH_PAVE) continue;
-        if (map.blocked(nx, ny)) continue;
-        if (map.tileAt(nx, ny).pathFlag != null) continue;
-        dirs[numDirs] = dir;
-        numDirs++;
+      int numA = 0;
+      for (Pathing n : next.adjacent(temp, map)) {
+        if (n == null || n.flaggedWith() != null) continue;
+        if (prefPave && n.pathType() != PATH_PAVE) continue; 
+        adj[numA] = n;
+        numA += 1;
       }
-      if (numDirs == 0) {
-        break;
-      }
-      else if (numDirs > 1) {
-        facing = dirs[Rand.index(numDirs)];
-      }
-      else {
-        facing = dirs[0];
-      }
-      next = map.tileAt(
-        next.x + T_X[facing],
-        next.y + T_Y[facing]
-      );
+      if (numA == 0) break;
+      
+      next = adj[Rand.index(numA)];
+      next.flagWith(walk);
       walk.add(next);
-      next.pathFlag = walk;
     }
     
-    for (Tile t : walk) t.pathFlag = null;
-    return walk.toArray(Tile.class);
+    for (Pathing t : walk) t.flagWith(null);
+    return walk.toArray(Pathing.class);
   }
   
   
 }
+

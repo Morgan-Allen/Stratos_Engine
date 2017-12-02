@@ -93,7 +93,7 @@ public class CityMapPlanning {
   
   
   void placeObject(Element e, int x, int y) {
-    e.setLocation(map.tileAt(x, y));
+    e.setLocation(map.tileAt(x, y), map);
     toBuild.add(e);
   }
   
@@ -164,8 +164,7 @@ public class CityMapPlanning {
         e.enterMap(map, t.x, t.y, 1);
       }
       else {
-        e.setLocation(t);
-        map.planning.placeObject(e);
+        map.planning.placeObject(e, t.x, t.y);
       }
       placed.add(e);
     }
