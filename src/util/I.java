@@ -177,8 +177,9 @@ public class I {
   public static String list(Object array[]) {
     if (array == null) return "NULL";
     final StringBuffer s = new StringBuffer();
-    for (Object o : array) {
-      final String pads = o == Visit.last(array) ? "" : ", ";
+    for (int i = 0; i < array.length; i++) {
+      Object o = array[i];
+      final String pads = (i == (array.length - 1)) ? "" : ", ";
       s.append(o+pads);
     }
     return s.toString();

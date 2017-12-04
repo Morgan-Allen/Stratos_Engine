@@ -77,7 +77,7 @@ public class BuildingForHome extends Building {
     //  This method checks the surrounding tiles out to a distance of 6 tiles:
     final int MAX_AMBIENCE_DIST = 6;
     final Tally <Pathing> costs = new Tally();
-    final Pathing temp[] = new Pathing[8];
+    final Pathing temp[] = new Pathing[9];
     
     Search <Pathing> spread = new Search <Pathing> (this, -1) {
       

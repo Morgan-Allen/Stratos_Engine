@@ -180,9 +180,9 @@ public class CityMap implements Session.Saveable {
     
     int x, y;
     
-    int     elevation = 0   ;
-    Terrain terrain   = null;
-    Element above     = null;
+    int elevation = 0;
+    Terrain terrain = EMPTY;
+    Element above = null;
     
     List <Actor> inside  = null;
     List <Actor> focused = null;
@@ -215,6 +215,11 @@ public class CityMap implements Session.Saveable {
     
     public CityMap.Tile at() {
       return this;
+    }
+    
+    
+    public Type type() {
+      return terrain;
     }
     
     
@@ -270,39 +275,38 @@ public class CityMap implements Session.Saveable {
     }
     
     
-    public float pathHeight() {
-      if (above != null) return elevation + above.pathHeight();
-      return elevation;
-    }
-    
-    
     public Pathing[] adjacent(Pathing[] temp, CityMap map) {
-      if (temp == null) temp = new Pathing[8];
+      if (temp == null) temp = new Pathing[9];
       
-      int pathing = pathType();
-      float high = pathHeight();
-      boolean blocked = pathing == PATH_BLOCK || pathing == PATH_WATER;
+      int pathT = pathType();
+      boolean blocked = pathT == PATH_BLOCK || pathT == PATH_WATER;
+      
+      if (above != null && above.allowsEntryFrom(this)) {
+        temp[8] = (Pathing) above;
+      }
+      else {
+        temp[8] = null;
+      }
       
       for (int dir : T_INDEX) {
         Tile n = map.tileAt(x + T_X[dir], y + T_Y[dir]);
-        int pathN = map.pathType(n);
-        if (n == null || blocked) {
-          temp[dir] = null;
-        }
-        else if (n.above != null && n.above.allowsEntryFrom(this)) {
+        if (n == null || blocked) { temp[dir] = null; continue; }
+        
+        int pathN = n.pathType();
+        if (n.above != above && n.above != null && n.above.allowsEntryFrom(this)) {
           temp[dir] = (Pathing) n.above;
         }
         else if (pathN == PATH_BLOCK || pathN == PATH_WATER) {
           temp[dir] = null;
         }
-        else if (pathN == PATH_WALLS || pathing == PATH_WALLS) {
-          boolean match = n.pathHeight() == high && pathN == pathing;
-          temp[dir] = match ? n : null;
+        else if (pathN == PATH_WALLS || pathT == PATH_WALLS) {
+          temp[dir] = pathN == pathT ? n : null;
         }
         else {
           temp[dir] = n;
         }
       }
+      
       return temp;
     }
     
@@ -356,7 +360,7 @@ public class CityMap implements Session.Saveable {
   
   
   public static Tile[] adjacent(Tile spot, Tile temp[], CityMap map) {
-    if (temp == null) temp = new Tile[8];
+    if (temp == null) temp = new Tile[9];
     for (int dir : T_INDEX) {
       int x = spot.x + T_X[dir], y = spot.y + T_Y[dir];
       temp[dir] = map.tileAt(x, y);

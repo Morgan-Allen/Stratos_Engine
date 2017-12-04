@@ -209,6 +209,11 @@ public class Type extends Index.Entry implements Session.Saveable {
   }
   
   
+  boolean isTerrain() {
+    return category == IS_TERRAIN;
+  }
+  
+  
   boolean isFlora() {
     return category == IS_FIXTURE && growRate > 0;
   }

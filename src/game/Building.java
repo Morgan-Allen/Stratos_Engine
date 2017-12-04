@@ -4,6 +4,7 @@ package game;
 import util.*;
 import static game.CityMap.*;
 import static game.GameConstants.*;
+import static util.TileConstants.*;
 
 
 
@@ -167,8 +168,7 @@ public class Building extends Element implements Pathing, Employer {
   /**  Construction and upgrade-related methods:
     */
   void onCompletion() {
-    //  TODO:  Updating pathing if entrances have changed!
-    entrances = selectEntrances();
+    refreshEntrances();
     super.onCompletion();
     updateOnPeriod(0);
   }
@@ -193,14 +193,16 @@ public class Building extends Element implements Pathing, Employer {
       return;
     }
     
-    if (! checkEntrancesOkay(entrances)) {
-      //  TODO:  Updating pathing if entrances have changed!
-      entrances = selectEntrances();
+    for (int i = 0; i < entrances.length; i++) {
+      Tile e = entrances[i];
+      if (! checkEntranceOkay(e, i)) {
+        refreshEntrances();
+        break;
+      }
     }
     
     if (--updateGap <= 0) {
-      //  TODO:  Updating pathing if entrances have changed!
-      entrances = selectEntrances();
+      refreshEntrances();
       updateOnPeriod(type.updateTime);
       updateGap = type.updateTime;
     }
@@ -209,6 +211,24 @@ public class Building extends Element implements Pathing, Employer {
   
   void updateOnPeriod(int period) {
     return;
+  }
+  
+  
+  
+  /**  Dealing with entrances and facing:
+    */
+  protected Tile tileAt(int initX, int initY, int facing) {
+    int wide = type.wide - 1, high = type.high - 1;
+    int x = 0, y = 0;
+    
+    switch (facing) {
+      case(N): x = initX       ; y = initY       ; break;
+      case(E): x = initY       ; y = high - initX; break;
+      case(S): x = wide - initX; y = high - initY; break;
+      case(W): x = wide - initY; y = initX       ; break;
+    }
+    
+    return map.tileAt(x + at().x, y + at().y);
   }
   
   
@@ -223,9 +243,31 @@ public class Building extends Element implements Pathing, Employer {
   }
   
   
-  boolean checkEntrancesOkay(Tile entrances[]) {
-    for (Tile e : entrances) if (map.blocked(e)) return false;
-    return true;
+  void refreshEntrances() {
+    Tile oldE[] = this.entrances;
+    Tile newE[] = selectEntrances();
+    
+    boolean flagUpdate = true;
+    flagUpdate &= Nums.max(oldE.length, newE.length) > 1;
+    flagUpdate &= ! Visit.arrayEquals(oldE, newE);
+    
+    if (flagUpdate) for (Tile e : oldE) {
+      map.pathCache.checkPathingChanged(e);
+    }
+    
+    this.entrances = newE;
+    
+    if (flagUpdate) for (Tile e : newE) {
+      map.pathCache.checkPathingChanged(e);
+    }
+  }
+  
+  
+  boolean checkEntranceOkay(Tile e, int index) {
+    if (e.above == this) return true;
+    int pathT = e.pathType();
+    if (pathT == PATH_FREE || pathT == PATH_PAVE) return true;
+    return false;
   }
   
   
@@ -234,14 +276,18 @@ public class Building extends Element implements Pathing, Employer {
     Pick <Tile> pick = new Pick();
     
     for (Coord c : Visit.perimeter(at.x, at.y, type.wide, type.high)) {
-      boolean outx = c.x == at.x - 1 || c.x == at.x + type.wide;
-      boolean outy = c.y == at.y - 1 || c.y == at.y + type.high;
-      if (outx && outy  ) continue;
-      if (map.blocked(c)) continue;
+      Tile t = map.tileAt(c);
+      if (t == null) continue;
+      boolean outx = t.x == at.x - 1 || t.x == at.x + type.wide;
+      boolean outy = t.y == at.y - 1 || t.y == at.y + type.high;
+      if (outx && outy) continue;
+      
+      int pathT = t.pathType();
+      if (pathT != PATH_FREE && pathT != PATH_PAVE) continue;
       
       float rating = 1;
-      if (map.pathType(c) != PATH_PAVE) rating /= 2;
-      pick.compare(map.tileAt(c), rating);
+      if (pathT != PATH_PAVE) rating /= 2;
+      pick.compare(t, rating);
     }
     
     if (pick.empty()) return new Tile[0];

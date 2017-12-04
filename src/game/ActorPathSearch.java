@@ -1,9 +1,9 @@
 
 
 package game;
+import util.*;
 import static game.CityMap.*;
 import static game.GameConstants.*;
-import util.*;
 
 
 
@@ -11,7 +11,7 @@ public class ActorPathSearch extends Search <Pathing> {
   
   CityMap map;
   Pathing dest;
-  Pathing temp[] = new Pathing[8];
+  Pathing temp[] = new Pathing[9];
   Actor   client   = null;
   boolean getNear  = false;
   boolean stealthy = false;
@@ -30,9 +30,22 @@ public class ActorPathSearch extends Search <Pathing> {
     this.map     = map;
     this.dest    = dest;
     this.maxCost = maxDist;
-    this.getNear = ! canEnter(dest);
   }
   
+  
+  public void setProximate(boolean yes) {
+    getNear = true;
+  }
+  
+  
+  public void setStealthy(boolean yes) {
+    stealthy = yes;
+  }
+  
+  
+  public Search <Pathing> doSearch() {
+    return super.doSearch();
+  }
   
   
   protected Pathing[] adjacent(Pathing spot) {
@@ -59,7 +72,9 @@ public class ActorPathSearch extends Search <Pathing> {
   
   protected float cost(Pathing prior, Pathing spot) {
     float dist = distance(prior, spot);
-    if (spot.pathType() == PATH_PAVE) dist *= 0.75f;
+    int type = spot.pathType();
+    if (type == PATH_PAVE  ) dist *= 0.75f;
+    if (type == PATH_HINDER) dist *= 2.50f;
     if (stealthy) dist += map.fog.sightLevel(spot.at());
     return dist;
   }

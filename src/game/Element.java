@@ -66,6 +66,11 @@ public class Element implements Session.Saveable, Target, Flood.Fill {
   }
   
   
+  public Type type() {
+    return type;
+  }
+  
+  
   
   /**  Entering and exiting the map-
     */
@@ -116,6 +121,7 @@ public class Element implements Session.Saveable, Target, Flood.Fill {
     
     setLocation(null, null);
     stateBits |= FLAG_EXIT;
+    stateBits &= ~FLAG_ON_MAP;
   }
   
   
@@ -131,11 +137,6 @@ public class Element implements Session.Saveable, Target, Flood.Fill {
   
   public Tile at() {
     return at;
-  }
-  
-
-  public float pathHeight() {
-    return type.deep;
   }
   
   

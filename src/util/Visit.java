@@ -230,6 +230,13 @@ public abstract class Visit <T> implements Iterable <T>, Iterator <T> {
   }
   
   
+  public static boolean arrayEquals(Object a[], Object o[]) {
+    if (a.length != o.length) return false;
+    for (int i = a.length; i-- > 0;) if (a[i] != o[i]) return false;
+    return true;
+  }
+  
+  
   public static int countInside(Object m, Object a[]) {
     int count = 0;
     for (Object o : a) if (o == m) count++;

@@ -4,6 +4,7 @@ package game;
 import util.*;
 import static game.CityMap.*;
 import static game.GameConstants.Pathing;
+import static game.GameConstants.Target;
 
 
 
@@ -66,9 +67,9 @@ public class CityMapPathCache {
   List <Area> needRefresh = new List();
   List <Area> needDelete  = new List();
   
-  private Pathing temp[] = new Pathing[8];
-  private Tile tempForFrom[] = new Tile[8];
-  private Tile tempForGoes[] = new Tile[8];
+  private Pathing temp[] = new Pathing[9];
+  private Tile tempForFrom[] = new Tile[9];
+  private Tile tempForGoes[] = new Tile[9];
   
   
   CityMapPathCache(CityMap map) {
@@ -104,10 +105,12 @@ public class CityMapPathCache {
   }
   
   
-  boolean pathConnects(Element from, Element goes) {
+  boolean pathConnects(
+    Pathing from, Target goes, boolean checkAdjacent
+  ) {
     if (from == null || goes == null) return false;
-    Tile fromA[] = around(from, tempForFrom);
-    Tile goesA[] = around(goes, tempForGoes);
+    Tile fromA[] = around(from, tempForFrom, false);
+    Tile goesA[] = around(goes, tempForGoes, checkAdjacent);
     
     for (Tile f : fromA) if (f != null) {
       for (Tile g : goesA) if (g != null) {
@@ -118,39 +121,36 @@ public class CityMapPathCache {
   }
   
   
-  private Tile[] around(Element e, Tile temp[]) {
+  private Tile[] around(Target e, Tile temp[], boolean checkAdjacent) {
+    Type t = e.type();
     Tile at = e.at();
-    Type t  = e.type;
     
-    //  In the case of actors, check from either their current tile or
-    //  the exits to the building they're inside:
-    if (t.isActor()) {
-      Actor a = (Actor) e;
-      if (a.inside() != null) {
-        return around((Element) a.inside(), temp);
-      }
-      else {
-        temp[0] = at;
-        for (int i = temp.length; i-- > 1;) temp[i] = null;
-        return temp;
-      }
+    if (t.isBuilding()) {
+      Building b = (Building) e;
+      if (b.complete()) return b.entrances();
     }
     
-    //  In the case of structures, either check to see if their entrance
-    //  /s can be accessed, or if one of the adjacent tiles can be:
-    else if (t.isBuilding() && e.complete()) {
-      return ((Building) e).entrances();
-    }
-    else if (t.wide == 1 && t.high == 1) {
-      return CityMap.adjacent(at, temp, map);
+    if (checkAdjacent) {
+      CityMap.adjacent(at, temp, map);
+      temp[8] = at;
+      return temp;
     }
     else {
-      Batch <Tile> around = new Batch();
-      for (Coord c : Visit.perimeter(at.x, at.y, t.wide, t.high)) {
-        around.add(map.tileAt(c));
-      }
-      return around.toArray(Tile.class);
+      for (int i = temp.length; i-- > 1;) temp[i] = null;
+      temp[0] = at;
+      return temp;
     }
+  }
+  
+  
+  Tile mostOpenNeighbour(Tile at) {
+    Pick <Tile> pick = new Pick();
+    
+    for (Tile t : CityMap.adjacent(at, null, map)) {
+      AreaGroup group = groupFor(areaFor(t));
+      if (group != null) pick.compare(t, group.totalTiles);
+    }
+    return pick.result();
   }
   
   
@@ -161,13 +161,10 @@ public class CityMapPathCache {
   }
   
   
-  Tile mostOpenNeighbour(Tile at) {
-    Pick <Tile> pick = new Pick();
-    for (Tile t : CityMap.adjacent(at, null, map)) {
-      AreaGroup group = groupFor(areaFor(t));
-      if (group != null) pick.compare(t, group.totalTiles);
-    }
-    return pick.result();
+  int groundTileAccess(Tile at) {
+    AreaGroup group = groupFor(areaFor(at));
+    if (group == null || ! group.hasGroundAccess) return 0;
+    return group.totalTiles;
   }
   
   
@@ -194,9 +191,18 @@ public class CityMapPathCache {
     //  that could potentially require a more comprehensive update (see
     //  below.)
     for (Pathing p : at.adjacent(temp, map)) {
+
+      //  Note:  In the case that this tile is/was an entrance to a
+      //  building with other exists, we have to treat it as a potential
+      //  'border' to another area:
       Tile n;
-      if (p == null || ! p.isTile()) n = null;
-      else n = (Tile) p;
+      if (p == null) n = null;
+      else if (p.isTile()) n = (Tile) p;
+      else {
+        n = null;
+        if (((Building) p).entrances().length > 1) multiArea = true;
+      }
+      
       tail = n == null ? null : areaLookup[n.x][n.y];
       
       //  We don't merge with areas outside a given 16x16 unit:
@@ -245,7 +251,7 @@ public class CityMapPathCache {
         markForRefresh(edge);
         didRefresh = true;
         if (map.settings.reportPathCache) {
-          I.say("Removed single tile: "+at+" from "+edge);
+          I.say("\nRemoved single tile: "+at+" from "+edge);
         }
       }
       
@@ -257,7 +263,7 @@ public class CityMapPathCache {
         markForRefresh(edge);
         didRefresh = true;
         if (map.settings.reportPathCache) {
-          I.say("Added single tile: "+at+" to "+edge);
+          I.say("\nAdded single tile: "+at+" to "+edge);
         }
       }
     }

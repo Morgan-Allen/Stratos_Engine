@@ -4,8 +4,7 @@ package game;
 import util.*;
 import static game.CityMap.*;
 import static game.GameConstants.*;
-
-import game.CityMap.Tile;
+import static util.TileConstants.*;
 
 
 
@@ -39,6 +38,8 @@ public class BuildingForWater extends Building {
     */
   void update() {
     super.update();
+    if (! complete()) return;
+    
     
     fillLevel = inventory.valueFor(WATER) / 10f;
     
@@ -59,7 +60,7 @@ public class BuildingForWater extends Building {
     
     if (hasSource) {
       Series <Element> fills = new Flood <Element> () {
-        Tile temp[] = new Tile[8];
+        Tile temp[] = new Tile[9];
         
         protected void addSuccessors(Element front) {
           int w = front.type.wide, h = front.type.high;
@@ -92,23 +93,20 @@ public class BuildingForWater extends Building {
   }
   
   
-  //  TODO:  Wait.  What happens if the entrances for a building change?
-  //  You'll have to flag a possible change in pathing to the pathing-
-  //  cache.
-  
-  
-  boolean checkEntrancesOkay(Tile[] entrances) {
-    return true;
-  }
-  
-  
   Tile[] selectEntrances() {
-    Tile e[] = super.selectEntrances();
-    Tile hatches[] = { map.tileAt(
-      at().x + (type.wide / 2),
-      at().y + (type.high / 2)
-    ) };
-    return (Tile[]) Visit.compose(Tile.class, e, hatches);
+    Tile at = this.at();
+    List <Tile> all = new List();
+    
+    all.add(map.tileAt(at.x + (type.wide / 2), at.y + (type.high / 2)));
+    all.add(tileAt(0, -1, N));
+    all.add(tileAt(0, -1, E));
+    all.add(tileAt(0, -1, S));
+    all.add(tileAt(0, -1, W));
+    
+    for (Tile e : all) {
+      if (e == null || ! checkEntranceOkay(e, -1)) all.remove(e);
+    }
+    return all.toArray(Tile.class);
   }
   
 

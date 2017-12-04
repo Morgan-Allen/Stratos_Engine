@@ -281,10 +281,12 @@ public class GameConstants {
     
   }
   final static Terrain
-    MEADOW = new Terrain("Meadow", 0),
-    JUNGLE = new Terrain("Jungle", 1),
-    DESERT = new Terrain("Desert", 2),
-    LAKE   = new Terrain("Lake"  , 3),
+    EMPTY  = new Terrain("Empty" , 0),
+    MEADOW = new Terrain("Meadow", 1),
+    JUNGLE = new Terrain("Jungle", 2),
+    DESERT = new Terrain("Desert", 3),
+    LAKE   = new Terrain("Lake"  , 4),
+    OCEAN  = new Terrain("Ocean" , 5),
     ALL_TERRAINS[] = TERRAINS_LIST.toArray(Terrain.class),
     NO_HABITAT  [] = {}
   ;
@@ -541,6 +543,7 @@ public class GameConstants {
     
     AQUEDUCT.name = "Aqueduct";
     AQUEDUCT.tint = TINT_LITE_AQUATIC;
+    AQUEDUCT.isWater = true;
     AQUEDUCT.pathing = PATH_WALLS;
     AQUEDUCT.setDimensions(1, 1, 1);
     AQUEDUCT.setBuildMaterials(CLAY, 1, STONE, 2);
@@ -596,8 +599,9 @@ public class GameConstants {
     BASIN.name = "Basin";
     BASIN.tint = TINT_AQUATIC;
     BASIN.isWater = true;
-    BASIN.setDimensions(2, 2, 0);
-    BASIN.setBuildMaterials(STONE, 2, CLAY, 2);
+    BASIN.pathing = PATH_WALLS;
+    BASIN.setDimensions(1, 1, 1);
+    BASIN.setBuildMaterials(STONE, 1, CLAY, 1);
     BASIN.setFeatures(IS_WATER, IS_VENDOR);
     
     SWEEPER.name = "Sweeper";
@@ -814,6 +818,7 @@ public class GameConstants {
   
   static interface Target {
     
+    Type type();
     Tile at();
     boolean onMap();
     
@@ -828,7 +833,6 @@ public class GameConstants {
     
     boolean isTile();
     int pathType();
-    float pathHeight();
     Pathing[] adjacent(Pathing temp[], CityMap map);
     boolean allowsEntryFrom(Pathing p);
     

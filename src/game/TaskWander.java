@@ -31,10 +31,10 @@ public class TaskWander extends Task {
     Batch <Pathing> walk = new Batch();
     
     CityMap map    = actor.map;
-    Pathing next   = pathOrigin();
+    Pathing next   = pathOrigin(actor);
     int     range  = Nums.max(4, Rand.index(MAX_WANDER_RANGE));
-    Pathing temp[] = new Pathing[8];
-    Pathing adj [] = new Pathing[8];
+    Pathing temp[] = new Pathing[9];
+    Pathing adj [] = new Pathing[9];
     
     next.flagWith(walk);
     walk.add(next);

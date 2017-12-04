@@ -121,19 +121,16 @@ public class TaskBuilding extends Task {
     int storeRange = store.type.maxDeliverRange;
     int maxRange = near ? actor.type.sightRange : storeRange;
     
-    //I.say("\nGetting next build-target-");
-    
     for (CityMapDemands.Entry e : demands.nearbyEntries(at.x, at.y)) {
       Element source = (Element) e.source;
-      
-      //I.say("  Evaluating: "+source);
-      
       if (CityMap.distance(source.at(), at) > maxRange  ) break;
       if (CityMap.distance(store .at(), at) > storeRange) continue;
-      if (! map.pathCache.pathConnects(actor, source)   ) continue;
-      if (decideNextAction(source, map)) {
-        return true;
-      }
+      
+      Pathing from = Task.pathOrigin(actor);
+      Target goes = buildPathTarget(source);
+      if (! map.pathCache.pathConnects(from, goes, true)) continue;
+      
+      if (decideNextAction(source, map)) return true;
     }
     //
     //  If there's no target to attend to, but you have surplus material
@@ -180,7 +177,7 @@ public class TaskBuilding extends Task {
       else {
         //  Begin your visit.  (Note that we cannot target the site
         //  directly, as it may not yet be in the world.)
-        configTask(store, null, b.at(), JOB.BUILDING, 1);
+        configTravel(b, JOB.BUILDING, store);
         site   = b;
         razing = false;
         return true;
@@ -188,7 +185,7 @@ public class TaskBuilding extends Task {
     }
     else if (needBuild < 0) {
       //  If there's salvage to be done, start that:
-      configTask(store, null, b.at(), JOB.SALVAGE, 1);
+      configTravel(b, JOB.SALVAGE, store);
       site   = b;
       razing = true;
       return true;
@@ -202,9 +199,17 @@ public class TaskBuilding extends Task {
   
   /**  Methods invoked once you arrive at the site:
     */
-  void configTravel(Building site, Task.JOB jobType, Employer e) {
-    if (site.complete()) {
-      configTask(e, site, null, jobType, 0);
+  Target buildPathTarget(Element site) {
+    if (site.complete() && site.type.isBuilding()) {
+      return (Building) site;
+    }
+    return site.at();
+  }
+  
+  
+  void configTravel(Element site, Task.JOB jobType, Employer e) {
+    if (site.complete() && site.type.isBuilding()) {
+      configTask(e, (Building) site, null, jobType, 0);
     }
     else {
       configTask(e, null, site.at(), jobType, 0);

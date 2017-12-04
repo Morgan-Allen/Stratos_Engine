@@ -179,9 +179,16 @@ public class Task implements Session.Saveable {
   }
   
   
-  Pathing pathOrigin() {
-    Pathing inside = actor.inside();
-    return inside == null ? actor.at() : inside;
+  static Pathing pathOrigin(Target from) {
+    Type t = from.type();
+    if (t.isBuilding() && ((Building) from).complete()) {
+      return (Building) from;
+    }
+    if (t.isActor()) {
+      Actor a = (Actor) from;
+      if (a.inside() != null) return a.inside();
+    }
+    return from.at();
   }
   
   
@@ -191,7 +198,7 @@ public class Task implements Session.Saveable {
       t = visits;
     }
     if (t == null && target != null) {
-      t = target.at();
+      t = pathOrigin(target);
     }
     if (t == null && path != null) {
       t = (Pathing) Visit.last(path);
@@ -227,7 +234,7 @@ public class Task implements Session.Saveable {
     if (CityMap.distance(last, target) > 1.5f) return false;
     
     int index = Nums.clamp(pathIndex, path.length);
-    if (pathOrigin() != path[index]) return false;
+    if (pathOrigin(actor) != path[index]) return false;
     
     for (int i = 0; i < actor.type.sightRange; i++, index++) {
       if (index >= path.length) break;
@@ -246,7 +253,7 @@ public class Task implements Session.Saveable {
     
     CityMap map      = actor.map;
     boolean visiting = visits != null;
-    Pathing from     = pathOrigin();
+    Pathing from     = pathOrigin(actor);
     Pathing heads    = pathTarget();
     
     if (report && verbose) {
@@ -258,6 +265,14 @@ public class Task implements Session.Saveable {
     }
     
     ActorPathSearch search = new ActorPathSearch(map, from, heads, -1);
+    
+    //  TODO:  You should have map-settings that toggle whether the
+    //  path-cache is used at all.  Default to simpler checks in that
+    //  case.
+    if ((! visiting) && ! map.pathCache.pathConnects(from, heads, false)) {
+      search.setProximate(true);
+    }
+    //search.verbosity = Search.VERBOSE;
     search.doSearch();
     Pathing path[] = search.fullPath(Pathing.class);
     
@@ -281,7 +296,7 @@ public class Task implements Session.Saveable {
   ) {
     if (Visit.empty(path) || path[0] != start) return false;
 
-    Pathing temp[] = new Pathing[8];
+    Pathing temp[] = new Pathing[9];
     Pathing last = (Pathing) Visit.last(path);
     if (last != end) {
       if (! Visit.arrayIncludes(end.adjacent(temp, map), last)) {
