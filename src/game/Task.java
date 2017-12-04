@@ -219,7 +219,8 @@ public class Task implements Session.Saveable {
     if (checkPathing(target)) {
       return true;
     }
-    path = updatePathing();
+    this.path = updatePathing();
+    this.pathIndex = -1;
     if (checkPathing(target)) {
       return true;
     }
@@ -234,13 +235,16 @@ public class Task implements Session.Saveable {
     if (CityMap.distance(last, target) > 1.5f) return false;
     
     int index = Nums.clamp(pathIndex, path.length);
-    if (pathOrigin(actor) != path[index]) return false;
+    Pathing current = pathOrigin(actor), step = path[index];
+    if (current != step) return false;
     
     for (int i = 0; i < actor.type.sightRange; i++, index++) {
       if (index >= path.length) break;
       Pathing t = path[index];
       if (t.isTile() && actor.map.blocked((Tile) t)) return false;
-      if (! t.allowsEntry(actor)) return false;
+      if (! t.allowsEntry(actor)) {
+        return false;
+      }
     }
     
     return true;
@@ -298,10 +302,8 @@ public class Task implements Session.Saveable {
 
     Pathing temp[] = new Pathing[9];
     Pathing last = (Pathing) Visit.last(path);
-    if (last != end) {
-      if (! Visit.arrayIncludes(end.adjacent(temp, map), last)) {
-        return false;
-      }
+    if (last != end && CityMap.distance(last, end) > 1.5f) {
+      return false;
     }
     
     Pathing prior = path[0];

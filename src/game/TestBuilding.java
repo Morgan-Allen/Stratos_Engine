@@ -11,7 +11,7 @@ public class TestBuilding extends Test {
   
   
   public static void main(String args[]) {
-    testBuilding(false);
+    testBuilding(true);
   }
   
   

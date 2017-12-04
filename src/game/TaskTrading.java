@@ -130,7 +130,7 @@ public class TaskTrading extends Task {
     //  foreign city-
     City city = tradeGoes.homeCity();
     city.world.beginJourney(city, (City) tradeGoes, actor);
-    actor.exitMap();
+    actor.exitMap(actor.map);
   }
   
   

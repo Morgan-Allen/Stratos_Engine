@@ -129,7 +129,7 @@ public class TestPathing extends Test {
     boolean insideWrong = false;
     boolean pathWrong   = false;
     boolean pathingDone = false;
-    int numReachedDest = 0;
+    int numReachedDest = 0, shouldReach = actors.size() * 10;
     
     while (map.time < 1000 || graphics) {
       numInside.clear();
@@ -160,21 +160,23 @@ public class TestPathing extends Test {
         }
         
         Pathing dest = destinations.get(a);
-        if (dest == a.at() || dest == a.inside) {
+        if (dest == a.at() || dest == a.inside()) {
           numReachedDest += 1;
           
           Pathing goes;
           if (a.inside != home && ! home.hasFocus()) {
             goes = home;
-            a.embarkOnVisit(home, 0, Task.JOB.WANDERING, null);
+            a.embarkOnVisit(home, 0, Task.JOB.RETURNING, null);
           }
           else {
             goes = map.tileAt(Rand.index(map.size), Rand.index(map.size));
-            a.embarkOnTarget(goes, 0, Task.JOB.WANDERING, null);
+            a.embarkOnTarget(goes, 0, Task.JOB.EXPLORING, null);
           }
           destinations.put(a, goes);
-          
+
           Pathing path[] = a.task == null ? null : a.task.path;
+          //I.say("\nSending "+a+" to "+goes);
+          //I.say("  Path: "+I.list(path));
           if (! Task.verifyPath(path, dest, goes, map)) {
             I.say("\n"+a+" CONSTRUCTED INVALID PATH-");
             I.say("  From: "+a.at()+", Goes: "+goes+"\n  ");
@@ -190,7 +192,7 @@ public class TestPathing extends Test {
         if (! graphics) break;
       }
       
-      if ((! pathingDone) && numReachedDest == actors.size() * 10) {
+      if ((! pathingDone) && numReachedDest == shouldReach) {
         pathingDone = true;
         if (pathingDone) {
           I.say("\nPATHING TEST CONCLUDED SUCCESSFULLY!");
@@ -203,7 +205,7 @@ public class TestPathing extends Test {
     
     I.say("\nPATHING TEST FAILED!");
     I.say("  Current time: "+map.time);
-    I.say("  Reached destination: "+numReachedDest+"/"+actors.size());
+    I.say("  Reached destination: "+numReachedDest+"/"+shouldReach);
     for (Actor a : actors) if (a.dead()) I.say("  "+a+" is dead!");
     
     return false;

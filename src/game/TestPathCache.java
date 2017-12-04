@@ -211,9 +211,9 @@ public class TestPathCache extends Test {
       }
     }
     
-    I.say("\nCompleted all pathing tests...");
+    I.say("\nPATH-CACHE TESTS SUCCESSFUL!");
     
-    map.settings.paused = true;
+    if (graphics) map.settings.paused = true;
     while (map.time < 10 || graphics) {
       map = test.runLoop(map, 1, graphics, "saves/test_path_cache.tlt");
     }

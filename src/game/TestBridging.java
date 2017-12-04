@@ -6,16 +6,16 @@ import static game.GameConstants.*;
 
 
 
-public class TestBuildPaths extends Test {
+public class TestBridging extends Test {
   
   
   public static void main(String args[]) {
-    testBuildPaths(true);
+    testBridging(true);
   }
   
   
-  static boolean testBuildPaths(boolean graphics) {
-    Test test = new TestBuildPaths();
+  static boolean testBridging(boolean graphics) {
+    Test test = new TestBridging();
     CityMap map = setupTestCity(16);
     map.settings.toggleFog     = false;
     map.settings.toggleFatigue = false;
@@ -183,7 +183,7 @@ public class TestBuildPaths extends Test {
         waterOkay = fillsOkay;
         
         if (waterOkay) {
-          I.say("\nBuild-Path Test Successful!");
+          I.say("\nBRIDGING TEST SUCCESSFUL!");
           if (! graphics) return true;
         }
       }
@@ -194,7 +194,9 @@ public class TestBuildPaths extends Test {
       }
     }
     
-    I.say("\nBuild-Path Test Failed!");
+    I.say("\nBRIDGING TEST FAILED!");
+    I.say("  Build okay: "+buildOkay);
+    I.say("  Water okay: "+waterOkay);
     
     return false;
   }

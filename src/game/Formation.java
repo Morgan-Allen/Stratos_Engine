@@ -180,7 +180,7 @@ public class Formation implements
   World.Journey beginJourney(City from, City goes) {
     if (reports()) I.say("\nREADY TO BEGIN FOREIGN MISSION!");
     for (Actor w : recruits) if (w.onMap(map)) {
-      w.exitMap();
+      w.exitMap(map);
     }
     away = true;
     map  = null;

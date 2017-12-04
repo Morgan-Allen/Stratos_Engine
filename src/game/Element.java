@@ -99,27 +99,33 @@ public class Element implements Session.Saveable, Target, Flood.Fill {
     stateBits |= FLAG_ON_MAP;
     setLocation(map.tileAt(x, y), map);
     
-    for (Good g : materials()) {
-      float need = materialNeed(g);
-      setMaterialLevel(g, need * buildLevel);
-    }
-    
-    for (Tile t : map.tilesUnder(at.x, at.y, type.wide, type.high)) {
-      if (t.above != null) t.above.exitMap(map);
-      map.setAbove(t, this);
+    if (! type.mobile) {
+      for (Good g : materials()) {
+        float need = materialNeed(g);
+        setMaterialLevel(g, need * buildLevel);
+      }
+      
+      for (Tile t : map.tilesUnder(at.x, at.y, type.wide, type.high)) {
+        if (t.above != null) t.above.exitMap(map);
+        map.setAbove(t, this);
+      }
     }
   }
   
   
   void exitMap(CityMap map) {
-    if (true       ) setFlagging(false, type.flagKey);
-    if (type.isCrop) setFlagging(false, NEED_PLANT  );
     
-    for (Tile t : map.tilesUnder(at.x, at.y, type.wide, type.high)) {
-      if (t.above == this) map.setAbove(t, null);
+    if (! type.mobile) {
+      if (true       ) setFlagging(false, type.flagKey);
+      if (type.isCrop) setFlagging(false, NEED_PLANT  );
+      
+      for (Tile t : map.tilesUnder(at.x, at.y, type.wide, type.high)) {
+        if (t.above == this) map.setAbove(t, null);
+      }
     }
     
-    setLocation(null, null);
+    setLocation(null, map);
+    map = null;
     stateBits |= FLAG_EXIT;
     stateBits &= ~FLAG_ON_MAP;
   }

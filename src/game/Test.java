@@ -93,7 +93,7 @@ public class Test {
       b.visitors.add(actor);
     }
     else {
-      Tile t = b.mainEntrance();
+      Tile t = b.centre();
       actor.enterMap(b.map, t.x, t.y, 1);
     }
     

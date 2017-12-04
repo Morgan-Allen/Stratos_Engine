@@ -127,15 +127,15 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   /**  World entry and exit-
     */
   void enterMap(CityMap map, int x, int y, float buildLevel) {
-    setLocation(map.tileAt(x, y), map);
+    super.enterMap(map, x, y, buildLevel);
     map.actors.add(this);
   }
   
   
-  void exitMap() {
+  void exitMap(CityMap map) {
     if (inside != null) setInside(inside, false);
     map.actors.remove(this);
-    setLocation(null, null);
+    super.exitMap(map);
   }
   
   
@@ -315,6 +315,9 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   /**  Miscellaneous behaviour triggers:
     */
   void assignTask(Task task) {
+    ///I.say("\n"+this+" assigned task: "+task);
+    ///I.reportStackTrace();
+    
     Target oldT = Task.focusTarget(this.task);
     this.task = task;
     Target newT = Task.focusTarget(this.task);
@@ -471,7 +474,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   void setAsKilled(String cause) {
     state = STATE_DEAD;
-    exitMap();
+    exitMap(map);
     setDestroyed();
   }
   

@@ -70,7 +70,7 @@ public class CityMapPlanning {
     }
     else {
       toBuild.remove(e);
-      I.say("  REMOVING FROM BUILD LIST: "+e);
+      ///I.say("  REMOVING FROM BUILD LIST: "+e);
     }
     for (Coord c : Visit.grid(at.x, at.y, type.wide, type.high, 1)) {
       grid[c.x][c.y] = doPlace ? e : null;

@@ -230,6 +230,9 @@ public class TaskBuilding extends Task {
       //  Drop off any surplus material at the end-
       actor.offloadGood(material, store);
     }
+    if (visits == site) {
+      onTarget(site.at());
+    }
   }
   
   
