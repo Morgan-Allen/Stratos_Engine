@@ -378,7 +378,7 @@ public class CityMapPathCache {
     final Batch <Tile> edging = new Batch();
     
     Series <Tile> covered = new Flood <Tile> () {
-      void addSuccessors(Tile front) {
+      protected void addSuccessors(Tile front) {
         for (Pathing p : front.adjacent(temp, map)) {
           if (p == null || p.flaggedWith() != null) continue;
           
@@ -488,7 +488,7 @@ public class CityMapPathCache {
     }
     
     Series <Area> covered = new Flood <Area> () {
-      void addSuccessors(Area front) {
+      protected void addSuccessors(Area front) {
         for (Area n : front.borders) {
           if (n.flaggedWith() != null) continue;
           tryAdding(n);

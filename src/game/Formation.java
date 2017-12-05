@@ -37,7 +37,7 @@ public class Formation implements
   City    homeCity    ;
   City    securedCity ;
   CityMap map         ;
-
+  
   boolean active = false;
   Tile    securedPoint;
   Object  objective   ;

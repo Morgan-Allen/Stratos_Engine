@@ -192,7 +192,7 @@ public class TestPathing extends Test {
         if (! graphics) break;
       }
       
-      if ((! pathingDone) && numReachedDest == shouldReach) {
+      if ((! pathingDone) && numReachedDest >= shouldReach) {
         pathingDone = true;
         if (pathingDone) {
           I.say("\nPATHING TEST CONCLUDED SUCCESSFULLY!");

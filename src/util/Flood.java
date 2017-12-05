@@ -1,14 +1,13 @@
 
 
-package game;
-import util.*;
+package util;
 
 
 
 public abstract class Flood <T extends Flood.Fill> {
   
   
-  static interface Fill {
+  public static interface Fill {
     void flagWith(Object o);
     Object flaggedWith();
   }
@@ -31,7 +30,7 @@ public abstract class Flood <T extends Flood.Fill> {
   }
   
   
-  void tryAdding(T item) {
+  protected void tryAdding(T item) {
     if (item == null || item.flaggedWith() != null) return;
     covered.add(item);
     frontier.add(item);
@@ -39,7 +38,7 @@ public abstract class Flood <T extends Flood.Fill> {
   }
   
   
-  abstract void addSuccessors(T front);
+  protected abstract void addSuccessors(T front);
   
 }
 

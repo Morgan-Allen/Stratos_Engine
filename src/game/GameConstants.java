@@ -746,7 +746,7 @@ public class GameConstants {
     TEMPLE_TZ .name = "Temple to Tezcatlipoca";
     //
     //  Fire and Water: Hu / Tl
-    TEMPLE_HU .name = "Temple to Huitzilipochtli";
+    TEMPLE_HU .name = "Temple to Huitzilopochtli";
     TEMPLE_TL .name = "Temple to Tlaloc";
     //
     //  Life and Death: Om / Mi
@@ -780,10 +780,10 @@ public class GameConstants {
     //    Aspects for discord, beauty, sin & confession
     //    Itztli/Itztlacoliuhqui, Huehuecoyotl/Mayahuel, Tlazolteotl
     //  Tlaloc:
-    //    Aspects for rivers & oceans, growth & monsters
+    //    Aspects for rivers & oceans, fertility & monstrosity
     //    Chalchiutlicue/Huixtocihuatl, Xochiquetzal/Xochipilli,
     //    Cipactli/Coatlicue/Tlaltecuhtli
-    //  Huitzilipochtli:
+    //  Huitzilopochtli:
     //    Aspects for warfare & lordship, fire & hearth
     //    Tonatiuh, Mixcoatl, Xiuhtecuhtli/Chantico
     //  Mictecacehuatl:
@@ -816,7 +816,7 @@ public class GameConstants {
     */
   final static Series <Actor> NO_ACTORS = new Batch();
   
-  static interface Target {
+  static interface Target extends Flood.Fill {
     
     Type type();
     Tile at();
@@ -835,9 +835,6 @@ public class GameConstants {
     int pathType();
     Pathing[] adjacent(Pathing temp[], CityMap map);
     boolean allowsEntryFrom(Pathing p);
-    
-    void flagWith(Object o);
-    Object flaggedWith();
 
     boolean allowsEntry(Actor a);
     void setInside(Actor a, boolean is);

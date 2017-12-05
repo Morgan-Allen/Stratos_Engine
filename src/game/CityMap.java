@@ -176,7 +176,7 @@ public class CityMap implements Session.Saveable {
   
   /**  Tiles and related setup/query methods-
     */
-  public static class Tile implements Pathing, Flood.Fill {
+  public static class Tile implements Pathing {
     
     int x, y;
     

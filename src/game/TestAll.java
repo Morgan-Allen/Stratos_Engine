@@ -6,7 +6,6 @@ import util.*;
 
 public class TestAll {
   
-  
   static int numTests = 0;
   static int numPass  = 0;
   static int numFail  = 0;

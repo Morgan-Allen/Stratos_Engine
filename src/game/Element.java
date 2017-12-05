@@ -7,7 +7,7 @@ import static game.GameConstants.*;
 
 
 
-public class Element implements Session.Saveable, Target, Flood.Fill {
+public class Element implements Session.Saveable, Target {
   
   
   /**  Data fields, construction and save/load methods-
