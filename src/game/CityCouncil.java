@@ -6,7 +6,6 @@ import static game.GameConstants.*;
 
 
 
-
 public class CityCouncil {
   
   
@@ -21,8 +20,25 @@ public class CityCouncil {
     AI_WARLIKE   =  4
   ;
   
+  //  TODO:  These should probably be Types, or at least moved into the
+  //  GameConstants class?
+  public static enum Role {
+    MONARCH          ,
+    FIRST_CONSORT    ,
+    HEIR_APPARENT    ,
+    PRIME_MINISTER   ,
+    HIGH_PRIEST      ,
+    MINISTER_WAR     ,
+    MINISTER_TRADE   ,
+    MINISTER_LEARNING,
+    MINISTER_ARTS    ,
+  };
+  
   final City city;
   int typeAI = AI_NORMAL;
+  
+  List <Actor> members = new List();
+  Table <Actor, Role> roles = new Table();
   
   
   CityCouncil(City city) {
@@ -32,11 +48,40 @@ public class CityCouncil {
   
   void loadState(Session s) throws Exception {
     typeAI = s.loadInt();
+    
+    for (int n = s.loadInt(); n-- > 0;) {
+      Actor a = (Actor) s.loadObject();
+      Role r = (Role) s.loadEnum(Role.values());
+      members.add(a);
+      roles.put(a, r);
+    }
   }
   
   
   void saveState(Session s) throws Exception {
     s.saveInt(typeAI);
+    
+    s.saveInt(members.size());
+    for (Actor a : members) {
+      s.saveObject(a);
+      s.saveEnum(roles.get(a));
+    }
+  }
+  
+  
+  //  TODO:  The personalities and loyalties of the council should be
+  //  used to weight decision-making when it comes to diplomacy, military
+  //  action, and perhaps spending priorities?
+  
+  void toggleMember(Actor actor, Role role, boolean yes) {
+    if (yes) {
+      members.include(actor);
+      roles.put(actor, role);
+    }
+    else {
+      members.remove(actor);
+      roles.remove(actor);
+    }
   }
   
   
