@@ -94,7 +94,7 @@ public class CityCouncil {
     if (typeAI == AI_OFF) return;
     //
     //  Once per month, otherwise, evaluate any likely prospects for invasion:
-    if (city.world.time % MONTH_LENGTH == 0) {
+    if (this.city.world.time % MONTH_LENGTH == 0) {
       Pick <InvasionAssessment> pick = new Pick(0);
       for (InvasionAssessment IA : updateInvasionChoices()) {
         pick.compare(IA, IA.evaluatedAppeal);
@@ -284,12 +284,11 @@ public class CityCouncil {
   
   Formation spawnInvasion(InvasionAssessment IA) {
     
-    Formation force = new Formation();
-    force.setupFormation(GARRISON, city);
+    Formation force = new Formation(new ObjectiveConquer(), city);
     force.assignDemands(City.POSTURE.VASSAL, null, IA.tribute);
     
     int n = 0;
-    while (force.formationPower() < city.armyPower / 2) {
+    while (force.powerSum() < city.armyPower / 2) {
       Type  type   = (n++ % 4 == 0) ? SOLDIER : CITIZEN;
       Actor fights = (Actor) type.generate();
       fights.assignHomeCity(IA.attackC);

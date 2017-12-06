@@ -285,9 +285,9 @@ public class TestWorld extends Test {
           City home = force.homeCity();
           if (j.goes == home) continue;
           
-          if (force.formationPower() < AVG_ARMY_POWER / 4) {
+          if (force.powerSum() < AVG_ARMY_POWER / 4) {
             I.say("\n"+home+" is fighting with inadequate forces:");
-            I.say("  Formation power: "+force.formationPower());
+            I.say("  Formation power: "+force.powerSum());
             I.say("  Average power:   "+AVG_ARMY_POWER);
             I.say("  Time: "+world.time+", going to: "+j.goes);
             return false;

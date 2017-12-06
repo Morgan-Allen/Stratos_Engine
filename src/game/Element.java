@@ -17,7 +17,8 @@ public class Element implements Session.Saveable, Target {
     FLAG_ON_MAP = 1 << 1,
     FLAG_BUILT  = 1 << 2,
     FLAG_RAZING = 1 << 3,
-    FLAG_EXIT   = 1 << 4
+    FLAG_EXIT   = 1 << 4,
+    FLAG_DEST   = 1 << 5
   ;
   
   Type type;
@@ -118,21 +119,26 @@ public class Element implements Session.Saveable, Target {
     if (! type.mobile) {
       if (true       ) setFlagging(false, type.flagKey);
       if (type.isCrop) setFlagging(false, NEED_PLANT  );
-      
       for (Tile t : map.tilesUnder(at.x, at.y, type.wide, type.high)) {
         if (t.above == this) map.setAbove(t, null);
       }
+      setDestroyed();
     }
     
     setLocation(null, map);
-    map = null;
+    this.map = null;
     stateBits |= FLAG_EXIT;
     stateBits &= ~FLAG_ON_MAP;
   }
   
   
   void setDestroyed() {
-    return;
+    stateBits |= FLAG_DEST;
+  }
+  
+  
+  boolean destroyed() {
+    return (stateBits & FLAG_DEST) != 0;
   }
   
   

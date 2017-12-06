@@ -17,10 +17,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     STATE_OKAY   = 1,
     STATE_SLEEP  = 2,
     STATE_DEAD   = 3,
-    STATE_DECOMP = 4,
-    
-    SEX_MALE   = 1 << 0,
-    SEX_FEMALE = 1 << 1
+    STATE_DECOMP = 4
   ;
   static int nextID = 0;
   int dirs[] = new int[4];
@@ -31,11 +28,12 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   Building  work;
   Building  home;
   City      homeCity;
-  Formation formation;
-  Pathing   inside;
   boolean   guest;
+  Building  recruiter;
+  Formation formation;
   
   Task task;
+  Pathing inside;
   
   Good  carried = null;
   float carryAmount = 0;
@@ -68,11 +66,12 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     work      = (Building ) s.loadObject();
     home      = (Building ) s.loadObject();
     homeCity  = (City     ) s.loadObject();
-    formation = (Formation) s.loadObject();
-    inside    = (Pathing  ) s.loadObject();
     guest     = s.loadBool();
+    recruiter = (Building ) s.loadObject();
+    formation = (Formation) s.loadObject();
     
-    task = (Task) s.loadObject();
+    task   = (Task   ) s.loadObject();
+    inside = (Pathing) s.loadObject();
     
     carried     = (Good) s.loadObject();
     carryAmount = s.loadFloat();
@@ -99,11 +98,12 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     s.saveObject(work     );
     s.saveObject(home     );
     s.saveObject(homeCity );
-    s.saveObject(formation);
-    s.saveObject(inside   );
     s.saveBool  (guest    );
+    s.saveObject(recruiter);
+    s.saveObject(formation);
     
-    s.saveObject(task);
+    s.saveObject(task  );
+    s.saveObject(inside);
     
     s.saveObject(carried);
     s.saveFloat(carryAmount);
@@ -140,12 +140,14 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   
   void setDestroyed() {
+    super.setDestroyed();
     if (formation != null) formation.toggleRecruit(this, false);
     if (home      != null) home.setResident(this, false);
     if (work      != null) work.setWorker  (this, false);
     if (task      != null) task.onCancel();
     home      = null;
     work      = null;
+    recruiter = null;
     formation = null;
     assignTask(null);
   }
@@ -474,7 +476,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   void setAsKilled(String cause) {
     state = STATE_DEAD;
-    exitMap(map);
+    if (map != null) exitMap(map);
     setDestroyed();
   }
   

@@ -404,8 +404,14 @@ public class City implements Session.Saveable, Trader {
       population = citizens * POP_PER_CITIZEN;
       
       float armyPower = 0;
-      for (Formation f : formations) armyPower += f.formationPower();
+      for (Building b : map.buildings) {
+        if (b.type.category == Type.IS_ARMY_BLD) {
+          armyPower += Formation.powerSum(b.recruits(), map);
+        }
+      }
       this.armyPower = armyPower;
+      
+      //I.say("POWER OF "+this+" IS "+armyPower);
       
       inventory.clear();
       buildLevel.clear();
@@ -435,13 +441,15 @@ public class City implements Session.Saveable, Trader {
         population = Nums.min(idealPop , population + popRegen);
       }
       for (Formation f : formations) {
-        idealArmy -= f.formationPower();
+        idealArmy -= f.powerSum();
       }
       if (idealArmy < 0) idealArmy = 0;
       
       if (armyPower < idealArmy) {
-        armyPower  = Nums.min(idealArmy, armyPower + popRegen);
+        armyPower = Nums.min(idealArmy, armyPower + popRegen);
       }
+      
+      //I.say("POWER OF "+this+" IS "+armyPower);
       
       for (Good g : tradeLevel.keys()) {
         float demand = tradeLevel.valueFor(g);

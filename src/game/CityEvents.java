@@ -14,7 +14,7 @@ public class CityEvents {
     */
   static void handleDeparture(Formation formation, City from, City goes) {
     City belongs = formation.homeCity();
-    belongs.armyPower -= formation.formationPower();
+    belongs.armyPower -= formation.powerSum();
     belongs.formations.include(formation);
     formation.beginSecuring(goes);
   }
@@ -37,7 +37,7 @@ public class CityEvents {
     CityCouncil.InvasionAssessment IA = new CityCouncil.InvasionAssessment();
     IA.attackC     = from;
     IA.defendC     = goes;
-    IA.attackPower = formation.formationPower() / POP_PER_CITIZEN;
+    IA.attackPower = formation.powerSum() / POP_PER_CITIZEN;
     IA.defendPower = goes.armyPower / POP_PER_CITIZEN;
     from.council.calculateChances(IA, true);
     
@@ -78,13 +78,11 @@ public class CityEvents {
     }
     if (victory) {
       signalVictory(from, goes, formation);
-      formation.stopSecuringPoint();
-      world.beginJourney(goes, from, formation);
+      formation.beginSecuring(from);
     }
     else {
       signalVictory(goes, from, formation);
-      formation.stopSecuringPoint();
-      world.beginJourney(goes, from, formation);
+      formation.beginSecuring(from);
     }
     //
     //  Either way, report the final outcome:
@@ -101,6 +99,7 @@ public class CityEvents {
     
     for (float i = Nums.min(numFought, casualties); i-- > 0;) {
       Actor lost = (Actor) Rand.pickFrom(formation.recruits);
+      lost.setAsKilled("casualty of war");
       formation.toggleRecruit(lost, false);
       numLost += 1;
     }
@@ -161,8 +160,8 @@ public class CityEvents {
     Formation formation, City from, World.Journey journey
   ) {
     City belongs = formation.homeCity();
-    belongs.armyPower += formation.formationPower();
-    belongs.formations.remove(formation);
+    belongs.armyPower += formation.powerSum();
+    formation.disbandFormation();
   }
 }
 

@@ -59,7 +59,7 @@ public class TestLifeCycle extends Test {
           originalPop = map.actors.copy();
           int i = 0;
           for (Actor w : originalPop) {
-            w.sexData = ((i++ % 2) == 0) ? Actor.SEX_FEMALE : Actor.SEX_MALE;
+            w.sexData = ((i++ % 2) == 0) ? SEX_FEMALE : SEX_MALE;
           }
         }
       }

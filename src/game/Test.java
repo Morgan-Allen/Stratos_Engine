@@ -521,9 +521,9 @@ public class Test {
       }
     }
     
-    if (b.formation() != null && b.formation().recruits.size() > 0) {
+    if (! b.recruits().empty()) {
       report.append("\nRecruits:");
-      for (Actor w : b.formation().recruits) {
+      for (Actor w : b.recruits()) {
         report.append("\n  "+w);
       }
     }

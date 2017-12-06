@@ -113,11 +113,6 @@ public class Building extends Element implements Pathing, Employer {
   }
   
   
-  boolean destroyed() {
-    return buildLevel() <= 0 && map == null;
-  }
-  
-  
   public CityMap.Tile centre() {
     Tile at = at();
     return map.tileAt(
@@ -374,20 +369,25 @@ public class Building extends Element implements Pathing, Employer {
   }
   
   
-  public void setWorker(Actor w, boolean is) {
-    w.work = is ? this : null;
-    workers.toggleMember(w, is);
+  public void setWorker(Actor a, boolean is) {
+    a.work = is ? this : null;
+    workers.toggleMember(a, is);
   }
   
   
-  public void setResident(Actor w, boolean is) {
-    w.home = is ? this : null;
-    residents.toggleMember(w, is);
+  public void setResident(Actor a, boolean is) {
+    a.home = is ? this : null;
+    residents.toggleMember(a, is);
   }
   
   
-  Formation formation() {
-    return null;
+  public Series <Actor> recruits() {
+    return NO_ACTORS;
+  }
+  
+  
+  public void deployInFormation(Formation f, boolean is) {
+    return;
   }
   
   

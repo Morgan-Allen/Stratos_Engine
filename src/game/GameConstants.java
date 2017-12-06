@@ -114,6 +114,9 @@ public class GameConstants {
     //  food/month, just like humans.)
     //
     //  Life cycle constants-
+    SEX_EITHER       = -1,
+    SEX_MALE         =  1 << 0,
+    SEX_FEMALE       =  1 << 1,
     AVG_INFANCY      = 4   ,
     AVG_PUBERTY      = 12  ,
     AVG_MARRIED      = 24  ,
@@ -426,10 +429,12 @@ public class GameConstants {
     HUNTER .attackScore = 4;
     HUNTER .defendScore = 3;
     HUNTER .attackRange = 6;
+    HUNTER .genderRole  = SEX_MALE;
     
     SOLDIER.attackScore = 5;
     SOLDIER.defendScore = 4;
     SOLDIER.maxHealth   = 6;
+    SOLDIER.genderRole  = SEX_MALE;
   }
   
   

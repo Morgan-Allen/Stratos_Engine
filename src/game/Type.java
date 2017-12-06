@@ -162,8 +162,6 @@ public class Type extends Index.Entry implements Session.Saveable {
   int maxResidents = 0;
   int maxVisitors  = AVG_MAX_VISITORS;
   int maxRecruits  = AVG_ARMY_SIZE;
-  int numRanks     = AVG_RANKS;
-  int numFile      = AVG_FILE ;
   
   
   void setUpgradeTiers(Type... tiers) {
@@ -253,6 +251,7 @@ public class Type extends Index.Entry implements Session.Saveable {
   /**  Walker-specific stats and setup methods-
     */
   int  socialClass  = CLASS_COMMON;
+  int  genderRole   = SEX_EITHER;
   Type patronGods[] = null;
   String names[] = {};
   
@@ -268,8 +267,15 @@ public class Type extends Index.Entry implements Session.Saveable {
   
   
   void initAsMigrant(Actor w) {
-    float age = Rand.range(AVG_MARRIED, AVG_MENOPAUSE) + Rand.num() - 0.5f;
-    int   sex = Rand.yes() ? Actor.SEX_FEMALE : Actor.SEX_MALE;
+    
+    float age = Rand.range(AVG_MARRIED, AVG_MENOPAUSE);
+    age += Rand.num() - 0.5f;
+    
+    int sex = genderRole;
+    if (sex == SEX_EITHER) {
+      sex = Rand.yes() ? SEX_FEMALE : SEX_MALE;
+    }
+    
     w.ageSeconds = (int) (age * YEAR_LENGTH);
     w.sexData    = sex;
     w.hunger     = Rand.num() - 0.5f;

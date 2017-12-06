@@ -398,6 +398,11 @@ public class CityMap implements Session.Saveable {
   }
   
   
+  public static float distancePenalty(Target a, Target b) {
+    return distancePenalty(distance(a, b));
+  }
+  
+  
   Tile tileAt(int x, int y) {
     if (x < 0 || x >= size || y < 0 || y >= size) return null;
     return grid[x][y];
