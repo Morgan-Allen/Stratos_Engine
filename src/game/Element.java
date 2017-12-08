@@ -142,6 +142,11 @@ public class Element implements Session.Saveable, Target {
   }
   
   
+  public CityMap map() {
+    return map;
+  }
+  
+  
   public boolean onMap() {
     return (stateBits & FLAG_ON_MAP) != 0;
   }

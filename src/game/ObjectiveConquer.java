@@ -121,15 +121,18 @@ public class ObjectiveConquer extends Formation.Objective {
   /**  Handling individual actor behaviours:
     */
   void selectActorBehaviour(Actor a, Formation parent) {
-    Actor target = a.inCombat() ? null : findCombatTarget(a, parent);
-    if (target != null) {
-      a.beginAttack(target, Task.JOB.COMBAT, parent);
+    
+    Actor target = a.inCombat() ? null : TaskCombat.findCombatTarget(a, parent);
+    TaskCombat taskC = TaskCombat.configCombat(a, target, parent);
+    if (taskC != null) {
+      a.assignTask(taskC);
       return;
     }
     
-    Tile sieges = a.inCombat() ? null : findSiegeTarget(a, parent);
-    if (sieges != null) {
-      a.beginAttack(sieges, Task.JOB.COMBAT, parent);
+    Tile sieges = a.inCombat() ? null : TaskCombat.findSiegeTarget(a, parent);
+    TaskCombat taskS = TaskCombat.configCombat(a, sieges, parent);
+    if (taskS != null) {
+      a.assignTask(taskS);
       return;
     }
     
@@ -142,14 +145,21 @@ public class ObjectiveConquer extends Formation.Objective {
   
   
   void actorUpdates(Actor a, Formation parent) {
-    Actor target = a.inCombat() ? null : findCombatTarget(a, parent);
-    if (target != null) {
-      a.beginAttack(target, Task.JOB.COMBAT, parent);
+    Actor target = a.inCombat() ? null : TaskCombat.findCombatTarget(a, parent);
+    TaskCombat taskC = TaskCombat.configCombat(a, target, parent);
+    if (taskC != null) {
+      a.assignTask(taskC);
       return;
     }
   }
   
   
+  void actorTargets(Actor a, Target other, Formation parent) {
+    return;
+  }
+  
+  
+  /*
   void actorTargets(Actor a, Target other, Formation parent) {
     if (a.inCombat() && other instanceof Actor) {
       a.performAttack((Actor) other);
@@ -228,6 +238,7 @@ public class ObjectiveConquer extends Formation.Objective {
     }
     return goes;
   }
+  //*/
   
 }
 

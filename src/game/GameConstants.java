@@ -222,6 +222,7 @@ public class GameConstants {
     IS_VENDOR  = new Good("Is Market"   , -1 ),
     IS_TRADER  = new Good("Is Trader"   , -1 ),
     IS_HOUSING = new Good("Is Housing"  , -1 ),
+    IS_WALL    = new Good("Is Wall"     , -1 ),
     IS_TOWER   = new Good("Is Tower"    , -1 ),
     IS_GATE    = new Good("Is Gate"     , -1 ),
     IS_CISTERN = new Good("Is Cistern"  , -1 ),
@@ -531,20 +532,21 @@ public class GameConstants {
     WALL.pathing = PATH_WALLS;
     WALL.setDimensions(1, 1, 2);
     WALL.setBuildMaterials(STONE, 2);
+    WALL.setFeatures(IS_WALL);
     
     GATE.name = "Gate";
     GATE.tint = TINT_MILITARY;
     GATE.pathing = PATH_WALLS;
     GATE.setDimensions(2, 2, 2);
     GATE.setBuildMaterials(STONE, 10);
-    GATE.setFeatures(IS_GATE);
+    GATE.setFeatures(IS_GATE, IS_WALL);
     
     TOWER.name = "Tower";
     TOWER.tint = TINT_MILITARY;
     TOWER.pathing = PATH_BLOCK;
     TOWER.setDimensions(2, 2, 4);
     TOWER.setBuildMaterials(STONE, 10);
-    TOWER.setFeatures(IS_TOWER);
+    TOWER.setFeatures(IS_TOWER, IS_WALL);
     
     AQUEDUCT.name = "Aqueduct";
     AQUEDUCT.tint = TINT_LITE_AQUATIC;
@@ -825,6 +827,7 @@ public class GameConstants {
     
     Type type();
     Tile at();
+    //CityMap map();
     boolean onMap();
     
     void targetedBy(Actor a);

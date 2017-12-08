@@ -128,10 +128,17 @@ public class Formation implements
   }
   
   
-  void toggleRecruit(Actor s, boolean is) {
-    this.recruits.toggleMember(s, is);
-    if (is) s.formation = this;
-    else    s.formation = null;
+  void toggleRecruit(Actor a, boolean is) {
+    this.recruits.toggleMember(a, is);
+    if (is) a.formation = this;
+    else    a.formation = null;
+  }
+  
+  
+  void toggleEscorted(Actor a, boolean is) {
+    this.escorted.toggleMember(a, is);
+    if (is) a.formation = this;
+    else    a.formation = null;
   }
   
   
@@ -169,7 +176,8 @@ public class Formation implements
     this.facing       = CENTRE;
     this.active       = false ;
     
-    for (Actor r : recruits) toggleRecruit(r, false);
+    for (Actor r : recruits) toggleRecruit (r, false);
+    for (Actor e : escorted) toggleEscorted(e, false);
   }
   
   

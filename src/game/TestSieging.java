@@ -35,10 +35,45 @@ public class TestSieging extends Test {
     City.setPosture(homeC, awayC, City.POSTURE.ENEMY, true);
     
     
+    CityMapPlanning.placeStructure(WALL, map, true, 4, 4, 20, 20);
+    CityMapPlanning.markDemolish(map, true, 6, 6, 16, 16);
+    
+    Building gate = (Building) GATE.generate();
+    gate.setFacing(TileConstants.E);
+    gate.enterMap(map, 22, 9, 1);
+    
+    Building tower = (Building) TOWER.generate();
+    tower.setFacing(TileConstants.E);
+    tower.enterMap(map, 22, 12, 1);
+    
+    
     BuildingForArmy fort = (BuildingForArmy) GARRISON.generate();
     fort.enterMap(map, 10, 10, 1);
     fillWorkVacancies(fort);
-    CityMapPlanning.placeStructure(ROAD, map, true, 10, 9, 40, 1);
+    CityMapPlanning.placeStructure(ROAD, map, true, 10, 9, 12, 1 );
+    CityMapPlanning.placeStructure(ROAD, map, true, 21, 9, 1 , 5 );
+    CityMapPlanning.placeStructure(ROAD, map, true, 16, 9, 1 , 12);
+    
+    for (Actor a : fort.workers) {
+      fort.toggleRecruit(a, true);
+    }
+    for (int n = 4; n-- > 0;) {
+      Building home = (Building) HOUSE.generate();
+      home.enterMap(map, 17, 10 + (n * 3), 1);
+      fillHomeVacancies(home, CITIZEN);
+      for (Actor a : home.residents) fort.toggleRecruit(a, true);
+      //I.say("Total residents in "+home+": "+home.residents.size());
+    }
+    
+    //I.say("Total recruits: "+fort.recruits.size());
+    Formation guarding = new Formation(new ObjectiveProtect(), homeC);
+    fort.deployInFormation(guarding, true);
+    guarding.beginSecuring(tower.at(), TileConstants.E, tower);
+    
+    //  TODO:
+    //  Check to see if the recruits are actually up on the wall, spaced
+    //  apart across a reasonable distance.
+    
     
     Building store = (Building) PORTER_POST.generate();
     store.enterMap(map, 10, 6, 1);

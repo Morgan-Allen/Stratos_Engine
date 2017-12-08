@@ -18,18 +18,18 @@ public class TestMilitary extends Test {
     Test test = new TestMilitary();
     
     World   world = GameConstants.setupDefaultWorld();
-    City    cityA = world.cities.atIndex(0);
-    City    cityB = world.cities.atIndex(1);
+    City    homeC = world.cities.atIndex(0);
+    City    awayC = world.cities.atIndex(1);
     CityMap map   = CityMapTerrain.generateTerrain(
-      cityA, 32, 0, MEADOW, JUNGLE
+      homeC, 32, 0, MEADOW, JUNGLE
     );
-    cityA.name = "Home City";
-    cityB.name = "Away City";
-    cityB.council.typeAI = CityCouncil.AI_OFF;
+    homeC.name = "Home City";
+    awayC.name = "Away City";
+    awayC.council.typeAI = CityCouncil.AI_OFF;
     map.settings.toggleFog = false;
     
-    City.setupRoute(cityA, cityB, 1);
-    City.setPosture(cityA, cityB, City.POSTURE.ENEMY, true);
+    City.setupRoute(homeC, awayC, 1);
+    City.setPosture(homeC, awayC, City.POSTURE.ENEMY, true);
     
     
     BuildingForArmy fort = (BuildingForArmy) GARRISON.generate();
@@ -43,18 +43,18 @@ public class TestMilitary extends Test {
       fillHomeVacancies(house, CITIZEN);
     }
     
-    float initPrestige = cityA.prestige;
-    float initLoyalty  = cityB.loyalty(cityA);
+    float initPrestige = homeC.prestige;
+    float initLoyalty  = awayC.loyalty(homeC);
     
     
     Formation troops  = null;
-    Formation enemies = new Formation(new ObjectiveConquer(), cityB);
+    Formation enemies = new Formation(new ObjectiveConquer(), awayC);
     for (int n = 4; n-- > 0;) {
       Actor fights = (Actor) ((n == 0) ? SOLDIER : CITIZEN).generate();
-      fights.assignHomeCity(cityB);
+      fights.assignHomeCity(awayC);
       enemies.toggleRecruit(fights, true);
     }
-    cityB.armyPower = AVG_ARMY_POWER / 4;
+    awayC.armyPower = AVG_ARMY_POWER / 4;
     
     
     boolean recruited = false;
@@ -68,15 +68,15 @@ public class TestMilitary extends Test {
       map = test.runLoop(map, 10, graphics, "saves/test_military.tlt");
       
       if (fort.recruits.size() >= 8 && ! recruited) {
-        troops = new Formation(new ObjectiveConquer(), cityA);
+        troops = new Formation(new ObjectiveConquer(), homeC);
         fort.deployInFormation(troops, true);
         troops.beginSecuring(map.tileAt(25, 25), TileConstants.E, null);
         recruited = true;
       }
       
       if (troops != null && troops.formationReady() && ! invaded) {
-        enemies.beginSecuring(cityA);
-        World.Journey j = world.beginJourney(cityB, cityA, enemies);
+        enemies.beginSecuring(homeC);
+        World.Journey j = world.beginJourney(awayC, homeC, enemies);
         world.completeJourney(j);
         enemies.beginSecuring(troops.securedPoint, TileConstants.W, troops);
         invaded = true;
@@ -95,14 +95,14 @@ public class TestMilitary extends Test {
       }
       
       if (homeWin && fort.recruits.size() >= 12 && ! invading) {
-        troops = new Formation(new ObjectiveConquer(), cityA);
+        troops = new Formation(new ObjectiveConquer(), homeC);
         fort.deployInFormation(troops, true);
-        troops.beginSecuring(cityB);
+        troops.beginSecuring(awayC);
         troops.assignDemands(City.POSTURE.VASSAL, null, null);
         invading = true;
       }
       
-      if (invading && cityA.isLordOf(cityB)) {
+      if (invading && homeC.isLordOf(awayC)) {
         awayWin = true;
       }
       
@@ -113,12 +113,12 @@ public class TestMilitary extends Test {
         }
         backHome = fort.recruits.size() > 8 && ! someAway;
         
-        if (cityA.prestige <= initPrestige) {
+        if (homeC.prestige <= initPrestige) {
           I.say("\nPrestige should be boosted by conquest!");
           break;
         }
         
-        if (cityB.loyalty(cityA) >= initLoyalty) {
+        if (awayC.loyalty(homeC) >= initLoyalty) {
           I.say("\nLoyalty should be reduced by conquest!");
           break;
         }
