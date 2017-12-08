@@ -54,25 +54,34 @@ public class TestSieging extends Test {
     CityMapPlanning.placeStructure(ROAD, map, true, 21, 9, 1 , 5 );
     CityMapPlanning.placeStructure(ROAD, map, true, 16, 9, 1 , 12);
     
-    for (Actor a : fort.workers) {
-      fort.toggleRecruit(a, true);
-    }
     for (int n = 4; n-- > 0;) {
       Building home = (Building) HOUSE.generate();
       home.enterMap(map, 17, 10 + (n * 3), 1);
       fillHomeVacancies(home, CITIZEN);
-      for (Actor a : home.residents) fort.toggleRecruit(a, true);
-      //I.say("Total residents in "+home+": "+home.residents.size());
+      
+      for (Actor a : home.residents) if (fort.eligible(a, false)) {
+        fort.toggleRecruit(a, true);
+      }
+    }
+    for (Actor a : fort.workers) {
+      fort.toggleRecruit(a, true);
     }
     
-    //I.say("Total recruits: "+fort.recruits.size());
     Formation guarding = new Formation(new ObjectiveProtect(), homeC);
     fort.deployInFormation(guarding, true);
     guarding.beginSecuring(tower.at(), TileConstants.E, tower);
     
-    //  TODO:
-    //  Check to see if the recruits are actually up on the wall, spaced
-    //  apart across a reasonable distance.
+    //  TODO:  Check to see if the recruits are actually up on the wall,
+    //  spaced apart across a reasonable distance, and facing outward.
+    
+    //  TODO:  Recruits need to be capable of attacking invaders (using
+    //  either ranged or melee attacks) without abandoning the wall.
+    
+    //  TODO:  Check to make sure invaders actually assault a logical
+    //  position on the wall.
+    
+    //  TODO:  Test to ensure that invaders cannot pass through
+    //  gatehouses!
     
     
     Building store = (Building) PORTER_POST.generate();

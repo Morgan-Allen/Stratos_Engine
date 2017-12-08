@@ -75,9 +75,18 @@ public class Element implements Session.Saveable, Target {
   
   /**  Entering and exiting the map-
     */
+  Visit <Tile> footprint(CityMap map) {
+    return map.tilesUnder(at.x, at.y, type.wide, type.high);
+  }
+  
+  
+  Visit <Tile> perimeter(CityMap map) {
+    return map.tilesAround(at.x, at.y, type.wide, type.high);
+  }
+  
+  
   boolean canPlace(CityMap map, int x, int y) {
-    for (Coord c : Visit.grid(x, y, type.wide, type.high, 1)) {
-      Tile t = map.tileAt(c.x, c.y);
+    for (Tile t : footprint(map)) {
       if (t == null || t.above != null) return false;
     }
     return true;
@@ -106,7 +115,7 @@ public class Element implements Session.Saveable, Target {
         setMaterialLevel(g, need * buildLevel);
       }
       
-      for (Tile t : map.tilesUnder(at.x, at.y, type.wide, type.high)) {
+      for (Tile t : footprint(map)) {
         if (t.above != null) t.above.exitMap(map);
         map.setAbove(t, this);
       }
@@ -119,7 +128,7 @@ public class Element implements Session.Saveable, Target {
     if (! type.mobile) {
       if (true       ) setFlagging(false, type.flagKey);
       if (type.isCrop) setFlagging(false, NEED_PLANT  );
-      for (Tile t : map.tilesUnder(at.x, at.y, type.wide, type.high)) {
+      for (Tile t : footprint(map)) {
         if (t.above == this) map.setAbove(t, null);
       }
       setDestroyed();
@@ -132,6 +141,9 @@ public class Element implements Session.Saveable, Target {
   }
   
   
+  
+  /**  Associated query methods-
+    */
   void setDestroyed() {
     stateBits |= FLAG_DEST;
   }

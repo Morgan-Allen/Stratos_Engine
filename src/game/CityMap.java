@@ -434,6 +434,16 @@ public class CityMap implements Session.Saveable {
   }
   
   
+  Visit <Tile> tilesAround(int x, int y, int w, int h) {
+    final Visit <Coord> VC = Visit.perimeter(x, y, w, h);
+    Visit <Tile> VT = new Visit <Tile> () {
+      public boolean hasNext() { return VC.hasNext(); }
+      public Tile next() { return tileAt(VC.next()); }
+    };
+    return VT;
+  }
+  
+  
   
   /**  Blockage and paving methods-
     */

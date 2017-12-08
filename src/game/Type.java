@@ -107,6 +107,7 @@ public class Type extends Index.Entry implements Session.Saveable {
   int     ambience = 0;
   boolean isCrop   = false;
   boolean isWater  = false;
+  boolean isWall   = false;
   
   
   void setDimensions(int w, int h, int d) {
@@ -244,6 +245,11 @@ public class Type extends Index.Entry implements Session.Saveable {
   
   boolean isTradeBuilding() {
     return category == IS_TRADE_BLD;
+  }
+  
+  
+  boolean isArmyOrWallsBuilding() {
+    return category == IS_ARMY_BLD || category == IS_WALLS_BLD;
   }
   
   

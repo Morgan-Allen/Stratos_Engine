@@ -5,7 +5,6 @@ import util.*;
 import static game.City.*;
 import static game.CityMap.*;
 import static game.GameConstants.*;
-import static util.TileConstants.*;
 
 
 
@@ -49,8 +48,8 @@ public class ObjectiveConquer extends Formation.Objective {
       if (secures == point && power > 0) return false;
     }
     
-    if (focus instanceof Building) {
-      Building sieged = (Building) focus;
+    if (focus instanceof Element) {
+      Element sieged = (Element) focus;
       if (! sieged.destroyed()) return false;
     }
     
@@ -75,7 +74,7 @@ public class ObjectiveConquer extends Formation.Objective {
     Pick <Option> pick = new Pick();
     
     for (Formation f : map.city.formations) {
-      if (f.away || f.securedPoint == null) continue;
+      if (f.away || f.securedPoint == null || ! f.active) continue;
       
       Option o = new Option();
       o.secures = f.securedPoint;
@@ -85,7 +84,7 @@ public class ObjectiveConquer extends Formation.Objective {
     }
     
     for (Building b : map.buildings) {
-      if (b.type.category != Type.IS_ARMY_BLD) continue;
+      if (! b.type.isArmyOrWallsBuilding()) continue;
       
       Option o = new Option();
       o.secures = b.centre();
@@ -96,8 +95,24 @@ public class ObjectiveConquer extends Formation.Objective {
     
     if (! pick.empty()) {
       Option o = pick.result();
-      parent.beginSecuring(o.secures, parent.facing, o.target);
-      return true;
+      
+      //  TODO:  There may be a problem here- once you start securing
+      //  the siege point, all subsequent path-checks will be made from
+      //  there, and your troops may not have room to stand.
+      
+      SiegeSearch search = new SiegeSearch(map, point, o.secures);
+      search.doSearch();
+      
+      Pathing path[] = (Pathing[]) search.fullPath(Pathing.class);
+      for (Pathing p : path) {
+        Tile t = (Tile) p;
+        Element above = t.above;
+        if (above != null && map.blocked(t)) {
+          parent.beginSecuring(t, parent.facing, above);
+          return true;
+        }
+      }
+      return false;
     }
     
     //
@@ -115,6 +130,33 @@ public class ObjectiveConquer extends Formation.Objective {
     }
   }
   
+  
+  static class SiegeSearch extends ActorPathSearch {
+    
+    Tile tempT[] = new Tile[9];
+    
+    public SiegeSearch(CityMap map, Tile init, Tile dest) {
+      super(map, init, dest, -1);
+    }
+    
+    protected Pathing[] adjacent(Pathing spot) {
+      CityMap.adjacent((Tile) spot, tempT, map);
+      return tempT;
+    }
+    
+    protected boolean canEnter(Pathing spot) {
+      if (super.canEnter(spot)) return true;
+      Element above = ((Tile) spot).above;
+      if (above != null && ! above.type.isNatural()) return true;
+      return false;
+    }
+    
+    protected float cost(Pathing prior, Pathing spot) {
+      Element above = ((Tile) spot).above;
+      if (above != null && ! above.type.isNatural()) return 20;
+      return super.cost(prior, spot);
+    }
+  }
   
   
   
@@ -157,88 +199,6 @@ public class ObjectiveConquer extends Formation.Objective {
   void actorTargets(Actor a, Target other, Formation parent) {
     return;
   }
-  
-  
-  /*
-  void actorTargets(Actor a, Target other, Formation parent) {
-    if (a.inCombat() && other instanceof Actor) {
-      a.performAttack((Actor) other);
-    }
-    if (a.inCombat() && other instanceof Tile) {
-      Building siege = (Building) ((Tile) other).above;
-      a.performAttack(siege);
-    }
-    return;
-  }
-  
-  
-  Actor findCombatTarget(Actor member, Formation parent) {
-    CityMap map = parent.map;
-    Tile point = parent.securedPoint;
-    
-    if (map == null) return null;
-    Pick <Actor> pick = new Pick();
-    
-    float seeBonus = AVG_FILE;
-    float range = member.type.sightRange + seeBonus;
-    
-    Series <Actor> others = map.actors;
-    if (others.size() > 100 || true) {
-      others = map.actorsInRange(member.at(), range);
-    }
-    
-    for (Actor other : others) if (Formation.hostile(other, member, map)) {
-      float distW = CityMap.distance(other.at(), member.at());
-      float distF = CityMap.distance(other.at(), point);
-      if (distF > range + 1) continue;
-      if (distW > range + 1) continue;
-      pick.compare(other, 0 - distW);
-    }
-    
-    return pick.result();
-  }
-  
-  
-  Tile findSiegeTarget(Actor member, Formation parent) {
-    
-    CityMap map = parent.map;
-    Object focus = parent.secureFocus;
-    if (! (focus instanceof Building)) return null;
-    
-    Building sieged = (Building) focus;
-    if (sieged.destroyed()) return null;
-    
-    Tile c = sieged.at();
-    Pick <Tile> pick = new Pick();
-    
-    for (Coord p : Visit.perimeter(
-      c.x, c.y, sieged.type.wide, sieged.type.high
-    )) {
-      if (map.blocked(p.x, p.y)) continue;
-      Tile best = null;
-      
-      for (int dir : T_ADJACENT) {
-        Tile tile = map.tileAt(p.x + T_X[dir], p.y + T_Y[dir]);
-        if (tile == null || tile.above != sieged) continue;
-        if (Task.hasTaskFocus(tile, Task.JOB.COMBAT)) continue;
-        
-        best = tile;
-        break;
-      }
-      
-      float dist = CityMap.distance(member.at(), best);
-      pick.compare(best, 0 - dist);
-    }
-    
-    Tile goes = pick.result();
-    if (goes == null) return null;
-    
-    if (! (goes.above instanceof Building)) {
-      I.complain("PROBLEMMMM");
-    }
-    return goes;
-  }
-  //*/
   
 }
 

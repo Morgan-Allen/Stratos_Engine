@@ -67,7 +67,7 @@ public class ObjectiveProtect extends Formation.Objective {
     //
     //  In the case we're defending a wall, try to spread out across
     //  the perimeter:
-    if (type.hasFeature(IS_WALL)) {
+    if (type.isWall) {
       final int MAX_DIST = 16;
       final Pathing temp[] = new Pathing[9];
       
@@ -160,6 +160,7 @@ public class ObjectiveProtect extends Formation.Objective {
   
   
   void actorUpdates(Actor a, Formation parent) {
+    
     //  TODO:  Don't attack targets if that means abandoning your post!
     
     Actor target = a.inCombat() ? null : TaskCombat.findCombatTarget(a, parent);

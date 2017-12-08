@@ -7,8 +7,6 @@ import static game.City.*;
 import static game.CityBorders.*;
 import static game.GameConstants.*;
 
-import game.GameConstants.Target;
-
 
 
 public class Formation implements
@@ -321,19 +319,6 @@ public class Formation implements
       sumStats += stats;
     }
     return (int) (sumStats * POP_PER_CITIZEN);
-  }
-  
-  
-  //  TODO:  Move this out to a TaskCombat class!
-  
-  static boolean hostile(Actor a, Actor b, CityMap map) {
-    City CA = a.homeCity, CB = b.homeCity;
-    if (CA == null) CA = map.city;
-    if (CB == null) CB = map.city;
-    if (CA == CB  ) return false;
-    POSTURE r = CA.posture(CB);
-    if (r == POSTURE.ENEMY) return true;
-    return false;
   }
   
   

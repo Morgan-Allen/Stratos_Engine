@@ -3,10 +3,9 @@
 package game;
 import util.*;
 import static game.CityMap.*;
+import static game.City.*;
 import static game.GameConstants.*;
 import static util.TileConstants.*;
-
-import game.CityMap.Tile;
 
 
 
@@ -43,6 +42,16 @@ public class TaskCombat extends Task {
   }
   
   
+  static boolean hostile(Actor a, Actor b, CityMap map) {
+    City CA = a.homeCity, CB = b.homeCity;
+    if (CA == null) CA = map.city;
+    if (CB == null) CB = map.city;
+    if (CA == CB  ) return false;
+    POSTURE r = CA.posture(CB);
+    if (r == POSTURE.ENEMY) return true;
+    return false;
+  }
+  
   
   static Actor findCombatTarget(Actor member, Formation parent) {
     CityMap map = parent.map;
@@ -59,11 +68,13 @@ public class TaskCombat extends Task {
       others = map.actorsInRange(member.at(), range);
     }
     
-    for (Actor other : others) if (Formation.hostile(other, member, map)) {
+    for (Actor other : others) if (hostile(other, member, map)) {
       float distW = CityMap.distance(other.at(), member.at());
       float distF = CityMap.distance(other.at(), point);
       if (distF > range + 1) continue;
       if (distW > range + 1) continue;
+      if (! map.pathCache.pathConnects(member.at(), other.at())) continue;
+      
       pick.compare(other, 0 - distW);
     }
     
@@ -75,17 +86,13 @@ public class TaskCombat extends Task {
     
     CityMap map = parent.map;
     Object focus = parent.secureFocus;
-    if (! (focus instanceof Building)) return null;
+    if (! (focus instanceof Element)) return null;
     
-    Building sieged = (Building) focus;
+    Element sieged = (Element) focus;
     if (sieged.destroyed()) return null;
     
-    Tile c = sieged.at();
     Pick <Tile> pick = new Pick();
-    
-    for (Coord p : Visit.perimeter(
-      c.x, c.y, sieged.type.wide, sieged.type.high
-    )) {
+    for (Tile p : sieged.perimeter(map)) {
       if (map.blocked(p.x, p.y)) continue;
       Tile best = null;
       
@@ -102,18 +109,8 @@ public class TaskCombat extends Task {
       pick.compare(best, 0 - dist);
     }
     
-    Tile goes = pick.result();
-    if (goes == null) return null;
-    
-    if (! (goes.above instanceof Building)) {
-      I.complain("PROBLEMMMM");
-    }
-    return goes;
+    return pick.result();
   }
-  
-  
-  
-  
   
   
   
@@ -126,7 +123,7 @@ public class TaskCombat extends Task {
       actor.performAttack((Actor) other);
     }
     if (actor.inCombat() && other instanceof Tile) {
-      Building siege = (Building) ((Tile) other).above;
+      Element siege = (Element) ((Tile) other).above;
       actor.performAttack(siege);
     }
   }

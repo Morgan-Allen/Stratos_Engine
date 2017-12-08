@@ -68,8 +68,8 @@ public class BuildingForWater extends Building {
           int high = at.elevation;
           
           if (w > 1 || h > 1) {
-            for (Coord c : Visit.perimeter(at.x, at.y, w, h)) {
-              tryAddingTile(map.tileAt(c), high);
+            for (Tile t : front.perimeter(map)) {
+              tryAddingTile(t, high);
             }
           }
           else for (Tile t : CityMap.adjacent(at, temp, map)) {
