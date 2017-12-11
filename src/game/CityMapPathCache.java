@@ -32,7 +32,8 @@ public class CityMapPathCache {
     Batch <Tile> toAdd = new Batch(4);
     Batch <Tile> toRem = new Batch(4);
     
-    List <Area> borders = new List();
+    //List <Area> borders = new List();
+    List <Border> borders = new List();
     AreaGroup group;
     
     Object pathFlag = null;
@@ -40,6 +41,13 @@ public class CityMapPathCache {
     public void flagWith(Object o) { pathFlag = o; }
     public Object flaggedWith() { return pathFlag; }
     public String toString() { return "A_"+ID; }
+  }
+  
+  static class Border {
+    
+    Area with;
+    int size;
+    boolean open;
   }
   
   static class AreaGroup {
@@ -102,6 +110,36 @@ public class CityMapPathCache {
     AreaGroup goesG = groupFor(areaFor(goes));
     if (fromG == null || goesG == null) return false;
     return fromG == goesG;
+  }
+  
+  
+  boolean openPathConnects(Tile from, Tile goes) {
+    final Area fromA = areaFor(from);
+    final Area goesA = areaFor(goes);
+    AreaGroup fromG = groupFor(fromA);
+    AreaGroup goesG = groupFor(goesA);
+    if (fromG == null || goesG == null) return false;
+    if (fromG != goesG) return false;
+    
+    //  TODO:  Later, you'll want separate group-layers for each faction.
+    //  See to that.
+    final Vars.Bool matched = new Vars.Bool();
+    new Flood <Area> () {
+      protected void addSuccessors(Area front) {
+        if (matched.val) return;
+        
+        for (Border b : front.borders) if (b.open) {
+          if (b.with == goesA) {
+            matched.val = true;
+            return;
+          }
+          
+          if (b.with.flaggedWith() != null) continue;
+          tryAdding(b.with);
+        }
+      }
+    }.floodFrom(fromA);
+    return matched.val;
   }
   
   
@@ -376,6 +414,7 @@ public class CityMapPathCache {
     
     final int aX = t.x / AREA_SIZE, aY = t.y / AREA_SIZE;
     final Batch <Tile> edging = new Batch();
+    final Batch <Tile> gated  = new Batch();
     
     Series <Tile> covered = new Flood <Tile> () {
       protected void addSuccessors(Tile front) {
@@ -385,8 +424,9 @@ public class CityMapPathCache {
           if (! p.isTile()) {
             Building b = (Building) p;
             for (Tile n : b.entrances()) if (n != p) {
-              edging.add(n);
-              n.pathFlag = edging;
+              gated.add(n);
+              //edging.add(n);
+              //n.flagWith(edging);
             }
             continue;
           }
@@ -394,7 +434,7 @@ public class CityMapPathCache {
           Tile n = (Tile) p;
           if (n.x / AREA_SIZE != aX || n.y / AREA_SIZE != aY) {
             edging.add(n);
-            n.pathFlag = edging;
+            n.flagWith(edging);
             continue;
           }
           
@@ -416,22 +456,30 @@ public class CityMapPathCache {
       areaLookup[c.x][c.y] = area;
     }
     
+    for (Tile e : gated) {
+      Area b = areaFor(e);
+      if (b != null && b != area) {
+        toggleBorders(area, b, true);
+      }
+    }
+    
     Batch <Area> bordering = new Batch();
     for (Tile e : edging) {
-      e.pathFlag = null;
+      e.flagWith(null);
     }
     for (Tile e : edging) {
       Area b = areaFor(e);
       if (b != null && b != area) bordering.include(b);
     }
     for (Area b : bordering) {
-      toggleBorders(area, b, true);
+      Border with = toggleBorders(area, b, true);
+      with.open = true;
     }
     
     if (map.settings.reportPathCache) {
       I.say("\n  Adding Area: "+area+" "+area.aX+"|"+area.aY);
       I.say("    Tiles: "+area.numTiles+"  Borders: ");
-      for (Area b : area.borders) I.add(b.ID+" ");
+      for (Border b : area.borders) I.add(b.with.ID+" ");
       if (area.borders.empty()) I.add("none");
       I.say("    Tiles:\n      ");
       int count = 0;
@@ -456,8 +504,8 @@ public class CityMapPathCache {
     for (Tile c : area.tiles) if (areaLookup[c.x][c.y] == area) {
       areaLookup[c.x][c.y] = null;
     }
-    for (Area b : area.borders) {
-      toggleBorders(area, b, false);
+    for (Border b : area.borders) {
+      toggleBorders(area, b.with, false);
     }
     if (area.group != null) {
       deleteGroup(area.group);
@@ -468,9 +516,33 @@ public class CityMapPathCache {
   }
   
   
-  private void toggleBorders(Area a, Area b, boolean yes) {
-    a.borders.toggleMember(b, yes);
-    b.borders.toggleMember(a, yes);
+  private Border toggleBorders(Area a, Area b, boolean yes) {
+    if (yes) {
+      Border made = borderBetween(a, b, true);
+      borderBetween(b, a, true);
+      return made;
+    }
+    else {
+      Border TA = borderBetween(a, b, false);
+      Border TB = borderBetween(b, a, false);
+      if (TA != null) a.borders.remove(TA);
+      if (TB != null) b.borders.remove(TB);
+      return null;
+    }
+  }
+  
+  
+  private Border borderBetween(Area a, Area o, boolean init) {
+    for (Border b : a.borders) {
+      if (b.with == o) return b;
+    }
+    if (init) {
+      Border b = new Border();
+      b.with = o;
+      a.borders.add(b);
+      return b;
+    }
+    return null;
   }
   
   
@@ -489,9 +561,9 @@ public class CityMapPathCache {
     
     Series <Area> covered = new Flood <Area> () {
       protected void addSuccessors(Area front) {
-        for (Area n : front.borders) {
-          if (n.flaggedWith() != null) continue;
-          tryAdding(n);
+        for (Border n : front.borders) {
+          if (n.with.flaggedWith() != null) continue;
+          tryAdding(n.with);
         }
       }
     }.floodFrom(area);

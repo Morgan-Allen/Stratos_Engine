@@ -230,8 +230,13 @@ public class Test {
     
     Area area = map.pathCache.rawArea(hovered), around[] = null;
     AreaGroup group = null;
-    if (area != null) around = area.borders.toArray(Area.class);
-    if (area != null) group  = area.group;
+    if (area != null) {
+      group  = area.group;
+      around = new Area[area.borders.size()];
+      int i = 0;
+      //for (Area b : area.borders) around[i++] = b;
+      for (Border b : area.borders) around[i++] = b.with;
+    }
     
     for (Tile t : map.allTiles()) {
       int fill = t.above == null ? BLANK_COLOR : t.above.debugTint();

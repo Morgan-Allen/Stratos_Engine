@@ -36,6 +36,7 @@ public class TestPathCache extends Test {
   
   static boolean testPathCache(boolean graphics) {
     TestPathCache test = new TestPathCache();
+    boolean allOkay = true;
     //
     //  Set up a small world initially:
     byte layout[][] = {
@@ -63,10 +64,12 @@ public class TestPathCache extends Test {
     Area area = miniMap.pathCache.areaFor(miniMap.tileAt(1, 1));
     if (area == null) {
       I.say("\nArea was not generated!");
+      allOkay = false;
       if (! graphics) return false;
     }
     if (area.numTiles != numT) {
       I.say("\nArea has "+area.numTiles+" tiles, expected "+numT);
+      allOkay = false;
       if (! graphics) return false;
     }
     for (int i = 0; i < coords.length;) {
@@ -74,6 +77,7 @@ public class TestPathCache extends Test {
       if (! Visit.arrayIncludes(area.tiles, t)) {
         I.say("\nExpected area to include "+t);
         I.say("  Tiles were: "+I.list(area.tiles));
+        allOkay = false;
         if (! graphics) return false;
       }
     }
@@ -81,6 +85,7 @@ public class TestPathCache extends Test {
     //  More broadly, we verify exhaustively that connection-queries
     //  accurately reflect ability to path between points:
     if (! verifyConnectionQueries(miniMap)) {
+      allOkay = false;
       if (! graphics) return false;
     }
     //
@@ -102,6 +107,7 @@ public class TestPathCache extends Test {
     }
     miniMap.pathCache.updatePathCache();
     if (! verifyConnectionQueries(miniMap)) {
+      allOkay = false;
       if (! graphics) return false;
     }
     //
@@ -114,6 +120,7 @@ public class TestPathCache extends Test {
     }
     miniMap.pathCache.updatePathCache();
     if (! verifyConnectionQueries(miniMap)) {
+      allOkay = false;
       if (! graphics) return false;
     }
     
@@ -146,6 +153,8 @@ public class TestPathCache extends Test {
     island0 = CityMapTerrain.nearestOpenTile(island0, map);
     test.keyTiles = new Tile[] { land1, land2, island0 };
     
+    map.pathCache.updatePathCache();
+    
     boolean landLinked = map.pathCache.pathConnects(land1, land2);
     if (! landLinked) {
       I.say("\nNearby regions not linked!");
@@ -156,12 +165,14 @@ public class TestPathCache extends Test {
           I.say("      "+a.numTiles+" tiles: "+a.aX+"|"+a.aY);
         }
       }
+      allOkay = false;
       if (! graphics) return false;
     }
     
     boolean islandLinked = map.pathCache.pathConnects(land1, island0);
     if (islandLinked) {
       I.say("\nSeparated regions should not be linked!");
+      allOkay = false;
       if (! graphics) return false;
     }
     
@@ -170,6 +181,7 @@ public class TestPathCache extends Test {
     landLinked = map.pathCache.pathConnects(land1, land2);
     if (landLinked) {
       I.say("\nWall should have partitioned mainland!");
+      allOkay = false;
       if (! graphics) return false;
     }
     
@@ -178,6 +190,7 @@ public class TestPathCache extends Test {
     islandLinked = map.pathCache.pathConnects(land1, island0);
     if (! islandLinked) {
       I.say("\nRoad should have connected island to mainland!");
+      allOkay = false;
       if (! graphics) return false;
     }
     
@@ -189,12 +202,21 @@ public class TestPathCache extends Test {
     landLinked = map.pathCache.pathConnects(land1, land2);
     if (! landLinked) {
       I.say("\nGate should have bridged partition!");
+      allOkay = false;
+      if (! graphics) return false;
+    }
+    
+    landLinked = map.pathCache.openPathConnects(land1, land2);
+    if (landLinked) {
+      I.say("\nGate should not allow open path!");
+      allOkay = false;
       if (! graphics) return false;
     }
     
     for (Tile t : map.allTiles()) {
       if (map.pathCache.rawArea(t) == null && ! map.blocked(t)) {
         I.say("\nUnblocked tile has no area: "+t);
+        allOkay = false;
         if (! graphics) return false;
       }
     }
@@ -207,18 +229,24 @@ public class TestPathCache extends Test {
       goes = CityMapTerrain.nearestOpenTile(goes, map);
       if (from == null || goes == null || from == goes) continue;
       if (! verifyConnection(from, goes, map)) {
+        allOkay = false;
         if (! graphics) return false;
       }
     }
     
-    I.say("\nPATH-CACHE TESTS SUCCESSFUL!");
+    if (allOkay) {
+      I.say("\nPATH-CACHE TESTS SUCCESSFUL!");
+    }
+    else {
+      I.say("\nPATH_CACHE TESTS FAILED!");
+    }
     
     if (graphics) map.settings.paused = true;
     while (map.time < 10 || graphics) {
       map = test.runLoop(map, 1, graphics, "saves/test_path_cache.tlt");
     }
     
-    return true;
+    return allOkay;
   }
   
   
