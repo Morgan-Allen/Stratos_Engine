@@ -113,15 +113,6 @@ public class Building extends Element implements Pathing, Employer {
   }
   
   
-  public CityMap.Tile centre() {
-    Tile at = at();
-    return map.tileAt(
-      at.x + (type.wide / 2),
-      at.y + (type.high / 2)
-    );
-  }
-  
-  
   
   /**  Auxiliary pathing-assist methods:
     */

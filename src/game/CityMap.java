@@ -186,8 +186,7 @@ public class CityMap implements Session.Saveable {
     
     List <Actor> inside  = null;
     List <Actor> focused = null;
-    Object pathFlag;  //  Note- this is used purely during path-searches, and
-                      //  doesn't have to be saved or loaded.
+    private Object pathFlag;  //  Only used during temporary path-searches...
     
     
     void loadState(Session s) throws Exception {

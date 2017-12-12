@@ -137,6 +137,77 @@ public class Task implements Session.Saveable {
   }
   
   
+  void toggleFocus(boolean active) {
+    Target t = Task.focusTarget(this);
+    if (t == null) return;
+    t.setFocused(actor, active);
+  }
+  
+  
+  
+  /**  Regular updates:
+    */
+  boolean checkAndUpdateTask() {
+    
+    Target focus = focusTarget(this);
+    if (focus == null || ! focus.onMap()) {
+      return false;
+    }
+    Target target = pathTarget();
+    if (target == null || ! target.onMap()) {
+      return false;
+    }
+    
+    if (! checkPathing(target)) {
+      this.path = updatePathing();
+      this.pathIndex = -1;
+      
+      if (! checkPathing(target)) {
+        return false;
+      }
+    }
+    
+    CityMap map      = actor.map;
+    Pathing inside   = actor.inside;
+    Pathing pathEnd  = (Pathing) Visit.last(path);
+    float   distance = CityMap.distance(actor.at(), pathEnd);
+    float   minRange = actionRange();
+    
+    if (visits != null && inside == visits) {
+      if (timeSpent++ <= maxTime) {
+        actor.onVisit(visits);
+        onVisit(visits);
+        visits.visitedBy(actor);
+        if (origin != null) origin.actorVisits(actor, visits);
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
+    else if (distance <= minRange) {
+      if (target != null && timeSpent++ <= maxTime) {
+        actor.onTarget(target);
+        onTarget(target);
+        target.targetedBy(actor);
+        if (origin != null) origin.actorTargets(actor, target);
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
+    else {
+      int index = Nums.clamp(pathIndex + 1, path.length);
+      Pathing ahead = path[pathIndex = index];
+      actor.setLocation(ahead.at(), map);
+      if (ahead.isTile()) actor.setInside(inside, false);
+      else actor.setInside(ahead, true);
+      return true;
+    }
+  }
+  
+  
   
   /**  Activity calls-
     */
@@ -192,6 +263,11 @@ public class Task implements Session.Saveable {
   }
   
   
+  float actionRange() {
+    return 0.1f;
+  }
+  
+  
   Pathing pathTarget() {
     Pathing t = null;
     if (t == null && visits != null && visits.complete()) {
@@ -204,27 +280,6 @@ public class Task implements Session.Saveable {
       t = (Pathing) Visit.last(path);
     }
     return t;
-  }
-  
-  
-  boolean checkAndUpdatePathing() {
-    Target focus = focusTarget(this);
-    if (focus == null || ! focus.onMap()) {
-      return false;
-    }
-    Target target = pathTarget();
-    if (target == null || ! target.onMap()) {
-      return false;
-    }
-    if (checkPathing(target)) {
-      return true;
-    }
-    this.path = updatePathing();
-    this.pathIndex = -1;
-    if (checkPathing(target)) {
-      return true;
-    }
-    return false;
   }
   
   
@@ -242,9 +297,7 @@ public class Task implements Session.Saveable {
       if (index >= path.length) break;
       Pathing t = path[index];
       if (t.isTile() && actor.map.blocked((Tile) t)) return false;
-      if (! t.allowsEntry(actor)) {
-        return false;
-      }
+      if (! t.allowsEntry(actor)) return false;
     }
     
     return true;

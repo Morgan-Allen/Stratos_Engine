@@ -262,10 +262,11 @@ public class Type extends Index.Entry implements Session.Saveable {
   String names[] = {};
   
   int maxHealth   = AVG_MAX_HEALTH;
-  int attackScore = AVG_ATTACK;
-  int defendScore = AVG_DEFEND;
+  int meleeDamage = AVG_MELEE;
+  int rangeDamage = AVG_MISSILE;
+  int rangeDist   = AVG_RANGE;
+  int armourClass = AVG_DEFEND;
   int sightRange  = AVG_SIGHT;
-  int attackRange = AVG_RANGE;
   
   Terrain habitats[] = NO_HABITAT;
   boolean predator   = false;

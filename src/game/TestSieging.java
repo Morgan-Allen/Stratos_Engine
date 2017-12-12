@@ -1,8 +1,9 @@
 
 
 package game;
-import static game.GameConstants.*;
 import util.*;
+import static game.CityMap.*;
+import static game.GameConstants.*;
 
 
 
@@ -53,8 +54,9 @@ public class TestSieging extends Test {
     CityMapPlanning.placeStructure(ROAD, map, true, 10, 9, 12, 1 );
     CityMapPlanning.placeStructure(ROAD, map, true, 21, 9, 1 , 5 );
     CityMapPlanning.placeStructure(ROAD, map, true, 16, 9, 1 , 12);
+    CityMapPlanning.placeStructure(ROAD, map, true, 24, 9, 8 , 1 );
     
-    for (int n = 4; n-- > 0;) {
+    for (int n = 3; n-- > 0;) {
       Building home = (Building) HOUSE.generate();
       home.enterMap(map, 17, 10 + (n * 3), 1);
       fillHomeVacancies(home, CITIZEN);
@@ -71,15 +73,17 @@ public class TestSieging extends Test {
     fort.deployInFormation(guarding, true);
     guarding.beginSecuring(tower.at(), TileConstants.E, tower);
     
+    
+    //
     //  TODO:  Check to see if the recruits are actually up on the wall,
     //  spaced apart across a reasonable distance, and facing outward.
-    
+    //
     //  TODO:  Recruits need to be capable of attacking invaders (using
     //  either ranged or melee attacks) without abandoning the wall.
-    
+    //
     //  TODO:  Check to make sure invaders actually assault a logical
     //  position on the wall.
-    
+    //
     //  TODO:  Test to ensure that invaders cannot pass through
     //  gatehouses!
     
@@ -98,6 +102,59 @@ public class TestSieging extends Test {
     boolean siegeComing = false;
     boolean victorious  = false;
     boolean tributePaid = false;
+    
+    
+    //  TODO:  Ideally, you'll want to test for route-finding
+    //  independently first.  Okay, try that.
+    
+    if (true) {
+      Formation enemies = new Formation(new ObjectiveConquer(), awayC);
+      for (int n = 8; n-- > 0;) {
+        Actor fights = (Actor) ((n < 3) ? SOLDIER : CITIZEN).generate();
+        fights.assignHomeCity(awayC);
+        enemies.toggleRecruit(fights, true);
+      }
+
+      enemies.beginSecuring(homeC);
+      World.Journey j = world.journeyFor(enemies);
+      world.completeJourney(j);
+      
+      I.say("\nBegan securing point- "+enemies.secureFocus);
+      I.say("  Entering map from: "+enemies.entryPoint);
+      I.say("  Gate is at: "+gate.at());
+      
+      /*
+      boolean directPath = map.pathCache.openPathConnects(enemies.entryPoint, gate.at());
+      if (directPath) {
+        I.say("\nDirect path onto wall should not exist!");
+        I.say("?");
+      }
+      //*/
+      
+      //  Alright.  Once a point has been selected, check to ensure that
+      //  every recruit has a distinct point to besiege.
+      
+      for (Actor a : enemies.recruits) {
+        TaskCombat task = TaskCombat.siegeCombat(a, enemies);
+        if (task == null) {
+          I.say("  "+a+" cannot siege.");
+          continue;
+        }
+        a.assignTask(task);
+        I.say("  "+a+" sieging: "+task.target+" at "+task.stands);
+      }
+      
+      //  Not all actors are being assigned a distinct siege-point.  You
+      //  may have to spread out a little more.  (And also, secondary
+      //  ranged attacks may be required.)
+      
+      I.say("?");
+      
+      //tribute = new Tally().setWith(COTTON, 10);
+      //enemies.assignDemands(City.POSTURE.VASSAL, null, tribute);
+      //siegeComing = true;
+    }
+    
     
     while (map.time < 1000 || graphics) {
       map = test.runLoop(map, 10, graphics, "saves/test_sieging.tlt");

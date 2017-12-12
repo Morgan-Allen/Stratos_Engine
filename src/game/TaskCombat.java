@@ -5,7 +5,6 @@ import util.*;
 import static game.CityMap.*;
 import static game.City.*;
 import static game.GameConstants.*;
-import static util.TileConstants.*;
 
 
 
@@ -14,6 +13,10 @@ public class TaskCombat extends Task {
   
   /**  Data fields, construction and save/load methods-
     */
+  Tile stands = null;
+  boolean inMelee = true;
+  
+  
   public TaskCombat(Actor actor) {
     super(actor);
   }
@@ -21,24 +24,116 @@ public class TaskCombat extends Task {
   
   public TaskCombat(Session s) throws Exception {
     super(s);
+    stands = CityMap.loadTile(actor.map, s);
+    inMelee = s.loadBool();
   }
 
 
   public void saveState(Session s) throws Exception {
     super.saveState(s);
+    CityMap.saveTile(stands, actor.map, s);
+    s.saveBool(inMelee);
   }
   
   
   
-  static TaskCombat configCombat(Actor a, Target other, Employer e) {
-    if (a == null || other == null) return null;
+  /**  Supplemental config and setup methods-
+    */
+  static TaskCombat actorCombat(Actor member, Formation parent) {
     
-    TaskCombat task = new TaskCombat(a);
-    if (task.configTask(e, null, other, JOB.COMBAT, 0) != null) {
-      return task;
+    //  TODO:  Make the anchor the actor's current stand-point instead?
+    
+    CityMap map = parent.map;
+    Tile anchor = parent.securePoint;
+    
+    if (map == null) return null;
+    Pick <Actor> pick = new Pick();
+    
+    Tile from = member.at();
+    float seeBonus = AVG_FILE;
+    float range = member.type.sightRange + seeBonus;
+    float attackRange = member.type.rangeDist;
+    
+    Series <Actor> others = map.actorsInRange(from, range);
+    for (Actor other : others) if (hostile(other, member, map)) {
+      Tile goes = other.at();
+      float distW = CityMap.distance(goes, from  );
+      float distF = CityMap.distance(goes, anchor);
+      if (distF > range + 1) continue;
+      if (distW > range + 1) continue;
+      
+      boolean path = map.pathCache.openPathConnects(from, goes);
+      if (distW > attackRange && ! path) continue;
+      
+      pick.compare(other, 0 - distW);
     }
     
-    return null;
+    Actor struck = pick.result();
+    TaskCombat task = new TaskCombat(member);
+    task.stands = struck.at();
+    
+    if (task.configTask(parent, null, struck, JOB.COMBAT, 0) != null) {
+      return task;
+    }
+    else return null;
+  }
+  
+  
+  static TaskCombat siegeCombat(Actor member, Formation parent) {
+    //if (true) return null;
+    
+    final CityMap map = parent.map;
+    Object focus = parent.secureFocus;
+    if (! (focus instanceof Element)) return null;
+    
+    final Element sieged = (Element) focus;
+    if (sieged.destroyed()) return null;
+    
+    final Box2D area   = sieged.area().expandBy(-0.5f);
+    final Tile  from   = member.at();
+    final Tile  temp[] = new Tile[9];
+    final float range  = Nums.max(member.type.rangeDist, 1);
+    
+    final Vars.Ref <Tile> result = new Vars.Ref();
+    
+    /*
+    for (Tile t : sieged.perimeter(map)) {
+      if (Task.hasTaskFocus(t, JOB.COMBAT)) continue;
+      if (map.pathCache.openPathConnects(from, t)) {
+        result.value = t;
+        break;
+      }
+    }
+    //*/
+    
+    //*
+    Flood <Tile> flood = new Flood <Tile> () {
+      protected void addSuccessors(Tile front) {
+        if (result.value != null) return;
+        for (Tile n : CityMap.adjacent(front, temp, map)) {
+          if (n == null || area.distance(n.x, n.y) > range) continue;
+          tryAdding(n);
+          
+          boolean reach = map.pathCache.openPathConnects(from, n);
+          if (n.above == sieged || ! reach    ) continue;
+          if (Task.hasTaskFocus(n, JOB.COMBAT)) continue;
+          
+          result.value = n;
+          return;
+        }
+      }
+    };
+    flood.floodFrom(sieged.centre());
+    //*/
+    
+    TaskCombat task = new TaskCombat(member);
+    task.stands = result.value;
+    task.inMelee = CityMap.distance(task.stands, from) <= 1;
+    
+    if (task.configTask(parent, null, sieged, JOB.COMBAT, 0) != null) {
+      return task;
+    }
+    else return null;
   }
   
   
@@ -53,89 +148,54 @@ public class TaskCombat extends Task {
   }
   
   
-  static Actor findCombatTarget(Actor member, Formation parent) {
-    CityMap map = parent.map;
-    Tile point = parent.securedPoint;
-    
-    if (map == null) return null;
-    Pick <Actor> pick = new Pick();
-    
-    float seeBonus = AVG_FILE;
-    float range = member.type.sightRange + seeBonus;
-    
-    Series <Actor> others = map.actors;
-    if (others.size() > 100 || true) {
-      others = map.actorsInRange(member.at(), range);
-    }
-    
-    for (Actor other : others) if (hostile(other, member, map)) {
-      float distW = CityMap.distance(other.at(), member.at());
-      float distF = CityMap.distance(other.at(), point);
-      if (distF > range + 1) continue;
-      if (distW > range + 1) continue;
-      if (! map.pathCache.pathConnects(member.at(), other.at())) continue;
-      
-      pick.compare(other, 0 - distW);
-    }
-    
-    return pick.result();
+  static float attackPower(Actor a) {
+    if (a.state >= Actor.STATE_DEAD) return 0;
+    float stats = Nums.max(a.type.meleeDamage, a.type.rangeDamage);
+    stats += a.type.armourClass;
+    stats /= Nums.max(AVG_MELEE, AVG_MISSILE) + AVG_DEFEND;
+    stats *= 1 - ((a.injury + a.hunger) / a.type.maxHealth);
+    return stats;
   }
   
   
-  static Tile findSiegeTarget(Actor member, Formation parent) {
-    
-    CityMap map = parent.map;
-    Object focus = parent.secureFocus;
-    if (! (focus instanceof Element)) return null;
-    
-    Element sieged = (Element) focus;
-    if (sieged.destroyed()) return null;
-    
-    Pick <Tile> pick = new Pick();
-    for (Tile p : sieged.perimeter(map)) {
-      if (map.blocked(p.x, p.y)) continue;
-      Tile best = null;
-      
-      for (int dir : T_ADJACENT) {
-        Tile tile = map.tileAt(p.x + T_X[dir], p.y + T_Y[dir]);
-        if (tile == null || tile.above != sieged) continue;
-        if (Task.hasTaskFocus(tile, Task.JOB.COMBAT)) continue;
-        
-        best = tile;
-        break;
-      }
-      
-      float dist = CityMap.distance(member.at(), best);
-      pick.compare(best, 0 - dist);
-    }
-    
-    return pick.result();
+  static boolean checkMeleeBetter(Actor a) {
+    return a.type.meleeDamage > a.type.rangeDamage;
   }
-  
-  
   
   
   
   /**  Behavioural routines-
     */
-  protected void onTarget(Target other) {
-    if (actor.inCombat() && other instanceof Actor) {
-      actor.performAttack((Actor) other);
-    }
-    if (actor.inCombat() && other instanceof Tile) {
-      Element siege = (Element) ((Tile) other).above;
-      actor.performAttack(siege);
-    }
+  boolean checkAndUpdateTask() {
+    inMelee = checkMeleeBetter(actor);
+    return super.checkAndUpdateTask();
   }
   
   
+  void toggleFocus(boolean active) {
+    super.toggleFocus(active);
+    if (stands == null) return;
+    stands.setFocused(actor, active);
+  }
+  
+  
+  float actionRange() {
+    return inMelee ? 0.1f : actor.type.rangeDist;
+  }
+
+
+  protected void onTarget(Target other) {
+    Type type = other.type();
+    if (type.isActor()) {
+      actor.performAttack((Actor) other, inMelee);
+    }
+    if (type.isBuilding() || type.isFixture()) {
+      Element siege = (Element) ((Tile) other).above;
+      actor.performAttack(siege, inMelee);
+    }
+  }
   
 }
-
-
-
-
-
 
 
 

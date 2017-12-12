@@ -171,7 +171,7 @@ public class Box2D {
   
   /**  Other utility methods-
     */
-  public Box2D expandBy(int e) {
+  public Box2D expandBy(float e) {
     return set(xpos - e, ypos - e, xdim + (e * 2), ydim + (e * 2));
   }
   

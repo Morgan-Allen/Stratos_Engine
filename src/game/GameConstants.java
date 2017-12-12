@@ -155,10 +155,11 @@ public class GameConstants {
     AVG_ARMY_SIZE    = 16  ,
     AVG_RANKS        = 4   ,
     AVG_FILE         = 4   ,
-    AVG_ATTACK       = 2   ,
+    AVG_MELEE        = 2   ,
+    AVG_MISSILE      = 1   ,
     AVG_DEFEND       = 2   ,
     AVG_SIGHT        = 6   ,
-    AVG_RANGE        = 1   ,
+    AVG_RANGE        = 3   ,
     MAX_EXPLORE_DIST = 200 ,
     //
     //  Trade and migration-
@@ -189,10 +190,8 @@ public class GameConstants {
   ;
   
   
-  
-  /**  Economic constants-
+  /**  Specialise sub-type classes:
     */
-  private static List <Good> GOODS_LIST = new List();
   static class Good extends Type {
     
     int price;
@@ -205,6 +204,53 @@ public class GameConstants {
       this.pathing = PATH_HINDER;
     }
   }
+  
+  static class Terrain extends Type {
+    
+    int terrainID = 0;
+    Type  fixtures[] = new Type [0];
+    Float weights [] = new Float[0];
+    
+    Terrain(String name, int index) {
+      super("terrain_"+index, IS_TERRAIN);
+      this.name      = name ;
+      this.terrainID = index;
+      this.pathing   = PATH_FREE;
+      TERRAINS_LIST.add(this);
+    }
+    
+    void attachFixtures(Object... args) {
+      Object split[][] = Visit.splitByModulus(args, 2);
+      fixtures = (Type []) castArray(split[0], Type .class);
+      weights  = (Float[]) castArray(split[1], Float.class);
+    }
+  }
+  
+  static class WalkerType extends Type {
+    
+    WalkerType(String ID, int category, int socialClass) {
+      super(ID, category);
+      this.socialClass = socialClass;
+      this.mobile      = true;
+    }
+    
+    WalkerType(String ID, int category) {
+      this(ID, category, CLASS_COMMON);
+    }
+  }
+
+  static class BuildType extends Type {
+    
+    BuildType(String ID, int category) {
+      super(ID, category);
+    }
+  }
+  
+  
+  
+  /**  Economic constants-
+    */
+  private static List <Good> GOODS_LIST = new List();
   final public static Good
     
     //  Note- 'void' is used to mark foundations for clearing during
@@ -222,7 +268,6 @@ public class GameConstants {
     IS_VENDOR  = new Good("Is Market"   , -1 ),
     IS_TRADER  = new Good("Is Trader"   , -1 ),
     IS_HOUSING = new Good("Is Housing"  , -1 ),
-    ///IS_WALL    = new Good("Is Wall"     , -1 ),
     IS_TOWER   = new Good("Is Tower"    , -1 ),
     IS_GATE    = new Good("Is Gate"     , -1 ),
     IS_CISTERN = new Good("Is Cistern"  , -1 ),
@@ -263,27 +308,6 @@ public class GameConstants {
   
 
   private static List <Terrain> TERRAINS_LIST = new List();
-  static class Terrain extends Type {
-    
-    int terrainID = 0;
-    Type  fixtures[] = new Type [0];
-    Float weights [] = new Float[0];
-    
-    Terrain(String name, int index) {
-      super("terrain_"+index, IS_TERRAIN);
-      this.name      = name ;
-      this.terrainID = index;
-      this.pathing   = PATH_FREE;
-      TERRAINS_LIST.add(this);
-    }
-    
-    void attachFixtures(Object... args) {
-      Object split[][] = Visit.splitByModulus(args, 2);
-      fixtures = (Type []) castArray(split[0], Type .class);
-      weights  = (Float[]) castArray(split[1], Float.class);
-    }
-    
-  }
   final static Terrain
     EMPTY  = new Terrain("Empty" , 0),
     MEADOW = new Terrain("Meadow", 1),
@@ -304,10 +328,10 @@ public class GameConstants {
     ALL_ROCKS[] = { DESERT_ROCK1, DESERT_ROCK2 },
     ALL_CLAYS[] = { CLAY_BANK1 }
   ;
-  final static Type
-    TAPIR   = new Type("animal_tapir" , IS_ANIMAL_ACT),
-    QUAIL   = new Type("animal_quail" , IS_ANIMAL_ACT),
-    JAGUAR  = new Type("animal_jaguar", IS_ANIMAL_ACT),
+  final static WalkerType
+    TAPIR   = new WalkerType("animal_tapir" , IS_ANIMAL_ACT),
+    QUAIL   = new WalkerType("animal_quail" , IS_ANIMAL_ACT),
+    JAGUAR  = new WalkerType("animal_jaguar", IS_ANIMAL_ACT),
     ALL_ANIMALS[] = { TAPIR, QUAIL, JAGUAR }
   ;
   static {
@@ -335,27 +359,27 @@ public class GameConstants {
     TAPIR .name        = "Tapir";
     TAPIR .habitats    = new Terrain[] { JUNGLE, MEADOW };
     TAPIR .predator    = false;
-    TAPIR .attackScore = 1;
-    TAPIR .defendScore = 3;
+    TAPIR .meleeDamage = 1;
+    TAPIR .armourClass = 3;
     TAPIR .maxHealth   = 9;
     
     QUAIL .name        = "Quail";
     QUAIL .habitats    = new Terrain[] { MEADOW, DESERT };
     QUAIL .predator    = false;
-    QUAIL .attackScore = 1;
-    QUAIL .defendScore = 1;
+    QUAIL .meleeDamage = 0;
+    QUAIL .armourClass = 1;
     QUAIL .maxHealth   = 2;
     
     JAGUAR.name        = "Jaguar";
     JAGUAR.habitats    = new Terrain[] { JUNGLE };
     JAGUAR.predator    = true;
-    JAGUAR.attackScore = 5;
-    JAGUAR.defendScore = 3;
+    JAGUAR.meleeDamage = 5;
+    JAGUAR.armourClass = 3;
     JAGUAR.maxHealth   = 8;
     
     for (Type s : ALL_ANIMALS) {
+      s.rangeDamage = -1;
       s.lifespan = s.predator ? HUNTER_LIFESPAN : GRAZER_LIFESPAN;
-      s.mobile   = true;
     }
     
     int i = 0;
@@ -392,13 +416,6 @@ public class GameConstants {
   
   /**  Walker types-
     */
-  static class WalkerType extends Type {
-    WalkerType(String ID, int category, int socialClass) {
-      super(ID, category);
-      this.socialClass = socialClass;
-      this.mobile      = true;
-    }
-  }
   final static WalkerType
     NO_WALKERS[] = new WalkerType[0],
     
@@ -427,13 +444,15 @@ public class GameConstants {
     SOLDIER .name = "Soldier" ;
     PRIEST  .name = "Priest"  ;
     
-    HUNTER .attackScore = 4;
-    HUNTER .defendScore = 3;
-    HUNTER .attackRange = 6;
+    HUNTER .rangeDamage = 4;
+    HUNTER .armourClass = 3;
+    HUNTER .rangeDist   = 6;
     HUNTER .genderRole  = SEX_MALE;
     
-    SOLDIER.attackScore = 5;
-    SOLDIER.defendScore = 4;
+    SOLDIER.meleeDamage = 5;
+    SOLDIER.rangeDamage = 2;
+    SOLDIER.rangeDist   = 4;
+    SOLDIER.armourClass = 4;
     SOLDIER.maxHealth   = 6;
     SOLDIER.genderRole  = SEX_MALE;
   }
@@ -441,11 +460,6 @@ public class GameConstants {
   
   /**  Infrastructure types-
     */
-  static class BuildType extends Type {
-    BuildType(String ID, int category) {
-      super(ID, category);
-    }
-  }
   final static int
     AMBIENCE_MIN = -10,
     AMBIENCE_AVG =  5 ,
@@ -796,7 +810,7 @@ public class GameConstants {
     //    Aspects for warfare & lordship, fire & hearth
     //    Tonatiuh, Mixcoatl, Xiuhtecuhtli/Chantico
     //  Mictecacehuatl:
-    //    Aspects for transmigration, ancestry & eclipse
+    //    Aspects for transmigration, ancestry, consumption & eclipse
     //    Xolotl/Nanahuatzin, Coyolxauhqui/Itzapapalotl/Oxomoco, Quilaztli
     //  Xipe Totec:
     //    Aspects of decay & abundance, factional tension

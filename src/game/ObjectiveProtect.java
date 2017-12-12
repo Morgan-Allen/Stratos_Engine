@@ -55,11 +55,11 @@ public class ObjectiveProtect extends Formation.Objective {
       guardPoints.clear();
       return;
     }
-    if (parent.securedPoint == focus.at() && map.time < nextUpdate) {
+    if (parent.securePoint == focus.at() && map.time < nextUpdate) {
       return;
     }
     
-    parent.securedPoint = focus.at();
+    parent.securePoint = focus.at();
     lastUpdateTime = map.time;
     Type type = focus.type();
     
@@ -144,8 +144,7 @@ public class ObjectiveProtect extends Formation.Objective {
     
     //  TODO:  Don't attack targets if that means abandoning your post!
     
-    Actor target = a.inCombat() ? null : TaskCombat.findCombatTarget(a, parent);
-    TaskCombat taskC = TaskCombat.configCombat(a, target, parent);
+    TaskCombat taskC = TaskCombat.actorCombat(a, parent);
     if (taskC != null) {
       a.assignTask(taskC);
       return;
@@ -163,8 +162,7 @@ public class ObjectiveProtect extends Formation.Objective {
     
     //  TODO:  Don't attack targets if that means abandoning your post!
     
-    Actor target = a.inCombat() ? null : TaskCombat.findCombatTarget(a, parent);
-    TaskCombat taskC = TaskCombat.configCombat(a, target, parent);
+    TaskCombat taskC = TaskCombat.actorCombat(a, parent);
     if (taskC != null) {
       a.assignTask(taskC);
       return;

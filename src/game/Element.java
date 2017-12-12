@@ -30,8 +30,7 @@ public class Element implements Session.Saveable, Target {
   private int   stateBits = 0;
   
   private List <Actor> focused = null;
-  Object pathFlag;  //  Note- this is used purely during path-searches,
-                    //  and doesn't have to be saved or loaded.
+  private Object pathFlag;  //  Note- used during temporary search.
   
   
   Element(Type type) {
@@ -82,6 +81,21 @@ public class Element implements Session.Saveable, Target {
   
   Visit <Tile> perimeter(CityMap map) {
     return map.tilesAround(at.x, at.y, type.wide, type.high);
+  }
+  
+  
+  Box2D area() {
+    if (at == null) return null;
+    return new Box2D(at.x, at.y, type.wide, type.high);
+  }
+  
+  
+  Tile centre() {
+    if (at == null) return null;
+    return map.tileAt(
+      at.x + (type.wide / 2),
+      at.y + (type.high / 2)
+    );
   }
   
   

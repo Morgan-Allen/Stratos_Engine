@@ -182,58 +182,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     }
     //
     //  Task updates-
-    if (task != null && task.checkAndUpdatePathing()) {
-      Task     task     = this.task;
-      Employer origin   = task.origin;
-      Building visits   = task.visits;
-      Target   target   = task.target;
-      boolean  combat   = inCombat();
-      Pathing  pathEnd  = (Pathing) Visit.last(task.path);
-      float    distance = CityMap.distance(at, pathEnd);
-      float    minRange = 0.1f;
-      
-      if (combat && ! indoors()) minRange = type.attackRange;
-      
-      if (visits != null && inside == visits) {
-        if (task.timeSpent++ <= task.maxTime) {
-          onVisit(visits);
-          task.onVisit(visits);
-          visits.visitedBy(this);
-          if (origin != null) origin.actorVisits(this, visits);
-        }
-        else {
-          beginNextBehaviour();
-        }
-      }
-      else if (distance <= minRange) {
-        if (target != null && task.timeSpent++ <= task.maxTime) {
-          onTarget(target);
-          task.onTarget(target);
-          target.targetedBy(this);
-          if (origin != null) origin.actorTargets(this, target);
-        }
-        else {
-          beginNextBehaviour();
-        }
-      }
-      else {
-        int index = Nums.clamp(task.pathIndex + 1, task.path.length);
-        if (index != -1) {
-          Pathing ahead = task.path[task.pathIndex = index];
-          setLocation(ahead.at(), map);
-          if (ahead.isTile()) setInside(inside, false);
-          else setInside(ahead, true);
-        }
-        else {
-          task.path = null;
-          task.pathIndex = -1;
-        }
-      }
-      //
-      //  Either way, allow the employer to monitor yourself:
-      if (origin != null) origin.actorUpdates(this);
-    }
-    else {
+    if (task == null || ! task.checkAndUpdateTask()) {
       beginNextBehaviour();
     }
     //
@@ -317,15 +266,9 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   /**  Miscellaneous behaviour triggers:
     */
   void assignTask(Task task) {
-    ///I.say("\n"+this+" assigned task: "+task);
-    ///I.reportStackTrace();
-    
-    Target oldT = Task.focusTarget(this.task);
+    if (this.task != null) this.task.toggleFocus(false);
     this.task = task;
-    Target newT = Task.focusTarget(this.task);
-    
-    if (oldT != null) oldT.setFocused(this, false);
-    if (newT != null) newT.setFocused(this, true );
+    if (this.task != null) this.task.toggleFocus(true );
   }
   
   
@@ -455,15 +398,13 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   /**  Combat and survival-related code:
     */
-  void performAttack(Element other) {
-    if (other == null || type.attackScore <= 0) return;
+  void performAttack(Element other, boolean melee) {
+    int damage = melee ? type.meleeDamage : type.rangeDamage;
+    if (other == null || damage <= 0) return;
     
-    int damage = Rand.index(type.attackScore + other.type.defendScore) + 1;
-    damage = Nums.max(0, damage - other.type.defendScore);
-    
-    if (damage > 0) {
-      other.takeDamage(damage);
-    }
+    damage = Rand.index(damage + other.type.armourClass) + 1;
+    damage = Nums.max(0, damage - other.type.armourClass);
+    if (damage > 0) other.takeDamage(damage);
   }
   
   

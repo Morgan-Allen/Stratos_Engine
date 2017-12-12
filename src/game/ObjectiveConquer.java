@@ -35,22 +35,29 @@ public class ObjectiveConquer extends Formation.Objective {
     
     CityMap map   = parent.map;
     City    home  = parent.homeCity;
-    Tile    point = parent.securedPoint;
+    Tile    entry = parent.entryPoint;
+    Tile    point = parent.securePoint;
     Object  focus = parent.secureFocus;
-    City    siege = parent.securedCity;
+    City    siege = parent.secureCity;
     
     //
     //  Determine whether your current target has been beaten yet-
+    
     if (focus instanceof Formation) {
       Formation opposed = (Formation) focus;
-      Tile secures = opposed.securedPoint;
+      Tile secures = opposed.securePoint;
       int  power   = opposed.powerSum();
-      if (secures == point && power > 0) return false;
+      boolean hasPath = map.pathCache.pathConnects(entry, secures);
+      if (hasPath && secures == point && power > 0) return false;
     }
     
     if (focus instanceof Element) {
       Element sieged = (Element) focus;
-      if (! sieged.destroyed()) return false;
+      boolean hasPath = false;
+      for (Tile t : sieged.perimeter(map)) {
+        if (map.pathCache.pathConnects(entry, t)) hasPath = true;
+      }
+      if (hasPath && ! sieged.destroyed()) return false;
     }
     
     if (focus instanceof City) {
@@ -74,10 +81,10 @@ public class ObjectiveConquer extends Formation.Objective {
     Pick <Option> pick = new Pick();
     
     for (Formation f : map.city.formations) {
-      if (f.away || f.securedPoint == null || ! f.active) continue;
+      if (f.away || f.securePoint == null || ! f.active) continue;
       
       Option o = new Option();
-      o.secures = f.securedPoint;
+      o.secures = f.securePoint;
       o.target  = f;
       float dist = CityMap.distance(o.secures, point);
       pick.compare(o, 0 - dist);
@@ -100,14 +107,19 @@ public class ObjectiveConquer extends Formation.Objective {
       //  the siege point, all subsequent path-checks will be made from
       //  there, and your troops may not have room to stand.
       
-      SiegeSearch search = new SiegeSearch(map, point, o.secures);
+      SiegeSearch search = new SiegeSearch(map, entry, o.secures);
       search.doSearch();
+      ///I.say("\nConducted search...");
       
       Pathing path[] = (Pathing[]) search.fullPath(Pathing.class);
       for (Pathing p : path) {
+        
         Tile t = (Tile) p;
         Element above = t.above;
-        if (above != null && map.blocked(t)) {
+        int pathT = t.pathType();
+        ///I.say("  "+above+": "+pathT);
+        
+        if (above != null && (pathT == PATH_BLOCK || pathT == PATH_WALLS)) {
           parent.beginSecuring(t, parent.facing, above);
           return true;
         }
@@ -164,15 +176,13 @@ public class ObjectiveConquer extends Formation.Objective {
     */
   void selectActorBehaviour(Actor a, Formation parent) {
     
-    Actor target = a.inCombat() ? null : TaskCombat.findCombatTarget(a, parent);
-    TaskCombat taskC = TaskCombat.configCombat(a, target, parent);
+    TaskCombat taskC = TaskCombat.actorCombat(a, parent);
     if (taskC != null) {
       a.assignTask(taskC);
       return;
     }
     
-    Tile sieges = a.inCombat() ? null : TaskCombat.findSiegeTarget(a, parent);
-    TaskCombat taskS = TaskCombat.configCombat(a, sieges, parent);
+    TaskCombat taskS = TaskCombat.siegeCombat(a, parent);
     if (taskS != null) {
       a.assignTask(taskS);
       return;
@@ -187,8 +197,7 @@ public class ObjectiveConquer extends Formation.Objective {
   
   
   void actorUpdates(Actor a, Formation parent) {
-    Actor target = a.inCombat() ? null : TaskCombat.findCombatTarget(a, parent);
-    TaskCombat taskC = TaskCombat.configCombat(a, target, parent);
+    TaskCombat taskC = TaskCombat.actorCombat(a, parent);
     if (taskC != null) {
       a.assignTask(taskC);
       return;

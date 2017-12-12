@@ -131,7 +131,7 @@ public class ActorAsAnimal extends Actor {
     
     if (jobType() == JOB.HUNTING) {
       Actor prey = (Actor) target;
-      performAttack(prey);
+      performAttack(prey, TaskCombat.checkMeleeBetter(this));
       
       if (prey.alive()) {
         beginAttack(prey, JOB.HUNTING, null);

@@ -78,7 +78,7 @@ public class TestMilitary extends Test {
         enemies.beginSecuring(homeC);
         World.Journey j = world.beginJourney(awayC, homeC, enemies);
         world.completeJourney(j);
-        enemies.beginSecuring(troops.securedPoint, TileConstants.W, troops);
+        enemies.beginSecuring(troops.securePoint, TileConstants.W, troops);
         invaded = true;
       }
       
