@@ -75,18 +75,20 @@ public class Element implements Session.Saveable, Target {
   /**  Entering and exiting the map-
     */
   Visit <Tile> footprint(CityMap map) {
+    if (at == null) return map.tilesAround(0, 0, 0, 0);
     return map.tilesUnder(at.x, at.y, type.wide, type.high);
   }
   
   
   Visit <Tile> perimeter(CityMap map) {
+    if (at == null) return map.tilesAround(0, 0, 0, 0);
     return map.tilesAround(at.x, at.y, type.wide, type.high);
   }
   
   
   Box2D area() {
     if (at == null) return null;
-    return new Box2D(at.x, at.y, type.wide, type.high);
+    return new Box2D(at.x - 0.5f, at.y - 0.5f, type.wide, type.high);
   }
   
   
@@ -180,6 +182,11 @@ public class Element implements Session.Saveable, Target {
   
   public Tile at() {
     return at;
+  }
+  
+  
+  public boolean isTile() {
+    return false;
   }
   
   

@@ -160,6 +160,7 @@ public class GameConstants {
     AVG_DEFEND       = 2   ,
     AVG_SIGHT        = 6   ,
     AVG_RANGE        = 3   ,
+    MAX_RANGE        = 6   ,
     MAX_EXPLORE_DIST = 200 ,
     //
     //  Trade and migration-
@@ -843,6 +844,7 @@ public class GameConstants {
     
     Type type();
     Tile at();
+    boolean isTile();
     //CityMap map();
     boolean onMap();
     
@@ -855,7 +857,6 @@ public class GameConstants {
   
   static interface Pathing extends Target {
     
-    boolean isTile();
     int pathType();
     Pathing[] adjacent(Pathing temp[], CityMap map);
     boolean allowsEntryFrom(Pathing p);

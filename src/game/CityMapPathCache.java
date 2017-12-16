@@ -8,7 +8,6 @@ import static game.GameConstants.Target;
 
 
 
-
 public class CityMapPathCache {
   
   
@@ -32,9 +31,9 @@ public class CityMapPathCache {
     Batch <Tile> toAdd = new Batch(4);
     Batch <Tile> toRem = new Batch(4);
     
-    //List <Area> borders = new List();
     List <Border> borders = new List();
     AreaGroup group;
+    AreaGroup openGroup;
     
     Object pathFlag = null;
     
@@ -74,10 +73,14 @@ public class CityMapPathCache {
   
   List <Area> needRefresh = new List();
   List <Area> needDelete  = new List();
+
+  //  Note:  These are refreshed frequently, so there's no need to save or load-
   
   private Pathing temp[] = new Pathing[9];
   private Tile tempForFrom[] = new Tile[9];
   private Tile tempForGoes[] = new Tile[9];
+
+  Table <String, Object> tempCache;
   
   
   CityMapPathCache(CityMap map) {
@@ -89,6 +92,7 @@ public class CityMapPathCache {
     int dirtyGS = Nums.round(map.size * 1f / AREA_SIZE, 1, true);
     areaLookup = new Area[size][size];
     flagDirty  = new boolean[dirtyGS][dirtyGS];
+    tempCache  = new Table((size * size) / 2);
   }
   
   
@@ -103,11 +107,29 @@ public class CityMapPathCache {
   
   
   
+  /**  Generic caching methods-
+    */
+  Object openGroupHandle(Tile at) {
+    return groupFor(areaFor(at), true);
+  }
+  
+  
+  Object getCache(String key) {
+    return tempCache.get(key);
+  }
+  
+  
+  void putCache(String key, Object object) {
+    tempCache.put(key, object);
+  }
+  
+  
+  
   /**  Query methods for distance and connection-
     */
   boolean pathConnects(Tile from, Tile goes) {
-    AreaGroup fromG = groupFor(areaFor(from));
-    AreaGroup goesG = groupFor(areaFor(goes));
+    AreaGroup fromG = groupFor(areaFor(from), false);
+    AreaGroup goesG = groupFor(areaFor(goes), false);
     if (fromG == null || goesG == null) return false;
     return fromG == goesG;
   }
@@ -116,30 +138,10 @@ public class CityMapPathCache {
   boolean openPathConnects(Tile from, Tile goes) {
     final Area fromA = areaFor(from);
     final Area goesA = areaFor(goes);
-    AreaGroup fromG = groupFor(fromA);
-    AreaGroup goesG = groupFor(goesA);
+    AreaGroup fromG = groupFor(fromA, true);
+    AreaGroup goesG = groupFor(goesA, true);
     if (fromG == null || goesG == null) return false;
-    if (fromG != goesG) return false;
-    
-    //  TODO:  Later, you'll want separate group-layers for each faction.
-    //  See to that.
-    final Vars.Bool matched = new Vars.Bool();
-    new Flood <Area> () {
-      protected void addSuccessors(Area front) {
-        if (matched.val) return;
-        
-        for (Border b : front.borders) if (b.open) {
-          if (b.with == goesA) {
-            matched.val = true;
-            return;
-          }
-          
-          if (b.with.flaggedWith() != null) continue;
-          tryAdding(b.with);
-        }
-      }
-    }.floodFrom(fromA);
-    return matched.val;
+    return fromG == goesG;
   }
   
   
@@ -185,7 +187,7 @@ public class CityMapPathCache {
     Pick <Tile> pick = new Pick();
     
     for (Tile t : CityMap.adjacent(at, null, map)) {
-      AreaGroup group = groupFor(areaFor(t));
+      AreaGroup group = groupFor(areaFor(t), false);
       if (group != null) pick.compare(t, group.totalTiles);
     }
     return pick.result();
@@ -193,14 +195,14 @@ public class CityMapPathCache {
   
   
   boolean hasGroundAccess(Tile at) {
-    AreaGroup group = groupFor(areaFor(at));
+    AreaGroup group = groupFor(areaFor(at), false);
     if (group == null || ! group.hasGroundAccess) return false;
     return true;
   }
   
   
   int groundTileAccess(Tile at) {
-    AreaGroup group = groupFor(areaFor(at));
+    AreaGroup group = groupFor(areaFor(at), false);
     if (group == null || ! group.hasGroundAccess) return 0;
     return group.totalTiles;
   }
@@ -279,13 +281,15 @@ public class CityMapPathCache {
     //  remove a single tile.  (Note that in the case of deleting a
     //  tile, there must not be a potential bottleneck.)
     if (edge != null && ! (multiArea || edge.flagDeletion)) {
-      AreaGroup group = groupFor(edge);
+      AreaGroup openG   = groupFor(edge, true );
+      AreaGroup closedG = groupFor(edge, false);
       
       if (blocked && numGaps < 2) {
         areaLookup[at.x][at.y] = null;
         edge.toRem.add(at);
-        edge .numTiles   -= 1;
-        group.totalTiles -= 1;
+        edge   .numTiles   -= 1;
+        openG  .totalTiles -= 1;
+        closedG.totalTiles -= 1;
         markForRefresh(edge);
         didRefresh = true;
         if (map.settings.reportPathCache) {
@@ -296,8 +300,9 @@ public class CityMapPathCache {
       if (core == null && ! blocked) {
         areaLookup[at.x][at.y] = edge;
         edge.toAdd.add(at);
-        edge .numTiles   += 1;
-        group.totalTiles += 1;
+        edge   .numTiles   += 1;
+        openG  .totalTiles += 1;
+        closedG.totalTiles += 1;
         markForRefresh(edge);
         didRefresh = true;
         if (map.settings.reportPathCache) {
@@ -382,8 +387,11 @@ public class CityMapPathCache {
     updateDirtyBounds();
     
     for (Area a : areas) {
-      groupFor(a);
+      groupFor(a, true );
+      groupFor(a, false);
     }
+    
+    tempCache.clear();
   }
   
   
@@ -549,9 +557,9 @@ public class CityMapPathCache {
   
   /**  Querying and generating area-group membership:
     */
-  AreaGroup groupFor(Area area) {
+  AreaGroup groupFor(final Area area, final boolean open) {
     if (area == null) return null;
-    AreaGroup group = area.group;
+    AreaGroup group = open ? area.openGroup : area.group;
     if (group != null && ! group.flagDeletion) return group;
     
     if (group != null && group.flagDeletion) {
@@ -562,6 +570,7 @@ public class CityMapPathCache {
     Series <Area> covered = new Flood <Area> () {
       protected void addSuccessors(Area front) {
         for (Border n : front.borders) {
+          if (open && ! n.open) continue;
           if (n.with.flaggedWith() != null) continue;
           tryAdding(n.with);
         }
@@ -575,13 +584,14 @@ public class CityMapPathCache {
     
     for (Area a : covered) {
       a.pathFlag = null;
-      a.group = group;
+      if (open) a.openGroup = group;
+      else a.group = group;
       group.hasGroundAccess |= a.grounded;
       group.totalTiles += a.numTiles;
     }
     
     if (map.settings.reportPathCache) {
-      I.say("\n  Adding Group "+group+": ");
+      I.say("\n  Adding "+(open ? "Open" : "Closed")+" Group "+group+": ");
       for (Area a : group.areas) I.add(a+" ");
     }
     
@@ -594,8 +604,9 @@ public class CityMapPathCache {
     if (map.settings.reportPathCache) {
       I.say("\n  Deleting Group "+group);
     }
-    for (Area a : group.areas) if (a.group == group) {
-      a.group = null;
+    for (Area a : group.areas) {
+      if (a.group     == group) a.group = null;
+      if (a.openGroup == group) a.group = null;
     }
     group.areas = null;
     groups.remove(group);

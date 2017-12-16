@@ -61,9 +61,7 @@ public class CityMapFog {
   /**  Regular updates-
     */
   void liftFog(Tile around, float range) {
-    if (! map.settings.toggleFog) {
-      return;
-    }
+    if (! map.settings.toggleFog) return;
     
     Box2D area = new Box2D(around.x, around.y, 0, 0);
     area.expandBy(Nums.round(range, 1, true));

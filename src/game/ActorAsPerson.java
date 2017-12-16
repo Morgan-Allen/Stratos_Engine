@@ -130,6 +130,8 @@ public class ActorAsPerson extends Actor {
   /**  Handling sight-range:
     */
   void updateVision() {
+    if (indoors() || ! onMap()) return;
+    
     float range = type.sightRange * (map.fog.lightLevel() + 1f) / 2;
     map.fog.liftFog(at(), range);
     

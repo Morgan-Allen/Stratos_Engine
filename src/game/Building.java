@@ -145,11 +145,6 @@ public class Building extends Element implements Pathing, Employer {
   }
   
   
-  public boolean isTile() {
-    return false;
-  }
-  
-  
   
   /**  Construction and upgrade-related methods:
     */

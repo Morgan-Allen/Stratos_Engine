@@ -320,6 +320,7 @@ public class I {
       
       this.info = new JTextPane();
       this.info.setEditable(false);
+      this.info.setFont(new Font("Monaco", Font.PLAIN, 9));
       this.add(info);
       
       pane.addKeyListener(this);

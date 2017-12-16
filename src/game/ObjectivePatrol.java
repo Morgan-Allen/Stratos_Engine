@@ -8,7 +8,7 @@ import static game.GameConstants.*;
 
 
 
-public class ObjectiveProtect extends Formation.Objective {
+public class ObjectivePatrol extends Formation.Objective {
   
   
   CityMap map;
@@ -16,12 +16,12 @@ public class ObjectiveProtect extends Formation.Objective {
   List <Tile> guardPoints = new List();
   
   
-  public ObjectiveProtect() {
+  public ObjectivePatrol() {
     super();
   }
   
   
-  public ObjectiveProtect(Session s) throws Exception {
+  public ObjectivePatrol(Session s) throws Exception {
     super(s);
     
     map = (CityMap) s.loadObject();
@@ -63,9 +63,8 @@ public class ObjectiveProtect extends Formation.Objective {
     lastUpdateTime = map.time;
     Type type = focus.type();
     
-    
     //
-    //  In the case we're defending a wall, try to spread out across
+    //  In the case where we're defending a wall, try to spread out across
     //  the perimeter:
     if (type.isWall) {
       final int MAX_DIST = 16;
@@ -94,7 +93,6 @@ public class ObjectiveProtect extends Formation.Objective {
       guardPoints.clear();
       
       for (Pathing p : covered) {
-        //if (p.facing() == CENTRE   ) continue;
         if (p.flaggedWith() != null || ! p.isTile()) continue;
         for (Pathing n : p.adjacent(temp, map)) {
           if (n != null && n.isTile()) {
@@ -109,22 +107,15 @@ public class ObjectiveProtect extends Formation.Objective {
       
       for (Tile t : touched) t.flagWith(null);
     }
-    
-    else if (type.isActor()) {
-      
-    }
-    else {
-      
-    }
   }
   
   
   
   boolean updateTacticalTarget(Formation parent) {
     
-    //  TODO:  In the case of local garrisons being assigned to defend...
-    //  look for a nearby wall to garrison, close to an invading army's
-    //  entry point?
+    //  TODO:  Look for a tower or gate close to the map edge- but this is
+    //  really more a case of decent CouncilAI?  Not relevant for the typical
+    //  player, since they'll have direct control.
     
     return false;
   }
@@ -132,19 +123,22 @@ public class ObjectiveProtect extends Formation.Objective {
   
 
   Tile standLocation(Actor member, Formation parent) {
-    this.updateGuardPoints(parent);
+    
+    int span = MONTH_LENGTH, numRecruits = parent.recruits.size();
+    int epoch = (parent.map.time / span) % numRecruits;
+    
     int index = parent.recruits.indexOf(member);
     if (index == -1) return null;
+    
+    updateGuardPoints(parent);
+    index = (index + epoch) % numRecruits;
     return guardPoints.atIndex(index);
   }
   
   
-  
   void selectActorBehaviour(Actor a, Formation parent) {
     
-    //  TODO:  Don't attack targets if that means abandoning your post!
-    
-    TaskCombat taskC = TaskCombat.actorCombat(a, parent);
+    TaskCombat taskC = a.inCombat() ? null : TaskCombat.nextReaction(a, parent);
     if (taskC != null) {
       a.assignTask(taskC);
       return;
@@ -159,10 +153,7 @@ public class ObjectiveProtect extends Formation.Objective {
   
   
   void actorUpdates(Actor a, Formation parent) {
-    
-    //  TODO:  Don't attack targets if that means abandoning your post!
-    
-    TaskCombat taskC = TaskCombat.actorCombat(a, parent);
+    TaskCombat taskC = a.inCombat() ? null : TaskCombat.nextReaction(a, parent);
     if (taskC != null) {
       a.assignTask(taskC);
       return;
@@ -175,10 +166,6 @@ public class ObjectiveProtect extends Formation.Objective {
   }
   
 }
-
-
-
-
 
 
 

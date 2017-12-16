@@ -75,7 +75,7 @@ public class Task implements Session.Saveable {
     }
     pathIndex = s.loadInt();
     offMap    = s.loadBool();
-    target    = (Target  ) s.loadObject();
+    target    = loadTarget(actor.map, s);
     visits    = (Building) s.loadObject();
   }
   
@@ -104,7 +104,7 @@ public class Task implements Session.Saveable {
     }
     s.saveInt(pathIndex);
     s.saveBool(offMap);
-    s.saveObject(target);
+    saveTarget(target, actor.map, s);
     s.saveObject(visits);
   }
   
@@ -149,29 +149,32 @@ public class Task implements Session.Saveable {
     */
   boolean checkAndUpdateTask() {
     
-    Target focus = focusTarget(this);
-    if (focus == null || ! focus.onMap()) {
+    Target focusT = focusTarget(this);
+    if (focusT == null || ! focusT.onMap()) {
       return false;
     }
-    Target target = pathTarget();
-    if (target == null || ! target.onMap()) {
+    Target pathT = pathTarget();
+    if (pathT == null || ! pathT.onMap()) {
       return false;
     }
     
-    if (! checkPathing(target)) {
+    if (! checkPathing(pathTarget())) {
       this.path = updatePathing();
       this.pathIndex = -1;
       
-      if (! checkPathing(target)) {
+      if (! checkPathing(pathTarget())) {
         return false;
       }
     }
     
-    CityMap map      = actor.map;
-    Pathing inside   = actor.inside;
-    Pathing pathEnd  = (Pathing) Visit.last(path);
-    float   distance = CityMap.distance(actor.at(), pathEnd);
-    float   minRange = actionRange();
+    CityMap  map      = actor.map;
+    Pathing  inside   = actor.inside;
+    Pathing  path[]   = this.path;
+    Pathing  pathEnd  = (Pathing) Visit.last(path);
+    float    distance = CityMap.distance(actor.at(), pathEnd);
+    float    minRange = actionRange();
+    Building visits   = this.visits;
+    Target   target   = this.target;
     
     if (visits != null && inside == visits) {
       if (timeSpent++ <= maxTime) {
@@ -200,9 +203,13 @@ public class Task implements Session.Saveable {
     else {
       int index = Nums.clamp(pathIndex + 1, path.length);
       Pathing ahead = path[pathIndex = index];
-      actor.setLocation(ahead.at(), map);
+      
+      //  TODO:  You should allow for climbing attempts, if the ensuing tile
+      //  is a wall and the last tile wasn't, or vice versa.
+      
       if (ahead.isTile()) actor.setInside(inside, false);
       else actor.setInside(ahead, true);
+      actor.setLocation(ahead.at(), map);
       return true;
     }
   }
@@ -242,11 +249,18 @@ public class Task implements Session.Saveable {
     return null;
   }
   
+
+  static boolean hasTaskFocus(Target t, JOB type, Actor except) {
+    if (t.focused().empty()) return false;
+    for (Actor a : t.focused()) {
+      if (a != except && a.jobType() == type) return true;
+    }
+    return false;
+  }
+  
   
   static boolean hasTaskFocus(Target t, JOB type) {
-    if (t.focused().empty()) return false;
-    for (Actor a : t.focused()) if (a.jobType() == type) return true;
-    return false;
+    return hasTaskFocus(t, type, null);
   }
   
   

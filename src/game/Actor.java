@@ -17,7 +17,13 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     STATE_OKAY   = 1,
     STATE_SLEEP  = 2,
     STATE_DEAD   = 3,
-    STATE_DECOMP = 4
+    STATE_DECOMP = 4,
+    
+    MOVE_NORMAL  = 1,
+    MOVE_RUN     = 2,
+    MOVE_CLIMB   = 3,
+    MOVE_SNEAK   = 4,
+    MOVE_SWIM    = 5
   ;
   static int nextID = 0;
   int dirs[] = new int[4];
@@ -34,6 +40,8 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   Task task;
   Pathing inside;
+  int moveMode = MOVE_NORMAL;
+  Vec3D position = new Vec3D();
   
   Good  carried = null;
   float carryAmount = 0;
@@ -72,6 +80,8 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     
     task   = (Task   ) s.loadObject();
     inside = (Pathing) s.loadObject();
+    moveMode = s.loadInt();
+    position.loadFrom(s.input());
     
     carried     = (Good) s.loadObject();
     carryAmount = s.loadFloat();
@@ -104,6 +114,8 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     
     s.saveObject(task  );
     s.saveObject(inside);
+    s.saveInt(moveMode);
+    position.saveTo(s.output());
     
     s.saveObject(carried);
     s.saveFloat(carryAmount);
@@ -182,16 +194,15 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     }
     //
     //  Task updates-
+    if (home      != null) home     .actorUpdates(this);
+    if (work      != null) work     .actorUpdates(this);
+    if (formation != null) formation.actorUpdates(this);
     if (task == null || ! task.checkAndUpdateTask()) {
       beginNextBehaviour();
     }
     //
-    //  Update vision-
-    if (map != null && inside == null) {
-      updateVision();
-    }
-    //
-    //  And update your current health-
+    //  And update your current vision and health-
+    updateVision();
     updateAging();
     checkHealthState();
   }
@@ -237,6 +248,13 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     }
     Tile old = this.at();
     super.setLocation(at, map);
+    
+    if (at != null) {
+      float height = at.elevation;
+      if (inside == null && at.above != null) height += at.above.type.deep;
+      position.set(at.x, at.y, height);
+    }
+    
     map.flagActor(this, old, false);
     map.flagActor(this, at , true );
   }
@@ -402,6 +420,9 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     int damage = melee ? type.meleeDamage : type.rangeDamage;
     if (other == null || damage <= 0) return;
     
+    //  TODO:  Grant a bonus to hit/damage if you're on walls and your enemy
+    //  isn't.
+    
     damage = Rand.index(damage + other.type.armourClass) + 1;
     damage = Nums.max(0, damage - other.type.armourClass);
     if (damage > 0) other.takeDamage(damage);
@@ -493,7 +514,14 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   
   public String toString() {
-    String from = homeCity == null ? "" : " ("+homeCity.name+")";
+    String from = "";
+    if (map != null && map.city != null && homeCity != null) {
+      City.POSTURE p = map.city.posture(homeCity);
+      if (p == City.POSTURE.ENEMY ) from = " (E)";
+      if (p == City.POSTURE.ALLY  ) from = " (A)";
+      if (p == City.POSTURE.VASSAL) from = " (V)";
+      if (p == City.POSTURE.LORD  ) from = " (L)";
+    }
     return type.name+" "+ID+from;
   }
   

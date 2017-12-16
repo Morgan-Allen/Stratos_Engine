@@ -111,9 +111,11 @@ public class Formation implements
     }
     
     abstract boolean updateTacticalTarget(Formation parent);
-    abstract void selectActorBehaviour(Actor w, Formation parent);
-    abstract void actorUpdates(Actor w, Formation parent);
-    abstract void actorTargets(Actor actor, Target other, Formation parent);
+    abstract Tile standLocation(Actor a, Formation parent);
+    
+    abstract void selectActorBehaviour(Actor a, Formation parent);
+    abstract void actorUpdates(Actor a, Formation parent);
+    abstract void actorTargets(Actor a, Target other, Formation parent);
   }
   
   
@@ -154,7 +156,7 @@ public class Formation implements
     
     if (this.map != null) {
       this.exitsPoint = findTransitPoint(map, city);
-      beginSecuring(exitsPoint, 0, city); //  Make this face the border!
+      beginSecuring(exitsPoint, 0, city, map); //  Make this face the border!
     }
     else {
       beginJourney(homeCity, secureCity);
@@ -162,13 +164,14 @@ public class Formation implements
   }
   
   
-  void beginSecuring(Tile point, int facing, Object focus) {
+  void beginSecuring(Tile point, int facing, Object focus, CityMap map) {
     homeCity.formations.toggleMember(this, true);
     
     this.securePoint = point ;
     this.facing      = facing;
     this.secureFocus = focus ;
     this.active      = true  ;
+    this.map         = map   ;
   }
   
   
@@ -190,14 +193,18 @@ public class Formation implements
     */
   void update() {
     
-    //  Update any tactical targets-
-    if (away && map != null) {
-      objective.updateTacticalTarget(this);
-    }
-    
     //  Cull any casualties...
     for (Actor a : recruits) if (a.dead()) {
       recruits.remove(a);
+    }
+    if (active && recruits.empty()) {
+      disbandFormation();
+      return;
+    }
+    
+    //  Update any tactical targets-
+    if (away && map != null) {
+      objective.updateTacticalTarget(this);
     }
     
     //  This is a hacky way of saying "I want to go to a different city, is
@@ -245,7 +252,7 @@ public class Formation implements
       for (Actor w : recruits) {
         w.enterMap(map, entryPoint.x, entryPoint.y, 1);
       }
-      beginSecuring(entryPoint, N, null);
+      beginSecuring(entryPoint, N, null, map);
       
       if (home) {
         this.away = false;
@@ -277,35 +284,11 @@ public class Formation implements
   
   /**  Other utility methods:
     */
-  Tile standLocation(Actor member) {
-    
-    Tile c = this.securePoint;
-    if (c == null) return null;
-    
-    int index = recruits.indexOf(member);
-    if (index == -1) return null;
-    
-    int ranks = AVG_RANKS   ;
-    int file  = AVG_FILE    ;
-    int x     = index % file;
-    int y     = index / file;
-    x += c.x - (file  / 2);
-    y += c.y + (ranks / 2);
-    
-    x = Nums.clamp(x, map.size);
-    y = Nums.clamp(y, map.size);
-    
-    //  TODO:  Find the nearest path-accessible point here!
-    
-    return map.tileAt(x, y);
-  }
-  
-  
   boolean formationReady() {
     if (map == null) return true;
     if (securePoint == null || ! active) return false;
-    for (Actor w : recruits) {
-      if (standLocation(w) != w.at()) {
+    for (Actor a : recruits) {
+      if (objective.standLocation(a, this) != a.at()) {
         return false;
       }
     }

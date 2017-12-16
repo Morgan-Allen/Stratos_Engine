@@ -4,6 +4,7 @@ package game;
 import util.*;
 import static game.CityMap.*;
 import static game.GameConstants.*;
+import static game.Task.*;
 
 
 
@@ -11,7 +12,7 @@ public class TestSieging extends Test {
   
   
   public static void main(String args[]) {
-    testSieging(true);
+    testSieging(false);
   }
   
   
@@ -24,17 +25,19 @@ public class TestSieging extends Test {
     CityMap map   = CityMapTerrain.generateTerrain(
       homeC, 32, 0, MEADOW, JUNGLE
     );
-    map.settings.toggleFog = false;
     homeC.name = "Home City";
     awayC.name = "Away City";
     world.addCities(homeC, awayC);
+    
+    map.settings.toggleFog     = false;
+    map.settings.toggleFatigue = false;
+    map.settings.toggleHunger  = false;
     
     awayC.initBuildLevels(GARRISON, 5, HOUSE, 1);
     awayC.council.typeAI = CityCouncil.AI_OFF;
     
     City.setupRoute(homeC, awayC, 1);
     City.setPosture(homeC, awayC, City.POSTURE.ENEMY, true);
-    
     
     CityMapPlanning.placeStructure(WALL, map, true, 4, 4, 20, 20);
     CityMapPlanning.markDemolish(map, true, 6, 6, 16, 16);
@@ -53,14 +56,13 @@ public class TestSieging extends Test {
     fillWorkVacancies(fort);
     CityMapPlanning.placeStructure(ROAD, map, true, 10, 9, 12, 1 );
     CityMapPlanning.placeStructure(ROAD, map, true, 21, 9, 1 , 5 );
-    CityMapPlanning.placeStructure(ROAD, map, true, 16, 9, 1 , 12);
+    CityMapPlanning.placeStructure(ROAD, map, true, 16, 9, 1 , 9 );
     CityMapPlanning.placeStructure(ROAD, map, true, 24, 9, 8 , 1 );
     
     for (int n = 3; n-- > 0;) {
       Building home = (Building) HOUSE.generate();
       home.enterMap(map, 17, 10 + (n * 3), 1);
       fillHomeVacancies(home, CITIZEN);
-      
       for (Actor a : home.residents) if (fort.eligible(a, false)) {
         fort.toggleRecruit(a, true);
       }
@@ -69,108 +71,73 @@ public class TestSieging extends Test {
       fort.toggleRecruit(a, true);
     }
     
-    Formation guarding = new Formation(new ObjectiveProtect(), homeC);
+    Formation guarding = new Formation(new ObjectivePatrol(), homeC);
     fort.deployInFormation(guarding, true);
-    guarding.beginSecuring(tower.at(), TileConstants.E, tower);
-    
-    
-    //
-    //  TODO:  Check to see if the recruits are actually up on the wall,
-    //  spaced apart across a reasonable distance, and facing outward.
-    //
-    //  TODO:  Recruits need to be capable of attacking invaders (using
-    //  either ranged or melee attacks) without abandoning the wall.
-    //
-    //  TODO:  Check to make sure invaders actually assault a logical
-    //  position on the wall.
-    //
-    //  TODO:  Test to ensure that invaders cannot pass through
-    //  gatehouses!
-    
+    guarding.beginSecuring(tower.at(), TileConstants.E, tower, map);
     
     Building store = (Building) PORTER_POST.generate();
     store.enterMap(map, 10, 6, 1);
     store.inventory.setWith(COTTON, 10);
     
-    
     float initPrestige = awayC.prestige;
     float initLoyalty  = homeC.loyalty(awayC);
+    Table <Actor, Tile> initPatrolPoints = new Table();
     Formation enemy = null;
     Tally <Good> tribute = null;
     
-    boolean evalDone    = false;
+    boolean patrolInit  = false;
+    boolean patrolDone  = false;
     boolean siegeComing = false;
+    boolean siegeBegun  = false;
+    boolean invadeFight = false;
+    boolean defendFight = false;
     boolean victorious  = false;
     boolean tributePaid = false;
+    boolean siegedOkay  = false;
     
+    final int RUN_TIME = 1000;
+    final int MIN_DEFENDERS = 4;
+    final int MIN_INVADERS  = 8;
     
-    //  TODO:  Ideally, you'll want to test for route-finding
-    //  independently first.  Okay, try that.
-    
-    if (true) {
-      Formation enemies = new Formation(new ObjectiveConquer(), awayC);
-      for (int n = 8; n-- > 0;) {
-        Actor fights = (Actor) ((n < 3) ? SOLDIER : CITIZEN).generate();
-        fights.assignHomeCity(awayC);
-        enemies.toggleRecruit(fights, true);
-      }
-
-      enemies.beginSecuring(homeC);
-      World.Journey j = world.journeyFor(enemies);
-      world.completeJourney(j);
+    while (map.time < RUN_TIME || graphics) {
+      map = test.runLoop(map, 1, graphics, "saves/test_sieging.tlt");
       
-      I.say("\nBegan securing point- "+enemies.secureFocus);
-      I.say("  Entering map from: "+enemies.entryPoint);
-      I.say("  Gate is at: "+gate.at());
-      
-      /*
-      boolean directPath = map.pathCache.openPathConnects(enemies.entryPoint, gate.at());
-      if (directPath) {
-        I.say("\nDirect path onto wall should not exist!");
-        I.say("?");
-      }
-      //*/
-      
-      //  Alright.  Once a point has been selected, check to ensure that
-      //  every recruit has a distinct point to besiege.
-      
-      for (Actor a : enemies.recruits) {
-        TaskCombat task = TaskCombat.siegeCombat(a, enemies);
-        if (task == null) {
-          I.say("  "+a+" cannot siege.");
-          continue;
-        }
-        a.assignTask(task);
-        I.say("  "+a+" sieging: "+task.target+" at "+task.stands);
-      }
-      
-      //  Not all actors are being assigned a distinct siege-point.  You
-      //  may have to spread out a little more.  (And also, secondary
-      //  ranged attacks may be required.)
-      
-      I.say("?");
-      
-      //tribute = new Tally().setWith(COTTON, 10);
-      //enemies.assignDemands(City.POSTURE.VASSAL, null, tribute);
-      //siegeComing = true;
-    }
-    
-    
-    while (map.time < 1000 || graphics) {
-      map = test.runLoop(map, 10, graphics, "saves/test_sieging.tlt");
-      
-      if (! evalDone) {
-        boolean checked = true;
-        if (homeC.armyPower <= 0   ) checked = false;
-        if (homeC.inventory.empty()) checked = false;
+      if (! patrolInit) {
+        int numPatrol = 0;
+        float avgMinDist = 0;
         
-        if (checked) {
-          evalDone = true;
+        for (Actor a : guarding.recruits) {
+          if (a.at() != guarding.objective.standLocation(a, guarding)) continue;
+          float minDist = 1000;
+          for (Actor o : guarding.recruits) if (o != a) {
+            minDist = Nums.min(minDist, distance(a, o));
+          }
+          avgMinDist += minDist;
+          initPatrolPoints.put(a, a.at());
+          numPatrol += 1;
+        }
+        avgMinDist /= guarding.recruits.size();
+        
+        if (avgMinDist > 1 && avgMinDist < 4 && numPatrol >= MIN_DEFENDERS) {
+          patrolInit = true;
+        }
+      }
+      
+      if (patrolInit && ! patrolDone) {
+        int numMoved = 0;
+        for (Actor a : guarding.recruits) {
+          Tile init = initPatrolPoints.get(a);
+          if (init != null && a.at() != init) {
+            numMoved += 1;
+          }
+        }
+        if (numMoved >= MIN_DEFENDERS) {
+          patrolDone = true;
           awayC.council.typeAI = CityCouncil.AI_WARLIKE;
         }
       }
       
-      if (evalDone && ! siegeComing) {
+      if (patrolDone && ! siegeComing) {
         for (World.Journey j : map.city.world.journeys) {
           Object goes = j.going.first();
           if (goes instanceof Formation) {
@@ -181,10 +148,55 @@ public class TestSieging extends Test {
         }
       }
       
-      if (siegeComing && homeC.isVassalOf(awayC) && ! victorious) {
-        victorious = true;
-        store.inventory.add(tribute);
-        fillWorkVacancies(store);
+      if (siegeComing && enemy.map != null && ! siegeBegun) {
+        Table <Tile, Actor> standing = new Table();
+        boolean standWrong = false;
+        
+        for (Actor a : enemy.recruits) {
+          if (a.jobType() == JOB.COMBAT) {
+            TaskCombat task = (TaskCombat) a.task;
+            if (task.primary != enemy.secureFocus) continue;
+            Tile stands = (Tile) task.target;
+            if (standing.get(stands) != null) standWrong = true;
+            else standing.put(stands, a);
+          }
+        }
+        
+        if (standing.size() > MIN_INVADERS && ! standWrong) {
+          siegeBegun = true;
+        }
+      }
+      
+      if (siegeComing && ! invadeFight) {
+        int numFighting = 0;
+        for (Actor a : enemy.recruits) {
+          if (a.jobType() != JOB.COMBAT) continue;
+          TaskCombat task = (TaskCombat) a.task;
+          if (! task.primary.type.isActor()) continue;
+          Actor struck = (Actor) task.primary;
+          if (guarding.recruits.includes(struck)) numFighting += 1;
+        }
+        invadeFight = numFighting > MIN_INVADERS / 2;
+      }
+      
+      if (siegeComing && ! defendFight) {
+        int numFighting = 0;
+        for (Actor a : guarding.recruits) {
+          if (a.jobType() != JOB.COMBAT) continue;
+          TaskCombat task = (TaskCombat) a.task;
+          if (! task.primary.type.isActor()) continue;
+          Actor struck = (Actor) task.primary;
+          if (enemy.recruits.includes(struck)) numFighting += 1;
+        }
+        defendFight = numFighting >= MIN_DEFENDERS / 2;
+      }
+      
+      if (siegeBegun && ! victorious) {
+        if (homeC.isVassalOf(awayC)) {
+          victorious = true;
+          store.inventory.add(tribute);
+          fillWorkVacancies(store);
+        }
       }
       
       if (victorious && ! tributePaid) {
@@ -212,18 +224,26 @@ public class TestSieging extends Test {
           I.say("\nLoyalty should be reduced by conquest!");
           break;
         }
-        
-        if (tributePaid) {
-          I.say("\nSIEGING TEST CONCLUDED SUCCESSFULLY!");
-          if (! graphics) return true;
-        }
+      }
+      
+      if (invadeFight && defendFight && tributePaid && ! siegedOkay) {
+        siegedOkay = true;
+        I.say("\nSIEGING TEST CONCLUDED SUCCESSFULLY!");
+        if (! graphics) return true;
       }
     }
     
     I.say("\nSIEGE TEST FAILED!");
+    I.say("  Patrol init:  "+patrolInit );
+    I.say("  Patrol done:  "+patrolDone );
     I.say("  Siege coming: "+siegeComing);
+    I.say("  Siege begun:  "+siegeBegun );
+    I.say("  Invade fight: "+invadeFight);
+    I.say("  Defend fight: "+defendFight);
     I.say("  Victorious:   "+victorious );
     I.say("  Tribute paid: "+tributePaid);
+    I.say("  Sieged okay:  "+siegedOkay );
+    
     return false;
   }
   

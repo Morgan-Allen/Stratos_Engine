@@ -65,7 +65,9 @@ public class TaskHunting extends Task {
   protected void onTarget(Target target) {
     if (target == prey) {
       Tile site = prey.at();
-      actor.performAttack(prey, TaskCombat.checkMeleeBetter(actor));
+      
+      //  TODO:  Check for this dynamically, or extend TaskCombat...
+      actor.performAttack(prey, false);
       
       if (! prey.dead()) {
         configTask(store, null, prey, JOB.HUNTING, 0);

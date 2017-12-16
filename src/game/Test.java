@@ -475,7 +475,12 @@ public class Test {
     
     if (e instanceof Actor) {
       Actor a = (Actor) e;
-      report.append("\n  Growth: "+I.percent(a.growLevel()));
+      report.append(
+        "\n  Melee/Range dmg:  "+e.type.meleeDamage+"/"+e.type.rangeDamage+
+        "\n  Armour class:     "+e.type.armourClass+
+        "\n  Sight/attack rng: "+e.type.sightRange+"/"+e.type.rangeDist+
+        "\n  Injury:           "+I.shorten(a.injury, 1)+"/"+e.type.maxHealth
+      );
       report.append("\n  Task: "+a.jobDesc());
       
       if (a.carried != null) {

@@ -70,7 +70,7 @@ public class TestMilitary extends Test {
       if (fort.recruits.size() >= 8 && ! recruited) {
         troops = new Formation(new ObjectiveConquer(), homeC);
         fort.deployInFormation(troops, true);
-        troops.beginSecuring(map.tileAt(25, 25), TileConstants.E, null);
+        troops.beginSecuring(map.tileAt(25, 25), TileConstants.E, null, map);
         recruited = true;
       }
       
@@ -78,7 +78,7 @@ public class TestMilitary extends Test {
         enemies.beginSecuring(homeC);
         World.Journey j = world.beginJourney(awayC, homeC, enemies);
         world.completeJourney(j);
-        enemies.beginSecuring(troops.securePoint, TileConstants.W, troops);
+        enemies.beginSecuring(troops.securePoint, TileConstants.W, troops, map);
         invaded = true;
       }
       
