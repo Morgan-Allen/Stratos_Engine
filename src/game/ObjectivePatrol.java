@@ -48,7 +48,7 @@ public class ObjectivePatrol extends Formation.Objective {
     //
     //  First, check to see if an update is due:
     final Target focus = (Target) parent.secureFocus;
-    final CityMap map = parent.map;
+    this.map = parent.map;
     int nextUpdate = lastUpdateTime >= 0 ? (lastUpdateTime + 10) : 0;
     
     if (focus == null || map == null) {

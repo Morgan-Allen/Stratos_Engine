@@ -25,11 +25,11 @@ public class CityMap implements Session.Saveable {
     PATH_WALLS  =  5
   ;
   
-  City city;
   int size, scanSize, flagSize;
   Tile grid[][];
   List <Actor> actorGrid[][];
   
+  City city;
   int time = 0;
   
   final CityMapSettings settings = new CityMapSettings(this);
@@ -56,7 +56,6 @@ public class CityMap implements Session.Saveable {
   public CityMap(Session s) throws Exception {
     s.cacheInstance(this);
     
-    city = (City) s.loadObject();
     performSetup(s.loadInt());
     for (Coord c : Visit.grid(0, 0, size, size, 1)) {
       grid[c.x][c.y].loadState(s);
@@ -64,6 +63,8 @@ public class CityMap implements Session.Saveable {
     for (Coord c : Visit.grid(0, 0, flagSize, flagSize, 1)) {
       s.loadObjects(actorGrid[c.x][c.y]);
     }
+    
+    city = (City) s.loadObject();
     time = s.loadInt();
     
     settings.loadState(s);
@@ -102,7 +103,6 @@ public class CityMap implements Session.Saveable {
   
   public void saveState(Session s) throws Exception {
     
-    s.saveObject(city);
     s.saveInt(size);
     for (Coord c : Visit.grid(0, 0, size, size, 1)) {
       grid[c.x][c.y].saveState(s);
@@ -110,6 +110,8 @@ public class CityMap implements Session.Saveable {
     for (Coord c : Visit.grid(0, 0, flagSize, flagSize, 1)) {
       s.saveObjects(actorGrid[c.x][c.y]);
     }
+    
+    s.saveObject(city);
     s.saveInt(time);
     
     settings.saveState(s);
@@ -167,9 +169,10 @@ public class CityMap implements Session.Saveable {
     
     planning.performSetup(size);
     fog.performSetup(size);
-    city.attachMap(this);
-    
     pathCache.performSetup(size);
+    
+    //  Note: this might occur when setup is performed during saving/loading...
+    if (city != null) city.attachMap(this);
   }
   
   
@@ -551,10 +554,18 @@ public class CityMap implements Session.Saveable {
       city.world.updateWithTime(time);
     }
     for (Building b : buildings) {
+      if (b.map == null) {
+        I.complain("\n"+b+" has no map but still registered on map!");
+        continue;
+      }
       b.update();
     }
-    for (Actor w : actors) {
-      w.update();
+    for (Actor a : actors) {
+      if (a.map == null) {
+        I.complain("\n"+a+" has no map but still registered on map!");
+        continue;
+      }
+      a.update();
     }
     
     if (time % SCAN_PERIOD == 0) {

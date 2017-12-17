@@ -12,7 +12,7 @@ public class TestSieging extends Test {
   
   
   public static void main(String args[]) {
-    testSieging(false);
+    testSieging(true);
   }
   
   
@@ -246,6 +246,7 @@ public class TestSieging extends Test {
     
     return false;
   }
+}
   
   
   
@@ -264,8 +265,6 @@ public class TestSieging extends Test {
     enemies.assignDemands(City.POSTURE.VASSAL, null, tribute);
 
   //*/
-  
-}
 
 
 

@@ -76,7 +76,7 @@ public class TestMilitary extends Test {
       
       if (troops != null && troops.formationReady() && ! invaded) {
         enemies.beginSecuring(homeC);
-        World.Journey j = world.beginJourney(awayC, homeC, enemies);
+        World.Journey j = world.journeyFor(enemies);
         world.completeJourney(j);
         enemies.beginSecuring(troops.securePoint, TileConstants.W, troops, map);
         invaded = true;

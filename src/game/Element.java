@@ -44,6 +44,7 @@ public class Element implements Session.Saveable, Target {
     type   = (Type) s.loadObject();
     map    = (CityMap) s.loadObject();
     at     = loadTile(map, s);
+    
     growLevel = s.loadFloat();
     buildBits = s.loadInt();
     stateBits = s.loadInt();
@@ -57,6 +58,7 @@ public class Element implements Session.Saveable, Target {
     s.saveObject(type);
     s.saveObject(map);
     saveTile(at, map, s);
+    
     s.saveFloat(growLevel);
     s.saveInt(buildBits);
     s.saveInt(stateBits);
@@ -152,7 +154,7 @@ public class Element implements Session.Saveable, Target {
     
     setLocation(null, map);
     this.map = null;
-    stateBits |= FLAG_EXIT;
+    stateBits |=  FLAG_EXIT;
     stateBits &= ~FLAG_ON_MAP;
   }
   

@@ -132,6 +132,9 @@ public class Test {
     DEMOLITION = "Demolition"
   ;
   
+  String filename = "";
+  boolean doLoad = false;
+  
   int[][]  graphic   = null;
   int[][]  fogLayer  = null;
   int      frames    = 0   ;
@@ -182,11 +185,13 @@ public class Test {
       graphic[c.x][c.y] = fill;
     }
     
-    for (Actor w : map.actors) if (w.inside == null) {
-      Tile at = w.at();
+    for (Actor a : map.actors) {
+      Tile at = a.at();
+      //I.say("At: "+at);
+      if (at == null || a.indoors()) continue;
       int fill = WALKER_COLOR;
-      if      (w.work != null) fill = w.work.type.tint;
-      else if (w.home != null) fill = w.home.type.tint;
+      if      (a.work != null) fill = a.work.type.tint;
+      else if (a.home != null) fill = a.home.type.tint;
       graphic[at.x][at.y] = fill;
     }
     
@@ -314,6 +319,7 @@ public class Test {
   ) {
     int skipUpdate = 0;
     boolean doQuit = false;
+    this.filename = filename;
     
     while (! doQuit) {
       
@@ -363,13 +369,16 @@ public class Test {
           I.presentInfo(reportFor((Element) above), VIEW_NAME);
         }
         else {
-          Vars.Ref <CityMap> ref = new Vars.Ref(map);
-          I.presentInfo(baseReport(ref, filename), VIEW_NAME);
-          map = ref.value;
+          I.presentInfo(baseReport(map), VIEW_NAME);
         }
         
         if (pressed.includes('p')) {
           map.settings.paused = ! map.settings.paused;
+        }
+        if (doLoad) {
+          map = loadMap(map, filename);
+          doLoad = false;
+          return map;
         }
       }
       
@@ -684,16 +693,13 @@ public class Test {
   }
   
   
-  private String baseReport(Vars.Ref <CityMap> ref, String filename) {
-    CityMap map = ref.value;
+  private String baseReport(CityMap map) {
     StringBuffer report = new StringBuffer("Home City: "+map.city);
     
-    //*
     report.append("\n\nFunds: "+map.city.currentFunds);
     report.append("\n\nTime: "+map.time);
     report.append("\nPaused: "+map.settings.paused);
     report.append("\n");
-    //*/
     
     float avgHunger = 0;
     for (Actor a : map.actors) avgHunger += a.hunger / a.type.maxHealth;
@@ -701,8 +707,6 @@ public class Test {
     
     report.append("\nTOTAL POPULATION: "+map.actors.size());
     report.append("\nHUNGER LEVEL: "+I.percent(avgHunger)+"\n\n");
-    //for (Actor a : map.walkers) report.append("\n  "+a);
-    
     
     report.append("\n(C) city view");
     if (pressed.includes('c')) {
@@ -728,7 +732,7 @@ public class Test {
     }
     report.append("\n(L) load");
     if (pressed.includes('l')) {
-      ref.value = map = loadMap(map, filename);
+      doLoad = true;
     }
     report.append("\n(Q) quit");
     if (pressed.includes('q')) {

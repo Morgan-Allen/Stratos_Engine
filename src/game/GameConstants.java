@@ -866,19 +866,6 @@ public class GameConstants {
     Series <Actor> inside();
   }
   
-  /*
-  static interface Flagging {
-    
-    Object flagKey();
-    int amountAt(Tile t);
-    void setAmount(Tile t, int amount);
-    
-    static interface Filter { boolean filter(Tile t); }
-    Tile pickNearest(
-      Element from, int maxRange, float randomness, Filter filter
-    );
-  }
-  //*/
   
   static interface Trader {
     Tally <Good> tradeLevel();

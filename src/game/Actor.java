@@ -139,6 +139,10 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   /**  World entry and exit-
     */
   void enterMap(CityMap map, int x, int y, float buildLevel) {
+    if (onMap()) {
+      I.complain("\nALREADY ON MAP: "+this);
+      return;
+    }
     super.enterMap(map, x, y, buildLevel);
     map.actors.add(this);
   }
@@ -147,6 +151,10 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   void exitMap(CityMap map) {
     if (inside != null) setInside(inside, false);
     map.actors.remove(this);
+    
+    if (map.actors.includes(this)) {
+      I.complain("\nMap still contains "+this);
+    }
     super.exitMap(map);
   }
   
