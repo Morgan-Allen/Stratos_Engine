@@ -252,9 +252,11 @@ public class GameConstants {
   }
   
   static class Trait extends Type {
-    Trait(String ID, String name) {
+    
+    Trait(String ID, String... names) {
       super(ID, IS_TRAIT);
-      this.name = name;
+      this.name = names[0];
+      this.namesRange = names;
     }
   }
   
@@ -457,7 +459,23 @@ public class GameConstants {
     SKILL_CRAFT = new Trait("skill_craft", "Craft"),
     SKILL_SPEAK = new Trait("skill_speak", "Speak"),
     SKILL_WRITE = new Trait("skill_write", "Write"),
-    SKILL_PRAY  = new Trait("skill_pray" , "Pray" )
+    SKILL_PRAY  = new Trait("skill_pray" , "Pray" ),
+    ALL_SKILLS[] = {
+      SKILL_MELEE, SKILL_RANGE, SKILL_EVADE,
+      SKILL_FARM , SKILL_BUILD, SKILL_CRAFT,
+      SKILL_SPEAK, SKILL_WRITE, SKILL_PRAY ,
+    },
+    
+    TRAIT_COMPASSION = new Trait("trait_compassion",
+      "Compassionate", null, "Cruel"
+    ),
+    TRAIT_DILIGENCE  = new Trait("trait_diligence",
+      "Diligent", null, "Fickle"
+    ),
+    TRAIT_BRAVERY    = new Trait("trait_bravery",
+      "Brave", null, "Nervous"
+    ),
+    ALL_PERSONALITY[] = { TRAIT_COMPASSION, TRAIT_DILIGENCE, TRAIT_BRAVERY }
   ;
   final static WalkerType
     NO_WALKERS[] = new WalkerType[0],

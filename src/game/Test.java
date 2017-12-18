@@ -83,7 +83,7 @@ public class Test {
   
   static Actor spawnWalker(Building b, Type type, boolean resident) {
     
-    Actor actor = (Actor) type.generate();
+    ActorAsPerson actor = (ActorAsPerson) type.generate();
     Tile at = b.at();
     type.initAsMigrant(actor);
     

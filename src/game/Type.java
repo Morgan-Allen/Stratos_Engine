@@ -90,7 +90,7 @@ public class Type extends Index.Entry implements Session.Saveable {
   
   /**  Common data fields and setup functions-
     */
-  String name;
+  String name, namesRange[];
   int tint = BLACK_COLOR;
   
   int category;
@@ -294,7 +294,7 @@ public class Type extends Index.Entry implements Session.Saveable {
   }
   
   
-  void initAsMigrant(Actor w) {
+  void initAsMigrant(ActorAsPerson a) {
     
     float age = Rand.range(AVG_MARRIED, AVG_MENOPAUSE);
     age += Rand.num() - 0.5f;
@@ -304,9 +304,17 @@ public class Type extends Index.Entry implements Session.Saveable {
       sex = Rand.yes() ? SEX_FEMALE : SEX_MALE;
     }
     
-    w.ageSeconds = (int) (age * YEAR_LENGTH);
-    w.sexData    = sex;
-    w.hunger     = Rand.num() - 0.5f;
+    a.ageSeconds = (int) (age * YEAR_LENGTH);
+    a.sexData    = sex;
+    a.hunger     = Rand.num() - 0.5f;
+    
+    for (int i = 0; i < initTraits.length; i++) {
+      a.setLevel(initTraits[i], traitLevels[i]);
+    }
+    
+    for (Trait t : ALL_PERSONALITY) {
+      a.setLevel(t, Rand.range(-1, 1));
+    }
   }
   
   

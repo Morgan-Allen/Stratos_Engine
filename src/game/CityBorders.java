@@ -92,7 +92,9 @@ public class CityBorders {
     numSpawn = Nums.min(numSpawn, spaces);
     
     while (numSpawn-- > 0) {
-      Actor w = (Actor) VAGRANT.generate();
+      //  TODO:  TRY AND SELECT ACTORS WITH BACKGROUNDS APPROPRIATE TO A GIVEN
+      //  WORK VENUE!
+      ActorAsPerson w = (ActorAsPerson) VAGRANT.generate();
       w.type.initAsMigrant(w);
       migrants.add(w);
     }

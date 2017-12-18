@@ -24,9 +24,6 @@ public class ActorAsPerson extends Actor {
   
   public ActorAsPerson(Type type) {
     super(type);
-    for (int i = 0; i < type.initTraits.length; i++) {
-      setLevel(type.initTraits[i], type.traitLevels[i]);
-    }
   }
   
   
