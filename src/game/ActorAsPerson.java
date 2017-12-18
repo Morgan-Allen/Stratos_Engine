@@ -15,7 +15,7 @@ public class ActorAsPerson extends Actor {
     */
   static class Level {
     Trait trait;
-    int XP;
+    float XP;
     float level;
   }
   
@@ -35,7 +35,7 @@ public class ActorAsPerson extends Actor {
     for (int n = s.loadInt(); n-- > 0;) {
       Level l = new Level();
       l.trait = (Trait) s.loadObject();
-      l.XP    = s.loadInt();
+      l.XP    = s.loadFloat();
       l.level = s.loadFloat();
     }
   }
@@ -46,7 +46,7 @@ public class ActorAsPerson extends Actor {
     s.saveInt(levels.size());
     for (Level l : levels) {
       s.saveObject(l.trait);
-      s.saveInt(l.XP);
+      s.saveFloat(l.XP);
       s.saveFloat(l.level);
     }
   }
@@ -77,9 +77,9 @@ public class ActorAsPerson extends Actor {
   }
   
   
-  void setXP(Trait trait, int XP) {
+  void setXP(Trait trait, float XP) {
     Level l = levelFor(trait, true);
-    l.XP = Nums.clamp(XP, MAX_SKILL_XP + 1);
+    l.XP = Nums.clamp(XP, 0, MAX_SKILL_XP);
     for (int i = MAX_SKILL_LEVEL; i >= 0; i--) {
       float remXP = (l.XP * 1f / BASE_LEVEL_XP) - SKILL_XP_TOTAL[i];
       if (remXP > 0) { l.level = i + (remXP / SKILL_XP_MULTS[i]); break; }
@@ -87,7 +87,7 @@ public class ActorAsPerson extends Actor {
   }
   
   
-  void gainXP(Trait trait, int XP) {
+  void gainXP(Trait trait, float XP) {
     Level l = levelFor(trait, true);
     setXP(trait, l.XP + XP);
   }
@@ -155,7 +155,6 @@ public class ActorAsPerson extends Actor {
     if (jobType() == JOB.RESTING) {
       float rests = 1f / FATIGUE_REGEN;
       float heals = 1f / HEALTH_REGEN ;
-      
       fatigue = Nums.max(0, fatigue - rests);
       injury  = Nums.max(0, injury  - heals);
     }

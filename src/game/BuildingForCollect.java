@@ -39,11 +39,6 @@ public class BuildingForCollect extends BuildingForCrafts {
   }
   
   
-  void advanceProduction() {
-    return;
-  }
-  
-  
   boolean pickNextCollection(Actor actor, Good g) {
     Pick <Building> pick = new Pick();
     Tile entrance = mainEntrance();

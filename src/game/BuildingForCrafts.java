@@ -2,7 +2,6 @@
 
 package game;
 import util.*;
-import static game.Task.*;
 import static game.GameConstants.*;
 
 
@@ -13,7 +12,6 @@ public class BuildingForCrafts extends Building {
   /**  Data fields, construction and save/load methods-
     */
   float craftProgress;
-  boolean stalled = false;
   
   
   BuildingForCrafts(Type type) {
@@ -24,14 +22,12 @@ public class BuildingForCrafts extends Building {
   public BuildingForCrafts(Session s) throws Exception {
     super(s);
     craftProgress = s.loadFloat();
-    stalled = s.loadBool();
   }
   
   
   public void saveState(Session s) throws Exception {
     super.saveState(s);
     s.saveFloat(craftProgress);
-    s.saveBool(stalled);
   }
   
   
@@ -43,12 +39,6 @@ public class BuildingForCrafts extends Building {
   }
   
   
-  void update() {
-    super.update();
-    advanceProduction();
-  }
-  
-  
   float demandFor(Good g) {
     boolean consumes = accessible() && Visit.arrayIncludes(needed(), g);
     float need = consumes ? stockNeeded(g) : 0;
@@ -56,9 +46,7 @@ public class BuildingForCrafts extends Building {
   }
   
   
-  void advanceProduction() {
-    if (craftProgress > 1) return;
-    
+  boolean canAdvanceCrafting() {
     boolean anyRoom = false, allMaterials = true;
     
     for (Good made : produced()) {
@@ -68,28 +56,7 @@ public class BuildingForCrafts extends Building {
       if (inventory.valueFor(need) <= 0) allMaterials = false;
     }
     
-    stalled = (! allMaterials) || (! anyRoom);
-    
-    
-    //  TODO:  Move this out into a dedicated Task.
-    
-    if (! stalled) {
-      float prog = 1f / type.craftTime;
-      
-      for (Good need : needed()) {
-        inventory.add(0 - prog, need);
-      }
-      craftProgress = Nums.min(craftProgress + prog, 1);
-      
-      if (craftProgress >= 1) {
-        for (Good made : produced()) {
-          if (inventory.valueFor(made) >= stockLimit(made)) continue;
-          inventory.add(1, made);
-          map.city.makeTotals.add(1, made);
-        }
-        craftProgress = 0;
-      }
-    }
+    return anyRoom && allMaterials;
   }
   
   
@@ -121,8 +88,10 @@ public class BuildingForCrafts extends Building {
     }
     //
     //  And failing all that, start crafting:
-    if (! stalled) {
-      actor.embarkOnVisit(this, -1, JOB.CRAFTING, this);
+    if (canAdvanceCrafting()) {
+      TaskCrafting task = TaskCrafting.configCrafting(actor, this);
+      actor.assignTask(task);
+      return;
     }
   }
   

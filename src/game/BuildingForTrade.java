@@ -74,10 +74,6 @@ public class BuildingForTrade extends BuildingForCrafts implements Trader {
   float stockLimit (Good made) { return Nums.abs(tradeLevel.valueFor(made)); }
   
   
-  void advanceProduction() {
-    return;
-  }
-  
   public City homeCity() {
     return map.city;
   }
