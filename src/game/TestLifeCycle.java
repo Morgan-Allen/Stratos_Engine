@@ -14,8 +14,22 @@ public class TestLifeCycle extends Test {
   }
   
   
-  static void testLifeCycle(boolean graphics) {
+  static boolean testLifeCycle(boolean graphics) {
     Test test = new TestLifeCycle();
+    
+    
+    I.say("\nTesting XP gain...");
+    ActorAsPerson single = (ActorAsPerson) CITIZEN.generate();
+    for (int n = MAX_TRAIN_TIME; n-- > 0;) {
+      single.gainXP(SKILL_BUILD, 1);
+      if (n % MONTH_LENGTH == 0) I.say("  "+single.levelOf(SKILL_BUILD));
+    }
+    
+    if (single.levelOf(SKILL_BUILD) < MAX_SKILL_LEVEL) {
+      I.say("\nXP gain did not function correctly!");
+      return false;
+    }
+    
     
     CityMap map = setupTestCity(10);
     map.settings.toggleFog = false;
@@ -37,6 +51,7 @@ public class TestLifeCycle extends Test {
     List <Actor> deaths = new List();
     boolean noBadJobs = true ;
     boolean cycled    = false;
+    
     
     I.say("\nTOTAL LIFE CYCLE RUN TIME: "+RUN_TIME);
     
@@ -113,7 +128,7 @@ public class TestLifeCycle extends Test {
           I.say("\nLIFE CYCLE TEST CONCLUDED SUCCESSFULLY!");
           I.say("  Births: "+births);
           I.say("  Deaths: "+deaths);
-          if (! graphics) return;
+          if (! graphics) return true;
         }
       }
     }
@@ -122,6 +137,7 @@ public class TestLifeCycle extends Test {
     I.say("  Births:   "+births);
     I.say("  Deaths:   "+deaths);
     I.say("  Bad jobs? "+(! noBadJobs));
+    return false;
   }
   
 }

@@ -56,8 +56,6 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   float stress ;
   int   state = STATE_OKAY;
   
-  Tally <Type> skills = new Tally();
-  
   
   
   Actor(Type type) {
@@ -96,7 +94,6 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     fatigue = s.loadFloat();
     stress  = s.loadFloat();
     state   = s.loadInt();
-    s.loadTally(skills);
   }
   
   
@@ -131,7 +128,6 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     s.saveFloat(fatigue);
     s.saveFloat(stress );
     s.saveInt  (state  );
-    s.saveTally(skills);
   }
   
   

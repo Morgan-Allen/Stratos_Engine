@@ -129,6 +129,26 @@ public class GameConstants {
     AVG_SENIOR_MORT  = 10  ,  //  senior mortality percent
     LIFESPAN_LENGTH  = AVG_RETIREMENT * YEAR_LENGTH,
     //
+    //  Skills and XP-
+    SKILL_XP_MULTS[] = { 1 , 2 , 3 , 4 , 5 , 6 , 7 , 8 , 9 , 10, -1 },
+    SKILL_XP_TOTAL[] = { 0 , 1 , 3 , 6 , 10, 15, 21, 28, 36, 45, 55 },
+    MAX_SKILL_LEVEL  = 10,
+    ALL_LEVELS_SUM   = SKILL_XP_TOTAL[10],
+    MAX_TRAIN_TIME   = (YEAR_LENGTH * 10) / 3,
+    BASE_LEVEL_XP    = MAX_TRAIN_TIME / ALL_LEVELS_SUM,
+    MAX_SKILL_XP     = BASE_LEVEL_XP * ALL_LEVELS_SUM,
+    CRAFT_XP_PERCENT = 100,
+    FARM_XP_PERCENT  = 200,
+    GATHR_XP_PERCENT = 200,
+    BUILD_XP_PERCENT = 300,
+    FIGHT_XP_PERCENT = 500,
+    TRAIN_XP_PERCENT = 50 ,
+    //
+    //  Basically, if you gain 1 XP per second while practicing 1/3rd of your
+    //  free time, you can expect to master a skill within 10 years.  For some
+    //  activities, this gets boosted/reduced based on the frequency of the
+    //  behaviour.  (NOTE- this will need fine-tuning later...)
+    //
     //  Health and survival-
     STARVE_INTERVAL  = MONTH_LENGTH * 2,
     FATIGUE_INTERVAL = MONTH_LENGTH * 2,
@@ -224,6 +244,12 @@ public class GameConstants {
       Object split[][] = Visit.splitByModulus(args, 2);
       fixtures = (Type []) castArray(split[0], Type .class);
       weights  = (Float[]) castArray(split[1], Float.class);
+    }
+  }
+  
+  static class Trait extends Type {
+    Trait(String ID) {
+      super(ID, IS_TRAIT);
     }
   }
   
@@ -417,6 +443,17 @@ public class GameConstants {
   
   /**  Walker types-
     */
+  final static Trait
+    SKILL_MELEE = new Trait("skill_melee"),
+    SKILL_RANGE = new Trait("skill_range"),
+    SKILL_EVADE = new Trait("skill_evade"),
+    SKILL_FARM  = new Trait("skill_farm" ),
+    SKILL_BUILD = new Trait("skill_build"),
+    SKILL_CRAFT = new Trait("skill_craft"),
+    SKILL_SPEAK = new Trait("skill_speak"),
+    SKILL_WRITE = new Trait("skill_write"),
+    SKILL_PRAY  = new Trait("skill_pray" )
+  ;
   final static WalkerType
     NO_WALKERS[] = new WalkerType[0],
     
@@ -433,29 +470,48 @@ public class GameConstants {
     PRIEST   = new WalkerType("type_priest"  , IS_PERSON_ACT, CLASS_NOBLE )
   ;
   static {
+    //  TODO:  Get rid of this background as a starting option
     VAGRANT .name = "Vagrant" ;
-    CHILD   .name = "Child"   ;
-    CITIZEN .name = "Citizen" ;
-    SERVANT .name = "Servant" ;
-    NOBLE   .name = "Noble"   ;
-    WORKER  .name = "Worker"  ;
-    MERCHANT.name = "Merchant";
-    PORTER  .name = "Porter"  ;
-    HUNTER  .name = "Hunter"  ;
-    SOLDIER .name = "Soldier" ;
-    PRIEST  .name = "Priest"  ;
     
+    CHILD   .name = "Child"   ;
+    CHILD.setInitTraits();
+    
+    CITIZEN .name = "Citizen" ;
+    CITIZEN.setInitTraits(SKILL_FARM, 1, SKILL_BUILD, 1, SKILL_CRAFT, 1);
+    
+    SERVANT .name = "Servant" ;
+    SERVANT.setInitTraits(SKILL_SPEAK, 1, SKILL_WRITE, 1);
+    
+    NOBLE   .name = "Noble"   ;
+    NOBLE.setInitTraits(SKILL_MELEE, 1, SKILL_SPEAK, 2, SKILL_WRITE, 2);
+    
+    WORKER  .name = "Worker"  ;
+    WORKER.setInitTraits(SKILL_FARM, 1, SKILL_BUILD, 1, SKILL_CRAFT, 1);
+    
+    MERCHANT.name = "Merchant";
+    MERCHANT.setInitTraits(SKILL_SPEAK, 2, SKILL_WRITE, 2);
+    
+    PORTER  .name = "Porter"  ;
+    PORTER.setInitTraits();
+    
+    HUNTER  .name = "Hunter";
     HUNTER .rangeDamage = 4;
     HUNTER .armourClass = 3;
     HUNTER .rangeDist   = 6;
     HUNTER .genderRole  = SEX_MALE;
-    
+    HUNTER.setInitTraits(SKILL_RANGE, 2, SKILL_EVADE, 2);
+
+    SOLDIER .name = "Soldier";
     SOLDIER.meleeDamage = 5;
     SOLDIER.rangeDamage = 2;
     SOLDIER.rangeDist   = 4;
     SOLDIER.armourClass = 4;
     SOLDIER.maxHealth   = 6;
     SOLDIER.genderRole  = SEX_MALE;
+    SOLDIER.setInitTraits(SKILL_MELEE, 2, SKILL_RANGE, 1, SKILL_EVADE, 1);
+    
+    PRIEST  .name = "Priest";
+    PRIEST.setInitTraits(SKILL_PRAY, 2, SKILL_WRITE, 2, SKILL_SPEAK, 2);
   }
   
   

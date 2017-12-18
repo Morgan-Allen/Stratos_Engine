@@ -11,21 +11,91 @@ import static game.GameConstants.*;
 public class ActorAsPerson extends Actor {
   
   
-  
   /**  Data fields, construction and save/load methods-
     */
+  static class Level {
+    Trait trait;
+    int XP;
+    float level;
+  }
+  
+  List <Level> levels = new List();
+  
+  
   public ActorAsPerson(Type type) {
     super(type);
+    for (int i = 0; i < type.initTraits.length; i++) {
+      setLevel(type.initTraits[i], type.traitLevels[i]);
+    }
   }
   
   
   public ActorAsPerson(Session s) throws Exception {
     super(s);
+    for (int n = s.loadInt(); n-- > 0;) {
+      Level l = new Level();
+      l.trait = (Trait) s.loadObject();
+      l.XP    = s.loadInt();
+      l.level = s.loadFloat();
+    }
   }
   
   
   public void saveState(Session s) throws Exception {
     super.saveState(s);
+    s.saveInt(levels.size());
+    for (Level l : levels) {
+      s.saveObject(l.trait);
+      s.saveInt(l.XP);
+      s.saveFloat(l.level);
+    }
+  }
+  
+  
+  
+  /**  Handling skills and traits-
+    */
+  private Level levelFor(Trait trait, boolean init) {
+    for (Level l : levels) {
+      if (l.trait == trait) return l;
+    }
+    if (init) {
+      Level l = new Level();
+      l.trait = trait;
+      levels.add(l);
+      return l;
+    }
+    else return null;
+  }
+  
+  
+  void setLevel(Trait trait, float level) {
+    Level l = levelFor(trait, true);
+    l.level = level = Nums.clamp(level, 0, MAX_SKILL_LEVEL);
+    l.XP =  BASE_LEVEL_XP * SKILL_XP_TOTAL[(int) level];
+    l.XP += BASE_LEVEL_XP * SKILL_XP_MULTS[(int) level] * (l.level % 1);
+  }
+  
+  
+  void setXP(Trait trait, int XP) {
+    Level l = levelFor(trait, true);
+    l.XP = Nums.clamp(XP, MAX_SKILL_XP + 1);
+    for (int i = MAX_SKILL_LEVEL; i >= 0; i--) {
+      float remXP = (l.XP * 1f / BASE_LEVEL_XP) - SKILL_XP_TOTAL[i];
+      if (remXP > 0) { l.level = i + (remXP / SKILL_XP_MULTS[i]); break; }
+    }
+  }
+  
+  
+  void gainXP(Trait trait, int XP) {
+    Level l = levelFor(trait, true);
+    setXP(trait, l.XP + XP);
+  }
+  
+  
+  float levelOf(Trait trait) {
+    Level l = levelFor(trait, false);
+    return l == null ? 0 : l.level;
   }
   
   
@@ -138,6 +208,7 @@ public class ActorAsPerson extends Actor {
     //  TODO:  Allow buildings to update fog-of-war as well (possibly on a
     //  different map-overlay for convenience.)
   }
+  
   
   
   

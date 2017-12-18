@@ -14,6 +14,7 @@ public class Type extends Index.Entry implements Session.Saveable {
   /**  Indexing, categorisation, spawning and save/load methods-
     */
   final static int
+    IS_TRAIT       = -100,
     IS_TERRAIN     = 0,
     IS_FIXTURE     = 1,
     IS_STRUCTURAL  = 2,
@@ -149,6 +150,7 @@ public class Type extends Index.Entry implements Session.Saveable {
   Good produced[] = NO_GOODS;
   Good features[] = NO_GOODS;
   Type gatherFlag = null;
+  Trait craftSkill = null;
   
   int updateTime      = AVG_UPDATE_GAP  ;
   int craftTime       = AVG_CRAFT_TIME  ;
@@ -259,7 +261,6 @@ public class Type extends Index.Entry implements Session.Saveable {
   int  socialClass  = CLASS_COMMON;
   int  genderRole   = SEX_EITHER;
   Type patronGods[] = null;
-  String names[] = {};
   
   int maxHealth   = AVG_MAX_HEALTH;
   int meleeDamage = AVG_MELEE;
@@ -268,9 +269,19 @@ public class Type extends Index.Entry implements Session.Saveable {
   int armourClass = AVG_DEFEND;
   int sightRange  = AVG_SIGHT;
   
+  Trait   initTraits [] = {};
+  Integer traitLevels[] = {};
+  
   Terrain habitats[] = NO_HABITAT;
   boolean predator   = false;
   int     lifespan   = LIFESPAN_LENGTH;
+  
+  
+  void setInitTraits(Object... args) {
+    Object split[][] = Visit.splitByModulus(args, 2);
+    initTraits  = (Trait  []) castArray(split[0], Trait  .class);
+    traitLevels = (Integer[]) castArray(split[1], Integer.class);
+  }
   
   
   void initAsMigrant(Actor w) {
