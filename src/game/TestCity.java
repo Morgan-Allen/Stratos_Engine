@@ -10,7 +10,7 @@ public class TestCity extends Test {
   
   
   public static void main(String args[]) {
-    testCity(false);
+    testCity(true);
   }
   
   
@@ -145,6 +145,7 @@ public class TestCity extends Test {
   
   
   static void reportOnMap(CityMap map, boolean okay) {
+    I.say("  Current time: "+map.time);
     if (! okay) for (Building b : map.buildings) {
       if (b.type.isHomeBuilding()) {
         BuildingForHome house = (BuildingForHome) b;

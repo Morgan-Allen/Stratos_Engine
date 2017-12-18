@@ -99,10 +99,11 @@ public class TaskCombat extends Task {
     
     for (Actor other : others) if (hostile(other, actor, map)) {
       Tile goes = other.at();
-      float distW = distance(goes, from  );
-      float distF = distance(goes, anchor);
+      float distF = distance(goes, from  );
+      float distA = distance(goes, anchor);
+      if (distA > noticeRange) continue;
       
-      float rating = 1f * distancePenalty(distW + distF);
+      float rating = 1f * distancePenalty(distF + distA);
       rating /= 1 + other.focused().size();
       
       Option o = new Option();

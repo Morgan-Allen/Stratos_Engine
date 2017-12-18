@@ -41,6 +41,7 @@ public class TestMilitary extends Test {
       Building house = (Building) HOUSE.generate();
       house.enterMap(map, 2 + (n * 3), 7, 1);
       fillHomeVacancies(house, CITIZEN);
+      for (Actor a : house.residents) a.sexData = SEX_MALE;
     }
     
     float initPrestige = homeC.prestige;

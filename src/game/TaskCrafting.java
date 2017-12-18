@@ -44,8 +44,9 @@ public class TaskCrafting extends Task {
     Trait skill = venue.type.craftSkill;
     float progress = venue.craftProgress;
     float progInc = 1f / venue.type.craftTime;
+    float skillMult = crafts.levelOf(skill) / MAX_SKILL_LEVEL;
     
-    progInc *= 1f + (1f * (crafts.levelOf(skill) / MAX_SKILL_LEVEL));
+    progInc *= 1f + (1f * skillMult);
     crafts.gainXP(skill, 1 * CRAFT_XP_PERCENT / 100f);
     
     for (Good need : venue.needed()) {
@@ -68,8 +69,6 @@ public class TaskCrafting extends Task {
   
   
 }
-
-
 
 
 

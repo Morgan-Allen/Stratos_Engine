@@ -57,6 +57,9 @@ public class Test {
       fillWorkVacancies(b);
       for (Actor w : b.workers) CityBorders.findHome(map, w);
     }
+    for (Building b : map.buildings) if (b.accessible()) {
+      fillHomeVacancies(b, CITIZEN);
+    }
   }
   
   

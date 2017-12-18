@@ -35,7 +35,6 @@ public class BuildingForCollect extends BuildingForCrafts {
     for (Good g : type.produced) {
       if (pickNextCollection(actor, g)) return;
     }
-    super.selectActorBehaviour(actor);
   }
   
   

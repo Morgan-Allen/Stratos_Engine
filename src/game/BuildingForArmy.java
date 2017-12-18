@@ -52,6 +52,7 @@ public class BuildingForArmy extends BuildingForCrafts {
     if (recruits.size() < type.maxRecruits) {
       for (Building b : map.buildings) {
         float rating = CityMap.distancePenalty(this, b);
+        if (b == this) rating *= 10;
         float sumE = 0;
         for (Actor a : b.workers) if (eligible(a, false)) {
           sumE += 1;
