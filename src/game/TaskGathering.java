@@ -104,10 +104,15 @@ public class TaskGathering extends Task {
     Element above = other.at().above;
     if (above == null || above.type.yields == null) return;
     
+    Trait skill      = store.type.craftSkill;
+    float skillBonus = actor.levelOf(skill) / MAX_SKILL_LEVEL;
+    float multXP     = above.type.isCrop ? FARM_XP_PERCENT : GATHR_XP_PERCENT;
+    
     if (actor.jobType() == JOB.PLANTING) {
       //
       //  First, initialise the crop:
       above.setGrowLevel(0);
+      actor.gainXP(skill, 1 * multXP / 100);
       //
       //  Then pick another point to sow:
       if (! pickPlantPoint(store, actor, true, false)) {
@@ -120,9 +125,13 @@ public class TaskGathering extends Task {
       if      (above.type.isCrop      ) above.setGrowLevel(-1);
       else if (above.type.growRate > 0) above.setGrowLevel( 0);
       
-      actor.carried      = above.type.yields;
-      actor.carryAmount += above.type.yieldAmount;
+      float yield = above.type.yieldAmount;
+      yield *= 1 + (skillBonus * 0.5f);
       
+      actor.carried      = above.type.yields;
+      actor.carryAmount += yield;
+      
+      actor.gainXP(skill, 1 * multXP / 100);
       ///I.say(actor+" harvested "+actor.carryAmount+" of "+above.type);
       
       if (actor.carryAmount >= 2) {

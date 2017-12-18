@@ -10,15 +10,17 @@ import static game.GameConstants.*;
 public class CityMapTerrain implements TileConstants {
   
   
-  final CityMap map;
-  
-  //  TODO:  Move this into the terrain class!
-  int growScanIndex = 0;
+  /**  Data fields, construction and save/load methods-
+    */
   static class HabitatScan {
     int numTiles = 0;
     int densities[][];
   }
+  
+  final CityMap map;
+  int growScanIndex = 0;
   HabitatScan scans[][] = new HabitatScan[2][ALL_TERRAINS.length];
+  byte fertility[][];
   
   
   CityMapTerrain(CityMap map) {
@@ -41,6 +43,8 @@ public class CityMapTerrain implements TileConstants {
       }
       scans[i][h] = scan;
     }
+    
+    s.loadByteArray(fertility);
   }
   
   
@@ -56,6 +60,13 @@ public class CityMapTerrain implements TileConstants {
         s.saveInt(scan.densities[c.x][c.y]);
       }
     }
+    
+    s.saveByteArray(fertility);
+  }
+  
+  
+  void performSetup(int size) {
+    this.fertility = new byte[size][size];
   }
   
   

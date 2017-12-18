@@ -734,6 +734,7 @@ public class GameConstants {
     FARM_PLOT.produced   = CROP_TYPES;
     FARM_PLOT.maxStock   = 25;
     FARM_PLOT.maxWorkers = 2;
+    FARM_PLOT.craftSkill = SKILL_FARM;
     
     SAWYER.name = "Sawyer";
     SAWYER.tint = TINT_LITE_INDUSTRIAL;
@@ -745,6 +746,7 @@ public class GameConstants {
     SAWYER.maxStock   = 25;
     SAWYER.produced   = new Good[] { WOOD };
     SAWYER.maxWorkers = 2;
+    SAWYER.craftSkill = SKILL_CRAFT;
     
     QUARRY_PIT.name = "Quarry Pit";
     QUARRY_PIT.tint = TINT_LITE_INDUSTRIAL;
@@ -756,6 +758,7 @@ public class GameConstants {
     QUARRY_PIT.maxStock   = 25;
     QUARRY_PIT.produced   = new Good[] { CLAY, STONE };
     QUARRY_PIT.maxWorkers = 2;
+    QUARRY_PIT.craftSkill = SKILL_CRAFT;
     
     KILN.name = "Kiln";
     KILN.tint = TINT_INDUSTRIAL;
@@ -765,6 +768,7 @@ public class GameConstants {
     KILN.needed   = new Good[] { CLAY };
     KILN.produced = new Good[] { POTTERY };
     KILN.maxStock = 3;
+    KILN.craftSkill = SKILL_CRAFT;
     
     WEAVER.name = "Weaver";
     WEAVER.tint = TINT_INDUSTRIAL;
@@ -774,6 +778,7 @@ public class GameConstants {
     WEAVER.needed   = new Good[] { RAW_COTTON };
     WEAVER.produced = new Good[] { COTTON };
     WEAVER.maxStock = 3;
+    WEAVER.craftSkill = SKILL_CRAFT;
     
     //
     //  Commercial structures:

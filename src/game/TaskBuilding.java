@@ -268,8 +268,14 @@ public class TaskBuilding extends Task {
     //
     //  We see how much work we can do in this action, either to raze or
     //  to build, and adjust progress/stocks accordingly-
-    float oldM = b.materialLevel(material);
-    float puts = Nums.clamp(amountGap, -0.1f, 0.1f);
+    Trait skill      = SKILL_BUILD;
+    float oldM       = b.materialLevel(material);
+    float skillBonus = actor.levelOf(skill) / MAX_SKILL_LEVEL;
+    float putLimit   = 0.1f * (1 + skillBonus);
+    float puts       = Nums.clamp(amountGap, -putLimit, putLimit);
+    
+    actor.gainXP(skill, 1 * BUILD_XP_PERCENT / 100f);
+    
     puts = Nums.min(puts, amountGot);
     puts = b.incMaterialLevel(material, puts) - oldM;
     if (puts == 0 && amountGot > 0) puts = amountGot;

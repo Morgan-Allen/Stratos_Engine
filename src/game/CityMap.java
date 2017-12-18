@@ -37,8 +37,8 @@ public class CityMap implements Session.Saveable {
   final CityMapFog      fog      = new CityMapFog     (this);
   final CityMapTerrain  terrain  = new CityMapTerrain (this);
   
-  Table <City, Tile           > transitPoints = new Table();
-  Table <Type, CityMapFlagging> flagging      = new Table();
+  Table <City, Tile> transitPoints = new Table();
+  Table <Type, CityMapFlagging> flagging = new Table();
   Table <String, CityMapDemands> demands = new Table();
   
   List <Building> buildings = new List();
@@ -167,8 +167,9 @@ public class CityMap implements Session.Saveable {
       actorGrid[c.x][c.y] = new List();
     }
     
-    planning.performSetup(size);
-    fog.performSetup(size);
+    terrain  .performSetup(size);
+    planning .performSetup(size);
+    fog      .performSetup(size);
     pathCache.performSetup(size);
     
     //  Note: this might occur when setup is performed during saving/loading...
