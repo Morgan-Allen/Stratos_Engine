@@ -137,12 +137,12 @@ public class GameConstants {
     MAX_TRAIN_TIME   = (YEAR_LENGTH * 10) / 3,
     BASE_LEVEL_XP    = MAX_TRAIN_TIME / ALL_LEVELS_SUM,
     MAX_SKILL_XP     = BASE_LEVEL_XP * ALL_LEVELS_SUM,
-    CRAFT_XP_PERCENT = 100,
-    FARM_XP_PERCENT  = 200,
-    GATHR_XP_PERCENT = 200,
-    BUILD_XP_PERCENT = 300,
-    FIGHT_XP_PERCENT = 500,
-    TRAIN_XP_PERCENT = 50 ,
+    CRAFT_XP_PERCENT = 100 ,
+    FARM_XP_PERCENT  = 400 ,
+    GATHR_XP_PERCENT = 200 ,
+    BUILD_XP_PERCENT = 800 ,
+    FIGHT_XP_PERCENT = 3200,
+    TRAIN_XP_PERCENT = 50  ,
     //
     //  Basically, if you gain 1 XP per second while practicing 1/3rd of your
     //  free time, you can expect to master a skill within 10 years.  For some
@@ -168,7 +168,7 @@ public class GameConstants {
     AVG_VISIT_TIME   = 20  ,
     MAX_SHOP_RANGE   = 50  ,
     HOME_USE_TIME    = YEAR_LENGTH * 2,
-    AVG_SERVICE_GIVE = 10  , //  value of education, diversion, etc.
+    AVG_SERVICE_GIVE = 10  ,  //  value of education, diversion, etc.
     AVG_MAX_VISITORS = 4   ,
     //
     //  Military, recon and combat-
@@ -182,6 +182,10 @@ public class GameConstants {
     AVG_RANGE        = 3   ,
     MAX_RANGE        = 6   ,
     MAX_EXPLORE_DIST = 200 ,
+    WALL_HIT_BONUS   = 40  ,  //  percent chance
+    WALL_DEF_BONUS   = 25  ,  //  percent chance
+    WALL_ARM_BONUS   = 2   ,
+    WALL_DMG_BONUS   = 1   ,
     //
     //  Trade and migration-
     TRADE_DIST_TIME  = 50  ,
@@ -248,8 +252,9 @@ public class GameConstants {
   }
   
   static class Trait extends Type {
-    Trait(String ID) {
+    Trait(String ID, String name) {
       super(ID, IS_TRAIT);
+      this.name = name;
     }
   }
   
@@ -444,15 +449,15 @@ public class GameConstants {
   /**  Walker types-
     */
   final static Trait
-    SKILL_MELEE = new Trait("skill_melee"),
-    SKILL_RANGE = new Trait("skill_range"),
-    SKILL_EVADE = new Trait("skill_evade"),
-    SKILL_FARM  = new Trait("skill_farm" ),
-    SKILL_BUILD = new Trait("skill_build"),
-    SKILL_CRAFT = new Trait("skill_craft"),
-    SKILL_SPEAK = new Trait("skill_speak"),
-    SKILL_WRITE = new Trait("skill_write"),
-    SKILL_PRAY  = new Trait("skill_pray" )
+    SKILL_MELEE = new Trait("skill_melee", "Melee"),
+    SKILL_RANGE = new Trait("skill_range", "Range"),
+    SKILL_EVADE = new Trait("skill_evade", "Evade"),
+    SKILL_FARM  = new Trait("skill_farm" , "Farm" ),
+    SKILL_BUILD = new Trait("skill_build", "Build"),
+    SKILL_CRAFT = new Trait("skill_craft", "Craft"),
+    SKILL_SPEAK = new Trait("skill_speak", "Speak"),
+    SKILL_WRITE = new Trait("skill_write", "Write"),
+    SKILL_PRAY  = new Trait("skill_pray" , "Pray" )
   ;
   final static WalkerType
     NO_WALKERS[] = new WalkerType[0],

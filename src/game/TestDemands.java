@@ -8,9 +8,11 @@ import static game.GameConstants.*;
 
 public class TestDemands {
   
+  
   public static void main(String args[]) {
     testDemands(true);
   }
+  
   
   static boolean testDemands(boolean graphics) {
     CityMap map = Test.setupTestCity(32);

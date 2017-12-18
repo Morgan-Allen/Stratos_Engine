@@ -240,6 +240,16 @@ public class Type extends Index.Entry implements Session.Saveable {
   }
   
   
+  boolean isPerson() {
+    return category == IS_PERSON_ACT;
+  }
+  
+  
+  boolean isAnimal() {
+    return category == IS_ANIMAL_ACT;
+  }
+  
+  
   boolean isHomeBuilding() {
     return category == IS_HOME_BLD;
   }

@@ -10,7 +10,7 @@ public class TestMilitary extends Test {
   
   
   public static void main(String args[]) {
-    testMilitary(true);
+    testMilitary(false);
   }
   
   
@@ -65,6 +65,10 @@ public class TestMilitary extends Test {
     boolean awayWin   = false;
     boolean backHome  = false;
     
+    Trait COMBAT_SKILLS[] = { SKILL_MELEE, SKILL_RANGE, SKILL_EVADE };
+    Table initSkills = null;
+    Batch <Actor> fromTroops = new Batch();
+    
     while (map.time < 1000 || graphics) {
       map = test.runLoop(map, 10, graphics, "saves/test_military.tlt");
       
@@ -72,6 +76,10 @@ public class TestMilitary extends Test {
         troops = new Formation(new ObjectiveConquer(), homeC);
         fort.deployInFormation(troops, true);
         troops.beginSecuring(map.tileAt(25, 25), TileConstants.E, null, map);
+        
+        Visit.appendTo(fromTroops, troops.recruits);
+        initSkills = recordSkills(fromTroops, COMBAT_SKILLS);
+        
         recruited = true;
       }
       
@@ -126,6 +134,7 @@ public class TestMilitary extends Test {
         
         if (backHome) {
           I.say("\nMILITARY TEST CONCLUDED SUCCESSFULLY!");
+          reportSkills(fromTroops, COMBAT_SKILLS, initSkills);
           if (! graphics) return true;
         }
       }
@@ -139,10 +148,51 @@ public class TestMilitary extends Test {
     I.say("  Away win:  "+awayWin  );
     I.say("  Back home: "+backHome );
     I.say("  Current recuits: "+fort.recruits().size());
+    reportSkills(fromTroops, COMBAT_SKILLS, initSkills);
     
     return false;
   }
   
+  
+  static Table recordSkills(Series <Actor> actors, Trait skills[]) {
+    Table <String, Float> record = new Table();
+    for (Actor a : actors) {
+      for (Trait skill : skills) {
+        String keyL = a.ID+"_"+skill+"_L";
+        record.put(keyL, a.levelOf(skill));
+      }
+    }
+    return record;
+  }
+  
+  
+  static void reportSkills(Series <Actor> actors, Trait skills[], Table init) {
+    Table ends = recordSkills(actors, skills);
+    
+    I.say("\nReporting experience gained.");
+    for (Actor a : actors) {
+      for (Trait skill : skills) {
+        String keyL = a.ID+"_"+skill+"_L";
+        float startS = (Float) init.get(keyL);
+        float endS   = (Float) ends.get(keyL);
+        if (endS <= startS) continue;
+        I.say("  "+a+" "+skill+": "+startS+" -> "+endS);
+      }
+    }
+  }
+  
+  
+  
 }
+
+
+
+
+
+
+
+
+
+
 
 

@@ -287,6 +287,8 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   /**  Miscellaneous behaviour triggers:
     */
+  //  TODO:  Start moving these all out into dedicated sub-tasks.
+  
   void assignTask(Task task) {
     if (this.task != null) this.task.toggleFocus(false);
     this.task = task;
@@ -422,14 +424,49 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     */
   void performAttack(Element other, boolean melee) {
     int damage = melee ? type.meleeDamage : type.rangeDamage;
+    int armour = other.type.armourClass;
     if (other == null || damage <= 0) return;
     
-    //  TODO:  Grant a bonus to hit/damage if you're on walls and your enemy
-    //  isn't.
+    //
+    //  TODO:  Move this out into the TaskCombat class.
+    Trait   attackSkill = melee ? SKILL_MELEE : SKILL_RANGE;
+    Trait   defendSkill = melee ? SKILL_MELEE : SKILL_EVADE;
+    boolean wallBonus   = wallBonus(this, other);
+    boolean wallPenalty = wallBonus(other, this);
+    boolean hits = true;
+    float XP = 1;
     
-    damage = Rand.index(damage + other.type.armourClass) + 1;
-    damage = Nums.max(0, damage - other.type.armourClass);
-    if (damage > 0) other.takeDamage(damage);
+    if (other.type.isActor()) {
+      float attackBonus = levelOf(attackSkill) * 2f / MAX_SKILL_LEVEL;
+      float defendBonus = levelOf(defendSkill) * 2f / MAX_SKILL_LEVEL;
+      if (wallBonus  ) attackBonus += WALL_HIT_BONUS / 100f;
+      if (wallPenalty) defendBonus += WALL_DEF_BONUS / 100f;
+      
+      float hitChance = Nums.clamp(attackBonus + 0.5f - defendBonus, 0, 1);
+      hits = Rand.num() > hitChance;
+      XP   = (1.5f - hitChance) * FIGHT_XP_PERCENT / 100f;
+      
+      float otherXP = (0.5f + hitChance) * FIGHT_XP_PERCENT / 100f;
+      ((Actor) other).gainXP(defendSkill, otherXP);
+    }
+    
+    if (hits) {
+      if (wallBonus  ) damage += WALL_DMG_BONUS;
+      if (wallPenalty) armour += WALL_ARM_BONUS;
+      damage = Rand.index(damage + armour) + 1;
+      damage = Nums.max(0, damage - armour);
+      if (damage > 0) other.takeDamage(damage);
+    }
+    
+    gainXP(attackSkill, XP);
+  }
+  
+  
+  boolean wallBonus(Element from, Element goes) {
+    boolean wallBonus = false;
+    wallBonus |= from.at().pathType() == PATH_WALLS;
+    wallBonus &= goes.at().pathType() != PATH_WALLS;
+    return wallBonus;
   }
   
   
@@ -466,6 +503,19 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   boolean dead() {
     return state == STATE_DEAD;
+  }
+  
+  
+  
+  /**  Stub methods related to skills and XP:
+    */
+  void gainXP(Trait trait, float XP) {
+    return;
+  }
+  
+  
+  float levelOf(Trait trait) {
+    return 0;
   }
   
   
