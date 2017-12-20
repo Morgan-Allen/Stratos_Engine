@@ -111,6 +111,21 @@ public class CityCouncil {
   
   
   
+  /**  Evaluating appeal and urgency across members.
+    */
+  float membersTraitAvg(Trait trait) {
+    float avg = 0, count = 0;
+    for (Actor m : members) {
+      avg += m.levelOf(trait);
+      count += 1;
+    }
+    return avg / Nums.max(1, count);
+  }
+  
+  
+  
+  
+  
   /**  Evaluating the appeal and probability of invading other cities:
     */
   static class InvasionAssessment {
@@ -123,6 +138,7 @@ public class CityCouncil {
     float winKillsA, lossKillsA;
     float winKillsD, lossKillsD;
     float hateBonus, lovePenalty;
+    float dutyBonus, dutyPenalty;
     
     float costs, benefits;
     float evaluatedAppeal;
@@ -150,30 +166,6 @@ public class CityCouncil {
   }
   
   
-  void calculateChances(InvasionAssessment a, boolean random) {
-    //
-    //  First, we calculate a rule-of-thumb calculation for how likely you are
-    //  to win or lose, and average casualties for both sides.  (We include
-    //  the prestige of each city in this calculation, as a reputation for
-    //  victory can intimidate opponents.)
-    float chance = 0, lossA = 0, lossD = 0, presDiff = 0;
-    presDiff = (a.attackC.prestige - a.defendC.prestige) / City.PRESTIGE_MAX;
-    chance   = a.attackPower / (a.attackPower + a.defendPower);
-    chance   = chance + (presDiff / 4);
-    chance   = Nums.clamp((chance * 2) - 0.5f, 0, 1);
-    lossA    = ((random ? Rand.num() : 0.5f) + 1 - chance) / 2;
-    lossD    = ((random ? Rand.num() : 0.5f) +     chance) / 2;
-    //
-    //  And then calculate probable casualties for both sides in each case:
-    a.winChance   = chance;
-    a.angerChance = 1;
-    a.winKillsA   = a.attackPower * Nums.clamp(lossA - 0.25f, 0, 1);
-    a.lossKillsA  = a.attackPower * Nums.clamp(lossA + 0.25f, 0, 1);
-    a.winKillsD   = a.defendPower * Nums.clamp(lossD + 0.25f, 0, 1);
-    a.lossKillsD  = a.defendPower * Nums.clamp(lossD - 0.25f, 0, 1);
-  }
-  
-  
   float casualtyValue(City city) {
     //
     //  For now, we'll assume that the value of lives is calculated on an
@@ -197,13 +189,41 @@ public class CityCouncil {
   }
   
   
+  void calculateChances(InvasionAssessment a, boolean random) {
+    //
+    //  First, we calculate a rule-of-thumb calculation for how likely you are
+    //  to win or lose, and average casualties for both sides.  (We include
+    //  the prestige of each city in this calculation, as a reputation for
+    //  victory can intimidate opponents.)
+    float bravery = membersTraitAvg(TRAIT_BRAVERY);
+    float chance = 0, lossA = 0, lossD = 0, presDiff = 0;
+    presDiff = (a.attackC.prestige - a.defendC.prestige) / City.PRESTIGE_MAX;
+    chance   = a.attackPower / (a.attackPower + a.defendPower);
+    chance   = chance + (presDiff / 4);
+    chance   = chance + (bravery  / 4);
+    chance   = Nums.clamp((chance * 2) - 0.5f, 0, 1);
+    lossA    = ((random ? Rand.num() : 0.5f) + 1 - chance) / 2;
+    lossD    = ((random ? Rand.num() : 0.5f) +     chance) / 2;
+    //
+    //  And then calculate probable casualties for both sides in each case:
+    a.winChance   = chance;
+    a.angerChance = 1;
+    a.winKillsA   = a.attackPower * Nums.clamp(lossA - 0.25f, 0, 1);
+    a.lossKillsA  = a.attackPower * Nums.clamp(lossA + 0.25f, 0, 1);
+    a.winKillsD   = a.defendPower * Nums.clamp(lossD + 0.25f, 0, 1);
+    a.lossKillsD  = a.defendPower * Nums.clamp(lossD - 0.25f, 0, 1);
+  }
+  
+  
   void calculateAppeal(InvasionAssessment a) {
     //
     //  We calculate the attractiveness of invasion using a relatively
     //  straightforward cost/benefit evaluation:
-    float casValueA = casualtyValue(a.attackC);
-    float casValueD = casualtyValue(a.defendC);
-    float tribValue = 0;
+    float diligence  = membersTraitAvg(TRAIT_DILIGENCE );
+    float compassion = membersTraitAvg(TRAIT_COMPASSION);
+    float casValueA  = casualtyValue(a.attackC);
+    float casValueD  = casualtyValue(a.defendC);
+    float tribValue  = 0;
     for (Good g : a.tribute.keys()) {
       tribValue += tributeValue(g, a.tribute.valueFor(g), a.attackC);
     }
@@ -215,9 +235,15 @@ public class CityCouncil {
     angerValue /= 4 * POP_PER_CITIZEN;
     //
     //  And account for pre-existing hostility/loyalty:
-    City.Relation r = a.attackC.relationWith(a.defendC);
-    a.hateBonus   = Nums.min(0, r.loyalty) * angerValue;
-    a.lovePenalty = Nums.max(0, r.loyalty) * angerValue;
+    City.Relation r  = a.attackC.relationWith(a.defendC);
+    boolean isLord   = a.defendC.isLordOf    (a.attackC);
+    boolean isVassal = a.defendC.isVassalOf  (a.attackC);
+    a.hateBonus   = Nums.min(0, 0 - r.loyalty) * angerValue;
+    a.lovePenalty = Nums.max(0, 0 + r.loyalty) * angerValue;
+    a.hateBonus   *= 1 - (compassion / 2);
+    a.lovePenalty *= 1 + (compassion / 2);
+    if (isLord  ) a.lovePenalty *= 1 + (diligence / 2);
+    if (isVassal) a.hateBonus   *= 1 - (diligence / 2);
     //
     //  Then simply tally up the pros and cons-
     a.costs    += a.winChance   * a.winKillsA  * casValueA;
