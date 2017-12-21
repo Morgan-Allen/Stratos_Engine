@@ -13,13 +13,28 @@ public class ActorAsPerson extends Actor {
   
   /**  Data fields, construction and save/load methods-
     */
+  final static int
+    BOND_CHILD   = 1 << 1,
+    BOND_PARENT  = 1 << 3,
+    BOND_MARRIED = 1 << 4,
+    BOND_MASTER  = 1 << 5,
+    BOND_SERVANT = 1 << 6
+  ;
+  
   static class Level {
     Trait trait;
     float XP;
     float level;
   }
   
+  static class Bond {
+    Actor with;
+    float level;
+    int properties;
+  }
+  
   List <Level> levels = new List();
+  List <Bond > bonds  = new List();
   
   
   public ActorAsPerson(Type type) {
@@ -34,6 +49,14 @@ public class ActorAsPerson extends Actor {
       l.trait = (Trait) s.loadObject();
       l.XP    = s.loadFloat();
       l.level = s.loadFloat();
+      levels.add(l);
+    }
+    for (int n = s.loadInt(); n-- > 0;) {
+      Bond b = new Bond();
+      b.with       = (Actor) s.loadObject();
+      b.level      = s.loadFloat();
+      b.properties = s.loadInt();
+      bonds.add(b);
     }
   }
   
@@ -45,6 +68,12 @@ public class ActorAsPerson extends Actor {
       s.saveObject(l.trait);
       s.saveFloat(l.XP);
       s.saveFloat(l.level);
+    }
+    s.saveInt(bonds.size());
+    for (Bond b : bonds) {
+      s.saveObject(b.with);
+      s.saveFloat(b.level);
+      s.saveInt(b.properties);
     }
   }
   
@@ -93,6 +122,72 @@ public class ActorAsPerson extends Actor {
   float levelOf(Trait trait) {
     Level l = levelFor(trait, false);
     return l == null ? 0 : l.level;
+  }
+  
+  
+  
+  /**  Handling bonds with other actors-
+    */
+  Bond bondWith(Actor with, boolean init) {
+    for (Bond b : bonds) {
+      if (b.with == with) return b;
+    }
+    if (init) {
+      Bond b = new Bond();
+      b.with = with;
+      bonds.add(b);
+      return b;
+    }
+    return null;
+  }
+  
+  
+  static void setBond(Actor a, Actor b, int typeA, int typeB, float level) {
+    if (a instanceof ActorAsPerson && b != null) {
+      ((ActorAsPerson) a).setBond(b, level, typeA);
+    }
+    if (b instanceof ActorAsPerson && a != null) {
+      ((ActorAsPerson) b).setBond(a, level, typeB);
+    }
+  }
+  
+  
+  void setBond(Actor with, float level, int... props) {
+    Bond b = bondWith(with, true);
+    b.level = level;
+    b.properties = 0;
+    for (int p : props) b.properties |= p;
+  }
+  
+  
+  void deleteBond(Actor with) {
+    Bond b = bondWith(with, false);
+    if (b != null) bonds.remove(b);
+  }
+  
+  
+  boolean hasBondType(Actor with, int type) {
+    Bond b = bondWith(with, false);
+    return b == null ? false : ((b.properties & type) != 0);
+  }
+  
+  
+  float bondLevel(Actor with) {
+    Bond b = bondWith(with, false);
+    return b == null ? 0 : b.level;
+  }
+  
+  
+  Actor bondedWith(int type) {
+    for (Bond b : bonds) if ((b.properties & type) != 0) return b.with;
+    return null;
+  }
+  
+  
+  Series <Actor> allBondedWith(int type) {
+    Batch <Actor> all = new Batch();
+    for (Bond b : bonds) if ((b.properties & type) != 0) all.add(b.with);
+    return all;
   }
   
   
@@ -216,16 +311,13 @@ public class ActorAsPerson extends Actor {
     if (pregnancy > 0) {
       pregnancy += 1;
       if (pregnancy > PREGNANCY_LENGTH && home != null && inside == home) {
-        
         float dieChance = AVG_CHILD_MORT / 100f;
         if (Rand.num() >= dieChance) {
-          Tile at = home.at();
-          Actor child = (Actor) CHILD.generate();
-          child.enterMap(map, at.x, at.y, 1);
-          child.inside = home;
-          home.setResident(child, true);
+          completePregnancy(home);
         }
-        pregnancy = 0;
+        else {
+          pregnancy = 0;
+        }
       }
       if (pregnancy > PREGNANCY_LENGTH + MONTH_LENGTH) {
         pregnancy = 0;
@@ -248,10 +340,33 @@ public class ActorAsPerson extends Actor {
           pregChance = fertility * chanceW / 100
         ;
         if (Rand.num() < pregChance) {
-          pregnancy = 1;
+          beginPregnancy();
         }
       }
     }
+  }
+  
+  
+  boolean pregnant() {
+    return pregnancy > 0;
+  }
+  
+  
+  void beginPregnancy() {
+    pregnancy = 1;
+  }
+  
+  
+  void completePregnancy(Building venue) {
+    Tile at = venue.at();
+    ActorAsPerson child  = (ActorAsPerson) CHILD.generate();
+    ActorAsPerson father = (ActorAsPerson) bondedWith(BOND_MARRIED);
+    child.enterMap(map, at.x, at.y, 1);
+    child.inside = venue;
+    setBond(this  , child, BOND_CHILD, BOND_PARENT, 0.5f);
+    setBond(father, child, BOND_CHILD, BOND_PARENT, 0.5f);
+    venue.setResident(child, true);
+    pregnancy = 0;
   }
   
   

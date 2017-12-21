@@ -16,6 +16,9 @@ public class ActorAsAnimal extends Actor {
   static float grazeOkay = 0, grazeFail = 0;
   static boolean reportCycle = false;
   
+  Actor master;
+  boolean rides;
+  
   
   public ActorAsAnimal(Type type) {
     super(type);
@@ -24,11 +27,15 @@ public class ActorAsAnimal extends Actor {
   
   public ActorAsAnimal(Session s) throws Exception {
     super(s);
+    master = (Actor) s.loadObject();
+    rides  = s.loadBool();
   }
   
   
   public void saveState(Session s) throws Exception {
     super.saveState(s);
+    s.saveObject(master);
+    s.saveBool(rides);
   }
   
   

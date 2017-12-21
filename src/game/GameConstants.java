@@ -485,6 +485,7 @@ public class GameConstants {
     CITIZEN  = new WalkerType("type_citizen" , IS_PERSON_ACT, CLASS_COMMON),
     SERVANT  = new WalkerType("type_servant" , IS_PERSON_ACT, CLASS_SLAVE ),
     NOBLE    = new WalkerType("type_noble"   , IS_PERSON_ACT, CLASS_NOBLE ),
+    CONSORT  = new WalkerType("type_consort" , IS_PERSON_ACT, CLASS_NOBLE ),
     WORKER   = new WalkerType("type_worker"  , IS_PERSON_ACT, CLASS_COMMON),
     MERCHANT = new WalkerType("type_merchant", IS_PERSON_ACT, CLASS_TRADER),
     PORTER   = new WalkerType("type_porter"  , IS_PERSON_ACT, CLASS_SLAVE ),
@@ -493,28 +494,31 @@ public class GameConstants {
     PRIEST   = new WalkerType("type_priest"  , IS_PERSON_ACT, CLASS_NOBLE )
   ;
   static {
-    //  TODO:  Get rid of this background as a starting option
-    VAGRANT .name = "Vagrant" ;
+    //  TODO:  Get rid of this background as a starting option.
+    VAGRANT .name = "Vagrant";
     
-    CHILD   .name = "Child"   ;
+    CHILD   .name = "Child";
     CHILD.setInitTraits();
     
-    CITIZEN .name = "Citizen" ;
+    CITIZEN .name = "Citizen";
     CITIZEN.setInitTraits(SKILL_FARM, 1, SKILL_BUILD, 1, SKILL_CRAFT, 1);
     
-    SERVANT .name = "Servant" ;
+    SERVANT .name = "Servant";
     SERVANT.setInitTraits(SKILL_SPEAK, 1, SKILL_WRITE, 1);
     
-    NOBLE   .name = "Noble"   ;
+    NOBLE   .name = "Noble";
     NOBLE.setInitTraits(SKILL_MELEE, 1, SKILL_SPEAK, 2, SKILL_WRITE, 2);
     
-    WORKER  .name = "Worker"  ;
+    CONSORT .name = "Consort";
+    CONSORT.setInitTraits(SKILL_SPEAK, 2, SKILL_WRITE, 1, SKILL_EVADE, 2);
+    
+    WORKER  .name = "Worker";
     WORKER.setInitTraits(SKILL_FARM, 1, SKILL_BUILD, 1, SKILL_CRAFT, 1);
     
     MERCHANT.name = "Merchant";
     MERCHANT.setInitTraits(SKILL_SPEAK, 2, SKILL_WRITE, 2);
     
-    PORTER  .name = "Porter"  ;
+    PORTER  .name = "Porter";
     PORTER.setInitTraits();
     
     HUNTER  .name = "Hunter";

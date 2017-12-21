@@ -396,6 +396,7 @@ public class City implements Session.Saveable, Trader {
     //  Local player-owned cities (i.e, with their own map), must derive their
     //  vitual statistics from that small-scale city map:
     if (updateStats && activeMap) {
+      council.updateCouncil(true);
       
       int citizens = 0;
       for (Actor a : map.actors) if (a.homeCity == this) {
@@ -430,7 +431,7 @@ public class City implements Session.Saveable, Trader {
     //  Foreign off-map cities must update their internal ratings somewhat
     //  differently-
     if (updateStats && ! activeMap) {
-      council.updateCouncil();
+      council.updateCouncil(false);
       
       float popRegen  = MONTH_LENGTH * 1f / LIFESPAN_LENGTH;
       float usageInc  = MONTH_LENGTH * 1f / YEAR_LENGTH;

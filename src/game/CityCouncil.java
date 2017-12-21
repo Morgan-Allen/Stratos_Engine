@@ -2,6 +2,7 @@
 
 package game;
 import util.*;
+import static game.ActorAsPerson.*;
 import static game.GameConstants.*;
 
 
@@ -24,8 +25,8 @@ public class CityCouncil {
   //  GameConstants class?
   public static enum Role {
     MONARCH          ,
-    FIRST_CONSORT    ,
-    HEIR_APPARENT    ,
+    CONSORT          ,
+    HEIR             ,
     PRIME_MINISTER   ,
     HIGH_PRIEST      ,
     MINISTER_WAR     ,
@@ -34,10 +35,11 @@ public class CityCouncil {
     MINISTER_ARTS    ,
   };
   
+  
   final City city;
   int typeAI = AI_NORMAL;
   
-  List <Actor> members = new List();
+  List <ActorAsPerson> members = new List();
   Table <Actor, Role> roles = new Table();
   
   
@@ -50,7 +52,7 @@ public class CityCouncil {
     typeAI = s.loadInt();
     
     for (int n = s.loadInt(); n-- > 0;) {
-      Actor a = (Actor) s.loadObject();
+      ActorAsPerson a = (ActorAsPerson) s.loadObject();
       Role r = (Role) s.loadEnum(Role.values());
       members.add(a);
       roles.put(a, r);
@@ -69,11 +71,10 @@ public class CityCouncil {
   }
   
   
-  //  TODO:  The personalities and loyalties of the council should be
-  //  used to weight decision-making when it comes to diplomacy, military
-  //  action, and perhaps spending priorities?
   
-  void toggleMember(Actor actor, Role role, boolean yes) {
+  /**  Toggle membership of the council and handling personality-effects-
+    */
+  void toggleMember(ActorAsPerson actor, Role role, boolean yes) {
     if (yes) {
       members.include(actor);
       roles.put(actor, role);
@@ -85,34 +86,19 @@ public class CityCouncil {
   }
   
   
-  
-  /**  Regular updates-
-    */
-  void updateCouncil() {
-    //
-    //  We annul any independent decision-making if AI is toggled off-
-    if (typeAI == AI_OFF) return;
-    //
-    //  Once per month, otherwise, evaluate any likely prospects for invasion:
-    if (this.city.world.time % MONTH_LENGTH == 0) {
-      Pick <InvasionAssessment> pick = new Pick(0);
-      for (InvasionAssessment IA : updateInvasionChoices()) {
-        pick.compare(IA, IA.evaluatedAppeal);
-      }
-      //
-      //  If any have positive appeal, launch the enterprise:
-      InvasionAssessment IA = pick.result();
-      if (IA != null) {
-        Formation force = spawnInvasion(IA);
-        CityEvents.handleDeparture(force, IA.attackC, IA.defendC);
-      }
-    }
+  ActorAsPerson memberWithRole(Role role) {
+    for (ActorAsPerson a : members) if (roles.get(a) == role) return a;
+    return null;
   }
   
   
+  Series <ActorAsPerson> allMembersWithRole(Role role) {
+    Batch <ActorAsPerson> all = new Batch();
+    for (ActorAsPerson a : members) if (roles.get(a) == role) all.add(a);
+    return all;
+  }
   
-  /**  Evaluating appeal and urgency across members.
-    */
+
   float membersTraitAvg(Trait trait) {
     float avg = 0, count = 0;
     for (Actor m : members) {
@@ -123,6 +109,77 @@ public class CityCouncil {
   }
   
   
+  float membersBondAvg(Actor with) {
+    float avg = 0, count = 0;
+    for (ActorAsPerson m : members) {
+      avg += m.bondLevel(with);
+      count += 1;
+    }
+    return avg / Nums.max(1, count);
+  }
+  
+  
+  
+  /**  Regular updates-
+    */
+  void updateCouncil(boolean onMap) {
+    //
+    //  Check on any current heirs and/or marriage status-
+    ActorAsPerson monarch = memberWithRole(Role.MONARCH);
+    if (monarch != null) {
+      for (Actor consort : monarch.allBondedWith(BOND_MARRIED)) {
+        toggleMember((ActorAsPerson) consort, Role.CONSORT, true);
+      }
+      for (Actor heir : monarch.allBondedWith(BOND_CHILD)) {
+        toggleMember((ActorAsPerson) heir, Role.HEIR, true);
+      }
+    }
+    //
+    //  For now, we'll assume succession is determined by quasi-hereditary-
+    //  male-line-primogeniture with a dash of popularity contest.  Might allow
+    //  for customisation later.
+    if (monarch != null && monarch.dead()) {
+      toggleMember(monarch, Role.MONARCH, false);
+      Pick <ActorAsPerson> pick = new Pick();
+      for (ActorAsPerson a : members) {
+        Role r = roles.get(a);
+        float rating = 1 + membersBondAvg(a);
+        if (r == Role.HEIR) rating *= 3;
+        if (a.woman()) rating /= 2;
+        rating *= 1 + (a.ageYears() / AVG_RETIREMENT);
+        pick.compare(a, rating);
+      }
+      //
+      //  The king is dead, long live the king-
+      ActorAsPerson newMonarch = pick.result();
+      if (newMonarch != null) toggleMember(newMonarch, Role.MONARCH, true);
+    }
+    //
+    //  We annul any independent decision-making if AI is toggled off-
+    if (typeAI == AI_OFF || onMap) return;
+    //
+    //  Once per month, otherwise, evaluate any major independent decisions-
+    if (this.city.world.time % MONTH_LENGTH == 0) {
+      updateCouncilAI();
+    }
+  }
+  
+  
+  void updateCouncilAI() {
+    //
+    //  Put together a list of possible invasions:
+    Pick <InvasionAssessment> pick = new Pick(0);
+    for (InvasionAssessment IA : updateInvasionChoices()) {
+      pick.compare(IA, IA.evaluatedAppeal);
+    }
+    //
+    //  And if any have positive appeal, launch the enterprise:
+    InvasionAssessment IA = pick.result();
+    if (IA != null) {
+      Formation force = spawnInvasion(IA);
+      CityEvents.handleDeparture(force, IA.attackC, IA.defendC);
+    }
+  }
   
   
   
