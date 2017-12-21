@@ -15,10 +15,13 @@ public class Formation implements
   
   /**  Data fields, setup and save/load methods-
     */
-  Objective    objective     = null;
-  City.POSTURE postureDemand = null;
-  Formation    actionDemand  = null;
-  Tally <Good> tributeDemand = new Tally();
+  Objective objective = null;
+  boolean success = false;
+  
+  City.POSTURE postureDemand  = null;
+  Formation    actionDemand   = null;
+  Actor        marriageDemand = null;
+  Tally <Good> tributeDemand  = new Tally();
   
   List <Actor> escorted = new List();
   List <Actor> recruits = new List();
@@ -46,9 +49,12 @@ public class Formation implements
   public Formation(Session s) throws Exception {
     s.cacheInstance(this);
     
-    objective     = (Objective   ) s.loadObject();
-    postureDemand = (City.POSTURE) s.loadEnum(City.POSTURE.values());
-    actionDemand  = (Formation   ) s.loadObject();
+    objective = (Objective) s.loadObject();
+    success   = s.loadBool();
+    
+    postureDemand  = (City.POSTURE) s.loadEnum(City.POSTURE.values());
+    actionDemand   = (Formation   ) s.loadObject();
+    marriageDemand = (Actor       ) s.loadObject();
     s.loadTally(tributeDemand);
     
     s.loadObjects(escorted);
@@ -70,10 +76,13 @@ public class Formation implements
   
   public void saveState(Session s) throws Exception {
     
-    s.saveObject(objective    );
-    s.saveEnum  (postureDemand);
-    s.saveObject(actionDemand );
-    s.saveTally (tributeDemand);
+    s.saveObject(objective);
+    s.saveBool(success);
+    
+    s.saveEnum  (postureDemand );
+    s.saveObject(actionDemand  );
+    s.saveObject(marriageDemand);
+    s.saveTally (tributeDemand );
     
     s.saveObjects(escorted);
     s.saveObjects(recruits);

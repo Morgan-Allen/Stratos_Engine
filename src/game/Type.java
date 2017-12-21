@@ -294,6 +294,12 @@ public class Type extends Index.Entry implements Session.Saveable {
   }
   
   
+  float initTraitLevel(Trait t) {
+    int index = Visit.indexOf(t, initTraits);
+    return index == -1 ? null : traitLevels[index];
+  }
+  
+  
   void initAsMigrant(ActorAsPerson a) {
     
     float age = Rand.range(AVG_MARRIED, AVG_MENOPAUSE);

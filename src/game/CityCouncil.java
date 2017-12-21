@@ -42,6 +42,8 @@ public class CityCouncil {
   List <Actor> members = new List();
   Table <Actor, Role> roles = new Table();
   
+  List <Formation> submittingDemands = new List();
+  
   
   CityCouncil(City city) {
     this.city = city;
@@ -57,6 +59,8 @@ public class CityCouncil {
       members.add(a);
       roles.put(a, r);
     }
+    
+    s.loadObjects(submittingDemands);
   }
   
   
@@ -68,6 +72,8 @@ public class CityCouncil {
       s.saveObject(a);
       s.saveEnum(roles.get(a));
     }
+    
+    s.saveObjects(submittingDemands);
   }
   
   

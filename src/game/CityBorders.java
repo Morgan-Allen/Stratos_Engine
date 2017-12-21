@@ -129,19 +129,21 @@ public class CityBorders {
     Tile from = migrant.at();
     final Pick <Opening> pick = new Pick();
     
-    //  TODO:  You'll want a more sophisticated measure of which jobs you
-    //  could reasonably fill.
-    
     for (Building b : map.buildings) if (b.accessible()) {
       for (Type t : b.type.workerTypes) {
         int space = b.maxWorkers(t) - b.numWorkers(t);
         if (space <= 0) continue;
-
-        float near = 10 / (10f + CityMap.distance(from, b));
+        
+        float fitness = 2;
+        for (Trait skill : t.initTraits) {
+          fitness += migrant.levelOf(skill) * t.initTraitLevel(skill);
+        }
+        
+        float near = CityMap.distancePenalty(from, b);
         Opening o = new Opening();
         o.b = b;
         o.position = t;
-        pick.compare(o, space * near);
+        pick.compare(o, near * fitness);
       }
     }
     

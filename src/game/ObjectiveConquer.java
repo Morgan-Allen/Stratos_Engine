@@ -70,8 +70,6 @@ public class ObjectiveConquer extends Formation.Objective {
     
     //
     //  If you're beaten, turn around and go home:
-    //  TODO:  Allow for retreat at partial strength!
-    //  TODO:  If you're already home, disband and/or flee...
     if (parent.powerSum() == 0) {
       CityEvents.enterHostility(siege, home, false, 1);
       CityEvents.signalVictory(siege, home, parent);
