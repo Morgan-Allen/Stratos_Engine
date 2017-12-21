@@ -48,6 +48,9 @@ public class CityBorders {
     float homeTotal = 0, homeFilled = 0;
     float jobsCrowding, homeCrowding;
     
+    Tally <Type> jobsDemand = new Tally();
+    Tally <Type> jobsSupply = new Tally();
+    
     Assessment(CityMap map) {
       int MR, NR, MW, NW;
       
@@ -64,6 +67,8 @@ public class CityBorders {
         for (Type t : b.type.workerTypes) {
           jobsTotal  += MW = b.maxWorkers(t);
           jobsFilled += NW = b.numWorkers(t);
+          jobsDemand.add(MW, t);
+          jobsSupply.add(NW, t);
           if (report) I.say("  Job "+t+": "+NW+"/"+MW);
         }
       }
@@ -82,19 +87,35 @@ public class CityBorders {
     float spaces = a.jobsTotal + a.homeTotal - (a.jobsFilled + a.homeFilled);
     if (crowding >= 1) return;
     
+    //
+    //  Tally up the number of migrants available to arrive this month-
     //  TODO:  Do this with each neighbouring city, based on their own
-    //  population/crowding levels, current relations, and proximity.
+    //    population/crowding levels, current relations, and proximity.
     City from = map.city;
-    
     Batch <Actor> migrants = new Batch();
     float months   = period * 1f / MONTH_LENGTH;
     float numSpawn = ((1 - crowding) * MIGRANTS_PER_1KM * months);
     numSpawn = Nums.min(numSpawn, spaces);
     
+    //
+    //  And put together a profile of which jobs are in greatest demand-
+    Type  jobTypes[] = a.jobsDemand.keysToArray(Type.class);
+    float jobNeeds[] = new float[jobTypes.length];
+    for (int i = jobTypes.length; i-- > 0;) {
+      Type j = jobTypes[i];
+      float need = a.jobsDemand.valueFor(j) - a.jobsSupply.valueFor(j);
+      jobNeeds[i] = Nums.max(0, need);
+    }
+    
+    //
+    //  Then spawn actors randomly generated to fit that profile-
+    
+    //  TODO:  There should always be a chance of getting random, unskilled
+    //  workers, and higher-skill positions might not be trivially filled.
+    
     while (numSpawn-- > 0) {
-      //  TODO:  TRY AND SELECT ACTORS WITH BACKGROUNDS APPROPRIATE TO A GIVEN
-      //  WORK VENUE!
-      ActorAsPerson w = (ActorAsPerson) VAGRANT.generate();
+      Type job = (Type) Rand.pickFrom(jobTypes, jobNeeds);
+      ActorAsPerson w = (ActorAsPerson) job.generate();
       w.type.initAsMigrant(w);
       migrants.add(w);
     }
