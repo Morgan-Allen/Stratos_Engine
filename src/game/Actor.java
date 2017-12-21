@@ -507,7 +507,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   
   
-  /**  Stub methods related to skills and XP:
+  /**  Stub methods related to skills, XP and bonding:
     */
   void gainXP(Trait trait, float XP) {
     return;
@@ -516,6 +516,16 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   float levelOf(Trait trait) {
     return 0;
+  }
+  
+  
+  float bondLevel(Actor with) {
+    return 0;
+  }
+  
+  
+  Series <Actor> allBondedWith(int type) {
+    return new Batch();
   }
   
   

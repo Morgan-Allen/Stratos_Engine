@@ -38,16 +38,15 @@ public class TaskCrafting extends Task {
   protected void onVisit(Building visits) {
     
     BuildingForCrafts venue = (BuildingForCrafts) visits;
-    ActorAsPerson crafts = (ActorAsPerson) actor;
     if (! venue.canAdvanceCrafting()) return;
     
     Trait skill = venue.type.craftSkill;
     float progress = venue.craftProgress;
     float progInc = 1f / venue.type.craftTime;
-    float skillMult = crafts.levelOf(skill) / MAX_SKILL_LEVEL;
+    float skillMult = actor.levelOf(skill) / MAX_SKILL_LEVEL;
     
     progInc *= 1f + (1f * skillMult);
-    crafts.gainXP(skill, 1 * CRAFT_XP_PERCENT / 100f);
+    actor.gainXP(skill, 1 * CRAFT_XP_PERCENT / 100f);
     
     for (Good need : venue.needed()) {
       venue.inventory.add(0 - progInc, need);

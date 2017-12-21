@@ -318,10 +318,10 @@ public class Type extends Index.Entry implements Session.Saveable {
   }
   
   
-  void initAsAnimal(Actor w) {
-    float age = Rand.num() * w.type.lifespan;
-    w.ageSeconds = (int) age;
-    w.hunger     = Rand.num() - 0.5f;
+  void initAsAnimal(ActorAsAnimal a) {
+    float age = Rand.num() * a.type.lifespan;
+    a.ageSeconds = (int) age;
+    a.hunger     = Rand.num() - 0.5f;
     return;
   }
   

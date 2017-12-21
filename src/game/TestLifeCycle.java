@@ -138,11 +138,10 @@ public class TestLifeCycle extends Test {
           break;
         }
         
-        for (Actor a : map.actors) if (a.type.isPerson()) {
-          ActorAsPerson p = (ActorAsPerson) a;
+        for (Actor a : map.actors) {
           if (a.child() && a.alive() && ! originalPop.includes(a)) {
             if (! births.includes(a)) {
-              Series <Actor> parents = p.allBondedWith(BOND_PARENT);
+              Series <Actor> parents = a.allBondedWith(BOND_PARENT);
               I.say("  Born: "+a+", parents: "+parents);
               
               if (parents.includes(oldKing)) {

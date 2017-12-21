@@ -39,7 +39,7 @@ public class CityCouncil {
   final City city;
   int typeAI = AI_NORMAL;
   
-  List <ActorAsPerson> members = new List();
+  List <Actor> members = new List();
   Table <Actor, Role> roles = new Table();
   
   
@@ -52,7 +52,7 @@ public class CityCouncil {
     typeAI = s.loadInt();
     
     for (int n = s.loadInt(); n-- > 0;) {
-      ActorAsPerson a = (ActorAsPerson) s.loadObject();
+      Actor a = (Actor) s.loadObject();
       Role r = (Role) s.loadEnum(Role.values());
       members.add(a);
       roles.put(a, r);
@@ -74,7 +74,7 @@ public class CityCouncil {
   
   /**  Toggle membership of the council and handling personality-effects-
     */
-  void toggleMember(ActorAsPerson actor, Role role, boolean yes) {
+  void toggleMember(Actor actor, Role role, boolean yes) {
     if (yes) {
       members.include(actor);
       roles.put(actor, role);
@@ -86,15 +86,15 @@ public class CityCouncil {
   }
   
   
-  ActorAsPerson memberWithRole(Role role) {
-    for (ActorAsPerson a : members) if (roles.get(a) == role) return a;
+  Actor memberWithRole(Role role) {
+    for (Actor a : members) if (roles.get(a) == role) return a;
     return null;
   }
   
   
-  Series <ActorAsPerson> allMembersWithRole(Role role) {
-    Batch <ActorAsPerson> all = new Batch();
-    for (ActorAsPerson a : members) if (roles.get(a) == role) all.add(a);
+  Series <Actor> allMembersWithRole(Role role) {
+    Batch <Actor> all = new Batch();
+    for (Actor a : members) if (roles.get(a) == role) all.add(a);
     return all;
   }
   
@@ -111,7 +111,7 @@ public class CityCouncil {
   
   float membersBondAvg(Actor with) {
     float avg = 0, count = 0;
-    for (ActorAsPerson m : members) {
+    for (Actor m : members) {
       avg += m.bondLevel(with);
       count += 1;
     }
@@ -125,13 +125,13 @@ public class CityCouncil {
   void updateCouncil(boolean onMap) {
     //
     //  Check on any current heirs and/or marriage status-
-    ActorAsPerson monarch = memberWithRole(Role.MONARCH);
+    Actor monarch = memberWithRole(Role.MONARCH);
     if (monarch != null) {
       for (Actor consort : monarch.allBondedWith(BOND_MARRIED)) {
-        toggleMember((ActorAsPerson) consort, Role.CONSORT, true);
+        toggleMember(consort, Role.CONSORT, true);
       }
       for (Actor heir : monarch.allBondedWith(BOND_CHILD)) {
-        toggleMember((ActorAsPerson) heir, Role.HEIR, true);
+        toggleMember(heir, Role.HEIR, true);
       }
     }
     //
@@ -140,8 +140,8 @@ public class CityCouncil {
     //  for customisation later.
     if (monarch != null && monarch.dead()) {
       toggleMember(monarch, Role.MONARCH, false);
-      Pick <ActorAsPerson> pick = new Pick();
-      for (ActorAsPerson a : members) {
+      Pick <Actor> pick = new Pick();
+      for (Actor a : members) {
         Role r = roles.get(a);
         float rating = 1 + membersBondAvg(a);
         if (r == Role.HEIR) rating *= 3;
@@ -151,7 +151,7 @@ public class CityCouncil {
       }
       //
       //  The king is dead, long live the king-
-      ActorAsPerson newMonarch = pick.result();
+      Actor newMonarch = pick.result();
       if (newMonarch != null) toggleMember(newMonarch, Role.MONARCH, true);
     }
     //
