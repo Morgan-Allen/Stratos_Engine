@@ -6,8 +6,6 @@ import static game.City.*;
 import static game.CityMap.*;
 import static game.GameConstants.*;
 
-import game.CityMap.Tile;
-
 
 
 public class ObjectiveConquer extends Formation.Objective {

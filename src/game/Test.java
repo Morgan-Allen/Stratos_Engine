@@ -176,7 +176,7 @@ public class Test {
     
     for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
       int fill = BLANK_COLOR;
-      CityMap.Tile at = map.tileAt(c.x, c.y);
+      Tile at = map.tileAt(c.x, c.y);
       
       if (at.above != null) {
         if (at.above.growLevel() == -1) fill = MISSED_COLOR;
