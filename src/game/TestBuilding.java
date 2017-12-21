@@ -193,8 +193,8 @@ public class TestBuilding extends Test {
       }
     }
     for (Actor a : map.actors) {
-      if (a.carried != null) {
-        total.add(a.carryAmount, a.carried);
+      if (a.carried != null && a.carried instanceof Good) {
+        total.add(a.carryAmount, (Good) a.carried);
       }
     }
     

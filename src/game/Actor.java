@@ -43,7 +43,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   int moveMode = MOVE_NORMAL;
   Vec3D position = new Vec3D();
   
-  Good  carried = null;
+  Object carried = null;
   float carryAmount = 0;
   Tally <Good> cargo = null;
   
@@ -81,7 +81,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     moveMode = s.loadInt();
     position.loadFrom(s.input());
     
-    carried     = (Good) s.loadObject();
+    carried     = s.loadObject();
     carryAmount = s.loadFloat();
     if (s.loadBool()) s.loadTally(cargo);
     

@@ -62,7 +62,7 @@ public class TaskGathering extends Task {
   
   
   static boolean pickNextCrop(
-    Building store, Actor actor, boolean close, Good... cropTypes
+    Building store, Actor actor, boolean close, Object... cropTypes
   ) {
     if (Visit.empty(cropTypes)) return false;
     
