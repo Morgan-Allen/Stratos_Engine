@@ -202,9 +202,9 @@ public class ObjectiveConquer extends Formation.Objective {
     x = Nums.clamp(x, map.size);
     y = Nums.clamp(y, map.size);
     
-    //  TODO:  Find the nearest path-accessible point here!
-    
-    return map.tileAt(x, y);
+    Tile stands = map.tileAt(x, y);
+    stands = Tile.nearestOpenTile(stands, map, AVG_FILE);
+    return stands;
   }
   
   

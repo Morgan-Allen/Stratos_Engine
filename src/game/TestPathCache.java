@@ -148,9 +148,9 @@ public class TestPathCache extends Test {
     Tile land1   = map.tileAt(0.5f * div, 7.5f * div);
     Tile land2   = map.tileAt(7.5f * div, 0.5f * div);
     Tile island0 = map.tileAt(1.5f * div, 1.5f * div);
-    land1   = CityMapTerrain.nearestOpenTile(land1  , map);
-    land2   = CityMapTerrain.nearestOpenTile(land2  , map);
-    island0 = CityMapTerrain.nearestOpenTile(island0, map);
+    land1   = Tile.nearestOpenTile(land1  , map);
+    land2   = Tile.nearestOpenTile(land2  , map);
+    island0 = Tile.nearestOpenTile(island0, map);
     test.keyTiles = new Tile[] { land1, land2, island0 };
     
     map.pathCache.updatePathCache();
@@ -225,8 +225,8 @@ public class TestPathCache extends Test {
       Tile from, goes;
       from = map.tileAt(Rand.index(map.size), Rand.index(map.size));
       goes = map.tileAt(Rand.index(map.size), Rand.index(map.size));
-      from = CityMapTerrain.nearestOpenTile(from, map);
-      goes = CityMapTerrain.nearestOpenTile(goes, map);
+      from = Tile.nearestOpenTile(from, map);
+      goes = Tile.nearestOpenTile(goes, map);
       if (from == null || goes == null || from == goes) continue;
       if (! verifyConnection(from, goes, map)) {
         allOkay = false;

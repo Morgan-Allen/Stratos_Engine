@@ -188,12 +188,6 @@ public class CityMap implements Session.Saveable {
   }
   
   
-  static Target loadTarget(CityMap map, Session s) throws Exception {
-    if (s.loadBool()) return loadTile(map, s);
-    else return (Target) s.loadObject();
-  }
-  
-  
   static void saveTile(Tile t, CityMap map, Session s) throws Exception {
     if (t != null && map == null) {
       I.complain("CANNOT SAVE TILE WITHOUT MAP");
@@ -205,6 +199,12 @@ public class CityMap implements Session.Saveable {
     }
     s.saveInt(t.x);
     s.saveInt(t.y);
+  }
+  
+  
+  static Target loadTarget(CityMap map, Session s) throws Exception {
+    if (s.loadBool()) return loadTile(map, s);
+    else return (Target) s.loadObject();
   }
   
   

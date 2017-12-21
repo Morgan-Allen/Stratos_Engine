@@ -162,7 +162,47 @@ public class Tile implements Pathing {
   }
   
   
+  
+  /**  Various utility and convenience methods-
+    */
+  static Tile nearestOpenTile(Tile from, CityMap map) {
+    return nearestOpenTile(from, map, 1);
+  }
+  
+
+  static Tile nearestOpenTile(Tile from, CityMap map, int maxRange) {
+    
+    if (from == null || ! map.blocked(from)) return from;
+    if (maxRange <= 0) return null;
+
+    for (Tile t : CityMap.adjacent(from, null, map)) {
+      if (t == null || map.blocked(t)) continue;
+      return t;
+    }
+    if (maxRange == 1) return null;
+    
+    int x = from.x, y = from.y, w = 1, h = 1;
+    for (int range = 2; range <= maxRange; range++) {
+      x -= 1;
+      y -= 1;
+      w += 2;
+      h += 2;
+      for (Tile t : map.tilesAround(x, y, w, h)) {
+        if (t == null || map.blocked(t)) continue;
+        return t;
+      }
+    }
+    
+    return null;
+  }
+  
+  
+  
+  /**  Graphical debug and interface methods-
+    */
   public String toString() {
     return "T"+x+"|"+y;
   }
 }
+
+

@@ -234,7 +234,7 @@ public class Test {
     configGraphic(map.size, map.size);
     
     Tile hovered = map.tileAt(hover.x, hover.y);
-    hovered = CityMapTerrain.nearestOpenTile(hovered, map);
+    hovered = Tile.nearestOpenTile(hovered, map);
     
     Area area = map.pathCache.rawArea(hovered), around[] = null;
     AreaGroup group = null;

@@ -124,8 +124,6 @@ public class CityMapTerrain implements TileConstants {
   
   
   
-  
-  
   /**  Initial terrain setup-
     */
   public static CityMap generateTerrain(
@@ -221,17 +219,6 @@ public class CityMapTerrain implements TileConstants {
   }
   
   
-  static Tile nearestOpenTile(Tile from, CityMap map) {
-    if (from == null || ! map.blocked(from)) return from;
-    
-    for (Tile t : CityMap.adjacent(from, null, map)) {
-      if (t == null || map.blocked(t)) continue;
-      return t;
-    }
-    return null;
-  }
-  
-  
   
   /**  Adding predators and prey:
     */
@@ -304,7 +291,7 @@ public class CityMapTerrain implements TileConstants {
       Nums.clamp(point.y + Rand.index(QR * 2) - QR, map.size)
     );
     
-    point = nearestOpenTile(point, map);
+    point = Tile.nearestOpenTile(point, map);
     return point;
   }
   
