@@ -15,8 +15,20 @@ public class Formation implements
   
   /**  Data fields, setup and save/load methods-
     */
-  Objective objective = null;
-  boolean success = false;
+  final static int
+    OBJECTIVE_STANDBY  = 0,
+    OBJECTIVE_CONQUER  = 1,
+    OBJECTIVE_GARRISON = 2,
+    OBJECTIVE_DIALOG   = 3
+  ;
+  
+  int objective = OBJECTIVE_STANDBY;
+  boolean termsGiven    = false;
+  boolean termsAccepted = false;
+  boolean termsRefused  = false;
+  boolean victorious    = false;
+  boolean defeated      = false;
+  boolean complete      = false;
   
   City.POSTURE postureDemand  = null;
   Formation    actionDemand   = null;
@@ -38,8 +50,18 @@ public class Formation implements
   Object  secureFocus;
   int     facing     ;
   
+  List <Tile> guardPoints = new List();
+  int lastUpdateTime = -1;
+  
   
   Formation(Objective objective, City belongs) {
+    //this.objective = objective;
+    this.homeCity  = belongs;
+    this.map       = belongs.map;
+  }
+  
+  
+  Formation(int objective, City belongs) {
     this.objective = objective;
     this.homeCity  = belongs;
     this.map       = belongs.map;
@@ -49,8 +71,13 @@ public class Formation implements
   public Formation(Session s) throws Exception {
     s.cacheInstance(this);
     
-    objective = (Objective) s.loadObject();
-    success   = s.loadBool();
+    objective     = s.loadInt ();
+    termsGiven    = s.loadBool();
+    termsAccepted = s.loadBool();
+    termsRefused  = s.loadBool();
+    victorious    = s.loadBool();
+    defeated      = s.loadBool();
+    complete      = s.loadBool();
     
     postureDemand  = (City.POSTURE) s.loadEnum(City.POSTURE.values());
     actionDemand   = (Formation   ) s.loadObject();
@@ -71,13 +98,24 @@ public class Formation implements
     securePoint = loadTile(map, s);
     secureFocus = s.loadObject();
     facing      = s.loadInt();
+    
+    for (int n = s.loadInt(); n-- > 0;) {
+      Tile point = CityMap.loadTile(map, s);
+      guardPoints.add(point);
+    }
+    lastUpdateTime = s.loadInt();
   }
   
   
   public void saveState(Session s) throws Exception {
     
-    s.saveObject(objective);
-    s.saveBool(success);
+    s.saveInt (objective    );
+    s.saveBool(termsGiven   );
+    s.saveBool(termsAccepted);
+    s.saveBool(termsRefused );
+    s.saveBool(victorious   );
+    s.saveBool(defeated     );
+    s.saveBool(complete     );
     
     s.saveEnum  (postureDemand );
     s.saveObject(actionDemand  );
@@ -98,6 +136,10 @@ public class Formation implements
     saveTile(securePoint, map, s);
     s.saveObject(secureFocus);
     s.saveInt(facing);
+    
+    s.saveInt(guardPoints.size());
+    for (Tile t : guardPoints) CityMap.saveTile(t, map, s);
+    s.saveInt(lastUpdateTime);
   }
   
   
@@ -132,14 +174,22 @@ public class Formation implements
   /**  Supplemental utility methods for setting objectives, demands and
     *  marching orders:
     */
-  void assignDemands(
+  void assignTerms(
     City.POSTURE posture,
     Formation actionTaken,
+    Actor toMarry,
     Tally <Good> tribute
   ) {
-    this.postureDemand = posture;
-    this.actionDemand  = actionTaken;
-    this.tributeDemand = tribute == null ? new Tally() : tribute;
+    this.postureDemand  = posture;
+    this.actionDemand   = actionTaken;
+    this.marriageDemand = toMarry;
+    this.tributeDemand  = tribute == null ? new Tally() : tribute;
+  }
+  
+  
+  void setTermsAccepted(boolean accepted) {
+    if (accepted) termsAccepted = true;
+    else          termsRefused  = true;
   }
   
   
@@ -211,13 +261,18 @@ public class Formation implements
       return;
     }
     
+    /*
     //  Update any tactical targets-
     if (away && map != null) {
       objective.updateTacticalTarget(this);
     }
+    //*/
     
     //  This is a hacky way of saying "I want to go to a different city, is
     //  everyone ready yet?"
+    
+    //  TODO:  Only do this once every actor is either dead or off the map.
+    
     if (
       map != null && secureCity != null &&
       secureCity != map.city && formationReady()
@@ -269,13 +324,16 @@ public class Formation implements
       }
       else {
         this.away = true;
-        objective.updateTacticalTarget(this);
+        //objective.updateTacticalTarget(this);
       }
     }
     //
     //  In the event that this happens off-map, either an army has returned
     //  home to a foreign city, or an army has assaulted a foreign city:
     else {
+      guardPoints.clear();
+      lastUpdateTime = -1;
+      
       if (home) {
         if (reports()) I.say("\nARRIVED HOME: "+goes+" FROM "+journey.from);
         this.away = false;
@@ -296,11 +354,15 @@ public class Formation implements
   boolean formationReady() {
     if (map == null) return true;
     if (securePoint == null || ! active) return false;
+    
+    //  TODO:  Consider this more carefully.
+    
     for (Actor a : recruits) {
-      if (objective.standLocation(a, this) != a.at()) {
+      if (standLocation(a, this) != a.at()) {
         return false;
       }
     }
+    //for (Actor a : recruits) if (a.onMap()) return false;
     return true;
   }
   
@@ -324,17 +386,95 @@ public class Formation implements
   /**  Organising actors and other basic query methods-
     */
   public void selectActorBehaviour(Actor actor) {
-    objective.selectActorBehaviour(actor, this);
+    
+    boolean haveTerms = false;
+    haveTerms |= marriageDemand != null;
+    haveTerms |= actionDemand   != null;
+    haveTerms |= postureDemand  != null;
+    haveTerms |= ! tributeDemand.empty();
+    
+    boolean isEnvoy = escorted.includes(actor);
+    boolean diplomatic = objective == OBJECTIVE_DIALOG;
+    boolean defensive = objective == OBJECTIVE_GARRISON;
+    
+    if (haveTerms && isEnvoy && ! termsGiven) {
+      Actor offersTerms = findOfferRecipient();
+      
+      if (offersTerms == null) termsGiven = true;
+      else {
+        actor.embarkOnTarget(offersTerms, 1, Task.JOB.DIALOG, this);
+        return;
+      }
+    }
+    
+    if (! defensive) {
+      updateTacticalTarget(this);
+    }
+    
+    if (defeated || victorious || (diplomatic && termsRefused)) {
+      Tile exits = exitLocation(actor);
+      if (exits != null) {
+        actor.embarkOnTarget(exits, 10, Task.JOB.RETURNING, this);
+        return;
+      }
+    }
+    
+    TaskCombat taskC = (actor.inCombat() || isEnvoy) ? null :
+      TaskCombat.nextReaction(actor, this)
+    ;
+    if (taskC != null) {
+      actor.assignTask(taskC);
+      return;
+    }
+    
+    TaskCombat taskS = (actor.inCombat() || isEnvoy) ? null :
+      TaskCombat.nextSieging(actor, this)
+    ;
+    if (taskS != null) {
+      actor.assignTask(taskS);
+      return;
+    }
+
+    boolean doPatrol =
+      (secureFocus instanceof Target) &&
+      ((Target) secureFocus).type().isWall
+    ;
+    
+    if (doPatrol) {
+      Tile stands = patrolPoint(actor, this);
+      if (stands != null) {
+        actor.embarkOnTarget(stands, 10, Task.JOB.MILITARY, this);
+        return;
+      }
+    }
+    else {
+      Tile stands = standLocation(actor, this);
+      if (stands != null) {
+        actor.embarkOnTarget(stands, 10, Task.JOB.MILITARY, this);
+        return;
+      }
+    }
   }
   
   
   public void actorUpdates(Actor actor) {
-    objective.actorUpdates(actor, this);
+    //objective.actorUpdates(actor, this);
   }
   
   
   public void actorTargets(Actor actor, Target other) {
-    objective.actorTargets(actor, other, this);
+    //objective.actorTargets(actor, other, this);
+    
+    if (actor.jobType() == Task.JOB.DIALOG) {
+      map.city.council.receiveTerms(this);
+    }
+    if (actor.jobType() == Task.JOB.MILITARY) {
+    }
+    if (actor.jobType() == Task.JOB.RETURNING) {
+    }
+    if (actor.jobType() == Task.JOB.RETREAT) {
+      actor.exitMap(map);
+    }
   }
   
   

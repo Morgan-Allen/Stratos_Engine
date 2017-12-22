@@ -40,6 +40,7 @@ public class TestDiplomacy extends Test {
     //  Accept the offer.
     //  OR
     //  Reject the offer.
+    //  (Allow up to 1 month to respond, let's say.)
     
     //  TODO:  If you reject the offer, they might attack right there!
     //  So... even regular military actions might allow for diplomacy, with
@@ -49,6 +50,14 @@ public class TestDiplomacy extends Test {
     //  Wait until they arrive.
     //  Ensure your offer is accepted.
     //  Allow the formation to return home.  Job done.
+    
+    
+    //  TODO:  Handle these permutations-
+    
+    //  Terms accepted/rejected.
+    
+    //  Force defeated/victorious.
+    
     
     while (map.time < 1000 || graphics) {
       map = test.runLoop(map, 10, graphics, "saves/test_diplomacy.tlt");

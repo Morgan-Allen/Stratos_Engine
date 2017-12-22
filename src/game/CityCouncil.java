@@ -372,9 +372,14 @@ public class CityCouncil {
   
   
   Formation spawnInvasion(InvasionAssessment IA) {
-    
     Formation force = new Formation(new ObjectiveConquer(), city);
-    force.assignDemands(City.POSTURE.VASSAL, null, IA.tribute);
+    
+    if (city.government == City.GOVERNMENT.BARBARIAN) {
+      //  Only non-barbarian governments will set up permanent command-fx.
+    }
+    else {
+      force.assignDemands(City.POSTURE.VASSAL, null, IA.tribute);
+    }
     
     int n = 0;
     while (force.powerSum() < city.armyPower / 2) {

@@ -885,6 +885,7 @@ public class GameConstants {
     //  NOTE- there's a bunch of other shrines/upgrades I might add
     //  later, but I want to work those out in due time.  Later.
     
+    //
     //  Quetzalcoatl:
     //    Aspects for healing & knowledge, travel & wind
     //    Patecatl/Piltzintecuhtli, Yacetecuhtli/Zacatzontli, Ehecatl
@@ -933,7 +934,6 @@ public class GameConstants {
     Type type();
     Tile at();
     boolean isTile();
-    //CityMap map();
     boolean onMap();
     
     void targetedBy(Actor a);

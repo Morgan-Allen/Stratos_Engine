@@ -15,6 +15,7 @@ public class Task implements Session.Saveable {
   public static enum JOB {
     NONE     ,
     RETURNING,
+    DEPARTING,
     RESTING  ,
     WANDERING,
     DELIVER  ,
@@ -29,8 +30,11 @@ public class Task implements Session.Saveable {
     MILITARY ,
     FORAGING ,
     HUNTING  ,
+    LOOTING  ,
     EXPLORING,
     COMBAT   ,
+    RETREAT  ,
+    DIALOG   ,
   };
   
   Actor actor;
