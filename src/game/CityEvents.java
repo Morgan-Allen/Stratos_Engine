@@ -2,7 +2,9 @@
 
 package game;
 import util.*;
+import static game.ActorAsPerson.*;
 import static game.City.*;
+import static game.CityCouncil.*;
 import static game.GameConstants.*;
 
 
@@ -74,7 +76,7 @@ public class CityEvents {
     enterHostility(goes, from, victory, 1);
     
     if (victory && from.government != GOVERNMENT.BARBARIAN) {
-      inflictDemands(goes, from, formation);
+      imposeTerms(goes, from, formation);
     }
     if (victory) {
       signalVictory(from, goes, formation);
@@ -119,16 +121,23 @@ public class CityEvents {
   /**  Note- these methods can also be called by formations on the map, so
     *  don't delete...
     */
-  static void inflictDemands(
+  static void imposeTerms(
     City defends, City attacks, Formation formation
   ) {
     if (defends == null || attacks == null || formation == null) return;
     setPosture(attacks, defends, formation.postureDemand, true);
     setSuppliesDue(defends, attacks, formation.tributeDemand);
+    arrangeMarriage(attacks, defends, formation.marriageDemand);
     defends.toggleRebellion(attacks, false);
     
     incPrestige(attacks, PRES_VICTORY_GAIN);
     incPrestige(defends, PRES_DEFEAT_LOSS );
+  }
+  
+  
+  static void arrangeMarriage(City city, City other, Actor marries) {
+    Actor monarch = city.council.memberWithRole(Role.MONARCH);
+    setBond(monarch, marries, BOND_MARRIED, BOND_MARRIED, 0);
   }
   
   
@@ -138,6 +147,7 @@ public class CityEvents {
     if (victor == null || losing == null || formation == null) return;
     incPrestige(victor, PRES_VICTORY_GAIN);
     incPrestige(losing, PRES_DEFEAT_LOSS );
+    formation.setMissionComplete(formation.homeCity == victor);
   }
   
   

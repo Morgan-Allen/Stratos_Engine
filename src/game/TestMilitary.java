@@ -10,7 +10,7 @@ public class TestMilitary extends Test {
   
   
   public static void main(String args[]) {
-    testMilitary(false);
+    testMilitary(true);
   }
   
   
@@ -49,7 +49,7 @@ public class TestMilitary extends Test {
     
     
     Formation troops  = null;
-    Formation enemies = new Formation(new ObjectiveConquer(), awayC);
+    Formation enemies = new Formation(Formation.OBJECTIVE_CONQUER, awayC, true);
     for (int n = 4; n-- > 0;) {
       Actor fights = (Actor) ((n == 0) ? SOLDIER : CITIZEN).generate();
       fights.assignHomeCity(awayC);
@@ -73,13 +73,12 @@ public class TestMilitary extends Test {
       map = test.runLoop(map, 10, graphics, "saves/test_military.tlt");
       
       if (fort.recruits.size() >= 8 && ! recruited) {
-        troops = new Formation(new ObjectiveConquer(), homeC);
+        troops = new Formation(Formation.OBJECTIVE_GARRISON, homeC, false);
         fort.deployInFormation(troops, true);
-        troops.beginSecuring(map.tileAt(25, 25), TileConstants.E, null, map);
+        troops.beginSecuring(map.tileAt(25, 25), TileConstants.E, map);
         
         Visit.appendTo(fromTroops, troops.recruits);
         initSkills = recordSkills(fromTroops, COMBAT_SKILLS);
-        
         recruited = true;
       }
       
@@ -87,7 +86,7 @@ public class TestMilitary extends Test {
         enemies.beginSecuring(homeC);
         World.Journey j = world.journeyFor(enemies);
         world.completeJourney(j);
-        enemies.beginSecuring(troops.securePoint, TileConstants.W, troops, map);
+        enemies.beginSecuring(troops, TileConstants.W, map);
         invaded = true;
       }
       
@@ -104,10 +103,10 @@ public class TestMilitary extends Test {
       }
       
       if (homeWin && fort.recruits.size() >= 12 && ! invading) {
-        troops = new Formation(new ObjectiveConquer(), homeC);
+        troops = new Formation(Formation.OBJECTIVE_CONQUER, homeC, false);
         fort.deployInFormation(troops, true);
         troops.beginSecuring(awayC);
-        troops.assignDemands(City.POSTURE.VASSAL, null, null);
+        troops.assignTerms(City.POSTURE.VASSAL, null, null, null);
         invading = true;
       }
       

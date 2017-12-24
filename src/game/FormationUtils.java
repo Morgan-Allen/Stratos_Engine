@@ -5,11 +5,28 @@
 package game;
 import util.*;
 import static game.CityMap.*;
+import static game.CityCouncil.*;
 import static game.GameConstants.*;
 
 
 
 public class FormationUtils {
+  
+  
+  static Actor findOfferRecipient(Formation parent) {
+    CityCouncil council = parent.map.city.council;
+    
+    Actor monarch = council.memberWithRole(Role.MONARCH);
+    if (monarch != null && monarch.onMap()) return monarch;
+    
+    Actor minister = council.memberWithRole(Role.PRIME_MINISTER);
+    if (minister != null && monarch.onMap()) return monarch;
+    
+    Actor consort = council.memberWithRole(Role.CONSORT);
+    if (consort != null && consort.onMap()) return consort;
+    
+    return null;
+  }
 
   
   static class SiegeSearch extends ActorPathSearch {
@@ -40,42 +57,72 @@ public class FormationUtils {
   }
   
   
-  boolean checkTacticalTargetValid(
-    Object focus, CityMap map, Tile entry, Tile current
+  
+  static class Option { Object target; Tile secures; float rating; }
+  
+  static Option tacticalOptionFor(
+    Object focus, CityMap map, Pathing pathFrom, boolean checkPathing
   ) {
+    
     if (focus instanceof Formation) {
-      Formation opposed = (Formation) focus;
-      Tile secures = opposed.securePoint;
-      int  power   = opposed.powerSum();
-      boolean hasPath = map.pathCache.pathConnects(entry, secures);
-      if (hasPath && secures == current && power > 0) return true;
+      Formation f = (Formation) focus;
+      Target goes = f.pathGoes();
+      if (f.away || goes == null) return null;
+      if (f.powerSum() == 0 || ! f.active) return null;
+      
+      int power = f.powerSum();
+      Tile secures = f.standPoint;
+      if (power <= 0) return null;
+
+      if (checkPathing) {
+        boolean hasPath = map.pathCache.pathConnects(pathFrom, goes, true, true);
+        if (! hasPath) return null;
+      }
+      
+      float dist = CityMap.distance(goes, pathFrom);
+      float rating = CityMap.distancePenalty(dist);
+      
+      Option o = new Option();
+      o.target  = focus;
+      o.secures = secures;
+      o.rating  = rating;
+      return o;
     }
+    
     
     if (focus instanceof Element) {
-      Element sieged = (Element) focus;
-      boolean hasPath = false;
-      for (Tile t : sieged.perimeter(map)) {
-        if (map.pathCache.pathConnects(entry, t)) hasPath = true;
+      Element e = (Element) focus;
+      if (e.destroyed()) return null;
+      if (! e.type.isArmyOrWallsBuilding()) return null;
+      
+      if (checkPathing) {
+        boolean hasPath = map.pathCache.pathConnects(pathFrom, e, true, true);
+        if (! hasPath) return null;
       }
-      if (hasPath && ! sieged.destroyed()) return true;
+      
+      Tile secures = e.centre();
+      float dist = CityMap.distance(secures, pathFrom);
+      float rating = CityMap.distancePenalty(dist);
+      
+      Option o = new Option();
+      o.target  = focus;
+      o.secures = secures;
+      o.rating  = rating;
+      return o;
     }
     
-    if (focus instanceof City) {
-      return true;
-    }
-    
-    return false;
+    return null;
   }
   
   
-  boolean updateTacticalTarget(Formation parent) {
+  static boolean updateTacticalTarget(Formation parent) {
     
-    CityMap map   = parent.map;
-    City    home  = parent.homeCity;
-    Tile    entry = parent.entryPoint;
-    Tile    point = parent.securePoint;
-    Object  focus = parent.secureFocus;
-    City    siege = parent.secureCity;
+    CityMap map    = parent.map;
+    City    home   = parent.homeCity;
+    Pathing from   = parent.pathFrom();
+    Tile    stands = parent.standPoint;
+    Object  focus  = parent.secureFocus;
+    City    siege  = parent.secureCity;
     
     //
     //  If you're beaten, turn around and go home:
@@ -88,47 +135,35 @@ public class FormationUtils {
     
     //
     //  Determine whether your current target has been beaten yet-
-    if (checkTacticalTargetValid(focus, map, entry, point)) {
+    if (tacticalOptionFor(focus, map, from, true) != null) {
       return false;
     }
     
     //
     //  Otherwise, look for either an enemy formation to engage, or
     //  a building to tear down:
-    class Option { Object target; Tile secures; }
     Pick <Option> pick = new Pick();
     
     for (Formation f : map.city.formations) {
-      if (f.away || f.securePoint == null) continue;
-      if (f.powerSum() == 0 || ! f.active) continue;
-      
-      Option o = new Option();
-      o.secures = f.securePoint;
-      o.target  = f;
-      float dist = CityMap.distance(o.secures, point);
-      pick.compare(o, 0 - dist);
+      Option o = tacticalOptionFor(f, map, from, false);
+      if (o != null && o.secures != null) pick.compare(o, o.rating);
     }
     
     for (Building b : map.buildings) {
-      if (b.destroyed() || ! b.type.isArmyOrWallsBuilding()) continue;
-      
-      Option o = new Option();
-      o.secures = b.centre();
-      o.target  = b;
-      float dist = CityMap.distance(o.secures, point);
-      pick.compare(o, 0 - dist);
+      Option o = tacticalOptionFor(b, map, from, false);
+      if (o != null && o.secures != null) pick.compare(o, o.rating);
     }
     
     if (! pick.empty()) {
       Option o = pick.result();
       
-      if (checkTacticalTargetValid(o.target, map, entry, o.secures)) {
-        parent.beginSecuring(o.secures, parent.facing, o.target, map);
+      if (tacticalOptionFor(o.target, map, from, true) != null) {
+        parent.beginSecuring(o.target, parent.facing, map);
         return true;
       }
       
       else {
-        SiegeSearch search = new SiegeSearch(map, entry, o.secures);
+        SiegeSearch search = new SiegeSearch(map, stands, o.secures);
         search.doSearch();
         Pathing path[] = (Pathing[]) search.fullPath(Pathing.class);
         for (Pathing p : path) {
@@ -137,7 +172,7 @@ public class FormationUtils {
           int pathT = t.pathType();
           
           if (above != null && (pathT == PATH_BLOCK || pathT == PATH_WALLS)) {
-            parent.beginSecuring(t, parent.facing, above, map);
+            parent.beginSecuring(above, parent.facing, map);
             return true;
           }
         }
@@ -149,7 +184,7 @@ public class FormationUtils {
     //  If there are no targets left here, declare victory and go home:
     else {
       CityEvents.enterHostility(siege, home, true, 1);
-      CityEvents.inflictDemands(siege, home, parent);
+      CityEvents.imposeTerms(siege, home, parent);
       CityEvents.signalVictory(home, siege, parent);
       parent.beginSecuring(home);
       return true;
@@ -159,7 +194,7 @@ public class FormationUtils {
   
   
   
-  void updateGuardPoints(final Formation parent) {
+  static void updateGuardPoints(final Formation parent) {
     
     //
     //  First, check to see if an update is due:
@@ -173,11 +208,10 @@ public class FormationUtils {
       parent.guardPoints.clear();
       return;
     }
-    if (parent.securePoint == focus.at() && map.time < nextUpdate) {
+    if (map.time < nextUpdate) {
       return;
     }
     
-    parent.securePoint = focus.at();
     parent.lastUpdateTime = map.time;
     Type type = focus.type();
     
@@ -228,12 +262,26 @@ public class FormationUtils {
   }
   
   
+  static Tile standingPointPatrol(Actor member, Formation parent) {
+    
+    int span = MONTH_LENGTH, numRecruits = parent.recruits.size();
+    int epoch = (parent.map.time / span) % numRecruits;
+    
+    int index = parent.recruits.indexOf(member);
+    if (index == -1) return null;
+    
+    updateGuardPoints(parent);
+    index = (index + epoch) % numRecruits;
+    return parent.guardPoints.atIndex(index);
+  }
+  
+  
   
   static Tile standingPointRanks(Actor member, Formation parent) {
     
     CityMap map = parent.map;
-    Tile c = parent.securePoint;
-    if (c == null || map == null) return null;
+    Tile goes = parent.standPoint;
+    if (goes == null || map == null) return null;
     
     int index = parent.recruits.indexOf(member);
     if (index == -1) return null;
@@ -242,8 +290,8 @@ public class FormationUtils {
     int file  = AVG_FILE    ;
     int x     = index % file;
     int y     = index / file;
-    x += c.x - (file  / 2);
-    y += c.y + (ranks / 2);
+    x += goes.x - (file  / 2);
+    y += goes.y + (ranks / 2);
     
     x = Nums.clamp(x, map.size);
     y = Nums.clamp(y, map.size);
@@ -252,9 +300,6 @@ public class FormationUtils {
     stands = Tile.nearestOpenTile(stands, map, AVG_FILE);
     return stands;
   }
-  
-  
-  
   
   
 }

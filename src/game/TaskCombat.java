@@ -69,7 +69,8 @@ public class TaskCombat extends Task {
   static TaskCombat nextSieging(Actor actor, Formation formation) {
     if (formation.secureFocus instanceof Element) {
       Element e = (Element) formation.secureFocus;
-      if (e.type.isActor()) return null;
+      if (e.destroyed() || ! e.onMap()) return null;
+      if (e.map.city == formation.homeCity) return null;
       return configCombat(actor, e, formation, null);
     }
     else return null;
@@ -85,7 +86,7 @@ public class TaskCombat extends Task {
     //  TODO:  Allow for a null formation to be passed in here.
     Tile from = actor.at();
     CityMap map = actor.map;
-    Tile anchor = formation.objective.standLocation(actor, formation);
+    Tile anchor = formation.standLocation(actor);
     
     //  TODO:  Grant a vision bonus for higher ground?
     float noticeBonus = AVG_FILE;
@@ -132,11 +133,16 @@ public class TaskCombat extends Task {
   }
   
   
+  static TaskCombat configCombat(Actor actor, Element target) {
+    return configCombat(actor, target, null, null);
+  }
+  
+  
   static TaskCombat configCombat(
     final Actor actor, final Element target,
     Formation formation, TaskCombat currentTask
   ) {
-    if (! target.onMap()) return null;
+    if (actor == null || target == null || ! target.onMap()) return null;
     Tile inRange[] = null;
     
     if (currentTask != null) {

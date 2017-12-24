@@ -128,7 +128,7 @@ public class TaskBuilding extends Task {
       
       Pathing from = Task.pathOrigin(actor);
       Target goes = buildPathTarget(source);
-      if (! map.pathCache.pathConnects(from, goes, true)) continue;
+      if (! map.pathCache.pathConnects(from, goes, true, false)) continue;
       
       if (decideNextAction(source, map)) return true;
     }

@@ -71,9 +71,10 @@ public class TestSieging extends Test {
       fort.toggleRecruit(a, true);
     }
     
-    Formation guarding = new Formation(new ObjectivePatrol(), homeC);
+    Formation guarding;
+    guarding = new Formation(Formation.OBJECTIVE_GARRISON, homeC, false);
     fort.deployInFormation(guarding, true);
-    guarding.beginSecuring(tower.at(), TileConstants.E, tower, map);
+    guarding.beginSecuring(tower, TileConstants.E, map);
     
     Building store = (Building) PORTER_POST.generate();
     store.enterMap(map, 10, 6, 1);
@@ -107,7 +108,7 @@ public class TestSieging extends Test {
         float avgMinDist = 0;
         
         for (Actor a : guarding.recruits) {
-          if (a.at() != guarding.objective.standLocation(a, guarding)) continue;
+          if (a.at() != guarding.standLocation(a)) continue;
           float minDist = 1000;
           for (Actor o : guarding.recruits) if (o != a) {
             minDist = Nums.min(minDist, distance(a, o));

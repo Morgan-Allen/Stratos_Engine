@@ -344,7 +344,7 @@ public class Task implements Session.Saveable {
     //  TODO:  You should have map-settings that toggle whether the
     //  path-cache is used at all.  Default to simpler checks in that
     //  case.
-    if ((! visiting) && ! map.pathCache.pathConnects(from, heads, false)) {
+    if ((! visiting) && ! map.pathCache.pathConnects(from, heads, false, false)) {
       search.setProximate(true);
     }
     //search.verbosity = Search.VERBOSE;

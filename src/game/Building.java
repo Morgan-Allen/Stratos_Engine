@@ -92,6 +92,7 @@ public class Building extends Element implements Pathing, Employer {
   
   
   void exitMap(CityMap map) {
+    refreshEntrances(new Tile[0]);
     super.exitMap(map);
     map.buildings.remove(this);
     for (Actor w : workers) if (w.work == this) {
@@ -108,8 +109,6 @@ public class Building extends Element implements Pathing, Employer {
       I.say(this+" exited with goods!");
       I.say("  "+inventory);
     }
-    
-    entrances = null;
   }
   
   
@@ -149,7 +148,7 @@ public class Building extends Element implements Pathing, Employer {
   /**  Construction and upgrade-related methods:
     */
   void onCompletion() {
-    refreshEntrances();
+    refreshEntrances(selectEntrances());
     super.onCompletion();
     updateOnPeriod(0);
   }
@@ -177,13 +176,13 @@ public class Building extends Element implements Pathing, Employer {
     for (int i = 0; i < entrances.length; i++) {
       Tile e = entrances[i];
       if (! checkEntranceOkay(e, i)) {
-        refreshEntrances();
+        refreshEntrances(selectEntrances());
         break;
       }
     }
     
     if (--updateGap <= 0) {
-      refreshEntrances();
+      refreshEntrances(selectEntrances());
       updateOnPeriod(type.updateTime);
       updateGap = type.updateTime;
     }
@@ -224,9 +223,8 @@ public class Building extends Element implements Pathing, Employer {
   }
   
   
-  void refreshEntrances() {
+  void refreshEntrances(Tile newE[]) {
     Tile oldE[] = this.entrances;
-    Tile newE[] = selectEntrances();
     
     boolean flagUpdate = true;
     flagUpdate &= Nums.max(oldE.length, newE.length) > 1;

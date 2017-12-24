@@ -23,6 +23,8 @@ public class Formation implements
   ;
   
   int objective = OBJECTIVE_STANDBY;
+  boolean activeAI = false;
+  
   boolean termsGiven    = false;
   boolean termsAccepted = false;
   boolean termsRefused  = false;
@@ -39,30 +41,22 @@ public class Formation implements
   List <Actor> recruits = new List();
   
   boolean away   = false;
-  City    homeCity   ;
-  City    secureCity ;
-  CityMap map        ;
-  
   boolean active = false;
-  Tile    entryPoint ;
-  Tile    exitsPoint ;
-  Tile    securePoint;
-  Object  secureFocus;
-  int     facing     ;
+  City    homeCity    ;
+  City    secureCity  ;
+  CityMap map         ;
+  Tile    transitPoint;
+  Tile    standPoint  ;
+  Object  secureFocus ;
+  int     facing      ;
   
   List <Tile> guardPoints = new List();
   int lastUpdateTime = -1;
   
   
-  Formation(Objective objective, City belongs) {
-    //this.objective = objective;
-    this.homeCity  = belongs;
-    this.map       = belongs.map;
-  }
-  
-  
-  Formation(int objective, City belongs) {
+  Formation(int objective, City belongs, boolean activeAI) {
     this.objective = objective;
+    this.activeAI  = activeAI;
     this.homeCity  = belongs;
     this.map       = belongs.map;
   }
@@ -87,17 +81,16 @@ public class Formation implements
     s.loadObjects(escorted);
     s.loadObjects(recruits);
     
-    away        = s.loadBool();
-    homeCity    = (City   ) s.loadObject();
-    secureCity  = (City   ) s.loadObject();
-    map         = (CityMap) s.loadObject();
+    away         = s.loadBool();
+    homeCity     = (City   ) s.loadObject();
+    secureCity   = (City   ) s.loadObject();
+    map          = (CityMap) s.loadObject();
     
-    active      = s.loadBool();
-    entryPoint  = loadTile(map, s);
-    exitsPoint  = loadTile(map, s);
-    securePoint = loadTile(map, s);
-    secureFocus = s.loadObject();
-    facing      = s.loadInt();
+    active       = s.loadBool();
+    transitPoint = loadTile(map, s);
+    standPoint   = loadTile(map, s);
+    secureFocus  = s.loadObject();
+    facing       = s.loadInt();
     
     for (int n = s.loadInt(); n-- > 0;) {
       Tile point = CityMap.loadTile(map, s);
@@ -131,42 +124,14 @@ public class Formation implements
     s.saveObject(map       );
     
     s.saveBool(active);
-    saveTile(entryPoint , map, s);
-    saveTile(exitsPoint , map, s);
-    saveTile(securePoint, map, s);
+    saveTile(transitPoint, map, s);
+    saveTile(standPoint  , map, s);
     s.saveObject(secureFocus);
     s.saveInt(facing);
     
     s.saveInt(guardPoints.size());
     for (Tile t : guardPoints) CityMap.saveTile(t, map, s);
     s.saveInt(lastUpdateTime);
-  }
-  
-  
-  
-  /**  Used to customise behaviour specific to conquest, defence, trade,
-    *  diplomacy, et cetera-
-    */
-  public abstract static class Objective implements Session.Saveable {
-    
-    Objective() {
-      return;
-    }
-    
-    public Objective(Session s) throws Exception {
-      s.cacheInstance(this);
-    }
-    
-    public void saveState(Session s) throws Exception {
-      return;
-    }
-    
-    abstract boolean updateTacticalTarget(Formation parent);
-    abstract Tile standLocation(Actor a, Formation parent);
-    
-    abstract void selectActorBehaviour(Actor a, Formation parent);
-    abstract void actorUpdates(Actor a, Formation parent);
-    abstract void actorTargets(Actor a, Target other, Formation parent);
   }
   
   
@@ -193,6 +158,13 @@ public class Formation implements
   }
   
   
+  void setMissionComplete(boolean victorious) {
+    if (victorious) this.victorious = true;
+    else this.defeated = true;
+    this.complete = true;
+  }
+  
+  
   void toggleRecruit(Actor a, boolean is) {
     this.recruits.toggleMember(a, is);
     if (is) a.formation = this;
@@ -214,8 +186,8 @@ public class Formation implements
     this.active     = true;
     
     if (this.map != null) {
-      this.exitsPoint = findTransitPoint(map, city);
-      beginSecuring(exitsPoint, 0, city, map); //  Make this face the border!
+      this.transitPoint = findTransitPoint(map, city);
+      beginSecuring(city, 0, map); //  Make this face the border?
     }
     else {
       beginJourney(homeCity, secureCity);
@@ -223,14 +195,59 @@ public class Formation implements
   }
   
   
-  void beginSecuring(Tile point, int facing, Object focus, CityMap map) {
+  void beginSecuring(Object focus, int facing, CityMap map) {
     homeCity.formations.toggleMember(this, true);
     
-    this.securePoint = point ;
     this.facing      = facing;
     this.secureFocus = focus ;
     this.active      = true  ;
     this.map         = map   ;
+    
+    this.standPoint = standPointFrom(secureFocus);
+  }
+  
+  
+  Tile standPointFrom(Object focus) {
+    
+    //  TODO:  Get the nearest open tile, just for good measure?
+    
+    if (focus instanceof City) {
+      return this.transitPoint;
+    }
+    if (focus instanceof Formation) {
+      Pathing from = ((Formation) focus).pathFrom();
+      return standPointFrom(from);
+    }
+    if (focus instanceof Element) {
+      return ((Element) focus).centre();
+    }
+    if (focus instanceof Target) {
+      return ((Target) focus).at();
+    }
+    return null;
+  }
+  
+  
+  Pathing pathFrom() {
+    
+    //  TODO:  Use the position of the member closest to average?
+    
+    Actor a = recruits.atIndex(recruits.size() / 2);
+    return Task.pathOrigin(a);
+  }
+  
+  
+  Target pathGoes() {
+    if (secureFocus instanceof City) {
+      return transitPoint;
+    }
+    if (secureFocus instanceof Formation) {
+      return ((Formation) secureFocus).pathFrom();
+    }
+    if (secureFocus instanceof Target) {
+      return (Target) secureFocus;
+    }
+    return null;
   }
   
   
@@ -238,7 +255,7 @@ public class Formation implements
     homeCity.formations.toggleMember(this, false);
     
     this.secureCity  = null  ;
-    this.securePoint = null  ;
+    this.secureFocus = null  ;
     this.facing      = CENTRE;
     this.active      = false ;
     
@@ -261,18 +278,12 @@ public class Formation implements
       return;
     }
     
-    /*
-    //  Update any tactical targets-
-    if (away && map != null) {
-      objective.updateTacticalTarget(this);
-    }
-    //*/
+    //
+    //  Update your stand-point...
+    this.standPoint = standPointFrom(secureFocus);
     
     //  This is a hacky way of saying "I want to go to a different city, is
     //  everyone ready yet?"
-    
-    //  TODO:  Only do this once every actor is either dead or off the map.
-    
     if (
       map != null && secureCity != null &&
       secureCity != map.city && formationReady()
@@ -287,12 +298,10 @@ public class Formation implements
     for (Actor w : recruits) if (w.onMap(map)) {
       w.exitMap(map);
     }
-    away        = true;
-    map         = null;
-    securePoint = null;
-    secureFocus = null;
-    entryPoint  = null;
-    exitsPoint  = null;
+    away         = true;
+    map          = null;
+    secureFocus  = null;
+    transitPoint = null;
     return goes.world.beginJourney(from, goes, this);
   }
   
@@ -310,13 +319,14 @@ public class Formation implements
     if (onMap) {
       if (reports()) I.say("\nARRIVED ON MAP: "+goes+" FROM "+journey.from);
       
-      this.map = goes.map;
-      this.entryPoint = findTransitPoint(map, journey.from);
+      Tile transits     = findTransitPoint(goes.map, journey.from);
+      this.map          = goes.map;
+      this.transitPoint = transits;
       
       for (Actor w : recruits) {
-        w.enterMap(map, entryPoint.x, entryPoint.y, 1);
+        w.enterMap(map, transits.x, transits.y, 1);
       }
-      beginSecuring(entryPoint, N, null, map);
+      beginSecuring(transitPoint, N, map);
       
       if (home) {
         this.away = false;
@@ -324,7 +334,7 @@ public class Formation implements
       }
       else {
         this.away = true;
-        //objective.updateTacticalTarget(this);
+        if (activeAI) FormationUtils.updateTacticalTarget(this);
       }
     }
     //
@@ -349,40 +359,6 @@ public class Formation implements
   
   
   
-  /**  Other utility methods:
-    */
-  boolean formationReady() {
-    if (map == null) return true;
-    if (securePoint == null || ! active) return false;
-    
-    //  TODO:  Consider this more carefully.
-    
-    for (Actor a : recruits) {
-      if (standLocation(a, this) != a.at()) {
-        return false;
-      }
-    }
-    //for (Actor a : recruits) if (a.onMap()) return false;
-    return true;
-  }
-  
-  
-  int powerSum() {
-    return powerSum(recruits, null);
-  }
-  
-  
-  static int powerSum(Series <Actor> recruits, CityMap mapOnly) {
-    float sumStats = 0;
-    for (Actor a : recruits) {
-      if (mapOnly != null && a.map != mapOnly) continue;
-      sumStats += TaskCombat.attackPower(a);
-    }
-    return (int) (sumStats * POP_PER_CITIZEN);
-  }
-  
-  
-  
   /**  Organising actors and other basic query methods-
     */
   public void selectActorBehaviour(Actor actor) {
@@ -393,26 +369,22 @@ public class Formation implements
     haveTerms |= postureDemand  != null;
     haveTerms |= ! tributeDemand.empty();
     
-    boolean isEnvoy = escorted.includes(actor);
+    boolean isEnvoy    = escorted.includes(actor);
     boolean diplomatic = objective == OBJECTIVE_DIALOG;
-    boolean defensive = objective == OBJECTIVE_GARRISON;
     
     if (haveTerms && isEnvoy && ! termsGiven) {
-      Actor offersTerms = findOfferRecipient();
-      
-      if (offersTerms == null) termsGiven = true;
-      else {
-        actor.embarkOnTarget(offersTerms, 1, Task.JOB.DIALOG, this);
-        return;
-      }
+      Actor offersTerms = FormationUtils.findOfferRecipient(this);
+      actor.embarkOnTarget(offersTerms, 1, Task.JOB.DIALOG, this);
+      if (actor.idle()) termsGiven = true;
+      else return;
     }
     
-    if (! defensive) {
-      updateTacticalTarget(this);
+    if (activeAI) {
+      FormationUtils.updateTacticalTarget(this);
     }
     
     if (defeated || victorious || (diplomatic && termsRefused)) {
-      Tile exits = exitLocation(actor);
+      Tile exits = standLocation(actor);
       if (exits != null) {
         actor.embarkOnTarget(exits, 10, Task.JOB.RETURNING, this);
         return;
@@ -434,31 +406,12 @@ public class Formation implements
       actor.assignTask(taskS);
       return;
     }
-
-    boolean doPatrol =
-      (secureFocus instanceof Target) &&
-      ((Target) secureFocus).type().isWall
-    ;
     
-    if (doPatrol) {
-      Tile stands = patrolPoint(actor, this);
-      if (stands != null) {
-        actor.embarkOnTarget(stands, 10, Task.JOB.MILITARY, this);
-        return;
-      }
+    Tile stands = standLocation(actor);
+    if (stands != null) {
+      actor.embarkOnTarget(stands, 10, Task.JOB.MILITARY, this);
+      return;
     }
-    else {
-      Tile stands = standLocation(actor, this);
-      if (stands != null) {
-        actor.embarkOnTarget(stands, 10, Task.JOB.MILITARY, this);
-        return;
-      }
-    }
-  }
-  
-  
-  public void actorUpdates(Actor actor) {
-    //objective.actorUpdates(actor, this);
   }
   
   
@@ -478,6 +431,11 @@ public class Formation implements
   }
   
   
+  public void actorUpdates(Actor actor) {
+    //objective.actorUpdates(actor, this);
+  }
+  
+  
   public void actorPasses(Actor actor, Building other) {
     return;
   }
@@ -490,6 +448,50 @@ public class Formation implements
   
   public City homeCity() {
     return homeCity;
+  }
+  
+  
+  Tile standLocation(Actor actor) {
+    boolean doPatrol =
+      (secureFocus instanceof Target) &&
+      ((Target) secureFocus).type().isWall
+    ;
+    if (doPatrol) {
+      return FormationUtils.standingPointPatrol(actor, this);
+    }
+    else {
+      return FormationUtils.standingPointRanks(actor, this);
+    }
+  }
+  
+  
+  boolean formationReady() {
+    if (map == null) return true;
+    if (secureFocus == null || ! active) return false;
+    
+    //  TODO:  Consider this more carefully?
+    for (Actor a : recruits) {
+      if (standLocation(a) != a.at()) {
+        return false;
+      }
+    }
+    
+    return true;
+  }
+  
+  
+  int powerSum() {
+    return powerSum(recruits, null);
+  }
+  
+  
+  static int powerSum(Series <Actor> recruits, CityMap mapOnly) {
+    float sumStats = 0;
+    for (Actor a : recruits) {
+      if (mapOnly != null && a.map != mapOnly) continue;
+      sumStats += TaskCombat.attackPower(a);
+    }
+    return (int) (sumStats * POP_PER_CITIZEN);
   }
   
   

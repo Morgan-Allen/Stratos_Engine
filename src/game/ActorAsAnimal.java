@@ -59,7 +59,8 @@ public class ActorAsAnimal extends Actor {
     if (idle() && hunger >= 1) {
       if (type.predator) {
         Actor prey = findPrey();
-        if (prey != null) beginAttack(prey, JOB.HUNTING, null);
+        TaskCombat hunt = TaskCombat.configCombat(this, prey);
+        if (hunt != null) assignTask(hunt);
       }
       else if (rests != null) {
         embarkOnTarget(rests, 1, JOB.FORAGING, null);
@@ -143,7 +144,8 @@ public class ActorAsAnimal extends Actor {
       performAttack(prey, true);
       
       if (prey.alive()) {
-        beginAttack(prey, JOB.HUNTING, null);
+        TaskCombat hunt = TaskCombat.configCombat(this, prey);
+        if (hunt != null) assignTask(hunt);
       }
       else {
         float oldH = hunger, yield = meatYield(prey);

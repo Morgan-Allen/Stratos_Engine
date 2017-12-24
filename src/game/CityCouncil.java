@@ -42,7 +42,7 @@ public class CityCouncil {
   List <Actor> members = new List();
   Table <Actor, Role> roles = new Table();
   
-  List <Formation> submittingDemands = new List();
+  List <Formation> petitions = new List();
   
   
   CityCouncil(City city) {
@@ -60,7 +60,7 @@ public class CityCouncil {
       roles.put(a, r);
     }
     
-    s.loadObjects(submittingDemands);
+    s.loadObjects(petitions);
   }
   
   
@@ -73,7 +73,7 @@ public class CityCouncil {
       s.saveEnum(roles.get(a));
     }
     
-    s.saveObjects(submittingDemands);
+    s.saveObjects(petitions);
   }
   
   
@@ -123,6 +123,17 @@ public class CityCouncil {
     }
     return avg / Nums.max(1, count);
   }
+  
+  
+  
+  /**  Handling agreements or terms submitted by other cities-
+    */
+  void receiveTerms(Formation givesTerms) {
+    petitions.include(givesTerms);
+  }
+  
+  
+  
   
   
   
@@ -372,13 +383,13 @@ public class CityCouncil {
   
   
   Formation spawnInvasion(InvasionAssessment IA) {
-    Formation force = new Formation(new ObjectiveConquer(), city);
+    Formation force = new Formation(Formation.OBJECTIVE_CONQUER, city, true);
     
     if (city.government == City.GOVERNMENT.BARBARIAN) {
       //  Only non-barbarian governments will set up permanent command-fx.
     }
     else {
-      force.assignDemands(City.POSTURE.VASSAL, null, IA.tribute);
+      force.assignTerms(City.POSTURE.VASSAL, null, null, IA.tribute);
     }
     
     int n = 0;

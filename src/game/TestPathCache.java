@@ -213,6 +213,29 @@ public class TestPathCache extends Test {
       if (! graphics) return false;
     }
     
+    Building tower = (Building) TOWER.generate();
+    tower.setFacing(TileConstants.N);
+    tower.enterMap(map, 110, 20, 1);
+    map.pathCache.updatePathCache();
+    
+    CityMapPlanning.markDemolish(map, true, 100, 19, 20, 1);
+    Tile onWall = map.tileAt(110, 24);
+    landLinked = map.pathCache.pathConnects(onWall, land2);
+    if (! landLinked) {
+      I.say("\nTower should have allowed pathing onto wall!");
+      allOkay = false;
+      if (! graphics) return false;
+    }
+    
+    tower.exitMap(map);
+    landLinked = map.pathCache.pathConnects(onWall, land2);
+    map.pathCache.updatePathCache();
+    if (landLinked) {
+      I.say("\nTower's demolition should have destroyed path!");
+      allOkay = false;
+      if (! graphics) return false;
+    }
+    
     for (Tile t : map.allTiles()) {
       if (map.pathCache.rawArea(t) == null && ! map.blocked(t)) {
         I.say("\nUnblocked tile has no area: "+t);

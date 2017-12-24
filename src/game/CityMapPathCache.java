@@ -146,15 +146,21 @@ public class CityMapPathCache {
   
   
   boolean pathConnects(
-    Pathing from, Target goes, boolean checkAdjacent
+    Pathing from, Target goes, boolean checkAdjacent, boolean open
   ) {
     if (from == null || goes == null) return false;
     Tile fromA[] = around(from, tempForFrom, false);
     Tile goesA[] = around(goes, tempForGoes, checkAdjacent);
+    if (fromA == null || goesA == null) return false;
     
     for (Tile f : fromA) if (f != null) {
       for (Tile g : goesA) if (g != null) {
-        if (pathConnects(f, g)) return true;
+        if (open) {
+          if (openPathConnects(f, g)) return true;
+        }
+        else {
+          if (pathConnects(f, g)) return true;
+        }
       }
     }
     return false;
@@ -185,7 +191,6 @@ public class CityMapPathCache {
   
   Tile mostOpenNeighbour(Tile at) {
     Pick <Tile> pick = new Pick();
-    
     for (Tile t : CityMap.adjacent(at, null, map)) {
       AreaGroup group = groupFor(areaFor(t), false);
       if (group != null) pick.compare(t, group.totalTiles);

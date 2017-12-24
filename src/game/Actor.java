@@ -287,8 +287,6 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   /**  Miscellaneous behaviour triggers:
     */
-  //  TODO:  Start moving these all out into dedicated sub-tasks.
-  
   void assignTask(Task task) {
     if (this.task != null) this.task.toggleFocus(false);
     this.task = task;
@@ -296,32 +294,27 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   }
   
   
-  void embarkOnVisit(Building goes, int maxTime, JOB jobType, Employer e) {
-    if (goes == null) return;
+  Task embarkOnVisit(Building goes, int maxTime, JOB jobType, Employer e) {
+    if (goes == null) return null;
     if (reports()) I.say(this+" will visit "+goes+" for time "+maxTime);
     
     Task t = new Task(this);
     assignTask(t.configTask(e, goes, null, jobType, maxTime));
+    return task;
   }
   
   
-  void embarkOnTarget(Target goes, int maxTime, JOB jobType, Employer e) {
-    if (goes == null) return;
+  Task embarkOnTarget(Target goes, int maxTime, JOB jobType, Employer e) {
+    if (goes == null) return null;
     if (reports()) I.say(this+" will target "+goes+" for time "+maxTime);
     
     Task t = new Task(this);
     assignTask(t.configTask(e, null, goes, jobType, maxTime));
+    return task;
   }
   
   
-  void beginAttack(Target target, JOB jobType, Employer e) {
-    if (target == null) return;
-    if (reports()) I.say(this+" will attack "+target);
-    
-    Task t = new Task(this);
-    assignTask(t.configTask(e, null, target, jobType, 0));
-  }
-  
+  //  TODO:  Start moving these all out into dedicated sub-tasks.
   
   void beginResting(Building rests) {
     if (rests == null) return;

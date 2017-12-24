@@ -86,7 +86,7 @@ public class TestBridging extends Test {
       
       pick.clear();
       for (Element e : toBuild) {
-        if (! map.pathCache.pathConnects(mason1, e, true)) continue;
+        if (! map.pathCache.pathConnects(mason1, e, true, false)) continue;
         pick.compare(e, Rand.index(16));
       }
       
