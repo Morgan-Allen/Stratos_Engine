@@ -302,7 +302,6 @@ public class ActorAsPerson extends Actor {
   
   
   
-  
   /**  Aging, reproduction and life-cycle methods-
     */
   void updateAging() {
@@ -328,7 +327,6 @@ public class ActorAsPerson extends Actor {
       if (senior() && Rand.index(100) < AVG_SENIOR_MORT) {
         setAsKilled("Old age");
       }
-      
       if (woman() && fertile() && pregnancy == 0 && home != null) {
         float
           ageYears   = ageSeconds / (YEAR_LENGTH * 1f),
@@ -362,7 +360,7 @@ public class ActorAsPerson extends Actor {
     ActorAsPerson child  = (ActorAsPerson) CHILD.generate();
     ActorAsPerson father = (ActorAsPerson) bondedWith(BOND_MARRIED);
     child.enterMap(map, at.x, at.y, 1);
-    child.inside = venue;
+    child.setInside(venue, true);
     setBond(this  , child, BOND_CHILD, BOND_PARENT, 0.5f);
     setBond(father, child, BOND_CHILD, BOND_PARENT, 0.5f);
     venue.setResident(child, true);

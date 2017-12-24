@@ -1,6 +1,9 @@
 
 
 package game;
+import util.*;
+import static game.ActorAsPerson.*;
+import static game.CityCouncil.*;
 import static game.GameConstants.*;
 
 
@@ -11,6 +14,7 @@ public class TestDiplomacy extends Test {
   public static void main(String args[]) {
     testDiplomacy(false);
   }
+  
   
   static boolean testDiplomacy(boolean graphics) {
     Test test = new TestDiplomacy();
@@ -27,8 +31,17 @@ public class TestDiplomacy extends Test {
     map.settings.toggleFog = false;
     
     
-    //  TODO:  You need to introduce tests for both on-map diplomacy and
-    //  off-map diplomacy in order for this to work.
+    
+    //  TODO:  Surround with a small curtain wall...
+
+    Building palace = (Building) PALACE.generate();
+    CityCouncil council = map.city.council;
+    
+    ActorAsPerson monarch = (ActorAsPerson) NOBLE.generate();
+    council.toggleMember(monarch, Role.MONARCH, true);
+    palace.setResident(monarch, true);
+    palace .enterMap(map, 10, 10, 1);
+    monarch.enterMap(map, 12, 9 , 1);
     
     //  So, step 1-
     //  Schedule a diplomatic formation from the foreign city.
@@ -37,32 +50,70 @@ public class TestDiplomacy extends Test {
     //  their business.
     //  Wait until a diplomatic offer is lodged.
     
-    //  Accept the offer.
-    //  OR
-    //  Reject the offer.
-    //  (Allow up to 1 month to respond, let's say.)
-    
-    //  TODO:  If you reject the offer, they might attack right there!
-    //  So... even regular military actions might allow for diplomacy, with
-    //  force as a later option.
-    
-    //  Dispatch your own diplomatic formation from your own city.
-    //  Wait until they arrive.
-    //  Ensure your offer is accepted.
-    //  Allow the formation to return home.  Job done.
-    
-    
-    //  TODO:  Handle these permutations-
-    
-    //  Terms accepted/rejected.
-    
-    //  Force defeated/victorious.
-    
-    
-    while (map.time < 1000 || graphics) {
-      map = test.runLoop(map, 10, graphics, "saves/test_diplomacy.tlt");
+    Formation entourage;
+    entourage = new Formation(Formation.OBJECTIVE_DIALOG, awayC, true);
+    for (int n = 4; n-- > 0;) {
+      Actor s = (Actor) SOLDIER.generate();
+      entourage.toggleRecruit(s, true);
     }
     
+    Actor envoy = (Actor) NOBLE.generate();
+    entourage.toggleEscorted(envoy, true);
+    Actor bride = (Actor) CONSORT.generate();
+    entourage.toggleEscorted(bride, true);
+    
+    entourage.assignTerms(City.POSTURE.ALLY, null, bride, null);
+    entourage.beginSecuring(homeC);
+    
+    
+    boolean escortArrived  = false;
+    boolean offerGiven     = false;
+    boolean offerAccepted  = false;
+    boolean termsOkay      = false;
+    boolean escortDeparted = false;
+    boolean testOkay       = false;
+    
+    //  TODO:  Handle these permutations-
+    //  Force is offensive/defensive/diplomatic.
+    //  Terms accepted/rejected/ignored.
+    //  Force returns/defeated/victorious.
+    //  Force is on map/away.
+    
+    while (map.time < 1000 || graphics) {
+      map = test.runLoop(map, 1, graphics, "saves/test_diplomacy.tlt");
+      
+      if (! escortArrived) {
+        escortArrived = entourage.map == map;
+      }
+      
+      if (escortArrived && ! offerGiven) {
+        offerGiven = council.petitions.includes(entourage);
+      }
+      
+      if (offerGiven && ! offerAccepted) {
+        council.acceptTerms(entourage);
+        offerAccepted = true;
+      }
+      
+      if (offerAccepted && ! termsOkay) {
+        boolean termsFilled = true;
+        termsFilled &= monarch.hasBondType(bride, BOND_MARRIED);
+        termsFilled &= homeC.isAllyOf(awayC);
+        termsOkay = termsFilled;
+      }
+      
+      if (termsOkay && ! escortDeparted) {
+        escortDeparted = entourage.map == null;
+      }
+      
+      if (escortDeparted && ! testOkay) {
+        I.say("\nDIPLOMACY TEST CONCLUDED SUCCESSFULLY!");
+        testOkay = true;
+        if (! graphics) return true;
+      }
+    }
+    
+    I.say("\nDIPLOMACY TEST FAILED!");
     return false;
   }
 }

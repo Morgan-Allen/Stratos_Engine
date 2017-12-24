@@ -128,12 +128,26 @@ public class CityCouncil {
   
   /**  Handling agreements or terms submitted by other cities-
     */
-  void receiveTerms(Formation givesTerms) {
-    petitions.include(givesTerms);
+  void receiveTerms(Formation petition) {
+    petitions.include(petition);
   }
   
   
+  Series <Formation> petitions() {
+    return petitions;
+  }
   
+  
+  void acceptTerms(Formation petition) {
+    petition.setTermsAccepted(true);
+    petitions.remove(petition);
+  }
+  
+  
+  void rejectTerms(Formation petition) {
+    petition.setTermsAccepted(false);
+    petitions.remove(petition);
+  }
   
   
   
@@ -155,7 +169,7 @@ public class CityCouncil {
     //  For now, we'll assume succession is determined by quasi-hereditary-
     //  male-line-primogeniture with a dash of popularity contest.  Might allow
     //  for customisation later.
-    if (monarch != null && monarch.dead()) {
+    if (monarch == null || monarch.dead()) {
       toggleMember(monarch, Role.MONARCH, false);
       Pick <Actor> pick = new Pick();
       for (Actor a : members) {
