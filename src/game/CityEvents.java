@@ -122,22 +122,29 @@ public class CityEvents {
     *  don't delete...
     */
   static void imposeTerms(
-    City defends, City attacks, Formation formation
+    City upon, City from, Formation formation
   ) {
-    if (defends == null || attacks == null || formation == null) return;
-    setPosture(attacks, defends, formation.postureDemand, true);
-    setSuppliesDue(defends, attacks, formation.tributeDemand);
-    arrangeMarriage(attacks, defends, formation.marriageDemand);
-    defends.toggleRebellion(attacks, false);
+    if (upon == null || from == null || formation == null) return;
+    setPosture(from, upon, formation.postureDemand, true);
+    setSuppliesDue (upon, from, formation.tributeDemand );
+    arrangeMarriage(upon, from, formation.marriageDemand);
     
-    incPrestige(attacks, PRES_VICTORY_GAIN);
-    incPrestige(defends, PRES_DEFEAT_LOSS );
+    //  TODO:  These should not be required- signalling victory or loss should
+    //  do the trick.
+    
+    upon.toggleRebellion(from, false);
+    incPrestige(from, PRES_VICTORY_GAIN);
+    incPrestige(upon, PRES_DEFEAT_LOSS );
   }
   
   
   static void arrangeMarriage(City city, City other, Actor marries) {
     Actor monarch = city.council.memberWithRole(Role.MONARCH);
+    if (monarch == null || monarch.dead()) return;
+    
     setBond(monarch, marries, BOND_MARRIED, BOND_MARRIED, 0);
+    marries.homeCity = monarch.homeCity;
+    if (monarch.home != null) monarch.home.setResident(marries, true);
   }
   
   

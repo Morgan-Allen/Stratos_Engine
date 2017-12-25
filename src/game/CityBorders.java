@@ -14,6 +14,9 @@ public class CityBorders {
     */
   static Tile findTransitPoint(CityMap map, City with) {
     
+    //  TODO:  Make sure there's a pathing connection to the main settlement
+    //  here!
+    
     Tile current = map.transitPoints.get(with);
     if (current != null && ! map.blocked(current.x, current.y)) return current;
     

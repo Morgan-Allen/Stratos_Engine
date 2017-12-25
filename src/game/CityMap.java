@@ -300,6 +300,12 @@ public class CityMap implements Session.Saveable {
   }
   
   
+  int timeSince(int time) {
+    if (time == -1) return -1;
+    return this.time - time;
+  }
+  
+  
   
   /**  Blockage and paving methods-
     */

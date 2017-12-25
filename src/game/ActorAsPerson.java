@@ -211,6 +211,9 @@ public class ActorAsPerson extends Actor {
       work.setWorker(this, false);
     }
     
+    //  TODO:  You will need to ensure that work/home/formation venues are
+    //  present on the same map to derive related bahaviours!
+    
     //  If you're seriously hungry/beat/tired, try going home:
     Batch <Good> menu = menuAt(home);
     float hurtRating = fatigue + injury + (menu.size() > 0 ? hunger : 0);

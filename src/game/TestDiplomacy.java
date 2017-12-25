@@ -12,7 +12,7 @@ public class TestDiplomacy extends Test {
   
   
   public static void main(String args[]) {
-    testDiplomacy(false);
+    testDiplomacy(true);
   }
   
   
@@ -36,24 +36,21 @@ public class TestDiplomacy extends Test {
 
     Building palace = (Building) PALACE.generate();
     CityCouncil council = map.city.council;
+    palace.enterMap(map, 10, 10, 1);
+    CityMapPlanning.placeStructure(ROAD, map, true, 15, 0, 1, 32);
     
     ActorAsPerson monarch = (ActorAsPerson) NOBLE.generate();
     council.toggleMember(monarch, Role.MONARCH, true);
     palace.setResident(monarch, true);
-    palace .enterMap(map, 10, 10, 1);
-    monarch.enterMap(map, 12, 9 , 1);
+    monarch.enterMap(map, 12, 9, 1);
     
-    //  So, step 1-
-    //  Schedule a diplomatic formation from the foreign city.
-    //  Wait until they arrive.
-    //  Allow the envoy/s to enter the city (even through walls) and conduct
-    //  their business.
-    //  Wait until a diplomatic offer is lodged.
+    
     
     Formation entourage;
     entourage = new Formation(Formation.OBJECTIVE_DIALOG, awayC, true);
     for (int n = 4; n-- > 0;) {
       Actor s = (Actor) SOLDIER.generate();
+      s.assignHomeCity(awayC);
       entourage.toggleRecruit(s, true);
     }
     
@@ -61,6 +58,8 @@ public class TestDiplomacy extends Test {
     entourage.toggleEscorted(envoy, true);
     Actor bride = (Actor) CONSORT.generate();
     entourage.toggleEscorted(bride, true);
+    
+    for (Actor e : entourage.escorted) e.assignHomeCity(awayC);
     
     entourage.assignTerms(City.POSTURE.ALLY, null, bride, null);
     entourage.beginSecuring(homeC);
@@ -73,11 +72,17 @@ public class TestDiplomacy extends Test {
     boolean escortDeparted = false;
     boolean testOkay       = false;
     
+    
     //  TODO:  Handle these permutations-
     //  Force is offensive/defensive/diplomatic.
     //  Terms accepted/rejected/ignored.
     //  Force returns/defeated/victorious.
     //  Force is on map/away.
+    
+    
+    //  Okay.  Now you need council AI for evaluating offers, and for generating
+    //  diplomatic missions themselves.  TODO:  That.
+    
     
     while (map.time < 1000 || graphics) {
       map = test.runLoop(map, 1, graphics, "saves/test_diplomacy.tlt");
@@ -114,6 +119,11 @@ public class TestDiplomacy extends Test {
     }
     
     I.say("\nDIPLOMACY TEST FAILED!");
+    I.say("  Escort arrived:  "+escortArrived );
+    I.say("  Offer given:     "+offerGiven    );
+    I.say("  Offer accepted:  "+offerAccepted );
+    I.say("  Terms okay:      "+termsOkay     );
+    I.say("  Escort departed: "+escortDeparted);
     return false;
   }
 }

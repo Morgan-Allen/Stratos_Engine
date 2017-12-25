@@ -42,7 +42,6 @@ public class BuildingForWalls extends Building {
   
   Tile[] selectEntrances() {
     int facing  = facing();
-    //I.say("\nSelecting entrances for "+this);
     
     if (tower) {
       Tile stair = tileAt(1, -1, facing);

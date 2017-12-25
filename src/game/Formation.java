@@ -25,7 +25,7 @@ public class Formation implements
   int objective = OBJECTIVE_STANDBY;
   boolean activeAI = false;
   
-  boolean termsGiven    = false;
+  int     timeTermsSent = -1;
   boolean termsAccepted = false;
   boolean termsRefused  = false;
   boolean victorious    = false;
@@ -66,7 +66,7 @@ public class Formation implements
     s.cacheInstance(this);
     
     objective     = s.loadInt ();
-    termsGiven    = s.loadBool();
+    timeTermsSent = s.loadInt ();
     termsAccepted = s.loadBool();
     termsRefused  = s.loadBool();
     victorious    = s.loadBool();
@@ -103,7 +103,7 @@ public class Formation implements
   public void saveState(Session s) throws Exception {
     
     s.saveInt (objective    );
-    s.saveBool(termsGiven   );
+    s.saveInt (timeTermsSent);
     s.saveBool(termsAccepted);
     s.saveBool(termsRefused );
     s.saveBool(victorious   );
@@ -152,9 +152,25 @@ public class Formation implements
   }
   
   
+  boolean hasTerms() {
+    boolean haveTerms = false;
+    haveTerms |= marriageDemand != null;
+    haveTerms |= actionDemand   != null;
+    haveTerms |= postureDemand  != null;
+    haveTerms |= tributeDemand  != null && ! tributeDemand.empty();
+    return haveTerms;
+  }
+  
+  
   void setTermsAccepted(boolean accepted) {
-    if (accepted) termsAccepted = true;
-    else          termsRefused  = true;
+    if (accepted) {
+      termsAccepted = true;
+      CityEvents.imposeTerms(secureCity, homeCity, this);
+      setMissionComplete(true);
+    }
+    else {
+      termsRefused = true;
+    }
   }
   
   
@@ -268,35 +284,42 @@ public class Formation implements
   /**  Regular updates and journey-related methods:
     */
   void update() {
-    
+    //
     //  Cull any casualties...
     for (Actor a : recruits) if (a.dead()) {
       recruits.remove(a);
     }
-    if (active && recruits.empty()) {
+    for (Actor a : escorted) if (a.dead()) {
+      escorted.remove(a);
+    }
+    if (active && recruits.empty() && escorted.empty()) {
       disbandFormation();
       return;
     }
-    
     //
-    //  Update your stand-point...
-    this.standPoint = standPointFrom(secureFocus);
-    
-    //  This is a hacky way of saying "I want to go to a different city, is
-    //  everyone ready yet?"
-    if (
-      map != null && secureCity != null &&
-      secureCity != map.city && formationReady()
-    ) {
-      beginJourney(map.city, secureCity);
+    //  Update your target and stand-point while you're on the map...
+    if (map != null) {
+      if (activeAI) {
+        FormationUtils.updateTacticalTarget(this);
+      }
+      this.standPoint = standPointFrom(secureFocus);
+      //
+      //  This is a hacky way of saying "I want to go to a different city, is
+      //  everyone ready yet?"
+      if (secureCity != null && secureCity != map.city && formationReady()) {
+        beginJourney(map.city, secureCity);
+      }
     }
   }
   
   
   private World.Journey beginJourney(City from, City goes) {
     if (reports()) I.say("\nREADY TO BEGIN FOREIGN MISSION!");
-    for (Actor w : recruits) if (w.onMap(map)) {
-      w.exitMap(map);
+    for (Actor r : recruits) if (r.onMap(map)) {
+      r.exitMap(map);
+    }
+    for (Actor e : escorted) if (e.onMap(map)) {
+      e.exitMap(map);
     }
     away         = true;
     map          = null;
@@ -323,8 +346,11 @@ public class Formation implements
       this.map          = goes.map;
       this.transitPoint = transits;
       
-      for (Actor w : recruits) {
-        w.enterMap(map, transits.x, transits.y, 1);
+      for (Actor r : recruits) {
+        r.enterMap(map, transits.x, transits.y, 1);
+      }
+      for (Actor e : escorted) {
+        e.enterMap(map, transits.x, transits.y, 1);
       }
       beginSecuring(transitPoint, N, map);
       
@@ -363,24 +389,24 @@ public class Formation implements
     */
   public void selectActorBehaviour(Actor actor) {
     
-    boolean haveTerms = false;
-    haveTerms |= marriageDemand != null;
-    haveTerms |= actionDemand   != null;
-    haveTerms |= postureDemand  != null;
-    haveTerms |= ! tributeDemand.empty();
-    
+    boolean haveTerms  = hasTerms();
     boolean isEnvoy    = escorted.includes(actor);
+    boolean hasEnvoy   = escorted.size() > 0;
     boolean diplomatic = objective == OBJECTIVE_DIALOG;
     
-    if (haveTerms && isEnvoy && ! termsGiven) {
-      Actor offersTerms = FormationUtils.findOfferRecipient(this);
-      actor.embarkOnTarget(offersTerms, 1, Task.JOB.DIALOG, this);
-      if (actor.idle()) termsGiven = true;
-      else return;
+    if ((! hasEnvoy) || map.timeSince(timeTermsSent) > MONTH_LENGTH) {
+      timeTermsSent = map.time;
+      termsRefused  = true;
     }
     
-    if (activeAI) {
-      FormationUtils.updateTacticalTarget(this);
+    if (haveTerms && isEnvoy && timeTermsSent == -1) {
+      Actor offersTerms = FormationUtils.findOfferRecipient(this);
+      actor.embarkOnTarget(offersTerms, 1, Task.JOB.DIALOG, this);
+      if (actor.idle()) {
+        timeTermsSent = map.time;
+        termsRefused  = true;
+      }
+      else return;
     }
     
     if (defeated || victorious || (diplomatic && termsRefused)) {
@@ -416,23 +442,21 @@ public class Formation implements
   
   
   public void actorTargets(Actor actor, Target other) {
-    //objective.actorTargets(actor, other, this);
-    
     if (actor.jobType() == Task.JOB.DIALOG) {
       map.city.council.receiveTerms(this);
+      timeTermsSent = map.time;
     }
     if (actor.jobType() == Task.JOB.MILITARY) {
+      return;
     }
     if (actor.jobType() == Task.JOB.RETURNING) {
-    }
-    if (actor.jobType() == Task.JOB.RETREAT) {
-      actor.exitMap(map);
+      return;
     }
   }
   
   
   public void actorUpdates(Actor actor) {
-    //objective.actorUpdates(actor, this);
+    return;
   }
   
   
@@ -469,13 +493,11 @@ public class Formation implements
     if (map == null) return true;
     if (secureFocus == null || ! active) return false;
     
-    //  TODO:  Consider this more carefully?
     for (Actor a : recruits) {
       if (standLocation(a) != a.at()) {
         return false;
       }
     }
-    
     return true;
   }
   

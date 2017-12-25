@@ -13,6 +13,65 @@ import static game.GameConstants.*;
 public class FormationUtils {
   
   
+  static float rateCampingPoint(Tile t, Formation parent) {
+    if (t == null || parent == null || parent.map == null) return -1;
+    
+    CityMap map = parent.map;
+    Pathing from = parent.pathFrom();
+    float rating = 0;
+    boolean blocked = false;
+    
+    for (Tile n : map.tilesUnder(
+      t.x - (AVG_RANKS / 2),
+      t.y - (AVG_FILE  / 2),
+      AVG_RANKS,
+      AVG_FILE
+    )) {
+      if (map.blocked(n)) {
+        rating -= 1;
+      }
+      else if (! map.pathCache.pathConnects(from, n, false, false)) {
+        blocked = true;
+      }
+      else {
+        rating += 1;
+      }
+    }
+    if (blocked || rating <= 0) return -1;
+    
+    rating *= distancePenalty(from, t);
+    return rating;
+  }
+  
+  
+  static Tile findCampingPoint(final Formation parent) {
+    if (parent == null || parent.map == null) return null;
+    
+    final CityMap map = parent.map;
+    final Tile init = Tile.nearestOpenTile(parent.standPoint, map);
+    if (init == null) return null;
+    
+    final Tile temp[] = new Tile[9];
+    final Pick <Tile> pick = new Pick(0);
+    
+    Flood <Tile> flood = new Flood <Tile> () {
+      protected void addSuccessors(Tile front) {
+        for (Tile n : CityMap.adjacent(front, temp, map)) {
+          if (map.blocked(n) || n.flaggedWith() != null) continue;
+          tryAdding(n);
+          
+          float rating = rateCampingPoint(n, parent);
+          pick.compare(n, rating);
+        }
+      }
+    };
+    flood.floodFrom(init);
+    return pick.result();
+  }
+  
+  
+  //  TODO:  Move this to the Council class...
+  
   static Actor findOfferRecipient(Formation parent) {
     CityCouncil council = parent.map.city.council;
     
@@ -27,7 +86,8 @@ public class FormationUtils {
     
     return null;
   }
-
+  
+  
   
   static class SiegeSearch extends ActorPathSearch {
     
@@ -125,6 +185,23 @@ public class FormationUtils {
     City    siege  = parent.secureCity;
     
     //
+    //  If this is a diplomatic mission, stay in camp unless and until terms
+    //  are refused-
+    if (parent.hasTerms() && parent.termsAccepted) {
+      parent.beginSecuring(home);
+      return true;
+    }
+    
+    if (parent.hasTerms() && ! parent.termsRefused) {
+      if (rateCampingPoint(stands, parent) > 0) {
+        return false;
+      }
+      Tile campPoint = findCampingPoint(parent);
+      parent.beginSecuring(campPoint, parent.facing, map);
+      return true;
+    }
+    
+    //
     //  If you're beaten, turn around and go home:
     if (parent.powerSum() == 0) {
       CityEvents.enterHostility(siege, home, false, 1);
@@ -192,8 +269,6 @@ public class FormationUtils {
   }
   
   
-  
-  
   static void updateGuardPoints(final Formation parent) {
     
     //
@@ -201,7 +276,6 @@ public class FormationUtils {
     final Target focus = (Target) parent.secureFocus;
     final CityMap map = parent.map;
     final int updateTime = parent.lastUpdateTime;
-    //this.map = parent.map;
     int nextUpdate = updateTime >= 0 ? (updateTime + 10) : 0;
     
     if (focus == null || map == null) {
@@ -267,6 +341,7 @@ public class FormationUtils {
     int span = MONTH_LENGTH, numRecruits = parent.recruits.size();
     int epoch = (parent.map.time / span) % numRecruits;
     
+    //  TODO:  Include escorted elements as well?
     int index = parent.recruits.indexOf(member);
     if (index == -1) return null;
     
@@ -276,13 +351,13 @@ public class FormationUtils {
   }
   
   
-  
   static Tile standingPointRanks(Actor member, Formation parent) {
     
     CityMap map = parent.map;
     Tile goes = parent.standPoint;
     if (goes == null || map == null) return null;
     
+    //  TODO:  Include escorted elements as well!
     int index = parent.recruits.indexOf(member);
     if (index == -1) return null;
     

@@ -171,7 +171,11 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   void assignHomeCity(City city) {
     this.homeCity = city;
-    this.guest    = true;
+  }
+  
+  
+  void assignGuestCity(City city) {
+    this.guest = true;
   }
   
   

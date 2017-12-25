@@ -152,6 +152,7 @@ public class TestSieging extends Test {
       if (siegeComing && enemy.map != null && ! siegeBegun) {
         Table <Tile, Actor> standing = new Table();
         boolean standWrong = false;
+        Actor testPathing = null;
         
         for (Actor a : enemy.recruits) {
           if (a.jobType() == JOB.COMBAT) {
@@ -160,11 +161,21 @@ public class TestSieging extends Test {
             Tile stands = (Tile) task.target;
             if (standing.get(stands) != null) standWrong = true;
             else standing.put(stands, a);
+            testPathing = a;
           }
         }
         
         if (standing.size() > MIN_INVADERS && ! standWrong) {
           siegeBegun = true;
+        }
+        
+        if (testPathing != null) {
+          ActorPathSearch search = new ActorPathSearch(testPathing, fort);
+          search.doSearch();
+          if (search.success()) {
+            I.say("\nGatehouse should not allow entry to invaders!");
+            return false;
+          }
         }
       }
       
