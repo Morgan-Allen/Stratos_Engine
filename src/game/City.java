@@ -295,9 +295,6 @@ public class City implements Session.Saveable, Trader {
   boolean isAllyOf  (City o) { return posture(o) == POSTURE.ALLY  ; }
   
   
-  //  TODO:  Reconsider the 'static' tags here?
-  
-  
   static void incLoyalty(City a, City b, float inc) {
     Relation r = a.relationWith(b);
     float loyalty = Nums.clamp(r.loyalty + inc, -1, 1);
@@ -386,6 +383,19 @@ public class City implements Session.Saveable, Trader {
   
   
   
+  /**  Handling army strength and population (for off-map cities-)
+    */
+  float idealPopulation() {
+    return buildLevel.valueFor(HOUSE) * AVG_HOUSE_POP;
+  }
+  
+  
+  float idealArmyPower() {
+    return buildLevel.valueFor(GARRISON) * AVG_ARMY_POWER;
+  }
+  
+  
+  
   /**  Regular updates-
     */
   void updateCity() {
@@ -435,8 +445,8 @@ public class City implements Session.Saveable, Trader {
       
       float popRegen  = MONTH_LENGTH * 1f / LIFESPAN_LENGTH;
       float usageInc  = MONTH_LENGTH * 1f / YEAR_LENGTH;
-      float idealPop  = buildLevel.valueFor(HOUSE   ) * AVG_HOUSE_POP ;
-      float idealArmy = buildLevel.valueFor(GARRISON) * AVG_ARMY_POWER;
+      float idealPop  = idealPopulation();
+      float idealArmy = idealArmyPower();
       
       if (population < idealPop) {
         population = Nums.min(idealPop , population + popRegen);

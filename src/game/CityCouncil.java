@@ -220,7 +220,11 @@ public class CityCouncil {
     
     City attackC, defendC;
     float attackPower, defendPower;
-    Tally <Good> tribute = new Tally();
+    
+    City.POSTURE postureDemand  = null;
+    Formation    actionDemand   = null;
+    Actor        marriageDemand = null;
+    Tally <Good> tributeDemand  = new Tally();
     
     float winChance, angerChance;
     float winKillsA, lossKillsA;
@@ -230,27 +234,6 @@ public class CityCouncil {
     
     float costs, benefits;
     float evaluatedAppeal;
-  }
-  
-  
-  void calculateTribute(InvasionAssessment a) {
-    //
-    //  We establish *reasonable* levels of tribute across a variety of goods,
-    //  based on what the attacker is hungry for and the defender seems to have
-    //  plenty of-
-    for (Good g : ALL_GOODS) {
-      float prodVal = 5 + a.defendC.inventory .valueFor(g);
-      prodVal      += 0 + a.defendC.tradeLevel.valueFor(g);
-      float consVal = 0 - a.attackC.tradeLevel.valueFor(g);
-      consVal      -= 5 + a.attackC.inventory .valueFor(g);
-      
-      float grabVal = (prodVal + consVal) / 2f;
-      if (grabVal <= 0) continue;
-      
-      grabVal *= AVG_TRIBUTE_PERCENT / 100f;
-      grabVal = Nums.round(grabVal, 5, true);
-      a.tribute.set(g, grabVal);
-    }
   }
   
   
@@ -274,6 +257,49 @@ public class CityCouncil {
     if (city.tradeLevel.valueFor(good) < 0) value *= 2;
     value *= good.price * perYear * AVG_TRIBUTE_YEARS;
     return value;
+  }
+  
+  
+  float marriageValue(Actor marries, City city) {
+    //
+    //  Calculate value of a marriage based on the power and trade potential of
+    //  their home city, assuming that it buys you X years of peace.
+    City from = marries.homeCity;
+    
+    float tradeVal = 0;
+    for (Good g : ALL_GOODS) {
+      float perYear = from.tradeLevel.valueFor(g);
+      if (perYear <= 0) continue;
+      tradeVal += tributeValue(g, perYear, city);
+    }
+    tradeVal *= AVG_ALLIANCE_YEARS * 1f / AVG_TRIBUTE_YEARS;
+    
+    float powerVal = from.idealArmyPower() / POP_PER_CITIZEN;
+    powerVal *= casualtyValue(city);
+    powerVal *= AVG_ALLIANCE_YEARS * 1f / AVG_RETIREMENT;
+    
+    return tradeVal + powerVal;
+  }
+  
+  
+  void calculateTribute(InvasionAssessment a) {
+    //
+    //  We establish *reasonable* levels of tribute across a variety of goods,
+    //  based on what the attacker is hungry for and the defender seems to have
+    //  plenty of-
+    for (Good g : ALL_GOODS) {
+      float prodVal = 5 + a.defendC.inventory .valueFor(g);
+      prodVal      += 0 + a.defendC.tradeLevel.valueFor(g);
+      float consVal = 0 - a.attackC.tradeLevel.valueFor(g);
+      consVal      -= 5 + a.attackC.inventory .valueFor(g);
+      
+      float grabVal = (prodVal + consVal) / 2f;
+      if (grabVal <= 0) continue;
+      
+      grabVal *= AVG_TRIBUTE_PERCENT / 100f;
+      grabVal = Nums.round(grabVal, 5, true);
+      a.tributeDemand.set(g, grabVal);
+    }
   }
   
   
@@ -313,8 +339,8 @@ public class CityCouncil {
     float casValueA  = casualtyValue(a.attackC);
     float casValueD  = casualtyValue(a.defendC);
     float tribValue  = 0;
-    for (Good g : a.tribute.keys()) {
-      tribValue += tributeValue(g, a.tribute.valueFor(g), a.attackC);
+    for (Good g : a.tributeDemand.keys()) {
+      tribValue += tributeValue(g, a.tributeDemand.valueFor(g), a.attackC);
     }
     //
     //  We also weight the value of hostility, roughly speaking, based on the
@@ -351,11 +377,15 @@ public class CityCouncil {
     float commitLevel, boolean random
   ) {
     InvasionAssessment IA = new InvasionAssessment();
+    
     IA.attackC     = attack;
     IA.defendC     = defend;
     IA.attackPower = attack.armyPower * commitLevel / POP_PER_CITIZEN;
     IA.defendPower = defend.armyPower               / POP_PER_CITIZEN;
+    
+    IA.postureDemand = City.POSTURE.VASSAL;
     calculateTribute(IA);
+    
     calculateChances(IA, false);
     calculateAppeal(IA);
     
@@ -404,7 +434,7 @@ public class CityCouncil {
       //  Only non-barbarian governments will set up permanent command-fx.
     }
     else {
-      force.assignTerms(City.POSTURE.VASSAL, null, null, IA.tribute);
+      force.assignTerms(City.POSTURE.VASSAL, null, null, IA.tributeDemand);
     }
     
     int n = 0;
