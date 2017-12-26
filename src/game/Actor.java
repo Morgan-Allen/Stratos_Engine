@@ -34,7 +34,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   Building  work;
   Building  home;
   City      homeCity;
-  boolean   guest;
+  City      guestCity;
   Building  recruiter;
   Formation formation;
   
@@ -72,7 +72,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     work      = (Building ) s.loadObject();
     home      = (Building ) s.loadObject();
     homeCity  = (City     ) s.loadObject();
-    guest     = s.loadBool();
+    guestCity = (City     ) s.loadObject();
     recruiter = (Building ) s.loadObject();
     formation = (Formation) s.loadObject();
     
@@ -105,7 +105,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     s.saveObject(work     );
     s.saveObject(home     );
     s.saveObject(homeCity );
-    s.saveBool  (guest    );
+    s.saveObject(guestCity);
     s.saveObject(recruiter);
     s.saveObject(formation);
     
@@ -175,7 +175,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   
   void assignGuestCity(City city) {
-    this.guest = true;
+    this.guestCity = city;
   }
   
   

@@ -284,15 +284,16 @@ public class CityCouncil {
     //  the prestige of each city in this calculation, as a reputation for
     //  victory can intimidate opponents.)
     float bravery = membersTraitAvg(TRAIT_BRAVERY);
-    float chance = 0, lossA = 0, lossD = 0, presDiff = 0;
+    float chance = 0, lossA = 0, lossD = 0, presDiff = 0, wallDiff;
     presDiff = (a.attackC.prestige - a.defendC.prestige) / City.PRESTIGE_MAX;
+    wallDiff = a.defendC.buildLevel.valueFor(WALL) > 0 ? 1 : 0;
     chance   = a.attackPower / (a.attackPower + a.defendPower);
     chance   = chance + (presDiff / 4);
     chance   = chance + (bravery  / 4);
+    chance   = chance - (wallDiff / 4);
     chance   = Nums.clamp((chance * 2) - 0.5f, 0, 1);
     lossA    = ((random ? Rand.num() : 0.5f) + 1 - chance) / 2;
     lossD    = ((random ? Rand.num() : 0.5f) +     chance) / 2;
-    //
     //  And then calculate probable casualties for both sides in each case:
     a.winChance   = chance;
     a.angerChance = 1;

@@ -60,7 +60,9 @@ public class BuildingForWalls extends Building {
   
   public boolean allowsEntry(Actor a) {
     City home = a.homeCity();
-    if (home != null && home != map.city && ! a.guest) return false;
+    if (home != null && home != map.city && a.guestCity != map.city) {
+      return false;
+    }
     return super.allowsEntry(a);
   }
   

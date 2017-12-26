@@ -31,13 +31,17 @@ public class TestDiplomacy extends Test {
     map.settings.toggleFog = false;
     
     
+    CityMapPlanning.placeStructure(WALL, map, true, 7, 7, 12, 12);
+    CityMapPlanning.markDemolish(map, true, 8, 8, 10, 10);
     
-    //  TODO:  Surround with a small curtain wall...
-
+    Building gate = (Building) GATE.generate();
+    gate.setFacing(TileConstants.N);
+    gate.enterMap(map, 12, 17, 1);
+    
     Building palace = (Building) PALACE.generate();
     CityCouncil council = map.city.council;
     palace.enterMap(map, 10, 10, 1);
-    CityMapPlanning.placeStructure(ROAD, map, true, 15, 0, 1, 32);
+    CityMapPlanning.placeStructure(ROAD, map, true, 12, 19, 1, 13);
     
     ActorAsPerson monarch = (ActorAsPerson) NOBLE.generate();
     council.toggleMember(monarch, Role.MONARCH, true);

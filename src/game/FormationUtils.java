@@ -182,7 +182,7 @@ public class FormationUtils {
     Pathing from   = parent.pathFrom();
     Tile    stands = parent.standPoint;
     Object  focus  = parent.secureFocus;
-    City    siege  = parent.secureCity;
+    City    sieges = parent.secureCity;
     
     //
     //  If this is a diplomatic mission, stay in camp unless and until terms
@@ -202,11 +202,15 @@ public class FormationUtils {
     }
     
     //
-    //  If you're beaten, turn around and go home:
-    if (parent.powerSum() == 0) {
-      CityEvents.enterHostility(siege, home, false, 1);
-      CityEvents.signalVictory(siege, home, parent);
+    //  If you're beaten, disband or turn around and go home:
+    if (parent.casualtyLevel() > MAX_CASUALTIES / 100f) {
+      CityEvents.enterHostility(sieges, home, false, 1);
+      CityEvents.signalVictory(sieges, home, parent);
       parent.beginSecuring(home);
+      return true;
+    }
+    if (parent.powerSum() == 0) {
+      parent.disbandFormation();
       return true;
     }
     
@@ -260,9 +264,9 @@ public class FormationUtils {
     //
     //  If there are no targets left here, declare victory and go home:
     else {
-      CityEvents.enterHostility(siege, home, true, 1);
-      CityEvents.imposeTerms(siege, home, parent);
-      CityEvents.signalVictory(home, siege, parent);
+      CityEvents.enterHostility(sieges, home, true, 1);
+      CityEvents.imposeTerms(sieges, home, parent);
+      CityEvents.signalVictory(home, sieges, parent);
       parent.beginSecuring(home);
       return true;
     }
@@ -341,7 +345,6 @@ public class FormationUtils {
     int span = MONTH_LENGTH, numRecruits = parent.recruits.size();
     int epoch = (parent.map.time / span) % numRecruits;
     
-    //  TODO:  Include escorted elements as well?
     int index = parent.recruits.indexOf(member);
     if (index == -1) return null;
     
@@ -357,8 +360,11 @@ public class FormationUtils {
     Tile goes = parent.standPoint;
     if (goes == null || map == null) return null;
     
-    //  TODO:  Include escorted elements as well!
     int index = parent.recruits.indexOf(member);
+    if (index == -1) {
+      index = parent.escorted.indexOf(member);
+      if (index != -1) index += parent.recruits.size();
+    }
     if (index == -1) return null;
     
     int ranks = AVG_RANKS   ;

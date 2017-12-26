@@ -37,8 +37,9 @@ public class Formation implements
   Actor        marriageDemand = null;
   Tally <Good> tributeDemand  = new Tally();
   
-  List <Actor> escorted = new List();
-  List <Actor> recruits = new List();
+  List <Actor> escorted   = new List();
+  List <Actor> recruits   = new List();
+  List <Actor> casualties = new List();
   
   boolean away   = false;
   boolean active = false;
@@ -78,8 +79,9 @@ public class Formation implements
     marriageDemand = (Actor       ) s.loadObject();
     s.loadTally(tributeDemand);
     
-    s.loadObjects(escorted);
-    s.loadObjects(recruits);
+    s.loadObjects(escorted  );
+    s.loadObjects(recruits  );
+    s.loadObjects(casualties);
     
     away         = s.loadBool();
     homeCity     = (City   ) s.loadObject();
@@ -115,8 +117,9 @@ public class Formation implements
     s.saveObject(marriageDemand);
     s.saveTally (tributeDemand );
     
-    s.saveObjects(escorted);
-    s.saveObjects(recruits);
+    s.saveObjects(escorted  );
+    s.saveObjects(recruits  );
+    s.saveObjects(casualties);
     
     s.saveBool  (away      );
     s.saveObject(homeCity  );
@@ -288,9 +291,11 @@ public class Formation implements
     //  Cull any casualties...
     for (Actor a : recruits) if (a.dead()) {
       recruits.remove(a);
+      casualties.add(a);
     }
     for (Actor a : escorted) if (a.dead()) {
       escorted.remove(a);
+      casualties.add(a);
     }
     if (active && recruits.empty() && escorted.empty()) {
       disbandFormation();
@@ -320,6 +325,7 @@ public class Formation implements
     }
     for (Actor e : escorted) if (e.onMap(map)) {
       e.exitMap(map);
+      e.assignGuestCity(null);
     }
     away         = true;
     map          = null;
@@ -351,6 +357,7 @@ public class Formation implements
       }
       for (Actor e : escorted) {
         e.enterMap(map, transits.x, transits.y, 1);
+        e.assignGuestCity(goes);
       }
       beginSecuring(transitPoint, N, map);
       
@@ -498,12 +505,23 @@ public class Formation implements
         return false;
       }
     }
+    for (Actor a : escorted) {
+      if (standLocation(a) != a.at()) {
+        return false;
+      }
+    }
     return true;
   }
   
   
   int powerSum() {
     return powerSum(recruits, null);
+  }
+  
+  
+  float casualtyLevel() {
+    float live = recruits.size(), dead = casualties.size();
+    return dead / (dead + live);
   }
   
   

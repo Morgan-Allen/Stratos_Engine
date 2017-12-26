@@ -181,6 +181,7 @@ public class GameConstants {
     AVG_SIGHT        = 6   ,
     AVG_RANGE        = 3   ,
     MAX_RANGE        = 6   ,
+    MAX_CASUALTIES   = 50  ,  //  percent of total force before retreat
     MAX_EXPLORE_DIST = 200 ,
     WALL_HIT_BONUS   = 40  ,  //  percent chance
     WALL_DEF_BONUS   = 25  ,  //  percent chance
