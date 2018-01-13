@@ -2,7 +2,9 @@
 
 package game;
 import util.*;
+import static game.ActorAsPerson.*;
 import static game.City.*;
+import static game.CityCouncil.*;
 import static game.GameConstants.*;
 
 
@@ -60,7 +62,6 @@ public class TestWorld extends Test {
       }
       
       float endP = lord.prestige, endL = vassal.loyalty(lord);
-      
       if (Nums.abs(endP - AVG_P) >= Nums.abs(initPrestige - AVG_P)) {
         I.say("\nCity prestige did not decay over time!");
         return false;
@@ -75,7 +76,7 @@ public class TestWorld extends Test {
     {
       City pair[] = configWeakStrongCityPair();
       float oldPower = pair[0].armyPower;
-      runCompleteInvasion(pair);
+      runCompleteInvasion(pair[1], pair[0]);
       float newPower = pair[0].armyPower;
       
       if (newPower >= oldPower) {
@@ -92,14 +93,66 @@ public class TestWorld extends Test {
       }
     }
     
+    //  This tests for the outcome of a basic dialog attempt:
+    {
+      City pair[] = configWeakStrongCityPair();
+      City goes = pair[0], from = pair[1];
+      goes.council.typeAI = CityCouncil.AI_PACIFIST;
+      runCompleteDialog(from, goes);
+      
+      if (from.posture(goes) != City.POSTURE.ALLY) {
+        I.say("\nDialog did not create ally!");
+        return false;
+      }
+    }
+    
+    //  This tests to ensure full life-cycles apply to the ruling house of
+    //  foreign cities-
+    {
+      City pair[] = configWeakStrongCityPair();
+      City mainC = pair[1];
+      Actor monarch = (Actor) NOBLE  .generate();
+      Actor queen   = (Actor) CONSORT.generate();
+      monarch.sexData    = SEX_MALE;
+      queen  .sexData    = SEX_FEMALE;
+      monarch.ageSeconds = LIFESPAN_LENGTH / 4;
+      queen  .ageSeconds = LIFESPAN_LENGTH / 4;
+      
+      ActorAsPerson.setBond(monarch, queen, BOND_MARRIED, BOND_MARRIED, 1);
+      mainC.council.toggleMember(monarch, Role.MONARCH, true);
+      mainC.council.toggleMember(queen  , Role.CONSORT, true);
+      
+      mainC.world.settings.toggleChildMort = false;
+      
+      int time = 0;
+      while (time < LIFESPAN_LENGTH * 2) {
+        mainC.world.updateWithTime(time++);
+      }
+      
+      Series <Actor> heirs = mainC.council.allMembersWithRole(Role.HEIR);
+      if (heirs.empty()) {
+        I.say("\nNo heirs produced!");
+        return false;
+      }
+      if (monarch.alive() || queen.alive()) {
+        I.say("\nParents still alive!");
+        return false;
+      }
+    }
+    
     //  This tests for the effect of 'barbarian' invasions-
     {
       City pair[] = configWeakStrongCityPair();
-      pair[1].government = City.GOVERNMENT.BARBARIAN;
-      runCompleteInvasion(pair);
+      City goes = pair[0], from = pair[1];
+      from.government = City.GOVERNMENT.BARBARIAN;
+      runCompleteInvasion(from, goes);
       
-      if (! pair[0].isEnemyOf(pair[1])) {
+      if (! goes.isEnemyOf(from)) {
         I.say("\nBarbarian invasion did not prompt correct posture!");
+        return false;
+      }
+      if (City.suppliesDue(goes, from).size() > 0) {
+        I.say("\nBarbarian invasion should not impose tribute!");
         return false;
       }
     }
@@ -107,35 +160,36 @@ public class TestWorld extends Test {
     //  This tests for victory over another lord's vassal-
     {
       City pair[] = configWeakStrongCityPair();
-      World world = pair[0].world;
+      City weak = pair[0], strong = pair[1];
+      World world = strong.world;
       
       City lord = new City(world);
       world.addCities(lord);
-      City.setPosture(lord, pair[0], City.POSTURE.VASSAL, true);
+      City.setPosture(lord, weak, City.POSTURE.VASSAL, true);
       City capital = new City(world);
       world.addCities(capital);
       City.setPosture(capital, lord, City.POSTURE.VASSAL, true);
       
-      if (capital != pair[0].capitalLord()) {
+      if (capital != weak.capitalLord()) {
         I.say("\nDid not calculate capital correctly!");
         return false;
       }
       
-      runCompleteInvasion(pair);
+      runCompleteInvasion(strong, weak);
       
-      if (lord.isLordOf(pair[0])) {
+      if (lord.isLordOf(weak)) {
         I.say("\nInvasion of vassal did not revoke lord's claim!");
         return false;
       }
-      if (! pair[0].isVassalOf(pair[1])) {
+      if (! weak.isVassalOf(strong)) {
         I.say("\nInvasion of vassal did not impose vassal status!");
         return false;
       }
-      if (! capital.isEnemyOf(pair[1])) {
+      if (! capital.isEnemyOf(strong)) {
         I.say("\nInvasion of vassal did not provoke war!");
         return false;
       }
-      if (capital.loyalty(pair[1]) >= City.LOY_CIVIL) {
+      if (capital.loyalty(strong) >= City.LOY_CIVIL) {
         I.say("\nInvasion of vassal did not sour relations with capital!");
         return false;
       }
@@ -184,7 +238,7 @@ public class TestWorld extends Test {
       }
       vassal.council.typeAI = CityCouncil.AI_OFF;
 
-      runCompleteInvasion(pair);
+      runCompleteInvasion(lord, vassal);
       
       if (! vassal.isLoyalVassalOf(lord)) {
         I.say("\nRevolt suppression did not occur!");
@@ -215,12 +269,100 @@ public class TestWorld extends Test {
       }
     }
     
+    //  TODO:  Test for synergy, marriage and trade-level effects on selecting
+    //  for allies.
+    
+    {
+      //final Good goods[] = { CLAY, MAIZE, WOOD, RAW_COTTON, POTTERY, COTTON };
+      World world = new World();
+      
+      City from[] = new City[6];
+      City goes[] = new City[4];
+      
+      float relations[][] = {
+        {  0.5f, -0.5f, -0.5f, -1.0f },
+        {  0.5f, -0.7f, -0.2f,  0.0f },
+        {  0.5f, -0.7f, -0.2f,  0.0f },
+        {  0.0f,  0.0f,  0.0f,  0.0f },
+        {  0.0f,  0.0f,  0.0f,  0.0f },
+        {  0.0f,  0.0f,  0.0f,  0.0f },
+      };
+      
+      for (int i = from.length; i-- > 0;) {
+        from[i] = new City(world, "From_"+i);
+      }
+      for (int i = goes.length; i-- > 0;) {
+        goes[i] = new City(world, "Goes_"+i);
+      }
+      world.addCities(from);
+      world.addCities(goes);
+      
+      for (int i = from.length; i-- > 0;) {
+        for (int j = goes.length; j-- > 0;) {
+          incLoyalty(from[i], goes[j], relations[i][j]);
+          incLoyalty(goes[j], from[i], relations[i][j]);
+        }
+      }
+      
+      for (City c : world.cities) {
+        c.initBuildLevels(HOUSE, 2f, GARRISON, 2f);
+        for (City o : world.cities) if (c != o) City.setupRoute(c, o, 1);
+      }
+      
+      
+      City main = from[0];
+      
+      //  Establish trade-options with city 3...
+      main   .tradeLevel.setWith(RAW_COTTON,  5, POTTERY,  5);
+      from[2].tradeLevel.setWith(RAW_COTTON, -5, POTTERY, -5);
+      
+      //  Establish enmity with city 5...
+      incLoyalty(main, from[4], -0.5f);
+      incLoyalty(from[4], main, -0.5f);
+      
+      //  TODO:  Establish a possible marriage with city 6 and test effects...
+      
+      CityCouncil.MissionAssessment
+        D1 = main.council.dialogAssessment(main, from[1], false),
+        D2 = main.council.dialogAssessment(main, from[2], false),
+        D3 = main.council.dialogAssessment(main, from[3], false),
+        D4 = main.council.dialogAssessment(main, from[4], false),
+        allD[] = { D1, D2, D3, D4 };
+      
+      //*
+      I.say("\nAppeal of alliances is: ");
+      for (CityCouncil.MissionAssessment d : allD) {
+        I.say("  "+d.goesC+": "+d.evaluatedAppeal);
+      }
+      //*/
+      
+      if (D1.evaluatedAppeal <= D3.evaluatedAppeal) {
+        I.say("\nSimilar relations should boost appeal of alliance!");
+        return false;
+      }
+      if (D2.evaluatedAppeal <= D1.evaluatedAppeal) {
+        I.say("\nTrade-potential should boost appeal of alliance!");
+        return false;
+      }
+      if (D4.evaluatedAppeal >= D3.evaluatedAppeal) {
+        I.say("\nMutual enmity should lower appeal of alliance!");
+        return false;
+      }
+      
+      /*
+      if (D5.evaluatedAppeal <= D3.evaluatedAppeal) {
+        I.say("\nPotential marriage should boost appeal of alliance!");
+      }
+      //*/
+    }
+    
     //
     //  Now we set up random cities with random troops and resources, placed at
     //  each of the compass-points on the map, and run the simulation for a
     //  while to ensure that invasions take place at reasonable frequency-
     World world = new World();
     
+    final int NUM_CITIES = 4;
     final String names[] = { "Tollan", "Texcoco", "Tlacopan", "Tlaxcala" };
     final Good goods[] = { CLAY, MAIZE, WOOD, RAW_COTTON, POTTERY, COTTON };
     final int tints[] = {
@@ -265,13 +407,13 @@ public class TestWorld extends Test {
     City mapCity = new City(world);
     CityMap map = new CityMap(mapCity);
     map.performSetup(8);
-    map.settings.worldView    = true;
-    map.settings.speedUp      = true;
-    map.settings.reportBattle = graphics;
+    world.settings.worldView    = true;
+    world.settings.speedUp      = true;
+    world.settings.reportBattle = graphics;
     
     int MAX_TIME = LIFESPAN_LENGTH, NUM_YEARS = MAX_TIME / YEAR_LENGTH;
     boolean relationsOkay = true;
-    int totalBattles = 0, timeWithEmpire = 0;
+    int totalBattles = 0, timeWithEmpire = 0, timeWithAllies = 0;
     
     I.say("\nRunning world simulation...");
     while (map.time < MAX_TIME) {
@@ -314,32 +456,29 @@ public class TestWorld extends Test {
       //
       //  We also check to see whether an empire has formed.  (This is isn't
       //  actually required, but it might account for a lull in hostilities.)
+      int timeStep = world.settings.speedUp ? 100 : 10;
       boolean empireExists = false;
-      City withEmpire = null;
       
       for (City c : world.cities) {
         boolean hasEmpire = true;
         for (City o : world.cities) {
           if (o == mapCity || o == c) continue;
           if (o.capitalLord() != c) hasEmpire = false;
+          if (o.isAllyOf(c)) timeWithAllies += timeStep;
         }
         empireExists |= hasEmpire;
-        if (hasEmpire) withEmpire = c;
       }
       
-      if (empireExists) {
-        timeWithEmpire += map.settings.speedUp ? 100 : 10;
-      }
+      if (empireExists) timeWithEmpire += timeStep;
     }
-    
-    //  TODO:  Allow for diplomatic missions to form alliances or broker peace.
     
     //
     //  Finally, check to see whether total battles fall within reasonable
     //  bounds for the world in question:
     timeWithEmpire /= YEAR_LENGTH;
-    int minBattles = (NUM_YEARS - timeWithEmpire) / 2;
-    int maxBattles = NUM_YEARS * world.cities.size() * 2;
+    timeWithAllies /= YEAR_LENGTH * NUM_CITIES * (NUM_CITIES - 1);
+    int minBattles  = (NUM_YEARS - (timeWithEmpire + timeWithAllies)) / 2;
+    int maxBattles  = NUM_YEARS * world.cities.size() * 2;
     boolean testOkay = true;
     
     if (totalBattles < minBattles) {
@@ -362,6 +501,7 @@ public class TestWorld extends Test {
     I.say("  Total years simulated: "+NUM_YEARS);
     I.say("  Battles: "+totalBattles+", min/max "+minBattles+"/"+maxBattles);
     I.say("  Years of empire: "+timeWithEmpire);
+    I.say("  Years of allies: "+timeWithAllies);
     
     if (graphics) reportOnWorld(world);
     return testOkay;
@@ -374,8 +514,7 @@ public class TestWorld extends Test {
     City b = new City(world);
     a.name = "Victim City" ;
     b.name = "Invader City";
-    world.cities.add(a);
-    world.cities.add(b);
+    world.addCities(a, b);
     setupRoute(a, b, 1);
     a.initBuildLevels(HOUSE, 1f, GARRISON, 1f);
     b.initBuildLevels(HOUSE, 9f, GARRISON, 6f);
@@ -385,19 +524,39 @@ public class TestWorld extends Test {
   }
   
   
-  static void runCompleteInvasion(City... pair) {
-    City goes = pair[0], from = pair[1];
+  static void runCompleteInvasion(City from, City goes) {
     World world = from.world;
     
-    CityCouncil.InvasionAssessment IA = from.council.performAssessment(
+    CityCouncil.MissionAssessment IA = from.council.invasionAssessment(
       from, goes, 0.5f, false
     );
-    Formation force = from.council.spawnInvasion(IA);
+    Formation force = from.council.spawnFormation(IA);
     CityEvents.handleDeparture(force, from, goes);
     
     int time = 0;
     World.Journey j = world.journeyFor(force);
     while (! world.isComplete(j)) {
+      world.updateWithTime(time++);
+    }
+  }
+  
+  
+  static void runCompleteDialog(City from, City goes) {
+    World world = from.world;
+    
+    CityCouncil.MissionAssessment DA = from.council.dialogAssessment(
+      from, goes, false
+    );
+    Formation force = from.council.spawnFormation(DA);
+    CityEvents.handleDeparture(force, from, goes);
+    
+    int time = 0;
+    World.Journey j = world.journeyFor(force);
+    while (! world.isComplete(j)) {
+      world.updateWithTime(time++);
+    }
+    
+    while (! (force.termsAccepted || force.termsRefused || force.complete)) {
       world.updateWithTime(time++);
     }
   }

@@ -174,8 +174,9 @@ public class ActorAsAnimal extends Actor {
   
   
   void update() {
-    hunger += map.settings.toggleHunger ? (1f / STARVE_INTERVAL ) : 0;
+    WorldSettings settings = map.city.world.settings;
     
+    hunger += settings.toggleHunger ? (1f / STARVE_INTERVAL ) : 0;
     if (jobType() == JOB.RESTING) {
       float rests = 1f / FATIGUE_REGEN;
       float heals = 1f / HEALTH_REGEN ;
@@ -183,7 +184,7 @@ public class ActorAsAnimal extends Actor {
       injury  = Nums.max(0, injury  - heals);
     }
     else {
-      fatigue += map.settings.toggleFatigue ? (1f / FATIGUE_INTERVAL) : 0;
+      fatigue += settings.toggleFatigue ? (1f / FATIGUE_INTERVAL) : 0;
       float heals = 0.5f / HEALTH_REGEN;
       injury = Nums.max(0, injury - heals);
     }
@@ -192,8 +193,8 @@ public class ActorAsAnimal extends Actor {
   }
   
   
-  void updateAging() {
-    super.updateAging();
+  void updateLifeCycle(City city, boolean onMap) {
+    super.updateLifeCycle(city, onMap);
     //
     //  Once per month, check to see if breeding conditions are correct.  (In
     //  the event that your numbers are really low, pregnancy is set to -1 to
@@ -218,7 +219,8 @@ public class ActorAsAnimal extends Actor {
       }
       //
       //  But if you're too damned old, just die-
-      if (ageSeconds > type.lifespan) {
+      boolean canDie = city.world.settings.toggleAging;
+      if (canDie && ageSeconds > type.lifespan) {
         setAsKilled("Old age");
       }
     }

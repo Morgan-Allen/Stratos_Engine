@@ -12,6 +12,14 @@ import static game.GameConstants.*;
 public class CityEvents {
   
   
+  /**  Rendering, debug and interface methods-
+    */
+  static boolean reportEvents(CityMap map) {
+    if (map == null) return false;
+    return map.city.world.settings.reportBattle;
+  }
+  
+  
   /**  Handling end-stage events:
     */
   static void handleDeparture(Formation formation, City from, City goes) {
@@ -31,16 +39,16 @@ public class CityEvents {
     World   world  = from.world;
     int     time   = world.time;
     CityMap map    = world.activeCityMap();
-    boolean report = map != null && map.settings.reportBattle;
+    boolean report = reportEvents(map);
     //
     //  We use the same math that estimates the appeal of invasion to play out
     //  the real event, and report accordingly:
     //  TODO:  Use separate math for the purpose?
-    CityCouncil.InvasionAssessment IA = new CityCouncil.InvasionAssessment();
-    IA.attackC     = from;
-    IA.defendC     = goes;
-    IA.attackPower = formation.powerSum() / POP_PER_CITIZEN;
-    IA.defendPower = goes.armyPower / POP_PER_CITIZEN;
+    CityCouncil.MissionAssessment IA = new CityCouncil.MissionAssessment();
+    IA.fromC     = from;
+    IA.goesC     = goes;
+    IA.fromPower = formation.powerSum() / POP_PER_CITIZEN;
+    IA.goesPower = goes.armyPower / POP_PER_CITIZEN;
     from.council.calculateChances(IA, true);
     
     float chance = IA.winChance, fromLost = 0, goesLost = 0;
@@ -60,8 +68,8 @@ public class CityEvents {
     if (report) {
       I.say("\n"+formation+" CONDUCTED ACTION AGAINST "+goes+", time "+time);
       I.say("  Victorious:    "+victory );
-      I.say("  Attack power:  "+IA.attackPower);
-      I.say("  Defend power:  "+IA.defendPower);
+      I.say("  Attack power:  "+IA.fromPower);
+      I.say("  Defend power:  "+IA.goesPower);
       I.say("  Taken losses:  "+fromLost);
       I.say("  Dealt losses:  "+goesLost);
     }
@@ -80,11 +88,9 @@ public class CityEvents {
     }
     if (victory) {
       signalVictory(from, goes, formation);
-      formation.beginSecuring(from);
     }
     else {
       signalVictory(goes, from, formation);
-      formation.beginSecuring(from);
     }
     //
     //  Either way, report the final outcome:
@@ -117,6 +123,30 @@ public class CityEvents {
   }
   
   
+  static void handleGarrison(
+    Formation formation, City goes, World.Journey journey
+  ) {
+    //  TODO:  Implement this?
+    return;
+  }
+  
+  
+  static void handleDialog(
+    Formation formation, City goes, World.Journey journey
+  ) {
+    formation.dispatchTerms(goes);
+  }
+  
+  
+  static void handleReturn(
+    Formation formation, City from, World.Journey journey
+  ) {
+    City belongs = formation.homeCity();
+    belongs.armyPower += formation.powerSum();
+    formation.disbandFormation();
+  }
+  
+  
   
   /**  Note- these methods can also be called by formations on the map, so
     *  don't delete...
@@ -131,10 +161,11 @@ public class CityEvents {
     
     //  TODO:  These should not be required- signalling victory or loss should
     //  do the trick.
-    
+    /*
     upon.toggleRebellion(from, false);
     incPrestige(from, PRES_VICTORY_GAIN);
     incPrestige(upon, PRES_DEFEAT_LOSS );
+    //*/
   }
   
   
@@ -152,6 +183,7 @@ public class CityEvents {
     City victor, City losing, Formation formation
   ) {
     if (victor == null || losing == null || formation == null) return;
+    losing.toggleRebellion(victor, false);
     incPrestige(victor, PRES_VICTORY_GAIN);
     incPrestige(losing, PRES_DEFEAT_LOSS );
     formation.setMissionComplete(formation.homeCity == victor);
@@ -170,15 +202,6 @@ public class CityEvents {
     //  TODO:  It should ideally take time for the news of a given assault to
     //  reach more distant cities?
     enterHostility(defends.currentLord(), attacks, victory, weight / 2);
-  }
-  
-  
-  static void handleReturn(
-    Formation formation, City from, World.Journey journey
-  ) {
-    City belongs = formation.homeCity();
-    belongs.armyPower += formation.powerSum();
-    formation.disbandFormation();
   }
 }
 

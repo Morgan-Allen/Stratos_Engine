@@ -32,7 +32,6 @@ public class CityMap implements Session.Saveable {
   City city;
   int time = 0;
   
-  final CityMapSettings settings = new CityMapSettings(this);
   final CityMapPlanning planning = new CityMapPlanning(this);
   final CityMapFog      fog      = new CityMapFog     (this);
   final CityMapTerrain  terrain  = new CityMapTerrain (this);
@@ -67,7 +66,6 @@ public class CityMap implements Session.Saveable {
     city = (City) s.loadObject();
     time = s.loadInt();
     
-    settings.loadState(s);
     planning.loadState(s);
     fog     .loadState(s);
     terrain .loadState(s);
@@ -114,7 +112,6 @@ public class CityMap implements Session.Saveable {
     s.saveObject(city);
     s.saveInt(time);
     
-    settings.saveState(s);
     planning.saveState(s);
     fog     .saveState(s);
     terrain .saveState(s);
@@ -259,6 +256,12 @@ public class CityMap implements Session.Saveable {
   }
   
   
+  public static int timeSince(int time, int from) {
+    if (time == -1) return -1;
+    return from - time;
+  }
+  
+  
   Tile tileAt(int x, int y) {
     if (x < 0 || x >= size || y < 0 || y >= size) return null;
     return grid[x][y];
@@ -297,12 +300,6 @@ public class CityMap implements Session.Saveable {
       public Tile next() { return tileAt(VC.next()); }
     };
     return VT;
-  }
-  
-  
-  int timeSince(int time) {
-    if (time == -1) return -1;
-    return this.time - time;
   }
   
   

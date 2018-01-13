@@ -22,7 +22,6 @@ public class TestTrading extends Test {
     City  awayC = new City(world);
     world.addCities(homeC, awayC);
     awayC.council.typeAI = CityCouncil.AI_OFF;
-    
     homeC.name = "(Home City)";
     awayC.name = "(Away City)";
     
@@ -46,11 +45,11 @@ public class TestTrading extends Test {
     );
     
     
-    CityMap map   = new CityMap(homeC);
+    CityMap map = new CityMap(homeC);
     map.performSetup(10);
-    map.settings.toggleFog     = false;
-    map.settings.toggleHunger  = false;
-    map.settings.toggleFatigue = false;
+    world.settings.toggleFog     = false;
+    world.settings.toggleHunger  = false;
+    world.settings.toggleFatigue = false;
     
     BuildingForTrade post1 = (BuildingForTrade) PORTER_POST.generate();
     post1.enterMap(map, 1, 6, 1);

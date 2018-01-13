@@ -209,7 +209,7 @@ public class BuildingForHome extends Building {
   void updateOnPeriod(int period) {
     super.updateOnPeriod(period);
     
-    if (! map.settings.toggleBuildEvolve) {
+    if (! map.city.world.settings.toggleBuildEvolve) {
       return;
     }
     
@@ -275,15 +275,22 @@ public class BuildingForHome extends Building {
   }
   
   
-  static float wealthLevel(Building home) {
-    Type type = home.type;
-    if (type.category != Type.IS_HOME_BLD) return 0;
-    
-    Type currentTier = ((BuildingForHome) home).currentTier;
-    float tier = Visit.indexOf(currentTier, type.upgradeTiers);
-    tier /= Nums.max(1, type.upgradeTiers.length - 1);
-    tier += type.homeSocialClass * 1f / CLASS_NOBLE;
-    return tier / 2;
+  static float wealthLevel(Actor actor) {
+    if (actor.onMap()) {
+      Building home = actor.home;
+      if (home == null) return 0;
+      Type type = home.type;
+      if (type.category != Type.IS_HOME_BLD) return 0;
+      
+      Type currentTier = ((BuildingForHome) home).currentTier;
+      float tier = Visit.indexOf(currentTier, type.upgradeTiers);
+      tier /= Nums.max(1, type.upgradeTiers.length - 1);
+      tier += type.homeSocialClass * 1f / CLASS_NOBLE;
+      return tier / 2;
+    }
+    else {
+      return actor.type.socialClass * 1f / CLASS_NOBLE;
+    }
   }
   
   

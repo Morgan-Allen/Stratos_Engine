@@ -19,7 +19,8 @@ public class TestForests extends Test {
     Test test = new TestForests();
     
     CityMap map = setupTestCity(32, JUNGLE, MEADOW);
-    map.settings.toggleFog = false;
+    World world = map.city.world;
+    world.settings.toggleFog = false;
     
     Building logs = (Building) SAWYER.generate();
     logs.enterMap(map, 5, 5, 1);

@@ -21,6 +21,9 @@ public class Formation implements
     OBJECTIVE_GARRISON = 2,
     OBJECTIVE_DIALOG   = 3
   ;
+  final static String OBJECTIVE_NAMES[] = {
+    "Standby", "Conquer", "Garrison", "Dialog"
+  };
   
   int objective = OBJECTIVE_STANDBY;
   boolean activeAI = false;
@@ -302,6 +305,14 @@ public class Formation implements
       return;
     }
     //
+    //  Check to see if an offer has expired-
+    int timeGone = CityMap.timeSince(timeTermsSent, homeCity.world.time);
+    boolean hasEnvoy = escorted.size() > 0;
+    if ((! hasEnvoy) || timeGone > MONTH_LENGTH) {
+      timeTermsSent = homeCity.world.time;
+      termsRefused  = true;
+    }
+    //
     //  Update your target and stand-point while you're on the map...
     if (map != null) {
       if (activeAI) {
@@ -313,6 +324,17 @@ public class Formation implements
       //  everyone ready yet?"
       if (secureCity != null && secureCity != map.city && formationReady()) {
         beginJourney(map.city, secureCity);
+      }
+    }
+    //
+    //  And see if it's time to leave otherwise-
+    else if (secureCity != homeCity) {
+      boolean shouldLeave = false;
+      shouldLeave |= termsAccepted;
+      shouldLeave |= termsRefused && objective == OBJECTIVE_DIALOG;
+      shouldLeave |= complete;
+      if (shouldLeave) {
+        beginSecuring(homeCity);
       }
     }
   }
@@ -385,7 +407,16 @@ public class Formation implements
       else {
         if (reports()) I.say("\nARRIVED AT: "+goes+" FROM "+journey.from);
         this.away = true;
-        CityEvents.handleInvasion(this, goes, journey);
+        
+        if (objective == OBJECTIVE_CONQUER) {
+          CityEvents.handleInvasion(this, goes, journey);
+        }
+        if (objective == OBJECTIVE_GARRISON) {
+          CityEvents.handleGarrison(this, goes, journey);
+        }
+        if (objective == OBJECTIVE_DIALOG) {
+          CityEvents.handleDialog(this, goes, journey);
+        }
       }
     }
   }
@@ -398,13 +429,7 @@ public class Formation implements
     
     boolean haveTerms  = hasTerms();
     boolean isEnvoy    = escorted.includes(actor);
-    boolean hasEnvoy   = escorted.size() > 0;
     boolean diplomatic = objective == OBJECTIVE_DIALOG;
-    
-    if ((! hasEnvoy) || map.timeSince(timeTermsSent) > MONTH_LENGTH) {
-      timeTermsSent = map.time;
-      termsRefused  = true;
-    }
     
     if (haveTerms && isEnvoy && timeTermsSent == -1) {
       Actor offersTerms = FormationUtils.findOfferRecipient(this);
@@ -450,8 +475,7 @@ public class Formation implements
   
   public void actorTargets(Actor actor, Target other) {
     if (actor.jobType() == Task.JOB.DIALOG) {
-      map.city.council.receiveTerms(this);
-      timeTermsSent = map.time;
+      dispatchTerms(map.city);
     }
     if (actor.jobType() == Task.JOB.MILITARY) {
       return;
@@ -479,6 +503,12 @@ public class Formation implements
   
   public City homeCity() {
     return homeCity;
+  }
+  
+  
+  void dispatchTerms(City goes) {
+    goes.council.receiveTerms(this);
+    timeTermsSent = goes.world.time;
   }
   
   

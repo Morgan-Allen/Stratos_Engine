@@ -191,7 +191,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     //
     //  Some checks to assist in case of blockage...
     Tile at = at();
-    if (inside == null && ! map.pathCache.hasGroundAccess(at)) {
+    if (inside == null && at != null && ! map.pathCache.hasGroundAccess(at)) {
       if (at.above != null && at.above.type.isBuilding()) {
         setInside((Building) at.above, true);
       }
@@ -202,17 +202,26 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     }
     //
     //  Task updates-
-    if (home      != null) home     .actorUpdates(this);
-    if (work      != null) work     .actorUpdates(this);
-    if (formation != null) formation.actorUpdates(this);
-    if (task == null || ! task.checkAndUpdateTask()) {
-      beginNextBehaviour();
+    if (onMap()) {
+      if (home      != null) home     .actorUpdates(this);
+      if (work      != null) work     .actorUpdates(this);
+      if (formation != null) formation.actorUpdates(this);
+      if (task == null || ! task.checkAndUpdateTask()) {
+        beginNextBehaviour();
+      }
     }
     //
     //  And update your current vision and health-
-    updateVision();
-    updateAging();
-    checkHealthState();
+    if (onMap()) {
+      updateVision();
+      checkHealthState();
+      updateLifeCycle(map.city, true);
+    }
+  }
+  
+  
+  void updateOffMap(City city) {
+    updateLifeCycle(city, false);
   }
   
   
@@ -468,7 +477,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   
   void takeDamage(float damage) {
-    if (map == null || ! map.settings.toggleInjury) return;
+    if (map == null || ! map.city.world.settings.toggleInjury) return;
     injury += damage;
     checkHealthState();
   }
@@ -560,7 +569,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   }
   
   
-  void updateAging() {
+  void updateLifeCycle(City city, boolean onMap) {
     ageSeconds += 1;
   }
   

@@ -128,8 +128,9 @@ public class TestPathCache extends Test {
     //  Now, set up a larger map for testing of connections between
     //  more distant areas:
     CityMap map = setupTestCity(128);
-    map.settings.toggleFog   = false;
-    map.settings.viewPathMap = true ;
+    World world = map.city.world;
+    world.settings.toggleFog   = false;
+    world.settings.viewPathMap = true ;
     
     final int div = map.size / layout.length, rand = div / 4;
     for (Tile t : map.allTiles()) {
@@ -264,7 +265,7 @@ public class TestPathCache extends Test {
       I.say("\nPATH_CACHE TESTS FAILED!");
     }
     
-    if (graphics) map.settings.paused = true;
+    if (graphics) world.settings.paused = true;
     while (map.time < 10 || graphics) {
       map = test.runLoop(map, 1, graphics, "saves/test_path_cache.tlt");
     }

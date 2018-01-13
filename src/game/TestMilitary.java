@@ -17,16 +17,17 @@ public class TestMilitary extends Test {
   static boolean testMilitary(boolean graphics) {
     Test test = new TestMilitary();
     
-    World   world = GameConstants.setupDefaultWorld();
-    City    homeC = world.cities.atIndex(0);
-    City    awayC = world.cities.atIndex(1);
+    World   world = new World();
+    City    homeC = new City(world);
+    City    awayC = new City(world);
     CityMap map   = CityMapTerrain.generateTerrain(
       homeC, 32, 0, MEADOW, JUNGLE
     );
+    world.addCities(homeC, awayC);
     homeC.name = "Home City";
     awayC.name = "Away City";
     awayC.council.typeAI = CityCouncil.AI_OFF;
-    map.settings.toggleFog = false;
+    world.settings.toggleFog = false;
     
     City.setupRoute(homeC, awayC, 1);
     City.setPosture(homeC, awayC, City.POSTURE.ENEMY, true);

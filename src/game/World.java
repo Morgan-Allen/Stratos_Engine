@@ -29,6 +29,8 @@ public class World implements Session.Saveable {
   
   /**  Data fields, setup and save/load methods-
     */
+  final WorldSettings settings = new WorldSettings(this);
+  
   int time = 0;
   List <City> cities = new List();
   List <Journey> journeys = new List();
@@ -45,6 +47,8 @@ public class World implements Session.Saveable {
   
   public World(Session s) throws Exception {
     s.cacheInstance(this);
+    
+    settings.loadState(s);
     
     time = s.loadInt();
     s.loadObjects(cities);
@@ -73,6 +77,8 @@ public class World implements Session.Saveable {
   
   
   public void saveState(Session s) throws Exception {
+    
+    settings.saveState(s);
     
     s.saveInt(time);
     s.saveObjects(cities);

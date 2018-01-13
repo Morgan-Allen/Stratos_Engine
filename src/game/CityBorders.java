@@ -83,7 +83,7 @@ public class CityBorders {
   
   
   static void spawnMigrants(CityMap map, int period) {
-    if (! map.settings.toggleMigrate) return;
+    if (map == null || ! map.city.world.settings.toggleMigrate) return;
     Assessment a = new Assessment(map);
     
     float crowding = Nums.max(a.jobsCrowding, a.homeCrowding);

@@ -18,7 +18,8 @@ public class TestCity extends Test {
     Test test = new TestCity();
     
     CityMap map = setupTestCity(32);
-    map.settings.toggleFog = false;
+    World world = map.city.world;
+    world.settings.toggleFog = false;
     
     CityMapPlanning.placeStructure(ROAD, map, true, 3, 8, 25 , 1);
     CityMapPlanning.placeStructure(ROAD, map, true, 8, 2 , 1, 25);

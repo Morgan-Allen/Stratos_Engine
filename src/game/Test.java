@@ -31,7 +31,7 @@ public class Test {
     world.mapWide = 10;
     city.mapX = 5;
     city.mapY = 5;
-    world.cities.add(city);
+    world.addCities(city);
     return map;
   }
   
@@ -327,8 +327,9 @@ public class Test {
     while (! doQuit) {
       
       if (graphics) {
-        if (! map.settings.worldView) {
-          if (map.settings.viewPathMap) {
+        World world = map.city.world;
+        if (! world.settings.worldView) {
+          if (world.settings.viewPathMap) {
             updateCityPathingView(map);
           }
           else {
@@ -344,7 +345,7 @@ public class Test {
         hover   = I.getDataCursor(VIEW_NAME, false);
         pressed = I.getKeysPressed(VIEW_NAME);
         
-        if (! map.settings.worldView) {
+        if (! world.settings.worldView) {
           above = map.above(hover.x, hover.y);
           
           //  TODO:  Have actors register within nearby tiles themselves.
@@ -376,7 +377,7 @@ public class Test {
         }
         
         if (pressed.includes('p')) {
-          map.settings.paused = ! map.settings.paused;
+          world.settings.paused = ! world.settings.paused;
         }
         if (doLoad) {
           map = loadMap(map, filename);
@@ -385,11 +386,12 @@ public class Test {
         }
       }
       
-      if (skipUpdate <= 0 && ! map.settings.paused) {
-        int iterUpdates = map.settings.speedUp ? 10 : 1;
+      World world = map.city.world;
+      if (skipUpdate <= 0 && ! world.settings.paused) {
+        int iterUpdates = world.settings.speedUp ? 10 : 1;
         for (int i = iterUpdates; i-- > 0;) map.update();
         
-        skipUpdate = map.settings.slowed ? 10 : 1;
+        skipUpdate = world.settings.slowed ? 10 : 1;
         if (numUpdates > 0 && --numUpdates == 0) doQuit = true;
       }
       
@@ -698,10 +700,11 @@ public class Test {
   
   private String baseReport(CityMap map) {
     StringBuffer report = new StringBuffer("Home City: "+map.city);
+    WorldSettings settings = map.city.world.settings;
     
     report.append("\n\nFunds: "+map.city.currentFunds);
     report.append("\n\nTime: "+map.time);
-    report.append("\nPaused: "+map.settings.paused);
+    report.append("\nPaused: "+settings.paused);
     report.append("\n");
     
     float avgHunger = 0;
@@ -713,15 +716,15 @@ public class Test {
     
     report.append("\n(C) city view");
     if (pressed.includes('c')) {
-      map.settings.worldView = false;
+      settings.worldView = false;
     }
     report.append("\n(W) world view");
     if (pressed.includes('w')) {
-      map.settings.worldView = true;
+      settings.worldView = true;
     }
     report.append("\n(T) toggle pathing view");
     if (pressed.includes('t')) {
-      map.settings.viewPathMap = ! map.settings.viewPathMap;
+      settings.viewPathMap = ! settings.viewPathMap;
     }
     report.append("\n(B) build menu");
     if (pressed.includes('b')) {

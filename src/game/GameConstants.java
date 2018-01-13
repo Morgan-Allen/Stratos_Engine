@@ -212,7 +212,9 @@ public class GameConstants {
     //
     //  Inter-city constants-
     AVG_TRIBUTE_PERCENT = 25,
-    AVG_TRIBUTE_YEARS   = 10
+    AVG_TRIBUTE_YEARS   = 10,
+    AVG_ALLIANCE_YEARS  = 15,
+    MARRIAGE_VALUE_MULT = 12
   ;
   
   

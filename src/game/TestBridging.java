@@ -17,9 +17,10 @@ public class TestBridging extends Test {
   static boolean testBridging(boolean graphics) {
     Test test = new TestBridging();
     CityMap map = setupTestCity(16);
-    map.settings.toggleFog     = false;
-    map.settings.toggleFatigue = false;
-    map.settings.toggleHunger  = false;
+    World world = map.city.world;
+    world.settings.toggleFog     = false;
+    world.settings.toggleFatigue = false;
+    world.settings.toggleHunger  = false;
     
     //
     //  Configure some artificially partitioned terrain:
@@ -190,7 +191,7 @@ public class TestBridging extends Test {
       
       if (map.time + 10 >= RUN_TIME && (! waterOkay) && (! graphics)) {
         graphics = true;
-        map.settings.paused = true;
+        world.settings.paused = true;
       }
     }
     

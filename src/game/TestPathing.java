@@ -20,10 +20,11 @@ public class TestPathing extends Test {
     Test test = new TestPathing();
     
     CityMap map = setupTestCity(32);
-    map.settings.toggleFog     = false;
-    map.settings.toggleHunger  = false;
-    map.settings.toggleHunger  = false;
-    map.settings.toggleMigrate = false;
+    World world = map.city.world;
+    world.settings.toggleFog     = false;
+    world.settings.toggleHunger  = false;
+    world.settings.toggleHunger  = false;
+    world.settings.toggleMigrate = false;
     
     //
     //  First, place a variety of structures on the map and test to

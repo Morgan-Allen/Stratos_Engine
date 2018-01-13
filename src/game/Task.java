@@ -315,7 +315,7 @@ public class Task implements Session.Saveable {
       if (index >= path.length) break;
       Pathing t = path[index];
       if (t.isTile() && actor.map.blocked((Tile) t)) return false;
-      if (! t.allowsEntry(actor)) return false;
+      if (! (t.onMap() && t.allowsEntry(actor))    ) return false;
     }
     
     return true;

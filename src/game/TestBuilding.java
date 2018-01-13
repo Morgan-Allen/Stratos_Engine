@@ -19,11 +19,12 @@ public class TestBuilding extends Test {
     Test test = new TestBuilding();
     
     CityMap map = setupTestCity(16);
-    map.settings.toggleFog         = false;
-    map.settings.toggleFatigue     = false;
-    map.settings.toggleHunger      = false;
-    map.settings.toggleMigrate     = false;
-    map.settings.toggleBuildEvolve = false;
+    World world = map.city.world;
+    world.settings.toggleFog         = false;
+    world.settings.toggleFatigue     = false;
+    world.settings.toggleHunger      = false;
+    world.settings.toggleMigrate     = false;
+    world.settings.toggleBuildEvolve = false;
     
     
     Building farm = (Building) FARM_PLOT.generate();

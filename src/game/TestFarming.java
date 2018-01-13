@@ -19,9 +19,10 @@ public class TestFarming extends Test {
     Test test = new TestFarming();
     
     CityMap map = setupTestCity(20, DESERT, MEADOW, JUNGLE);
-    map.settings.toggleFog    = false;
-    map.settings.toggleHunger = false;
-    map.settings.toggleHunger = false;
+    World world = map.city.world;
+    world.settings.toggleFog    = false;
+    world.settings.toggleHunger = false;
+    world.settings.toggleHunger = false;
     
     BuildingForGather farm = (BuildingForGather) FARM_PLOT.generate();
     farm.enterMap(map, 9, 9, 1);

@@ -297,7 +297,7 @@ public class CityMapPathCache {
         closedG.totalTiles -= 1;
         markForRefresh(edge);
         didRefresh = true;
-        if (map.settings.reportPathCache) {
+        if (report()) {
           I.say("\nRemoved single tile: "+at+" from "+edge);
         }
       }
@@ -310,7 +310,7 @@ public class CityMapPathCache {
         closedG.totalTiles += 1;
         markForRefresh(edge);
         didRefresh = true;
-        if (map.settings.reportPathCache) {
+        if (report()) {
           I.say("\nAdded single tile: "+at+" to "+edge);
         }
       }
@@ -331,7 +331,7 @@ public class CityMapPathCache {
     if (area.flagDeletion) return;
     area.flagDeletion = true;
     needDelete.add(area);
-    if (map.settings.reportPathCache) {
+    if (report()) {
       I.say("\n  Flag To Delete: "+area);
     }
   }
@@ -341,7 +341,7 @@ public class CityMapPathCache {
     if (area.flagTiling) return;
     area.flagTiling = true;
     needRefresh.add(area);
-    if (map.settings.reportPathCache) {
+    if (report()) {
       I.say("\n  Flag To Refresh: "+area);
     }
   }
@@ -489,7 +489,7 @@ public class CityMapPathCache {
       with.open = true;
     }
     
-    if (map.settings.reportPathCache) {
+    if (report()) {
       I.say("\n  Adding Area: "+area+" "+area.aX+"|"+area.aY);
       I.say("    Tiles: "+area.numTiles+"  Borders: ");
       for (Border b : area.borders) I.add(b.with.ID+" ");
@@ -509,7 +509,7 @@ public class CityMapPathCache {
   private void deleteArea(Area area) {
     if (area.tiles == null) return;
     
-    if (map.settings.reportPathCache) {
+    if (report()) {
       I.say("\n  Deleting Area "+area);
     }
     
@@ -595,7 +595,7 @@ public class CityMapPathCache {
       group.totalTiles += a.numTiles;
     }
     
-    if (map.settings.reportPathCache) {
+    if (report()) {
       I.say("\n  Adding "+(open ? "Open" : "Closed")+" Group "+group+": ");
       for (Area a : group.areas) I.add(a+" ");
     }
@@ -606,7 +606,7 @@ public class CityMapPathCache {
   
   private void deleteGroup(AreaGroup group) {
     if (group.areas == null) return;
-    if (map.settings.reportPathCache) {
+    if (report()) {
       I.say("\n  Deleting Group "+group);
     }
     for (Area a : group.areas) {
@@ -615,6 +615,14 @@ public class CityMapPathCache {
     }
     group.areas = null;
     groups.remove(group);
+  }
+  
+  
+  
+  /**  Rendering, debug and interface methods.
+    */
+  boolean report() {
+    return map.city.world.settings.reportPathCache;
   }
   
 }

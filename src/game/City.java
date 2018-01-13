@@ -96,6 +96,12 @@ public class City implements Session.Saveable, Trader {
   }
   
   
+  City(World world, String name) {
+    this.world = world;
+    this.name  = name;
+  }
+  
+  
   public City(Session s) throws Exception {
     s.cacheInstance(this);
     
@@ -241,7 +247,7 @@ public class City implements Session.Saveable, Trader {
   
   
   float loyalty(City other) {
-    if (other == null) return -100;
+    if (other == null) return 0;
     return relationWith(other).loyalty;
   }
   
@@ -338,7 +344,14 @@ public class City implements Session.Saveable, Trader {
   }
   
   
-  Batch <City> vassalsInRevolt() {
+  Series <City> relationsWith() {
+    Batch <City> all = new Batch();
+    for (City c : relations.keySet()) all.add(c);
+    return all;
+  }
+  
+  
+  Series <City> vassalsInRevolt() {
     Batch <City> all = new Batch();
     for (Relation r : relations.values()) {
       if (r.with.yearsSinceRevolt(this) > 0) all.add(r.with);
@@ -362,6 +375,13 @@ public class City implements Session.Saveable, Trader {
     if (suppliesDue == null) suppliesDue = new Tally();
     Relation r = a.relationWith(b);
     r.suppliesDue = suppliesDue;
+  }
+  
+  
+  static Tally <Good> suppliesDue(City a, City b) {
+    Relation r = a.relationWith(b);
+    if (r == null) return new Tally();
+    return r.suppliesDue;
   }
   
   
@@ -548,9 +568,13 @@ public class City implements Session.Saveable, Trader {
       }
     }
     //
-    //  And update any formations active-
+    //  And update any formations and actors currently active-
     for (Formation f : formations) {
       f.update();
+    }
+    for (Actor a : council.members) {
+      if (a.formation != null || a.onMap()) continue;
+      a.updateOffMap(this);
     }
   }
   

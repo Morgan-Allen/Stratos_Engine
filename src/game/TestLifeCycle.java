@@ -34,7 +34,8 @@ public class TestLifeCycle extends Test {
     }
     
     CityMap map = setupTestCity(16);
-    map.settings.toggleFog = false;
+    World world = map.city.world;
+    world.settings.toggleFog = false;
     
     for (int x = 7; x > 0; x -= 3) {
       for (int y = 7; y > 0; y -= 3) {
@@ -174,7 +175,7 @@ public class TestLifeCycle extends Test {
         consort.beginPregnancy();
       }
       if (consort.pregnant() && consort.inside == palace && ! heirBorn) {
-        consort.completePregnancy(palace);
+        consort.completePregnancy(palace, true);
       }
       if (! recognised) {
         recognised = council.memberWithRole(Role.HEIR) != null;

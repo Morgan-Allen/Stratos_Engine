@@ -89,6 +89,7 @@ public class BuildingForArmy extends BuildingForCrafts {
     */
   boolean eligible(Actor actor, boolean isMember) {
     if (actor.woman() || actor.dead()        ) return false;
+    if (actor.type.socialClass == CLASS_NOBLE) return false;
     if (actor.recruiter != null && ! isMember) return false;
     return true;
   }

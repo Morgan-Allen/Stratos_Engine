@@ -3,6 +3,7 @@
 package game;
 import util.*;
 import static game.ActorAsPerson.*;
+import static game.City.*;
 import static game.GameConstants.*;
 
 
@@ -21,8 +22,6 @@ public class CityCouncil {
     AI_WARLIKE   =  4
   ;
   
-  //  TODO:  These should probably be Types, or at least moved into the
-  //  GameConstants class?
   public static enum Role {
     MONARCH          ,
     CONSORT          ,
@@ -153,6 +152,28 @@ public class CityCouncil {
   
   /**  Regular updates-
     */
+  static class MissionAssessment {
+    
+    City fromC, goesC;
+    float fromPower, goesPower;
+    
+    int objective;
+    POSTURE      postureDemand  = null;
+    Formation    actionDemand   = null;
+    Actor        marriageDemand = null;
+    Tally <Good> tributeDemand  = null;
+    
+    float winChance, angerChance;
+    float winKillsA, lossKillsA;
+    float winKillsD, lossKillsD;
+    float hateBonus, lovePenalty;
+    float dutyBonus, dutyPenalty;
+    
+    float costs, benefits;
+    float evaluatedAppeal;
+  }
+  
+  
   void updateCouncil(boolean onMap) {
     //
     //  Check on any current heirs and/or marriage status-
@@ -186,29 +207,53 @@ public class CityCouncil {
       if (newMonarch != null) toggleMember(newMonarch, Role.MONARCH, true);
     }
     //
+    //  And remove any other dead council-members:
+    for (Actor a : members) {
+      Role r = roles.get(a);
+      if (a.dead()) toggleMember(a, r, false);
+    }
+    //
     //  We annul any independent decision-making if AI is toggled off-
     if (typeAI == AI_OFF || onMap) return;
     //
     //  Once per month, otherwise, evaluate any major independent decisions-
-    if (this.city.world.time % MONTH_LENGTH == 0) {
+    if (city.world.time % (MONTH_LENGTH / 2) == 0) {
       updateCouncilAI();
     }
   }
   
   
   void updateCouncilAI() {
+    
+    for (Formation petition : petitions) {
+      float appeal = appealOfTerms(
+        petition.homeCity, city,
+        petition.postureDemand,
+        petition.actionDemand,
+        petition.marriageDemand,
+        petition.tributeDemand
+      );
+      if (Rand.num() < appeal) {
+        petition.setTermsAccepted(true);
+      }
+      else {
+        petition.setTermsAccepted(false);
+      }
+      petitions.remove(petition);
+    }
+    
     //
-    //  Put together a list of possible invasions:
-    Pick <InvasionAssessment> pick = new Pick(0);
-    for (InvasionAssessment IA : updateInvasionChoices()) {
-      pick.compare(IA, IA.evaluatedAppeal);
+    //  Put together a list of possible missions:
+    Pick <MissionAssessment> pickI = new Pick(0);
+    for (MissionAssessment IA : updateMissionChoices()) {
+      pickI.compare(IA, IA.evaluatedAppeal);
     }
     //
     //  And if any have positive appeal, launch the enterprise:
-    InvasionAssessment IA = pick.result();
+    MissionAssessment IA = pickI.result();
     if (IA != null) {
-      Formation force = spawnInvasion(IA);
-      CityEvents.handleDeparture(force, IA.attackC, IA.defendC);
+      Formation force = spawnFormation(IA);
+      CityEvents.handleDeparture(force, IA.fromC, IA.goesC);
     }
   }
   
@@ -216,27 +261,6 @@ public class CityCouncil {
   
   /**  Evaluating the appeal and probability of invading other cities:
     */
-  static class InvasionAssessment {
-    
-    City attackC, defendC;
-    float attackPower, defendPower;
-    
-    City.POSTURE postureDemand  = null;
-    Formation    actionDemand   = null;
-    Actor        marriageDemand = null;
-    Tally <Good> tributeDemand  = new Tally();
-    
-    float winChance, angerChance;
-    float winKillsA, lossKillsA;
-    float winKillsD, lossKillsD;
-    float hateBonus, lovePenalty;
-    float dutyBonus, dutyPenalty;
-    
-    float costs, benefits;
-    float evaluatedAppeal;
-  }
-  
-  
   float casualtyValue(City city) {
     //
     //  For now, we'll assume that the value of lives is calculated on an
@@ -260,50 +284,30 @@ public class CityCouncil {
   }
   
   
-  float marriageValue(Actor marries, City city) {
-    //
-    //  Calculate value of a marriage based on the power and trade potential of
-    //  their home city, assuming that it buys you X years of peace.
-    City from = marries.homeCity;
-    
-    float tradeVal = 0;
-    for (Good g : ALL_GOODS) {
-      float perYear = from.tradeLevel.valueFor(g);
-      if (perYear <= 0) continue;
-      tradeVal += tributeValue(g, perYear, city);
-    }
-    tradeVal *= AVG_ALLIANCE_YEARS * 1f / AVG_TRIBUTE_YEARS;
-    
-    float powerVal = from.idealArmyPower() / POP_PER_CITIZEN;
-    powerVal *= casualtyValue(city);
-    powerVal *= AVG_ALLIANCE_YEARS * 1f / AVG_RETIREMENT;
-    
-    return tradeVal + powerVal;
-  }
-  
-  
-  void calculateTribute(InvasionAssessment a) {
+  Tally <Good> calculateTribute(MissionAssessment a) {
     //
     //  We establish *reasonable* levels of tribute across a variety of goods,
     //  based on what the attacker is hungry for and the defender seems to have
     //  plenty of-
+    Tally <Good> tribute = new Tally();
     for (Good g : ALL_GOODS) {
-      float prodVal = 5 + a.defendC.inventory .valueFor(g);
-      prodVal      += 0 + a.defendC.tradeLevel.valueFor(g);
-      float consVal = 0 - a.attackC.tradeLevel.valueFor(g);
-      consVal      -= 5 + a.attackC.inventory .valueFor(g);
+      float prodVal = 5 + a.goesC.inventory .valueFor(g);
+      prodVal      += 0 + a.goesC.tradeLevel.valueFor(g);
+      float consVal = 0 - a.fromC.tradeLevel.valueFor(g);
+      consVal      -= 5 + a.fromC.inventory .valueFor(g);
       
       float grabVal = (prodVal + consVal) / 2f;
       if (grabVal <= 0) continue;
       
       grabVal *= AVG_TRIBUTE_PERCENT / 100f;
       grabVal = Nums.round(grabVal, 5, true);
-      a.tributeDemand.set(g, grabVal);
+      tribute.set(g, grabVal);
     }
+    return tribute;
   }
   
   
-  void calculateChances(InvasionAssessment a, boolean random) {
+  void calculateChances(MissionAssessment a, boolean random) {
     //
     //  First, we calculate a rule-of-thumb calculation for how likely you are
     //  to win or lose, and average casualties for both sides.  (We include
@@ -311,9 +315,9 @@ public class CityCouncil {
     //  victory can intimidate opponents.)
     float bravery = membersTraitAvg(TRAIT_BRAVERY);
     float chance = 0, lossA = 0, lossD = 0, presDiff = 0, wallDiff;
-    presDiff = (a.attackC.prestige - a.defendC.prestige) / City.PRESTIGE_MAX;
-    wallDiff = a.defendC.buildLevel.valueFor(WALL) > 0 ? 1 : 0;
-    chance   = a.attackPower / (a.attackPower + a.defendPower);
+    presDiff = (a.fromC.prestige - a.goesC.prestige) / PRESTIGE_MAX;
+    wallDiff = a.goesC.buildLevel.valueFor(WALL) > 0 ? 1 : 0;
+    chance   = a.fromPower / (a.fromPower + a.goesPower);
     chance   = chance + (presDiff / 4);
     chance   = chance + (bravery  / 4);
     chance   = chance - (wallDiff / 4);
@@ -323,36 +327,36 @@ public class CityCouncil {
     //  And then calculate probable casualties for both sides in each case:
     a.winChance   = chance;
     a.angerChance = 1;
-    a.winKillsA   = a.attackPower * Nums.clamp(lossA - 0.25f, 0, 1);
-    a.lossKillsA  = a.attackPower * Nums.clamp(lossA + 0.25f, 0, 1);
-    a.winKillsD   = a.defendPower * Nums.clamp(lossD + 0.25f, 0, 1);
-    a.lossKillsD  = a.defendPower * Nums.clamp(lossD - 0.25f, 0, 1);
+    a.winKillsA   = a.fromPower * Nums.clamp(lossA - 0.25f, 0, 1);
+    a.lossKillsA  = a.fromPower * Nums.clamp(lossA + 0.25f, 0, 1);
+    a.winKillsD   = a.goesPower * Nums.clamp(lossD + 0.25f, 0, 1);
+    a.lossKillsD  = a.goesPower * Nums.clamp(lossD - 0.25f, 0, 1);
   }
   
   
-  void calculateAppeal(InvasionAssessment a) {
+  void calculateInvasionAppeal(MissionAssessment a) {
     //
     //  We calculate the attractiveness of invasion using a relatively
     //  straightforward cost/benefit evaluation:
     float diligence  = membersTraitAvg(TRAIT_DILIGENCE );
     float compassion = membersTraitAvg(TRAIT_COMPASSION);
-    float casValueA  = casualtyValue(a.attackC);
-    float casValueD  = casualtyValue(a.defendC);
+    float casValueA  = casualtyValue(a.fromC);
+    float casValueD  = casualtyValue(a.goesC);
     float tribValue  = 0;
     for (Good g : a.tributeDemand.keys()) {
-      tribValue += tributeValue(g, a.tributeDemand.valueFor(g), a.attackC);
+      tribValue += tributeValue(g, a.tributeDemand.valueFor(g), a.fromC);
     }
     //
     //  We also weight the value of hostility, roughly speaking, based on the
     //  cost of retaliation by the opponent:
     float loseChance = 1 - a.winChance;
-    float angerValue = a.defendC.population * (casValueA + casValueD) / 2f;
+    float angerValue = a.goesC.population * (casValueA + casValueD) / 2f;
     angerValue /= 4 * POP_PER_CITIZEN;
     //
     //  And account for pre-existing hostility/loyalty:
-    City.Relation r  = a.attackC.relationWith(a.defendC);
-    boolean isLord   = a.defendC.isLordOf    (a.attackC);
-    boolean isVassal = a.defendC.isVassalOf  (a.attackC);
+    Relation r       = a.fromC.relationWith(a.goesC);
+    boolean isLord   = a.goesC.isLordOf    (a.fromC);
+    boolean isVassal = a.goesC.isVassalOf  (a.fromC);
     a.hateBonus   = Nums.min(0, 0 - r.loyalty) * angerValue;
     a.lovePenalty = Nums.max(0, 0 + r.loyalty) * angerValue;
     a.hateBonus   *= 1 - (compassion / 2);
@@ -372,39 +376,185 @@ public class CityCouncil {
   }
   
   
-  InvasionAssessment performAssessment(
+  MissionAssessment invasionAssessment(
     City attack, City defend,
     float commitLevel, boolean random
   ) {
-    InvasionAssessment IA = new InvasionAssessment();
+    MissionAssessment MA = new MissionAssessment();
     
-    IA.attackC     = attack;
-    IA.defendC     = defend;
-    IA.attackPower = attack.armyPower * commitLevel / POP_PER_CITIZEN;
-    IA.defendPower = defend.armyPower               / POP_PER_CITIZEN;
+    MA.objective = Formation.OBJECTIVE_CONQUER;
+    MA.fromC     = attack;
+    MA.goesC     = defend;
+    MA.fromPower = attack.armyPower * commitLevel / POP_PER_CITIZEN;
+    MA.goesPower = defend.armyPower               / POP_PER_CITIZEN;
     
-    IA.postureDemand = City.POSTURE.VASSAL;
-    calculateTribute(IA);
+    MA.postureDemand = POSTURE.VASSAL;
+    MA.tributeDemand = calculateTribute(MA);
     
-    calculateChances(IA, false);
-    calculateAppeal(IA);
+    calculateChances(MA, false);
+    calculateInvasionAppeal(MA);
     
-    if (typeAI == AI_WARLIKE ) IA.costs    = 0;
-    if (typeAI == AI_PACIFIST) IA.benefits = 0;
+    if (typeAI == AI_WARLIKE ) MA.costs    = 0;
+    if (typeAI == AI_PACIFIST) MA.benefits = 0;
     
     float appeal = 0;
-    appeal += (random ? Rand.avgNums(2) : 0.5f) * IA.benefits;
-    appeal -= (random ? Rand.avgNums(2) : 0.5f) * IA.costs;
-    appeal /= (IA.benefits + IA.costs) / 2;
-    appeal *= CityBorders.distanceRating(IA.attackC, IA.defendC);
-    IA.evaluatedAppeal = appeal;
+    appeal += (random ? Rand.avgNums(2) : 0.5f) * MA.benefits;
+    appeal -= (random ? Rand.avgNums(2) : 0.5f) * MA.costs;
+    //appeal /= (MA.benefits + MA.costs) / 2;
+    appeal *= CityBorders.distanceRating(MA.fromC, MA.goesC);
+    MA.evaluatedAppeal = appeal;
     
-    return IA;
+    return MA;
   }
   
   
-  List <InvasionAssessment> updateInvasionChoices() {
-    List <InvasionAssessment> choices = new List();
+  
+  //  TODO:  Appeal of a trade-relationship depends on whether mutual trade
+  //  would be attractive.
+  
+  float appealOfTerms(
+    City from, City goes,
+    POSTURE      posture ,
+    Formation    action  ,
+    Actor        marriage,
+    Tally <Good> tribute
+  ) {
+    if (typeAI == AI_WARLIKE ) return 0;
+    if (typeAI == AI_PACIFIST) return 1000000;
+    
+    //  TODO:  Merge this with the assessment code below.
+    
+    float synergyVal = 0, dot = 0, count = 0;
+    for (City c : goes.relationsWith()) {
+      float valueF = from.loyalty(c);
+      float valueG = goes.loyalty(c);
+      synergyVal += dot = valueF * valueG;
+      count += (Nums.abs(dot) + 1) / 2;
+    }
+    synergyVal /= Nums.max(1, count);
+    
+    float tradeVal = 0;
+    for (Good g : ALL_GOODS) {
+      float perYear = from.tradeLevel.valueFor(g);
+      if (perYear <= 0) continue;
+      tradeVal += tributeValue(g, perYear, city);
+    }
+    tradeVal *= AVG_ALLIANCE_YEARS * 1f / AVG_TRIBUTE_YEARS;
+    
+    float powerVal = from.idealArmyPower() / POP_PER_CITIZEN;
+    powerVal *= casualtyValue(city);
+    powerVal *= AVG_ALLIANCE_YEARS * 1f / AVG_RETIREMENT;
+    
+    float marriageVal = 0;
+    if (marriage != null) {
+      marriageVal = casualtyValue(goes) * MARRIAGE_VALUE_MULT;
+    }
+    
+    float appeal = 0;
+    appeal += tradeVal;
+    appeal += powerVal;
+    appeal += marriageVal;
+    appeal *= 1 + synergyVal;
+    
+    return appeal;
+  }
+  
+  
+  MissionAssessment dialogAssessment(
+    City from, City goes, boolean random
+  ) {
+    MissionAssessment MA = new MissionAssessment();
+    
+    MA.objective = Formation.OBJECTIVE_DIALOG;
+    MA.fromC = from;
+    MA.goesC = goes;
+    
+    if (typeAI == AI_WARLIKE) {
+      MA.evaluatedAppeal = -1;
+      return MA;
+    }
+    
+    //  See if it's possible to arrange a marriage as well.
+    
+    Actor monarch = goes.council.memberWithRole(CityCouncil.Role.MONARCH);
+    Pick <Actor> pickM = new Pick();
+    
+    for (Actor a : from.council.allMembersWithRole(CityCouncil.Role.HEIR)) {
+      Actor spouse = a.allBondedWith(BOND_MARRIED).first();
+      if (spouse != null) continue;
+      if (monarch.sexData == a.sexData) continue;
+      
+      float rating = 1.0f;
+      if (random) rating += Rand.num() - 0.5f;
+      pickM.compare(a, rating);
+    }
+    Actor marries = pickM.result();
+    
+    MA.postureDemand  = POSTURE.ALLY;
+    MA.marriageDemand = marries;
+    
+    //  Appeal of alliance depends on whether you have a good existing
+    //  relationship and/or share similar enemies.
+    
+    //I.say("\nGetting synergy between "+from+" and "+goes);
+    float synergyVal = 0, dot = 0, count = 0;
+    for (City c : goes.relationsWith()) {
+      float valueF = from.loyalty(c);
+      float valueG = goes.loyalty(c);
+      //I.say("  "+c+": "+valueF+" * "+valueG);
+      if (valueF == -100 || valueG == -100) continue;
+      synergyVal += dot = valueF * valueG;
+      count += (Nums.abs(dot) + 1) / 2;
+    }
+    synergyVal /= Nums.max(1, count);
+    //I.say("  Total value: "+synergyVal);
+    
+    float tradeVal = 0;
+    for (Good g : ALL_GOODS) {
+      float exports = from.tradeLevel.valueFor(g);
+      if (exports > 0) {
+        tradeVal += tributeValue(g, exports, goes);
+      }
+      float imports = goes.tradeLevel.valueFor(g);
+      if (imports > 0) {
+        tradeVal += tributeValue(g, exports, from);
+      }
+    }
+    tradeVal *= AVG_ALLIANCE_YEARS * 1f / AVG_TRIBUTE_YEARS;
+    
+    //I.say("  Trade value: "+tradeVal);
+    
+    float powerVal = from.idealArmyPower() / POP_PER_CITIZEN;
+    powerVal *= casualtyValue(city);
+    powerVal *= AVG_ALLIANCE_YEARS * 1f / AVG_RETIREMENT;
+    
+    float marriageCost = 0;
+    if (marries != null) {
+      marriageCost = casualtyValue(from) * MARRIAGE_VALUE_MULT;
+      marriageCost *= (1 + from.council.membersBondAvg(marries)) / 2;
+    }
+    
+    float relationsVal = 0;
+    relationsVal = (goes.loyalty(from) + from.loyalty(goes)) / 2;
+    
+    MA.benefits += tradeVal;
+    MA.benefits += powerVal;
+    MA.benefits *= 1 + synergyVal + relationsVal;
+    MA.costs    += marriageCost;
+    
+    float appeal = 0;
+    appeal += (random ? Rand.avgNums(2) : 0.5f) * MA.benefits;
+    appeal -= (random ? Rand.avgNums(2) : 0.5f) * MA.costs;
+    //appeal /= (MA.benefits + MA.costs) / 2;
+    appeal *= CityBorders.distanceRating(MA.fromC, MA.goesC);
+    MA.evaluatedAppeal = appeal;
+    
+    return MA;
+  }
+  
+  
+  List <MissionAssessment> updateMissionChoices() {
+    List <MissionAssessment> choices = new List();
     //
     //  This is something of a hack at the moment, but it helps prevent some
     //  of the more bitty exchanges...
@@ -413,36 +563,68 @@ public class CityCouncil {
     }
     //
     //  TODO:  Allow for multiple levels of force-commitment, since you don't
-    //  want your own city to be vulnerable?
-    for (City other : city.world.cities) {
+    //  want your own city to be vulnerable?  And multiple options for terms
+    //  during diplomacy?
+    for (City other : city.world.cities) if (other != city) {
       Integer distance = city.distances.get(other);
-      if (distance == null || other == city) continue;
-      if (other.isLoyalVassalOf   (city)   ) continue;
-      if (other.isVassalOfSameLord(city)   ) continue;
+      if (distance == null) continue;
       
-      InvasionAssessment IA = performAssessment(city, other, 0.5f, true);
-      choices.add(IA);
+      if (! (
+        other.isLoyalVassalOf(city) ||
+        other.isVassalOfSameLord(city)
+      )) {
+        MissionAssessment IA = invasionAssessment(city, other, 0.5f, true);
+        choices.add(IA);
+      }
+      
+      if (! (
+        other.isLordOf(city) ||
+        other.isAllyOf(city)
+      )) {
+        MissionAssessment DA = dialogAssessment(city, other, true);
+        choices.add(DA);
+      }
+      
     }
     return choices;
   }
   
   
-  Formation spawnInvasion(InvasionAssessment IA) {
-    Formation force = new Formation(Formation.OBJECTIVE_CONQUER, city, true);
-    
-    if (city.government == City.GOVERNMENT.BARBARIAN) {
-      //  Only non-barbarian governments will set up permanent command-fx.
-    }
-    else {
-      force.assignTerms(City.POSTURE.VASSAL, null, null, IA.tributeDemand);
-    }
+  Formation spawnFormation(MissionAssessment IA) {
+    Formation force = new Formation(IA.objective, city, true);
     
     int n = 0;
     while (force.powerSum() < city.armyPower / 2) {
       Type  type   = (n++ % 4 == 0) ? SOLDIER : CITIZEN;
       Actor fights = (Actor) type.generate();
-      fights.assignHomeCity(IA.attackC);
+      fights.assignHomeCity(IA.fromC);
       force.toggleRecruit(fights, true);
+    }
+    
+    if (city.government == GOVERNMENT.BARBARIAN) {
+      //  Only non-barbarian governments will set up permanent command-fx or
+      //  attempt diplomacy...
+    }
+    else {
+      force.assignTerms(
+        IA.postureDemand,
+        IA.actionDemand,
+        IA.marriageDemand,
+        IA.tributeDemand
+      );
+      if (IA.marriageDemand != null) {
+        Actor marries = IA.marriageDemand;
+        marries.assignHomeCity(city);
+        force.toggleEscorted(marries, true);
+      }
+      if (IA.objective == Formation.OBJECTIVE_DIALOG) {
+        while (force.escorted.size() < 2) {
+          Type type = (n++ % 2 == 0) ? NOBLE : CONSORT;
+          Actor talks = (Actor) type.generate();
+          talks.assignHomeCity(city);
+          force.toggleEscorted(talks, true);
+        }
+      }
     }
     
     return force;
@@ -454,7 +636,7 @@ public class CityCouncil {
     if (typeAI == AI_COMPLIANT) return false;
     if (typeAI == AI_OFF      ) return false;
     
-    InvasionAssessment IA = performAssessment(city, lord, 0.5f, true);
+    MissionAssessment IA = invasionAssessment(city, lord, 0.5f, true);
     float chance = period * 1f / AVG_TRIBUTE_YEARS;
     return IA.evaluatedAppeal > 0 && Rand.num() < chance;
   }

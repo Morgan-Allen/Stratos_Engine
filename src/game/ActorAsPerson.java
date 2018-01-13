@@ -245,8 +245,9 @@ public class ActorAsPerson extends Actor {
   /**  Handling hunger, injury, healing and eating, etc:
     */
   void update() {
-    hunger += map.settings.toggleHunger ? (1f / STARVE_INTERVAL ) : 0;
+    WorldSettings settings = map.city.world.settings;
     
+    hunger += settings.toggleHunger ? (1f / STARVE_INTERVAL ) : 0;
     if (jobType() == JOB.RESTING) {
       float rests = 1f / FATIGUE_REGEN;
       float heals = 1f / HEALTH_REGEN ;
@@ -254,7 +255,7 @@ public class ActorAsPerson extends Actor {
       injury  = Nums.max(0, injury  - heals);
     }
     else {
-      fatigue += map.settings.toggleFatigue ? (1f / FATIGUE_INTERVAL) : 0;
+      fatigue += settings.toggleFatigue ? (1f / FATIGUE_INTERVAL) : 0;
       float heals = 0.5f / HEALTH_REGEN;
       injury = Nums.max(0, injury - heals);
     }
@@ -294,7 +295,7 @@ public class ActorAsPerson extends Actor {
   /**  Handling sight-range:
     */
   void updateVision() {
-    if (indoors() || ! onMap()) return;
+    if (indoors()) return;
     
     float range = type.sightRange * (map.fog.lightLevel() + 1f) / 2;
     map.fog.liftFog(at(), range);
@@ -307,15 +308,20 @@ public class ActorAsPerson extends Actor {
   
   /**  Aging, reproduction and life-cycle methods-
     */
-  void updateAging() {
-    super.updateAging();
+  void updateLifeCycle(City city, boolean onMap) {
+    super.updateLifeCycle(city, onMap);
+    
+    WorldSettings settings = city.world.settings;
     
     if (pregnancy > 0) {
+      boolean canBirth = (home != null && inside == home) || ! onMap;
       pregnancy += 1;
-      if (pregnancy > PREGNANCY_LENGTH && home != null && inside == home) {
+      if (pregnancy > PREGNANCY_LENGTH && canBirth) {
         float dieChance = AVG_CHILD_MORT / 100f;
+        if (! settings.toggleChildMort) dieChance = 0;
+        
         if (Rand.num() >= dieChance) {
-          completePregnancy(home);
+          completePregnancy(home, onMap);
         }
         else {
           pregnancy = 0;
@@ -327,15 +333,19 @@ public class ActorAsPerson extends Actor {
     }
     
     if (ageSeconds % YEAR_LENGTH == 0) {
-      if (senior() && Rand.index(100) < AVG_SENIOR_MORT) {
+      
+      boolean canDie = settings.toggleAging;
+      if (senior() && canDie && Rand.index(100) < AVG_SENIOR_MORT) {
         setAsKilled("Old age");
       }
-      if (woman() && fertile() && pregnancy == 0 && home != null) {
+      
+      boolean canConceive = home != null || ! onMap;
+      if (woman() && fertile() && pregnancy == 0 && canConceive) {
         float
           ageYears   = ageSeconds / (YEAR_LENGTH * 1f),
           fertSpan   = AVG_MENOPAUSE - AVG_MARRIED,
           fertility  = (AVG_MENOPAUSE - ageYears) / fertSpan,
-          wealth     = BuildingForHome.wealthLevel(home),
+          wealth     = BuildingForHome.wealthLevel(this),
           chanceRng  = MAX_PREG_CHANCE - MIN_PREG_CHANCE,
           chanceW    = MAX_PREG_CHANCE - (wealth * chanceRng),
           pregChance = fertility * chanceW / 100
@@ -358,16 +368,20 @@ public class ActorAsPerson extends Actor {
   }
   
   
-  void completePregnancy(Building venue) {
-    Tile at = venue.at();
+  void completePregnancy(Building venue, boolean onMap) {
+    
     ActorAsPerson child  = (ActorAsPerson) CHILD.generate();
     ActorAsPerson father = (ActorAsPerson) bondedWith(BOND_MARRIED);
-    child.enterMap(map, at.x, at.y, 1);
-    child.setInside(venue, true);
     setBond(this  , child, BOND_CHILD, BOND_PARENT, 0.5f);
     setBond(father, child, BOND_CHILD, BOND_PARENT, 0.5f);
-    venue.setResident(child, true);
     pregnancy = 0;
+    
+    if (onMap) {
+      Tile at = venue.at();
+      child.enterMap(map, at.x, at.y, 1);
+      child.setInside(venue, true);
+      venue.setResident(child, true);
+    }
   }
   
   

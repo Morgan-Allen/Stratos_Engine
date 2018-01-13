@@ -61,7 +61,7 @@ public class CityMapFog {
   /**  Regular updates-
     */
   void liftFog(Tile around, float range) {
-    if (! map.settings.toggleFog) return;
+    if (! isToggled()) return;
     
     Box2D area = new Box2D(around.x, around.y, 0, 0);
     area.expandBy(Nums.round(range, 1, true));
@@ -78,7 +78,7 @@ public class CityMapFog {
   void updateFog() {
     dayState = WorldCalendar.dayState(map.time);
     
-    if (! map.settings.toggleFog) {
+    if (! isToggled()) {
       return;
     }
     for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
@@ -96,13 +96,13 @@ public class CityMapFog {
   /**  Exploration-related queries:
     */
   Tile pickRandomFogPoint(Element near) {
-    if (! map.settings.toggleFog) return null;
+    if (! isToggled()) return null;
     return maxMap.pickRandomPoint(near, -1);
   }
   
   
   Tile findNearbyFogPoint(Element near, int range) {
-    if (! map.settings.toggleFog) return null;
+    if (! isToggled()) return null;
     return maxMap.findNearbyPoint(near, range);
   }
   
@@ -110,15 +110,20 @@ public class CityMapFog {
   
   /**  Common queries-
     */
+  private boolean isToggled() {
+    return map.city.world.settings.toggleFog;
+  }
+  
+  
   float sightLevel(Tile t) {
-    if (! map.settings.toggleFog) return 1;
+    if (! isToggled()) return 1;
     if (t == null) return 0;
     return oldVals[t.x][t.y] * 1f / MAX_FOG;
   }
   
   
   float maxSightLevel(Tile t) {
-    if (! map.settings.toggleFog) return 1;
+    if (! isToggled()) return 1;
     if (t == null) return 0;
     return 1 - (maxMap.flagVal(t.x, t.y) / MAX_FOG);
   }

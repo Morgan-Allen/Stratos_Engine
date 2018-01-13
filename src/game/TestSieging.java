@@ -29,9 +29,9 @@ public class TestSieging extends Test {
     awayC.name = "Away City";
     world.addCities(homeC, awayC);
     
-    map.settings.toggleFog     = false;
-    map.settings.toggleFatigue = false;
-    map.settings.toggleHunger  = false;
+    world.settings.toggleFog     = false;
+    world.settings.toggleFatigue = false;
+    world.settings.toggleHunger  = false;
     
     awayC.initBuildLevels(GARRISON, 5, HOUSE, 1);
     awayC.council.typeAI = CityCouncil.AI_OFF;
@@ -59,12 +59,13 @@ public class TestSieging extends Test {
     CityMapPlanning.placeStructure(ROAD, map, true, 16, 9, 1 , 9 );
     CityMapPlanning.placeStructure(ROAD, map, true, 24, 9, 8 , 1 );
     
-    for (int n = 3; n-- > 0;) {
+    for (int n = 3, s = 0; n-- > 0;) {
       Building home = (Building) HOUSE.generate();
       home.enterMap(map, 17, 10 + (n * 3), 1);
       fillHomeVacancies(home, CITIZEN);
-      for (Actor a : home.residents) if (fort.eligible(a, false)) {
-        fort.toggleRecruit(a, true);
+      for (Actor a : home.residents) {
+        a.sexData = (s++ % 2 == 0) ? SEX_MALE : SEX_FEMALE;
+        if (fort.eligible(a, false)) fort.toggleRecruit(a, true);
       }
     }
     for (Actor a : fort.workers) {
@@ -147,9 +148,14 @@ public class TestSieging extends Test {
             siegeComing = true;
           }
         }
+        if (siegeComing && enemy.objective != Formation.OBJECTIVE_CONQUER) {
+          I.say("\nEnemies should be here to conquer!");
+          break;
+        }
       }
       
       if (siegeComing && enemy.map != null && ! siegeBegun) {
+        
         Table <Tile, Actor> standing = new Table();
         boolean standWrong = false;
         Actor testPathing = null;
@@ -157,7 +163,21 @@ public class TestSieging extends Test {
         for (Actor a : enemy.recruits) {
           if (a.jobType() == JOB.COMBAT) {
             TaskCombat task = (TaskCombat) a.task;
-            if (task.primary != enemy.secureFocus) continue;
+            
+            Element target = task.primary;
+            Series <Actor> guards = guarding.recruits;
+            boolean isGuard = false, isWall = false;
+            
+            if (target.type.isActor() && guards.includes((Actor) target)) {
+              isGuard = true;
+            }
+            if (target.type.isWall) {
+              isWall = true;
+            }
+            if (! (isGuard || isWall)) {
+              continue;
+            }
+            
             Tile stands = (Tile) task.target;
             if (standing.get(stands) != null) standWrong = true;
             else standing.put(stands, a);
@@ -174,7 +194,7 @@ public class TestSieging extends Test {
           search.doSearch();
           if (search.success()) {
             I.say("\nGatehouse should not allow entry to invaders!");
-            return false;
+            break;
           }
         }
       }
