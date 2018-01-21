@@ -13,7 +13,7 @@ public class BuildingForCollect extends BuildingForCrafts {
   
   /**  Data fields, construction and save/load methods-
     */
-  BuildingForCollect(Type type) {
+  public BuildingForCollect(Type type) {
     super(type);
   }
   

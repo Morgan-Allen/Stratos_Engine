@@ -33,7 +33,7 @@ public class Element implements Session.Saveable, Target {
   private Object pathFlag;  //  Note- used during temporary search.
   
   
-  Element(Type type) {
+  public Element(Type type) {
     this.type = type;
   }
   

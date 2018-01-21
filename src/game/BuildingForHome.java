@@ -17,7 +17,7 @@ public class BuildingForHome extends Building {
   Type currentTier;
   
   
-  BuildingForHome(Type type) {
+  public BuildingForHome(Type type) {
     super(type);
     this.currentTier = type;
   }

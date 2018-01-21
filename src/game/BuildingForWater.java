@@ -2,7 +2,6 @@
 
 package game;
 import util.*;
-import static game.CityMap.*;
 import static game.GameConstants.*;
 import static util.TileConstants.*;
 
@@ -16,7 +15,7 @@ public class BuildingForWater extends Building {
   float fillLevel = 0;
   
   
-  BuildingForWater(Type type) {
+  public BuildingForWater(Type type) {
     super(type);
   }
   

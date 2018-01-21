@@ -29,7 +29,7 @@ public class Building extends Element implements Pathing, Employer {
   Tally <Good> inventory = new Tally();
   
   
-  Building(Type type) {
+  public Building(Type type) {
     super(type);
     this.ID = "#"+nextID++;
   }

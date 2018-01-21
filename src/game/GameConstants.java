@@ -225,7 +225,7 @@ public class GameConstants {
     int price;
     
     Good(String name, int price) {
-      super("good_"+name.toLowerCase().replace(' ', '_'), IS_GOOD);
+      super(null, "good_"+name.toLowerCase().replace(' ', '_'), IS_GOOD);
       if (price != -1) GOODS_LIST.add(this);
       this.name    = name ;
       this.price   = price;
@@ -240,7 +240,7 @@ public class GameConstants {
     Float weights [] = new Float[0];
     
     Terrain(String name, int index) {
-      super("terrain_"+index, IS_TERRAIN);
+      super(null, "terrain_"+index, IS_TERRAIN);
       this.name      = name ;
       this.terrainID = index;
       this.pathing   = PATH_FREE;
@@ -257,7 +257,7 @@ public class GameConstants {
   static class Trait extends Type {
     
     Trait(String ID, String... names) {
-      super(ID, IS_TRAIT);
+      super(null, ID, IS_TRAIT);
       this.name = names[0];
       this.namesRange = names;
     }
@@ -265,21 +265,21 @@ public class GameConstants {
   
   static class WalkerType extends Type {
     
-    WalkerType(String ID, int category, int socialClass) {
-      super(ID, category);
+    WalkerType(Class baseClass, String ID, int category, int socialClass) {
+      super(baseClass, ID, category);
       this.socialClass = socialClass;
       this.mobile      = true;
     }
     
-    WalkerType(String ID, int category) {
-      this(ID, category, CLASS_COMMON);
+    WalkerType(Class baseClass, String ID, int category) {
+      this(baseClass, ID, category, CLASS_COMMON);
     }
   }
-
+  
   static class BuildType extends Type {
     
-    BuildType(String ID, int category) {
-      super(ID, category);
+    BuildType(Class baseClass, String ID, int category) {
+      super(baseClass, ID, category);
     }
   }
   
@@ -356,19 +356,19 @@ public class GameConstants {
     NO_HABITAT  [] = {}
   ;
   final static Type
-    JUNGLE_TREE1 = new Type("fixture_j_tree1", IS_FIXTURE),
-    DESERT_ROCK1 = new Type("fixture_d_rock1", IS_FIXTURE),
-    DESERT_ROCK2 = new Type("fixture_d_rock2", IS_FIXTURE),
-    CLAY_BANK1   = new Type("fixture_b_clay1", IS_FIXTURE),
+    JUNGLE_TREE1 = new Type(Element.class, "fixture_j_tree1", IS_FIXTURE),
+    DESERT_ROCK1 = new Type(Element.class, "fixture_d_rock1", IS_FIXTURE),
+    DESERT_ROCK2 = new Type(Element.class, "fixture_d_rock2", IS_FIXTURE),
+    CLAY_BANK1   = new Type(Element.class, "fixture_b_clay1", IS_FIXTURE),
     
     ALL_TREES[] = { JUNGLE_TREE1 },
     ALL_ROCKS[] = { DESERT_ROCK1, DESERT_ROCK2 },
     ALL_CLAYS[] = { CLAY_BANK1 }
   ;
   final static WalkerType
-    TAPIR   = new WalkerType("animal_tapir" , IS_ANIMAL_ACT),
-    QUAIL   = new WalkerType("animal_quail" , IS_ANIMAL_ACT),
-    JAGUAR  = new WalkerType("animal_jaguar", IS_ANIMAL_ACT),
+    TAPIR   = new WalkerType(ActorAsAnimal.class, "animal_tapir" , IS_ANIMAL_ACT),
+    QUAIL   = new WalkerType(ActorAsAnimal.class, "animal_quail" , IS_ANIMAL_ACT),
+    JAGUAR  = new WalkerType(ActorAsAnimal.class, "animal_jaguar", IS_ANIMAL_ACT),
     ALL_ANIMALS[] = { TAPIR, QUAIL, JAGUAR }
   ;
   static {
@@ -483,18 +483,18 @@ public class GameConstants {
   final static WalkerType
     NO_WALKERS[] = new WalkerType[0],
     
-    VAGRANT  = new WalkerType("type_vagrant" , IS_PERSON_ACT, CLASS_COMMON),
-    CHILD    = new WalkerType("type_child"   , IS_PERSON_ACT, CLASS_COMMON),
-    CITIZEN  = new WalkerType("type_citizen" , IS_PERSON_ACT, CLASS_COMMON),
-    SERVANT  = new WalkerType("type_servant" , IS_PERSON_ACT, CLASS_SLAVE ),
-    NOBLE    = new WalkerType("type_noble"   , IS_PERSON_ACT, CLASS_NOBLE ),
-    CONSORT  = new WalkerType("type_consort" , IS_PERSON_ACT, CLASS_NOBLE ),
-    WORKER   = new WalkerType("type_worker"  , IS_PERSON_ACT, CLASS_COMMON),
-    MERCHANT = new WalkerType("type_merchant", IS_PERSON_ACT, CLASS_TRADER),
-    PORTER   = new WalkerType("type_porter"  , IS_PERSON_ACT, CLASS_SLAVE ),
-    HUNTER   = new WalkerType("type_hunter"  , IS_PERSON_ACT, CLASS_NOBLE ),
-    SOLDIER  = new WalkerType("type_soldier" , IS_PERSON_ACT, CLASS_NOBLE ),
-    PRIEST   = new WalkerType("type_priest"  , IS_PERSON_ACT, CLASS_NOBLE )
+    VAGRANT  = new WalkerType(ActorAsPerson.class, "type_vagrant" , IS_PERSON_ACT, CLASS_COMMON),
+    CHILD    = new WalkerType(ActorAsPerson.class, "type_child"   , IS_PERSON_ACT, CLASS_COMMON),
+    CITIZEN  = new WalkerType(ActorAsPerson.class, "type_citizen" , IS_PERSON_ACT, CLASS_COMMON),
+    SERVANT  = new WalkerType(ActorAsPerson.class, "type_servant" , IS_PERSON_ACT, CLASS_SLAVE ),
+    NOBLE    = new WalkerType(ActorAsPerson.class, "type_noble"   , IS_PERSON_ACT, CLASS_NOBLE ),
+    CONSORT  = new WalkerType(ActorAsPerson.class, "type_consort" , IS_PERSON_ACT, CLASS_NOBLE ),
+    WORKER   = new WalkerType(ActorAsPerson.class, "type_worker"  , IS_PERSON_ACT, CLASS_COMMON),
+    MERCHANT = new WalkerType(ActorAsPerson.class, "type_merchant", IS_PERSON_ACT, CLASS_TRADER),
+    PORTER   = new WalkerType(ActorAsPerson.class, "type_porter"  , IS_PERSON_ACT, CLASS_SLAVE ),
+    HUNTER   = new WalkerType(ActorAsPerson.class, "type_hunter"  , IS_PERSON_ACT, CLASS_NOBLE ),
+    SOLDIER  = new WalkerType(ActorAsPerson.class, "type_soldier" , IS_PERSON_ACT, CLASS_NOBLE ),
+    PRIEST   = new WalkerType(ActorAsPerson.class, "type_priest"  , IS_PERSON_ACT, CLASS_NOBLE )
   ;
   static {
     //  TODO:  Get rid of this background as a starting option.
@@ -558,55 +558,55 @@ public class GameConstants {
     NO_TIERS[] = new BuildType[0],
     NO_NEEDS[] = new BuildType[0],
     
-    ROAD          = new BuildType("type_road"    , IS_STRUCTURAL),
-    WALL          = new BuildType("type_wall"    , IS_STRUCTURAL),
-    GATE          = new BuildType("type_gate"    , IS_WALLS_BLD ),
-    TOWER         = new BuildType("type_tower"   , IS_WALLS_BLD ),
-    AQUEDUCT      = new BuildType("type_aqueduct", IS_STRUCTURAL),
-    CISTERN       = new BuildType("type_cistern" , IS_WATER_BLD ),
+    ROAD          = new BuildType(Element.class         , "type_road"    , IS_STRUCTURAL),
+    WALL          = new BuildType(Element.class         , "type_wall"    , IS_STRUCTURAL),
+    GATE          = new BuildType(BuildingForWalls.class, "type_gate"    , IS_WALLS_BLD ),
+    TOWER         = new BuildType(BuildingForWalls.class, "type_tower"   , IS_WALLS_BLD ),
+    AQUEDUCT      = new BuildType(Element.class         , "type_aqueduct", IS_STRUCTURAL),
+    CISTERN       = new BuildType(BuildingForWater.class, "type_cistern" , IS_WATER_BLD ),
     
     INFRASTRUCTURE_BUILDINGS[] = {
       ROAD, WALL, GATE, TOWER, AQUEDUCT, CISTERN
     },
     
-    PALACE        = new BuildType("type_palace"       , IS_HOME_BLD   ),
+    PALACE        = new BuildType(BuildingForHome.class   , "type_palace"       , IS_HOME_BLD   ),
     PALACE_BUILDINGS[] = { PALACE },
     
-    HOUSE         = new BuildType("type_house"        , IS_HOME_BLD   ),
-    HOUSE_T1      = new BuildType("type_house_tier1"  , IS_UPGRADE    ),
-    HOUSE_T2      = new BuildType("type_house_tier2"  , IS_UPGRADE    ),
-    SWEEPER       = new BuildType("type_sweeper"      , IS_COLLECT_BLD),
-    BASIN         = new BuildType("type_basin"        , IS_WATER_BLD  ),
-    SCHOOL        = new BuildType("type_public_school", IS_AMENITY_BLD),
-    BALL_COURT    = new BuildType("type_ball_court"   , IS_AMENITY_BLD),
+    HOUSE         = new BuildType(BuildingForHome.class   , "type_house"        , IS_HOME_BLD   ),
+    HOUSE_T1      = new BuildType(BuildingForHome.class   , "type_house_tier1"  , IS_UPGRADE    ),
+    HOUSE_T2      = new BuildType(BuildingForHome.class   , "type_house_tier2"  , IS_UPGRADE    ),
+    SWEEPER       = new BuildType(BuildingForCollect.class, "type_sweeper"      , IS_COLLECT_BLD),
+    BASIN         = new BuildType(BuildingForWater.class  , "type_basin"        , IS_WATER_BLD  ),
+    SCHOOL        = new BuildType(BuildingForAmenity.class, "type_public_school", IS_AMENITY_BLD),
+    BALL_COURT    = new BuildType(BuildingForAmenity.class, "type_ball_court"   , IS_AMENITY_BLD),
     RESIDENTIAL_BUILDINGS[] = { HOUSE, SWEEPER, BASIN, SCHOOL, BALL_COURT },
     
-    FARM_PLOT     = new BuildType("type_farm_plot"    , IS_GATHER_BLD ),
-    SAWYER        = new BuildType("type_sawyer"       , IS_GATHER_BLD ),
-    QUARRY_PIT    = new BuildType("type_quarry_pit"   , IS_GATHER_BLD ),
-    KILN          = new BuildType("type_kiln"         , IS_CRAFTS_BLD ),
-    WEAVER        = new BuildType("type_weaver"       , IS_CRAFTS_BLD ),
-    MASON         = new BuildType("type_mason"        , IS_CRAFTS_BLD ),
+    FARM_PLOT     = new BuildType(BuildingForGather.class , "type_farm_plot"    , IS_GATHER_BLD ),
+    SAWYER        = new BuildType(BuildingForGather.class , "type_sawyer"       , IS_GATHER_BLD ),
+    QUARRY_PIT    = new BuildType(BuildingForGather.class , "type_quarry_pit"   , IS_GATHER_BLD ),
+    KILN          = new BuildType(BuildingForCrafts.class , "type_kiln"         , IS_CRAFTS_BLD ),
+    WEAVER        = new BuildType(BuildingForCrafts.class , "type_weaver"       , IS_CRAFTS_BLD ),
+    MASON         = new BuildType(BuildingForCrafts.class , "type_mason"        , IS_CRAFTS_BLD ),
     INDUSTRIAL_BUILDINGS[] = { FARM_PLOT, QUARRY_PIT, KILN, WEAVER, MASON },
     
-    MARKET        = new BuildType("type_market"       , IS_CRAFTS_BLD ),
-    PORTER_POST   = new BuildType("type_porter_post"  , IS_TRADE_BLD  ),
-    COLLECTOR     = new BuildType("type_collector"    , IS_COLLECT_BLD),
+    MARKET        = new BuildType(BuildingForCrafts.class , "type_market"       , IS_CRAFTS_BLD ),
+    PORTER_POST   = new BuildType(BuildingForTrade.class  , "type_porter_post"  , IS_TRADE_BLD  ),
+    COLLECTOR     = new BuildType(BuildingForCollect.class, "type_collector"    , IS_COLLECT_BLD),
     ECONOMIC_BUILDINGS[] = { MARKET, PORTER_POST, COLLECTOR },
     
-    HUNTER_LODGE  = new BuildType("type_hunter_lodge" , IS_HUNTS_BLD  ),
-    GARRISON      = new BuildType("type_garrison"     , IS_ARMY_BLD   ),
+    HUNTER_LODGE  = new BuildType(BuildingForHunt.class   , "type_hunter_lodge" , IS_HUNTS_BLD  ),
+    GARRISON      = new BuildType(BuildingForArmy.class   , "type_garrison"     , IS_ARMY_BLD   ),
     MILITARY_BUILDINGS[] = { GARRISON },
     
-    TEMPLE_QZ     = new BuildType("type_temple_qz"    , IS_FAITH_BLD  ),
-    TEMPLE_TZ     = new BuildType("type_temple_tz"    , IS_FAITH_BLD  ),
-    TEMPLE_HU     = new BuildType("type_temple_hu"    , IS_FAITH_BLD  ),
-    TEMPLE_TL     = new BuildType("type_temple_tl"    , IS_FAITH_BLD  ),
-    TEMPLE_MI     = new BuildType("type_temple_mi"    , IS_FAITH_BLD  ),
-    TEMPLE_XT     = new BuildType("type_temple_xt"    , IS_FAITH_BLD  ),
+    TEMPLE_QZ     = new BuildType(BuildingForFaith.class , "type_temple_qz"     , IS_FAITH_BLD  ),
+    TEMPLE_TZ     = new BuildType(BuildingForFaith.class , "type_temple_tz"     , IS_FAITH_BLD  ),
+    TEMPLE_HU     = new BuildType(BuildingForFaith.class , "type_temple_hu"     , IS_FAITH_BLD  ),
+    TEMPLE_TL     = new BuildType(BuildingForFaith.class , "type_temple_tl"     , IS_FAITH_BLD  ),
+    TEMPLE_MI     = new BuildType(BuildingForFaith.class , "type_temple_mi"     , IS_FAITH_BLD  ),
+    TEMPLE_XT     = new BuildType(BuildingForFaith.class , "type_temple_xt"     , IS_FAITH_BLD  ),
     
-    SHRINE_OMC    = new BuildType("type_shrine_omc"   , IS_FAITH_BLD  ),
-    SHRINE_OMT    = new BuildType("type_shrine_omt"   , IS_FAITH_BLD  ),
+    SHRINE_OMC    = new BuildType(BuildingForFaith.class , "type_shrine_omc"    , IS_FAITH_BLD  ),
+    SHRINE_OMT    = new BuildType(BuildingForFaith.class , "type_shrine_omt"    , IS_FAITH_BLD  ),
     
     ALL_TEMPLES[] = {
       TEMPLE_QZ, TEMPLE_TZ, TEMPLE_HU, TEMPLE_TL, TEMPLE_MI, TEMPLE_XT

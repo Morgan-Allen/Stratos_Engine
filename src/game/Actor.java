@@ -58,7 +58,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   
   
-  Actor(Type type) {
+  public Actor(Type type) {
     super(type);
     this.ID = "#"+nextID++;
   }
@@ -212,11 +212,9 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     }
     //
     //  And update your current vision and health-
-    if (onMap()) {
-      updateVision();
-      checkHealthState();
-      updateLifeCycle(map.city, true);
-    }
+    if (onMap()) updateVision();
+    if (onMap()) checkHealthState();
+    if (onMap()) updateLifeCycle(map.city, true);
   }
   
   

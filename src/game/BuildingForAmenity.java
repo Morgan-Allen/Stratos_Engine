@@ -9,7 +9,7 @@ public class BuildingForAmenity extends Building {
   
   /**  Data fields, construction and save/load methods-
     */
-  BuildingForAmenity(Type type) {
+  public BuildingForAmenity(Type type) {
     super(type);
   }
   

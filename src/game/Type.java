@@ -1,9 +1,9 @@
 
 
 package game;
-import util.*;
 import static game.GameConstants.*;
-import java.lang.reflect.Array;
+import util.*;
+import java.lang.reflect.*;
 
 
 
@@ -40,9 +40,10 @@ public class Type extends Index.Entry implements Session.Saveable {
   final static Index <Type> INDEX = new Index();
   
   
-  Type(String ID, int category) {
+  Type(Class baseClass, String ID, int category) {
     super(INDEX, ID);
-    this.category = category;
+    this.baseClass = baseClass;
+    this.category  = category ;
   }
   
   
@@ -57,26 +58,28 @@ public class Type extends Index.Entry implements Session.Saveable {
   
   
   Object generate() {
-    switch (category) {
-      case(IS_FIXTURE    ): return new Element(this);
-      case(IS_STRUCTURAL ): return new Element(this);
-      case(IS_BUILDING   ): return new Building          (this);
-      case(IS_CRAFTS_BLD ): return new BuildingForCrafts (this);
-      case(IS_GATHER_BLD ): return new BuildingForGather (this);
-      case(IS_WATER_BLD  ): return new BuildingForWater  (this);
-      case(IS_TRADE_BLD  ): return new BuildingForTrade  (this);
-      case(IS_HOME_BLD   ): return new BuildingForHome   (this);
-      case(IS_AMENITY_BLD): return new BuildingForAmenity(this);
-      case(IS_COLLECT_BLD): return new BuildingForCollect(this);
-      case(IS_HUNTS_BLD  ): return new BuildingForHunt   (this);
-      case(IS_ARMY_BLD   ): return new BuildingForArmy   (this);
-      case(IS_WALLS_BLD  ): return new BuildingForWalls  (this);
-      case(IS_FAITH_BLD  ): return new BuildingForFaith  (this);
-      case(IS_ACTOR      ): return new Actor        (this);
-      case(IS_PERSON_ACT ): return new ActorAsPerson(this);
-      case(IS_ANIMAL_ACT ): return new ActorAsAnimal(this);
+    if (baseClass == null) {
+      return null;
     }
-    return null;
+    try {
+      if (! Element.class.isAssignableFrom(baseClass)) return null;
+      final Constructor c = baseClass.getConstructor(Type.class);
+      return c.newInstance(this);
+    }
+    catch (NoSuchMethodException e) {
+      I.say(
+        "\n  WARNING: NO TYPE CONSTRUCTOR FOR: "+baseClass.getName()+
+        "\n  All Elements should implement a public constructor taking a Type "+
+        "\n  as the sole argument, or else their Type should override the "+
+        "\n  generate() method.  Thank you.\n"
+      );
+      return null;
+    }
+    catch (Exception e) {
+      I.say("ERROR INSTANCING "+baseClass.getSimpleName()+": "+e);
+      e.printStackTrace();
+      return null;
+    }
   }
   
   
@@ -93,6 +96,8 @@ public class Type extends Index.Entry implements Session.Saveable {
   String name, namesRange[];
   int tint = BLACK_COLOR;
   
+  
+  Class baseClass;
   int category;
   Type flagKey = null;
   int wide = 1, high = 1, deep = 1;
