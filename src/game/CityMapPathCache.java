@@ -169,7 +169,6 @@ public class CityMapPathCache {
   
   private Tile[] around(Target e, Tile temp[], boolean checkAdjacent) {
     Type t = e.type();
-    Tile at = e.at();
     
     if (t.isBuilding()) {
       Building b = (Building) e;
@@ -177,13 +176,24 @@ public class CityMapPathCache {
     }
     
     if (checkAdjacent) {
-      CityMap.adjacent(at, temp, map);
-      temp[8] = at;
-      return temp;
+      Tile at = e.at();
+      if (t.wide > 1 || t.high > 1) {
+        temp = new Tile[(t.wide + 1 + t.high + 1) * 2];
+        int i = 0;
+        for (Tile a : map.tilesAround(at.x, at.y, t.wide, t.high)) {
+          temp[i++] = a;
+        }
+        return temp;
+      }
+      else {
+        CityMap.adjacent(at, temp, map);
+        temp[8] = at;
+        return temp;
+      }
     }
     else {
       for (int i = temp.length; i-- > 1;) temp[i] = null;
-      temp[0] = at;
+      temp[0] = e.at();
       return temp;
     }
   }

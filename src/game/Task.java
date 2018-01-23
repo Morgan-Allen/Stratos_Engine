@@ -13,28 +13,29 @@ public class Task implements Session.Saveable {
   /**  Data fields, construction and save/load methods-
     */
   public static enum JOB {
-    NONE     ,
-    RETURNING,
-    DEPARTING,
-    RESTING  ,
-    WANDERING,
-    DELIVER  ,
-    SHOPPING ,
-    TRADING  ,
-    VISITING ,
-    PLANTING ,
-    HARVEST  ,
-    CRAFTING ,
-    BUILDING ,
-    SALVAGE  ,
-    MILITARY ,
-    FORAGING ,
-    HUNTING  ,
-    LOOTING  ,
-    EXPLORING,
-    COMBAT   ,
-    RETREAT  ,
-    DIALOG   ,
+    NONE      ,
+    COLLECTING,
+    RETURNING ,
+    DEPARTING ,
+    RESTING   ,
+    WANDERING ,
+    DELIVER   ,
+    SHOPPING  ,
+    TRADING   ,
+    VISITING  ,
+    PLANTING  ,
+    HARVEST   ,
+    CRAFTING  ,
+    BUILDING  ,
+    SALVAGE   ,
+    MILITARY  ,
+    FORAGING  ,
+    HUNTING   ,
+    LOOTING   ,
+    EXPLORING ,
+    COMBAT    ,
+    RETREAT   ,
+    DIALOG    ,
   };
   
   Actor actor;
@@ -269,6 +270,9 @@ public class Task implements Session.Saveable {
   
   
   static Pathing pathOrigin(Target from) {
+    if (from == null) {
+      return null;
+    }
     Type t = from.type();
     if (t.isBuilding() && ((Building) from).complete()) {
       return (Building) from;
@@ -360,7 +364,7 @@ public class Task implements Session.Saveable {
       return null;
     }
     else {
-      if (report) I.say("  Path is: "+path.length+" tiles long...");
+      ///if (report) I.say("  Path is: "+path.length+" tiles long...");
       return path;
     }
   }

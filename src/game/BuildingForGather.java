@@ -72,7 +72,7 @@ public class BuildingForGather extends Building {
       return;
     }
     
-    if (TaskGathering.pickNextCrop(this, actor, false, type.produced)) {
+    if (TaskGathering.pickNextCrop(this, actor, false, (Object[]) type.produced)) {
       return;
     }
     if (TaskGathering.pickPlantPoint(this, actor, false, true)) {

@@ -35,8 +35,6 @@ public class TestBuilding extends Test {
     
     BuildingForHome home = (BuildingForHome) HOUSE.generate();
     map.planning.placeObject(home, 6, 3);
-    BuildingForHome palace = (BuildingForHome) PALACE.generate();
-    map.planning.placeObject(palace, 1, 3);
     
     BuildingForTrade post = (BuildingForTrade) PORTER_POST.generate();
     post.enterMap(map, 2, 10, 0);
@@ -51,12 +49,12 @@ public class TestBuilding extends Test {
     fillWorkVacancies(post);
     map.planning.placeObject(post);
     
-    Building mason = (Building) MASON.generate();
-    mason.enterMap(map, 9, 6, 0);
-    fillWorkVacancies(mason);
-    map.planning.placeObject(mason);
+    Building palace = (Building) PALACE.generate();
+    palace.enterMap(map, 9, 6, 0);
+    fillWorkVacancies(palace);
+    map.planning.placeObject(palace);
     
-    Building toBuild[] = { post, home, palace, mason };
+    Building toBuild[] = { post, home, palace };
     Series <Element> road = CityMapPlanning.placeStructure(
       ROAD, map, false, 2, 2, 10, 1
     );
@@ -166,6 +164,7 @@ public class TestBuilding extends Test {
         I.say("    "+g+": "+level+"/"+need);
       }
     }
+    
     I.say("\nStructure inventories:");
     for (Building b : toBuild) {
       I.say("  "+b);
@@ -175,6 +174,8 @@ public class TestBuilding extends Test {
         I.say("    "+g+": "+level+"/"+need);
       }
     }
+    
+    getDiffs(startingMaterials, endMaterials, true, BUILD_GOODS);
     
     return false;
   }
@@ -215,6 +216,7 @@ public class TestBuilding extends Test {
       if (report) I.say("  "+g+": "+bef+" -> "+aft+": "+(aft - bef));
       diffs += Nums.abs(aft - bef);
     }
+    if (report) I.say("  Total diffs: "+diffs);
     return diffs;
   }
   

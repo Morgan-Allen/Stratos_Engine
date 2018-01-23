@@ -41,7 +41,9 @@ public class BuildingForWalls extends Building {
   
   
   Tile[] selectEntrances() {
-    int facing  = facing();
+    int facing = facing();
+    
+    //  TODO:  Scrub any null entrances from these lists!
     
     if (tower) {
       Tile stair = tileAt(1, -1, facing);

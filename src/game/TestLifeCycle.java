@@ -39,7 +39,7 @@ public class TestLifeCycle extends Test {
     
     for (int x = 7; x > 0; x -= 3) {
       for (int y = 7; y > 0; y -= 3) {
-        Type type = y == 7 ? HOUSE : KILN;
+        Type type = y == 7 ? HOUSE : ENGINEER_STATION;
         Building built = (Building) type.generate();
         built.enterMap(map, x, y, 1);
       }
@@ -114,7 +114,7 @@ public class TestLifeCycle extends Test {
       if (migrated) {
         
         for (Building b : map.buildings) {
-          if (b.type == KILN) {
+          if (b.type == ENGINEER_STATION) {
             b.inventory.set(CLAY   , 5);
             b.inventory.set(POTTERY, 5);
           }

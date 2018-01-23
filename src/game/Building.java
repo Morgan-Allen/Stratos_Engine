@@ -86,12 +86,18 @@ public class Building extends Element implements Pathing, Employer {
   
   
   void enterMap(CityMap map, int x, int y, float buildLevel) {
+    
+    //I.say("ENTERING MAP: "+this);
+    
     super.enterMap(map, x, y, buildLevel);
     map.buildings.add(this);
   }
   
   
   void exitMap(CityMap map) {
+    
+    //I.say("EXITING MAP: "+this);
+    
     refreshEntrances(new Tile[0]);
     super.exitMap(map);
     map.buildings.remove(this);

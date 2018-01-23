@@ -13,7 +13,7 @@ public class TaskBuilding extends Task {
   Building store;
   Good material;
   Element site;
-  boolean razing;
+  //boolean razing;
   
   
   public TaskBuilding(Actor actor, Building store, Good material) {
@@ -28,7 +28,7 @@ public class TaskBuilding extends Task {
     store    = (Building) s.loadObject();
     material = (Good    ) s.loadObject();
     site     = (Element ) s.loadObject();
-    razing   = s.loadBool();
+    //razing   = s.loadBool();
   }
   
   
@@ -37,7 +37,7 @@ public class TaskBuilding extends Task {
     s.saveObject(store   );
     s.saveObject(material);
     s.saveObject(site    );
-    s.saveBool  (razing  );
+    //s.saveBool  (razing  );
   }
   
 
@@ -116,30 +116,29 @@ public class TaskBuilding extends Task {
     //  Iterate over any structures demanding your attention and see if
     //  they're close enough to attend to:
     CityMapDemands demands = demandsFor(material, map);
-    if (demands == null) return false;
+    boolean canPickup = actor.carried == null || actor.carried == material;
     
-    int storeRange = store.type.maxDeliverRange;
-    int maxRange = near ? actor.type.sightRange : storeRange;
-    
-    for (CityMapDemands.Entry e : demands.nearbyEntries(at.x, at.y)) {
-      Element source = (Element) e.source;
-      if (CityMap.distance(source.at(), at) > maxRange  ) break;
-      if (CityMap.distance(store .at(), at) > storeRange) continue;
+    if (demands != null && canPickup) {
+      int storeRange = store.type.maxDeliverRange;
+      int maxRange = near ? actor.type.sightRange : storeRange;
       
-      Pathing from = Task.pathOrigin(actor);
-      Target goes = buildPathTarget(source);
-      if (! map.pathCache.pathConnects(from, goes, true, false)) continue;
-      
-      if (decideNextAction(source, map)) return true;
+      for (CityMapDemands.Entry e : demands.nearbyEntries(at.x, at.y)) {
+        Element source = (Element) e.source;
+        if (CityMap.distance(source.at(), at) > maxRange  ) continue;
+        if (CityMap.distance(store .at(), at) > storeRange) continue;
+        
+        Pathing from = Task.pathOrigin(actor);
+        Target goes = source;// buildPathTarget(source);
+        if (! map.pathCache.pathConnects(from, goes, true, false)) continue;
+        
+        if (decideNextAction(source, map)) return true;
+      }
     }
     //
-    //  If there's no target to attend to, but you have surplus material
-    //  left over, return it to your store:
+    //  If there's no target to attend to, but you have surplus material left
+    //  over, return it to your store:
     if (actor.carried == material) {
-      configTravel(store, JOB.RETURNING, store);
-      site   = null;
-      razing = false;
-      return true;
+      return configTravel(store, site, JOB.RETURNING, store);
     }
     return false;
   }
@@ -157,38 +156,27 @@ public class TaskBuilding extends Task {
     
     float atStore   = store.inventory.valueFor(material);
     float needBuild = checkNeedForBuilding(b, material, map);
+    float carried   = getCarryAmount(material, b, false);
     
     if (needBuild > 0) {
       //  Decide whether to obtain the materials from your store, based
       //  on whether they're available and not already present on-site.
-      float carried = getCarryAmount(material, b, false);
-      
       if (carried <= 0 && atStore > 0) {
         //  Go to the store and pick up the material!
-        configTravel(store, JOB.RETURNING, store);
-        site   = b;
-        razing = false;
-        return true;
+        return configTravel(store, b, JOB.COLLECTING, store);
       }
       else if (carried <= 0) {
         //  Impossible.  Skip onto the next target.
         return false;
       }
       else {
-        //  Begin your visit.  (Note that we cannot target the site
-        //  directly, as it may not yet be in the world.)
-        configTravel(b, JOB.BUILDING, store);
-        site   = b;
-        razing = false;
-        return true;
+        //  Begin your visit for construction-
+        return configTravel(b, b, JOB.BUILDING, store);
       }
     }
     else if (needBuild < 0) {
       //  If there's salvage to be done, start that:
-      configTravel(b, JOB.SALVAGE, store);
-      site   = b;
-      razing = true;
-      return true;
+      return configTravel(b, b, JOB.SALVAGE, store);
     }
     else {
       return false;
@@ -199,52 +187,76 @@ public class TaskBuilding extends Task {
   
   /**  Methods invoked once you arrive at the site:
     */
-  Target buildPathTarget(Element site) {
-    if (site.complete() && site.type.isBuilding()) {
-      return (Building) site;
+  boolean configTravel(
+    Element goes, Element site, Task.JOB jobType, Employer e
+  ) {
+    if (goes.complete() && goes.type.isBuilding()) {
+      this.site = site;
+      return configTask(e, (Building) goes, null, jobType, 0) != null;
     }
-    return site.at();
+    else {
+      //
+      //  You need to configure a visit to an adjacent tile here...
+      CityMap map = goes.map;
+      Tile c = goes.at();
+      Type t = goes.type();
+      Pathing from = Task.pathOrigin(actor);
+      Pick <Tile> pick = new Pick();
+      
+      for (Tile a : map.tilesAround(c.x, c.y, t.wide, t.high)) {
+        if (! map.pathCache.pathConnects(from, a, false, false)) continue;
+        
+        float rating = 1;
+        rating *= CityMap.distancePenalty(from, a);
+        if (Task.hasTaskFocus(a, jobType, actor)) rating /= 3;
+        
+        pick.compare(a, rating);
+      }
+      
+      if (pick.empty()) {
+        return false;
+      }
+      else {
+        this.site = site;
+        return configTask(e, null, pick.result(), jobType, 0) != null;
+      }
+    }
   }
   
   
-  void configTravel(Element site, Task.JOB jobType, Employer e) {
-    if (site.complete() && site.type.isBuilding()) {
-      configTask(e, (Building) site, null, jobType, 0);
-    }
-    else {
-      configTask(e, null, site.at(), jobType, 0);
-    }
+  void toggleFocus(boolean active) {
+    super.toggleFocus(active);
+    site.setFocused(actor, active);
   }
   
   
   protected void onVisit(Building visits) {
-    if (visits == store && site != null) {
-      //
-      //  Pick up some of the material, then go on to the site-
-      float amount = Nums.min(5, store.inventory.valueFor(material));
-      actor.pickupGood(material, amount, store);
-      configTask(store, null, site, JOB.BUILDING, 1);
-    }
-    if (visits == store && site == null) {
-      //
-      //  Drop off any surplus material at the end-
-      actor.offloadGood(material, store);
-    }
-    if (visits == site) {
-      onTarget(site.at());
-    }
+    onTarget(visits);
   }
   
   
   protected void onTarget(Target target) {
-    if (target == store.at() && type == JOB.RETURNING) {
-      onVisit(store);
+    //
+    //  Pick up some of the material initially-
+    if (type == JOB.COLLECTING && adjacent(target, store)) {
+      float amount = Nums.min(5, store.inventory.valueFor(material));
+      actor.pickupGood(material, amount, store);
+      if (! decideNextAction(site, actor.map)) {
+        pickNextTarget(true);
+      }
     }
-    if (site != null && target == site.at() && type != JOB.RETURNING) {
+    //
+    //  Then go on to the site and advance actual construction-
+    if ((type == JOB.BUILDING || type == JOB.SALVAGE) && adjacent(target, site)) {
       advanceBuilding(site, actor.map);
       if (! decideNextAction(site, actor.map)) {
         pickNextTarget(true);
       }
+    }
+    //
+    //  And drop off any surplus material at the end-
+    if (type == JOB.RETURNING && adjacent(target, store)) {
+      actor.offloadGood(material, store);
     }
   }
   
@@ -324,12 +336,7 @@ public class TaskBuilding extends Task {
   }
   
   
-  
 }
-
-
-
-
 
 
 

@@ -3,7 +3,6 @@
 package game;
 import util.*;
 import static game.Task.*;
-import static game.CityMap.*;
 import static game.GameConstants.*;
 
 

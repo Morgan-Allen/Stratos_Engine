@@ -117,18 +117,18 @@ public class Test {
   }
   
   final static String
-    VIEW_NAME = "Tlatoani";
+    VIEW_NAME = "Stratos2e";
   final static BuildType BUILD_MENUS[][] = {
-    PALACE_BUILDINGS     ,
-    INDUSTRIAL_BUILDINGS ,
+    MILITARY_BUILDINGS   ,
+    SCIENCE_BUILDINGS    ,
     ECONOMIC_BUILDINGS   ,
     RESIDENTIAL_BUILDINGS,
-    MILITARY_BUILDINGS   ,
-    RELIGIOUS_BUILDINGS  ,
+    PSI_SCHOOL_BUILDINGS ,
+    RESOURCE_BUILDINGS   ,
   };
   final static String BUILD_MENU_NAMES[] = {
-    "Palace"     , "Industrial", "Economic" ,
-    "Residential", "Military"  , "Religious"
+    "Military"   , "Science"   , "Economic" ,
+    "Residential", "Psi School", "Resource"
   };
   final static String
     ROADS0     = "Roads",

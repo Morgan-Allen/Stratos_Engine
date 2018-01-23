@@ -119,15 +119,21 @@ public class TaskDelivery extends Task {
     for (Building b : from.map.buildings) if (b != from) {
       if (type != null && b.type != type) continue;
       
+      //
+      //  Check to ensure that traders don't deliver to other traders using a
+      //  standard delivery mechanism, and that any requisite features are
+      //  present-
       boolean otherTrades = b.type.isTradeBuilding();
-      if (trades && otherTrades) continue;
-      
-      boolean featured = b.type.hasFeature(feature);
+      boolean featured    = b.type.hasFeature(feature);
+      if (trades && otherTrades        ) continue;
       if (feature != null && ! featured) continue;
       
-      float dist = CityMap.distance(
-        from.mainEntrance(), b.mainEntrance()
-      );
+      //
+      //  We need to allow for structures that aren't built yet, as well as
+      //  those that are-
+      Tile fromT = from.accessible() ? from.mainEntrance() : from.at();
+      Tile goesT = b   .accessible() ? b   .mainEntrance() : b   .at();
+      float dist = CityMap.distance(fromT, goesT);
       if (maxDist > 0 && dist > maxDist) continue;
       
       float rating = 1;
@@ -170,8 +176,12 @@ public class TaskDelivery extends Task {
   
   protected void onVisit(Building visits) {
     if (visits == from) {
-      actor.pickupGood(carried, amount, from);
-      configTravel(goes, type, origin);
+      amount = Nums.min(amount, visits.inventory.valueFor(carried));
+      amount = Nums.max(amount, 0);
+      if (amount > 0) {
+        actor.pickupGood(carried, amount, from);
+        configTravel(goes, type, origin);
+      }
     }
     if (visits == goes) {
       actor.offloadGood(carried, goes);
@@ -184,7 +194,20 @@ public class TaskDelivery extends Task {
     if (targets == goes.at()) onVisit(goes);
   }
   
+  
+  
+  /**  Rendering, debug and interface methods-
+    */
+  public String toString() {
+    return "Delivering "+carried+" from "+from+" to "+goes;
+  }
 }
+
+
+
+
+
+
 
 
 

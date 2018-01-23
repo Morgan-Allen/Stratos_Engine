@@ -27,7 +27,7 @@ public class TaskCrafting extends Task {
   
   static TaskCrafting configCrafting(Actor actor, BuildingForCrafts venue) {
     TaskCrafting task = new TaskCrafting(actor);
-    if (task.configTask(venue, venue, null, JOB.CRAFTING, 1) == null) {
+    if (task.configTask(venue, venue, null, JOB.CRAFTING, 10) == null) {
       return null;
     }
     return task;
@@ -35,17 +35,26 @@ public class TaskCrafting extends Task {
   
   
   
+  //  NOTE:  Used purely for debug purposes, possibly remove later.
+  public static int totalCraftTime = 0;
+  public static double totalProgInc = 0;
+  
+  
   protected void onVisit(Building visits) {
     
     BuildingForCrafts venue = (BuildingForCrafts) visits;
     if (! venue.canAdvanceCrafting()) return;
     
-    Trait skill = venue.type.craftSkill;
-    float progress = venue.craftProgress;
-    float progInc = 1f / venue.type.craftTime;
+    Trait skill     = venue.type.craftSkill;
+    float progress  = venue.craftProgress;
     float skillMult = actor.levelOf(skill) / MAX_SKILL_LEVEL;
     
-    progInc *= 1f + (1f * skillMult);
+    float progInc = 1f + (1f * skillMult);
+    progInc *= 1f / venue.type.craftTime;
+    
+    totalCraftTime += 1;
+    totalProgInc += progInc;
+    
     actor.gainXP(skill, 1 * CRAFT_XP_PERCENT / 100f);
     
     for (Good need : venue.needed()) {
@@ -64,8 +73,6 @@ public class TaskCrafting extends Task {
     
     venue.craftProgress = progress;
   }
-  
-  
   
 }
 

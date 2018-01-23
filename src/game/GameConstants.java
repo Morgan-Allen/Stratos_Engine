@@ -8,6 +8,11 @@ import java.awt.Color;
 
 
 
+
+//  Trooper.  Runner.  Enforcer.
+//  
+
+
 public class GameConstants {
   
   
@@ -319,7 +324,7 @@ public class GameConstants {
     COMMERCE_TYPES[] = { IS_ADMIN, IS_TRADER, IS_VENDOR, IS_HOUSING },
     SERVICE_TYPES [] = { DIVERSION, EDUCATION, HEALTHCARE, RELIGION },
     
-    WATER      = new Good("Water"       , 0  ),
+    //WATER      = new Good("Water"       , 0  ),
     MAIZE      = new Good("Maize"       , 10 ),
     FRUIT      = new Good("Fruit"       , 12 ),
     MEAT       = new Good("Meat"        , 35 ),
@@ -332,7 +337,7 @@ public class GameConstants {
     COTTON     = new Good("Cotton"      , 75 ),
     
     CASH       = new Good("Cash"        , 1  ),
-    SOIL       = new Good("Soil"        , 5  ),
+    //SOIL       = new Good("Soil"        , 5  ),
     
     CROP_TYPES  [] = { MAIZE, FRUIT, RAW_COTTON },
     FOOD_TYPES  [] = { MAIZE, FRUIT, MEAT },
@@ -507,7 +512,7 @@ public class GameConstants {
     CITIZEN.setInitTraits(SKILL_FARM, 1, SKILL_BUILD, 1, SKILL_CRAFT, 1);
     
     SERVANT .name = "Servant";
-    SERVANT.setInitTraits(SKILL_SPEAK, 1, SKILL_WRITE, 1);
+    SERVANT.setInitTraits(SKILL_SPEAK, 1, SKILL_WRITE, 1, SKILL_BUILD, 1);
     
     NOBLE   .name = "Noble";
     NOBLE.setInitTraits(SKILL_MELEE, 1, SKILL_SPEAK, 2, SKILL_WRITE, 2);
@@ -562,41 +567,37 @@ public class GameConstants {
     WALL          = new BuildType(Element.class         , "type_wall"    , IS_STRUCTURAL),
     GATE          = new BuildType(BuildingForWalls.class, "type_gate"    , IS_WALLS_BLD ),
     TOWER         = new BuildType(BuildingForWalls.class, "type_tower"   , IS_WALLS_BLD ),
-    AQUEDUCT      = new BuildType(Element.class         , "type_aqueduct", IS_STRUCTURAL),
-    CISTERN       = new BuildType(BuildingForWater.class, "type_cistern" , IS_WATER_BLD ),
     
     INFRASTRUCTURE_BUILDINGS[] = {
-      ROAD, WALL, GATE, TOWER, AQUEDUCT, CISTERN
+      ROAD, WALL, GATE, TOWER
     },
     
     PALACE        = new BuildType(BuildingForHome.class   , "type_palace"       , IS_HOME_BLD   ),
-    PALACE_BUILDINGS[] = { PALACE },
-    
     HOUSE         = new BuildType(BuildingForHome.class   , "type_house"        , IS_HOME_BLD   ),
     HOUSE_T1      = new BuildType(BuildingForHome.class   , "type_house_tier1"  , IS_UPGRADE    ),
     HOUSE_T2      = new BuildType(BuildingForHome.class   , "type_house_tier2"  , IS_UPGRADE    ),
-    SWEEPER       = new BuildType(BuildingForCollect.class, "type_sweeper"      , IS_COLLECT_BLD),
-    BASIN         = new BuildType(BuildingForWater.class  , "type_basin"        , IS_WATER_BLD  ),
-    SCHOOL        = new BuildType(BuildingForAmenity.class, "type_public_school", IS_AMENITY_BLD),
     BALL_COURT    = new BuildType(BuildingForAmenity.class, "type_ball_court"   , IS_AMENITY_BLD),
-    RESIDENTIAL_BUILDINGS[] = { HOUSE, SWEEPER, BASIN, SCHOOL, BALL_COURT },
+    RESIDENTIAL_BUILDINGS[] = { PALACE, HOUSE, BALL_COURT },
     
     FARM_PLOT     = new BuildType(BuildingForGather.class , "type_farm_plot"    , IS_GATHER_BLD ),
     SAWYER        = new BuildType(BuildingForGather.class , "type_sawyer"       , IS_GATHER_BLD ),
     QUARRY_PIT    = new BuildType(BuildingForGather.class , "type_quarry_pit"   , IS_GATHER_BLD ),
-    KILN          = new BuildType(BuildingForCrafts.class , "type_kiln"         , IS_CRAFTS_BLD ),
-    WEAVER        = new BuildType(BuildingForCrafts.class , "type_weaver"       , IS_CRAFTS_BLD ),
-    MASON         = new BuildType(BuildingForCrafts.class , "type_mason"        , IS_CRAFTS_BLD ),
-    INDUSTRIAL_BUILDINGS[] = { FARM_PLOT, QUARRY_PIT, KILN, WEAVER, MASON },
+    RESOURCE_BUILDINGS[] = { FARM_PLOT, SAWYER, QUARRY_PIT },
     
     MARKET        = new BuildType(BuildingForCrafts.class , "type_market"       , IS_CRAFTS_BLD ),
     PORTER_POST   = new BuildType(BuildingForTrade.class  , "type_porter_post"  , IS_TRADE_BLD  ),
+    
+    //  TODO:  THIS HAS TO BE MERGED WITH THE PALACE/BASTION!
     COLLECTOR     = new BuildType(BuildingForCollect.class, "type_collector"    , IS_COLLECT_BLD),
     ECONOMIC_BUILDINGS[] = { MARKET, PORTER_POST, COLLECTOR },
     
     HUNTER_LODGE  = new BuildType(BuildingForHunt.class   , "type_hunter_lodge" , IS_HUNTS_BLD  ),
     GARRISON      = new BuildType(BuildingForArmy.class   , "type_garrison"     , IS_ARMY_BLD   ),
-    MILITARY_BUILDINGS[] = { GARRISON },
+    MILITARY_BUILDINGS[] = { HUNTER_LODGE, GARRISON },
+    
+    ENGINEER_STATION  = new BuildType(BuildingForCrafts.class , "venue_engineer" , IS_CRAFTS_BLD ),
+    PHYSICIAN_STATION = new BuildType(BuildingForCrafts.class , "venue_physician", IS_CRAFTS_BLD ),
+    SCIENCE_BUILDINGS[] = { ENGINEER_STATION, PHYSICIAN_STATION },
     
     TEMPLE_QZ     = new BuildType(BuildingForFaith.class , "type_temple_qz"     , IS_FAITH_BLD  ),
     TEMPLE_TZ     = new BuildType(BuildingForFaith.class , "type_temple_tz"     , IS_FAITH_BLD  ),
@@ -605,18 +606,9 @@ public class GameConstants {
     TEMPLE_MI     = new BuildType(BuildingForFaith.class , "type_temple_mi"     , IS_FAITH_BLD  ),
     TEMPLE_XT     = new BuildType(BuildingForFaith.class , "type_temple_xt"     , IS_FAITH_BLD  ),
     
-    SHRINE_OMC    = new BuildType(BuildingForFaith.class , "type_shrine_omc"    , IS_FAITH_BLD  ),
-    SHRINE_OMT    = new BuildType(BuildingForFaith.class , "type_shrine_omt"    , IS_FAITH_BLD  ),
-    
-    ALL_TEMPLES[] = {
+    PSI_SCHOOL_BUILDINGS[] = {
       TEMPLE_QZ, TEMPLE_TZ, TEMPLE_HU, TEMPLE_TL, TEMPLE_MI, TEMPLE_XT
-    },
-    ALL_SHRINES[] = {
-      SHRINE_OMC, SHRINE_OMT
-    },
-    RELIGIOUS_BUILDINGS[] = (BuildType[]) Visit.compose(
-      BuildType.class, ALL_TEMPLES, ALL_SHRINES
-    )
+    }
   ;
   static {
     
@@ -651,38 +643,22 @@ public class GameConstants {
     TOWER.setBuildMaterials(STONE, 10);
     TOWER.setFeatures(IS_TOWER);
     
-    AQUEDUCT.name = "Aqueduct";
-    AQUEDUCT.tint = TINT_LITE_AQUATIC;
-    AQUEDUCT.isWater = true;
-    AQUEDUCT.pathing = PATH_WALLS;
-    AQUEDUCT.setDimensions(1, 1, 1);
-    AQUEDUCT.setBuildMaterials(CLAY, 1, STONE, 2);
-    
-    //  TODO:  Fractional material-costs should be possible here!
-    
-    CISTERN.name = "Cistern";
-    CISTERN.tint = TINT_AQUATIC;
-    CISTERN.pathing = PATH_WALLS;
-    CISTERN.isWater = true;
-    CISTERN.setDimensions(3, 3, 1);
-    CISTERN.setBuildMaterials(CLAY, 4, STONE, 10);
-    
     //
-    //  Palace structures:
+    //  Residential structures:
     PALACE.name = "Palace";
     PALACE.tint = TINT_RESIDENTIAL;
     PALACE.setDimensions(5, 5, 2);
+    PALACE.maxHealth = 300;
     PALACE.setBuildMaterials(CLAY, 5, WOOD, 15, STONE, 25);
-    PALACE.setHomeUsage(POTTERY, 5, COTTON, 10);
+    ///PALACE.setHomeUsage(POTTERY, 5, COTTON, 10);
     PALACE.setWorkerTypes(NOBLE, SERVANT);
     PALACE.homeSocialClass = CLASS_NOBLE;
     PALACE.maxResidents = 2;
-    PALACE.maxWorkers = 2;
-    PALACE.maxHealth = 300;
+    PALACE.maxWorkers   = 2;
+    PALACE.buildsWith   = new Good[] { WOOD, CLAY, STONE };
     PALACE.setFeatures(IS_HOUSING);
+    PALACE.worksBeforeBuilt = true;
     
-    //
-    //  Residential structures:
     HOUSE.name = "House";
     HOUSE.tint = TINT_LITE_RESIDENTIAL;
     HOUSE.setDimensions(2, 2, 1);
@@ -704,29 +680,7 @@ public class GameConstants {
     HOUSE_T2.setBuildMaterials(WOOD, 6, CLAY, 3);
     HOUSE_T2.setHomeUsage(POTTERY, 1, COTTON, 1);
     HOUSE_T2.maxStock = 2;
-    HOUSE_T2.setUpgradeNeeds(DIVERSION, 15, SCHOOL, 1);
-    
-    BASIN.name = "Basin";
-    BASIN.tint = TINT_AQUATIC;
-    BASIN.isWater = true;
-    BASIN.pathing = PATH_WALLS;
-    BASIN.setDimensions(1, 1, 1);
-    BASIN.setBuildMaterials(STONE, 1, CLAY, 1);
-    BASIN.setFeatures(IS_WATER, IS_VENDOR);
-    
-    SWEEPER.name = "Sweeper";
-    SWEEPER.tint = TINT_LITE_INDUSTRIAL;
-    SWEEPER.setDimensions(1, 1, 1);
-    SWEEPER.setBuildMaterials(WOOD, 2, CLAY, 1);
-    SWEEPER.setWorkerTypes(WORKER);
-    SWEEPER.produced = new Good[] { SOIL };
-    
-    SCHOOL.name = "Public School";
-    SCHOOL.tint = TINT_HEALTH_ED;
-    SCHOOL.setDimensions(2, 2, 1);
-    SCHOOL.setBuildMaterials(WOOD, 5, CLAY, 2, STONE, 3);
-    SCHOOL.setWorkerTypes(CITIZEN);
-    SCHOOL.setFeatures(EDUCATION);
+    HOUSE_T2.setUpgradeNeeds(DIVERSION, 15, PHYSICIAN_STATION, 1);
     
     BALL_COURT.name = "Ball Court";
     BALL_COURT.tint = TINT_AMENITY;
@@ -737,17 +691,6 @@ public class GameConstants {
 
     //
     //  Industrial structures:
-    MASON.name = "Mason";
-    MASON.tint = TINT_LITE_INDUSTRIAL;
-    MASON.setDimensions(2, 2, 1);
-    MASON.setBuildMaterials(STONE, 2, WOOD, 2, CLAY, 2);
-    MASON.setWorkerTypes(WORKER);
-    MASON.worksBeforeBuilt = true;
-    MASON.craftTime *= 2;
-    MASON.maxWorkers = 2;
-    MASON.buildsWith = new Good[] { WOOD, CLAY, STONE };
-    MASON.needed     = MASON.buildsWith;
-    MASON.maxStock   = 10;
     
     FARM_PLOT.name = "Farm Plot";
     FARM_PLOT.tint = TINT_LITE_INDUSTRIAL;
@@ -785,26 +728,6 @@ public class GameConstants {
     QUARRY_PIT.maxWorkers = 2;
     QUARRY_PIT.craftSkill = SKILL_CRAFT;
     
-    KILN.name = "Kiln";
-    KILN.tint = TINT_INDUSTRIAL;
-    KILN.setDimensions(2, 2, 1);
-    KILN.setBuildMaterials(STONE, 2, WOOD, 2, CLAY, 1);
-    KILN.setWorkerTypes(WORKER);
-    KILN.needed   = new Good[] { CLAY };
-    KILN.produced = new Good[] { POTTERY };
-    KILN.maxStock = 3;
-    KILN.craftSkill = SKILL_CRAFT;
-    
-    WEAVER.name = "Weaver";
-    WEAVER.tint = TINT_INDUSTRIAL;
-    WEAVER.setDimensions(2, 2, 1);
-    WEAVER.setBuildMaterials(WOOD, 2, CLAY, 1);
-    WEAVER.setWorkerTypes(WORKER);
-    WEAVER.needed   = new Good[] { RAW_COTTON };
-    WEAVER.produced = new Good[] { COTTON };
-    WEAVER.maxStock = 3;
-    WEAVER.craftSkill = SKILL_CRAFT;
-    
     //
     //  Commercial structures:
     MARKET.name = "Marketplace";
@@ -823,8 +746,7 @@ public class GameConstants {
     PORTER_POST.worksBeforeBuilt = true;
     PORTER_POST.features = new Good[] { IS_TRADER };
     
-    //  TODO:  You could make this into more of a 'governor's post', since the
-    //  tax-collectors basically functioned that way.
+    //  TODO:  Make this into a 'Guardhouse', or the nearest equivalent...
     COLLECTOR.name = "Collector";
     COLLECTOR.tint = TINT_COMMERCIAL;
     COLLECTOR.setDimensions(2, 2, 1);
@@ -854,6 +776,30 @@ public class GameConstants {
     GARRISON.maxHealth  = 250;
     
     //
+    //  Science structures:
+    ENGINEER_STATION.name = "Engineer Station";
+    ENGINEER_STATION.tint = TINT_INDUSTRIAL;
+    ENGINEER_STATION.setDimensions(2, 2, 1);
+    ENGINEER_STATION.setBuildMaterials(STONE, 2, WOOD, 2, CLAY, 1);
+    ENGINEER_STATION.setWorkerTypes(WORKER);
+    ENGINEER_STATION.needed   = new Good[] { CLAY };
+    ENGINEER_STATION.produced = new Good[] { POTTERY };
+    ENGINEER_STATION.maxStock = 3;
+    ENGINEER_STATION.craftSkill = SKILL_CRAFT;
+    
+    PHYSICIAN_STATION.name = "Physician Station";
+    PHYSICIAN_STATION.tint = TINT_INDUSTRIAL;
+    PHYSICIAN_STATION.setDimensions(2, 2, 1);
+    PHYSICIAN_STATION.setBuildMaterials(WOOD, 2, CLAY, 1);
+    PHYSICIAN_STATION.setWorkerTypes(WORKER);
+    PHYSICIAN_STATION.needed   = new Good[] { RAW_COTTON };
+    PHYSICIAN_STATION.produced = new Good[] { COTTON };
+    PHYSICIAN_STATION.maxStock = 3;
+    PHYSICIAN_STATION.craftSkill = SKILL_CRAFT;
+    PHYSICIAN_STATION.setFeatures(HEALTHCARE);
+    PHYSICIAN_STATION.featureAmount = 20;
+    
+    //
     //  Religious structures:
     //
     //  Day/Order and Night/Freedom : Qz / Tz
@@ -866,13 +812,11 @@ public class GameConstants {
     //
     //  Life and Death: Om / Mi
     TEMPLE_MI .name = "Temple to Mictecacehuatl";
-    SHRINE_OMC.name = "Shrine to Omecihuatl";
-    SHRINE_OMT.name = "Shrine to Ometicuhtli";
     //
     //  Balancing/tension: Xt
     TEMPLE_XT .name = "Temple to Xipe Totec";
     
-    for (Type t : ALL_TEMPLES) {
+    for (Type t : PSI_SCHOOL_BUILDINGS) {
       t.tint = TINT_RELIGIOUS;
       t.setDimensions(6, 6, 3);
       t.setBuildMaterials(STONE, 15);
@@ -882,47 +826,6 @@ public class GameConstants {
       t.maxResidents    = 1;
       t.homeSocialClass = CLASS_NOBLE;
       t.features        = new Good[] { RELIGION };
-    }
-    
-    //
-    //  NOTE- there's a bunch of other shrines/upgrades I might add
-    //  later, but I want to work those out in due time.  Later.
-    
-    //
-    //  Quetzalcoatl:
-    //    Aspects for healing & knowledge, travel & wind
-    //    Patecatl/Piltzintecuhtli, Yacetecuhtli/Zacatzontli, Ehecatl
-    //  Tezcatlipoca:
-    //    Aspects for discord, beauty, sin & confession
-    //    Itztli/Itztlacoliuhqui, Huehuecoyotl/Mayahuel, Tlazolteotl
-    //  Tlaloc:
-    //    Aspects for rivers & oceans, fertility & monstrosity
-    //    Chalchiutlicue/Huixtocihuatl, Xochiquetzal/Xochipilli,
-    //    Cipactli/Coatlicue/Tlaltecuhtli
-    //  Huitzilopochtli:
-    //    Aspects for warfare & lordship, fire & hearth
-    //    Tonatiuh, Mixcoatl, Xiuhtecuhtli/Chantico
-    //  Mictecacehuatl:
-    //    Aspects for transmigration, ancestry, consumption & eclipse
-    //    Xolotl/Nanahuatzin, Coyolxauhqui/Itzapapalotl/Oxomoco, Quilaztli
-    //  Xipe Totec:
-    //    Aspects of decay & abundance, factional tension
-    //    Centeotl/Xilonen
-    //  
-    //  Ometeotl:     Synergy bonus based on factional balance
-    //  The Toci:     Synergy bonus for earth-goddesses
-    //  400 Rabbits:  Synergy bonus for regular festivals
-    
-    for (Type t : ALL_SHRINES) {
-      t.tint = TINT_RELIGIOUS;
-      if (t == SHRINE_OMC || t == SHRINE_OMT) {
-        t.setDimensions(2, 2, 1);
-        t.setBuildMaterials(STONE, 8);
-      }
-      else {
-        t.setDimensions(1, 1, 1);
-        t.setBuildMaterials(STONE, 2);
-      }
     }
   }
   
@@ -964,10 +867,12 @@ public class GameConstants {
     City homeCity();
   }
   
+  
   static interface Journeys {
     void onArrival(City goes, World.Journey journey);
     City homeCity();
   }
+  
   
   static interface Employer {
     void selectActorBehaviour(Actor actor);

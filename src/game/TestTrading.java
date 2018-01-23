@@ -69,10 +69,10 @@ public class TestTrading extends Test {
       STONE     , 5 
     );
     
-    Building kiln = (Building) KILN.generate();
+    Building kiln = (Building) ENGINEER_STATION.generate();
     kiln.enterMap(map, 2, 3, 1);
     
-    Building weaver = (Building) WEAVER.generate();
+    Building weaver = (Building) PHYSICIAN_STATION.generate();
     weaver.enterMap(map, 5, 3, 1);
     
     CityMapPlanning.placeStructure(ROAD, map, true, 1, 5, 8, 1);

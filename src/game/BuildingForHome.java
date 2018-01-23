@@ -178,7 +178,6 @@ public class BuildingForHome extends Building {
   
   float maxTierStock(Good g, Type tier) {
     if (Visit.arrayIncludes(FOOD_TYPES, g)) return 5;
-    if (g == WATER) return 1;
     int index = Visit.indexOf(g, tier.homeUseGoods);
     if (index == -1) return 0;
     return tier.homeUsage[index];
@@ -187,7 +186,6 @@ public class BuildingForHome extends Building {
   
   Batch <Good> usedBy(Type tier) {
     Batch <Good> consumes = new Batch();
-    consumes.add(WATER);
     for (Good g : FOOD_TYPES       ) consumes.add(g);
     for (Good g : tier.homeUseGoods) consumes.add(g);
     return consumes;
@@ -209,7 +207,7 @@ public class BuildingForHome extends Building {
   void updateOnPeriod(int period) {
     super.updateOnPeriod(period);
     
-    if (! map.city.world.settings.toggleBuildEvolve) {
+    if (! this.map.city.world.settings.toggleBuildEvolve) {
       return;
     }
     
@@ -260,12 +258,6 @@ public class BuildingForHome extends Building {
   
   
   void generateOutputs(Type tier) {
-    float soilLevel = residents.size();
-    soilLevel *= type.updateTime;
-    soilLevel /= FECES_UNIT_TIME;
-    inventory.add(soilLevel, SOIL);
-    map.city.makeTotals.add(soilLevel, SOIL);
-
     float taxLevel = residents.size() * TAX_VALUES[type.homeSocialClass];
     taxLevel *= (1 + Visit.indexOf(tier, type.upgradeTiers));
     taxLevel *= type.updateTime;
@@ -304,43 +296,54 @@ public class BuildingForHome extends Building {
       returnActorHere(actor);
     }
     //
-    //  Failing that, see if you can go shopping:
-    Type tier = tierOffset(1);
-    class Order { Building b; Good g; float amount; }
-    Pick <Order> pickS = new Pick();
-    
-    for (Good cons : usedBy(tier)) {
-      float need = 1 + maxTierStock(cons, tier);
-      need -= inventory.valueFor(cons);
-      need -= totalFetchedFor(this, cons);
-      if (need <= 0) continue;
-      
-      for (Building b : map.buildings) {
-        if (! b.type.hasFeature(IS_VENDOR)) continue;
-        
-        float dist = CityMap.distance(this, b);
-        if (dist > 50) continue;
-        
-        float amount = b.inventory.valueFor(cons);
-        amount -= totalFetchedFrom(b, cons);
-        if (amount < 1) continue;
-        
-        float rating = need * amount * CityMap.distancePenalty(dist);
-        Order o = new Order();
-        o.b = b;
-        o.g = cons;
-        o.amount = need;
-        pickS.compare(o, rating);
-      }
-    }
-    if (! pickS.empty()) {
-      Order o = pickS.result();
-      TaskDelivery d = new TaskDelivery(actor);
-      d.configDelivery(o.b, this, JOB.SHOPPING, o.g, o.amount, this);
-      if (d != null) {
-        //I.say("Delivering "+o.amount+" "+o.g+" from "+o.b+" to "+this);
-        actor.assignTask(d);
+    //  Non-nobles have work to do-
+    if (actor.type.socialClass != CLASS_NOBLE) {
+      //
+      //  See if you can assist with building-projects:
+      Task building = TaskBuilding.nextBuildingTask(this, actor);
+      if (building != null) {
+        actor.assignTask(building);
         return;
+      }
+      //
+      //  Failing that, see if you can go shopping:
+      Type tier = tierOffset(1);
+      class Order { Building b; Good g; float amount; }
+      Pick <Order> pickS = new Pick();
+      
+      for (Good cons : usedBy(tier)) {
+        float need = 1 + maxTierStock(cons, tier);
+        need -= inventory.valueFor(cons);
+        need -= totalFetchedFor(this, cons);
+        if (need <= 0) continue;
+        
+        for (Building b : map.buildings) {
+          if (! b.type.hasFeature(IS_VENDOR)) continue;
+          
+          float dist = distance(this, b);
+          if (dist > 50) continue;
+          
+          float amount = b.inventory.valueFor(cons);
+          amount -= totalFetchedFrom(b, cons);
+          if (amount < 1) continue;
+          
+          float rating = need * amount * distancePenalty(dist);
+          Order o  = new Order();
+          o.b      = b;
+          o.g      = cons;
+          o.amount = Nums.min(need, amount);
+          pickS.compare(o, rating);
+        }
+      }
+      if (! pickS.empty()) {
+        Order o = pickS.result();
+        TaskDelivery d = new TaskDelivery(actor);
+        d.configDelivery(o.b, this, JOB.SHOPPING, o.g, o.amount, this);
+        if (d != null) {
+          //I.say("Delivering "+o.amount+" "+o.g+" from "+o.b+" to "+this);
+          actor.assignTask(d);
+          return;
+        }
       }
     }
     //
@@ -388,7 +391,8 @@ public class BuildingForHome extends Building {
     for (Actor a : store.focused()) {
       if (! (a.task instanceof TaskDelivery)) continue;
       TaskDelivery fetch = (TaskDelivery) a.task;
-      if (fetch.carried == good) total += fetch.amount;
+      if (fetch.from    != store) continue;
+      if (fetch.carried == good ) total += fetch.amount;
     }
     return total;
   }

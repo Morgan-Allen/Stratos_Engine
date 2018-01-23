@@ -1,7 +1,6 @@
 
 package game;
 import util.*;
-import static game.CityMap.*;
 import static game.GameConstants.*;
 
 
@@ -36,50 +35,39 @@ public class TestBridging extends Test {
       int high = elevation[t.y];
       map.setTerrain(t, ter, high);
     }
-    for (Tile t : map.tilesUnder(4, 1, 2, 2)) {
+    for (Tile t : map.tilesUnder(4, 0, 2, 8)) {
       map.setTerrain(t, LAKE, t.elevation);
     }
     
-    //
-    //  Set up some essential construction facilities:
-    Building mason1 = (Building) MASON.generate();
-    Building mason2 = (Building) MASON.generate();
-    mason1.enterMap(map, 8, 12, 1);
-    mason2.enterMap(map, 6, 12, 1);
-    for (Good g : mason1.type.buildsWith) {
-      mason1.inventory.set(g, 100);
-      mason2.inventory.set(g, 100);
+    
+    Building palace = (Building) PALACE.generate();
+    palace.enterMap(map, 8, 10, 1);
+    for (Good g : palace.type.buildsWith) {
+      palace.inventory.set(g, 100);
     }
-    fillWorkVacancies(mason1);
-    fillWorkVacancies(mason2);
+    fillWorkVacancies(palace);
     
-    //
-    //  Test to ensure that water does not collect in cisterns away
-    //  from a water-source:
-    Building cistern0 = (Building) CISTERN.generate();
-    map.planning.placeObject(cistern0, 8, 0);
     
-    //  ...and can flow along connected aqueducts, but not uphill:
-    Building cistern1 = (Building) CISTERN.generate();
-    map.planning.placeObject(cistern1, 1, 0);
+    CityMapPlanning.placeStructure(WALL, map, false, 14, 2, 2, 10);
+    CityMapPlanning.placeStructure(ROAD, map, false, 2 , 2, 1, 10);
     
-    Building cistern2 = (Building) CISTERN.generate();
-    map.planning.placeObject(cistern2, 12, 10);
+    Building tower1 = (Building) TOWER.generate();
+    tower1.setFacing(TileConstants.E);
+    map.planning.placeObject(tower1, 14, 12);
     
-    Building basin1 = (Building) BASIN.generate();
-    map.planning.placeObject(basin1, 2, 13);
+    Building tower2 = (Building) TOWER.generate();
+    tower2.setFacing(TileConstants.E);
+    map.planning.placeObject(tower2, 14, 2);
     
-    Building basin2 = (Building) BASIN.generate();
-    map.planning.placeObject(basin2, 14, 2);
-    
-    CityMapPlanning.placeStructure(AQUEDUCT, map, false , 2, 3, 1, 10);
-    CityMapPlanning.placeStructure(AQUEDUCT, map, false, 15, 2, 1, 10);
+    Building kiln = (Building) ENGINEER_STATION.generate();
+    map.planning.placeObject(kiln, 10, 2);
     
     //
     //  First, we simulate the entire construction process by picking
     //  accessible buildings at random and increment their construction
     //  progress, while checking to ensure there are no discrepancies
     //  in pathing afterward.
+    map.planning.updatePlanning();
     List <Element> toBuild = map.planning.toBuild.copy();
     Pick <Element> pick = new Pick();
     
@@ -87,7 +75,13 @@ public class TestBridging extends Test {
       
       pick.clear();
       for (Element e : toBuild) {
-        if (! map.pathCache.pathConnects(mason1, e, true, false)) continue;
+        if (e.at() == null) {
+          I.say("REMOVED ELEMENTS SHOULD NOT BE ON PLANNING MAP!");
+          pick.clear();
+          break;
+        }
+        
+        if (! map.pathCache.pathConnects(palace, e, true, false)) continue;
         pick.compare(e, Rand.index(16));
       }
       
@@ -111,7 +105,7 @@ public class TestBridging extends Test {
         at.y - 1,
         type.wide + 2,
         type.high + 2
-      )) if (t != null && ! testPathing(t, mason1, map)) {
+      )) if (t != null && ! testPathing(t, palace, map)) {
         return false;
       }
     }
@@ -133,10 +127,10 @@ public class TestBridging extends Test {
       
       if (! graphics) return false;
     }
-
-    //  Otherwise, we need to ensure that actor-based construction will
-    //  work.  So we tear down all of these structures, and get them
-    //  ready to be rebuilt.
+    
+    //  Otherwise, we still need to ensure that actor-based construction will
+    //  work.  So we tear down all of these structures, and get them ready to
+    //  be rebuilt.
     else {
       Batch <Element> freshBuilt = new Batch();
       for (Element e : map.planning.toBuild) {
@@ -145,12 +139,15 @@ public class TestBridging extends Test {
         e.exitMap(map);
         
         Element copy = (Element) e.type.generate();
+        if (e.type.isBuilding()) {
+          ((Building) copy).setFacing(((Building) e).facing());
+        }
         copy.setLocation(at, map);
         freshBuilt.add(copy);
         
-        if (e == cistern0) cistern0 = (BuildingForWater) copy;
-        if (e == basin1  ) basin1   = (BuildingForWater) copy;
-        if (e == basin2  ) basin2   = (BuildingForWater) copy;
+        if (e == tower1) tower1 = (Building) copy;
+        if (e == tower2) tower2 = (Building) copy;
+        if (e == kiln  ) kiln   = (Building) copy;
       }
       
       for (Element e : freshBuilt) {
@@ -161,8 +158,10 @@ public class TestBridging extends Test {
     //
     //  Run simulation:
     final int RUN_TIME = YEAR_LENGTH;
-    boolean buildOkay = false;
-    boolean waterOkay = false;
+    boolean buildOkay  = false;
+    boolean accessOkay = false;
+    boolean testOkay   = false;
+    
     
     while (map.time < RUN_TIME || graphics) {
       map = test.runLoop(map, 1, graphics, "saves/test_build_path.tlt");
@@ -176,28 +175,25 @@ public class TestBridging extends Test {
         buildOkay = buildDone;
       }
       
-      if (buildOkay && ! waterOkay) {
-        boolean fillsOkay = true;
-        fillsOkay &= basin1  .inventory.valueFor(WATER) >= 5;
-        fillsOkay &= basin2  .inventory.valueFor(WATER) == 0;
-        fillsOkay &= cistern0.inventory.valueFor(WATER) == 0;
-        waterOkay = fillsOkay;
+      if (! accessOkay) {
+        Tile from = map.tileAt(1, 1), goes = map.tileAt(15, 0);
         
-        if (waterOkay) {
-          I.say("\nBRIDGING TEST SUCCESSFUL!");
-          if (! graphics) return true;
-        }
+        boolean connected = true;
+        connected &= map.pathCache.pathConnects(from, goes);
+        
+        accessOkay = connected;
       }
       
-      if (map.time + 10 >= RUN_TIME && (! waterOkay) && (! graphics)) {
-        graphics = true;
-        world.settings.paused = true;
+      if (accessOkay && buildOkay && ! testOkay) {
+        I.say("\nBRIDGING TEST SUCCESSFUL!");
+        testOkay = true;
+        if (! graphics) return true;
       }
     }
     
     I.say("\nBRIDGING TEST FAILED!");
-    I.say("  Build okay: "+buildOkay);
-    I.say("  Water okay: "+waterOkay);
+    I.say("  Build okay:  "+buildOkay );
+    I.say("  Access okay: "+accessOkay);
     
     return false;
   }

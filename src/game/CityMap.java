@@ -214,6 +214,7 @@ public class CityMap implements Session.Saveable {
   
   public static Tile[] adjacent(Tile spot, Tile temp[], CityMap map) {
     if (temp == null) temp = new Tile[9];
+    if (map == null || spot == null) return temp;
     for (int dir : T_INDEX) {
       int x = spot.x + T_X[dir], y = spot.y + T_Y[dir];
       temp[dir] = map.tileAt(x, y);
@@ -231,6 +232,18 @@ public class CityMap implements Session.Saveable {
   public static float distance(Target a, Target b) {
     if (a == null || b == null) return 1000000000;
     return distance(a.at(), b.at());
+  }
+  
+  
+  public static boolean adjacent(Target a, Target b) {
+    if (a == null || b == null) return false;
+    Tile AA = a.at  (), AB = b.at  ();
+    Type TA = a.type(), TB = b.type();
+    if (AA.x > AB.x + TB.wide) return false;
+    if (AA.y > AB.y + TB.high) return false;
+    if (AB.x > AA.x + TA.wide) return false;
+    if (AB.y > AA.y + TA.high) return false;
+    return true;
   }
   
   
