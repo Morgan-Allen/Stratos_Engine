@@ -21,10 +21,10 @@ public class Tile implements Pathing {
   private Object pathFlag;  //  Only used during temporary path-searches...
   
   
-  void loadState(Session s) throws Exception {
+  void loadState(Session s, CityMap map) throws Exception {
     elevation = s.loadInt();
     int terrID = s.loadInt();
-    terrain = terrID == -1 ? null : ALL_TERRAINS[terrID];
+    terrain = terrID == -1 ? EMPTY : map.terrainTypes[terrID];
     above   = (Element) s.loadObject();
     
     if (s.loadBool()) s.loadObjects(focused = new List());
@@ -32,9 +32,9 @@ public class Tile implements Pathing {
   }
   
   
-  void saveState(Session s) throws Exception {
+  void saveState(Session s, CityMap map) throws Exception {
     s.saveInt(elevation);
-    s.saveInt(terrain == null ? -1 : terrain.terrainID);
+    s.saveInt(Visit.indexOf(terrain, map.terrainTypes));
     s.saveObject(above);
     
     s.saveBool(focused != null);

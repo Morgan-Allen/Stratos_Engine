@@ -3,6 +3,7 @@
 package game;
 import util.*;
 import static game.GameConstants.*;
+import static game.GameContent.*;
 
 
 
@@ -16,13 +17,14 @@ public class TestMilitary extends Test {
   
   static boolean testMilitary(boolean graphics) {
     Test test = new TestMilitary();
-    
-    World   world = new World();
+
+    World   world = new World(ALL_GOODS);
     City    homeC = new City(world);
     City    awayC = new City(world);
     CityMap map   = CityMapTerrain.generateTerrain(
       homeC, 32, 0, MEADOW, JUNGLE
     );
+    world.assignCitizenTypes(ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES);
     world.addCities(homeC, awayC);
     homeC.name = "Home City";
     awayC.name = "Away City";

@@ -1,9 +1,8 @@
 
 
 package game;
-import static game.GameConstants.*;
 import util.*;
-
+import static game.GameConstants.*;
 
 
 
@@ -30,6 +29,10 @@ public class World implements Session.Saveable {
   /**  Data fields, setup and save/load methods-
     */
   final WorldSettings settings = new WorldSettings(this);
+  Good goodTypes   [] = {};
+  Type citizenTypes[] = {};
+  Type soldierTypes[] = {};
+  Type nobleTypes  [] = {};
   
   int time = 0;
   List <City> cities = new List();
@@ -40,8 +43,8 @@ public class World implements Session.Saveable {
   int mapWide = 10, mapHigh = 10;
   
   
-  World() {
-    return;
+  World(Good goodTypes[]) {
+    this.goodTypes = goodTypes;
   }
   
   
@@ -49,6 +52,10 @@ public class World implements Session.Saveable {
     s.cacheInstance(this);
     
     settings.loadState(s);
+    goodTypes    = (Good[]) s.loadObjectArray(Good.class);
+    citizenTypes = (Type[]) s.loadObjectArray(Type.class);
+    soldierTypes = (Type[]) s.loadObjectArray(Type.class);
+    nobleTypes   = (Type[]) s.loadObjectArray(Type.class);
     
     time = s.loadInt();
     s.loadObjects(cities);
@@ -79,6 +86,10 @@ public class World implements Session.Saveable {
   public void saveState(Session s) throws Exception {
     
     settings.saveState(s);
+    s.saveObjectArray(goodTypes   );
+    s.saveObjectArray(citizenTypes);
+    s.saveObjectArray(soldierTypes);
+    s.saveObjectArray(nobleTypes  );
     
     s.saveInt(time);
     s.saveObjects(cities);
@@ -101,6 +112,17 @@ public class World implements Session.Saveable {
     
     s.saveInt(mapWide);
     s.saveInt(mapHigh);
+  }
+  
+  
+  /**  Assign citizen types:
+    */
+  public void assignCitizenTypes(
+    Type citizens[], Type soldiers[], Type nobles[]
+  ) {
+    this.citizenTypes = citizens;
+    this.soldierTypes = soldiers;
+    this.nobleTypes   = nobles  ;
   }
   
   

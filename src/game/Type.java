@@ -140,12 +140,13 @@ public class Type extends Index.Entry implements Session.Saveable {
   
   /**  Building-specific data fields and setup methods-
     */
-  Good    buildsWith  [] = NO_GOODS;
   Type    upgradeTiers[] = NO_TIERS;
   Type    upgradeNeeds[] = NO_NEEDS;
   Integer upgradeUsage[] = {};
   Good    homeUseGoods[] = NO_GOODS;
   Integer homeUsage   [] = {};
+  Good    homeFoods   [] = {};
+  Good    buildsWith  [] = NO_GOODS;
   boolean worksBeforeBuilt = false;
   
   int homeSocialClass  = CLASS_COMMON;
@@ -276,6 +277,7 @@ public class Type extends Index.Entry implements Session.Saveable {
   int  socialClass  = CLASS_COMMON;
   int  genderRole   = SEX_EITHER;
   Type patronGods[] = null;
+  boolean isPorter  = false;
   
   int maxHealth   = AVG_MAX_HEALTH;
   int meleeDamage = AVG_MELEE;
@@ -287,9 +289,11 @@ public class Type extends Index.Entry implements Session.Saveable {
   Trait   initTraits [] = {};
   Integer traitLevels[] = {};
   
-  Terrain habitats[] = NO_HABITAT;
-  boolean predator   = false;
-  int     lifespan   = LIFESPAN_LENGTH;
+  Terrain habitats[]   = NO_HABITAT;
+  boolean predator     = false;
+  int     lifespan     = LIFESPAN_LENGTH;
+  Good[]  foodsAllowed = null;
+  Good    meatType     = null;
   
   
   void setInitTraits(Object... args) {

@@ -7,7 +7,7 @@ import static game.CityBorders.*;
 
 
 
-public class BuildingForTrade extends BuildingForCrafts implements Trader {
+public class BuildingForTrade extends Building implements Trader {
   
   
   /**  Data fields, setup and save/load methods-
@@ -74,6 +74,13 @@ public class BuildingForTrade extends BuildingForCrafts implements Trader {
   float stockLimit (Good made) { return Nums.abs(tradeLevel.valueFor(made)); }
   
   
+  float demandFor(Good g) {
+    boolean consumes = accessible() && Visit.arrayIncludes(needed(), g);
+    float need = consumes ? stockNeeded(g) : 0;
+    return super.demandFor(g) + need;
+  }
+  
+  
   public City homeCity() {
     return map.city;
   }
@@ -83,18 +90,29 @@ public class BuildingForTrade extends BuildingForCrafts implements Trader {
   /**  Selecting behaviour for walkers-
     */
   public void selectActorBehaviour(Actor actor) {
-    if (actor.type == PORTER) {
+    
+    if (actor == workers.first()) {
       selectTraderBehaviour(actor);
     }
     else {
-      super.selectActorBehaviour(actor);
+      if (! actorIsHereWithPrompt(actor)) return;
+      
+      Task delivery = TaskDelivery.pickNextDelivery(actor, this, produced());
+      if (delivery != null) {
+        actor.assignTask(delivery);
+        return;
+      }
+      
+      Task building = TaskBuilding.nextBuildingTask(this, actor);
+      if (building != null) {
+        actor.assignTask(building);
+        return;
+      }
     }
   }
   
   
   void selectTraderBehaviour(Actor trader) {
-    
-    if (! actorIsHereWithPrompt(trader)) return;
     
     class Order { Tally <Good> cargo; Trader goes; float rating; }
     List <Trader> targets = new List();
@@ -118,9 +136,10 @@ public class BuildingForTrade extends BuildingForCrafts implements Trader {
     }
     
     for (Trader t : targets) {
+      World w = map.city.world;
       City c = (t == t.homeCity()) ? ((City) t) : null;
-      Tally <Good> cargoAway = configureCargo(this, t, false);
-      Tally <Good> cargoBack = configureCargo(t, this, true );
+      Tally <Good> cargoAway = configureCargo(this, t, false, w);
+      Tally <Good> cargoBack = configureCargo(t, this, true , w);
       
       float distRating = distanceRating(this, t);
       float rating = 0;

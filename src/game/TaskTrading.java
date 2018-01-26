@@ -139,7 +139,7 @@ public class TaskTrading extends Task {
     //  If you've arrived at your destination city, offload your cargo, take on
     //  fresh goods, and record any profits in the process:
     if (goes != homeCity) {
-      Tally <Good> taken = configureCargo(goes, tradeFrom, false);
+      Tally <Good> taken = configureCargo(goes, tradeFrom, false, goes.world);
       offloadGoods(goes       );
       takeOnGoods (goes, taken);
       homeCity.world.beginJourney(journey.goes, homeCity, actor);

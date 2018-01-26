@@ -1,9 +1,9 @@
 
 
+
 package game;
 import util.*;
-import static game.CityMap.*;
-import static game.GameConstants.*;
+import static game.GameContent.*;
 
 
 
@@ -18,22 +18,24 @@ public class TestExploring extends Test {
   static boolean testExploring(boolean graphics) {
     Test test = new TestExploring();
     
-    CityMap map = Test.setupTestCity(32, JUNGLE, MEADOW);
+    CityMap map = Test.setupTestCity(32, ALL_GOODS, true, JUNGLE, MEADOW);
     
+    CityMapPlanning.markDemolish(map, true, 3, 3, 6, 6);
     Building lodge = (Building) HUNTER_LODGE.generate();
     lodge.enterMap(map, 4, 4, 1);
     Test.fillWorkVacancies(lodge);
     
     CityMapTerrain.populateAnimals(map, TAPIR);
     
-    boolean explored = false;
     int tilesSeen = 0, tilesOpen = 0;
-    boolean didHunting = false;
+    boolean exploreOkay = false;
+    boolean huntingOkay = false;
+    boolean testOkay    = false;
     
     while (map.time < 1000 || graphics) {
       map = test.runLoop(map, 10, graphics, "saves/test_gathering.tlt");
       
-      if (! explored) {
+      if (! exploreOkay) {
         tilesSeen = 0;
         tilesOpen = 0;
         
@@ -43,28 +45,27 @@ public class TestExploring extends Test {
           if (map.fog.maxSightLevel(map.tileAt(c)) == 1) tilesSeen += 1;
         }
         
-        explored = tilesSeen == tilesOpen;
+        exploreOkay = tilesSeen == tilesOpen;
       }
       
-      if (! didHunting) {
-        didHunting = lodge.inventory.valueFor(MEAT) > lodge.type.maxStock;
+      if (! huntingOkay) {
+        huntingOkay = lodge.inventory.valueFor(MEAT) > lodge.type.maxStock;
       }
       
-      if (explored && didHunting) {
+      if (exploreOkay && huntingOkay && ! testOkay) {
         I.say("\nEXPLORING TEST CONCLUDED SUCCESSFULLY!");
+        testOkay = true;
         if (! graphics) return true;
       }
     }
     
     I.say("\nEXPLORING TEST FAILED!");
     I.say("  Total tiles seen: "+tilesSeen+"/"+tilesOpen);
+    I.say("  Explore Okay: "+exploreOkay);
+    I.say("  Hunting Okay: "+huntingOkay);
     return false;
   }
   
 }
-
-
-
-
 
 

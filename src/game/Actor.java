@@ -389,6 +389,15 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   
   void incCarried(Good carried, float amount) {
+    
+    //  TODO:  Add a proper warning system for this?
+    /*
+    if (this.carried != null && carried != this.carried) {
+      I.say("ERASING GOOD: "+carryAmount+" "+carried);
+      I.say("???");
+    }
+    //*/
+    
     if (this.carried != carried) this.carryAmount = 0;
     this.carried      = carried;
     this.carryAmount += amount ;

@@ -1,11 +1,13 @@
 
 
+
 package game;
 import util.*;
 import static game.ActorAsPerson.*;
 import static game.City.*;
 import static game.CityCouncil.*;
 import static game.GameConstants.*;
+import static game.GameContent.*;
 
 
 
@@ -274,7 +276,8 @@ public class TestWorld extends Test {
     
     {
       //final Good goods[] = { CLAY, MAIZE, WOOD, RAW_COTTON, POTTERY, COTTON };
-      World world = new World();
+      World world = new World(ALL_GOODS);
+      world.assignCitizenTypes(ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES);
       
       City from[] = new City[6];
       City goes[] = new City[4];
@@ -360,7 +363,8 @@ public class TestWorld extends Test {
     //  Now we set up random cities with random troops and resources, placed at
     //  each of the compass-points on the map, and run the simulation for a
     //  while to ensure that invasions take place at reasonable frequency-
-    World world = new World();
+    World world = new World(ALL_GOODS);
+    world.assignCitizenTypes(ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES);
     
     final int NUM_CITIES = 4;
     final String names[] = { "Tollan", "Texcoco", "Tlacopan", "Tlaxcala" };
@@ -406,7 +410,7 @@ public class TestWorld extends Test {
     //  visual debugger...
     City mapCity = new City(world);
     CityMap map = new CityMap(mapCity);
-    map.performSetup(8);
+    map.performSetup(8, new Terrain[0]);
     world.settings.worldView    = true;
     world.settings.speedUp      = true;
     world.settings.reportBattle = graphics;
@@ -509,7 +513,8 @@ public class TestWorld extends Test {
   
   
   static City[] configWeakStrongCityPair() {
-    World world = new World();
+    World world = new World(ALL_GOODS);
+    world.assignCitizenTypes(ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES);
     City a = new City(world);
     City b = new City(world);
     a.name = "Victim City" ;

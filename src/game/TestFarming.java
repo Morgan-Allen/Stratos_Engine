@@ -1,9 +1,10 @@
 
 
+
 package game;
 import util.*;
-import static game.CityMap.*;
 import static game.GameConstants.*;
+import static game.GameContent.*;
 
 
 
@@ -18,7 +19,7 @@ public class TestFarming extends Test {
   static boolean testFarming(boolean graphics) {
     Test test = new TestFarming();
     
-    CityMap map = setupTestCity(20, DESERT, MEADOW, JUNGLE);
+    CityMap map = setupTestCity(20, ALL_GOODS, true, DESERT, MEADOW, JUNGLE);
     World world = map.city.world;
     world.settings.toggleFog    = false;
     world.settings.toggleHunger = false;

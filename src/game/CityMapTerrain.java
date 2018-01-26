@@ -18,8 +18,10 @@ public class CityMapTerrain implements TileConstants {
   }
   
   final CityMap map;
+  
   int growScanIndex = 0;
-  HabitatScan scans[][] = new HabitatScan[2][ALL_TERRAINS.length];
+  int numTerrains = -1;
+  HabitatScan scans[][] = new HabitatScan[2][1];
   byte fertility[][];
   
   
@@ -31,7 +33,7 @@ public class CityMapTerrain implements TileConstants {
   void loadState(Session s) throws Exception {
     
     growScanIndex = s.loadInt();
-    for (int i = 2; i-- > 0;) for (int h = ALL_TERRAINS.length; h-- > 0;) {
+    for (int i = 2; i-- > 0;) for (int h = numTerrains; h-- > 0;) {
       int numT = s.loadInt();
       if (numT == -1) { scans[i][h] = null; continue; }
       
@@ -51,7 +53,7 @@ public class CityMapTerrain implements TileConstants {
   void saveState(Session s) throws Exception {
     
     s.saveInt(growScanIndex);
-    for (int i = 2; i-- > 0;) for (int h = ALL_TERRAINS.length; h-- > 0;) {
+    for (int i = 2; i-- > 0;) for (int h = numTerrains; h-- > 0;) {
       HabitatScan scan = scans[i][h];
       if (scan == null) { s.saveInt(-1); continue; }
       
@@ -67,6 +69,10 @@ public class CityMapTerrain implements TileConstants {
   
   void performSetup(int size) {
     this.fertility = new byte[size][size];
+    int maxID = 0;
+    for (Terrain t : map.terrainTypes) maxID = Nums.max(maxID, t.terrainID);
+    this.numTerrains = maxID + 1;
+    this.scans = new HabitatScan[2][numTerrains];
   }
   
   
@@ -101,7 +107,7 @@ public class CityMapTerrain implements TileConstants {
   
   void endScan() {
     growScanIndex = 0;
-    for (int i = ALL_TERRAINS.length; i-- > 0;) {
+    for (int i = numTerrains; i-- > 0;) {
       scans[0][i] = scans[1][i];
       scans[1][i] = null;
     }
@@ -130,7 +136,7 @@ public class CityMapTerrain implements TileConstants {
     City city, int size, int maxHigh, Terrain... gradient
   ) {
     CityMap map = new CityMap(city);
-    map.performSetup(size);
+    map.performSetup(size, gradient);
     populateTerrain(map, maxHigh, gradient);
     return map;
   }
@@ -223,7 +229,6 @@ public class CityMapTerrain implements TileConstants {
   /**  Adding predators and prey:
     */
   public static void populateAnimals(CityMap map, Type... species) {
-    if (Visit.empty(species)) species = ALL_ANIMALS;
     
     for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
       map.terrain.scanHabitat(map.grid[c.x][c.y]);

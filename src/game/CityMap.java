@@ -25,6 +25,9 @@ public class CityMap implements Session.Saveable {
     PATH_WALLS  =  5
   ;
   
+  Terrain terrainTypes[] = { EMPTY };
+  Good goodTypes[] = {};
+  
   int size, scanSize, flagSize;
   Tile grid[][];
   List <Actor> actorGrid[][];
@@ -55,9 +58,11 @@ public class CityMap implements Session.Saveable {
   public CityMap(Session s) throws Exception {
     s.cacheInstance(this);
     
-    performSetup(s.loadInt());
+    terrainTypes = (Terrain[]) s.loadObjectArray(Terrain.class);
+    
+    performSetup(s.loadInt(), terrainTypes);
     for (Coord c : Visit.grid(0, 0, size, size, 1)) {
-      grid[c.x][c.y].loadState(s);
+      grid[c.x][c.y].loadState(s, this);
     }
     for (Coord c : Visit.grid(0, 0, flagSize, flagSize, 1)) {
       s.loadObjects(actorGrid[c.x][c.y]);
@@ -101,9 +106,11 @@ public class CityMap implements Session.Saveable {
   
   public void saveState(Session s) throws Exception {
     
+    s.saveObjectArray(terrainTypes);
+    
     s.saveInt(size);
     for (Coord c : Visit.grid(0, 0, size, size, 1)) {
-      grid[c.x][c.y].saveState(s);
+      grid[c.x][c.y].saveState(s, this);
     }
     for (Coord c : Visit.grid(0, 0, flagSize, flagSize, 1)) {
       s.saveObjects(actorGrid[c.x][c.y]);
@@ -142,7 +149,9 @@ public class CityMap implements Session.Saveable {
   }
   
   
-  void performSetup(int size) {
+  void performSetup(int size, Terrain terrainTypes[]) {
+    
+    this.terrainTypes = terrainTypes;
     
     int s = 1;
     while (s < size) s *= 2;
@@ -237,7 +246,8 @@ public class CityMap implements Session.Saveable {
   
   public static boolean adjacent(Target a, Target b) {
     if (a == null || b == null) return false;
-    Tile AA = a.at  (), AB = b.at  ();
+    Tile AA = a.at(), AB = b.at();
+    if (AA == null || AB == null) return false;
     Type TA = a.type(), TB = b.type();
     if (AA.x > AB.x + TB.wide) return false;
     if (AA.y > AB.y + TB.high) return false;

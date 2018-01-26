@@ -4,6 +4,7 @@
 package game;
 import util.*;
 import static game.GameConstants.*;
+import static game.GameContent.*;
 
 
 
@@ -18,7 +19,7 @@ public class TestEcology extends Test {
   static void testAnimals(boolean graphics) {
     Test test = new TestEcology();
     
-    CityMap map = Test.setupTestCity(64, JUNGLE, MEADOW);
+    CityMap map = Test.setupTestCity(64, ALL_GOODS, true, JUNGLE, MEADOW);
     ActorAsAnimal.reportCycle = graphics;
     
     Type species[] = { QUAIL, JAGUAR };

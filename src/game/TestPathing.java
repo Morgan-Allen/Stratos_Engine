@@ -2,8 +2,8 @@
 
 package game;
 import util.*;
-import static game.CityMap.*;
 import static game.GameConstants.*;
+import static game.GameContent.*;
 
 
 
@@ -19,7 +19,9 @@ public class TestPathing extends Test {
   static boolean testPathing(boolean graphics) {
     Test test = new TestPathing();
     
-    CityMap map = setupTestCity(32);
+    boolean testOkay = true;
+    
+    CityMap map = setupTestCity(32, ALL_GOODS, false);
     World world = map.city.world;
     world.settings.toggleFog     = false;
     world.settings.toggleHunger  = false;
@@ -63,13 +65,15 @@ public class TestPathing extends Test {
     for (Pathing n : p1) {
       if (n != null && ((Tile) n).above == null) {
         I.say("\nWALL TILES SHOULD ONLY BORDER OTHER WALL TILES!");
-        return false;
+        testOkay = false;
+        if (! graphics) return false;
       }
     }
     for (Pathing n : p2) {
       if (n != null && ((Tile) n).above != null) {
         I.say("\nGROUND TILES SHOULD ONLY BORDER OTHER GROUND TILES!");
-        return false;
+        testOkay = false;
+        if (! graphics) return false;
       }
     }
     
@@ -78,11 +82,13 @@ public class TestPathing extends Test {
     
     if (! Visit.arrayIncludes(p1, tower1)) {
       I.say("\nENTRANCES MUST LEAD TO BUILDING");
-      return false;
+      testOkay = false;
+      if (! graphics) return false;
     }
     if (! Visit.arrayIncludes(p2, tower1)) {
       I.say("\nENTRANCES MUST LEAD TO BUILDING");
-      return false;
+      testOkay = false;
+      if (! graphics) return false;
     }
     
     p1 = checkPathingOkay(cornerWall, endWall    , map);
@@ -90,11 +96,13 @@ public class TestPathing extends Test {
     
     if (p1 == null) {
       I.say("\nPATHING ALONG WALL WAS NOT POSSIBLE");
-      return false;
+      testOkay = false;
+      if (! graphics) return false;
     }
     if (! Visit.arrayIncludes(p2, tower1)) {
       I.say("\nWALL-TO-GROUND PATHS SHOULD GO BY TOWER");
-      return false;
+      testOkay = false;
+      if (! graphics) return false;
     }
     
     p1 = checkPathingOkay(innerGround, outerGround, map);
@@ -102,11 +110,13 @@ public class TestPathing extends Test {
     
     if (! Visit.arrayIncludes(p1, gate)) {
       I.say("\nEXITING COURTYARD SHOULD GO BY GATE");
-      return false;
+      testOkay = false;
+      if (! graphics) return false;
     }
     if (! Visit.arrayIncludes(p2, tower2)) {
       I.say("\nGROUND-TO-WALL PATHS SHOULD GO BY TOWER");
-      return false;
+      testOkay = false;
+      if (! graphics) return false;
     }
     
     //
@@ -193,7 +203,7 @@ public class TestPathing extends Test {
         if (! graphics) break;
       }
       
-      if ((! pathingDone) && numReachedDest >= shouldReach) {
+      if ((! pathingDone) && numReachedDest >= shouldReach && testOkay) {
         pathingDone = true;
         if (pathingDone) {
           I.say("\nPATHING TEST CONCLUDED SUCCESSFULLY!");

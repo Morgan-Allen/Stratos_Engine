@@ -6,6 +6,7 @@ import static game.ActorAsPerson.*;
 import static game.GameConstants.*;
 import static game.CityCouncil.*;
 import static game.CityMapPlanning.*;
+import static game.GameContent.*;
 
 
 
@@ -33,7 +34,7 @@ public class TestLifeCycle extends Test {
       return false;
     }
     
-    CityMap map = setupTestCity(16);
+    CityMap map = setupTestCity(16, ALL_GOODS, false);
     World world = map.city.world;
     world.settings.toggleFog = false;
     

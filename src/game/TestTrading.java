@@ -1,8 +1,10 @@
 
 
+
 package game;
 import util.*;
 import static game.GameConstants.*;
+import static game.GameContent.*;
 
 
 
@@ -10,14 +12,14 @@ public class TestTrading extends Test {
   
 
   public static void main(String args[]) {
-    testTrading(true);
+    testTrading(false);
   }
   
   
   static boolean testTrading(boolean graphics) {
     Test test = new TestTrading();
-    
-    World world = new World();
+
+    World world = new World(ALL_GOODS);
     City  homeC = new City(world);
     City  awayC = new City(world);
     world.addCities(homeC, awayC);
@@ -46,7 +48,7 @@ public class TestTrading extends Test {
     
     
     CityMap map = new CityMap(homeC);
-    map.performSetup(10);
+    map.performSetup(10, new Terrain[0]);
     world.settings.toggleFog     = false;
     world.settings.toggleHunger  = false;
     world.settings.toggleFatigue = false;

@@ -1,8 +1,9 @@
 
 
+
 package game;
 import util.*;
-import static game.GameConstants.*;
+import static game.GameContent.*;
 
 
 
@@ -15,7 +16,7 @@ public class TestDemands {
   
   
   static boolean testDemands(boolean graphics) {
-    CityMap map = Test.setupTestCity(32);
+    CityMap map = Test.setupTestCity(32, ALL_GOODS, false);
     CityMapDemands demands = new CityMapDemands(map, "AAA");
     
     class TestItem {

@@ -60,13 +60,19 @@ public class TaskCombat extends Task {
   }
   
   
+  static float attackPower(Type t) {
+    float power = Nums.max(t.meleeDamage, t.rangeDamage) + t.armourClass;
+    power /= Nums.max(AVG_MELEE, AVG_MISSILE) + AVG_DEFEND;
+    power *= t.maxHealth * 1f / AVG_MAX_HEALTH;
+    return power;
+  }
+  
+  
   static float attackPower(Actor a) {
     if (a.state >= Actor.STATE_DEAD) return 0;
-    float stats = Nums.max(a.type.meleeDamage, a.type.rangeDamage);
-    stats += a.type.armourClass;
-    stats /= Nums.max(AVG_MELEE, AVG_MISSILE) + AVG_DEFEND;
-    stats *= 1 - ((a.injury + a.hunger) / a.type.maxHealth);
-    return stats;
+    float power = attackPower(a.type);
+    power *= 1 - ((a.injury + a.hunger) / a.type.maxHealth);
+    return power;
   }
   
   

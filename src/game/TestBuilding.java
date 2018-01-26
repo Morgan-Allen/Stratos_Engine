@@ -1,9 +1,10 @@
 
 
+
 package game;
 import util.*;
-import static game.CityMap.*;
 import static game.GameConstants.*;
+import static game.GameContent.*;
 
 
 
@@ -18,14 +19,13 @@ public class TestBuilding extends Test {
   static boolean testBuilding(boolean graphics) {
     Test test = new TestBuilding();
     
-    CityMap map = setupTestCity(16);
+    CityMap map = setupTestCity(16, ALL_GOODS, false);
     World world = map.city.world;
     world.settings.toggleFog         = false;
     world.settings.toggleFatigue     = false;
     world.settings.toggleHunger      = false;
     world.settings.toggleMigrate     = false;
     world.settings.toggleBuildEvolve = false;
-    
     
     Building farm = (Building) FARM_PLOT.generate();
     farm.enterMap(map, 1, 1, 1);
@@ -59,7 +59,7 @@ public class TestBuilding extends Test {
       ROAD, map, false, 2, 2, 10, 1
     );
     
-    Tally <Good> startingMaterials = totalMaterials(map);
+    Tally <Good> startingMaterials = totalMaterials(map, false, BUILD_GOODS);
     Tally <Good> endMaterials = null;
     
     int     numPaved     = 0;
@@ -76,7 +76,7 @@ public class TestBuilding extends Test {
     final int RUN_TIME = YEAR_LENGTH;
     
     while (map.time < RUN_TIME || graphics) {
-      map = test.runLoop(map, 10, graphics, "saves/test_building.tlt");
+      map = test.runLoop(map, 1, graphics, "saves/test_building.tlt");
       
       if (! razingOkay) {
         boolean allRazed = true;
@@ -107,7 +107,7 @@ public class TestBuilding extends Test {
       setupOkay = razingOkay && buildingOkay && pavingOkay;
       
       if (setupOkay && ! testMaterial) {
-        endMaterials = totalMaterials(map);
+        endMaterials = totalMaterials(map, false, BUILD_GOODS);
         float diff = getDiffs(
           startingMaterials, endMaterials,
           false, BUILD_GOODS
@@ -151,6 +151,7 @@ public class TestBuilding extends Test {
     I.say("  Building okay: "+buildingOkay);
     I.say("  Paving okay:   "+pavingOkay  );
     I.say("  Number paved:  "+numPaved    );
+    I.say("  Material test: "+testMaterial);
     I.say("  Material okay: "+materialOkay);
     I.say("  Did damage:    "+didDamage   );
     I.say("  Repairs okay:  "+repairsOkay );
@@ -181,21 +182,37 @@ public class TestBuilding extends Test {
   }
   
   
-  static Tally <Good> totalMaterials(CityMap map) {
+  static Tally <Good> totalMaterials(
+    CityMap map, boolean report, Good[] compared
+  ) {
+    if (report) I.say("\nReporting material presences...");
+    
     Tally <Good> total = new Tally();
     for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
       Element b = map.above(c);
       if (b == null || b.at() != map.tileAt(c)) continue;
       
+      if (report) I.say("  "+b);
+      
       for (Good m : b.materials()) {
+        if (! Visit.arrayIncludes(compared, m)) continue;
+        if (report) I.say("    "+m+" (M): "+b.materialLevel(m));
         total.add(b.materialLevel(m), m);
       }
+      
       if (b.type.isBuilding()) {
-        total.add(((Building) b).inventory);
+        Building v = (Building) b;
+        for (Good m : v.inventory.keys()) {
+          if (! Visit.arrayIncludes(compared, m)) continue;
+          if (report) I.say("    "+m+" (I): "+v.inventory.valueFor(m));
+          total.add(v.inventory.valueFor(m), m);
+        }
       }
     }
     for (Actor a : map.actors) {
-      if (a.carried != null && a.carried instanceof Good) {
+      if (report) I.say("  "+a);
+      if (Visit.arrayIncludes(compared, a.carried)) {
+        if (report) I.say("    "+a.carried+" (C): "+a.carryAmount);
         total.add(a.carryAmount, (Good) a.carried);
       }
     }
@@ -206,7 +223,7 @@ public class TestBuilding extends Test {
   
   static float getDiffs(
     Tally <Good> before, Tally <Good> after,
-    boolean report, Good... compared
+    boolean report, Good[] compared
   ) {
     if (report) I.say("\nReporting differences in goods:");
     float diffs = 0;

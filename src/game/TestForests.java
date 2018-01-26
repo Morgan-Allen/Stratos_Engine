@@ -2,8 +2,8 @@
 
 
 package game;
-import static game.GameConstants.*;
 import util.*;
+import static game.GameContent.*;
 
 
 
@@ -18,7 +18,7 @@ public class TestForests extends Test {
   static boolean testForests(boolean graphics) {
     Test test = new TestForests();
     
-    CityMap map = setupTestCity(32, JUNGLE, MEADOW);
+    CityMap map = setupTestCity(32, ALL_GOODS, true, JUNGLE, MEADOW);
     World world = map.city.world;
     world.settings.toggleFog = false;
     

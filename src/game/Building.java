@@ -414,10 +414,7 @@ public class Building extends Element implements Pathing, Employer {
       return actor.inside == this;
     }
     else {
-      Tile at = actor.at(), t = this.at();
-      boolean adjX = at.x >= t.x - 1 && at.x <= t.x + type.wide;
-      boolean adjY = at.y >= t.y - 1 && at.y <= t.y + type.high;
-      return adjX && adjY;
+      return CityMap.adjacent(this, actor);
     }
   }
   

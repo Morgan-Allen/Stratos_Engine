@@ -188,7 +188,7 @@ public class CityBorders {
   
   
   static Tally <Good> configureCargo(
-    Trader from, Trader goes, boolean cityOnly
+    Trader from, Trader goes, boolean cityOnly, World world
   ) {
     Tally <Good> cargo = new Tally();
     boolean fromCity = from.homeCity() == from;
@@ -199,7 +199,7 @@ public class CityBorders {
     City.Relation fromR = goes.homeCity().relationWith(from.homeCity());
     City.Relation goesR = from.homeCity().relationWith(goes.homeCity());
     
-    for (Good good : ALL_GOODS) {
+    for (Good good : world.goodTypes) {
       float amountO = from.inventory ().valueFor(good);
       float demandO = from.tradeLevel().valueFor(good);
       float amountD = goes.inventory ().valueFor(good);

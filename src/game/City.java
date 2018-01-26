@@ -213,8 +213,8 @@ public class City implements Session.Saveable, Trader {
   
   void initBuildLevels(Object... buildLevelArgs) {
     this.buildLevel.setWith(buildLevelArgs);
-    this.population = buildLevel.valueFor(HOUSE   ) * AVG_HOUSE_POP;
-    this.armyPower  = buildLevel.valueFor(GARRISON) * AVG_ARMY_POWER;
+    this.population = idealPopulation();
+    this.armyPower  = idealArmyPower ();
   }
   
   
@@ -406,12 +406,45 @@ public class City implements Session.Saveable, Trader {
   /**  Handling army strength and population (for off-map cities-)
     */
   float idealPopulation() {
-    return buildLevel.valueFor(HOUSE) * AVG_HOUSE_POP;
+    float sum = 0;
+    for (Type t : buildLevel.keys()) {
+      float l = buildLevel.valueFor(t);
+      sum += l * t.maxResidents;
+    }
+    return sum * POP_PER_CITIZEN;
   }
   
   
   float idealArmyPower() {
-    return buildLevel.valueFor(GARRISON) * AVG_ARMY_POWER;
+    Type citizen = (Type) Visit.first(world.citizenTypes);
+    float powerC = citizen == null ? 0 : TaskCombat.attackPower(citizen);
+    
+    float sum = 0;
+    for (Type t : buildLevel.keys()) {
+      if (t.isArmyOrWallsBuilding()) {
+        float l = buildLevel.valueFor(t);
+        for (Type w : t.workerTypes) {
+          sum += l * TaskCombat.attackPower(w) * t.maxWorkers;
+        }
+        if (t.maxRecruits > t.maxWorkers) {
+          sum += l * (t.maxRecruits - t.maxWorkers) * powerC;
+        }
+      }
+    }
+    
+    return sum * POP_PER_CITIZEN;
+  }
+  
+  
+  float wallsLevel() {
+    float sum = 0;
+    for (Type t : buildLevel.keys()) {
+      if (t.category == Type.IS_WALLS_BLD) {
+        float l = buildLevel.valueFor(t);
+        sum += l * 1;
+      }
+    }
+    return sum;
   }
   
   

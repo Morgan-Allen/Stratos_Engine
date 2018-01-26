@@ -42,9 +42,9 @@ public class BuildingForHunt extends Building {
       returnActorHere(actor);
     }
     
-    if (actor.idle() && inventory.valueFor(MEAT) < type.maxStock) {
+    if (actor.idle()) {
       TaskHunting hunting = new TaskHunting(actor);
-      hunting = hunting.configHunting(this);
+      hunting = hunting.configHunting(this, produced());
       if (hunting != null) actor.assignTask(hunting);
     }
     

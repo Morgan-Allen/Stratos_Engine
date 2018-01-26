@@ -38,7 +38,7 @@ public class TaskHunting extends Task {
   
   /**  Scripting and events-
     */
-  TaskHunting configHunting(Building store) {
+  TaskHunting configHunting(Building store, Good... meatTypes) {
     
     Pick <Actor> forHunt = new Pick();
     for (Actor a : actor.map.actors) {
@@ -46,6 +46,10 @@ public class TaskHunting extends Task {
       if (a.type.category != Type.IS_ANIMAL_ACT) continue;
       if (a.type.predator || a.growLevel() < 1 ) continue;
       if (hasTaskFocus(a, JOB.HUNTING)         ) continue;
+      
+      Good meat = a.type.meatType;
+      if (! Visit.arrayIncludes(meatTypes, meat)) continue;
+      if (store.inventory.valueFor(meat) >= store.type.maxStock) continue;
       
       float dist = CityMap.distance(actor.at(), a.at());
       if (dist > MAX_EXPLORE_DIST) continue;
@@ -78,7 +82,7 @@ public class TaskHunting extends Task {
     }
     else {
       float yield = ActorAsAnimal.meatYield(prey);
-      actor.incCarried(MEAT, yield);
+      actor.incCarried(prey.type.meatType, yield);
       configTask(store, store, null, JOB.DELIVER, 0);
     }
   }
@@ -86,7 +90,7 @@ public class TaskHunting extends Task {
   
   protected void onVisit(Building visits) {
     if (visits != store) return;
-    actor.offloadGood(MEAT, visits);
+    actor.offloadGood(prey.type.meatType, visits);
   }
   
 }

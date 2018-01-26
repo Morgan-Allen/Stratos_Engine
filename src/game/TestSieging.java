@@ -5,6 +5,7 @@ import util.*;
 import static game.CityMap.*;
 import static game.GameConstants.*;
 import static game.Task.*;
+import static game.GameContent.*;
 
 
 
@@ -19,7 +20,7 @@ public class TestSieging extends Test {
   static boolean testSieging(boolean graphics) {
     Test test = new TestSieging();
     
-    World   world = new World();
+    World   world = new World(ALL_GOODS);
     City    homeC = new City(world);
     City    awayC = new City(world);
     CityMap map   = CityMapTerrain.generateTerrain(
@@ -27,6 +28,7 @@ public class TestSieging extends Test {
     );
     homeC.name = "Home City";
     awayC.name = "Away City";
+    world.assignCitizenTypes(ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES);
     world.addCities(homeC, awayC);
     
     world.settings.toggleFog     = false;
@@ -146,6 +148,13 @@ public class TestSieging extends Test {
             enemy = (Formation) goes;
             tribute = enemy.tributeDemand;
             siegeComing = true;
+            
+            //  TODO:  Add explicit test for this...
+            /*
+            I.say("Enemy recruits are: ");
+            for (Actor a : enemy.recruits) I.say("  "+a);
+            I.say("  Total: "+enemy.recruits.size());
+            //*/
           }
         }
         if (siegeComing && enemy.objective != Formation.OBJECTIVE_CONQUER) {

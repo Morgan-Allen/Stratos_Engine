@@ -290,7 +290,7 @@ public class CityCouncil {
     //  based on what the attacker is hungry for and the defender seems to have
     //  plenty of-
     Tally <Good> tribute = new Tally();
-    for (Good g : ALL_GOODS) {
+    for (Good g : city.world.goodTypes) {
       float prodVal = 5 + a.goesC.inventory .valueFor(g);
       prodVal      += 0 + a.goesC.tradeLevel.valueFor(g);
       float consVal = 0 - a.fromC.tradeLevel.valueFor(g);
@@ -316,7 +316,7 @@ public class CityCouncil {
     float bravery = membersTraitAvg(TRAIT_BRAVERY);
     float chance = 0, lossA = 0, lossD = 0, presDiff = 0, wallDiff;
     presDiff = (a.fromC.prestige - a.goesC.prestige) / PRESTIGE_MAX;
-    wallDiff = a.goesC.buildLevel.valueFor(WALL) > 0 ? 1 : 0;
+    wallDiff = a.goesC.wallsLevel() > 0 ? 1 : 0;
     chance   = a.fromPower / (a.fromPower + a.goesPower);
     chance   = chance + (presDiff / 4);
     chance   = chance + (bravery  / 4);
@@ -434,7 +434,7 @@ public class CityCouncil {
     synergyVal /= Nums.max(1, count);
     
     float tradeVal = 0;
-    for (Good g : ALL_GOODS) {
+    for (Good g : city.world.goodTypes) {
       float perYear = from.tradeLevel.valueFor(g);
       if (perYear <= 0) continue;
       tradeVal += tributeValue(g, perYear, city);
@@ -510,7 +510,7 @@ public class CityCouncil {
     //I.say("  Total value: "+synergyVal);
     
     float tradeVal = 0;
-    for (Good g : ALL_GOODS) {
+    for (Good g : city.world.goodTypes) {
       float exports = from.tradeLevel.valueFor(g);
       if (exports > 0) {
         tradeVal += tributeValue(g, exports, goes);
@@ -593,9 +593,13 @@ public class CityCouncil {
   Formation spawnFormation(MissionAssessment IA) {
     Formation force = new Formation(IA.objective, city, true);
     
+    Type citizen = (Type) Visit.first(city.world.citizenTypes);
+    Type soldier = (Type) Visit.first(city.world.soldierTypes);
+    Type noble   = (Type) Visit.first(city.world.nobleTypes  );
+    
     int n = 0;
     while (force.powerSum() < city.armyPower / 2) {
-      Type  type   = (n++ % 4 == 0) ? SOLDIER : CITIZEN;
+      Type  type   = (n++ % 4 == 0) ? soldier : citizen;
       Actor fights = (Actor) type.generate();
       fights.assignHomeCity(IA.fromC);
       force.toggleRecruit(fights, true);
@@ -619,8 +623,7 @@ public class CityCouncil {
       }
       if (IA.objective == Formation.OBJECTIVE_DIALOG) {
         while (force.escorted.size() < 2) {
-          Type type = (n++ % 2 == 0) ? NOBLE : CONSORT;
-          Actor talks = (Actor) type.generate();
+          Actor talks = (Actor) noble.generate();
           talks.assignHomeCity(city);
           force.toggleEscorted(talks, true);
         }

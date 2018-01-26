@@ -1,10 +1,11 @@
 
 
+
 package game;
 import util.*;
 import static game.GameConstants.*;
-
-import game.Task.JOB;
+import static game.GameContent.*;
+import static game.Task.*;
 
 
 
@@ -19,7 +20,7 @@ public class TestCity extends Test {
   static boolean testCity(boolean graphics) {
     Test test = new TestCity();
     
-    CityMap map = setupTestCity(32);
+    CityMap map = setupTestCity(32, ALL_GOODS, false);
     World world = map.city.world;
     world.settings.toggleFog = false;
     

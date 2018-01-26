@@ -266,7 +266,9 @@ public class ActorAsPerson extends Actor {
   
   Batch <Good> menuAt(Building visits) {
     Batch <Good> menu = new Batch();
-    if (visits != null) for (Good g : FOOD_TYPES) {
+    if (type.foodsAllowed == null) return menu;
+    
+    if (visits != null) for (Good g : type.foodsAllowed) {
       if (visits.inventory.valueFor(g) >= 1) menu.add(g);
     }
     return menu;

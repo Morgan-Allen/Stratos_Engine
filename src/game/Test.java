@@ -2,9 +2,9 @@
 
 package game;
 import util.*;
-import static game.CityMap.*;
 import static game.CityMapPathCache.*;
 import static game.GameConstants.*;
+import static game.GameContent.*;
 
 
 
@@ -13,14 +13,16 @@ public class Test {
   
   /**  Initial setup utilities:
     */
-  static CityMap setupTestCity(int size, Terrain... gradient) {
-    World   world = new World();
+  static CityMap setupTestCity(
+    int size, Good goods[], boolean genTerrain, Terrain... gradient
+  ) {
+    World   world = new World(goods);
     City    city  = new City(world);
     CityMap map   = null;
     
-    if (Visit.empty(gradient)) {
+    if (! genTerrain) {
       map = new CityMap(city);
-      map.performSetup(size);
+      map.performSetup(size, gradient);
     }
     else {
       map = CityMapTerrain.generateTerrain(city, size, 0, gradient);
@@ -37,10 +39,10 @@ public class Test {
   
   
   static CityMap setupTestCity(
-    byte layout[][], byte elevation[][], Terrain... gradient
+    byte layout[][], byte elevation[][], Good goods[], Terrain... gradient
   ) {
     int wide = layout.length, high = layout[0].length;
-    CityMap map = setupTestCity(Nums.max(wide, high));
+    CityMap map = setupTestCity(Nums.max(wide, high), goods, false, gradient);
     
     for (Tile t : map.allTiles()) {
       Terrain terr = gradient[layout[t.x][t.y]];

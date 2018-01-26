@@ -5,6 +5,7 @@ import util.*;
 import static game.CityMap.*;
 import static game.GameConstants.*;
 import static game.CityMapPathCache.*;
+import static game.GameContent.*;
 
 
 
@@ -50,7 +51,7 @@ public class TestPathCache extends Test {
       { 1, 1, 1, 1, 1, 1, 1, 1 },
     };
     int miniSize = 8;
-    CityMap miniMap = setupTestCity(miniSize);
+    CityMap miniMap = setupTestCity(miniSize, ALL_GOODS, false, ALL_TERRAINS);
     
     for (Coord c : Visit.grid(0, 0, miniSize, miniSize, 1)) {
       byte l = layout[c.x][c.y];
@@ -127,7 +128,7 @@ public class TestPathCache extends Test {
     //
     //  Now, set up a larger map for testing of connections between
     //  more distant areas:
-    CityMap map = setupTestCity(128);
+    CityMap map = setupTestCity(128, ALL_GOODS, false, ALL_TERRAINS);
     World world = map.city.world;
     world.settings.toggleFog   = false;
     world.settings.viewPathMap = true ;

@@ -6,6 +6,7 @@ import static game.ActorAsPerson.*;
 import static game.City.*;
 import static game.CityCouncil.*;
 import static game.GameConstants.*;
+import static game.GameContent.*;
 
 
 
@@ -20,13 +21,14 @@ public class TestDiplomacy extends Test {
   static boolean testDiplomacy(boolean graphics) {
     Test test = new TestDiplomacy();
     
-    World   world = new World();
+    World   world = new World(ALL_GOODS);
     City    homeC = new City(world);
     City    awayC = new City(world);
     City    neutC = new City(world);
     CityMap map   = CityMapTerrain.generateTerrain(
       homeC, 32, 0, MEADOW, JUNGLE
     );
+    world.assignCitizenTypes(ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES);
     world.addCities(homeC, awayC, neutC);
     homeC.name = "Home City";
     awayC.name = "Away City";

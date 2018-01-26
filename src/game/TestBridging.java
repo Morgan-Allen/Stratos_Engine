@@ -1,7 +1,10 @@
 
+
+
 package game;
 import util.*;
 import static game.GameConstants.*;
+import static game.GameContent.*;
 
 
 
@@ -15,7 +18,9 @@ public class TestBridging extends Test {
   
   static boolean testBridging(boolean graphics) {
     Test test = new TestBridging();
-    CityMap map = setupTestCity(16);
+    
+    Terrain terrTypes[] = { LAKE, MEADOW, JUNGLE };
+    CityMap map = setupTestCity(16, ALL_GOODS, false, terrTypes);
     World world = map.city.world;
     world.settings.toggleFog     = false;
     world.settings.toggleFatigue = false;
@@ -23,7 +28,6 @@ public class TestBridging extends Test {
     
     //
     //  Configure some artificially partitioned terrain:
-    Terrain terrTypes[] = { LAKE, MEADOW, JUNGLE };
     byte terrIDs[] = {
       1, 1, 1, 1,   2, 2, 0, 0,   0, 0, 2, 2,   2, 2, 2, 2
     };
@@ -185,7 +189,7 @@ public class TestBridging extends Test {
       }
       
       if (accessOkay && buildOkay && ! testOkay) {
-        I.say("\nBRIDGING TEST SUCCESSFUL!");
+        I.say("\nBRIDGING TEST CONCLUDED SUCCESSFULLY!");
         testOkay = true;
         if (! graphics) return true;
       }

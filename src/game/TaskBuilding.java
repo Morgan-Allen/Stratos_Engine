@@ -10,16 +10,18 @@ import static game.GameConstants.*;
 public class TaskBuilding extends Task {
   
   
-  Building store;
-  Good material;
-  Element site;
-  //boolean razing;
+  final Building store;
+  final Good material;
+  final Element site;
   
   
-  public TaskBuilding(Actor actor, Building store, Good material) {
+  public TaskBuilding(
+    Actor actor, Building store, Good material, Element site
+  ) {
     super(actor);
     this.store    = store;
     this.material = material;
+    this.site     = site;
   }
   
   
@@ -28,7 +30,6 @@ public class TaskBuilding extends Task {
     store    = (Building) s.loadObject();
     material = (Good    ) s.loadObject();
     site     = (Element ) s.loadObject();
-    //razing   = s.loadBool();
   }
   
   
@@ -37,7 +38,6 @@ public class TaskBuilding extends Task {
     s.saveObject(store   );
     s.saveObject(material);
     s.saveObject(site    );
-    //s.saveBool  (razing  );
   }
   
 
@@ -88,28 +88,21 @@ public class TaskBuilding extends Task {
     */
   static Task nextBuildingTask(Building store, Actor a) {
     if (Visit.empty(store.type.buildsWith)) return null;
-    
-    Task clearing = TaskBuilding.configBuilding(store, a, VOID);
-    if (clearing != null) return clearing;
-    
+    {
+      Task clearing = nextBuildingTask(store, a, VOID, false);
+      if (clearing != null) return clearing;
+    }
     for (Good g : store.type.buildsWith) {
-      Task building = TaskBuilding.configBuilding(store, a, g);
+      Task building = nextBuildingTask(store, a, g, false);
       if (building != null) return building;
     }
-    
     return null;
   }
   
   
-  static TaskBuilding configBuilding(
-    Building store, Actor a, Good material
+  static Task nextBuildingTask(
+    Building store, Actor actor, Good material, boolean near
   ) {
-    TaskBuilding task = new TaskBuilding(a, store, material);
-    return task.pickNextTarget(false) ? task : null;
-  }
-  
-  
-  boolean pickNextTarget(boolean near) {
     CityMap map = actor.map;
     Tile at = actor.at();
     //
@@ -128,19 +121,23 @@ public class TaskBuilding extends Task {
         if (CityMap.distance(store .at(), at) > storeRange) continue;
         
         Pathing from = Task.pathOrigin(actor);
-        Target goes = source;// buildPathTarget(source);
+        Target goes = source;
         if (! map.pathCache.pathConnects(from, goes, true, false)) continue;
         
-        if (decideNextAction(source, map)) return true;
+        TaskBuilding task = new TaskBuilding(actor, store, material, source);
+        if (task.decideNextAction(source, map)) return task;
       }
     }
     //
     //  If there's no target to attend to, but you have surplus material left
     //  over, return it to your store:
     if (actor.carried == material) {
-      return configTravel(store, site, JOB.RETURNING, store);
+      TaskBuilding task = new TaskBuilding(actor, store, material, null);
+      if (task.configTravel(store, JOB.RETURNING, store)) return task;
     }
-    return false;
+    //
+    //  Otherwise, nothing doing-
+    return null;
   }
   
   
@@ -163,7 +160,7 @@ public class TaskBuilding extends Task {
       //  on whether they're available and not already present on-site.
       if (carried <= 0 && atStore > 0) {
         //  Go to the store and pick up the material!
-        return configTravel(store, b, JOB.COLLECTING, store);
+        return configTravel(store, JOB.COLLECTING, store);
       }
       else if (carried <= 0) {
         //  Impossible.  Skip onto the next target.
@@ -171,12 +168,12 @@ public class TaskBuilding extends Task {
       }
       else {
         //  Begin your visit for construction-
-        return configTravel(b, b, JOB.BUILDING, store);
+        return configTravel(b, JOB.BUILDING, store);
       }
     }
     else if (needBuild < 0) {
       //  If there's salvage to be done, start that:
-      return configTravel(b, b, JOB.SALVAGE, store);
+      return configTravel(b, JOB.SALVAGE, store);
     }
     else {
       return false;
@@ -188,10 +185,9 @@ public class TaskBuilding extends Task {
   /**  Methods invoked once you arrive at the site:
     */
   boolean configTravel(
-    Element goes, Element site, Task.JOB jobType, Employer e
+    Element goes, Task.JOB jobType, Employer e
   ) {
     if (goes.complete() && goes.type.isBuilding()) {
-      this.site = site;
       return configTask(e, (Building) goes, null, jobType, 0) != null;
     }
     else {
@@ -217,7 +213,6 @@ public class TaskBuilding extends Task {
         return false;
       }
       else {
-        this.site = site;
         return configTask(e, null, pick.result(), jobType, 0) != null;
       }
     }
@@ -226,7 +221,7 @@ public class TaskBuilding extends Task {
   
   void toggleFocus(boolean active) {
     super.toggleFocus(active);
-    site.setFocused(actor, active);
+    if (site != null) site.setFocused(actor, active);
   }
   
   
@@ -236,28 +231,32 @@ public class TaskBuilding extends Task {
   
   
   protected void onTarget(Target target) {
+    //float oldTotal[] = totalMaterial(), newTotal[] = oldTotal;
     //
     //  Pick up some of the material initially-
     if (type == JOB.COLLECTING && adjacent(target, store)) {
       float amount = Nums.min(5, store.inventory.valueFor(material));
       actor.pickupGood(material, amount, store);
-      if (! decideNextAction(site, actor.map)) {
-        pickNextTarget(true);
-      }
     }
     //
     //  Then go on to the site and advance actual construction-
     if ((type == JOB.BUILDING || type == JOB.SALVAGE) && adjacent(target, site)) {
       advanceBuilding(site, actor.map);
-      if (! decideNextAction(site, actor.map)) {
-        pickNextTarget(true);
-      }
     }
     //
     //  And drop off any surplus material at the end-
     if (type == JOB.RETURNING && adjacent(target, store)) {
       actor.offloadGood(material, store);
     }
+    //
+    //  But if you're not done yet, find the next step to take...
+    else if (! decideNextAction(site, actor.map)) {
+      Task next = nextBuildingTask(store, actor, material, true);
+      actor.assignTask(next);
+    }
+    
+    //newTotal = totalMaterial();
+    //checkTotalsDiff(oldTotal, newTotal);
   }
   
   
@@ -290,8 +289,13 @@ public class TaskBuilding extends Task {
     
     puts = Nums.min(puts, amountGot);
     puts = b.incMaterialLevel(material, puts) - oldM;
+    
+    //  NOTE:  This is important for avoiding rare loop-conditions with very
+    //  small remainders of a material...
     if (puts == 0 && amountGot > 0) puts = amountGot;
+    
     incCarryAmount(0 - puts, material, b, false);
+    
     //
     //  If we've depleted the structure entirely, remove it from the
     //  world, report and exit:
@@ -301,30 +305,36 @@ public class TaskBuilding extends Task {
   }
   
   
-  float incCarryAmount(float a, Good m, Element b, boolean siteOnly) {
+  float incCarryAmount(float inc, Good m, Element b, boolean siteOnly) {
     //
     //  The default 'nothing' material gets special treatment:
     if (m == VOID) return 100;
     //
     //  If we're recovering material, the actor keeps it:
     float total = 0;
-    if (a > 0) {
-      actor.incCarried(material, a);
-      a = 0;
+    if (inc > 0) {
+      actor.incCarried(material, inc);
+      inc = 0;
     }
     //
     //  If we're depleting the material, take it from the actor first:
-    if (actor.carried(m) > 0 && a < 0 && ! siteOnly) {
-      float sub = Nums.min(actor.carryAmount, 0 - a);
+    if (actor.carried(m) > 0 && inc < 0 && ! siteOnly) {
+      float sub = Nums.min(actor.carryAmount, 0 - inc);
       actor.incCarried(material, 0 - sub);
-      a += sub;
+      inc += sub;
     }
     total += actor.carried(m);
     //
     //  And take from the building's stock as necessary:
     if (b.type.isBuilding()) {
       Building site = (Building) b;
-      if (a != 0) site.inventory.add(a, m);
+      if (inc < 0) {
+        float sub = Nums.min(0 - inc, site.inventory.valueFor(m));
+        site.inventory.add(0 - sub, m);
+      }
+      if (inc > 0) {
+        site.inventory.add(inc, m);
+      }
       total += site.inventory.valueFor(m);
     }
     return total;
@@ -335,7 +345,31 @@ public class TaskBuilding extends Task {
     return incCarryAmount(0, m, b, siteOnly);
   }
   
+
   
+  /**  Rendering, debug and interface methods:
+    */
+  
+  private float[] totalMaterial() {
+    float total[] = new float[5];
+    total[0] += total[1] = site == null ? 0 : site.materialLevel(material);
+    total[0] += total[2] = actor.carried(material);
+    total[0] += total[3] = store.inventory.valueFor(material);
+    if (site != null && site.type.isBuilding() && site != store) {
+      total[0] += total[4] = ((Building) site).inventory.valueFor(material);
+    }
+    return total;
+  }
+  
+  
+  private void checkTotalsDiff(float oldT[], float newT[]) {
+    if (Nums.abs(oldT[0] - newT[0]) > 0.001f && material != VOID) {
+      I.say("Diff in "+material+" for "+site);
+      I.say("  Old: "+oldT);
+      I.say("  New: "+newT);
+      I.say("  ???");
+    }
+  }
 }
 
 
