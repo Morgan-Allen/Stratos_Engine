@@ -13,7 +13,7 @@ public class TestTrading extends Test {
   
 
   public static void main(String args[]) {
-    testTrading(false);
+    testTrading(true);
   }
   
   
@@ -40,7 +40,7 @@ public class TestTrading extends Test {
       RAW_COTTON, -50,
       CLAY      , -50
     );
-    awayC.initTradeLevels(
+    awayC.initInventory(
       RAW_COTTON,  20,
       CLAY      ,  20,
       FRUIT     ,  15,
@@ -132,6 +132,9 @@ public class TestTrading extends Test {
     }
     
     I.say("\nTRADING TEST FAILED!");
+    I.say("  Trade okay:  "+tradeOkay );
+    I.say("  Supply okay: "+supplyOkay);
+    I.say("  Money okay:  "+moneyOkay );
     reportOnMap(homeC, awayC, false);
     return false;
   }

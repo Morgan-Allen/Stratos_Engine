@@ -71,7 +71,7 @@ public class TestPathing extends Test {
       }
     }
     for (Pathing n : p2) {
-      if (n != null && map.above(((Tile) n)) == null) {
+      if (n != null && map.above(((Tile) n)) != null) {
         I.say("\nGROUND TILES SHOULD ONLY BORDER OTHER GROUND TILES!");
         testOkay = false;
         if (! graphics) return false;
