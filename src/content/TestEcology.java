@@ -1,10 +1,11 @@
 
 
 
-package game;
+package content;
+import game.*;
 import util.*;
+import static content.GameContent.*;
 import static game.GameConstants.*;
-import static game.GameContent.*;
 
 
 
@@ -33,7 +34,7 @@ public class TestEcology extends Test {
     
     I.say("\nTOTAL ECOLOGY RUN TIME: "+RUN_TIME);
     
-    while(map.time < RUN_TIME || graphics) {
+    while(map.time() < RUN_TIME || graphics) {
       
       //  We want to be sure that populations remain relatively stable over
       //  time, so we check whether actual populations are within a certain
@@ -47,8 +48,8 @@ public class TestEcology extends Test {
           maxPop   = (idealPop * 1.5f) + 2,
           realPop  = 0;
         
-        for (Actor a : map.actors) {
-          if (a.type == s) realPop++;
+        for (Actor a : map.actors()) {
+          if (a.type() == s) realPop++;
         }
         
         realPops .set(s, realPop);
@@ -59,8 +60,8 @@ public class TestEcology extends Test {
         }
       }
       
-      if (map.time % 1000 == 0 || ! popsOkay) {
-        I.say("\nTime: "+map.time);
+      if (map.time() % 1000 == 0 || ! popsOkay) {
+        I.say("\nTime: "+map.time());
         I.say("  Population levels:");
         for (Type s : species) {
           String percent = I.percent(popLevels.valueFor(s));

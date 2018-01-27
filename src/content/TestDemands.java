@@ -1,13 +1,14 @@
 
 
 
-package game;
+package content;
+import game.*;
 import util.*;
-import static game.GameContent.*;
+import static content.GameContent.*;
 
 
 
-public class TestDemands {
+public class TestDemands extends Test {
   
   
   public static void main(String args[]) {
@@ -16,7 +17,7 @@ public class TestDemands {
   
   
   static boolean testDemands(boolean graphics) {
-    CityMap map = Test.setupTestCity(32, ALL_GOODS, false);
+    CityMap map = setupTestCity(32, ALL_GOODS, false);
     CityMapDemands demands = new CityMapDemands(map, "AAA");
     
     class TestItem {
@@ -95,11 +96,12 @@ public class TestDemands {
     int numIters = 0;
     
     for (CityMapDemands.Entry e : demands.nearbyEntries(fromX, fromY)) {
-      float dist = CityMap.distance(fromX, fromY, e.x, e.y);
+      Coord c = e.coord();
+      float dist = CityMap.distance(fromX, fromY, c.x, c.y);
       
       if (dist < lastDist) {
         I.say("\nDID NOT SORT ENTRIES BY DISTANCE:");
-        I.say("  "+e.source+" -> "+e.x+"|"+e.y+", distance: "+dist);
+        I.say("  "+e.source()+" -> "+c.x+"|"+c.y+", distance: "+dist);
         allOkay = false;
       }
       lastDist = dist;

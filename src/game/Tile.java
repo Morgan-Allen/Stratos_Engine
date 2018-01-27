@@ -10,7 +10,7 @@ import static util.TileConstants.*;
 
 public class Tile implements Pathing {
   
-  int x, y;
+  final public int x, y;
   
   int elevation = 0;
   Terrain terrain = EMPTY;
@@ -19,6 +19,12 @@ public class Tile implements Pathing {
   List <Actor> inside  = null;
   List <Actor> focused = null;
   private Object pathFlag;  //  Only used during temporary path-searches...
+  
+  
+  Tile(int x, int y) {
+    this.x = x;
+    this.y = y;
+  }
   
   
   void loadState(Session s, CityMap map) throws Exception {
@@ -44,6 +50,9 @@ public class Tile implements Pathing {
   }
   
   
+  
+  /**  Satisfying target and pathing interface-
+    */
   public Tile at() {
     return this;
   }
@@ -163,14 +172,27 @@ public class Tile implements Pathing {
   
   
   
+  /**  Terrain and elevation methods-
+    */
+  public int elevation() {
+    return elevation;
+  }
+  
+  
+  public Terrain terrain() {
+    return terrain;
+  }
+  
+  
+  
   /**  Various utility and convenience methods-
     */
-  static Tile nearestOpenTile(Tile from, CityMap map) {
+  public static Tile nearestOpenTile(Tile from, CityMap map) {
     return nearestOpenTile(from, map, 1);
   }
   
 
-  static Tile nearestOpenTile(Tile from, CityMap map, int maxRange) {
+  public static Tile nearestOpenTile(Tile from, CityMap map, int maxRange) {
     
     if (from == null || ! map.blocked(from)) return from;
     if (maxRange <= 0) return null;

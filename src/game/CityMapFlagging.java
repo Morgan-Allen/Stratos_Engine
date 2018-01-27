@@ -79,14 +79,14 @@ public class CityMapFlagging {
   }
   
   
-  void setFlagVal(int x, int y, int val) {
+  public void setFlagVal(int x, int y, int val) {
     int old = baseLevel()[x][y];
     if (old == val) return;
     incFlagVal(x, y, val - old);
   }
   
   
-  void incFlagVal(int x, int y, int inc) {
+  public void incFlagVal(int x, int y, int inc) {
     int l = 0;
     while (l < flagLevels.length) {
       if (l == 0) ((byte[][]) flagLevels[0])[x][y] += inc;
@@ -99,7 +99,7 @@ public class CityMapFlagging {
   }
   
   
-  int flagVal(int x, int y) {
+  public int flagVal(int x, int y) {
     return baseLevel()[x][y];
   }
   
@@ -107,7 +107,7 @@ public class CityMapFlagging {
   
   /**  More complex queries-
     */
-  Tile pickDistantPoint(Element near, int maxRange, float randomness) {
+  public Tile pickDistantPoint(Element near, int maxRange, float randomness) {
     
     boolean report = near.reports();
     if (report) I.say("\nGETTING TILE TO LOOK AT...");
@@ -181,12 +181,12 @@ public class CityMapFlagging {
   }
   
   
-  Tile pickRandomPoint(Element near, int range) {
+  public Tile pickRandomPoint(Element near, int range) {
     return pickDistantPoint(near, range, 1);
   }
   
   
-  Tile findNearbyPoint(Element near, int range) {
+  public Tile findNearbyPoint(Element near, int range) {
     
     Tile from = near.at();
     int minX = from.x - range, minY = from.y - range;
@@ -207,7 +207,7 @@ public class CityMapFlagging {
   }
   
   
-  int totalSum() {
+  public int totalSum() {
     int sum = 0;
     int l = flagLevels.length - 1;
     for (int[] r : upperLevel(l)) for (int v : r) sum += v;

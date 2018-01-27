@@ -49,7 +49,7 @@ public class BuildingForArmy extends BuildingForCrafts {
     
     //  TODO:  On larger maps you will need a more efficient protocol
     //  here-
-    if (recruits.size() < type.maxRecruits) {
+    if (recruits.size() < type().maxRecruits) {
       for (Building b : map.buildings) {
         float rating = CityMap.distancePenalty(this, b);
         if (b == this) rating *= 10;
@@ -87,15 +87,15 @@ public class BuildingForArmy extends BuildingForCrafts {
   
   /**  Handling recruitment and deployment-
     */
-  boolean eligible(Actor actor, boolean isMember) {
-    if (actor.woman() || actor.dead()        ) return false;
-    if (actor.type.socialClass == CLASS_NOBLE) return false;
-    if (actor.recruiter != null && ! isMember) return false;
+  public boolean eligible(Actor actor, boolean isMember) {
+    if (actor.woman() || actor.dead()          ) return false;
+    if (actor.type().socialClass == CLASS_NOBLE) return false;
+    if (actor.recruiter != null && ! isMember  ) return false;
     return true;
   }
   
   
-  void toggleRecruit(Actor actor, boolean is) {
+  public void toggleRecruit(Actor actor, boolean is) {
     if (is) {
       recruits.include(actor);
       actor.recruiter = this;

@@ -1,10 +1,11 @@
 
 
 
-package game;
+package content;
+import game.*;
 import util.*;
+import static content.GameContent.*;
 import static game.GameConstants.*;
-import static game.GameContent.*;
 
 
 
@@ -35,7 +36,7 @@ public class TestFarming extends Test {
       map, 6, 6, 10, 10, needed
     );
     
-    CityMapFlagging forCrops = map.flagging.get(NEED_PLANT);
+    CityMapFlagging forCrops = map.flagMap(NEED_PLANT, true);
     if (plantTiles.length != forCrops.totalSum()) {
       I.say("\nFARMING TEST FAILED- NOT ALL PLANTED TILES WERE FLAGGED");
       I.say("  Flagged: "+forCrops.totalSum()+"/"+plantTiles.length);
@@ -46,14 +47,12 @@ public class TestFarming extends Test {
     boolean harvest  = false;
     boolean badFocus = false;
     
-    while (map.time < 1000 || graphics) {
+    while (map.time() < 1000 || graphics) {
       map = test.runLoop(map, 10, graphics, "saves/test_farming.tlt");
       
       //
       //  Ensure that every actor has exactly one focus-target:
-      for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
-        
-        Tile t = map.tileAt(c);
+      for (Tile t : map.allTiles()) {
         
         int numF = 0;
         for (Actor a : t.focused()) {
@@ -71,7 +70,7 @@ public class TestFarming extends Test {
         Actor a = t.focused().first();
         if (a == null) continue;
         
-        Target mainFocus = Task.focusTarget(a.task);
+        Target mainFocus = Task.focusTarget(a.task());
         if (mainFocus != t) {
           I.say("\nFARMING TEST FAILED- ACTOR-FOCUS WAS NOT REMOVED FROM:");
           I.say("  "+t+", focused by "+a+", now focused on "+mainFocus);
@@ -94,11 +93,12 @@ public class TestFarming extends Test {
         Batch <Element> crops = new Batch();
         int numT = 0;
         for (Tile t : plantTiles) {
-          Type above = t.above == null ? null : t.above.type;
+          Element aboveE = map.above(t);
+          Type above = aboveE == null ? null : aboveE.type();
           if (above == null || above.growRate == 0) continue;
           numT += 1;
-          if (Visit.arrayIncludes(needed, above) && t.above.growLevel() >= 0) {
-            crops.add(t.above);
+          if (Visit.arrayIncludes(needed, above) && aboveE.growLevel() >= 0) {
+            crops.add(aboveE);
           }
         }
         //
@@ -112,7 +112,7 @@ public class TestFarming extends Test {
       //  Then actual harvesting needs to proceed correctly:
       if (planted && ! harvest) {
         boolean enough = true;
-        for (Good n : needed) if (farm.inventory.valueFor(n) < 5) {
+        for (Good n : needed) if (farm.inventory(n) < 5) {
           enough = false;
         }
         harvest = enough;
@@ -125,7 +125,7 @@ public class TestFarming extends Test {
     }
     
     I.say("\nFARMING TEST FAILED!");
-    I.say("  Total gathered: "+farm.inventory);
+    I.say("  Total gathered: "+farm.inventory());
     return false;
   }
   

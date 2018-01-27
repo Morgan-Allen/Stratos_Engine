@@ -4,7 +4,6 @@ package game;
 import util.*;
 import static game.CityMapPathCache.*;
 import static game.GameConstants.*;
-import static game.GameContent.*;
 
 
 
@@ -13,7 +12,7 @@ public class Test {
   
   /**  Initial setup utilities:
     */
-  static CityMap setupTestCity(
+  protected static CityMap setupTestCity(
     int size, Good goods[], boolean genTerrain, Terrain... gradient
   ) {
     World   world = new World(goods);
@@ -38,7 +37,7 @@ public class Test {
   }
   
   
-  static CityMap setupTestCity(
+  protected static CityMap setupTestCity(
     byte layout[][], byte elevation[][], Good goods[], Terrain... gradient
   ) {
     int wide = layout.length, high = layout[0].length;
@@ -54,19 +53,19 @@ public class Test {
   }
   
   
-  static void fillAllVacancies(CityMap map) {
+  protected static void fillAllVacancies(CityMap map, Type defaultCitizen) {
     for (Building b : map.buildings) if (b.accessible()) {
       fillWorkVacancies(b);
       for (Actor w : b.workers) CityBorders.findHome(map, w);
     }
     for (Building b : map.buildings) if (b.accessible()) {
-      fillHomeVacancies(b, CITIZEN);
+      fillHomeVacancies(b, defaultCitizen);
     }
   }
   
   
-  static void fillWorkVacancies(Building b) {
-    for (Type t : b.type.workerTypes) {
+  protected static void fillWorkVacancies(Building b) {
+    for (Type t : b.type().workerTypes) {
       while (b.numWorkers(t) < b.maxWorkers(t)) {
         spawnWalker(b, t, false);
       }
@@ -74,7 +73,7 @@ public class Test {
   }
   
   
-  static void fillHomeVacancies(Building b, Type... types) {
+  protected static void fillHomeVacancies(Building b, Type... types) {
     for (Type t : types) {
       while (b.numResidents(t.socialClass) < b.maxResidents(t.socialClass)) {
         spawnWalker(b, t, true);
@@ -94,7 +93,7 @@ public class Test {
     
     if (b.complete()) {
       actor.enterMap(b.map, at.x, at.y, 1);
-      actor.inside = b;
+      actor.setInside(b, true);
       b.visitors.add(actor);
     }
     else {
@@ -118,24 +117,20 @@ public class Test {
     }
   }
   
-  final static String
-    VIEW_NAME = "Stratos2e";
-  final static BuildType BUILD_MENUS[][] = {
-    MILITARY_BUILDINGS   ,
-    SCIENCE_BUILDINGS    ,
-    ECONOMIC_BUILDINGS   ,
-    RESIDENTIAL_BUILDINGS,
-    PSI_SCHOOL_BUILDINGS ,
-    RESOURCE_BUILDINGS   ,
-  };
-  final static String BUILD_MENU_NAMES[] = {
-    "Military"   , "Science"   , "Economic" ,
-    "Residential", "Psi School", "Resource"
-  };
-  final static String
-    ROADS0     = "Roads",
-    DEMOLITION = "Demolition"
-  ;
+  
+  final static String VIEW_NAME = "TESTING";
+  
+  BuildType buildMenus[][] = new BuildType[0][0];
+  String buildMenuNames[] = new String[0];
+  
+  public void attachBuildMenu(
+    BuildType buildMenus[][],
+    String buildMenuNames[]
+  ) {
+    this.buildMenus = buildMenus;
+    this.buildMenuNames = buildMenuNames;
+  }
+  
   
   String filename = "";
   boolean doLoad = false;
@@ -195,11 +190,12 @@ public class Test {
       //I.say("At: "+at);
       if (at == null || a.indoors()) continue;
       int fill = WALKER_COLOR;
-      if      (a.work != null) fill = a.work.type.tint;
-      else if (a.home != null) fill = a.home.type.tint;
+      if      (a.work != null) fill = a.work.type().tint;
+      else if (a.home != null) fill = a.home.type().tint;
       graphic[at.x][at.y] = fill;
     }
     
+    /*
     if (placing == ROADS0) {
       for (Coord c : Visit.grid(drawnBox(map))) {
         if (map.blocked(c.x, c.y)) continue;
@@ -214,10 +210,11 @@ public class Test {
         }
       }
     }
-    
-    else if (placing != null) {
+    //*/
+    //else
+    if (placing != null) {
       Building builds = (Building) placing;
-      Type type = builds.type;
+      Type type = builds.type();
       int x = hover.x, y = hover.y, w = type.wide, h = type.high;
       boolean canPlace = builds.canPlace(map, x, y);
       
@@ -319,7 +316,7 @@ public class Test {
   }
   
   
-  CityMap runLoop(
+  public CityMap runLoop(
     CityMap map, int numUpdates, boolean graphics, String filename
   ) {
     int skipUpdate = 0;
@@ -410,7 +407,7 @@ public class Test {
   
   /**  Saving and loading-
     */
-  static void saveMap(CityMap map, String filename) {
+  protected static void saveMap(CityMap map, String filename) {
     try {
       I.say("\nWILL SAVE CURRENT MAP...");
       Session.saveSession(filename, map);
@@ -419,7 +416,7 @@ public class Test {
   }
   
   
-  static CityMap loadMap(CityMap oldMap, String filename) {
+  protected static CityMap loadMap(CityMap oldMap, String filename) {
     if (! Session.fileExists(filename)) {
       return oldMap;
     }
@@ -457,7 +454,7 @@ public class Test {
     }
     
     List <String> goodRep = new List();
-    for (Good g : ALL_GOODS) {
+    for (Good g : c.world.goodTypes) {
       float amount = c.inventory.valueFor(g);
       float demand = c.tradeLevel.valueFor(g);
       if (amount == 0 && demand == 0) continue;
@@ -491,26 +488,27 @@ public class Test {
     
     if (e instanceof Actor) {
       Actor a = (Actor) e;
+      Type t = e.type();
       report.append(
-        "\n  Melee/Range dmg:  "+e.type.meleeDamage+"/"+e.type.rangeDamage+
-        "\n  Armour class:     "+e.type.armourClass+
-        "\n  Sight/attack rng: "+e.type.sightRange+"/"+e.type.rangeDist+
-        "\n  Injury:           "+I.shorten(a.injury, 1)+"/"+e.type.maxHealth
+        "\n  Melee/Range dmg:  "+t.meleeDamage+"/"+t.rangeDamage+
+        "\n  Armour class:     "+t.armourClass+
+        "\n  Sight/attack rng: "+t.sightRange+"/"+t.rangeDist+
+        "\n  Injury:           "+I.shorten(a.injury, 1)+"/"+t.maxHealth
       );
       report.append("\n  Task: "+a.jobDesc());
       
-      if (a.carried != null) {
-        report.append("\n  Carried: "+a.carried+": "+a.carryAmount);
+      if (a.carried() != null) {
+        report.append("\n  Carried: "+a.carried()+": "+a.carryAmount());
       }
-      if (a.cargo != null) {
+      if (a.cargo() != null) {
         report.append("\n  Cargo:");
-        for (Good g : a.cargo.keys()) {
-          report.append("\n    "+g+": "+a.cargo.valueFor(g));
+        for (Good g : a.cargo().keys()) {
+          report.append("\n    "+g+": "+a.cargo().valueFor(g));
         }
       }
     }
     else {
-      if (e.type.growRate > 0) {
+      if (e.type().growRate > 0) {
         report.append("\n  Growth: "+I.percent(e.growLevel()));
       }
       else {
@@ -567,8 +565,8 @@ public class Test {
     Tally <Good> homeCons = b.homeUsed();
     List <String> goodRep = new List();
     
-    for (Good g : ALL_GOODS) {
-      float amount   = b.inventory.valueFor(g);
+    for (Good g : b.map.city.world.goodTypes) {
+      float amount   = b.inventory(g);
       float demand   = b.demandFor(g) + amount;
       float consumes = homeCons.valueFor(g);
       if (amount <= 0 && demand <= 0 && consumes <= 0) continue;
@@ -589,6 +587,7 @@ public class Test {
   private String reportForBuildMenu(CityMap map) {
     StringBuffer report = new StringBuffer("");
     
+    /*
     if (placing == ROADS0) {
       report.append("Place Roads");
       if (drawnTile == null) {
@@ -634,15 +633,17 @@ public class Test {
         placing   = null;
       }
     }
-    else if (placing != null) {
+    else
+    //*/
+    if (placing != null) {
       Building builds = (Building) placing;
-      report.append("Place Building: "+builds.type.name);
+      report.append("Place Building: "+builds.type().name);
       report.append("\n  (S) confirm site");
       
       int x = hover.x, y = hover.y;
       if (pressed.includes('s') && builds.canPlace(map, x, y)) {
         builds.enterMap(map, x, y, 1);
-        placing = (Building) builds.type.generate();
+        placing = (Building) builds.type().generate();
       }
       
       report.append("\n  (X) cancel");
@@ -654,14 +655,15 @@ public class Test {
     else if (buildMenu == null) {
       report.append("Build Menu: Main\n");
       int i = 1;
-      for (BuildType[] menu : BUILD_MENUS) {
-        report.append("\n  ("+i+") "+BUILD_MENU_NAMES[i - 1]);
+      for (BuildType[] menu : buildMenus) {
+        report.append("\n  ("+i+") "+buildMenuNames[i - 1]);
         if (pressed.includes((char) ('0' + i))) {
           buildMenu = menu;
         }
         i++;
       }
       
+      /*
       report.append("\n  (R) roads");
       if (pressed.includes('r')) {
         placing = ROADS0;
@@ -671,6 +673,7 @@ public class Test {
       if (pressed.includes('d')) {
         placing = DEMOLITION;
       }
+      //*/
       
       report.append("\n  (X) cancel");
       if (pressed.includes('x')) {
@@ -679,8 +682,8 @@ public class Test {
     }
     
     else {
-      int catIndex = Visit.indexOf(buildMenu, BUILD_MENUS);
-      report.append("Build Menu: "+BUILD_MENU_NAMES[catIndex]+"\n");
+      int catIndex = Visit.indexOf(buildMenu, buildMenus);
+      report.append("Build Menu: "+buildMenuNames[catIndex]+"\n");
       int i = 1;
       for (BuildType b : (BuildType[]) buildMenu) {
         report.append("\n  ("+i+") "+b.name);
@@ -710,7 +713,7 @@ public class Test {
     report.append("\n");
     
     float avgHunger = 0;
-    for (Actor a : map.actors) avgHunger += a.hunger / a.type.maxHealth;
+    for (Actor a : map.actors) avgHunger += a.hunger / a.type().maxHealth;
     avgHunger /= map.actors.size();
     
     report.append("\nTOTAL POPULATION: "+map.actors.size());

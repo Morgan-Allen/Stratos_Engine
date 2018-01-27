@@ -1,9 +1,10 @@
 
 
-package game;
+package content;
+import game.*;
 import util.*;
+import static content.GameContent.*;
 import static game.GameConstants.*;
-import static game.GameContent.*;
 
 
 
@@ -26,9 +27,9 @@ public class TestMilitary extends Test {
     );
     world.assignCitizenTypes(ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES);
     world.addCities(homeC, awayC);
-    homeC.name = "Home City";
-    awayC.name = "Away City";
-    awayC.council.typeAI = CityCouncil.AI_OFF;
+    homeC.setName("Home City");
+    awayC.setName("Away City");
+    awayC.council.setTypeAI(CityCouncil.AI_OFF);
     world.settings.toggleFog = false;
     
     City.setupRoute(homeC, awayC, 1);
@@ -44,10 +45,10 @@ public class TestMilitary extends Test {
       Building house = (Building) HOUSE.generate();
       house.enterMap(map, 2 + (n * 3), 7, 1);
       fillHomeVacancies(house, CITIZEN);
-      for (Actor a : house.residents) a.sexData = SEX_MALE;
+      for (Actor a : house.residents()) a.setSexData(SEX_MALE);
     }
     
-    float initPrestige = homeC.prestige;
+    float initPrestige = homeC.prestige();
     float initLoyalty  = awayC.loyalty(homeC);
     
     
@@ -58,7 +59,7 @@ public class TestMilitary extends Test {
       fights.assignHomeCity(awayC);
       enemies.toggleRecruit(fights, true);
     }
-    awayC.armyPower = AVG_ARMY_POWER / 4;
+    awayC.setArmyPower(AVG_ARMY_POWER / 4);
     
     
     boolean recruited = false;
@@ -72,15 +73,15 @@ public class TestMilitary extends Test {
     Table initSkills = null;
     Batch <Actor> fromTroops = new Batch();
     
-    while (map.time < 1000 || graphics) {
+    while (map.time() < 1000 || graphics) {
       map = test.runLoop(map, 10, graphics, "saves/test_military.tlt");
       
-      if (fort.recruits.size() >= 8 && ! recruited) {
+      if (fort.recruits().size() >= 8 && ! recruited) {
         troops = new Formation(Formation.OBJECTIVE_GARRISON, homeC, false);
         fort.deployInFormation(troops, true);
         troops.beginSecuring(map.tileAt(25, 25), TileConstants.E, map);
         
-        Visit.appendTo(fromTroops, troops.recruits);
+        Visit.appendTo(fromTroops, troops.recruits());
         initSkills = recordSkills(fromTroops, COMBAT_SKILLS);
         recruited = true;
       }
@@ -95,17 +96,17 @@ public class TestMilitary extends Test {
       
       if (recruited && ! homeWin) {
         boolean survivors = false;
-        for (Actor w : enemies.recruits) {
-          if (w.state < Actor.STATE_DEAD) survivors = true;
+        for (Actor w : enemies.recruits()) {
+          if (w.alive()) survivors = true;
         }
         homeWin = ! survivors;
         if (homeWin) {
           troops.disbandFormation();
-          fillAllVacancies(map);
+          fillAllVacancies(map, CITIZEN);
         }
       }
       
-      if (homeWin && fort.recruits.size() >= 12 && ! invading) {
+      if (homeWin && fort.recruits().size() >= 12 && ! invading) {
         troops = new Formation(Formation.OBJECTIVE_CONQUER, homeC, false);
         fort.deployInFormation(troops, true);
         troops.beginSecuring(awayC);
@@ -119,12 +120,12 @@ public class TestMilitary extends Test {
       
       if (awayWin && ! backHome) {
         boolean someAway = false;
-        for (Actor w : fort.recruits) {
-          if (w.map != map) someAway = true;
+        for (Actor w : fort.recruits()) {
+          if (w.map() != map) someAway = true;
         }
-        backHome = fort.recruits.size() > 8 && ! someAway;
+        backHome = fort.recruits().size() > 8 && ! someAway;
         
-        if (homeC.prestige <= initPrestige) {
+        if (homeC.prestige() <= initPrestige) {
           I.say("\nPrestige should be boosted by conquest!");
           break;
         }
@@ -160,7 +161,7 @@ public class TestMilitary extends Test {
     Table <String, Float> record = new Table();
     for (Actor a : actors) {
       for (Trait skill : skills) {
-        String keyL = a.ID+"_"+skill+"_L";
+        String keyL = a.ID()+"_"+skill+"_L";
         record.put(keyL, a.levelOf(skill));
       }
     }
@@ -174,7 +175,7 @@ public class TestMilitary extends Test {
     I.say("\nReporting experience gained.");
     for (Actor a : actors) {
       for (Trait skill : skills) {
-        String keyL = a.ID+"_"+skill+"_L";
+        String keyL = a.ID()+"_"+skill+"_L";
         float startS = (Float) init.get(keyL);
         float endS   = (Float) ends.get(keyL);
         if (endS <= startS) continue;

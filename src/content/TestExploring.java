@@ -1,9 +1,10 @@
 
 
 
-package game;
+package content;
+import game.*;
 import util.*;
-import static game.GameContent.*;
+import static content.GameContent.*;
 
 
 
@@ -32,24 +33,24 @@ public class TestExploring extends Test {
     boolean huntingOkay = false;
     boolean testOkay    = false;
     
-    while (map.time < 1000 || graphics) {
+    while (map.time() < 1000 || graphics) {
       map = test.runLoop(map, 10, graphics, "saves/test_gathering.tlt");
       
       if (! exploreOkay) {
         tilesSeen = 0;
         tilesOpen = 0;
         
-        for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
-          if (map.blocked(c)) continue;
+        for (Tile t : map.allTiles()) {
+          if (map.blocked(t)) continue;
           tilesOpen += 1;
-          if (map.fog.maxSightLevel(map.tileAt(c)) == 1) tilesSeen += 1;
+          if (map.fog.maxSightLevel(t) == 1) tilesSeen += 1;
         }
         
         exploreOkay = tilesSeen == tilesOpen;
       }
       
       if (! huntingOkay) {
-        huntingOkay = lodge.inventory.valueFor(MEAT) > lodge.type.maxStock;
+        huntingOkay = lodge.inventory(MEAT) > lodge.type().maxStock;
       }
       
       if (exploreOkay && huntingOkay && ! testOkay) {

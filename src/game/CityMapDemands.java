@@ -18,13 +18,16 @@ public class CityMapDemands {
     NODE_SIZE_DIV = 2
   ;
   
-  static class Entry {
+  public static class Entry {
     Node   parent;
     int    x, y;
     float  amount;
     Object source;
     float  tempDist = -1;  // Used during search...
     boolean leaf() { return true; }
+    
+    public Object source() { return source; }
+    public Coord coord() { return new Coord(x, y); }
   }
   
   static class Node extends Entry {
@@ -42,7 +45,7 @@ public class CityMapDemands {
   Node root;
   
   
-  CityMapDemands(CityMap map, Object key) {
+  public CityMapDemands(CityMap map, Object key) {
     this.map  = map;
     this.key  = key;
     root      = new Node();
@@ -207,18 +210,18 @@ public class CityMapDemands {
   
   /**  Common/basic query and update methods:
     */
-  float amountAt(int x, int y) {
+  public float amountAt(int x, int y) {
     Entry e = findEntryFor(x, y, false);
     return e == null ? 0 : e.amount;
   }
   
   
-  float totalAmount() {
+  public float totalAmount() {
     return root.amount;
   }
   
   
-  void setAmount(float amount, Object source, int x, int y) {
+  public void setAmount(float amount, Object source, int x, int y) {
     if (amount == 0) {
       Entry e = findEntryFor(x, y, false);
       if (e == null) return;
@@ -238,7 +241,7 @@ public class CityMapDemands {
   
   /**  More complex proximity-queries:
     */
-  Iterable <Entry> nearbyEntries(final int x, final int y) {
+  public Iterable <Entry> nearbyEntries(final int x, final int y) {
     //final Tile from = map.tileAt(x, y);
     
     class iteration implements Iterable <Entry>, Iterator <Entry> {

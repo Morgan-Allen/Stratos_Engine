@@ -45,7 +45,7 @@ public class BuildingForTrade extends Building implements Trader {
   public void setTradeLevels(boolean matchStock, Object... args) {
     tradeLevel.setWith(args);
     if (matchStock) for (Good g : tradeLevel.keys()) {
-      inventory.set(g, Nums.abs(tradeLevel.valueFor(g)));
+      setInventory(g, Nums.abs(tradeLevel.valueFor(g)));
     }
   }
   
@@ -65,16 +65,20 @@ public class BuildingForTrade extends Building implements Trader {
   
   
   public Tally <Good> tradeLevel() { return tradeLevel; }
-  public Tally <Good> inventory () { return inventory ; }
+  public Tally <Good> inventory () { return super.inventory(); }
   
-  Good[] needed  () { return needed  ; }
-  Good[] produced() { return produced; }
+  public Good[] needed  () { return needed  ; }
+  public Good[] produced() { return produced; }
   
-  float stockNeeded(Good need) { return Nums.abs(tradeLevel.valueFor(need)); }
-  float stockLimit (Good made) { return Nums.abs(tradeLevel.valueFor(made)); }
+  public float stockNeeded(Good need) {
+    return Nums.abs(tradeLevel.valueFor(need));
+  }
   
+  public float stockLimit (Good made) {
+    return Nums.abs(tradeLevel.valueFor(made));
+  }
   
-  float demandFor(Good g) {
+  public float demandFor(Good g) {
     boolean consumes = accessible() && Visit.arrayIncludes(needed(), g);
     float need = consumes ? stockNeeded(g) : 0;
     return super.demandFor(g) + need;

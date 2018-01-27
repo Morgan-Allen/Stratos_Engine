@@ -12,8 +12,8 @@ public class ActorAsAnimal extends Actor {
   
   /**  Data fields, construction and save/load methods-
     */
-  static float grazeOkay = 0, grazeFail = 0;
-  static boolean reportCycle = false;
+  public static float grazeOkay = 0, grazeFail = 0;
+  public static boolean reportCycle = false;
   
   Actor master;
   boolean rides;
@@ -49,14 +49,14 @@ public class ActorAsAnimal extends Actor {
     assignTask(null);
     //
     //  If you're seriously tired or hurt, but not hungry, find a place to rest:
-    if (hurtRating > type.maxHealth / 2 && hunger < 1 && rests != null) {
+    if (hurtRating > type().maxHealth / 2 && hunger < 1 && rests != null) {
       embarkOnTarget(rests, 10, JOB.RESTING, null);
     }
     //
     //  If you're hungry, look for food, either by grazing within your habitat
     //  or seeking prey:
     if (idle() && hunger >= 1) {
-      if (type.predator) {
+      if (type().predator) {
         Actor prey = findPrey();
         TaskCombat hunt = TaskCombat.configCombat(this, prey);
         if (hunt != null) assignTask(hunt);
@@ -83,7 +83,7 @@ public class ActorAsAnimal extends Actor {
     Pick <Tile> pick = new Pick();
     for (Tile t : CityMap.adjacent(at(), null, map)) {
       if (t == null || map.blocked(t)) continue;
-      if (! Visit.arrayIncludes(type.habitats, t.terrain)) continue;
+      if (! Visit.arrayIncludes(type().habitats, t.terrain)) continue;
       pick.compare(t, Rand.num());
     }
     
@@ -93,7 +93,7 @@ public class ActorAsAnimal extends Actor {
     }
     
     grazeFail += 1;
-    return CityMapTerrain.findGrazePoint(type, map);
+    return CityMapTerrain.findGrazePoint(type(), map);
   }
   
   
@@ -107,8 +107,8 @@ public class ActorAsAnimal extends Actor {
     //  regenerate.)
     
     for (Actor a : map.actors) {
-      int category = a.type.category;
-      if (a.type.predator) continue;
+      int category = a.type().category;
+      if (a.type().predator) continue;
       if (a.pregnancy != 0) continue;
       
       float dist   = CityMap.distance(a.at(), at());
@@ -162,12 +162,12 @@ public class ActorAsAnimal extends Actor {
   
   /**  Regular updates and life-cycle:
     */
-  boolean adult() {
+  public boolean adult() {
     return ageSeconds > ANIMAL_MATURES;
   }
   
   
-  float growLevel() {
+  public float growLevel() {
     return Nums.min(1, ageSeconds * 1f / ANIMAL_MATURES);
   }
   
@@ -201,9 +201,9 @@ public class ActorAsAnimal extends Actor {
     if (ageSeconds % MONTH_LENGTH == 0) {
       if (growLevel() == 1 && pregnancy <= 0) {
         
-        float idealPop = CityMapTerrain.idealPopulation(type, map);
+        float idealPop = CityMapTerrain.idealPopulation(type(), map);
         float actualPop = 0;
-        for (Actor a : map.actors) if (a.type == type) {
+        for (Actor a : map.actors) if (a.type() == type()) {
           actualPop += a.pregnancy > 0 ? 2 : 1;
         }
         
@@ -219,7 +219,7 @@ public class ActorAsAnimal extends Actor {
       //
       //  But if you're too damned old, just die-
       boolean canDie = city.world.settings.toggleAging;
-      if (canDie && ageSeconds > type.lifespan) {
+      if (canDie && ageSeconds > type().lifespan) {
         setAsKilled("Old age");
       }
     }
@@ -230,7 +230,7 @@ public class ActorAsAnimal extends Actor {
       if (pregnancy > ANIMAL_PREG_TIME) {
         pregnancy = 0;
         
-        Actor child = (ActorAsAnimal) type.generate();
+        Actor child = (ActorAsAnimal) type().generate();
         Tile at = this.at();
         child.enterMap(map, at.x, at.y, 1);
         if (reportCycle) I.say(this+" GAVE BIRTH");
@@ -239,7 +239,7 @@ public class ActorAsAnimal extends Actor {
   }
   
   
-  void setAsKilled(String cause) {
+  public void setAsKilled(String cause) {
     super.setAsKilled(cause);
     if (reportCycle) I.say(this+" DIED FROM CAUSE: "+cause);
   }

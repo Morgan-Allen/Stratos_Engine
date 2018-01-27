@@ -42,14 +42,14 @@ public class TaskHunting extends Task {
     
     Pick <Actor> forHunt = new Pick();
     for (Actor a : actor.map.actors) {
-      if (a.maxSightLevel() == 0               ) continue;
-      if (a.type.category != Type.IS_ANIMAL_ACT) continue;
-      if (a.type.predator || a.growLevel() < 1 ) continue;
-      if (hasTaskFocus(a, JOB.HUNTING)         ) continue;
+      if (a.maxSightLevel() == 0                 ) continue;
+      if (a.type().category != Type.IS_ANIMAL_ACT) continue;
+      if (a.type().predator || a.growLevel() < 1 ) continue;
+      if (hasTaskFocus(a, JOB.HUNTING)           ) continue;
       
-      Good meat = a.type.meatType;
+      Good meat = a.type().meatType;
       if (! Visit.arrayIncludes(meatTypes, meat)) continue;
-      if (store.inventory.valueFor(meat) >= store.type.maxStock) continue;
+      if (store.inventory(meat) >= store.type().maxStock) continue;
       
       float dist = CityMap.distance(actor.at(), a.at());
       if (dist > MAX_EXPLORE_DIST) continue;
@@ -82,7 +82,7 @@ public class TaskHunting extends Task {
     }
     else {
       float yield = ActorAsAnimal.meatYield(prey);
-      actor.incCarried(prey.type.meatType, yield);
+      actor.incCarried(prey.type().meatType, yield);
       configTask(store, store, null, JOB.DELIVER, 0);
     }
   }
@@ -90,7 +90,7 @@ public class TaskHunting extends Task {
   
   protected void onVisit(Building visits) {
     if (visits != store) return;
-    actor.offloadGood(prey.type.meatType, visits);
+    actor.offloadGood(prey.type().meatType, visits);
   }
   
 }

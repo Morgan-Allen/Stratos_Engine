@@ -1,10 +1,11 @@
 
 
 
-package game;
+package content;
+import game.*;
 import util.*;
+import static content.GameContent.*;
 import static game.GameConstants.*;
-import static game.GameContent.*;
 
 
 
@@ -23,9 +24,9 @@ public class TestTrading extends Test {
     City  homeC = new City(world);
     City  awayC = new City(world);
     world.addCities(homeC, awayC);
-    awayC.council.typeAI = CityCouncil.AI_OFF;
-    homeC.name = "(Home City)";
-    awayC.name = "(Away City)";
+    awayC.council.setTypeAI(CityCouncil.AI_OFF);
+    homeC.setName("(Home City)");
+    awayC.setName("(Away City)");
     
     City.setupRoute(homeC, awayC, 1);
     City.setPosture(homeC, awayC, City.POSTURE.VASSAL, true);
@@ -33,13 +34,13 @@ public class TestTrading extends Test {
     Tally <Good> supplies = new Tally().setWith(FRUIT, 10, STONE, 5);
     City.setSuppliesDue(awayC, homeC, supplies);
     
-    awayC.tradeLevel.setWith(
+    awayC.initTradeLevels(
       COTTON    ,  50,
       POTTERY   ,  50,
       RAW_COTTON, -50,
       CLAY      , -50
     );
-    awayC.inventory.setWith(
+    awayC.initTradeLevels(
       RAW_COTTON,  20,
       CLAY      ,  20,
       FRUIT     ,  15,
@@ -55,8 +56,8 @@ public class TestTrading extends Test {
     
     BuildingForTrade post1 = (BuildingForTrade) PORTER_POST.generate();
     post1.enterMap(map, 1, 6, 1);
-    post1.ID = "(Does Trading)";
-    post1.tradeLevel.setWith(
+    post1.setID("(Does Trading)");
+    post1.setTradeLevels(false,
       RAW_COTTON,  2 ,
       CLAY      ,  2 ,
       COTTON    , -5 ,
@@ -65,8 +66,8 @@ public class TestTrading extends Test {
     
     BuildingForTrade post2 = (BuildingForTrade) PORTER_POST.generate();
     post2.enterMap(map, 5, 6, 1);
-    post2.ID = "(Gets Supplies)";
-    post2.tradeLevel.setWith(
+    post2.setID("(Gets Supplies)");
+    post2.setTradeLevels(false,
       FRUIT     , 15,
       STONE     , 5 
     );
@@ -79,9 +80,9 @@ public class TestTrading extends Test {
     
     CityMapPlanning.placeStructure(ROAD, map, true, 1, 5, 8, 1);
     
-    fillAllVacancies(map);
+    fillAllVacancies(map, CITIZEN);
     int initFunds = 100;
-    homeC.currentFunds = initFunds;
+    homeC.initFunds(initFunds);
     
     
     final int RUN_TIME = YEAR_LENGTH;
@@ -89,19 +90,19 @@ public class TestTrading extends Test {
     boolean supplyOkay = false;
     boolean moneyOkay  = false;
     
-    while (map.time < RUN_TIME || graphics) {
+    while (map.time() < RUN_TIME || graphics) {
       map = test.runLoop(map, 100, graphics, "saves/test_trading.tlt");
       
       boolean allHome = true;
-      for (Building b : map.buildings) for (Actor a : b.workers) {
+      for (Building b : map.buildings()) for (Actor a : b.workers()) {
         if (a.jobType() == Task.JOB.TRADING) allHome = false;
       }
       if (allHome) {
         float funds = projectedEarnings(homeC, awayC, initFunds, false);
-        if (Nums.abs(funds - homeC.currentFunds) > 1) {
+        if (Nums.abs(funds - homeC.funds()) > 1) {
           I.say("\nTrade-earnings do not match projections!");
-          I.say("  Expected: "+funds    );
-          I.say("  Actual:   "+homeC.currentFunds);
+          I.say("  Expected: "+funds        );
+          I.say("  Actual:   "+homeC.funds());
           projectedEarnings(homeC, awayC, initFunds, true);
           return false;
         }
@@ -112,14 +113,14 @@ public class TestTrading extends Test {
         boolean check = true;
         check &= City.goodsSent(homeC, awayC, POTTERY) > 1;
         check &= City.goodsSent(homeC, awayC, COTTON ) > 1;
-        check &= homeC.currentFunds > 0;
+        check &= homeC.funds() > 0;
         tradeOkay = check;
       }
       
       if (! supplyOkay) {
         boolean check = true;
-        check &= post2.inventory.valueFor(STONE) >= 5;
-        check &= post2.inventory.valueFor(FRUIT) >= 15;
+        check &= post2.inventory(STONE) >= 5;
+        check &= post2.inventory(FRUIT) >= 15;
         supplyOkay = check;
       }
       
@@ -167,12 +168,12 @@ public class TestTrading extends Test {
     
     I.say("\nGoods report:");
     for (Good g : GOODS) {
-      I.say("  Made "+g+": "+a.makeTotals.valueFor(g));
+      I.say("  Made "+g+": "+a.totalMade(g));
       I.add("  Sent "+City.goodsSent(a, b, g));
       I.add("  Got " +City.goodsSent(b, a, g));
     }
-    I.say("  Current funds: "+a.currentFunds);
-    I.say("  Current time:  "+a.world.time);
+    I.say("  Current funds: "+a.funds());
+    I.say("  Current time:  "+a.world.time());
   }
 
 }

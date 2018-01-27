@@ -64,7 +64,7 @@ public class TaskBuilding extends Task {
     if (at == null) return 0;
     
     Element onPlan  = map.planning.objectAt(at);
-    boolean natural = b.type.isNatural();
+    boolean natural = b.type().isNatural();
     boolean raze    = onPlan != b && (onPlan != null || ! natural);
     
     b.flagTeardown(raze);
@@ -87,12 +87,12 @@ public class TaskBuilding extends Task {
   /**  Setup and config methods exclusive to the task itself:
     */
   static Task nextBuildingTask(Building store, Actor a) {
-    if (Visit.empty(store.type.buildsWith)) return null;
+    if (Visit.empty(store.type().buildsWith)) return null;
     {
       Task clearing = nextBuildingTask(store, a, VOID, false);
       if (clearing != null) return clearing;
     }
-    for (Good g : store.type.buildsWith) {
+    for (Good g : store.type().buildsWith) {
       Task building = nextBuildingTask(store, a, g, false);
       if (building != null) return building;
     }
@@ -109,11 +109,11 @@ public class TaskBuilding extends Task {
     //  Iterate over any structures demanding your attention and see if
     //  they're close enough to attend to:
     CityMapDemands demands = demandsFor(material, map);
-    boolean canPickup = actor.carried == null || actor.carried == material;
+    boolean canPickup = actor.carried() == null || actor.carried() == material;
     
     if (demands != null && canPickup) {
-      int storeRange = store.type.maxDeliverRange;
-      int maxRange = near ? actor.type.sightRange : storeRange;
+      int storeRange = store.type().maxDeliverRange;
+      int maxRange = near ? actor.type().sightRange : storeRange;
       
       for (CityMapDemands.Entry e : demands.nearbyEntries(at.x, at.y)) {
         Element source = (Element) e.source;
@@ -131,7 +131,7 @@ public class TaskBuilding extends Task {
     //
     //  If there's no target to attend to, but you have surplus material left
     //  over, return it to your store:
-    if (actor.carried == material) {
+    if (actor.carried() == material) {
       TaskBuilding task = new TaskBuilding(actor, store, material, null);
       if (task.configTravel(store, JOB.RETURNING, store)) return task;
     }
@@ -144,14 +144,14 @@ public class TaskBuilding extends Task {
   boolean decideNextAction(Element b, CityMap map) {
     //
     //  Avoid piling up on the same target:
-    if (b != site && b.type.isFixture() && (
+    if (b != site && b.type().isFixture() && (
       Task.hasTaskFocus(b, JOB.BUILDING) ||
       Task.hasTaskFocus(b, JOB.SALVAGE )
     )) {
       return false;
     }
     
-    float atStore   = store.inventory.valueFor(material);
+    float atStore   = store.inventory(material);
     float needBuild = checkNeedForBuilding(b, material, map);
     float carried   = getCarryAmount(material, b, false);
     
@@ -187,7 +187,7 @@ public class TaskBuilding extends Task {
   boolean configTravel(
     Element goes, Task.JOB jobType, Employer e
   ) {
-    if (goes.complete() && goes.type.isBuilding()) {
+    if (goes.complete() && goes.type().isBuilding()) {
       return configTask(e, (Building) goes, null, jobType, 0) != null;
     }
     else {
@@ -235,7 +235,7 @@ public class TaskBuilding extends Task {
     //
     //  Pick up some of the material initially-
     if (type == JOB.COLLECTING && adjacent(target, store)) {
-      float amount = Nums.min(5, store.inventory.valueFor(material));
+      float amount = Nums.min(5, store.inventory(material));
       actor.pickupGood(material, amount, store);
     }
     //
@@ -319,23 +319,23 @@ public class TaskBuilding extends Task {
     //
     //  If we're depleting the material, take it from the actor first:
     if (actor.carried(m) > 0 && inc < 0 && ! siteOnly) {
-      float sub = Nums.min(actor.carryAmount, 0 - inc);
+      float sub = Nums.min(actor.carryAmount(), 0 - inc);
       actor.incCarried(material, 0 - sub);
       inc += sub;
     }
     total += actor.carried(m);
     //
     //  And take from the building's stock as necessary:
-    if (b.type.isBuilding()) {
+    if (b.type().isBuilding()) {
       Building site = (Building) b;
       if (inc < 0) {
-        float sub = Nums.min(0 - inc, site.inventory.valueFor(m));
-        site.inventory.add(0 - sub, m);
+        float sub = Nums.min(0 - inc, site.inventory(m));
+        site.addInventory(0 - sub, m);
       }
       if (inc > 0) {
-        site.inventory.add(inc, m);
+        site.addInventory(inc, m);
       }
-      total += site.inventory.valueFor(m);
+      total += site.inventory(m);
     }
     return total;
   }
@@ -349,14 +349,13 @@ public class TaskBuilding extends Task {
   
   /**  Rendering, debug and interface methods:
     */
-  
   private float[] totalMaterial() {
     float total[] = new float[5];
     total[0] += total[1] = site == null ? 0 : site.materialLevel(material);
     total[0] += total[2] = actor.carried(material);
-    total[0] += total[3] = store.inventory.valueFor(material);
-    if (site != null && site.type.isBuilding() && site != store) {
-      total[0] += total[4] = ((Building) site).inventory.valueFor(material);
+    total[0] += total[3] = store.inventory(material);
+    if (site != null && site.type().isBuilding() && site != store) {
+      total[0] += total[4] = ((Building) site).inventory(material);
     }
     return total;
   }

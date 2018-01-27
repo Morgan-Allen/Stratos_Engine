@@ -29,7 +29,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   int dirs[] = new int[4];
   
   
-  String ID;
+  private String ID;
   
   Building  work;
   Building  home;
@@ -38,14 +38,14 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   Building  recruiter;
   Formation formation;
   
-  Task task;
-  Pathing inside;
-  int moveMode = MOVE_NORMAL;
-  Vec3D position = new Vec3D();
+  private Task task;
+  private Pathing inside;
+  private int moveMode = MOVE_NORMAL;
+  private Vec3D position = new Vec3D();
   
-  Object carried = null;
-  float carryAmount = 0;
-  Tally <Good> cargo = null;
+  private Object carried = null;
+  private float carryAmount = 0;
+  private Tally <Good> cargo = null;
   
   int sexData    = -1;
   int ageSeconds =  0;
@@ -134,7 +134,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   /**  World entry and exit-
     */
-  void enterMap(CityMap map, int x, int y, float buildLevel) {
+  public void enterMap(CityMap map, int x, int y, float buildLevel) {
     if (onMap()) {
       I.complain("\nALREADY ON MAP: "+this);
       return;
@@ -144,7 +144,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   }
   
   
-  void exitMap(CityMap map) {
+  public void exitMap(CityMap map) {
     if (inside != null) setInside(inside, false);
     map.actors.remove(this);
     
@@ -155,7 +155,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   }
   
   
-  void setDestroyed() {
+  public void setDestroyed() {
     super.setDestroyed();
     if (formation != null) formation.toggleRecruit(this, false);
     if (home      != null) home.setResident(this, false);
@@ -169,17 +169,17 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   }
   
   
-  void assignHomeCity(City city) {
+  public void assignHomeCity(City city) {
     this.homeCity = city;
   }
   
   
-  void assignGuestCity(City city) {
+  public void assignGuestCity(City city) {
     this.guestCity = city;
   }
   
   
-  boolean onMap(CityMap map) {
+  public boolean onMap(CityMap map) {
     return map != null && map == this.map;
   }
   
@@ -192,7 +192,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     //  Some checks to assist in case of blockage...
     Tile at = at();
     if (inside == null && at != null && ! map.pathCache.hasGroundAccess(at)) {
-      if (at.above != null && at.above.type.isBuilding()) {
+      if (at.above != null && at.above.type().isBuilding()) {
         setInside((Building) at.above, true);
       }
       else {
@@ -256,7 +256,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   }
   
   
-  void setLocation(Tile at, CityMap map) {
+  public void setLocation(Tile at, CityMap map) {
     if (! onMap()) {
       super.setLocation(at, map);
       return;
@@ -266,7 +266,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     
     if (at != null) {
       float height = at.elevation;
-      if (inside == null && at.above != null) height += at.above.type.deep;
+      if (inside == null && at.above != null) height += at.above.type().deep;
       position.set(at.x, at.y, height);
     }
     
@@ -298,14 +298,27 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   /**  Miscellaneous behaviour triggers:
     */
-  void assignTask(Task task) {
+  public void assignTask(Task task) {
     if (this.task != null) this.task.toggleFocus(false);
     this.task = task;
     if (this.task != null) this.task.toggleFocus(true );
   }
   
   
-  Task embarkOnVisit(Building goes, int maxTime, JOB jobType, Employer e) {
+  public Task task() {
+    return task;
+  }
+  
+  
+  public Pathing[] currentPath() {
+    if (task == null || task.path == null) return new Pathing[0];
+    return task.path;
+  }
+  
+  
+  public Task embarkOnVisit(
+    Building goes, int maxTime, JOB jobType, Employer e
+  ) {
     if (goes == null) return null;
     if (reports()) I.say(this+" will visit "+goes+" for time "+maxTime);
     
@@ -315,7 +328,9 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   }
   
   
-  Task embarkOnTarget(Target goes, int maxTime, JOB jobType, Employer e) {
+  public Task embarkOnTarget(
+    Target goes, int maxTime, JOB jobType, Employer e
+  ) {
     if (goes == null) return null;
     if (reports()) I.say(this+" will target "+goes+" for time "+maxTime);
     
@@ -369,26 +384,26 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   /**  Methods to assist trade and migration-
     */
-  void pickupGood(Good carried, float amount, Building store) {
+  public void pickupGood(Good carried, float amount, Building store) {
     if (store == null || carried == null || amount <= 0) return;
     
-    store.inventory.add(0 - amount, carried);
+    store.addInventory(0 - amount, carried);
     incCarried(carried, amount);
   }
   
   
-  void offloadGood(Good carried, Building store) {
+  public void offloadGood(Good carried, Building store) {
     if (store == null || carried != this.carried) return;
     
     if (reports()) I.say(this+" Depositing "+carried+" at "+store);
     
-    store.inventory.add(carryAmount, carried);
+    store.addInventory(carryAmount, carried);
     this.carried = null;
     this.carryAmount = 0;
   }
   
   
-  void incCarried(Good carried, float amount) {
+  public void incCarried(Good carried, float amount) {
     
     //  TODO:  Add a proper warning system for this?
     /*
@@ -405,14 +420,31 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   }
   
   
-  void assignCargo(Tally <Good> cargo) {
+  public void assignCargo(Tally <Good> cargo) {
     this.cargo = cargo;
   }
   
   
-  float carried(Good g) {
-    if (this.carried == g) return carryAmount;
-    return 0;
+  public Tally <Good> cargo() {
+    return cargo;
+  }
+  
+  
+  public Object carried() {
+    return carried;
+  }
+  
+  
+  public float carryAmount() {
+    return carryAmount;
+  }
+  
+  
+  public float carried(Good g) {
+    float sum = 0;
+    if (this.carried == g) sum += carryAmount;
+    if (this.cargo != null) sum += cargo.valueFor(g);
+    return sum;
   }
   
   
@@ -436,8 +468,8 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   /**  Combat and survival-related code:
     */
   void performAttack(Element other, boolean melee) {
-    int damage = melee ? type.meleeDamage : type.rangeDamage;
-    int armour = other.type.armourClass;
+    int damage = melee ? type().meleeDamage : type().rangeDamage;
+    int armour = other.type().armourClass;
     if (other == null || damage <= 0) return;
     
     //
@@ -449,7 +481,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     boolean hits = true;
     float XP = 1;
     
-    if (other.type.isActor()) {
+    if (other.type().isActor()) {
       float attackBonus = levelOf(attackSkill) * 2f / MAX_SKILL_LEVEL;
       float defendBonus = levelOf(defendSkill) * 2f / MAX_SKILL_LEVEL;
       if (wallBonus  ) attackBonus += WALL_HIT_BONUS / 100f;
@@ -483,14 +515,14 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   }
   
   
-  void takeDamage(float damage) {
+  public void takeDamage(float damage) {
     if (map == null || ! map.city.world.settings.toggleInjury) return;
     injury += damage;
     checkHealthState();
   }
   
   
-  void setAsKilled(String cause) {
+  public void setAsKilled(String cause) {
     state = STATE_DEAD;
     if (map != null) exitMap(map);
     setDestroyed();
@@ -503,18 +535,18 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   
   void checkHealthState() {
-    if (injury + hunger > type.maxHealth && state != STATE_DEAD) {
+    if (injury + hunger > type().maxHealth && state != STATE_DEAD) {
       setAsKilled("Injury: "+injury+" Hunger "+hunger);
     }
   }
   
   
-  boolean alive() {
+  public boolean alive() {
     return state != STATE_DEAD;
   }
   
   
-  boolean dead() {
+  public boolean dead() {
     return state == STATE_DEAD;
   }
   
@@ -522,22 +554,22 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   /**  Stub methods related to skills, XP and bonding:
     */
-  void gainXP(Trait trait, float XP) {
+  public void gainXP(Trait trait, float XP) {
     return;
   }
   
   
-  float levelOf(Trait trait) {
+  public float levelOf(Trait trait) {
     return 0;
   }
   
   
-  float bondLevel(Actor with) {
+  public float bondLevel(Actor with) {
     return 0;
   }
   
   
-  Series <Actor> allBondedWith(int type) {
+  public Series <Actor> allBondedWith(int type) {
     return new Batch();
   }
   
@@ -545,33 +577,43 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   /**  Aging, reproduction and life-cycle:
     */
-  float ageYears() {
+  public void setSexData(int sexData) {
+    this.sexData    = sexData;
+  }
+  
+  
+  public void setAgeYears(float ageYears) {
+    this.ageSeconds = (int) (ageYears * YEAR_LENGTH);
+  }
+  
+  
+  public float ageYears() {
     float years = ageSeconds / (YEAR_LENGTH * 1f);
     return years;
   }
   
   
-  float growLevel() {
+  public float growLevel() {
     return Nums.min(1, ageYears() / AVG_MARRIED);
   }
   
   
-  boolean adult() {
+  public boolean adult() {
     return true;
   }
   
   
-  boolean child() {
+  public boolean child() {
     return false;
   }
   
   
-  boolean man() {
+  public boolean man() {
     return false;
   }
   
   
-  boolean woman() {
+  public boolean woman() {
     return false;
   }
   
@@ -590,6 +632,16 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   }
   
   
+  public String ID() {
+    return ID;
+  }
+  
+  
+  public void setID(String newID) {
+    this.ID = newID;
+  }
+  
+  
   public String toString() {
     String from = "";
     if (map != null && map.city != null && homeCity != null) {
@@ -599,7 +651,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
       if (p == City.POSTURE.VASSAL) from = " (V)";
       if (p == City.POSTURE.LORD  ) from = " (L)";
     }
-    return type.name+" "+ID+from;
+    return type().name+" "+ID+from;
   }
   
   

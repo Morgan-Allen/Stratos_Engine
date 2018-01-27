@@ -13,7 +13,7 @@ public class ActorAsPerson extends Actor {
   
   /**  Data fields, construction and save/load methods-
     */
-  final static int
+  final public static int
     BOND_CHILD   = 1 << 1,
     BOND_PARENT  = 1 << 3,
     BOND_MARRIED = 1 << 4,
@@ -95,7 +95,7 @@ public class ActorAsPerson extends Actor {
   }
   
   
-  void setLevel(Trait trait, float level) {
+  public void setLevel(Trait trait, float level) {
     Level l = levelFor(trait, true);
     l.level = level = Nums.clamp(level, 0, MAX_SKILL_LEVEL);
     l.XP =  BASE_LEVEL_XP * SKILL_XP_TOTAL[(int) level];
@@ -103,7 +103,7 @@ public class ActorAsPerson extends Actor {
   }
   
   
-  void setXP(Trait trait, float XP) {
+  public void setXP(Trait trait, float XP) {
     Level l = levelFor(trait, true);
     l.XP = Nums.clamp(XP, 0, MAX_SKILL_XP);
     for (int i = MAX_SKILL_LEVEL; i >= 0; i--) {
@@ -113,13 +113,13 @@ public class ActorAsPerson extends Actor {
   }
   
   
-  void gainXP(Trait trait, float XP) {
+  public void gainXP(Trait trait, float XP) {
     Level l = levelFor(trait, true);
     setXP(trait, l.XP + XP);
   }
   
   
-  float levelOf(Trait trait) {
+  public float levelOf(Trait trait) {
     Level l = levelFor(trait, false);
     return l == null ? 0 : l.level;
   }
@@ -142,7 +142,9 @@ public class ActorAsPerson extends Actor {
   }
   
   
-  static void setBond(Actor a, Actor b, int typeA, int typeB, float level) {
+  public static void setBond(
+    Actor a, Actor b, int typeA, int typeB, float level
+  ) {
     if (a instanceof ActorAsPerson && b != null) {
       ((ActorAsPerson) a).setBond(b, level, typeA);
     }
@@ -152,7 +154,7 @@ public class ActorAsPerson extends Actor {
   }
   
   
-  void setBond(Actor with, float level, int... props) {
+  public void setBond(Actor with, float level, int... props) {
     Bond b = bondWith(with, true);
     b.level = level;
     b.properties = 0;
@@ -160,31 +162,31 @@ public class ActorAsPerson extends Actor {
   }
   
   
-  void deleteBond(Actor with) {
+  public void deleteBond(Actor with) {
     Bond b = bondWith(with, false);
     if (b != null) bonds.remove(b);
   }
   
   
-  boolean hasBondType(Actor with, int type) {
+  public boolean hasBondType(Actor with, int type) {
     Bond b = bondWith(with, false);
     return b == null ? false : ((b.properties & type) != 0);
   }
   
   
-  float bondLevel(Actor with) {
+  public float bondLevel(Actor with) {
     Bond b = bondWith(with, false);
     return b == null ? 0 : b.level;
   }
   
   
-  Actor bondedWith(int type) {
+  public Actor bondedWith(int type) {
     for (Bond b : bonds) if ((b.properties & type) != 0) return b.with;
     return null;
   }
   
   
-  Series <Actor> allBondedWith(int type) {
+  public Series <Actor> allBondedWith(int type) {
     Batch <Actor> all = new Batch();
     for (Bond b : bonds) if ((b.properties & type) != 0) all.add(b.with);
     return all;
@@ -217,7 +219,7 @@ public class ActorAsPerson extends Actor {
     //  If you're seriously hungry/beat/tired, try going home:
     Batch <Good> menu = menuAt(home);
     float hurtRating = fatigue + injury + (menu.size() > 0 ? hunger : 0);
-    if (hurtRating > (type.maxHealth * (Rand.num() + 0.5f))) {
+    if (hurtRating > (type().maxHealth * (Rand.num() + 0.5f))) {
       beginResting(home);
     }
     
@@ -266,10 +268,10 @@ public class ActorAsPerson extends Actor {
   
   Batch <Good> menuAt(Building visits) {
     Batch <Good> menu = new Batch();
-    if (type.foodsAllowed == null) return menu;
+    if (type().foodsAllowed == null) return menu;
     
-    if (visits != null) for (Good g : type.foodsAllowed) {
-      if (visits.inventory.valueFor(g) >= 1) menu.add(g);
+    if (visits != null) for (Good g : type().foodsAllowed) {
+      if (visits.inventory(g) >= 1) menu.add(g);
     }
     return menu;
   }
@@ -285,7 +287,7 @@ public class ActorAsPerson extends Actor {
         if (menu.size() > 0) for (Good g : menu) {
           float eats = 1f / (menu.size() * HUNGER_REGEN);
           if (! adult) eats /= 2;
-          visits.inventory.add(0 - eats, g);
+          visits.addInventory(0 - eats, g);
           hunger -= eats / FOOD_UNIT_PER_HP;
         }
       }
@@ -299,7 +301,7 @@ public class ActorAsPerson extends Actor {
   void updateVision() {
     if (indoors()) return;
     
-    float range = type.sightRange * (map.fog.lightLevel() + 1f) / 2;
+    float range = type().sightRange * (map.fog.lightLevel() + 1f) / 2;
     map.fog.liftFog(at(), range);
     
     //  TODO:  Allow buildings to update fog-of-war as well (possibly on a
@@ -316,7 +318,7 @@ public class ActorAsPerson extends Actor {
     WorldSettings settings = city.world.settings;
     
     if (pregnancy > 0) {
-      boolean canBirth = (home != null && inside == home) || ! onMap;
+      boolean canBirth = (home != null && inside() == home) || ! onMap;
       pregnancy += 1;
       if (pregnancy > PREGNANCY_LENGTH && canBirth) {
         float dieChance = AVG_CHILD_MORT / 100f;
@@ -360,17 +362,17 @@ public class ActorAsPerson extends Actor {
   }
   
   
-  boolean pregnant() {
+  public boolean pregnant() {
     return pregnancy > 0;
   }
   
   
-  void beginPregnancy() {
+  public void beginPregnancy() {
     pregnancy = 1;
   }
   
   
-  void completePregnancy(Building venue, boolean onMap) {
+  public void completePregnancy(Building venue, boolean onMap) {
     
     ActorAsPerson child  = (ActorAsPerson) CHILD.generate();
     ActorAsPerson father = (ActorAsPerson) bondedWith(BOND_MARRIED);
@@ -387,32 +389,32 @@ public class ActorAsPerson extends Actor {
   }
   
   
-  boolean child() {
+  public boolean child() {
     return ageYears() < AVG_PUBERTY;
   }
   
   
-  boolean senior() {
+  public boolean senior() {
     return ageYears() > AVG_RETIREMENT;
   }
   
   
-  boolean fertile() {
+  public boolean fertile() {
     return ageYears() > AVG_MARRIED && ageYears() < AVG_MENOPAUSE;
   }
   
   
-  boolean adult() {
+  public boolean adult() {
     return ! (child() || senior());
   }
   
   
-  boolean man() {
+  public boolean man() {
     return (sexData & SEX_MALE) != 0;
   }
   
   
-  boolean woman() {
+  public boolean woman() {
     return (sexData & SEX_FEMALE) != 0;
   }
   

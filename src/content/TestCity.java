@@ -1,10 +1,11 @@
 
 
 
-package game;
+package content;
 import util.*;
+import game.*;
+import static content.GameContent.*;
 import static game.GameConstants.*;
-import static game.GameContent.*;
 import static game.Task.*;
 
 
@@ -57,19 +58,19 @@ public class TestCity extends Test {
       rock.enterMap(map, 1 + (n * 3), 28, 1);
     }
     
-    CityMapFlagging forRock = map.flagging.get(IS_STONE);
+    CityMapFlagging forRock = map.flagMap(IS_STONE, true);
     if (forRock.totalSum() != 4) {
       I.say("NO ROCKS FLAGGED: "+forRock.totalSum());
       return false;
     }
     
-    for (Building b : map.buildings) {
-      if (b.type == HOUSE) {
-        b.inventory.set(CASH, 20);
+    for (Building b : map.buildings()) {
+      if (b.type() == HOUSE) {
+        b.setInventory(CASH, 20);
       }
-      if (b.type == ENGINEER_STATION) {
-        b.inventory.set(CLAY   , 1);
-        b.inventory.set(POTTERY, 1);
+      if (b.type() == ENGINEER_STATION) {
+        b.setInventory(CLAY   , 1);
+        b.setInventory(POTTERY, 1);
       }
       map.planning.placeObject(b);
     }
@@ -92,16 +93,16 @@ public class TestCity extends Test {
     boolean goodsOkay  = true ;
     boolean testOkay   = false;
     
-    while (map.time < RUN_TIME || graphics) {
+    while (map.time() < RUN_TIME || graphics) {
       map = test.runLoop(map, 1, graphics, "saves/test_city.tlt");
       
       if (goodsOkay) {
-        for (Building b : map.buildings) {
-          if (b.type == HOUSE) {
+        for (Building b : map.buildings()) {
+          if (b.type() == HOUSE) {
             BuildingForHome home = (BuildingForHome) b;
-            for (Good g : home.usedBy(home.currentTier)) {
+            for (Good g : home.usedBy(home.currentTier())) {
               float need = home.maxStock(g) + 1;
-              float have = home.inventory.valueFor(g);
+              float have = home.inventory(g);
               if (have > need + 1) goodsOkay = false;
             }
           }
@@ -110,29 +111,29 @@ public class TestCity extends Test {
       
       if (! housesOkay) {
         boolean allNeeds = true;
-        for (Building b : map.buildings) {
-          if (b.type == MARKET) {
-            b.inventory.set(COTTON, 10);
-            b.inventory.set(MAIZE , 10);
+        for (Building b : map.buildings()) {
+          if (b.type() == MARKET) {
+            b.setInventory(COTTON, 10);
+            b.setInventory(MAIZE , 10);
           }
-          if (b.type == PALACE) {
-            for (Good g : b.type.homeUseGoods) {
-              b.inventory.set(g, 15);
+          if (b.type() == PALACE) {
+            for (Good g : b.type().homeUseGoods) {
+              b.setInventory(g, 15);
             }
-            b.inventory.set(STONE, 10);
-            b.inventory.set(WOOD , 10);
-            b.inventory.set(CLAY , 10);
+            b.setInventory(STONE, 10);
+            b.setInventory(WOOD , 10);
+            b.setInventory(CLAY , 10);
           }
-          if (b.type == HOUSE) {
+          if (b.type() == HOUSE) {
             BuildingForHome home = (BuildingForHome) b;
-            if (home.currentTier != HOUSE_T2        ) allNeeds = false;
-            if (home.inventory.valueFor(CASH) > 5.0f) allNeeds = false;
+            if (home.currentTier() != HOUSE_T2) allNeeds = false;
+            if (home.inventory(CASH) > 5.0f   ) allNeeds = false;
           }
-          if (b.type == ENGINEER_STATION) {
+          if (b.type() == ENGINEER_STATION) {
             boolean isCrafting = false;
-            for (Actor a : b.workers) {
-              if (b.inventory.valueFor(CLAY) <= 0) break;
-              if (a.inside == b && a.jobType() == JOB.CRAFTING) {
+            for (Actor a : b.workers()) {
+              if (b.inventory(CLAY) <= 0) break;
+              if (a.inside() == b && a.jobType() == JOB.CRAFTING) {
                 isCrafting = true;
               }
             }
@@ -171,22 +172,22 @@ public class TestCity extends Test {
   
   
   static void reportOnMap(CityMap map, boolean okay) {
-    I.say("  Current time: "+map.time);
-    if (! okay) for (Building b : map.buildings) {
-      if (b.type.isHomeBuilding()) {
+    I.say("  Current time: "+map.time());
+    if (! okay) for (Building b : map.buildings()) {
+      if (b.type().isHomeBuilding()) {
         BuildingForHome house = (BuildingForHome) b;
         I.say("  "+house);
-        I.say("    Tier:      "+house.currentTier);
-        I.say("    Inventory: "+house.inventory);
+        I.say("    Tier:      "+house.currentTier());
+        I.say("    Inventory: "+house.inventory());
       }
     }
     I.say("\nTotal goods produced:");
     for (Good g : HOUSE_T2.homeUseGoods) {
-      I.say("  "+g+": "+map.city.makeTotals.valueFor(g));
+      I.say("  "+g+": "+map.city.totalMade(g));
     }
     I.say("\nTotal goods consumed:");
     for (Good g : HOUSE_T2.homeUseGoods) {
-      I.say("  "+g+": "+map.city.usedTotals.valueFor(g));
+      I.say("  "+g+": "+map.city.totalMade(g));
     }
   }
   

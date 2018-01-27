@@ -15,7 +15,7 @@ public class Formation implements
   
   /**  Data fields, setup and save/load methods-
     */
-  final static int
+  final public static int
     OBJECTIVE_STANDBY  = 0,
     OBJECTIVE_CONQUER  = 1,
     OBJECTIVE_GARRISON = 2,
@@ -25,7 +25,7 @@ public class Formation implements
     "Standby", "Conquer", "Garrison", "Dialog"
   };
   
-  int objective = OBJECTIVE_STANDBY;
+  final public int objective;
   boolean activeAI = false;
   
   int     timeTermsSent = -1;
@@ -58,7 +58,7 @@ public class Formation implements
   int lastUpdateTime = -1;
   
   
-  Formation(int objective, City belongs, boolean activeAI) {
+  public Formation(int objective, City belongs, boolean activeAI) {
     this.objective = objective;
     this.activeAI  = activeAI;
     this.homeCity  = belongs;
@@ -145,7 +145,7 @@ public class Formation implements
   /**  Supplemental utility methods for setting objectives, demands and
     *  marching orders:
     */
-  void assignTerms(
+  public void assignTerms(
     City.POSTURE posture,
     Formation actionTaken,
     Actor toMarry,
@@ -158,7 +158,7 @@ public class Formation implements
   }
   
   
-  boolean hasTerms() {
+  public boolean hasTerms() {
     boolean haveTerms = false;
     haveTerms |= marriageDemand != null;
     haveTerms |= actionDemand   != null;
@@ -168,7 +168,13 @@ public class Formation implements
   }
   
   
-  void setTermsAccepted(boolean accepted) {
+  public POSTURE      postureDemand () { return postureDemand ; }
+  public Formation    actionDemand  () { return actionDemand  ; }
+  public Actor        marriageDemand() { return marriageDemand; }
+  public Tally <Good> tributeDemand () { return tributeDemand ; }
+  
+  
+  public void setTermsAccepted(boolean accepted) {
     if (accepted) {
       termsAccepted = true;
       CityEvents.imposeTerms(secureCity, homeCity, this);
@@ -180,28 +186,48 @@ public class Formation implements
   }
   
   
-  void setMissionComplete(boolean victorious) {
+  public boolean termsAnswered() {
+    return termsAccepted || termsRefused;
+  }
+  
+  
+  public void setMissionComplete(boolean victorious) {
     if (victorious) this.victorious = true;
     else this.defeated = true;
     this.complete = true;
   }
   
   
-  void toggleRecruit(Actor a, boolean is) {
+  public boolean complete() {
+    return complete;
+  }
+  
+  
+  public void toggleRecruit(Actor a, boolean is) {
     this.recruits.toggleMember(a, is);
     if (is) a.formation = this;
     else    a.formation = null;
   }
   
   
-  void toggleEscorted(Actor a, boolean is) {
+  public void toggleEscorted(Actor a, boolean is) {
     this.escorted.toggleMember(a, is);
     if (is) a.formation = this;
     else    a.formation = null;
   }
   
   
-  void beginSecuring(City city) {
+  public Series <Actor> recruits() {
+    return recruits;
+  }
+  
+  
+  public Series <Actor> escorted() {
+    return escorted;
+  }
+  
+  
+  public void beginSecuring(City city) {
     homeCity.formations.toggleMember(this, true);
     
     this.secureCity = city;
@@ -217,7 +243,7 @@ public class Formation implements
   }
   
   
-  void beginSecuring(Object focus, int facing, CityMap map) {
+  public void beginSecuring(Object focus, int facing, CityMap map) {
     homeCity.formations.toggleMember(this, true);
     
     this.facing      = facing;
@@ -226,6 +252,19 @@ public class Formation implements
     this.map         = map   ;
     
     this.standPoint = standPointFrom(secureFocus);
+  }
+  
+  
+  public void disbandFormation() {
+    homeCity.formations.toggleMember(this, false);
+    
+    this.secureCity  = null  ;
+    this.secureFocus = null  ;
+    this.facing      = CENTRE;
+    this.active      = false ;
+    
+    for (Actor r : recruits) toggleRecruit (r, false);
+    for (Actor e : escorted) toggleEscorted(e, false);
   }
   
   
@@ -273,16 +312,13 @@ public class Formation implements
   }
   
   
-  void disbandFormation() {
-    homeCity.formations.toggleMember(this, false);
-    
-    this.secureCity  = null  ;
-    this.secureFocus = null  ;
-    this.facing      = CENTRE;
-    this.active      = false ;
-    
-    for (Actor r : recruits) toggleRecruit (r, false);
-    for (Actor e : escorted) toggleEscorted(e, false);
+  public boolean onMap() {
+    return map != null;
+  }
+  
+  
+  public boolean onMap(CityMap map) {
+    return this.map != null && this.map == map;
   }
   
   
@@ -512,7 +548,7 @@ public class Formation implements
   }
   
   
-  Tile standLocation(Actor actor) {
+  public Tile standLocation(Actor actor) {
     boolean doPatrol =
       (secureFocus instanceof Target) &&
       ((Target) secureFocus).type().isWall
@@ -526,7 +562,7 @@ public class Formation implements
   }
   
   
-  boolean formationReady() {
+  public boolean formationReady() {
     if (map == null) return true;
     if (secureFocus == null || ! active) return false;
     
@@ -544,12 +580,12 @@ public class Formation implements
   }
   
   
-  int powerSum() {
+  public int powerSum() {
     return powerSum(recruits, null);
   }
   
   
-  float casualtyLevel() {
+  public float casualtyLevel() {
     float live = recruits.size(), dead = casualties.size();
     return dead / (dead + live);
   }

@@ -31,7 +31,7 @@ public class BuildingForGather extends Building {
   
   /**  Utility methods for filling up crop areas:
     */
-  static Tile[] applyPlanting(
+  public static Tile[] applyPlanting(
     CityMap map, int x, int y, int w, int h, Good... crops
   ) {
     Batch <Tile> planted = new Batch();
@@ -39,7 +39,7 @@ public class BuildingForGather extends Building {
       
       Tile t = map.tileAt(c);
       if (t == null) continue;
-      if (t.above != null && ! t.above.type.isFlora()) continue;
+      if (t.above != null && ! t.above.type().isFlora()) continue;
       
       Good seed = seedType(t, crops);
       Element crop = new Element(seed);
@@ -51,7 +51,7 @@ public class BuildingForGather extends Building {
   }
   
   
-  static Good seedType(Tile t, Good crops[]) {
+  public static Good seedType(Tile t, Good crops[]) {
     float index = t.x % 5;
     index += (t.y % 5) / 5f;
     index *= crops.length / 5f;
@@ -72,7 +72,7 @@ public class BuildingForGather extends Building {
       return;
     }
     
-    if (TaskGathering.pickNextCrop(this, actor, false, (Object[]) type.produced)) {
+    if (TaskGathering.pickNextCrop(this, actor, false, (Object[]) type().produced)) {
       return;
     }
     if (TaskGathering.pickPlantPoint(this, actor, false, true)) {

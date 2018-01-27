@@ -1,6 +1,6 @@
 
 
-package game;
+package content;
 import util.*;
 
 

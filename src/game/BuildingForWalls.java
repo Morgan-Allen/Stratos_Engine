@@ -48,12 +48,12 @@ public class BuildingForWalls extends Building {
     if (tower) {
       Tile stair = tileAt(1, -1, facing);
       Tile left  = tileAt(-1, 0, facing);
-      Tile right = tileAt(type.wide, 0, facing);
+      Tile right = tileAt(type().wide, 0, facing);
       return new Tile[] { stair, left, right };
     }
     if (gate) {
       Tile front = tileAt(1, -1, facing);
-      Tile back  = tileAt(1, type.high, facing);
+      Tile back  = tileAt(1, type().high, facing);
       return new Tile[] { front, back };
     }
     return super.selectEntrances();

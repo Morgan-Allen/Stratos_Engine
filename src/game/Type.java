@@ -13,7 +13,7 @@ public class Type extends Index.Entry implements Session.Saveable {
   
   /**  Indexing, categorisation, spawning and save/load methods-
     */
-  final static int
+  final public static int
     IS_TRAIT       = -100,
     IS_TERRAIN     = 0,
     IS_FIXTURE     = 1,
@@ -40,7 +40,7 @@ public class Type extends Index.Entry implements Session.Saveable {
   final static Index <Type> INDEX = new Index();
   
   
-  Type(Class baseClass, String ID, int category) {
+  public Type(Class baseClass, String ID, int category) {
     super(INDEX, ID);
     this.baseClass = baseClass;
     this.category  = category ;
@@ -57,7 +57,7 @@ public class Type extends Index.Entry implements Session.Saveable {
   }
   
   
-  Object generate() {
+  public Object generate() {
     if (baseClass == null) {
       return null;
     }
@@ -93,30 +93,30 @@ public class Type extends Index.Entry implements Session.Saveable {
   
   /**  Common data fields and setup functions-
     */
-  String name, namesRange[];
-  int tint = BLACK_COLOR;
+  public String name, namesRange[];
+  public int tint = BLACK_COLOR;
   
   
-  Class baseClass;
-  int category;
-  Type flagKey = null;
-  int wide = 1, high = 1, deep = 1;
+  public Class baseClass;
+  public int category;
+  public Type flagKey = null;
+  public int wide = 1, high = 1, deep = 1;
   
-  Good    yields      = null;
-  float   yieldAmount = 0;
-  Good    builtFrom  [] = EMPTY_MATERIAL;
-  Integer builtAmount[] = { 1 };
+  public Good    yields      = null;
+  public float   yieldAmount = 0;
+  public Good    builtFrom  [] = EMPTY_MATERIAL;
+  public Integer builtAmount[] = { 1 };
   
-  int     pathing  = CityMap.PATH_BLOCK;
-  boolean mobile   = false;
-  float   growRate = 0;
-  int     ambience = 0;
-  boolean isCrop   = false;
-  boolean isWater  = false;
-  boolean isWall   = false;
+  public int     pathing  = CityMap.PATH_BLOCK;
+  public boolean mobile   = false;
+  public float   growRate = 0;
+  public int     ambience = 0;
+  public boolean isCrop   = false;
+  public boolean isWater  = false;
+  public boolean isWall   = false;
   
   
-  void setDimensions(int w, int h, int d) {
+  public void setDimensions(int w, int h, int d) {
     this.wide = w;
     this.high = h;
     this.deep = d;
@@ -124,7 +124,7 @@ public class Type extends Index.Entry implements Session.Saveable {
   }
   
   
-  void setBuildMaterials(Object... args) {
+  public void setBuildMaterials(Object... args) {
     //
     //  Note:  1 unit of 'nothing' is always included in the list of
     //  build-materials so that a foundation can be laid and allow
@@ -140,74 +140,74 @@ public class Type extends Index.Entry implements Session.Saveable {
   
   /**  Building-specific data fields and setup methods-
     */
-  Type    upgradeTiers[] = NO_TIERS;
-  Type    upgradeNeeds[] = NO_NEEDS;
-  Integer upgradeUsage[] = {};
-  Good    homeUseGoods[] = NO_GOODS;
-  Integer homeUsage   [] = {};
-  Good    homeFoods   [] = {};
-  Good    buildsWith  [] = NO_GOODS;
-  boolean worksBeforeBuilt = false;
+  public Type    upgradeTiers[] = NO_TIERS;
+  public Type    upgradeNeeds[] = NO_NEEDS;
+  public Integer upgradeUsage[] = {};
+  public Good    homeUseGoods[] = NO_GOODS;
+  public Integer homeUsage   [] = {};
+  public Good    homeFoods   [] = {};
+  public Good    buildsWith  [] = NO_GOODS;
+  public boolean worksBeforeBuilt = false;
   
-  int homeSocialClass  = CLASS_COMMON;
-  int homeAmbienceNeed = AMBIENCE_MIN;
+  public int homeSocialClass  = CLASS_COMMON;
+  public int homeAmbienceNeed = AMBIENCE_MIN;
   
-  Good needed  [] = NO_GOODS;
-  Good produced[] = NO_GOODS;
-  Good features[] = NO_GOODS;
-  Type gatherFlag = null;
-  Trait craftSkill = null;
+  public Good needed  [] = NO_GOODS;
+  public Good produced[] = NO_GOODS;
+  public Good features[] = NO_GOODS;
+  public Type gatherFlag = null;
+  public Trait craftSkill = null;
   
-  int updateTime      = AVG_UPDATE_GAP  ;
-  int craftTime       = AVG_CRAFT_TIME  ;
-  int gatherRange     = AVG_GATHER_RANGE;
-  int maxDeliverRange = MAX_TRADER_RANGE;
-  int maxStock        = AVG_MAX_STOCK   ;
-  int homeUseTime     = HOME_USE_TIME   ;
-  int featureAmount   = AVG_SERVICE_GIVE;
+  public int updateTime      = AVG_UPDATE_GAP  ;
+  public int craftTime       = AVG_CRAFT_TIME  ;
+  public int gatherRange     = AVG_GATHER_RANGE;
+  public int maxDeliverRange = MAX_TRADER_RANGE;
+  public int maxStock        = AVG_MAX_STOCK   ;
+  public int homeUseTime     = HOME_USE_TIME   ;
+  public int featureAmount   = AVG_SERVICE_GIVE;
   
-  Type workerTypes[] = NO_WALKERS;
-  int maxWorkers   = 1;
-  int maxResidents = 0;
-  int maxVisitors  = AVG_MAX_VISITORS;
-  int maxRecruits  = AVG_ARMY_SIZE;
+  public Type workerTypes[] = NO_WALKERS;
+  public int maxWorkers   = 1;
+  public int maxResidents = 0;
+  public int maxVisitors  = AVG_MAX_VISITORS;
+  public int maxRecruits  = AVG_ARMY_SIZE;
   
   
-  void setUpgradeTiers(Type... tiers) {
+  public void setUpgradeTiers(Type... tiers) {
     this.upgradeTiers = tiers;
   }
   
   
-  void setUpgradeNeeds(Object... args) {
+  public void setUpgradeNeeds(Object... args) {
     Object split[][] = Visit.splitByModulus(args, 2);
     upgradeNeeds = (Type   []) castArray(split[0], Type   .class);
     upgradeUsage = (Integer[]) castArray(split[1], Integer.class);
   }
   
   
-  void setHomeUsage(Object... args) {
+  public void setHomeUsage(Object... args) {
     Object split[][] = Visit.splitByModulus(args, 2);
     homeUseGoods = (Good   []) castArray(split[0], Good   .class);
     homeUsage    = (Integer[]) castArray(split[1], Integer.class);
   }
   
   
-  void setWorkerTypes(Type... types) {
+  public void setWorkerTypes(Type... types) {
     this.workerTypes = types;
   }
   
   
-  void setFeatures(Good... features) {
+  public void setFeatures(Good... features) {
     this.features = features;
   }
   
   
-  boolean hasFeature(Good feature) {
+  public boolean hasFeature(Good feature) {
     return Visit.arrayIncludes(features, feature);
   }
   
   
-  boolean isNatural() {
+  public boolean isNatural() {
     return
       category == IS_FIXTURE ||
       category == IS_TERRAIN ||
@@ -216,57 +216,57 @@ public class Type extends Index.Entry implements Session.Saveable {
   }
   
   
-  boolean isTerrain() {
+  public boolean isTerrain() {
     return category == IS_TERRAIN;
   }
   
   
-  boolean isFlora() {
+  public boolean isFlora() {
     return category == IS_FIXTURE && growRate > 0;
   }
   
   
-  boolean isFauna() {
+  public boolean isFauna() {
     return category == IS_ANIMAL_ACT;
   }
   
   
-  boolean isFixture() {
+  public boolean isFixture() {
     return category == IS_FIXTURE || category == IS_STRUCTURAL;
   }
   
   
-  boolean isBuilding() {
+  public boolean isBuilding() {
     return category >= IS_BUILDING && category < IS_ACTOR;
   }
   
   
-  boolean isActor() {
+  public boolean isActor() {
     return category >= IS_ACTOR;
   }
   
   
-  boolean isPerson() {
+  public boolean isPerson() {
     return category == IS_PERSON_ACT;
   }
   
   
-  boolean isAnimal() {
+  public boolean isAnimal() {
     return category == IS_ANIMAL_ACT;
   }
   
   
-  boolean isHomeBuilding() {
+  public boolean isHomeBuilding() {
     return category == IS_HOME_BLD;
   }
   
   
-  boolean isTradeBuilding() {
+  public boolean isTradeBuilding() {
     return category == IS_TRADE_BLD;
   }
   
   
-  boolean isArmyOrWallsBuilding() {
+  public boolean isArmyOrWallsBuilding() {
     return category == IS_ARMY_BLD || category == IS_WALLS_BLD;
   }
   
@@ -274,42 +274,42 @@ public class Type extends Index.Entry implements Session.Saveable {
   
   /**  Walker-specific stats and setup methods-
     */
-  int  socialClass  = CLASS_COMMON;
-  int  genderRole   = SEX_EITHER;
-  Type patronGods[] = null;
-  boolean isPorter  = false;
+  public int  socialClass  = CLASS_COMMON;
+  public int  genderRole   = SEX_EITHER;
+  public  Type patronGods[] = null;
+  public boolean isPorter  = false;
   
-  int maxHealth   = AVG_MAX_HEALTH;
-  int meleeDamage = AVG_MELEE;
-  int rangeDamage = AVG_MISSILE;
-  int rangeDist   = AVG_RANGE;
-  int armourClass = AVG_DEFEND;
-  int sightRange  = AVG_SIGHT;
+  public int maxHealth   = AVG_MAX_HEALTH;
+  public int meleeDamage = AVG_MELEE;
+  public int rangeDamage = AVG_MISSILE;
+  public int rangeDist   = AVG_RANGE;
+  public int armourClass = AVG_DEFEND;
+  public int sightRange  = AVG_SIGHT;
   
-  Trait   initTraits [] = {};
-  Integer traitLevels[] = {};
+  public Trait   initTraits [] = {};
+  public Integer traitLevels[] = {};
   
-  Terrain habitats[]   = NO_HABITAT;
-  boolean predator     = false;
-  int     lifespan     = LIFESPAN_LENGTH;
-  Good[]  foodsAllowed = null;
-  Good    meatType     = null;
+  public Terrain habitats[]   = NO_HABITAT;
+  public boolean predator     = false;
+  public int     lifespan     = LIFESPAN_LENGTH;
+  public Good[]  foodsAllowed = null;
+  public Good    meatType     = null;
   
   
-  void setInitTraits(Object... args) {
+  public void setInitTraits(Object... args) {
     Object split[][] = Visit.splitByModulus(args, 2);
     initTraits  = (Trait  []) castArray(split[0], Trait  .class);
     traitLevels = (Integer[]) castArray(split[1], Integer.class);
   }
   
   
-  float initTraitLevel(Trait t) {
+  public float initTraitLevel(Trait t) {
     int index = Visit.indexOf(t, initTraits);
     return index == -1 ? null : traitLevels[index];
   }
   
   
-  void initAsMigrant(ActorAsPerson a) {
+  public void initAsMigrant(ActorAsPerson a) {
     
     float age = Rand.range(AVG_MARRIED, AVG_MENOPAUSE);
     age += Rand.num() - 0.5f;
@@ -333,8 +333,8 @@ public class Type extends Index.Entry implements Session.Saveable {
   }
   
   
-  void initAsAnimal(ActorAsAnimal a) {
-    float age = Rand.num() * a.type.lifespan;
+  public void initAsAnimal(ActorAsAnimal a) {
+    float age = Rand.num() * a.type().lifespan;
     a.ageSeconds = (int) age;
     a.hunger     = Rand.num() - 0.5f;
     return;

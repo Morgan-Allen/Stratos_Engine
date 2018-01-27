@@ -67,7 +67,7 @@ public class CityBorders {
           homeFilled += NR = b.numResidents(socialClass);
           if (report) I.say("  Class "+socialClass+": "+NR+"/"+MR);
         }
-        for (Type t : b.type.workerTypes) {
+        for (Type t : b.type().workerTypes) {
           jobsTotal  += MW = b.maxWorkers(t);
           jobsFilled += NW = b.numWorkers(t);
           jobsDemand.add(MW, t);
@@ -119,7 +119,7 @@ public class CityBorders {
     while (numSpawn-- > 0) {
       Type job = (Type) Rand.pickFrom(jobTypes, jobNeeds);
       ActorAsPerson w = (ActorAsPerson) job.generate();
-      w.type.initAsMigrant(w);
+      w.type().initAsMigrant(w);
       migrants.add(w);
     }
     map.city.world.beginJourney(from, map.city, (Batch) migrants);
@@ -133,7 +133,7 @@ public class CityBorders {
     final Pick <Opening> pick = new Pick();
     
     for (Building b : map.buildings) if (b.accessible()) {
-      for (Type t : b.type.workerTypes) {
+      for (Type t : b.type().workerTypes) {
         int space = b.maxWorkers(t) - b.numWorkers(t);
         if (space <= 0) continue;
         
@@ -155,7 +155,7 @@ public class CityBorders {
       Building b = o.b;
       int SC = o.position.socialClass;
       
-      migrant.type = o.position;
+      migrant.assignType(o.position);
       b.setWorker(migrant, true);
       if (b.maxResidents(SC) > b.numResidents(SC)) b.setResident(migrant, true);
     }
@@ -163,7 +163,7 @@ public class CityBorders {
   
   
   static void findHome(CityMap map, Actor migrant) {
-    int socialClass = migrant.type.socialClass;
+    int socialClass = migrant.type().socialClass;
     Tile from = migrant.at();
     final Pick <Building> pick = new Pick();
     

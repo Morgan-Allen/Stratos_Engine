@@ -34,12 +34,12 @@ public class BuildingForCrafts extends Building {
   
   /**  Life-cycle, update and economic functions-
     */
-  void enterMap(CityMap map, int x, int y, float buildLevel) {
+  public void enterMap(CityMap map, int x, int y, float buildLevel) {
     super.enterMap(map, x, y, buildLevel);
   }
   
   
-  float demandFor(Good g) {
+  public float demandFor(Good g) {
     boolean consumes = accessible() && Visit.arrayIncludes(needed(), g);
     float need = consumes ? stockNeeded(g) : 0;
     return super.demandFor(g) + need;
@@ -50,17 +50,17 @@ public class BuildingForCrafts extends Building {
     boolean anyRoom = false, allMaterials = true;
     
     for (Good made : produced()) {
-      if (inventory.valueFor(made) < stockLimit(made)) anyRoom = true;
+      if (inventory(made) < stockLimit(made)) anyRoom = true;
     }
     for (Good need : needed()) {
-      if (inventory.valueFor(need) <= 0) allMaterials = false;
+      if (inventory(need) <= 0) allMaterials = false;
     }
     
     return anyRoom && allMaterials;
   }
   
   
-  float craftProgress() {
+  public float craftProgress() {
     return craftProgress;
   }
   

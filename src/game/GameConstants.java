@@ -18,15 +18,15 @@ public class GameConstants {
   
   /**  Colour prototyping-
     */
-  static int colour(int r, int g, int b) {
+  public static int colour(int r, int g, int b) {
     return new Color(r / 10f, g / 10f, b / 10f).getRGB();
   }
   
-  static int colour(int r, int g, int b, int a) {
+  public static int colour(int r, int g, int b, int a) {
     return new Color(r / 10f, g / 10f, b / 10f, a / 10f).getRGB();
   }
   
-  final static int
+  final public static int
     
     //  Some default colours for diagnostic-display purposes:
     BLANK_COLOR  = colour(5, 5, 5),
@@ -38,39 +38,7 @@ public class GameConstants {
     
     WHITE_COLOR  = colour(10, 10, 10),
     BLACK_COLOR  = colour(0 , 0 , 0 ),
-    CLEAR_COLOR  = colour(0 , 0 , 0 , 0),
-    
-    //  Industrial in brown.
-    TINT_LITE_INDUSTRIAL  = colour(6, 3, 3),
-    TINT_INDUSTRIAL       = colour(5, 2, 2),
-    //  Aquatic in cyan.
-    TINT_LITE_AQUATIC     = colour(7, 8, 9),
-    TINT_AQUATIC          = colour(0, 5, 7),
-    //  Military in red.
-    TINT_LITE_MILITARY    = colour(8, 1, 1),
-    TINT_MILITARY         = colour(7, 0, 0),
-    //  Economic in blue.
-    TINT_LITE_COMMERCIAL  = colour(3, 1, 8),
-    TINT_COMMERCIAL       = colour(2, 0, 7),
-    //  Residential in yellow.
-    TINT_LITE_RESIDENTIAL = colour(8, 8, 1),
-    TINT_RESIDENTIAL      = colour(7, 7, 0),
-    //  Entertainment in purple.
-    TINT_LITE_AMENITY     = colour(8, 1, 8),
-    TINT_AMENITY          = colour(7, 0, 7),
-    //  Health/education in white.
-    TINT_LITE_HEALTH_ED   = colour(8, 8, 8),
-    TINT_HEALTH_ED        = colour(7, 7, 7),
-    //  Religious in orange.
-    TINT_LITE_RELIGIOUS   = colour(8, 4, 1),
-    TINT_RELIGIOUS        = colour(7, 3, 0),
-    
-    //  Crops in shades of green:
-    TINT_CROPS[] = {
-      colour(1, 8, 3),
-      colour(0, 7, 2),
-      colour(2, 8, 0),
-    }
+    CLEAR_COLOR  = colour(0 , 0 , 0 , 0)
   ;
   
   
@@ -197,7 +165,7 @@ public class GameConstants {
     TRADE_DIST_TIME  = 50  ,
     MIGRANTS_PER_1KM = 10     //  per month per 1000 foreign citizens
   ;
-  final static int
+  final public static int
     CLASS_SLAVE    = 0,
     CLASS_COMMON   = 1,
     CLASS_TRADER   = 2,
@@ -229,11 +197,11 @@ public class GameConstants {
   
   /**  Specialise sub-type classes:
     */
-  static class Good extends Type {
+  public static class Good extends Type {
     
-    int price;
+    final public int price;
     
-    Good(String name, int price) {
+    public Good(String name, int price) {
       super(null, "good_"+name.toLowerCase().replace(' ', '_'), IS_GOOD);
       //if (price != -1) GOODS_LIST.add(this);
       this.name    = name ;
@@ -242,13 +210,13 @@ public class GameConstants {
     }
   }
   
-  static class Terrain extends Type {
+  public static class Terrain extends Type {
     
-    int terrainID = 0;
+    final public int terrainID;
     Type  fixtures[] = new Type [0];
     Float weights [] = new Float[0];
     
-    Terrain(String name, int index) {
+    public Terrain(String name, int index) {
       super(null, "terrain_"+index, IS_TERRAIN);
       this.name      = name ;
       this.terrainID = index;
@@ -256,38 +224,38 @@ public class GameConstants {
       //TERRAINS_LIST.add(this);
     }
     
-    void attachFixtures(Object... args) {
+    public void attachFixtures(Object... args) {
       Object split[][] = Visit.splitByModulus(args, 2);
       fixtures = (Type []) castArray(split[0], Type .class);
       weights  = (Float[]) castArray(split[1], Float.class);
     }
   }
   
-  static class Trait extends Type {
+  public static class Trait extends Type {
     
-    Trait(String ID, String... names) {
+    public Trait(String ID, String... names) {
       super(null, ID, IS_TRAIT);
       this.name = names[0];
       this.namesRange = names;
     }
   }
   
-  static class WalkerType extends Type {
+  public static class WalkerType extends Type {
     
-    WalkerType(Class baseClass, String ID, int category, int socialClass) {
+    public WalkerType(Class baseClass, String ID, int category, int socialClass) {
       super(baseClass, ID, category);
       this.socialClass = socialClass;
       this.mobile      = true;
     }
     
-    WalkerType(Class baseClass, String ID, int category) {
+    public WalkerType(Class baseClass, String ID, int category) {
       this(baseClass, ID, category, CLASS_COMMON);
     }
   }
   
-  static class BuildType extends Type {
+  public static class BuildType extends Type {
     
-    BuildType(Class baseClass, String ID, int category) {
+    public BuildType(Class baseClass, String ID, int category) {
       super(baseClass, ID, category);
     }
   }
@@ -329,11 +297,11 @@ public class GameConstants {
     COMMERCE_TYPES[] = { IS_ADMIN, IS_TRADER, IS_VENDOR, IS_HOUSING },
     SERVICE_TYPES [] = { DIVERSION, EDUCATION, HEALTHCARE, RELIGION };
   
-  final static Terrain
+  final public static Terrain
     NO_HABITAT[] = {},
     EMPTY = new Terrain("Empty", 0);
   
-  final static WalkerType
+  final public static WalkerType
     NO_WALKERS[] = new WalkerType[0],
     CHILD = new WalkerType(ActorAsPerson.class, "type_child", IS_PERSON_ACT, CLASS_COMMON);
   
@@ -346,7 +314,7 @@ public class GameConstants {
   
   /**  Walker types-
     */
-  final static Trait
+  final public static Trait
     SKILL_MELEE = new Trait("skill_melee", "Melee"),
     SKILL_RANGE = new Trait("skill_range", "Range"),
     SKILL_EVADE = new Trait("skill_evade", "Evade"),
@@ -394,7 +362,7 @@ public class GameConstants {
     */
   final static Series <Actor> NO_ACTORS = new Batch();
   
-  static interface Target extends Flood.Fill {
+  public static interface Target extends Flood.Fill {
     
     Type type();
     Tile at();
@@ -408,7 +376,7 @@ public class GameConstants {
   }
   
   
-  static interface Pathing extends Target {
+  public static interface Pathing extends Target {
     
     int pathType();
     Pathing[] adjacent(Pathing temp[], CityMap map);
@@ -420,20 +388,20 @@ public class GameConstants {
   }
   
   
-  static interface Trader {
+  public static interface Trader {
     Tally <Good> tradeLevel();
     Tally <Good> inventory ();
     City homeCity();
   }
   
   
-  static interface Journeys {
+  public static interface Journeys {
     void onArrival(City goes, World.Journey journey);
     City homeCity();
   }
   
   
-  static interface Employer {
+  public static interface Employer {
     void selectActorBehaviour(Actor actor);
     void actorUpdates(Actor actor);
     void actorPasses (Actor actor, Building other );

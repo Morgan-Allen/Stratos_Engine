@@ -50,10 +50,10 @@ public class TaskDelivery extends Task {
     //  Find someone to deliver to:
     class Order { Building goes; Good good; float amount; }
     Pick <Order> pickD = new Pick();
-    int maxRange = from.type.maxDeliverRange;
+    int maxRange = from.type().maxDeliverRange;
     
     for (Good made : produced) {
-      int amount = (int) from.inventory.valueFor(made);
+      int amount = (int) from.inventory(made);
       if (amount <= 0) continue;
       
       //  TODO:  Iterate over suitable building-types here.
@@ -114,17 +114,17 @@ public class TaskDelivery extends Task {
     Building from
   ) {
     Pick <Building> pick = new Pick();
-    boolean trades = from.type.isTradeBuilding();
+    boolean trades = from.type().isTradeBuilding();
     
     for (Building b : from.map.buildings) if (b != from) {
-      if (type != null && b.type != type) continue;
+      if (type != null && b.type() != type) continue;
       
       //
       //  Check to ensure that traders don't deliver to other traders using a
       //  standard delivery mechanism, and that any requisite features are
       //  present-
-      boolean otherTrades = b.type.isTradeBuilding();
-      boolean featured    = b.type.hasFeature(feature);
+      boolean otherTrades = b.type().isTradeBuilding();
+      boolean featured    = b.type().hasFeature(feature);
       if (trades && otherTrades        ) continue;
       if (feature != null && ! featured) continue;
       
@@ -179,7 +179,7 @@ public class TaskDelivery extends Task {
     
     if (visits == from) {
       ///I.say("Collecting "+amount+" "+carried+" from "+from);
-      amount = Nums.min(amount, visits.inventory.valueFor(carried));
+      amount = Nums.min(amount, visits.inventory(carried));
       amount = Nums.max(amount, 0);
       if (amount > 0) {
         actor.pickupGood(carried, amount, from);
@@ -212,9 +212,9 @@ public class TaskDelivery extends Task {
   
   private float[] totalMaterial() {
     float total[] = new float[4];
-    total[0] += total[1] = from.inventory.valueFor(carried);
+    total[0] += total[1] = from.inventory(carried);
     total[0] += total[2] = actor.carried(carried);
-    total[0] += total[3] = goes.inventory.valueFor(carried);
+    total[0] += total[3] = goes.inventory(carried);
     return total;
   }
   

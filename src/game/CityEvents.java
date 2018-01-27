@@ -22,7 +22,9 @@ public class CityEvents {
   
   /**  Handling end-stage events:
     */
-  static void handleDeparture(Formation formation, City from, City goes) {
+  public static void handleDeparture(
+    Formation formation, City from, City goes
+  ) {
     City belongs = formation.homeCity();
     belongs.armyPower -= formation.powerSum();
     belongs.formations.include(formation);
@@ -30,7 +32,7 @@ public class CityEvents {
   }
   
   
-  static void handleInvasion(
+  public static void handleInvasion(
     Formation formation, City goes, World.Journey journey
   ) {
     //

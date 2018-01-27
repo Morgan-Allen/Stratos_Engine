@@ -1,11 +1,10 @@
 
 
-package game;
+package content;
+import game.*;
 import util.*;
-import static game.CityMap.*;
-import static game.GameConstants.*;
+import static content.GameContent.*;
 import static game.CityMapPathCache.*;
-import static game.GameContent.*;
 
 
 
@@ -68,16 +67,16 @@ public class TestPathCache extends Test {
       allOkay = false;
       if (! graphics) return false;
     }
-    if (area.numTiles != numT) {
-      I.say("\nArea has "+area.numTiles+" tiles, expected "+numT);
+    if (area.numTiles() != numT) {
+      I.say("\nArea has "+area.numTiles()+" tiles, expected "+numT);
       allOkay = false;
       if (! graphics) return false;
     }
     for (int i = 0; i < coords.length;) {
       Tile t = miniMap.tileAt(coords[i++], coords[i++]);
-      if (! Visit.arrayIncludes(area.tiles, t)) {
+      if (! Visit.arrayIncludes(area.tiles(), t)) {
         I.say("\nExpected area to include "+t);
-        I.say("  Tiles were: "+I.list(area.tiles));
+        I.say("  Tiles were: "+I.list(area.tiles()));
         allOkay = false;
         if (! graphics) return false;
       }
@@ -133,14 +132,14 @@ public class TestPathCache extends Test {
     world.settings.toggleFog   = false;
     world.settings.viewPathMap = true ;
     
-    final int div = map.size / layout.length, rand = div / 4;
+    final int div = map.size() / layout.length, rand = div / 4;
     for (Tile t : map.allTiles()) {
       int x = t.x, y = t.y;
       
       x += Rand.range(-rand, rand);
       y += Rand.range(-rand, rand);
-      x = Nums.clamp(x, map.size);
-      y = Nums.clamp(y, map.size);
+      x = Nums.clamp(x, map.size());
+      y = Nums.clamp(y, map.size());
       
       byte l = layout[x / div][y / div];
       map.setTerrain(t, l == 0 ? LAKE : MEADOW, 0);
@@ -160,11 +159,11 @@ public class TestPathCache extends Test {
     boolean landLinked = map.pathCache.pathConnects(land1, land2);
     if (! landLinked) {
       I.say("\nNearby regions not linked!");
-      I.say("  Total groups: "+map.pathCache.groups.size());
-      for (AreaGroup g : map.pathCache.groups) {
+      I.say("  Total groups: "+map.pathCache.groups().size());
+      for (AreaGroup g : map.pathCache.groups()) {
         I.say("    Group areas: ");
-        for (Area a : g.areas) {
-          I.say("      "+a.numTiles+" tiles: "+a.aX+"|"+a.aY);
+        for (Area a : g.areas()) {
+          I.say("      "+a.numTiles()+" tiles: "+a.coord());
         }
       }
       allOkay = false;
@@ -248,8 +247,9 @@ public class TestPathCache extends Test {
     
     for (int n = 100; n-- > 0;) {
       Tile from, goes;
-      from = map.tileAt(Rand.index(map.size), Rand.index(map.size));
-      goes = map.tileAt(Rand.index(map.size), Rand.index(map.size));
+      int mapS = map.size();
+      from = map.tileAt(Rand.index(mapS), Rand.index(mapS));
+      goes = map.tileAt(Rand.index(mapS), Rand.index(mapS));
       from = Tile.nearestOpenTile(from, map);
       goes = Tile.nearestOpenTile(goes, map);
       if (from == null || goes == null || from == goes) continue;
@@ -267,7 +267,7 @@ public class TestPathCache extends Test {
     }
     
     if (graphics) world.settings.paused = true;
-    while (map.time < 10 || graphics) {
+    while (map.time() < 10 || graphics) {
       map = test.runLoop(map, 1, graphics, "saves/test_path_cache.tlt");
     }
     
@@ -276,10 +276,10 @@ public class TestPathCache extends Test {
   
   
   static boolean verifyConnectionQueries(CityMap map) {
-    for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
+    for (Coord c : Visit.grid(0, 0, map.size(), map.size(), 1)) {
       if (map.blocked(c)) continue;
       
-      for (Coord o : Visit.grid(0, 0, map.size, map.size, 1)) {
+      for (Coord o : Visit.grid(0, 0, map.size(), map.size(), 1)) {
         if (map.blocked(o)) continue;
         
         Tile from = map.tileAt(c);

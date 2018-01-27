@@ -15,7 +15,7 @@ public class Building extends Element implements Pathing, Employer {
     */
   static int nextID = 0;
   
-  String ID;
+  protected String ID;
   
   private int facing = TileConstants.N;
   private Tile entrances[] = new Tile[0];
@@ -25,8 +25,8 @@ public class Building extends Element implements Pathing, Employer {
   List <Actor> residents = new List();
   List <Actor> visitors  = new List();
   
-  Tally <Type> materials = new Tally();
-  Tally <Good> inventory = new Tally();
+  private Tally <Type> materials = new Tally();
+  private Tally <Good> inventory = new Tally();
   
   
   public Building(Type type) {
@@ -75,17 +75,17 @@ public class Building extends Element implements Pathing, Employer {
   
   /**  World entry and exit-
     */
-  void setFacing(int facing) {
+  public void setFacing(int facing) {
     this.facing = facing;
   }
   
   
-  int facing() {
+  public int facing() {
     return facing;
   }
   
   
-  void enterMap(CityMap map, int x, int y, float buildLevel) {
+  public void enterMap(CityMap map, int x, int y, float buildLevel) {
     
     //I.say("ENTERING MAP: "+this);
     
@@ -94,7 +94,7 @@ public class Building extends Element implements Pathing, Employer {
   }
   
   
-  void exitMap(CityMap map) {
+  public void exitMap(CityMap map) {
     
     //I.say("EXITING MAP: "+this);
     
@@ -107,7 +107,7 @@ public class Building extends Element implements Pathing, Employer {
     for (Actor w : residents) if (w.home == this) {
       w.home = null;
     }
-    for (Actor a : visitors) if (a.inside == this) {
+    for (Actor a : visitors) if (a.inside() == this) {
       a.setInside(this, false);
     }
     
@@ -151,7 +151,7 @@ public class Building extends Element implements Pathing, Employer {
   
   
   
-  /**  Construction and upgrade-related methods:
+  /**  Construction, inventory and upgrade-related methods:
     */
   void onCompletion() {
     refreshEntrances(selectEntrances());
@@ -161,13 +161,38 @@ public class Building extends Element implements Pathing, Employer {
   
   
   boolean accessible() {
-    return complete() || type.worksBeforeBuilt;
+    return complete() || type().worksBeforeBuilt;
   }
   
   
   float ambience() {
     if (! complete()) return 0;
-    return type.ambience;
+    return type().ambience;
+  }
+  
+  
+  public float setInventory(Good g, float amount) {
+    return inventory.set(g, amount);
+  }
+  
+  
+  public float addInventory(float amount, Good g) {
+    return inventory.add(amount, g);
+  }
+  
+  
+  public void addInventory(Tally <Good> added) {
+    inventory.add(added);
+  }
+  
+  
+  public float inventory(Good g) {
+    return inventory.valueFor(g);
+  }
+  
+  
+  public Tally <Good> inventory() {
+    return inventory;
   }
   
   
@@ -189,8 +214,8 @@ public class Building extends Element implements Pathing, Employer {
     
     if (--updateGap <= 0) {
       refreshEntrances(selectEntrances());
-      updateOnPeriod(type.updateTime);
-      updateGap = type.updateTime;
+      updateOnPeriod(type().updateTime);
+      updateGap = type().updateTime;
     }
   }
   
@@ -204,7 +229,7 @@ public class Building extends Element implements Pathing, Employer {
   /**  Dealing with entrances and facing:
     */
   protected Tile tileAt(int initX, int initY, int facing) {
-    int wide = type.wide - 1, high = type.high - 1;
+    int wide = type().wide - 1, high = type().high - 1;
     int x = 0, y = 0;
     
     switch (facing) {
@@ -260,11 +285,11 @@ public class Building extends Element implements Pathing, Employer {
     Tile at = at();
     Pick <Tile> pick = new Pick();
     
-    for (Coord c : Visit.perimeter(at.x, at.y, type.wide, type.high)) {
+    for (Coord c : Visit.perimeter(at.x, at.y, type().wide, type().high)) {
       Tile t = map.tileAt(c);
       if (t == null) continue;
-      boolean outx = t.x == at.x - 1 || t.x == at.x + type.wide;
-      boolean outy = t.y == at.y - 1 || t.y == at.y + type.high;
+      boolean outx = t.x == at.x - 1 || t.x == at.x + type().wide;
+      boolean outy = t.y == at.y - 1 || t.y == at.y + type().high;
       if (outx && outy) continue;
       
       int pathT = t.pathType();
@@ -283,7 +308,7 @@ public class Building extends Element implements Pathing, Employer {
   
   /**  Utility methods for finding points of supply/demand:
     */
-  float demandFor(Good g) {
+  public float demandFor(Good g) {
     float need = razing() ? 0 : materialNeed(g);
     float hasB = materialLevel(g);
     float hasG = inventory.valueFor(g);
@@ -291,7 +316,7 @@ public class Building extends Element implements Pathing, Employer {
   }
   
   
-  float setMaterialLevel(Good material, float level) {
+  public float setMaterialLevel(Good material, float level) {
     if (level == -1) {
       return materials.valueFor(material);
     }
@@ -303,25 +328,25 @@ public class Building extends Element implements Pathing, Employer {
   }
   
   
-  float maxStock(Good g) {
-    return type.maxStock;
+  public float maxStock(Good g) {
+    return type().maxStock;
   }
   
   
-  Good[] needed  () { return type.needed  ; }
-  Good[] produced() { return type.produced; }
+  public Good[] needed  () { return type().needed  ; }
+  public Good[] produced() { return type().produced; }
   
   
-  float stockNeeded(Good need) { return type.maxStock; }
-  float stockLimit (Good made) { return type.maxStock; }
+  public float stockNeeded(Good need) { return type().maxStock; }
+  public float stockLimit (Good made) { return type().maxStock; }
   
   
-  Tally <Good> homeUsed() {
+  public Tally <Good> homeUsed() {
     return new Tally();
   }
   
   
-  float craftProgress() {
+  public float craftProgress() {
     return 0;
   }
   
@@ -329,20 +354,20 @@ public class Building extends Element implements Pathing, Employer {
   
   /**  Moderating and udpating recruitment and residency:
     */
-  protected int numWorkers(Type type) {
+  public int numWorkers(Type type) {
     int sum = 0;
-    for (Actor w : workers) if (w.type == type) sum++;
+    for (Actor w : workers) if (w.type() == type) sum++;
     return sum;
   }
   
   
-  protected int maxWorkers(Type w) {
-    if (! Visit.arrayIncludes(type.workerTypes, w)) return 0;
-    return type.maxWorkers;
+  public int maxWorkers(Type w) {
+    if (! Visit.arrayIncludes(type().workerTypes, w)) return 0;
+    return type().maxWorkers;
   }
   
   
-  protected int numResidents(int socialClass) {
+  public int numResidents(int socialClass) {
     return residents.size();
     //  TODO:  Restore this later once you have multiple housing types...
     //int sum = 0;
@@ -351,8 +376,8 @@ public class Building extends Element implements Pathing, Employer {
   }
   
   
-  protected int maxResidents(int socialClass) {
-    return type.maxResidents;
+  public int maxResidents(int socialClass) {
+    return type().maxResidents;
     //  TODO:  Restore this later once you have multiple housing types...
     //if (type.homeSocialClass != socialClass) return 0;
     //return type.maxResidents;
@@ -368,6 +393,16 @@ public class Building extends Element implements Pathing, Employer {
   public void setResident(Actor a, boolean is) {
     a.home = is ? this : null;
     residents.toggleMember(a, is);
+  }
+  
+  
+  public Series <Actor> workers() {
+    return workers;
+  }
+  
+  
+  public Series <Actor> residents() {
+    return residents;
   }
   
   
@@ -411,7 +446,7 @@ public class Building extends Element implements Pathing, Employer {
   
   boolean actorIsHere(Actor actor) {
     if (complete()) {
-      return actor.inside == this;
+      return actor.inside() == this;
     }
     else {
       return CityMap.adjacent(this, actor);
@@ -461,7 +496,7 @@ public class Building extends Element implements Pathing, Employer {
     Tile at = at();
     float avg = 0;
     for (int x = 2; x-- > 0;) for (int y = 2; y-- > 0;) {
-      Tile t = map.tileAt(at.x + (x * type.wide), at.y + (y * type.high));
+      Tile t = map.tileAt(at.x + (x * type().wide), at.y + (y * type().high));
       avg += max ? map.fog.maxSightLevel(t) : map.fog.sightLevel(t);
     }
     return avg / 4;
@@ -476,8 +511,18 @@ public class Building extends Element implements Pathing, Employer {
   }
   
   
+  public String ID() {
+    return ID;
+  }
+  
+  
+  public void setID(String newID) {
+    this.ID = newID;
+  }
+  
+  
   public String toString() {
-    return type.name+" "+ID;
+    return type().name+" "+ID;
   }
 }
 

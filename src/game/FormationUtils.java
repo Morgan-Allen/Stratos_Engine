@@ -105,13 +105,13 @@ public class FormationUtils {
     protected boolean canEnter(Pathing spot) {
       if (super.canEnter(spot)) return true;
       Element above = ((Tile) spot).above;
-      if (above != null && ! above.type.isNatural()) return true;
+      if (above != null && ! above.type().isNatural()) return true;
       return false;
     }
     
     protected float cost(Pathing prior, Pathing spot) {
       Element above = ((Tile) spot).above;
-      if (above != null && ! above.type.isNatural()) return 20;
+      if (above != null && ! above.type().isNatural()) return 20;
       return super.cost(prior, spot);
     }
   }
@@ -153,7 +153,7 @@ public class FormationUtils {
     if (focus instanceof Element) {
       Element e = (Element) focus;
       if (e.destroyed()) return null;
-      if (! e.type.isArmyOrWallsBuilding()) return null;
+      if (! e.type().isArmyOrWallsBuilding()) return null;
       
       if (checkPathing) {
         boolean hasPath = map.pathCache.pathConnects(pathFrom, e, true, true);

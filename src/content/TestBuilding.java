@@ -1,10 +1,11 @@
 
 
 
-package game;
+package content;
 import util.*;
+import game.*;
+import static content.GameContent.*;
 import static game.GameConstants.*;
-import static game.GameContent.*;
 
 
 
@@ -38,7 +39,7 @@ public class TestBuilding extends Test {
     
     BuildingForTrade post = (BuildingForTrade) PORTER_POST.generate();
     post.enterMap(map, 2, 10, 0);
-    post.ID = "(Stock of Goods)";
+    post.setID("(Stock of Goods)");
     post.setTradeLevels(true,
       CLAY   , 40,
       STONE  , 80,
@@ -75,7 +76,7 @@ public class TestBuilding extends Test {
     
     final int RUN_TIME = YEAR_LENGTH;
     
-    while (map.time < RUN_TIME || graphics) {
+    while (map.time() < RUN_TIME || graphics) {
       map = test.runLoop(map, 1, graphics, "saves/test_building.tlt");
       
       if (! razingOkay) {
@@ -122,7 +123,7 @@ public class TestBuilding extends Test {
           if (b == home) {
             home.setCurrentTier(HOUSE_T1);
           }
-          else for (Good m : b.type.builtFrom) {
+          else for (Good m : b.type().builtFrom) {
             float level = b.materialLevel(m);
             b.setMaterialLevel(m, level * 0.75f);
           }
@@ -146,7 +147,7 @@ public class TestBuilding extends Test {
     }
     
     I.say("\nBUILDING TEST FAILED!");
-    I.say("  Current time:  "+map.time+"/"+RUN_TIME);
+    I.say("  Current time:  "+map.time()+"/"+RUN_TIME);
     I.say("  Razing okay:   "+razingOkay  );
     I.say("  Building okay: "+buildingOkay);
     I.say("  Paving okay:   "+pavingOkay  );
@@ -169,8 +170,8 @@ public class TestBuilding extends Test {
     I.say("\nStructure inventories:");
     for (Building b : toBuild) {
       I.say("  "+b);
-      for (Good g : b.inventory.keys()) {
-        float level = b.inventory.valueFor(g);
+      for (Good g : b.inventory().keys()) {
+        float level = b.inventory(g);
         float need  = b.demandFor(g);
         I.say("    "+g+": "+level+"/"+need);
       }
@@ -188,7 +189,7 @@ public class TestBuilding extends Test {
     if (report) I.say("\nReporting material presences...");
     
     Tally <Good> total = new Tally();
-    for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
+    for (Coord c : Visit.grid(0, 0, map.size(), map.size(), 1)) {
       Element b = map.above(c);
       if (b == null || b.at() != map.tileAt(c)) continue;
       
@@ -200,20 +201,21 @@ public class TestBuilding extends Test {
         total.add(b.materialLevel(m), m);
       }
       
-      if (b.type.isBuilding()) {
+      if (b.type().isBuilding()) {
         Building v = (Building) b;
-        for (Good m : v.inventory.keys()) {
+        for (Good m : v.inventory().keys()) {
           if (! Visit.arrayIncludes(compared, m)) continue;
-          if (report) I.say("    "+m+" (I): "+v.inventory.valueFor(m));
-          total.add(v.inventory.valueFor(m), m);
+          if (report) I.say("    "+m+" (I): "+v.inventory(m));
+          total.add(v.inventory(m), m);
         }
       }
     }
-    for (Actor a : map.actors) {
+    for (Actor a : map.actors()) {
       if (report) I.say("  "+a);
-      if (Visit.arrayIncludes(compared, a.carried)) {
-        if (report) I.say("    "+a.carried+" (C): "+a.carryAmount);
-        total.add(a.carryAmount, (Good) a.carried);
+      if (Visit.arrayIncludes(compared, a.carried())) {
+        float amount = a.carried((Good) a.carried());
+        if (report) I.say("    "+a.carried()+" (C): "+amount);
+        total.add(amount, (Good) a.carried());
       }
     }
     

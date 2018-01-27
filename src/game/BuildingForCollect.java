@@ -32,7 +32,7 @@ public class BuildingForCollect extends BuildingForCrafts {
   /**  Assigning actor behaviours:
     */
   public void selectActorBehaviour(Actor actor) {
-    for (Good g : type.produced) {
+    for (Good g : type().produced) {
       if (pickNextCollection(actor, g)) return;
     }
   }
@@ -43,12 +43,12 @@ public class BuildingForCollect extends BuildingForCrafts {
     Tile entrance = mainEntrance();
     
     for (Building b : map.buildings) {
-      if (! b.type.hasFeature(IS_HOUSING)) continue;
+      if (! b.type().hasFeature(IS_HOUSING)) continue;
       float distW = CityMap.distance(actor.at(), b.mainEntrance());
       float distB = CityMap.distance(entrance  , b.mainEntrance());
-      if (distB > type.maxDeliverRange) continue;
+      if (distB > type().maxDeliverRange) continue;
       
-      int amount = (int) b.inventory.valueFor(g);
+      int amount = (int) b.inventory(g);
       if (amount <= 0) continue;
       
       pick.compare(b, amount * CityMap.distancePenalty(distW));
@@ -66,30 +66,30 @@ public class BuildingForCollect extends BuildingForCrafts {
     
     //  TODO:  Replace this with a custom task...
     
-    if (visits == this) for (Good made : type.produced) {
+    if (visits == this) for (Good made : type().produced) {
       actor.offloadGood(made, this);
-      int amount = (int) inventory.valueFor(made);
+      int amount = (int) inventory(made);
       
       boolean taxes = made == CASH;
       if (taxes && amount > 0) {
         map.city.currentFunds += amount;
-        inventory.add(0 - amount, made);
+        addInventory(0 - amount, made);
       }
-      else if (amount > type.maxStock) {
-        inventory.set(made, type.maxStock);
+      else if (amount > type().maxStock) {
+        setInventory(made, type().maxStock);
       }
     }
     
     else if (actor.jobType() == JOB.VISITING) {
-      for (Good g : type.produced) {
+      for (Good g : type().produced) {
         boolean taxes = g == CASH;
         int carryLimit = taxes ? 100 : 10;
         
-        float amount = visits.inventory.valueFor(g);
+        float amount = visits.inventory(g);
         if (amount <= 0) continue;
         actor.pickupGood(g, amount, visits);
         
-        if (actor.carryAmount >= carryLimit) {
+        if (actor.carryAmount() >= carryLimit) {
           returnActorHere(actor);
           return;
         }

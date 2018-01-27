@@ -13,7 +13,7 @@ public class CityCouncil {
   
   /**  Data fields, construction and save/load methods-
     */
-  final static int
+  final public static int
     AI_OFF       = -1,
     AI_NORMAL    =  0,
     AI_COMPLIANT =  1,
@@ -36,12 +36,12 @@ public class CityCouncil {
   
   
   final City city;
-  int typeAI = AI_NORMAL;
+  private int typeAI = AI_NORMAL;
   
-  List <Actor> members = new List();
-  Table <Actor, Role> roles = new Table();
+  private List <Actor> members = new List();
+  private Table <Actor, Role> roles = new Table();
   
-  List <Formation> petitions = new List();
+  private List <Formation> petitions = new List();
   
   
   CityCouncil(City city) {
@@ -79,7 +79,12 @@ public class CityCouncil {
   
   /**  Toggle membership of the council and handling personality-effects-
     */
-  void toggleMember(Actor actor, Role role, boolean yes) {
+  public void setTypeAI(int typeAI) {
+    this.typeAI = typeAI;
+  }
+  
+  
+  public void toggleMember(Actor actor, Role role, boolean yes) {
     if (yes) {
       members.include(actor);
       roles.put(actor, role);
@@ -91,20 +96,25 @@ public class CityCouncil {
   }
   
   
-  Actor memberWithRole(Role role) {
+  public Actor memberWithRole(Role role) {
     for (Actor a : members) if (roles.get(a) == role) return a;
     return null;
   }
   
   
-  Series <Actor> allMembersWithRole(Role role) {
+  public Series <Actor> members() {
+    return members;
+  }
+  
+  
+  public Series <Actor> allMembersWithRole(Role role) {
     Batch <Actor> all = new Batch();
     for (Actor a : members) if (roles.get(a) == role) all.add(a);
     return all;
   }
   
 
-  float membersTraitAvg(Trait trait) {
+  public float membersTraitAvg(Trait trait) {
     float avg = 0, count = 0;
     for (Actor m : members) {
       avg += m.levelOf(trait);
@@ -114,7 +124,7 @@ public class CityCouncil {
   }
   
   
-  float membersBondAvg(Actor with) {
+  public float membersBondAvg(Actor with) {
     float avg = 0, count = 0;
     for (Actor m : members) {
       avg += m.bondLevel(with);
@@ -127,23 +137,23 @@ public class CityCouncil {
   
   /**  Handling agreements or terms submitted by other cities-
     */
-  void receiveTerms(Formation petition) {
+  public void receiveTerms(Formation petition) {
     petitions.include(petition);
   }
   
   
-  Series <Formation> petitions() {
+  public Series <Formation> petitions() {
     return petitions;
   }
   
   
-  void acceptTerms(Formation petition) {
+  public void acceptTerms(Formation petition) {
     petition.setTermsAccepted(true);
     petitions.remove(petition);
   }
   
   
-  void rejectTerms(Formation petition) {
+  public void rejectTerms(Formation petition) {
     petition.setTermsAccepted(false);
     petitions.remove(petition);
   }
@@ -152,7 +162,7 @@ public class CityCouncil {
   
   /**  Regular updates-
     */
-  static class MissionAssessment {
+  public static class MissionAssessment {
     
     City fromC, goesC;
     float fromPower, goesPower;
@@ -171,6 +181,10 @@ public class CityCouncil {
     
     float costs, benefits;
     float evaluatedAppeal;
+    
+    public City from() { return fromC; }
+    public City goes() { return goesC; }
+    public float appeal() { return evaluatedAppeal; }
   }
   
   
@@ -376,7 +390,7 @@ public class CityCouncil {
   }
   
   
-  MissionAssessment invasionAssessment(
+  public MissionAssessment invasionAssessment(
     City attack, City defend,
     float commitLevel, boolean random
   ) {
@@ -460,7 +474,7 @@ public class CityCouncil {
   }
   
   
-  MissionAssessment dialogAssessment(
+  public MissionAssessment dialogAssessment(
     City from, City goes, boolean random
   ) {
     MissionAssessment MA = new MissionAssessment();
@@ -590,7 +604,7 @@ public class CityCouncil {
   }
   
   
-  Formation spawnFormation(MissionAssessment IA) {
+  public Formation spawnFormation(MissionAssessment IA) {
     Formation force = new Formation(IA.objective, city, true);
     
     Type citizen = (Type) Visit.first(city.world.citizenTypes);

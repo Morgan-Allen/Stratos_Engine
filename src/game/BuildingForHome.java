@@ -55,7 +55,7 @@ public class BuildingForHome extends Building {
     
     for (Good service : SERVICE_TYPES) {
       for (Building b : map.buildings) {
-        if (! Visit.arrayIncludes(b.type.features, service)) continue;
+        if (! Visit.arrayIncludes(b.type().features, service)) continue;
         
         float dist = CityMap.distance(b.mainEntrance(), entrance);
         if (dist > maxRange) continue;
@@ -64,8 +64,8 @@ public class BuildingForHome extends Building {
           continue;
         }
         
-        access.add(1, b.type);
-        access.add(b.type.featureAmount, service);
+        access.add(1, b.type());
+        access.add(b.type().featureAmount, service);
       }
     }
     return access;
@@ -141,10 +141,15 @@ public class BuildingForHome extends Building {
   
   
   Type tierOffset(int off) {
-    Type tiers[] = type.upgradeTiers;
+    Type tiers[] = type().upgradeTiers;
     int index = Visit.indexOf(currentTier, tiers);
-    if (index == -1) return type;
+    if (index == -1) return type();
     return tiers[Nums.clamp(index + off, tiers.length)];
+  }
+  
+  
+  public Type currentTier() {
+    return currentTier;
   }
   
   
@@ -153,46 +158,46 @@ public class BuildingForHome extends Building {
     */
   boolean performConsumerCheck(Type tier, Tally <Type> access) {
     for (Good g : tier.homeUseGoods) {
-      float amount = inventory.valueFor(g);
+      float amount = inventory(g);
       if (amount < maxTierStock(g, tier)) return false;
     }
     return true;
   }
   
 
-  Good[] materials() {
+  public Good[] materials() {
     return currentTier.builtFrom;
   }
   
   
-  float materialNeed(Good g) {
+  public float materialNeed(Good g) {
     int index = Visit.indexOf(g, currentTier.builtFrom);
     return index == -1 ? 0 : currentTier.builtAmount[index];
   }
   
   
-  float maxStock(Good g) {
+  public float maxStock(Good g) {
     return maxTierStock(g, currentTier);
   }
   
   
   float maxTierStock(Good g, Type tier) {
-    if (Visit.arrayIncludes(type.homeFoods, g)) return 5;
+    if (Visit.arrayIncludes(type().homeFoods, g)) return 5;
     int index = Visit.indexOf(g, tier.homeUseGoods);
     if (index == -1) return 0;
     return tier.homeUsage[index];
   }
   
   
-  Batch <Good> usedBy(Type tier) {
+  public Batch <Good> usedBy(Type tier) {
     Batch <Good> consumes = new Batch();
-    for (Good g : type.homeFoods   ) consumes.add(g);
+    for (Good g : type().homeFoods ) consumes.add(g);
     for (Good g : tier.homeUseGoods) consumes.add(g);
     return consumes;
   }
   
   
-  Tally <Good> homeUsed() {
+  public Tally <Good> homeUsed() {
     Type tier = tierOffset(1);
     Batch <Good> consumed = usedBy(tier);
     Tally <Good> cons = new Tally();
@@ -233,8 +238,8 @@ public class BuildingForHome extends Building {
   }
   
   
-  void setCurrentTier(Type tier) {
-    if (Visit.arrayIncludes(type.upgradeTiers, tier)) return;
+  public void setCurrentTier(Type tier) {
+    if (Visit.arrayIncludes(type().upgradeTiers, tier)) return;
     currentTier = tier;
     
     //  TODO:  Create a distinction between the current and target
@@ -243,26 +248,26 @@ public class BuildingForHome extends Building {
   
   
   void advanceHomeUse(Type tier) {
-    float conLevel = (1 + (residents.size() * 1f / type.maxResidents)) / 2;
-    conLevel *= type.updateTime;
+    float conLevel = (1 + (residents.size() * 1f / type().maxResidents)) / 2;
+    conLevel *= type().updateTime;
     conLevel /= tier.homeUseTime;
     
     for (Good cons : tier.homeUseGoods) {
-      float oldAmount = inventory.valueFor(cons);
+      float oldAmount = inventory(cons);
       float used      = maxTierStock(cons, tier) * conLevel;
       float amount    = Nums.max(0, oldAmount - used);
-      inventory.set(cons, amount);
+      setInventory(cons, amount);
       map.city.usedTotals.add(oldAmount - amount, cons);
     }
   }
   
   
   void generateOutputs(Type tier) {
-    float taxLevel = residents.size() * TAX_VALUES[type.homeSocialClass];
-    taxLevel *= (1 + Visit.indexOf(tier, type.upgradeTiers));
-    taxLevel *= type.updateTime;
+    float taxLevel = residents.size() * TAX_VALUES[type().homeSocialClass];
+    taxLevel *= (1 + Visit.indexOf(tier, type().upgradeTiers));
+    taxLevel *= type().updateTime;
     taxLevel /= TAX_INTERVAL;
-    inventory.add(taxLevel, CASH);
+    addInventory(taxLevel, CASH);
     map.city.makeTotals.add(taxLevel, CASH);
   }
   
@@ -271,7 +276,7 @@ public class BuildingForHome extends Building {
     if (actor.onMap()) {
       Building home = actor.home;
       if (home == null) return 0;
-      Type type = home.type;
+      Type type = home.type();
       if (type.category != Type.IS_HOME_BLD) return 0;
       
       Type currentTier = ((BuildingForHome) home).currentTier;
@@ -281,7 +286,7 @@ public class BuildingForHome extends Building {
       return tier / 2;
     }
     else {
-      return actor.type.socialClass * 1f / CLASS_NOBLE;
+      return actor.type().socialClass * 1f / CLASS_NOBLE;
     }
   }
   
@@ -297,7 +302,7 @@ public class BuildingForHome extends Building {
     }
     //
     //  Non-nobles have work to do-
-    if (actor.type.socialClass != CLASS_NOBLE) {
+    if (actor.type().socialClass != CLASS_NOBLE) {
       //
       //  See if you can assist with building-projects:
       Task building = TaskBuilding.nextBuildingTask(this, actor);
@@ -313,17 +318,17 @@ public class BuildingForHome extends Building {
       
       for (Good cons : usedBy(tier)) {
         float need = 1 + maxTierStock(cons, tier);
-        need -= inventory.valueFor(cons);
+        need -= inventory(cons);
         need -= totalFetchedFor(this, cons);
         if (need <= 0) continue;
         
         for (Building b : map.buildings) {
-          if (! b.type.hasFeature(IS_VENDOR)) continue;
+          if (! b.type().hasFeature(IS_VENDOR)) continue;
           
           float dist = distance(this, b);
           if (dist > 50) continue;
           
-          float amount = b.inventory.valueFor(cons);
+          float amount = b.inventory(cons);
           amount -= totalFetchedFrom(b, cons);
           if (amount < 1) continue;
           
@@ -378,8 +383,8 @@ public class BuildingForHome extends Building {
   float totalFetchedFor(Building home, Good good) {
     float total = 0;
     for (Actor a : home.residents) {
-      if (! (a.task instanceof TaskDelivery)) continue;
-      TaskDelivery fetch = (TaskDelivery) a.task;
+      if (! (a.task() instanceof TaskDelivery)) continue;
+      TaskDelivery fetch = (TaskDelivery) a.task();
       if (fetch.carried == good) total += fetch.amount;
     }
     return total;
@@ -389,8 +394,8 @@ public class BuildingForHome extends Building {
   float totalFetchedFrom(Building store, Good good) {
     float total = 0;
     for (Actor a : store.focused()) {
-      if (! (a.task instanceof TaskDelivery)) continue;
-      TaskDelivery fetch = (TaskDelivery) a.task;
+      if (! (a.task() instanceof TaskDelivery)) continue;
+      TaskDelivery fetch = (TaskDelivery) a.task();
       if (fetch.from    != store) continue;
       if (fetch.carried == good ) total += fetch.amount;
     }

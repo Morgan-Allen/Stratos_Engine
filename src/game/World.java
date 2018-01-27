@@ -11,15 +11,19 @@ public class World implements Session.Saveable {
   
   /**  Public interfaces-
     */
-  static class Journey {
+  public static class Journey {
     City from;
     City goes;
     int startTime;
     int arriveTime;
     Batch <Journeys> going = new Batch();
+    
+    public City from() { return from; }
+    public City goes() { return goes; }
+    public Series <Journeys> going() { return going; }
   }
   
-  static class Event {
+  public static class Event {
     String label;
     int time;
     Object[] involved;
@@ -28,7 +32,8 @@ public class World implements Session.Saveable {
   
   /**  Data fields, setup and save/load methods-
     */
-  final WorldSettings settings = new WorldSettings(this);
+  final public WorldSettings settings = new WorldSettings(this);
+  
   Good goodTypes   [] = {};
   Type citizenTypes[] = {};
   Type soldierTypes[] = {};
@@ -43,7 +48,7 @@ public class World implements Session.Saveable {
   int mapWide = 10, mapHigh = 10;
   
   
-  World(Good goodTypes[]) {
+  public World(Good goodTypes[]) {
     this.goodTypes = goodTypes;
   }
   
@@ -129,27 +134,32 @@ public class World implements Session.Saveable {
   
   /**  Managing cities:
     */
-  void addCities(City... cities) {
+  public void addCities(City... cities) {
     Visit.appendTo(this.cities, cities);
   }
   
   
-  City cityNamed(String n) {
+  public City cityNamed(String n) {
     for (City c : cities) if (c.name.equals(n)) return c;
     return null;
   }
   
   
-  CityMap activeCityMap() {
+  public CityMap activeCityMap() {
     for (City c : cities) if (c.map != null) return c.map;
     return null;
+  }
+  
+  
+  public Series <City> cities() {
+    return cities;
   }
   
   
   
   /**  Registering and updating journeys:
     */
-  Journey beginJourney(City from, City goes, Journeys... going) {
+  public Journey beginJourney(City from, City goes, Journeys... going) {
     if (from == null || goes == null) return null;
     
     Integer distance = from.distances.get(goes);
@@ -177,12 +187,12 @@ public class World implements Session.Saveable {
   }
 
   
-  Journey beginJourney(City from, City goes, Series <Journeys> going) {
+  public Journey beginJourney(City from, City goes, Series <Journeys> going) {
     return beginJourney(from, goes, going.toArray(Journeys.class));
   }
   
   
-  boolean completeJourney(Journey j) {
+  public boolean completeJourney(Journey j) {
     journeys.remove(j);
     for (Journeys g : j.going) {
       g.onArrival(j.goes, j);
@@ -191,12 +201,12 @@ public class World implements Session.Saveable {
   }
   
   
-  boolean isComplete(Journey j) {
+  public boolean isComplete(Journey j) {
     return time >= j.arriveTime;
   }
   
   
-  Journey journeyFor(Journeys on) {
+  public Journey journeyFor(Journeys on) {
     for (Journey j : journeys) {
       if (j.going.includes(on)) return j;
     }
@@ -204,10 +214,15 @@ public class World implements Session.Saveable {
   }
   
   
+  public Series <Journey> journeys() {
+    return journeys;
+  }
+  
+  
   
   /**  Recording events:
     */
-  void recordEvent(String label, Object... involved) {
+  public void recordEvent(String label, Object... involved) {
     Event e = new Event();
     e.label    = label;
     e.time     = time;
@@ -216,22 +231,27 @@ public class World implements Session.Saveable {
   }
   
   
-  void clearHistory() {
+  public void clearHistory() {
     history.clear();
   }
   
   
-  Batch <Event> eventsWithLabel(String label) {
+  public Batch <Event> eventsWithLabel(String label) {
     Batch <Event> matches = new Batch();
     for (Event e : history) if (e.label.equals(label)) matches.add(e);
     return matches;
   }
   
   
+  public Series <Event> history() {
+    return history;
+  }
+  
+  
   
   /**  Regular updates-
     */
-  void updateWithTime(int time) {
+  public void updateWithTime(int time) {
     this.time = time;
     
     for (City city : cities) {
@@ -248,6 +268,11 @@ public class World implements Session.Saveable {
         completeJourney(j);
       }
     }
+  }
+  
+  
+  public int time() {
+    return time;
   }
   
   
@@ -278,6 +303,12 @@ public class World implements Session.Saveable {
   
   String descFor(Event e) {
     return e.label+" at time "+e.time+": "+I.list(e.involved);
+  }
+  
+  
+  public void setMapSize(int mapW, int mapH) {
+    this.mapWide = mapW;
+    this.mapHigh = mapH;
   }
   
   

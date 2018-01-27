@@ -1,12 +1,13 @@
 
 
-package game;
+package content;
+import game.*;
 import util.*;
+import static content.GameContent.*;
 import static game.ActorAsPerson.*;
 import static game.GameConstants.*;
 import static game.CityCouncil.*;
 import static game.CityMapPlanning.*;
-import static game.GameContent.*;
 
 
 
@@ -54,12 +55,12 @@ public class TestLifeCycle extends Test {
     
     ActorAsPerson oldKing = (ActorAsPerson) NOBLE  .generate();
     ActorAsPerson consort = (ActorAsPerson) CONSORT.generate();
-    oldKing.type.initAsMigrant(oldKing);
-    consort.type.initAsMigrant(consort);
-    oldKing.ageSeconds = LIFESPAN_LENGTH / 3;
-    consort.ageSeconds = LIFESPAN_LENGTH / 3;
-    oldKing.sexData = SEX_MALE;
-    consort.sexData = SEX_FEMALE;
+    oldKing.type().initAsMigrant(oldKing);
+    consort.type().initAsMigrant(consort);
+    oldKing.setAgeYears(AVG_RETIREMENT / 3);
+    consort.setAgeYears(AVG_RETIREMENT / 3);
+    oldKing.setSexData(SEX_MALE  );
+    consort.setSexData(SEX_FEMALE);
     ActorAsPerson.setBond(oldKing, consort, BOND_MARRIED, BOND_MARRIED, 0.5f);
     council.toggleMember(oldKing, Role.MONARCH, true);
     
@@ -87,43 +88,44 @@ public class TestLifeCycle extends Test {
     
     I.say("\nTOTAL LIFE CYCLE RUN TIME: "+RUN_TIME);
     
-    while (map.time < RUN_TIME || graphics) {
+    while (map.time() < RUN_TIME || graphics) {
       map = test.runLoop(map, 1, graphics, "saves/test_cycle.tlt");
       
-      if (map.time % 1000 == 0) {
-        I.say("  Time: "+map.time);
+      if (map.time() % 1000 == 0) {
+        I.say("  Time: "+map.time());
       }
       
       if (! migrated) {
         boolean allFilled = true;
-        for (Building b : map.buildings) {
-          for (Type t : b.type.workerTypes) {
+        for (Building b : map.buildings()) {
+          for (Type t : b.type().workerTypes) {
             if (b.numWorkers(t) < b.maxWorkers(t)) allFilled = false;
           }
         }
         if (allFilled) {
           migrated = true;
-          originalPop = map.actors.copy();
+          originalPop = new List();
+          Visit.appendTo(originalPop, map.actors());
           int i = 0;
           for (Actor a : originalPop) {
-            if (a.type.socialClass == CLASS_NOBLE) continue;
-            a.sexData = ((i++ % 2) == 0) ? SEX_FEMALE : SEX_MALE;
+            if (a.type().socialClass == CLASS_NOBLE) continue;
+            a.setSexData(((i++ % 2) == 0) ? SEX_FEMALE : SEX_MALE);
           }
         }
       }
       
       if (migrated) {
         
-        for (Building b : map.buildings) {
-          if (b.type == ENGINEER_STATION) {
-            b.inventory.set(CLAY   , 5);
-            b.inventory.set(POTTERY, 5);
+        for (Building b : map.buildings()) {
+          if (b.type() == ENGINEER_STATION) {
+            b.setInventory(CLAY   , 5);
+            b.setInventory(POTTERY, 5);
           }
-          if (b.type == HOUSE || b.type == PALACE) {
-            b.inventory.set(MAIZE  , 5);
-            b.inventory.set(FRUIT  , 5);
-            b.inventory.set(POTTERY, 5);
-            b.inventory.set(COTTON , 5);
+          if (b.type() == HOUSE || b.type() == PALACE) {
+            b.setInventory(MAIZE  , 5);
+            b.setInventory(FRUIT  , 5);
+            b.setInventory(POTTERY, 5);
+            b.setInventory(COTTON , 5);
           }
         }
         //  TODO:  Restore this later- it may take time to update employment
@@ -140,7 +142,7 @@ public class TestLifeCycle extends Test {
           break;
         }
         
-        for (Actor a : map.actors) {
+        for (Actor a : map.actors()) {
           if (a.child() && a.alive() && ! originalPop.includes(a)) {
             if (! births.includes(a)) {
               Series <Actor> parents = a.allBondedWith(BOND_PARENT);
@@ -158,7 +160,7 @@ public class TestLifeCycle extends Test {
           }
         }
         for (Actor w : originalPop) {
-          if (w.dead() && ! map.actors.includes(w)) {
+          if (w.dead() && ! map.actors().includes(w)) {
             if (! deaths.includes(w)) I.say("  Died: "+w);
             deaths.include(w);
           }
@@ -172,16 +174,16 @@ public class TestLifeCycle extends Test {
       //
       //  We need to speed things up a little to avoid infant mortality and
       //  variable lifespans, if succession is going to be checked-
-      if (map.time > MAX_DELAY && (! consort.pregnant()) && ! heirBorn) {
+      if (map.time() > MAX_DELAY && (! consort.pregnant()) && ! heirBorn) {
         consort.beginPregnancy();
       }
-      if (consort.pregnant() && consort.inside == palace && ! heirBorn) {
+      if (consort.pregnant() && consort.inside() == palace && ! heirBorn) {
         consort.completePregnancy(palace, true);
       }
       if (! recognised) {
         recognised = council.memberWithRole(Role.HEIR) != null;
       }
-      if (map.time > MAX_REIGN && recognised && ! oldKing.dead()) {
+      if (map.time() > MAX_REIGN && recognised && ! oldKing.dead()) {
         oldKing.setAsKilled("Died to allow heir to succeed");
       }
       if (oldKing.dead() && ! kingDied) {

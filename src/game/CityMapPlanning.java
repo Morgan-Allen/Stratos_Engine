@@ -51,7 +51,7 @@ public class CityMapPlanning {
     //  First, we compile a list of all elements that might interfere
     //  with this placement, either in the physical area or within the
     //  plan-map:
-    Type type = e.type;
+    Type type = e.type();
     Tile at   = e.at();
     Batch <Element> inArea = new Batch();
     Batch <Element> inPlan = new Batch();
@@ -87,24 +87,29 @@ public class CityMapPlanning {
   }
   
   
-  void placeObject(Element e) {
+  public void placeObject(Element e) {
     toBuild.add(e);
   }
   
   
-  void placeObject(Element e, int x, int y) {
+  public void placeObject(Element e, int x, int y) {
     e.setLocation(map.tileAt(x, y), map);
     toBuild.add(e);
   }
   
   
-  void unplaceObject(Element e) {
+  public void unplaceObject(Element e) {
     togglePlacement(e, false);
   }
   
   
-  Element objectAt(Tile t) {
+  public Element objectAt(Tile t) {
     return grid[t.x][t.y];
+  }
+  
+  
+  public List <Element> toBuildCopy() {
+    return toBuild.copy();
   }
   
   
@@ -116,13 +121,13 @@ public class CityMapPlanning {
   private void updateBuildDemands(Element e) {
     //  TODO:  Migrate the 'check build need' function in here?
     
-    for (Good m : e.type.builtFrom) {
+    for (Good m : e.type().builtFrom) {
       TaskBuilding.checkNeedForBuilding(e, m, map);
     }
   }
   
   
-  void updatePlanning() {
+  public void updatePlanning() {
     int maxChecked = Nums.min(100, toBuild.size());
     //
     //  We regularly 'check up' on scheduled structures to see whether

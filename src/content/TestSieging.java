@@ -1,11 +1,12 @@
 
 
-package game;
+package content;
+import game.*;
 import util.*;
+import static content.GameContent.*;
 import static game.CityMap.*;
 import static game.GameConstants.*;
 import static game.Task.*;
-import static game.GameContent.*;
 
 
 
@@ -26,8 +27,8 @@ public class TestSieging extends Test {
     CityMap map   = CityMapTerrain.generateTerrain(
       homeC, 32, 0, MEADOW, JUNGLE
     );
-    homeC.name = "Home City";
-    awayC.name = "Away City";
+    homeC.setName("Home City");
+    awayC.setName("Away City");
     world.assignCitizenTypes(ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES);
     world.addCities(homeC, awayC);
     
@@ -36,7 +37,7 @@ public class TestSieging extends Test {
     world.settings.toggleHunger  = false;
     
     awayC.initBuildLevels(GARRISON, 5, HOUSE, 1);
-    awayC.council.typeAI = CityCouncil.AI_OFF;
+    awayC.council.setTypeAI(CityCouncil.AI_OFF);
     
     City.setupRoute(homeC, awayC, 1);
     City.setPosture(homeC, awayC, City.POSTURE.ENEMY, true);
@@ -65,12 +66,12 @@ public class TestSieging extends Test {
       Building home = (Building) HOUSE.generate();
       home.enterMap(map, 17, 10 + (n * 3), 1);
       fillHomeVacancies(home, CITIZEN);
-      for (Actor a : home.residents) {
-        a.sexData = (s++ % 2 == 0) ? SEX_MALE : SEX_FEMALE;
+      for (Actor a : home.residents()) {
+        a.setSexData((s++ % 2 == 0) ? SEX_MALE : SEX_FEMALE);
         if (fort.eligible(a, false)) fort.toggleRecruit(a, true);
       }
     }
-    for (Actor a : fort.workers) {
+    for (Actor a : fort.workers()) {
       fort.toggleRecruit(a, true);
     }
     
@@ -81,9 +82,9 @@ public class TestSieging extends Test {
     
     Building store = (Building) PORTER_POST.generate();
     store.enterMap(map, 10, 6, 1);
-    store.inventory.setWith(COTTON, 10);
+    store.setInventory(COTTON, 10);
     
-    float initPrestige = awayC.prestige;
+    float initPrestige = awayC.prestige();
     float initLoyalty  = homeC.loyalty(awayC);
     Table <Actor, Tile> initPatrolPoints = new Table();
     Formation enemy = null;
@@ -103,24 +104,24 @@ public class TestSieging extends Test {
     final int MIN_DEFENDERS = 4;
     final int MIN_INVADERS  = 8;
     
-    while (map.time < RUN_TIME || graphics) {
+    while (map.time() < RUN_TIME || graphics) {
       map = test.runLoop(map, 1, graphics, "saves/test_sieging.tlt");
       
       if (! patrolInit) {
         int numPatrol = 0;
         float avgMinDist = 0;
         
-        for (Actor a : guarding.recruits) {
+        for (Actor a : guarding.recruits()) {
           if (a.at() != guarding.standLocation(a)) continue;
           float minDist = 1000;
-          for (Actor o : guarding.recruits) if (o != a) {
+          for (Actor o : guarding.recruits()) if (o != a) {
             minDist = Nums.min(minDist, distance(a, o));
           }
           avgMinDist += minDist;
           initPatrolPoints.put(a, a.at());
           numPatrol += 1;
         }
-        avgMinDist /= guarding.recruits.size();
+        avgMinDist /= guarding.recruits().size();
         
         if (avgMinDist > 1 && avgMinDist < 4 && numPatrol >= MIN_DEFENDERS) {
           patrolInit = true;
@@ -129,7 +130,7 @@ public class TestSieging extends Test {
       
       if (patrolInit && ! patrolDone) {
         int numMoved = 0;
-        for (Actor a : guarding.recruits) {
+        for (Actor a : guarding.recruits()) {
           Tile init = initPatrolPoints.get(a);
           if (init != null && a.at() != init) {
             numMoved += 1;
@@ -137,16 +138,15 @@ public class TestSieging extends Test {
         }
         if (numMoved >= MIN_DEFENDERS) {
           patrolDone = true;
-          awayC.council.typeAI = CityCouncil.AI_WARLIKE;
+          awayC.council.setTypeAI(CityCouncil.AI_WARLIKE);
         }
       }
       
       if (patrolDone && ! siegeComing) {
-        for (World.Journey j : map.city.world.journeys) {
-          Object goes = j.going.first();
-          if (goes instanceof Formation) {
-            enemy = (Formation) goes;
-            tribute = enemy.tributeDemand;
+        for (World.Journey j : map.city.world.journeys()) {
+          for (Journeys g : j.going()) if (g instanceof Formation) {
+            enemy = (Formation) g;
+            tribute = enemy.tributeDemand();
             siegeComing = true;
             
             //  TODO:  Add explicit test for this...
@@ -163,31 +163,31 @@ public class TestSieging extends Test {
         }
       }
       
-      if (siegeComing && enemy.map != null && ! siegeBegun) {
+      if (siegeComing && enemy.onMap() && ! siegeBegun) {
         
         Table <Tile, Actor> standing = new Table();
         boolean standWrong = false;
         Actor testPathing = null;
         
-        for (Actor a : enemy.recruits) {
+        for (Actor a : enemy.recruits()) {
           if (a.jobType() == JOB.COMBAT) {
-            TaskCombat task = (TaskCombat) a.task;
+            TaskCombat task = (TaskCombat) a.task();
             
             Element target = task.primary;
-            Series <Actor> guards = guarding.recruits;
+            Series <Actor> guards = guarding.recruits();
             boolean isGuard = false, isWall = false;
             
-            if (target.type.isActor() && guards.includes((Actor) target)) {
+            if (target.type().isActor() && guards.includes((Actor) target)) {
               isGuard = true;
             }
-            if (target.type.isWall) {
+            if (target.type().isWall) {
               isWall = true;
             }
             if (! (isGuard || isWall)) {
               continue;
             }
             
-            Tile stands = (Tile) task.target;
+            Tile stands = (Tile) task.target();
             if (standing.get(stands) != null) standWrong = true;
             else standing.put(stands, a);
             testPathing = a;
@@ -210,24 +210,24 @@ public class TestSieging extends Test {
       
       if (siegeComing && ! invadeFight) {
         int numFighting = 0;
-        for (Actor a : enemy.recruits) {
+        for (Actor a : enemy.recruits()) {
           if (a.jobType() != JOB.COMBAT) continue;
-          TaskCombat task = (TaskCombat) a.task;
-          if (! task.primary.type.isActor()) continue;
+          TaskCombat task = (TaskCombat) a.task();
+          if (! task.primary.type().isActor()) continue;
           Actor struck = (Actor) task.primary;
-          if (guarding.recruits.includes(struck)) numFighting += 1;
+          if (guarding.recruits().includes(struck)) numFighting += 1;
         }
         invadeFight = numFighting > MIN_INVADERS / 2;
       }
       
       if (siegeComing && ! defendFight) {
         int numFighting = 0;
-        for (Actor a : guarding.recruits) {
+        for (Actor a : guarding.recruits()) {
           if (a.jobType() != JOB.COMBAT) continue;
-          TaskCombat task = (TaskCombat) a.task;
-          if (! task.primary.type.isActor()) continue;
+          TaskCombat task = (TaskCombat) a.task();
+          if (! task.primary.type().isActor()) continue;
           Actor struck = (Actor) task.primary;
-          if (enemy.recruits.includes(struck)) numFighting += 1;
+          if (enemy.recruits().includes(struck)) numFighting += 1;
         }
         defendFight = numFighting >= MIN_DEFENDERS / 2;
       }
@@ -235,28 +235,27 @@ public class TestSieging extends Test {
       if (siegeBegun && ! victorious) {
         if (homeC.isVassalOf(awayC)) {
           victorious = true;
-          store.inventory.add(tribute);
+          store.addInventory(tribute);
           fillWorkVacancies(store);
         }
       }
       
       if (victorious && ! tributePaid) {
         
-        City.Relation r = homeC.relationWith(awayC);
         boolean allSent = true;
         for (Good g : tribute.keys()) {
           float need = tribute.valueFor(g);
-          float sent = r.suppliesSent.valueFor(g);
+          float sent = City.suppliesDue(homeC, awayC, g);
           if (sent < need) allSent = false;
         }
         tributePaid = allSent;
         
-        if (homeC.currentFunds > 0) {
+        if (homeC.funds() > 0) {
           I.say("\nShould not receive payment for tribute!");
           break;
         }
         
-        if (awayC.prestige <= initPrestige) {
+        if (awayC.prestige() <= initPrestige) {
           I.say("\nPrestige should be boosted by conquest!");
           break;
         }

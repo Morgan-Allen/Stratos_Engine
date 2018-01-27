@@ -36,10 +36,10 @@ public class TaskGathering extends Task {
   static boolean pickPlantPoint(
     Building store, Actor actor, boolean close, boolean start
   ) {
-    if (start && actor.inside != store) return false;
+    if (start && actor.inside() != store) return false;
     
     boolean canPlant = false;
-    for (Good g : store.type.produced) if (g.isCrop) canPlant = true;
+    for (Good g : store.type().produced) if (g.isCrop) canPlant = true;
     if (! canPlant) return false;
     
     CityMapFlagging flagging = store.map.flagging.get(NEED_PLANT);
@@ -47,7 +47,7 @@ public class TaskGathering extends Task {
     
     Tile goes = null;
     if (close) goes = flagging.findNearbyPoint(actor, AVG_GATHER_RANGE);
-    else goes = flagging.pickRandomPoint(store, store.type.maxDeliverRange);
+    else goes = flagging.pickRandomPoint(store, store.type().maxDeliverRange);
     
     if (goes == null) return false;
     
@@ -67,21 +67,21 @@ public class TaskGathering extends Task {
     if (Visit.empty(cropTypes)) return false;
     
     int spaceTaken = 0;
-    for (Good g : store.type.produced) {
-      spaceTaken += store.inventory.valueFor(g);
+    for (Good g : store.type().produced) {
+      spaceTaken += store.inventory(g);
     }
-    if (spaceTaken >= store.type.maxStock) return false;
+    if (spaceTaken >= store.type().maxStock) return false;
     
-    CityMapFlagging flagging = store.map.flagging.get(store.type.gatherFlag);
+    CityMapFlagging flagging = store.map.flagging.get(store.type().gatherFlag);
     if (flagging == null) return false;
     
     Tile goes = null;
     if (close) goes = flagging.findNearbyPoint(actor, AVG_GATHER_RANGE);
-    else goes = flagging.pickRandomPoint(store, store.type.maxDeliverRange);
+    else goes = flagging.pickRandomPoint(store, store.type().maxDeliverRange);
     Element above = goes == null ? null : goes.above;
     
     if (above == null) return false;
-    if (! Visit.arrayIncludes(cropTypes, above.type.yields)) return false;
+    if (! Visit.arrayIncludes(cropTypes, above.type().yields)) return false;
     
     TaskGathering task = new TaskGathering(actor, store);
     if (task.configTask(store, null, goes, JOB.HARVEST, 2) != null) {
@@ -102,11 +102,11 @@ public class TaskGathering extends Task {
     }
     
     Element above = other.at().above;
-    if (above == null || above.type.yields == null) return;
+    if (above == null || above.type().yields == null) return;
     
-    Trait skill      = store.type.craftSkill;
+    Trait skill      = store.type().craftSkill;
     float skillBonus = actor.levelOf(skill) / MAX_SKILL_LEVEL;
-    float multXP     = above.type.isCrop ? FARM_XP_PERCENT : GATHR_XP_PERCENT;
+    float multXP     = above.type().isCrop ? FARM_XP_PERCENT : GATHR_XP_PERCENT;
     
     if (actor.jobType() == JOB.PLANTING) {
       //
@@ -122,22 +122,19 @@ public class TaskGathering extends Task {
     
     if (actor.jobType() == JOB.HARVEST) {
       
-      if      (above.type.isCrop      ) above.setGrowLevel(-1);
-      else if (above.type.growRate > 0) above.setGrowLevel( 0);
+      if      (above.type().isCrop      ) above.setGrowLevel(-1);
+      else if (above.type().growRate > 0) above.setGrowLevel( 0);
       
-      float yield = above.type.yieldAmount;
+      float yield = above.type().yieldAmount;
       yield *= 1 + (skillBonus * 0.5f);
       
-      actor.carried      = above.type.yields;
-      actor.carryAmount += yield;
-      
+      actor.incCarried(above.type().yields, yield);
       actor.gainXP(skill, 1 * multXP / 100);
-      ///I.say(actor+" harvested "+actor.carryAmount+" of "+above.type);
       
-      if (actor.carryAmount >= 2) {
+      if (actor.carryAmount() >= 2) {
         returnToStore();
       }
-      else if (! pickNextCrop(store, actor, true, actor.carried)) {
+      else if (! pickNextCrop(store, actor, true, actor.carried())) {
         returnToStore();
       }
     }
@@ -156,7 +153,7 @@ public class TaskGathering extends Task {
   
   protected void onVisit(Building visits) {
     if (visits == store) {
-      for (Good made : store.type.produced) {
+      for (Good made : store.type().produced) {
         actor.offloadGood(made, store);
       }
     }

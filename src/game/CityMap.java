@@ -12,7 +12,7 @@ public class CityMap implements Session.Saveable {
   
   /**  Data fields and initialisation-
     */
-  final static int
+  final public static int
     SCAN_RES    = 16,
     FLAG_RES    = 4,
     
@@ -32,12 +32,12 @@ public class CityMap implements Session.Saveable {
   Tile grid[][];
   List <Actor> actorGrid[][];
   
-  City city;
+  final public City city;
   int time = 0;
   
-  final CityMapPlanning planning = new CityMapPlanning(this);
-  final CityMapFog      fog      = new CityMapFog     (this);
-  final CityMapTerrain  terrain  = new CityMapTerrain (this);
+  final public CityMapPlanning planning = new CityMapPlanning(this);
+  final public CityMapFog      fog      = new CityMapFog     (this);
+  final public CityMapTerrain  terrain  = new CityMapTerrain (this);
   
   Table <City, Tile> transitPoints = new Table();
   Table <Type, CityMapFlagging> flagging = new Table();
@@ -45,12 +45,12 @@ public class CityMap implements Session.Saveable {
   
   List <Building> buildings = new List();
   List <Actor   > actors    = new List();
-  CityMapPathCache pathCache = new CityMapPathCache(this);
+  final public CityMapPathCache pathCache = new CityMapPathCache(this);
   
   String saveName;
   
   
-  CityMap(City city) {
+  public CityMap(City city) {
     this.city = city;
   }
   
@@ -149,7 +149,7 @@ public class CityMap implements Session.Saveable {
   }
   
   
-  void performSetup(int size, Terrain terrainTypes[]) {
+  public void performSetup(int size, Terrain terrainTypes[]) {
     
     this.terrainTypes = terrainTypes;
     
@@ -163,9 +163,7 @@ public class CityMap implements Session.Saveable {
     
     this.grid = new Tile[size][size];
     for (Coord c : Visit.grid(0, 0, size, size, 1)) {
-      Tile t = grid[c.x][c.y] = new Tile();
-      t.x = c.x;
-      t.y = c.y;
+      grid[c.x][c.y] = new Tile(c.x, c.y);
     }
     
     this.actorGrid = new List[flagSize][flagSize];
@@ -180,6 +178,19 @@ public class CityMap implements Session.Saveable {
     
     //  Note: this might occur when setup is performed during saving/loading...
     if (city != null) city.attachMap(this);
+  }
+  
+  
+  
+  /**  Basic public access methods-
+    */
+  public Series <Building> buildings() {
+    return buildings;
+  }
+  
+  
+  public Series <Actor> actors() {
+    return actors;
   }
   
   
@@ -257,6 +268,11 @@ public class CityMap implements Session.Saveable {
   }
   
   
+  public int size() {
+    return size;
+  }  
+  
+  
   public static float distance(int ox, int oy, int dx, int dy) {
     float sx = ox - dx, sy = oy - dy;
     return Nums.sqrt((sx * sx) + (sy * sy));
@@ -279,34 +295,39 @@ public class CityMap implements Session.Saveable {
   }
   
   
+  public int time() {
+    return time;
+  }
+  
+  
   public static int timeSince(int time, int from) {
     if (time == -1) return -1;
     return from - time;
   }
   
   
-  Tile tileAt(int x, int y) {
+  public Tile tileAt(int x, int y) {
     if (x < 0 || x >= size || y < 0 || y >= size) return null;
     return grid[x][y];
   }
   
   
-  Tile tileAt(float x, float y) {
+  public Tile tileAt(float x, float y) {
     return tileAt((int) x, (int) y);
   }
   
   
-  Tile tileAt(Coord c) {
+  public Tile tileAt(Coord c) {
     return tileAt(c.x, c.y);
   }
   
   
-  Visit <Tile> allTiles() {
+  public Visit <Tile> allTiles() {
     return tilesUnder(0, 0, size, size);
   }
   
   
-  Visit <Tile> tilesUnder(int x, int y, int w, int h) {
+  public Visit <Tile> tilesUnder(int x, int y, int w, int h) {
     final Visit <Coord> VC = Visit.grid(x, y, w, h, 1);
     Visit <Tile> VT = new Visit <Tile> () {
       public boolean hasNext() { return VC.hasNext(); }
@@ -316,7 +337,7 @@ public class CityMap implements Session.Saveable {
   }
   
   
-  Visit <Tile> tilesAround(int x, int y, int w, int h) {
+  public Visit <Tile> tilesAround(int x, int y, int w, int h) {
     final Visit <Coord> VC = Visit.perimeter(x, y, w, h);
     Visit <Tile> VT = new Visit <Tile> () {
       public boolean hasNext() { return VC.hasNext(); }
@@ -329,55 +350,55 @@ public class CityMap implements Session.Saveable {
   
   /**  Blockage and paving methods-
     */
-  Element above(int x, int y) {
+  public Element above(int x, int y) {
     Tile under = tileAt(x, y);
     return under == null ? null : under.above;
   }
   
   
-  Element above(Tile t) {
+  public Element above(Tile t) {
     return above(t.x, t.y);
   }
   
   
-  Element above(Coord c) {
+  public Element above(Coord c) {
     return above(c.x, c.y);
   }
   
   
-  int pathType(Tile t) {
+  public int pathType(Tile t) {
     if (t == null) return PATH_BLOCK;
     return t.pathType();
   }
   
   
-  int pathType(Coord c) {
+  public int pathType(Coord c) {
     return pathType(c.x, c.y);
   }
   
   
-  int pathType(int x, int y) {
+  public int pathType(int x, int y) {
     return pathType(tileAt(x, y));
   }
   
   
-  boolean blocked(Tile t) {
+  public boolean blocked(Tile t) {
     int pathing = pathType(t);
     return pathing == PATH_BLOCK || pathing == PATH_WATER;
   }
   
   
-  boolean blocked(Coord c) {
+  public boolean blocked(Coord c) {
     return blocked(tileAt(c));
   }
   
   
-  boolean blocked(int x, int y) {
+  public boolean blocked(int x, int y) {
     return blocked(tileAt(x, y));
   }
   
   
-  void setTerrain(Tile t, Terrain ter, int elevation) {
+  public void setTerrain(Tile t, Terrain ter, int elevation) {
     int oldP = t.pathType();
     t.terrain   = ter;
     t.elevation = elevation;
@@ -385,29 +406,29 @@ public class CityMap implements Session.Saveable {
   }
   
   
-  void setTerrain(Coord c, Terrain ter, int elevation) {
+  public void setTerrain(Coord c, Terrain ter, int elevation) {
     setTerrain(tileAt(c), ter, elevation);
   }
   
   
-  void setTerrain(int x, int y, Terrain ter, int elevation) {
+  public void setTerrain(int x, int y, Terrain ter, int elevation) {
     setTerrain(tileAt(x, y), ter, elevation);
   }
   
   
-  void setAbove(Tile t, Element above) {
+  public void setAbove(Tile t, Element above) {
     int oldP = t.pathType();
     t.above = above;
     if (oldP != t.pathType()) pathCache.checkPathingChanged(t);
   }
   
   
-  void setAbove(Coord c, Element above) {
+  public void setAbove(Coord c, Element above) {
     setAbove(tileAt(c), above);
   }
   
   
-  void setAbove(int x, int y, Element above) {
+  public void setAbove(int x, int y, Element above) {
     setAbove(tileAt(x, y), above);
   }
   
@@ -455,13 +476,20 @@ public class CityMap implements Session.Saveable {
   
   /**  Various presence-related queries and updates-
     */
-  void flagType(Type key, int x, int y, boolean is) {
+  public CityMapFlagging flagMap(Type key, boolean init) {
     CityMapFlagging forKey = flagging.get(key);
-    if (forKey == null) {
+    if (forKey != null) return forKey;
+    if (init) {
       forKey = new CityMapFlagging(this, key, 1);
       forKey.setupWithSize(size);
       flagging.put(key, forKey);
     }
+    return forKey;
+  }
+  
+  
+  void flagType(Type key, int x, int y, boolean is) {
+    CityMapFlagging forKey = flagMap(key, true);
     forKey.setFlagVal(x, y, is ? 1 : 0);
   }
   

@@ -1,6 +1,7 @@
 
 
-package game;
+package content;
+import game.*;
 import util.*;
 import static game.CityMap.*;
 import static game.GameConstants.*;
@@ -9,6 +10,42 @@ import static game.Type.*;
 
 
 public class GameContent {
+  
+  
+  final static int
+    
+    //  Industrial in brown.
+    TINT_LITE_INDUSTRIAL  = colour(6, 3, 3),
+    TINT_INDUSTRIAL       = colour(5, 2, 2),
+    //  Aquatic in cyan.
+    TINT_LITE_AQUATIC     = colour(7, 8, 9),
+    TINT_AQUATIC          = colour(0, 5, 7),
+    //  Military in red.
+    TINT_LITE_MILITARY    = colour(8, 1, 1),
+    TINT_MILITARY         = colour(7, 0, 0),
+    //  Economic in blue.
+    TINT_LITE_COMMERCIAL  = colour(3, 1, 8),
+    TINT_COMMERCIAL       = colour(2, 0, 7),
+    //  Residential in yellow.
+    TINT_LITE_RESIDENTIAL = colour(8, 8, 1),
+    TINT_RESIDENTIAL      = colour(7, 7, 0),
+    //  Entertainment in purple.
+    TINT_LITE_AMENITY     = colour(8, 1, 8),
+    TINT_AMENITY          = colour(7, 0, 7),
+    //  Health/education in white.
+    TINT_LITE_HEALTH_ED   = colour(8, 8, 8),
+    TINT_HEALTH_ED        = colour(7, 7, 7),
+    //  Religious in orange.
+    TINT_LITE_RELIGIOUS   = colour(8, 4, 1),
+    TINT_RELIGIOUS        = colour(7, 3, 0),
+    
+    //  Crops in shades of green:
+    TINT_CROPS[] = {
+      colour(1, 8, 3),
+      colour(0, 7, 2),
+      colour(2, 8, 0),
+    }
+  ;
   
   
   final public static Good
@@ -221,7 +258,7 @@ public class GameContent {
   }
   
   
-  final static BuildType  
+  final static BuildType
     
     ROAD          = new BuildType(Element.class         , "type_road"    , IS_STRUCTURAL),
     WALL          = new BuildType(Element.class         , "type_wall"    , IS_STRUCTURAL),
@@ -500,9 +537,9 @@ public class GameContent {
     City  cityB = new City(world);
     world.assignCitizenTypes(ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES);
     
-    cityA.name = "Xochimilco";
+    cityA.setName("Xochimilco");
     cityA.setWorldCoords(1, 1);
-    cityA.tradeLevel.setWith(
+    cityA.initTradeLevels(
       POTTERY, 5f ,
       COTTON , 10f
     );
@@ -512,9 +549,9 @@ public class GameContent {
     );
     world.addCities(cityA);
     
-    cityB.name = "Tlacopan";
+    cityB.setName("Tlacopan");
     cityB.setWorldCoords(3, 3);
-    cityB.tradeLevel.setWith(
+    cityB.initTradeLevels(
       MAIZE, 5f ,
       CLAY , 10f
     );
@@ -525,7 +562,7 @@ public class GameContent {
     world.addCities(cityB);
     
     City.setupRoute(cityA, cityB, AVG_CITY_DIST / 2);
-    world.mapWide = world.mapHigh = 10;
+    world.setMapSize(10, 10);
     
     return world;
   }

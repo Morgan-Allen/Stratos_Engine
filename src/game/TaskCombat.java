@@ -19,7 +19,7 @@ public class TaskCombat extends Task {
     ATTACK_FIRE  = 3
   ;
   
-  Element primary;
+  final public Element primary;
   int attackMode;
   
   
@@ -70,8 +70,8 @@ public class TaskCombat extends Task {
   
   static float attackPower(Actor a) {
     if (a.state >= Actor.STATE_DEAD) return 0;
-    float power = attackPower(a.type);
-    power *= 1 - ((a.injury + a.hunger) / a.type.maxHealth);
+    float power = attackPower(a.type());
+    power *= 1 - ((a.injury + a.hunger) / a.type().maxHealth);
     return power;
   }
   
@@ -101,7 +101,7 @@ public class TaskCombat extends Task {
     
     //  TODO:  Grant a vision bonus for higher ground?
     float noticeBonus = AVG_FILE;
-    float noticeRange = actor.type.sightRange + noticeBonus;
+    float noticeRange = actor.type().sightRange + noticeBonus;
     Series <Actor> others = map.actorsInRange(from, noticeRange);
     
     class Option { Actor other; float rating; };
@@ -204,7 +204,7 @@ public class TaskCombat extends Task {
     }
     
     float rangeMelee   = 1.5f;
-    float rangeMissile = actor.type.rangeDist;
+    float rangeMissile = actor.type().rangeDist;
     float maxRange     = Nums.max(rangeMelee, rangeMissile);
     
     Pick <Tile> pick = new Pick();
@@ -231,8 +231,8 @@ public class TaskCombat extends Task {
       if (dist > maxRange) continue;
       
       float rating = 0;
-      if      (dist < rangeMelee  ) rating += actor.type.meleeDamage;
-      else if (dist < rangeMissile) rating += actor.type.rangeDamage;
+      if      (dist < rangeMelee  ) rating += actor.type().meleeDamage;
+      else if (dist < rangeMissile) rating += actor.type().rangeDamage;
       pick.compare(t, rating);
     }
     
@@ -283,8 +283,8 @@ public class TaskCombat extends Task {
   
   float actionRange() {
     if (attackMode == ATTACK_MELEE) return 0;
-    if (attackMode == ATTACK_RANGE) return actor.type.rangeDist + 1;
-    if (attackMode == ATTACK_FIRE ) return actor.type.rangeDist + 1;
+    if (attackMode == ATTACK_RANGE) return actor.type().rangeDist + 1;
+    if (attackMode == ATTACK_FIRE ) return actor.type().rangeDist + 1;
     return -1;
   }
   

@@ -122,7 +122,7 @@ public class Task implements Session.Saveable {
   ) {
     //  Note- the un/assign task calls are needed to ensure that current focus
     //  for the actor is updated correctly.
-    boolean active = actor.task == this;
+    boolean active = actor.task() == this;
     if (active) actor.assignTask(null);
     
     this.origin    = origin ;
@@ -173,7 +173,7 @@ public class Task implements Session.Saveable {
     }
     
     CityMap  map      = actor.map;
-    Pathing  inside   = actor.inside;
+    Pathing  inside   = actor.inside();
     Pathing  path[]   = this.path;
     Pathing  pathEnd  = (Pathing) Visit.last(path);
     float    distance = CityMap.distance(actor.at(), pathEnd);
@@ -246,7 +246,7 @@ public class Task implements Session.Saveable {
   
   /**  Pathing and focus-related methods:
     */
-  static Target focusTarget(Task t) {
+  public static Target focusTarget(Task t) {
     if (t        == null) return null;
     if (t.target != null) return t.target;
     if (t.visits != null) return t.visits;
@@ -255,7 +255,7 @@ public class Task implements Session.Saveable {
   }
   
 
-  static boolean hasTaskFocus(Target t, JOB type, Actor except) {
+  public static boolean hasTaskFocus(Target t, JOB type, Actor except) {
     if (t.focused().empty()) return false;
     for (Actor a : t.focused()) {
       if (a != except && a.jobType() == type) return true;
@@ -264,12 +264,22 @@ public class Task implements Session.Saveable {
   }
   
   
-  static boolean hasTaskFocus(Target t, JOB type) {
+  public static boolean hasTaskFocus(Target t, JOB type) {
     return hasTaskFocus(t, type, null);
   }
   
   
-  static Pathing pathOrigin(Target from) {
+  public Target target() {
+    return target;
+  }
+  
+  
+  public Building visits() {
+    return visits;
+  }
+  
+  
+  public static Pathing pathOrigin(Target from) {
     if (from == null) {
       return null;
     }
@@ -315,7 +325,7 @@ public class Task implements Session.Saveable {
     Pathing current = pathOrigin(actor), step = path[index];
     if (current != step) return false;
     
-    for (int i = 0; i < actor.type.sightRange; i++, index++) {
+    for (int i = 0; i < actor.type().sightRange; i++, index++) {
       if (index >= path.length) break;
       Pathing t = path[index];
       if (t.isTile() && actor.map.blocked((Tile) t)) return false;
@@ -370,7 +380,7 @@ public class Task implements Session.Saveable {
   }
   
   
-  static boolean verifyPath(
+  public static boolean verifyPath(
     Pathing path[], Pathing start, Pathing end, CityMap map
   ) {
     if (Visit.empty(path) || path[0] != start) return false;

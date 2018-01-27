@@ -17,7 +17,7 @@ public class CityMapPathCache {
     AREA_SIZE = 16
   ;
   
-  static class Area implements Flood.Fill {
+  public static class Area implements Flood.Fill {
     
     int ID;
     boolean flagTiling   = false;
@@ -40,16 +40,20 @@ public class CityMapPathCache {
     public void flagWith(Object o) { pathFlag = o; }
     public Object flaggedWith() { return pathFlag; }
     public String toString() { return "A_"+ID; }
+    
+    public Tile[] tiles() { return tiles; }
+    public int numTiles() { return numTiles; }
+    public Coord coord() { return new Coord(aX, aY); }
   }
   
-  static class Border {
+  public static class Border {
     
     Area with;
     int size;
     boolean open;
   }
   
-  static class AreaGroup {
+  public static class AreaGroup {
     
     int ID;
     boolean flagDeletion = false;
@@ -59,6 +63,8 @@ public class CityMapPathCache {
     int totalTiles;
     
     public String toString() { return "G_"+ID; }
+    
+    public Series <Area> areas() { return areas; }
   }
   
   
@@ -107,6 +113,19 @@ public class CityMapPathCache {
   
   
   
+  /**  Basic group/area accessors-
+    */
+  public Series <Area> areas() {
+    return areas;
+  }
+  
+  
+  public Series <AreaGroup> groups() {
+    return groups;
+  }
+  
+  
+  
   /**  Generic caching methods-
     */
   Object openGroupHandle(Tile at) {
@@ -127,7 +146,7 @@ public class CityMapPathCache {
   
   /**  Query methods for distance and connection-
     */
-  boolean pathConnects(Tile from, Tile goes) {
+  public boolean pathConnects(Tile from, Tile goes) {
     AreaGroup fromG = groupFor(areaFor(from), false);
     AreaGroup goesG = groupFor(areaFor(goes), false);
     if (fromG == null || goesG == null) return false;
@@ -135,7 +154,7 @@ public class CityMapPathCache {
   }
   
   
-  boolean openPathConnects(Tile from, Tile goes) {
+  public boolean openPathConnects(Tile from, Tile goes) {
     final Area fromA = areaFor(from);
     final Area goesA = areaFor(goes);
     AreaGroup fromG = groupFor(fromA, true);
@@ -145,7 +164,7 @@ public class CityMapPathCache {
   }
   
   
-  boolean pathConnects(
+  public boolean pathConnects(
     Pathing from, Target goes, boolean checkAdjacent, boolean open
   ) {
     if (from == null || goes == null) return false;
@@ -199,7 +218,7 @@ public class CityMapPathCache {
   }
   
   
-  Tile mostOpenNeighbour(Tile at) {
+  public Tile mostOpenNeighbour(Tile at) {
     Pick <Tile> pick = new Pick();
     for (Tile t : CityMap.adjacent(at, null, map)) {
       AreaGroup group = groupFor(areaFor(t), false);
@@ -209,14 +228,14 @@ public class CityMapPathCache {
   }
   
   
-  boolean hasGroundAccess(Tile at) {
+  public boolean hasGroundAccess(Tile at) {
     AreaGroup group = groupFor(areaFor(at), false);
     if (group == null || ! group.hasGroundAccess) return false;
     return true;
   }
   
   
-  int groundTileAccess(Tile at) {
+  public int groundTileAccess(Tile at) {
     AreaGroup group = groupFor(areaFor(at), false);
     if (group == null || ! group.hasGroundAccess) return 0;
     return group.totalTiles;
@@ -387,7 +406,7 @@ public class CityMapPathCache {
   }
   
   
-  void updatePathCache() {
+  public void updatePathCache() {
     
     for (Area a : needRefresh) {
       refreshTiling(a);
@@ -413,13 +432,13 @@ public class CityMapPathCache {
   
   /**  Querying and generating area-ownership:
     */
-  Area rawArea(Tile t) {
+  public Area rawArea(Tile t) {
     if (t == null) return null;
     return areaLookup[t.x][t.y];
   }
   
   
-  Area areaFor(Tile t) {
+  public Area areaFor(Tile t) {
     if (t == null) return null;
     Area area = areaLookup[t.x][t.y];
     

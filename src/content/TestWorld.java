@@ -1,13 +1,16 @@
 
 
 
-package game;
+package content;
 import util.*;
+import game.*;
+import static content.GameContent.*;
+import static game.Actor.*;
 import static game.ActorAsPerson.*;
 import static game.City.*;
 import static game.CityCouncil.*;
 import static game.GameConstants.*;
-import static game.GameContent.*;
+import static game.World.*;
 
 
 
@@ -29,16 +32,16 @@ public class TestWorld extends Test {
       City vassal = pair[0], lord = pair[1];
       World world = vassal.world;
       
-      vassal.tradeLevel.setWith(MAIZE, 10f, COTTON, -5f);
-      for (Good g : vassal.tradeLevel.keys()) {
-        float demand = vassal.tradeLevel.valueFor(g);
-        if (demand > 0) vassal.inventory.set(g, demand);
+      vassal.initTradeLevels(MAIZE, 10f, COTTON, -5f);
+      for (Good g : vassal.tradeLevel().keys()) {
+        float demand = vassal.tradeLevel(g);
+        if (demand > 0) vassal.setInventory(g, demand);
       }
       
       float AVG_P = City.PRESTIGE_AVG, AVG_L = City.LOY_CIVIL;
       float initPrestige = AVG_P + ((Rand.yes() ? 1 : -1) * 10);
       float initLoyalty  = AVG_L + ((Rand.yes() ? 1 : -1) / 2f);
-      lord.prestige = initPrestige;
+      lord.initPrestige(initPrestige);
       City.incLoyalty(vassal, lord, initLoyalty);
       
       int time = 0;
@@ -46,24 +49,24 @@ public class TestWorld extends Test {
         world.updateWithTime(time++);
       }
       
-      for (Good g : vassal.tradeLevel.keys()) {
-        float demand = vassal.tradeLevel.valueFor(g);
+      for (Good g : vassal.tradeLevel().keys()) {
+        float demand = vassal.tradeLevel(g);
         if (demand > 0) {
-          if (vassal.inventory.valueFor(g) > 1) {
+          if (vassal.inventory(g) > 1) {
             I.say("\nCity did not consume goods over time!");
             return false;
           }
         }
         if (demand < 0) {
           float supply = 0 - demand;
-          if (vassal.inventory.valueFor(g) < supply - 1) {
+          if (vassal.inventory(g) < supply - 1) {
             I.say("\nCity did not generate goods over time!");
             return false;
           }
         }
       }
       
-      float endP = lord.prestige, endL = vassal.loyalty(lord);
+      float endP = lord.prestige(), endL = vassal.loyalty(lord);
       if (Nums.abs(endP - AVG_P) >= Nums.abs(initPrestige - AVG_P)) {
         I.say("\nCity prestige did not decay over time!");
         return false;
@@ -77,9 +80,9 @@ public class TestWorld extends Test {
     //  This tests for the basic outcomes of a single invasion attempt:
     {
       City pair[] = configWeakStrongCityPair();
-      float oldPower = pair[0].armyPower;
+      float oldPower = pair[0].armyPower();
       runCompleteInvasion(pair[1], pair[0]);
-      float newPower = pair[0].armyPower;
+      float newPower = pair[0].armyPower();
       
       if (newPower >= oldPower) {
         I.say("\nInvasion inflicted no casualties!");
@@ -99,7 +102,7 @@ public class TestWorld extends Test {
     {
       City pair[] = configWeakStrongCityPair();
       City goes = pair[0], from = pair[1];
-      goes.council.typeAI = CityCouncil.AI_PACIFIST;
+      goes.council.setTypeAI(CityCouncil.AI_PACIFIST);
       runCompleteDialog(from, goes);
       
       if (from.posture(goes) != City.POSTURE.ALLY) {
@@ -115,10 +118,10 @@ public class TestWorld extends Test {
       City mainC = pair[1];
       Actor monarch = (Actor) NOBLE  .generate();
       Actor queen   = (Actor) CONSORT.generate();
-      monarch.sexData    = SEX_MALE;
-      queen  .sexData    = SEX_FEMALE;
-      monarch.ageSeconds = LIFESPAN_LENGTH / 4;
-      queen  .ageSeconds = LIFESPAN_LENGTH / 4;
+      monarch.setSexData(SEX_MALE  );
+      queen  .setSexData(SEX_FEMALE);
+      monarch.setAgeYears(AVG_RETIREMENT / 4);
+      queen  .setAgeYears(AVG_RETIREMENT / 4);
       
       ActorAsPerson.setBond(monarch, queen, BOND_MARRIED, BOND_MARRIED, 1);
       mainC.council.toggleMember(monarch, Role.MONARCH, true);
@@ -146,7 +149,7 @@ public class TestWorld extends Test {
     {
       City pair[] = configWeakStrongCityPair();
       City goes = pair[0], from = pair[1];
-      from.government = City.GOVERNMENT.BARBARIAN;
+      from.setGovernment(City.GOVERNMENT.BARBARIAN);
       runCompleteInvasion(from, goes);
       
       if (! goes.isEnemyOf(from)) {
@@ -204,9 +207,9 @@ public class TestWorld extends Test {
       City vassal = pair[0], lord = pair[1];
       World world = vassal.world;
       setPosture(vassal, lord, POSTURE.LORD, true);
-      vassal.council.typeAI = CityCouncil.AI_DEFIANT;
+      vassal.council.setTypeAI(CityCouncil.AI_DEFIANT);
       
-      float initPrestige = lord.prestige;
+      float initPrestige = lord.prestige();
       
       int time = 0;
       while (time < YEAR_LENGTH * (AVG_TRIBUTE_YEARS + 1)) {
@@ -221,7 +224,7 @@ public class TestWorld extends Test {
         I.say("\nCity in rebellion did not break relations!");
         return false;
       }
-      if (lord.prestige >= initPrestige) {
+      if (lord.prestige() >= initPrestige) {
         I.say("\nLord's prestige did not suffer from rebellion!");
       }
     }
@@ -232,13 +235,13 @@ public class TestWorld extends Test {
       City vassal = pair[0], lord = pair[1];
       World world = vassal.world;
       setPosture(vassal, lord, POSTURE.LORD, true);
-      vassal.council.typeAI = CityCouncil.AI_DEFIANT;
+      vassal.council.setTypeAI(CityCouncil.AI_DEFIANT);
       
       int time = 0;
       while (vassal.isLoyalVassalOf(lord)) {
         world.updateWithTime(time++);
       }
-      vassal.council.typeAI = CityCouncil.AI_OFF;
+      vassal.council.setTypeAI(CityCouncil.AI_OFF);
 
       runCompleteInvasion(lord, vassal);
       
@@ -256,15 +259,14 @@ public class TestWorld extends Test {
       World world = vassal.world;
       setPosture(vassal, lord, POSTURE.LORD, true);
       setSuppliesDue(vassal, lord, new Tally().setWith(STONE, 10));
-      vassal.council.typeAI = CityCouncil.AI_COMPLIANT;
+      vassal.council.setTypeAI(CityCouncil.AI_COMPLIANT);
       
       int time = 0;
       while (time < YEAR_LENGTH * 0.8f) {
         world.updateWithTime(time++);
       }
       
-      Relation r = vassal.relationWith(lord);
-      float tributeSent = r.suppliesSent.valueFor(STONE);
+      float tributeSent = City.suppliesDue(vassal, lord, STONE);
       if (tributeSent < 5) {
         I.say("\nInsufficient tribute dispatched!");
         return false;
@@ -307,17 +309,17 @@ public class TestWorld extends Test {
         }
       }
       
-      for (City c : world.cities) {
+      for (City c : world.cities()) {
         c.initBuildLevels(HOUSE, 2f, GARRISON, 2f);
-        for (City o : world.cities) if (c != o) City.setupRoute(c, o, 1);
+        for (City o : world.cities()) if (c != o) City.setupRoute(c, o, 1);
       }
       
       
       City main = from[0];
       
       //  Establish trade-options with city 3...
-      main   .tradeLevel.setWith(RAW_COTTON,  5, POTTERY,  5);
-      from[2].tradeLevel.setWith(RAW_COTTON, -5, POTTERY, -5);
+      main   .initTradeLevels(RAW_COTTON,  5, POTTERY,  5);
+      from[2].initTradeLevels(RAW_COTTON, -5, POTTERY, -5);
       
       //  Establish enmity with city 5...
       incLoyalty(main, from[4], -0.5f);
@@ -332,26 +334,22 @@ public class TestWorld extends Test {
         D4 = main.council.dialogAssessment(main, from[4], false),
         allD[] = { D1, D2, D3, D4 };
       
-      //*
       I.say("\nAppeal of alliances is: ");
       for (CityCouncil.MissionAssessment d : allD) {
-        I.say("  "+d.goesC+": "+d.evaluatedAppeal);
+        I.say("  "+d.goes()+": "+d.appeal());
       }
-      //*/
-      
-      if (D1.evaluatedAppeal <= D3.evaluatedAppeal) {
+      if (D1.appeal() <= D3.appeal()) {
         I.say("\nSimilar relations should boost appeal of alliance!");
         return false;
       }
-      if (D2.evaluatedAppeal <= D1.evaluatedAppeal) {
+      if (D2.appeal() <= D1.appeal()) {
         I.say("\nTrade-potential should boost appeal of alliance!");
         return false;
       }
-      if (D4.evaluatedAppeal >= D3.evaluatedAppeal) {
+      if (D4.appeal() >= D3.appeal()) {
         I.say("\nMutual enmity should lower appeal of alliance!");
         return false;
       }
-      
       /*
       if (D5.evaluatedAppeal <= D3.evaluatedAppeal) {
         I.say("\nPotential marriage should boost appeal of alliance!");
@@ -378,8 +376,8 @@ public class TestWorld extends Test {
     
     for (int n = 0; n < 4; n++) {
       City city = new City(world);
-      city.name = names[n];
-      city.tint = tints[n];
+      city.setName(names[n]);
+      city.setTint(tints[n]);
       
       city.setWorldCoords(
         2 + (2 * TileConstants.T_X[n * 2]),
@@ -388,7 +386,7 @@ public class TestWorld extends Test {
       for (Good g : goods) {
         float amount = (Rand.num() - 0.5f) * 10;
         amount = Nums.round(amount, 2, amount >= 0);
-        city.tradeLevel.set(g, amount);
+        city.setTradeLevel(g, amount);
       }
       city.initBuildLevels(
         GARRISON, 2f + Rand.index(3),
@@ -396,12 +394,11 @@ public class TestWorld extends Test {
       );
       world.addCities(city);
     }
-    world.mapHigh = 5;
-    world.mapWide = 5;
+    world.setMapSize(5, 5);
     
-    for (City c : world.cities) for (City o : world.cities) {
+    for (City c : world.cities()) for (City o : world.cities()) {
       if (c == o) continue;
-      float dist = Nums.abs(c.mapX - o.mapX) + Nums.abs(c.mapY - o.mapY);
+      float dist = c.worldCoords().lineDist(o.worldCoords());
       City.setupRoute(c, o, (int) dist);
     }
     
@@ -420,35 +417,34 @@ public class TestWorld extends Test {
     int totalBattles = 0, timeWithEmpire = 0, timeWithAllies = 0;
     
     I.say("\nRunning world simulation...");
-    while (map.time < MAX_TIME) {
+    while (map.time() < MAX_TIME) {
       map = test.runLoop(map, 10, graphics, "saves/test_world.tlt");
       //
       //  Ensure that any forces being sent are of reasonable size:
-      for (World.Journey j : world.journeys) {
-        Object goes = j.going.first();
-        if (goes instanceof Formation) {
-          Formation force = (Formation) goes;
+      for (World.Journey j : world.journeys()) {
+        for (Journeys g : j.going()) if (g instanceof Formation) {
+          Formation force = (Formation) g;
           City home = force.homeCity();
-          if (j.goes == home) continue;
+          if (j.goes() == home) continue;
           
           if (force.powerSum() < AVG_ARMY_POWER / 4) {
             I.say("\n"+home+" is fighting with inadequate forces:");
             I.say("  Formation power: "+force.powerSum());
             I.say("  Average power:   "+AVG_ARMY_POWER);
-            I.say("  Time: "+world.time+", going to: "+j.goes);
+            I.say("  Time: "+world.time()+", going to: "+j.goes());
             return false;
           }
         }
       }
       //
       //  If anything big has happened, make sure relations stay consistent.
-      if (! world.history.empty()) {
-        for (World.Event e : world.history) {
-          if (e.label.equals("attacked")) totalBattles += 1;
+      if (! world.history().empty()) {
+        for (World.Event e : world.eventsWithLabel("attacked")) {
+          totalBattles += 1;
         }
         world.clearHistory();
         
-        for (City c : world.cities) {
+        for (City c : world.cities()) {
           if (! testRelationsOkay(c)) relationsOkay = false;
         }
         
@@ -463,9 +459,9 @@ public class TestWorld extends Test {
       int timeStep = world.settings.speedUp ? 100 : 10;
       boolean empireExists = false;
       
-      for (City c : world.cities) {
+      for (City c : world.cities()) {
         boolean hasEmpire = true;
-        for (City o : world.cities) {
+        for (City o : world.cities()) {
           if (o == mapCity || o == c) continue;
           if (o.capitalLord() != c) hasEmpire = false;
           if (o.isAllyOf(c)) timeWithAllies += timeStep;
@@ -482,7 +478,7 @@ public class TestWorld extends Test {
     timeWithEmpire /= YEAR_LENGTH;
     timeWithAllies /= YEAR_LENGTH * NUM_CITIES * (NUM_CITIES - 1);
     int minBattles  = (NUM_YEARS - (timeWithEmpire + timeWithAllies)) / 2;
-    int maxBattles  = NUM_YEARS * world.cities.size() * 2;
+    int maxBattles  = NUM_YEARS * world.cities().size() * 2;
     boolean testOkay = true;
     
     if (totalBattles < minBattles) {
@@ -517,14 +513,14 @@ public class TestWorld extends Test {
     world.assignCitizenTypes(ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES);
     City a = new City(world);
     City b = new City(world);
-    a.name = "Victim City" ;
-    b.name = "Invader City";
+    a.setName("Victim City" );
+    b.setName("Invader City");
     world.addCities(a, b);
     setupRoute(a, b, 1);
     a.initBuildLevels(HOUSE, 1f, GARRISON, 1f);
     b.initBuildLevels(HOUSE, 9f, GARRISON, 6f);
-    a.council.typeAI = CityCouncil.AI_OFF;
-    b.council.typeAI = CityCouncil.AI_OFF;
+    a.council.setTypeAI(CityCouncil.AI_OFF);
+    b.council.setTypeAI(CityCouncil.AI_OFF);
     return new City[] { a, b };
   }
   
@@ -561,7 +557,7 @@ public class TestWorld extends Test {
       world.updateWithTime(time++);
     }
     
-    while (! (force.termsAccepted || force.termsRefused || force.complete)) {
+    while (! (force.termsAnswered() || force.complete())) {
       world.updateWithTime(time++);
     }
   }
@@ -570,7 +566,7 @@ public class TestWorld extends Test {
   static boolean testRelationsOkay(City city) {
     int numLords = 0;
     
-    for (City o : city.world.cities) {
+    for (City o : city.world.cities()) {
       POSTURE p = city.posture(o);
       POSTURE i = o.posture(city);
       if (p == POSTURE.LORD) numLords++;
@@ -588,23 +584,25 @@ public class TestWorld extends Test {
   
   static void reportOnWorld(World world) {
     I.say("\nReporting world state:");
-    for (City c : world.cities) {
+    for (City c : world.cities()) {
       I.say("  "+c+":");
-      I.say("    Pop: "+c.population);
-      I.say("    Arm: "+c.armyPower );
-      I.say("    Prs: "+c.prestige  );
-      I.say("    Trd: "+c.tradeLevel);
-      I.say("    Bld: "+c.buildLevel);
-      I.say("    Inv: "+c.inventory );
+      I.say("    Pop: "+c.population());
+      I.say("    Arm: "+c.armyPower ());
+      I.say("    Prs: "+c.prestige  ());
+      I.say("    Trd: "+c.tradeLevel());
+      I.say("    Bld: "+c.buildLevel());
+      I.say("    Inv: "+c.inventory ());
       I.say("    Relations-");
-      for (City o : world.cities) if (o != c) {
-        City.Relation r = c.relationWith(o);
-        I.add(" "+o+": "+r.posture+" "+r.loyalty);
+      for (City o : world.cities()) if (o != c) {
+        I.add(" "+o+": "+c.posture(o)+" "+c.loyalty(o));
       }
     }
   }
   
 }
+
+
+
 
 
 

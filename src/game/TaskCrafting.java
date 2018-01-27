@@ -45,12 +45,12 @@ public class TaskCrafting extends Task {
     BuildingForCrafts venue = (BuildingForCrafts) visits;
     if (! venue.canAdvanceCrafting()) return;
     
-    Trait skill     = venue.type.craftSkill;
+    Trait skill     = venue.type().craftSkill;
     float progress  = venue.craftProgress;
     float skillMult = actor.levelOf(skill) / MAX_SKILL_LEVEL;
     
     float progInc = 1f + (1f * skillMult);
-    progInc *= 1f / venue.type.craftTime;
+    progInc *= 1f / venue.type().craftTime;
     
     totalCraftTime += 1;
     totalProgInc += progInc;
@@ -58,14 +58,14 @@ public class TaskCrafting extends Task {
     actor.gainXP(skill, 1 * CRAFT_XP_PERCENT / 100f);
     
     for (Good need : venue.needed()) {
-      venue.inventory.add(0 - progInc, need);
+      venue.addInventory(0 - progInc, need);
     }
     progress = Nums.min(progress + progInc, 1);
     
     if (progress >= 1) {
       for (Good made : venue.produced()) {
-        if (venue.inventory.valueFor(made) >= venue.stockLimit(made)) continue;
-        venue.inventory.add(1, made);
+        if (venue.inventory(made) >= venue.stockLimit(made)) continue;
+        venue.addInventory(1, made);
         venue.map.city.makeTotals.add(1, made);
       }
       progress = 0;

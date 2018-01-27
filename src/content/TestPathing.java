@@ -1,9 +1,10 @@
 
 
-package game;
+package content;
+import game.*;
 import util.*;
+import static content.GameContent.*;
 import static game.GameConstants.*;
-import static game.GameContent.*;
 
 
 
@@ -63,14 +64,14 @@ public class TestPathing extends Test {
     p2 = cornerGround.adjacent(null, map);
     
     for (Pathing n : p1) {
-      if (n != null && ((Tile) n).above == null) {
+      if (n != null && map.above(((Tile) n)) == null) {
         I.say("\nWALL TILES SHOULD ONLY BORDER OTHER WALL TILES!");
         testOkay = false;
         if (! graphics) return false;
       }
     }
     for (Pathing n : p2) {
-      if (n != null && ((Tile) n).above != null) {
+      if (n != null && map.above(((Tile) n)) == null) {
         I.say("\nGROUND TILES SHOULD ONLY BORDER OTHER GROUND TILES!");
         testOkay = false;
         if (! graphics) return false;
@@ -142,11 +143,10 @@ public class TestPathing extends Test {
     boolean pathingDone = false;
     int numReachedDest = 0, shouldReach = actors.size() * 10;
     
-    while (map.time < 1000 || graphics) {
+    while (map.time() < 1000 || graphics) {
       numInside.clear();
       
-      for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
-        Tile t = map.tileAt(c);
+      for (Tile t : map.allTiles()) {
         for (Actor i : t.inside()) {
           numInside.add(1, i);
           if (t != i.at()) {
@@ -175,17 +175,17 @@ public class TestPathing extends Test {
           numReachedDest += 1;
           
           Pathing goes;
-          if (a.inside != home && ! home.hasFocus()) {
+          if (a.inside() != home && ! home.hasFocus()) {
             goes = home;
             a.embarkOnVisit(home, 0, Task.JOB.RETURNING, null);
           }
           else {
-            goes = map.tileAt(Rand.index(map.size), Rand.index(map.size));
+            goes = map.tileAt(Rand.index(map.size()), Rand.index(map.size()));
             a.embarkOnTarget(goes, 0, Task.JOB.EXPLORING, null);
           }
           destinations.put(a, goes);
-
-          Pathing path[] = a.task == null ? null : a.task.path;
+          
+          Pathing path[] = a.task() == null ? null : a.currentPath();
           //I.say("\nSending "+a+" to "+goes);
           //I.say("  Path: "+I.list(path));
           if (! Task.verifyPath(path, dest, goes, map)) {
@@ -215,7 +215,7 @@ public class TestPathing extends Test {
     }
     
     I.say("\nPATHING TEST FAILED!");
-    I.say("  Current time: "+map.time);
+    I.say("  Current time: "+map.time());
     I.say("  Reached destination: "+numReachedDest+"/"+shouldReach);
     for (Actor a : actors) if (a.dead()) I.say("  "+a+" is dead!");
     

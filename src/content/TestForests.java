@@ -1,9 +1,10 @@
 
 
 
-package game;
+package content;
+import game.*;
 import util.*;
-import static game.GameContent.*;
+import static content.GameContent.*;
 
 
 
@@ -28,11 +29,11 @@ public class TestForests extends Test {
     
     boolean loggingDone = false;
     
-    while (map.time < 1000 || graphics) {
+    while (map.time() < 1000 || graphics) {
       map = test.runLoop(map, 10, graphics, "saves/test_forests.tlt");
       
       if (! loggingDone) {
-        loggingDone = logs.inventory.valueFor(WOOD) >= logs.type.maxStock;
+        loggingDone = logs.inventory(WOOD) >= logs.type().maxStock;
         
         if (loggingDone) {
           I.say("\nFOREST TEST CONCLUDED SUCCESSFULLY!");
@@ -42,7 +43,7 @@ public class TestForests extends Test {
     }
     
     I.say("\nFORESTS TEST FAILED!");
-    I.say("  Total gathered: "+logs.inventory);
+    I.say("  Total gathered: "+logs.inventory());
     return false;
   }
   

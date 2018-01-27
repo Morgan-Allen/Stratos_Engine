@@ -1,12 +1,13 @@
 
 
-package game;
+package content;
+import game.*;
 import util.*;
+import static content.GameContent.*;
 import static game.ActorAsPerson.*;
 import static game.City.*;
 import static game.CityCouncil.*;
 import static game.GameConstants.*;
-import static game.GameContent.*;
 
 
 
@@ -30,11 +31,11 @@ public class TestDiplomacy extends Test {
     );
     world.assignCitizenTypes(ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES);
     world.addCities(homeC, awayC, neutC);
-    homeC.name = "Home City";
-    awayC.name = "Away City";
-    neutC.name = "Neutral City";
-    awayC.council.typeAI = AI_OFF;
-    neutC.council.typeAI = AI_OFF;
+    homeC.setName("Home City");
+    awayC.setName("Away City");
+    neutC.setName("Neutral City");
+    awayC.council.setTypeAI(AI_OFF);
+    neutC.council.setTypeAI(AI_OFF);
     world.settings.toggleFog     = false;
     world.settings.toggleMigrate = false;
     
@@ -63,7 +64,7 @@ public class TestDiplomacy extends Test {
     
     Building garrison = (Building) GARRISON.generate();
     garrison.enterMap(map, 12, 1, 1);
-    Test.fillAllVacancies(map);
+    Test.fillAllVacancies(map, CITIZEN);
     
     
     Formation escort;
@@ -79,7 +80,7 @@ public class TestDiplomacy extends Test {
     Actor bride = (Actor) CONSORT.generate();
     escort.toggleEscorted(bride, true);
     
-    for (Actor e : escort.escorted) e.assignHomeCity(awayC);
+    for (Actor e : escort.escorted()) e.assignHomeCity(awayC);
     
     escort.assignTerms(City.POSTURE.ALLY, null, bride, null);
     escort.beginSecuring(homeC);
@@ -95,15 +96,15 @@ public class TestDiplomacy extends Test {
     boolean escortReturned = false;
     boolean testOkay       = false;
     
-    while (map.time < 1000 || graphics) {
+    while (map.time() < 1000 || graphics) {
       map = test.runLoop(map, 1, graphics, "saves/test_diplomacy.tlt");
       
       if (! escortArrived) {
-        escortArrived = escort.map == map;
+        escortArrived = escort.onMap(map);
       }
       
       if (escortArrived && ! offerGiven) {
-        offerGiven = council.petitions.includes(escort);
+        offerGiven = council.petitions().includes(escort);
       }
       
       if (offerGiven && ! offerAccepted) {
@@ -119,7 +120,7 @@ public class TestDiplomacy extends Test {
       }
       
       if (termsOkay && ! escortDeparted) {
-        escortDeparted = escort.map == null;
+        escortDeparted = ! escort.onMap();
       }
       
       if (escortDeparted && ! escortSent) {
@@ -142,8 +143,8 @@ public class TestDiplomacy extends Test {
       
       if (termsAwayOkay && ! escortReturned) {
         boolean allBack = true;
-        for (Actor a : escort.recruits) if (a.map() != map) allBack = false;
-        for (Actor a : escort.escorted) if (a.map() != map) allBack = false;
+        for (Actor a : escort.recruits()) if (a.map() != map) allBack = false;
+        for (Actor a : escort.escorted()) if (a.map() != map) allBack = false;
         escortReturned = allBack;
       }
       

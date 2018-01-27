@@ -115,31 +115,31 @@ public class CityMapFog {
   }
   
   
-  float sightLevel(Tile t) {
+  public float sightLevel(Tile t) {
     if (! isToggled()) return 1;
     if (t == null) return 0;
     return oldVals[t.x][t.y] * 1f / MAX_FOG;
   }
   
   
-  float maxSightLevel(Tile t) {
+  public float maxSightLevel(Tile t) {
     if (! isToggled()) return 1;
     if (t == null) return 0;
     return 1 - (maxMap.flagVal(t.x, t.y) / MAX_FOG);
   }
   
   
-  boolean day() {
+  public boolean day() {
     return dayState == STATE_LIGHT;
   }
   
   
-  boolean night() {
+  public boolean night() {
     return dayState == STATE_DARKNESS;
   }
   
   
-  float lightLevel() {
+  public float lightLevel() {
     if (day  ()) return 1;
     if (night()) return 0;
     return 0.5f;

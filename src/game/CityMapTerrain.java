@@ -118,7 +118,7 @@ public class CityMapTerrain implements TileConstants {
     Terrain t = tile.terrain;
     if (t == null) return;
     
-    Type above = tile.above == null ? null : tile.above.type;
+    Type above = tile.above == null ? null : tile.above.type();
     if (above != null && ! above.isNatural()) return;
     
     HabitatScan scan = scans[1][t.terrainID];
@@ -250,7 +250,7 @@ public class CityMapTerrain implements TileConstants {
   }
   
   
-  static float habitatDensity(Tile tile, Terrain t, CityMap map) {
+  public static float habitatDensity(Tile tile, Terrain t, CityMap map) {
     HabitatScan scan = map.terrain.scans[0][t.terrainID];
     if (scan == null) return 0;
     float d = scan.densities[tile.x / SCAN_RES][tile.y / SCAN_RES];
@@ -258,7 +258,7 @@ public class CityMapTerrain implements TileConstants {
   }
   
   
-  static float idealPopulation(Type species, CityMap map) {
+  public static float idealPopulation(Type species, CityMap map) {
     float numTiles = 0;
     for (Terrain h : species.habitats) {
       HabitatScan scan = map.terrain.scans[0][h.terrainID];
@@ -273,7 +273,7 @@ public class CityMapTerrain implements TileConstants {
   }
   
   
-  static Tile findGrazePoint(Type species, CityMap map) {
+  public static Tile findGrazePoint(Type species, CityMap map) {
     int x = SCAN_RES / 2, y = SCAN_RES / 2, QR = SCAN_RES / 4;
     
     Batch <Tile > points  = new Batch();

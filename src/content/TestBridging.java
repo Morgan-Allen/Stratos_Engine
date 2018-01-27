@@ -1,10 +1,12 @@
 
 
 
-package game;
+package content;
 import util.*;
+import game.*;
+import static content.GameContent.*;
 import static game.GameConstants.*;
-import static game.GameContent.*;
+
 
 
 
@@ -40,14 +42,14 @@ public class TestBridging extends Test {
       map.setTerrain(t, ter, high);
     }
     for (Tile t : map.tilesUnder(4, 0, 2, 8)) {
-      map.setTerrain(t, LAKE, t.elevation);
+      map.setTerrain(t, LAKE, t.elevation());
     }
     
     
     Building palace = (Building) PALACE.generate();
     palace.enterMap(map, 8, 10, 1);
-    for (Good g : palace.type.buildsWith) {
-      palace.inventory.set(g, 100);
+    for (Good g : palace.type().buildsWith) {
+      palace.setInventory(g, 100);
     }
     fillWorkVacancies(palace);
     
@@ -72,7 +74,7 @@ public class TestBridging extends Test {
     //  progress, while checking to ensure there are no discrepancies
     //  in pathing afterward.
     map.planning.updatePlanning();
-    List <Element> toBuild = map.planning.toBuild.copy();
+    List <Element> toBuild = map.planning.toBuildCopy();
     Pick <Element> pick = new Pick();
     
     while (! toBuild.empty()) {
@@ -93,7 +95,7 @@ public class TestBridging extends Test {
       if (builds == null) break;
       
       Tile at = builds.at();
-      Type type = builds.type;
+      Type type = builds.type();
       if (! builds.onMap()) builds.enterMap(map, at.x, at.y, 0);
       
       float l = builds.buildLevel();
@@ -121,7 +123,7 @@ public class TestBridging extends Test {
     if (! toBuild.empty()) {
       I.say("\nNOT ALL STRUCTURES WERE ACCESSIBLE!");
       I.say("  Buildings are: ");
-      for (Building b : map.buildings) {
+      for (Building b : map.buildings()) {
         I.say("  "+b+" at: "+b.at()+", entrances:");
         for (Tile e : b.entrances()) I.say("    "+e);
       }
@@ -137,13 +139,13 @@ public class TestBridging extends Test {
     //  be rebuilt.
     else {
       Batch <Element> freshBuilt = new Batch();
-      for (Element e : map.planning.toBuild) {
+      for (Element e : map.planning.toBuildCopy()) {
         Tile at = e.at();
         map.planning.unplaceObject(e);
         e.exitMap(map);
         
-        Element copy = (Element) e.type.generate();
-        if (e.type.isBuilding()) {
+        Element copy = (Element) e.type().generate();
+        if (e.type().isBuilding()) {
           ((Building) copy).setFacing(((Building) e).facing());
         }
         copy.setLocation(at, map);
@@ -167,14 +169,15 @@ public class TestBridging extends Test {
     boolean testOkay   = false;
     
     
-    while (map.time < RUN_TIME || graphics) {
+    while (map.time() < RUN_TIME || graphics) {
       map = test.runLoop(map, 1, graphics, "saves/test_build_path.tlt");
       
       if (! buildOkay) {
         boolean buildDone = true;
         for (Tile t : map.allTiles()) {
-          if (t.above == null || t.above.type.isNatural()) continue;
-          if (t.above.buildLevel() < 1) buildDone = false;
+          Element a = map.above(t);
+          if (a == null || a.type().isNatural()) continue;
+          if (a.buildLevel() < 1) buildDone = false;
         }
         buildOkay = buildDone;
       }
@@ -215,12 +218,13 @@ public class TestBridging extends Test {
     boolean backOK   = b.success();
     boolean mapsOK   = map.pathCache.pathConnects(t, base.mainEntrance());
     boolean groundOK = map.pathCache.hasGroundAccess(t);
+    Element above    = map.above(t);
     
     if (pathOK != backOK || (pathOK && backOK) != mapsOK) {
       I.say("\nMISMATCH IN PATHING OBSERVED AT "+t);
       I.say("  Path type:   "+t.pathType());
-      I.say("  Above:       "+t.above);
-      I.say("  Build level: "+(t.above == null ? 0 : t.above.buildLevel()));
+      I.say("  Above:       "+above);
+      I.say("  Build level: "+(above == null ? 0 : above.buildLevel()));
       I.say("  Tile to Home OK: "+pathOK  );
       I.say("  Home to Tile OK: "+backOK  );
       I.say("  Map connection:  "+mapsOK  );
@@ -231,10 +235,6 @@ public class TestBridging extends Test {
   }
   
 }
-
-
-
-
 
 
 

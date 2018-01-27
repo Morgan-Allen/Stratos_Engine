@@ -21,7 +21,7 @@ public class Element implements Session.Saveable, Target {
     FLAG_DEST   = 1 << 5
   ;
   
-  Type type;
+  private Type type;
   
   CityMap map;
   private Tile at;
@@ -68,8 +68,14 @@ public class Element implements Session.Saveable, Target {
   }
   
   
+  
   public Type type() {
     return type;
+  }
+  
+  
+  protected void assignType(Type newType) {
+    this.type = newType;
   }
   
   
@@ -103,7 +109,7 @@ public class Element implements Session.Saveable, Target {
   }
   
   
-  boolean canPlace(CityMap map, int x, int y) {
+  public boolean canPlace(CityMap map, int x, int y) {
     for (Tile t : footprint(map)) {
       if (t == null || t.above != null) return false;
     }
@@ -111,7 +117,7 @@ public class Element implements Session.Saveable, Target {
   }
   
   
-  void setLocation(Tile at, CityMap map) {
+  public void setLocation(Tile at, CityMap map) {
     this.at  = at;
     this.map = map;
     stateBits |= FLAG_SITED;
@@ -123,7 +129,7 @@ public class Element implements Session.Saveable, Target {
   }
   
   
-  void enterMap(CityMap map, int x, int y, float buildLevel) {
+  public void enterMap(CityMap map, int x, int y, float buildLevel) {
     stateBits |= FLAG_ON_MAP;
     setLocation(map.tileAt(x, y), map);
     
@@ -141,7 +147,7 @@ public class Element implements Session.Saveable, Target {
   }
   
   
-  void exitMap(CityMap map) {
+  public void exitMap(CityMap map) {
     
     if (! type.mobile) {
       if (true       ) setFlagging(false, type.flagKey);
@@ -162,12 +168,12 @@ public class Element implements Session.Saveable, Target {
   
   /**  Associated query methods-
     */
-  void setDestroyed() {
+  public void setDestroyed() {
     stateBits |= FLAG_DEST;
   }
   
   
-  boolean destroyed() {
+  public boolean destroyed() {
     return (stateBits & FLAG_DEST) != 0;
   }
   
@@ -223,7 +229,7 @@ public class Element implements Session.Saveable, Target {
   }
   
   
-  void setGrowLevel(float level) {
+  public void setGrowLevel(float level) {
     this.growLevel = level;
     if (type.growRate > 0) {
       setFlagging(growLevel >= 1, type.flagKey);
@@ -234,23 +240,23 @@ public class Element implements Session.Saveable, Target {
   }
   
   
-  float growLevel() {
+  public float growLevel() {
     return growLevel;
   }
   
   
-  Good[] materials() {
+  public Good[] materials() {
     return type.builtFrom;
   }
   
   
-  float materialNeed(Good g) {
+  public float materialNeed(Good g) {
     int index = Visit.indexOf(g, type.builtFrom);
     return index == -1 ? 0 : type.builtAmount[index];
   }
   
   
-  void takeDamage(float damage) {
+  public void takeDamage(float damage) {
     
     float totalNeed = 0, totalHave = 0;
     for (Good g : materials()) {
@@ -274,7 +280,7 @@ public class Element implements Session.Saveable, Target {
   }
   
   
-  float buildLevel() {
+  public float buildLevel() {
     float totalNeed = 0, totalHave = 0;
     for (Good g : materials()) {
       totalNeed += materialNeed(g);
@@ -284,7 +290,7 @@ public class Element implements Session.Saveable, Target {
   }
   
   
-  float setMaterialLevel(Good material, float level) {
+  public float setMaterialLevel(Good material, float level) {
     int index = Visit.indexOf(material, materials());
     if (index == -1) return 0;
     
@@ -326,34 +332,34 @@ public class Element implements Session.Saveable, Target {
   }
   
   
-  float materialLevel(Good material) {
+  public float materialLevel(Good material) {
     return setMaterialLevel(material, -1);
   }
   
   
-  float incMaterialLevel(Good material, float inc) {
+  public float incMaterialLevel(Good material, float inc) {
     float level = materialLevel(material) + inc;
     return setMaterialLevel(material, level);
   }
   
   
-  void flagTeardown(boolean yes) {
+  public void flagTeardown(boolean yes) {
     if (yes) stateBits |= FLAG_RAZING;
     else stateBits &= ~ FLAG_RAZING;
   }
   
   
-  boolean complete() {
+  public boolean complete() {
     return (stateBits & FLAG_BUILT) != 0;
   }
   
   
-  boolean razing() {
+  public boolean razing() {
     return (stateBits & FLAG_RAZING) != 0;
   }
   
   
-  void setFlagging(boolean is, Type key) {
+  public void setFlagging(boolean is, Type key) {
     if (key == null || type.mobile) return;
     map.flagType(key, at.x, at.y, is);
   }
