@@ -58,7 +58,7 @@ public class ActorAsAnimal extends Actor {
     if (idle() && hunger >= 1) {
       if (type().predator) {
         Actor prey = findPrey();
-        TaskCombat hunt = TaskCombat.configCombat(this, prey);
+        TaskCombat hunt = TaskCombat.configHunting(this, prey);
         if (hunt != null) assignTask(hunt);
       }
       else if (rests != null) {
@@ -139,11 +139,10 @@ public class ActorAsAnimal extends Actor {
     if (jobType() == JOB.HUNTING) {
       
       //  TODO:  Check for this dynamically, or extend TaskCombat...
-      Actor prey = (Actor) target;
-      performAttack(prey, true);
+      Actor prey = (Actor) ((TaskCombat) task()).primary;
       
       if (prey.alive()) {
-        TaskCombat hunt = TaskCombat.configCombat(this, prey);
+        TaskCombat hunt = TaskCombat.configHunting(this, prey);
         if (hunt != null) assignTask(hunt);
       }
       else {

@@ -183,8 +183,8 @@ public class Task implements Session.Saveable {
     
     if (visits != null && inside == visits) {
       if (timeSpent++ <= maxTime) {
-        actor.onVisit(visits);
         onVisit(visits);
+        actor.onVisit(visits);
         visits.visitedBy(actor);
         if (origin != null) origin.actorVisits(actor, visits);
         return true;
@@ -195,8 +195,8 @@ public class Task implements Session.Saveable {
     }
     else if (distance <= minRange) {
       if (target != null && timeSpent++ <= maxTime) {
-        actor.onTarget(target);
         onTarget(target);
+        actor.onTarget(target);
         target.targetedBy(actor);
         if (origin != null) origin.actorTargets(actor, target);
         return true;

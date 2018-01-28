@@ -83,6 +83,13 @@ public class CityMapTerrain implements TileConstants {
   }
   
   
+  HabitatScan scanFor(Terrain terrain) {
+    int index = Visit.indexOf(terrain, map.terrainTypes);
+    if (index == -1) return null;
+    return scans[0][terrain.terrainID];
+  }
+  
+  
   
   /**  Regular map updates:
     */
@@ -237,7 +244,6 @@ public class CityMapTerrain implements TileConstants {
     
     for (Type s : species) {
       float idealPop = idealPopulation(s, map);
-      
       while (idealPop-- > 0) {
         Tile point = findGrazePoint(s, map);
         if (point == null) continue;
@@ -251,7 +257,7 @@ public class CityMapTerrain implements TileConstants {
   
   
   public static float habitatDensity(Tile tile, Terrain t, CityMap map) {
-    HabitatScan scan = map.terrain.scans[0][t.terrainID];
+    HabitatScan scan = map.terrain.scanFor(t);
     if (scan == null) return 0;
     float d = scan.densities[tile.x / SCAN_RES][tile.y / SCAN_RES];
     return d / (SCAN_RES * SCAN_RES);
@@ -261,7 +267,7 @@ public class CityMapTerrain implements TileConstants {
   public static float idealPopulation(Type species, CityMap map) {
     float numTiles = 0;
     for (Terrain h : species.habitats) {
-      HabitatScan scan = map.terrain.scans[0][h.terrainID];
+      HabitatScan scan = map.terrain.scanFor(h);
       numTiles += scan == null ? 0 : scan.numTiles;
     }
     if (species.predator) {

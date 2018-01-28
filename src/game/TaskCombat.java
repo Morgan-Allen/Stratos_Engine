@@ -82,7 +82,7 @@ public class TaskCombat extends Task {
       Element e = (Element) formation.secureFocus;
       if (e.destroyed() || ! e.onMap()) return null;
       if (e.map.city == formation.homeCity) return null;
-      return configCombat(actor, e, formation, null);
+      return configCombat(actor, e, formation, null, JOB.COMBAT);
     }
     else return null;
   }
@@ -126,7 +126,7 @@ public class TaskCombat extends Task {
     
     options.queueSort();
     for (Option o : options) {
-      TaskCombat c = configCombat(actor, o.other, formation, null);
+      TaskCombat c = configCombat(actor, o.other, formation, null, JOB.COMBAT);
       if (c != null) return c;
     }
     
@@ -145,13 +145,19 @@ public class TaskCombat extends Task {
   
   
   static TaskCombat configCombat(Actor actor, Element target) {
-    return configCombat(actor, target, null, null);
+    return configCombat(actor, target, null, null, JOB.COMBAT);
+  }
+  
+  
+  static TaskCombat configHunting(Actor actor, Element target) {
+    return configCombat(actor, target, null, null, JOB.HUNTING);
   }
   
   
   static TaskCombat configCombat(
     final Actor actor, final Element target,
-    Formation formation, TaskCombat currentTask
+    Formation formation, TaskCombat currentTask,
+    JOB jobType
   ) {
     if (actor == null || target == null || ! target.onMap()) return null;
     Tile inRange[] = null;
@@ -223,7 +229,7 @@ public class TaskCombat extends Task {
     }
     
     for (Tile t : inRange) {
-      if (Task.hasTaskFocus(t, JOB.COMBAT, actor)) continue;
+      if (Task.hasTaskFocus(t, jobType, actor)) continue;
       
       float dist = area.distance(t.x, t.y);
       if (report) I.say("  "+t+" dist: "+dist);
@@ -259,7 +265,7 @@ public class TaskCombat extends Task {
     }
     
     if (needsConfig) return (TaskCombat) (
-      currentTask.configTask(formation, null, t, JOB.COMBAT, 0)
+      currentTask.configTask(formation, null, t, jobType, 0)
     );
     else {
       return currentTask;
@@ -269,7 +275,7 @@ public class TaskCombat extends Task {
   
 
   boolean checkAndUpdateTask() {
-    Task self = configCombat(actor, primary, actor.formation, this);
+    Task self = configCombat(actor, primary, actor.formation, this, type);
     if (self == null) return false;
     return super.checkAndUpdateTask();
   }
