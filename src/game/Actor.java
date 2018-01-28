@@ -447,7 +447,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
       if (wallPenalty) defendBonus += WALL_DEF_BONUS / 100f;
       
       float hitChance = Nums.clamp(attackBonus + 0.5f - defendBonus, 0, 1);
-      hits = Rand.num() > hitChance;
+      hits = Rand.num() < hitChance;
       XP   = (1.5f - hitChance) * FIGHT_XP_PERCENT / 100f;
       
       float otherXP = (0.5f + hitChance) * FIGHT_XP_PERCENT / 100f;
