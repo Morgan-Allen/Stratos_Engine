@@ -36,34 +36,34 @@ public class TestSieging extends Test {
     world.settings.toggleFatigue = false;
     world.settings.toggleHunger  = false;
     
-    awayC.initBuildLevels(GARRISON, 5, HOUSE, 1);
+    awayC.initBuildLevels(TROOPER_LODGE, 5, HOLDING, 1);
     awayC.council.setTypeAI(CityCouncil.AI_OFF);
     
     City.setupRoute(homeC, awayC, 1);
     City.setPosture(homeC, awayC, City.POSTURE.ENEMY, true);
     
-    CityMapPlanning.placeStructure(WALL, map, true, 4, 4, 20, 20);
+    CityMapPlanning.placeStructure(SHIELD_WALL, map, true, 4, 4, 20, 20);
     CityMapPlanning.markDemolish(map, true, 6, 6, 16, 16);
     
-    Building gate = (Building) GATE.generate();
+    Building gate = (Building) BLAST_DOOR.generate();
     gate.setFacing(TileConstants.E);
     gate.enterMap(map, 22, 9, 1);
     
-    Building tower = (Building) TOWER.generate();
+    Building tower = (Building) TURRET.generate();
     tower.setFacing(TileConstants.E);
     tower.enterMap(map, 22, 12, 1);
     
     
-    BuildingForArmy fort = (BuildingForArmy) GARRISON.generate();
+    BuildingForArmy fort = (BuildingForArmy) TROOPER_LODGE.generate();
     fort.enterMap(map, 10, 10, 1);
     fillWorkVacancies(fort);
-    CityMapPlanning.placeStructure(ROAD, map, true, 10, 9, 12, 1 );
-    CityMapPlanning.placeStructure(ROAD, map, true, 21, 9, 1 , 5 );
-    CityMapPlanning.placeStructure(ROAD, map, true, 16, 9, 1 , 9 );
-    CityMapPlanning.placeStructure(ROAD, map, true, 24, 9, 8 , 1 );
+    CityMapPlanning.placeStructure(WALKWAY, map, true, 10, 9, 12, 1 );
+    CityMapPlanning.placeStructure(WALKWAY, map, true, 21, 9, 1 , 5 );
+    CityMapPlanning.placeStructure(WALKWAY, map, true, 16, 9, 1 , 9 );
+    CityMapPlanning.placeStructure(WALKWAY, map, true, 24, 9, 8 , 1 );
     
     for (int n = 3, s = 0; n-- > 0;) {
-      Building home = (Building) HOUSE.generate();
+      Building home = (Building) HOLDING.generate();
       home.enterMap(map, 17, 10 + (n * 3), 1);
       fillHomeVacancies(home, CITIZEN);
       for (Actor a : home.residents()) {
@@ -80,7 +80,7 @@ public class TestSieging extends Test {
     fort.deployInFormation(guarding, true);
     guarding.beginSecuring(tower, TileConstants.E, map);
     
-    Building store = (Building) PORTER_POST.generate();
+    Building store = (Building) SUPPLY_DEPOT.generate();
     store.enterMap(map, 10, 6, 1);
     store.setInventory(MEDICINE, 10);
     

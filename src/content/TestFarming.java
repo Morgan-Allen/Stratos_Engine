@@ -26,10 +26,10 @@ public class TestFarming extends Test {
     world.settings.toggleHunger = false;
     world.settings.toggleHunger = false;
     
-    BuildingForGather farm = (BuildingForGather) FARM_PLOT.generate();
+    BuildingForGather farm = (BuildingForGather) NURSERY.generate();
     farm.enterMap(map, 9, 9, 1);
     fillWorkVacancies(farm);
-    CityMapPlanning.placeStructure(ROAD, map, true, 9, 8, 10, 1);
+    CityMapPlanning.placeStructure(WALKWAY, map, true, 9, 8, 10, 1);
     
     Good needed[] = { CARBS, GREENS };
     Tile plantTiles[] = BuildingForGather.applyPlanting(

@@ -28,16 +28,16 @@ public class TestBuilding extends Test {
     world.settings.toggleMigrate     = false;
     world.settings.toggleBuildEvolve = false;
     
-    Building farm = (Building) FARM_PLOT.generate();
+    Building farm = (Building) NURSERY.generate();
     farm.enterMap(map, 1, 1, 1);
     Element tree = (Element) JUNGLE_TREE1.generate();
     tree.enterMap(map, 6, 2, 1);
     Element toRaze[] = { farm, tree };
     
-    BuildingForHome home = (BuildingForHome) HOUSE.generate();
+    BuildingForHome home = (BuildingForHome) HOLDING.generate();
     map.planning.placeObject(home, 6, 3);
     
-    BuildingForTrade post = (BuildingForTrade) PORTER_POST.generate();
+    BuildingForTrade post = (BuildingForTrade) SUPPLY_DEPOT.generate();
     post.enterMap(map, 2, 10, 0);
     post.setID("(Stock of Goods)");
     post.setTradeLevels(true,
@@ -48,14 +48,14 @@ public class TestBuilding extends Test {
     fillWorkVacancies(post);
     map.planning.placeObject(post);
     
-    Building palace = (Building) PALACE.generate();
+    Building palace = (Building) BASTION.generate();
     palace.enterMap(map, 9, 6, 0);
     fillWorkVacancies(palace);
     map.planning.placeObject(palace);
     
     Building toBuild[] = { post, home, palace };
     Series <Element> road = CityMapPlanning.placeStructure(
-      ROAD, map, false, 2, 2, 10, 1
+      WALKWAY, map, false, 2, 2, 10, 1
     );
     
     Tally <Good> startingMaterials = totalMaterials(map, false, BUILD_GOODS);

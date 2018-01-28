@@ -41,16 +41,16 @@ public class TestLifeCycle extends Test {
     
     for (int x = 7; x > 0; x -= 3) {
       for (int y = 7; y > 0; y -= 3) {
-        Type type = y == 7 ? HOUSE : ENGINEER_STATION;
+        Type type = y == 7 ? HOLDING : ENGINEER_STATION;
         Building built = (Building) type.generate();
         built.enterMap(map, x, y, 1);
       }
-      placeStructure(ROAD, map, true, x - 1, 0, 1, 10);
+      placeStructure(WALKWAY, map, true, x - 1, 0, 1, 10);
     }
-    placeStructure(ROAD, map, true, 0, 0, 10, 1);
-    placeStructure(ROAD, map, true, 0, 9, 16, 1);
+    placeStructure(WALKWAY, map, true, 0, 0, 10, 1);
+    placeStructure(WALKWAY, map, true, 0, 9, 16, 1);
     
-    Building palace = (Building) PALACE.generate();
+    Building palace = (Building) BASTION.generate();
     CityCouncil council = map.city.council;
     
     ActorAsPerson oldKing = (ActorAsPerson) NOBLE  .generate();
@@ -121,7 +121,7 @@ public class TestLifeCycle extends Test {
             b.setInventory(ORES   , 5);
             b.setInventory(PARTS, 5);
           }
-          if (b.type() == HOUSE || b.type() == PALACE) {
+          if (b.type() == HOLDING || b.type() == BASTION) {
             b.setInventory(CARBS  , 5);
             b.setInventory(GREENS  , 5);
             b.setInventory(PARTS, 5);

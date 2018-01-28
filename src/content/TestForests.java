@@ -23,7 +23,7 @@ public class TestForests extends Test {
     World world = map.city.world;
     world.settings.toggleFog = false;
     
-    Building logs = (Building) SAWYER.generate();
+    Building logs = (Building) FORMER_BAY.generate();
     logs.enterMap(map, 5, 5, 1);
     fillWorkVacancies(logs);
     

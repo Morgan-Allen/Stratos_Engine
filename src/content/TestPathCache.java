@@ -177,7 +177,7 @@ public class TestPathCache extends Test {
       if (! graphics) return false;
     }
     
-    CityMapPlanning.placeStructure(WALL, map, true, 88, 20, 48, 8);
+    CityMapPlanning.placeStructure(SHIELD_WALL, map, true, 88, 20, 48, 8);
     map.pathCache.updatePathCache();
     landLinked = map.pathCache.pathConnects(land1, land2);
     if (landLinked) {
@@ -186,7 +186,7 @@ public class TestPathCache extends Test {
       if (! graphics) return false;
     }
     
-    CityMapPlanning.placeStructure(ROAD, map, true, 20, 24, 8, 48);
+    CityMapPlanning.placeStructure(WALKWAY, map, true, 20, 24, 8, 48);
     map.pathCache.updatePathCache();
     islandLinked = map.pathCache.pathConnects(land1, island0);
     if (! islandLinked) {
@@ -196,7 +196,7 @@ public class TestPathCache extends Test {
     }
     
     CityMapPlanning.markDemolish(map, true, 120, 20, 2, 8);
-    Building gate = (Building) GATE.generate();
+    Building gate = (Building) BLAST_DOOR.generate();
     gate.setFacing(TileConstants.N);
     gate.enterMap(map, 120, 23, 1);
     map.pathCache.updatePathCache();
@@ -214,7 +214,7 @@ public class TestPathCache extends Test {
       if (! graphics) return false;
     }
     
-    Building tower = (Building) TOWER.generate();
+    Building tower = (Building) TURRET.generate();
     tower.setFacing(TileConstants.N);
     tower.enterMap(map, 110, 20, 1);
     map.pathCache.updatePathCache();

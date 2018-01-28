@@ -53,7 +53,7 @@ public class TestTrading extends Test {
     world.settings.toggleHunger  = false;
     world.settings.toggleFatigue = false;
     
-    BuildingForTrade post1 = (BuildingForTrade) PORTER_POST.generate();
+    BuildingForTrade post1 = (BuildingForTrade) SUPPLY_DEPOT.generate();
     post1.enterMap(map, 1, 6, 1);
     post1.setID("(Does Trading)");
     post1.setTradeLevels(false,
@@ -63,7 +63,7 @@ public class TestTrading extends Test {
       PARTS     , -5 
     );
     
-    BuildingForTrade post2 = (BuildingForTrade) PORTER_POST.generate();
+    BuildingForTrade post2 = (BuildingForTrade) SUPPLY_DEPOT.generate();
     post2.enterMap(map, 5, 6, 1);
     post2.setID("(Gets Supplies)");
     post2.setTradeLevels(false,
@@ -77,7 +77,7 @@ public class TestTrading extends Test {
     Building weaver = (Building) PHYSICIAN_STATION.generate();
     weaver.enterMap(map, 5, 3, 1);
     
-    CityMapPlanning.placeStructure(ROAD, map, true, 1, 5, 8, 1);
+    CityMapPlanning.placeStructure(WALKWAY, map, true, 1, 5, 8, 1);
     
     fillAllVacancies(map, CITIZEN);
     int initFunds = 100;

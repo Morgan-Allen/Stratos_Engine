@@ -40,17 +40,17 @@ public class TestDiplomacy extends Test {
     world.settings.toggleMigrate = false;
     
     
-    CityMapPlanning.placeStructure(WALL, map, true, 7, 7, 12, 12);
+    CityMapPlanning.placeStructure(SHIELD_WALL, map, true, 7, 7, 12, 12);
     CityMapPlanning.markDemolish(map, true, 8, 8, 10, 10);
     
-    Building gate = (Building) GATE.generate();
+    Building gate = (Building) BLAST_DOOR.generate();
     gate.setFacing(TileConstants.N);
     gate.enterMap(map, 12, 17, 1);
     
-    Building palace = (Building) PALACE.generate();
+    Building palace = (Building) BASTION.generate();
     CityCouncil council = map.city.council;
     palace.enterMap(map, 10, 10, 1);
-    CityMapPlanning.placeStructure(ROAD, map, true, 12, 19, 1, 13);
+    CityMapPlanning.placeStructure(WALKWAY, map, true, 12, 19, 1, 13);
     
     ActorAsPerson monarch = (ActorAsPerson) NOBLE.generate();
     council.toggleMember(monarch, Role.MONARCH, true);
@@ -62,7 +62,7 @@ public class TestDiplomacy extends Test {
     palace.setResident(minister, true);
     minister.enterMap(map, 12, 9, 1);
     
-    Building garrison = (Building) GARRISON.generate();
+    Building garrison = (Building) TROOPER_LODGE.generate();
     garrison.enterMap(map, 12, 1, 1);
     Test.fillAllVacancies(map, CITIZEN);
     

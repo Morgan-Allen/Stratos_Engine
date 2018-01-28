@@ -34,22 +34,22 @@ public class TestPathing extends Test {
     //  ensure that pathing-checks function correctly between various
     //  points on the ground, walls, between gates, et cetera:
     
-    CityMapPlanning.placeStructure(WALL, map, true, 4, 4, 20, 20);
+    CityMapPlanning.placeStructure(SHIELD_WALL, map, true, 4, 4, 20, 20);
     CityMapPlanning.markDemolish(map, true, 6, 6, 16, 16);
     
-    Building gate = (Building) GATE.generate();
+    Building gate = (Building) BLAST_DOOR.generate();
     gate.setFacing(TileConstants.N);
     gate.enterMap(map, 14, 22, 1);
     
-    Building tower1 = (Building) TOWER.generate();
+    Building tower1 = (Building) TURRET.generate();
     tower1.setFacing(TileConstants.W);
     tower1.enterMap(map, 4, 14, 1);
     
-    Building tower2 = (Building) TOWER.generate();
+    Building tower2 = (Building) TURRET.generate();
     tower2.setFacing(TileConstants.E);
     tower2.enterMap(map, 22, 14, 1);
     
-    Building home = (Building) HOUSE.generate();
+    Building home = (Building) HOLDING.generate();
     home.enterMap(map, 10, 10, 1);
     
     Tile cornerWall   = map.tileAt(4 , 4 );

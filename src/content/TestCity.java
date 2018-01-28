@@ -25,13 +25,13 @@ public class TestCity extends Test {
     World world = map.city.world;
     world.settings.toggleFog = false;
     
-    CityMapPlanning.placeStructure(ROAD, map, true, 3, 8, 25 , 1);
-    CityMapPlanning.placeStructure(ROAD, map, true, 8, 2 , 1, 25);
+    CityMapPlanning.placeStructure(WALKWAY, map, true, 3, 8, 25 , 1);
+    CityMapPlanning.placeStructure(WALKWAY, map, true, 8, 2 , 1, 25);
     
-    Building palace = (Building) PALACE.generate();
+    Building palace = (Building) BASTION.generate();
     Building school = (Building) PHYSICIAN_STATION.generate();
-    Building court  = (Building) BALL_COURT.generate();
-    Building admin  = (Building) COLLECTOR .generate();
+    Building court  = (Building) CANTINA.generate();
+    Building admin  = (Building) ENFORCER_BLOC .generate();
     
     palace.enterMap(map, 3 , 3 , 1);
     court .enterMap(map, 9 , 9 , 1);
@@ -39,14 +39,14 @@ public class TestCity extends Test {
     admin .enterMap(map, 18, 9 , 1);
     
     for (int n = 4; n-- > 0;) {
-      Building house = (Building) HOUSE.generate();
+      Building house = (Building) HOLDING.generate();
       house.enterMap(map, 9 + (n * 3), 6, 1f);
     }
     
-    Building quarry = (Building) QUARRY_PIT.generate();
+    Building quarry = (Building) ORE_SMELTER.generate();
     Building kiln1  = (Building) ENGINEER_STATION      .generate();
     Building kiln2  = (Building) ENGINEER_STATION      .generate();
-    Building market = (Building) MARKET    .generate();
+    Building market = (Building) STOCK_EXCHANGE    .generate();
     
     quarry.enterMap(map, 4 , 15, 1);
     kiln1 .enterMap(map, 9 , 17, 1);
@@ -65,7 +65,7 @@ public class TestCity extends Test {
     }
     
     for (Building b : map.buildings()) {
-      if (b.type() == HOUSE) {
+      if (b.type() == HOLDING) {
         b.setInventory(CASH, 20);
       }
       if (b.type() == ENGINEER_STATION) {
@@ -98,7 +98,7 @@ public class TestCity extends Test {
       
       if (goodsOkay) {
         for (Building b : map.buildings()) {
-          if (b.type() == HOUSE) {
+          if (b.type() == HOLDING) {
             BuildingForHome home = (BuildingForHome) b;
             for (Good g : home.usedBy(home.currentTier())) {
               float need = home.maxStock(g) + 1;
@@ -112,18 +112,18 @@ public class TestCity extends Test {
       if (! housesOkay) {
         boolean allNeeds = true;
         for (Building b : map.buildings()) {
-          if (b.type() == MARKET) {
+          if (b.type() == STOCK_EXCHANGE) {
             b.setInventory(MEDICINE, 10);
             b.setInventory(CARBS   , 10);
             b.setInventory(GREENS  , 10);
           }
-          if (b.type() == PALACE) {
+          if (b.type() == BASTION) {
             for (Good g : b.type().homeUseGoods) {
               b.setInventory(g, 15);
             }
             b.setInventory(PLASTICS, 10);
           }
-          if (b.type() == HOUSE) {
+          if (b.type() == HOLDING) {
             BuildingForHome home = (BuildingForHome) b;
             if (home.currentTier() != HOUSE_T2) allNeeds = false;
             if (home.inventory(CASH) > 5.0f   ) allNeeds = false;

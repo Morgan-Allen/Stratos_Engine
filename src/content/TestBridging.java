@@ -46,7 +46,7 @@ public class TestBridging extends Test {
     }
     
     
-    Building palace = (Building) PALACE.generate();
+    Building palace = (Building) BASTION.generate();
     palace.enterMap(map, 8, 10, 1);
     for (Good g : palace.type().buildsWith) {
       palace.setInventory(g, 100);
@@ -54,14 +54,14 @@ public class TestBridging extends Test {
     fillWorkVacancies(palace);
     
     
-    CityMapPlanning.placeStructure(WALL, map, false, 14, 2, 2, 10);
-    CityMapPlanning.placeStructure(ROAD, map, false, 2 , 2, 1, 10);
+    CityMapPlanning.placeStructure(SHIELD_WALL, map, false, 14, 2, 2, 10);
+    CityMapPlanning.placeStructure(WALKWAY, map, false, 2 , 2, 1, 10);
     
-    Building tower1 = (Building) TOWER.generate();
+    Building tower1 = (Building) TURRET.generate();
     tower1.setFacing(TileConstants.E);
     map.planning.placeObject(tower1, 14, 12);
     
-    Building tower2 = (Building) TOWER.generate();
+    Building tower2 = (Building) TURRET.generate();
     tower2.setFacing(TileConstants.E);
     map.planning.placeObject(tower2, 14, 2);
     

@@ -257,220 +257,95 @@ public class GameContent {
   
   final static BuildType
     
-    ROAD          = new BuildType(Element.class         , "type_road"    , IS_STRUCTURAL),
-    WALL          = new BuildType(Element.class         , "type_wall"    , IS_STRUCTURAL),
-    GATE          = new BuildType(BuildingForWalls.class, "type_gate"    , IS_WALLS_BLD ),
-    TOWER         = new BuildType(BuildingForWalls.class, "type_tower"   , IS_WALLS_BLD ),
+    //  TODO:  Add Runner Market and Pseer/Kommando School.
     
-    INFRASTRUCTURE_BUILDINGS[] = {
-      ROAD, WALL, GATE, TOWER
-    },
+    BASTION           = new BuildType(BuildingForHome.class   , "venue_bastion"  , IS_HOME_BLD   ),
+    TROOPER_LODGE     = new BuildType(BuildingForArmy.class   , "venue_trooper"  , IS_ARMY_BLD   ),
+    ENFORCER_BLOC     = new BuildType(BuildingForCollect.class, "venue_enforcer" , IS_COLLECT_BLD),
     
-    PALACE        = new BuildType(BuildingForHome.class   , "type_palace"       , IS_HOME_BLD   ),
-    HOUSE         = new BuildType(BuildingForHome.class   , "type_house"        , IS_HOME_BLD   ),
-    HOUSE_T1      = new BuildType(BuildingForHome.class   , "type_house_tier1"  , IS_UPGRADE    ),
-    HOUSE_T2      = new BuildType(BuildingForHome.class   , "type_house_tier2"  , IS_UPGRADE    ),
-    BALL_COURT    = new BuildType(BuildingForAmenity.class, "type_ball_court"   , IS_AMENITY_BLD),
-    RESIDENTIAL_BUILDINGS[] = { PALACE, HOUSE, BALL_COURT },
-    
-    FARM_PLOT     = new BuildType(BuildingForGather.class , "type_farm_plot"    , IS_GATHER_BLD ),
-    SAWYER        = new BuildType(BuildingForGather.class , "type_sawyer"       , IS_GATHER_BLD ),
-    QUARRY_PIT    = new BuildType(BuildingForGather.class , "type_quarry_pit"   , IS_GATHER_BLD ),
-    RESOURCE_BUILDINGS[] = { FARM_PLOT, SAWYER, QUARRY_PIT },
-    
-    MARKET        = new BuildType(BuildingForCrafts.class , "type_market"       , IS_CRAFTS_BLD ),
-    PORTER_POST   = new BuildType(BuildingForTrade.class  , "type_porter_post"  , IS_TRADE_BLD  ),
-    
-    //  TODO:  THIS HAS TO BE MERGED WITH THE PALACE/BASTION!
-    COLLECTOR     = new BuildType(BuildingForCollect.class, "type_collector"    , IS_COLLECT_BLD),
-    ECONOMIC_BUILDINGS[] = { MARKET, PORTER_POST, COLLECTOR },
-    
-    HUNTER_LODGE  = new BuildType(BuildingForHunt.class   , "type_hunter_lodge" , IS_HUNTS_BLD  ),
-    GARRISON      = new BuildType(BuildingForArmy.class   , "type_garrison"     , IS_ARMY_BLD   ),
-    MILITARY_BUILDINGS[] = { HUNTER_LODGE, GARRISON },
-    
+    ECOLOGIST_STATION = new BuildType(BuildingForHunt.class   , "venue_ecologist", IS_HUNTS_BLD  ),
     ENGINEER_STATION  = new BuildType(BuildingForCrafts.class , "venue_engineer" , IS_CRAFTS_BLD ),
     PHYSICIAN_STATION = new BuildType(BuildingForCrafts.class , "venue_physician", IS_CRAFTS_BLD ),
+    
+    CANTINA           = new BuildType(BuildingForAmenity.class, "venue_cantina"  , IS_AMENITY_BLD),
+    STOCK_EXCHANGE    = new BuildType(BuildingForCrafts.class , "venue_stock_ex" , IS_CRAFTS_BLD ),
+    SUPPLY_DEPOT      = new BuildType(BuildingForTrade.class  , "venue_supply_d" , IS_TRADE_BLD  ),
+    
+    SCHOOL_LOG        = new BuildType(BuildingForFaith.class , "venue_logician"  , IS_FAITH_BLD  ),
+    SCHOOL_COL        = new BuildType(BuildingForFaith.class , "venue_collective", IS_FAITH_BLD  ),
+    SCHOOL_LEN        = new BuildType(BuildingForFaith.class , "venue_lensr"     , IS_FAITH_BLD  ),
+    SCHOOL_SHA        = new BuildType(BuildingForFaith.class , "venue_shaper"    , IS_FAITH_BLD  ),
+    SCHOOL_TEK        = new BuildType(BuildingForFaith.class , "venue_tek_priest", IS_FAITH_BLD  ),
+    SCHOOL_SPA        = new BuildType(BuildingForFaith.class , "venue_spacer"    , IS_FAITH_BLD  ),
+    
+    
+    WALKWAY       = new BuildType(Element.class           , "type_walkway"      , IS_STRUCTURAL ),
+    SHIELD_WALL   = new BuildType(Element.class           , "type_shield_wall"  , IS_STRUCTURAL ),
+    BLAST_DOOR    = new BuildType(BuildingForWalls.class  , "type_blast_door"   , IS_WALLS_BLD  ),
+    TURRET        = new BuildType(BuildingForWalls.class  , "type_turret"       , IS_WALLS_BLD  ),
+    
+    HOLDING       = new BuildType(BuildingForHome.class   , "type_holding"      , IS_HOME_BLD   ),
+    HOUSE_T1      = new BuildType(BuildingForHome.class   , "type_house_tier1"  , IS_UPGRADE    ),
+    HOUSE_T2      = new BuildType(BuildingForHome.class   , "type_house_tier2"  , IS_UPGRADE    ),
+    
+    NURSERY       = new BuildType(BuildingForGather.class , "type_farm_plot"    , IS_GATHER_BLD ),
+    FORMER_BAY    = new BuildType(BuildingForGather.class , "type_sawyer"       , IS_GATHER_BLD ),
+    ORE_SMELTER   = new BuildType(BuildingForGather.class , "type_quarry_pit"   , IS_GATHER_BLD ),
+    SOLAR_TOWER   = new BuildType(BuildingForGather.class , "type_solar_tower"  , IS_GATHER_BLD ),
+    
+    INFRASTRUCTURE_BUILDINGS[] = { WALKWAY, SHIELD_WALL, BLAST_DOOR, TURRET },
+    RESIDENTIAL_BUILDINGS[] = { BASTION, HOLDING, CANTINA },
+    RESOURCE_BUILDINGS[] = { NURSERY, FORMER_BAY, ORE_SMELTER },
+    ECONOMIC_BUILDINGS[] = { STOCK_EXCHANGE, SUPPLY_DEPOT, ENFORCER_BLOC },
+    MILITARY_BUILDINGS[] = { ECOLOGIST_STATION, TROOPER_LODGE },
     SCIENCE_BUILDINGS[] = { ENGINEER_STATION, PHYSICIAN_STATION },
-    
-    TEMPLE_QZ     = new BuildType(BuildingForFaith.class , "type_temple_qz"     , IS_FAITH_BLD  ),
-    TEMPLE_TZ     = new BuildType(BuildingForFaith.class , "type_temple_tz"     , IS_FAITH_BLD  ),
-    TEMPLE_HU     = new BuildType(BuildingForFaith.class , "type_temple_hu"     , IS_FAITH_BLD  ),
-    TEMPLE_TL     = new BuildType(BuildingForFaith.class , "type_temple_tl"     , IS_FAITH_BLD  ),
-    TEMPLE_MI     = new BuildType(BuildingForFaith.class , "type_temple_mi"     , IS_FAITH_BLD  ),
-    TEMPLE_XT     = new BuildType(BuildingForFaith.class , "type_temple_xt"     , IS_FAITH_BLD  ),
-    
     PSI_SCHOOL_BUILDINGS[] = {
-      TEMPLE_QZ, TEMPLE_TZ, TEMPLE_HU, TEMPLE_TL, TEMPLE_MI, TEMPLE_XT
+      SCHOOL_LOG, SCHOOL_COL, SCHOOL_LEN, SCHOOL_SHA, SCHOOL_TEK, SCHOOL_SPA
     }
   ;
   static {
-    
-    //
-    //  1x1 infrastructure:
-    ROAD.name = "Road";
-    ROAD.tint = PAVE_COLOR;
-    ROAD.pathing = PATH_PAVE;
-    ROAD.setDimensions(1, 1, 0);
-    ROAD.setBuildMaterials(PARTS, 1);
-    
-    WALL.name = "Wall";
-    WALL.tint = TINT_LITE_MILITARY;
-    WALL.pathing = PATH_WALLS;
-    WALL.isWall  = true;
-    WALL.setDimensions(1, 1, 2);
-    WALL.setBuildMaterials(PARTS, 2);
-    
-    GATE.name = "Gate";
-    GATE.tint = TINT_MILITARY;
-    GATE.pathing = PATH_WALLS;
-    GATE.isWall  = true;
-    GATE.setDimensions(2, 2, 2);
-    GATE.setBuildMaterials(PARTS, 10);
-    GATE.setFeatures(IS_GATE);
-    
-    TOWER.name = "Tower";
-    TOWER.tint = TINT_MILITARY;
-    TOWER.pathing = PATH_BLOCK;
-    TOWER.isWall  = true;
-    TOWER.setDimensions(2, 2, 4);
-    TOWER.setBuildMaterials(PARTS, 10);
-    TOWER.setFeatures(IS_TOWER);
-    
-    //
-    //  Residential structures:
-    PALACE.name = "Palace";
-    PALACE.tint = TINT_RESIDENTIAL;
-    PALACE.setDimensions(5, 5, 2);
-    PALACE.maxHealth = 300;
-    PALACE.setBuildMaterials(PLASTICS, 10, PARTS, 25);
-    ///PALACE.setHomeUsage(POTTERY, 5, COTTON, 10);
-    PALACE.setWorkerTypes(NOBLE, SERVANT);
-    PALACE.homeSocialClass = CLASS_NOBLE;
-    PALACE.maxResidents = 2;
-    PALACE.maxWorkers   = 2;
-    PALACE.buildsWith   = new Good[] { PLASTICS, PARTS };
-    PALACE.setFeatures(IS_HOUSING);
-    PALACE.worksBeforeBuilt = true;
-    
-    HOUSE.name = "House";
-    HOUSE.tint = TINT_LITE_RESIDENTIAL;
-    HOUSE.setDimensions(2, 2, 1);
-    HOUSE.setBuildMaterials(PLASTICS, 1);
-    HOUSE.setWorkerTypes(CITIZEN);
-    HOUSE.homeFoods    = FOOD_TYPES;
-    HOUSE.maxResidents = 4;
-    HOUSE.maxStock     = 1;
-    HOUSE.buildsWith   = new Good[] { PLASTICS, PARTS };
-    HOUSE.features     = new Good[] { IS_HOUSING };
-    HOUSE.setUpgradeTiers(HOUSE, HOUSE_T1, HOUSE_T2);
-    
-    HOUSE_T1.name = "Improved House";
-    HOUSE_T1.setBuildMaterials(PLASTICS, 2, PARTS, 1);
-    HOUSE_T1.maxStock = 2;
-    HOUSE_T1.setUpgradeNeeds(DIVERSION, 10);
-    
-    HOUSE_T2.name = "Fancy House";
-    HOUSE_T2.setBuildMaterials(PLASTICS, 3, PARTS, 2);
-    HOUSE_T2.setHomeUsage(MEDICINE, 1);
-    HOUSE_T2.maxStock = 2;
-    HOUSE_T2.setUpgradeNeeds(DIVERSION, 15, PHYSICIAN_STATION, 1);
-    
-    BALL_COURT.name = "Ball Court";
-    BALL_COURT.tint = TINT_AMENITY;
-    BALL_COURT.setDimensions(3, 3, 1);
-    BALL_COURT.setBuildMaterials(PARTS, 10);
-    BALL_COURT.setFeatures(DIVERSION);
-    BALL_COURT.featureAmount = 15;
 
-    //
-    //  Industrial structures:
+    BASTION.name = "Bastion";
+    BASTION.tint = TINT_MILITARY;
+    BASTION.setDimensions(5, 5, 2);
+    BASTION.maxHealth = 300;
+    BASTION.setBuildMaterials(PLASTICS, 10, PARTS, 25);
+    BASTION.setWorkerTypes(NOBLE, SERVANT);
+    BASTION.homeSocialClass = CLASS_NOBLE;
+    BASTION.maxResidents = 2;
+    BASTION.maxWorkers   = 2;
+    BASTION.buildsWith   = new Good[] { PLASTICS, PARTS };
+    BASTION.setFeatures(IS_HOUSING);
+    BASTION.worksBeforeBuilt = true;
     
-    FARM_PLOT.name = "Farm Plot";
-    FARM_PLOT.tint = TINT_LITE_INDUSTRIAL;
-    FARM_PLOT.setDimensions(2, 2, 1);
-    FARM_PLOT.setBuildMaterials(PLASTICS, 5, PARTS, 2);
-    FARM_PLOT.setWorkerTypes(WORKER);
-    FARM_PLOT.worksBeforeBuilt = true;
-    FARM_PLOT.gatherFlag = IS_CROP;
-    FARM_PLOT.produced   = CROP_TYPES;
-    FARM_PLOT.maxStock   = 25;
-    FARM_PLOT.maxWorkers = 2;
-    FARM_PLOT.craftSkill = SKILL_FARM;
+    TROOPER_LODGE.name = "Trooper Lodge";
+    TROOPER_LODGE.tint = TINT_MILITARY;
+    TROOPER_LODGE.setDimensions(6, 6, 2);
+    TROOPER_LODGE.setBuildMaterials(PLASTICS, 1, PARTS, 7);
+    TROOPER_LODGE.setWorkerTypes(SOLDIER);
+    TROOPER_LODGE.maxWorkers = 2;
+    TROOPER_LODGE.maxHealth  = 250;
     
-    SAWYER.name = "Sawyer";
-    SAWYER.tint = TINT_LITE_INDUSTRIAL;
-    SAWYER.setDimensions(2, 2, 1);
-    SAWYER.setBuildMaterials(PLASTICS, 5, PARTS, 2);
-    SAWYER.setWorkerTypes(WORKER);
-    SAWYER.worksBeforeBuilt = true;
-    SAWYER.gatherFlag = IS_TREE;
-    SAWYER.maxStock   = 25;
-    SAWYER.produced   = new Good[] { CARBONS };
-    SAWYER.maxWorkers = 2;
-    SAWYER.craftSkill = SKILL_CRAFT;
-    
-    QUARRY_PIT.name = "Quarry Pit";
-    QUARRY_PIT.tint = TINT_LITE_INDUSTRIAL;
-    QUARRY_PIT.setDimensions(2, 2, 1);
-    QUARRY_PIT.setBuildMaterials(PLASTICS, 2, PARTS, 5);
-    QUARRY_PIT.setWorkerTypes(WORKER);
-    QUARRY_PIT.worksBeforeBuilt = true;
-    QUARRY_PIT.gatherFlag = IS_STONE;
-    QUARRY_PIT.maxStock   = 25;
-    QUARRY_PIT.produced   = new Good[] { CARBONS, ORES };
-    QUARRY_PIT.maxWorkers = 2;
-    QUARRY_PIT.craftSkill = SKILL_CRAFT;
-    
-    //
-    //  Commercial structures:
-    MARKET.name = "Marketplace";
-    MARKET.tint = TINT_COMMERCIAL;
-    MARKET.setDimensions(4, 4, 1);
-    MARKET.setBuildMaterials(PLASTICS, 4, PARTS, 2);
-    MARKET.setWorkerTypes(MERCHANT);
-    MARKET.needed   = MARKET_GOODS;
-    MARKET.features = new Good[] { IS_VENDOR };
-    
-    PORTER_POST.name = "Porter Post";
-    PORTER_POST.tint = TINT_COMMERCIAL;
-    PORTER_POST.setDimensions(3, 3, 1);
-    PORTER_POST.setBuildMaterials(PLASTICS, 4, PARTS, 2);
-    PORTER_POST.setWorkerTypes(PORTER, WORKER);
-    PORTER_POST.worksBeforeBuilt = true;
-    PORTER_POST.features = new Good[] { IS_TRADER };
-    
-    //  TODO:  Make this into a 'Guardhouse', or the nearest equivalent...
-    COLLECTOR.name = "Collector";
-    COLLECTOR.tint = TINT_COMMERCIAL;
-    COLLECTOR.setDimensions(2, 2, 1);
-    COLLECTOR.setBuildMaterials(PARTS, 4);
-    COLLECTOR.setWorkerTypes(MERCHANT);
-    COLLECTOR.produced = new Good[] { CASH };
-    COLLECTOR.features = new Good[] { IS_ADMIN };
-    
-    //
-    //  Military structures:
-    HUNTER_LODGE.name = "Hunter Lodge";
-    HUNTER_LODGE.tint = TINT_MILITARY;
-    HUNTER_LODGE.setDimensions(4, 4, 1);
-    HUNTER_LODGE.setBuildMaterials(PLASTICS, 7, PARTS, 1);
-    HUNTER_LODGE.setWorkerTypes(HUNTER);
-    HUNTER_LODGE.worksBeforeBuilt = true;
-    HUNTER_LODGE.maxWorkers = 2;
-    HUNTER_LODGE.maxHealth  = 100;
-    HUNTER_LODGE.produced   = new Good[] { PROTEIN };
-    
-    GARRISON.name = "Garrison";
-    GARRISON.tint = TINT_MILITARY;
-    GARRISON.setDimensions(6, 6, 2);
-    GARRISON.setBuildMaterials(PLASTICS, 1, PARTS, 7);
-    GARRISON.setWorkerTypes(SOLDIER);
-    GARRISON.maxWorkers = 2;
-    GARRISON.maxHealth  = 250;
+    ENFORCER_BLOC.name = "Enforcer Bloc";
+    ENFORCER_BLOC.tint = TINT_COMMERCIAL;
+    ENFORCER_BLOC.setDimensions(2, 2, 1);
+    ENFORCER_BLOC.setBuildMaterials(PARTS, 4);
+    ENFORCER_BLOC.setWorkerTypes(MERCHANT);
+    ENFORCER_BLOC.produced = new Good[] { CASH };
+    ENFORCER_BLOC.features = new Good[] { IS_ADMIN };
     
     //
     //  Science structures:
+    ECOLOGIST_STATION.name = "Ecologist Station";
+    ECOLOGIST_STATION.tint = TINT_MILITARY;
+    ECOLOGIST_STATION.setDimensions(4, 4, 1);
+    ECOLOGIST_STATION.setBuildMaterials(PLASTICS, 7, PARTS, 1);
+    ECOLOGIST_STATION.setWorkerTypes(HUNTER);
+    ECOLOGIST_STATION.worksBeforeBuilt = true;
+    ECOLOGIST_STATION.maxWorkers = 2;
+    ECOLOGIST_STATION.maxHealth  = 100;
+    ECOLOGIST_STATION.produced   = new Good[] { PROTEIN };
+    
     ENGINEER_STATION.name = "Engineer Station";
     ENGINEER_STATION.tint = TINT_INDUSTRIAL;
     ENGINEER_STATION.setDimensions(2, 2, 1);
@@ -494,21 +369,31 @@ public class GameContent {
     PHYSICIAN_STATION.featureAmount = 20;
     
     //
+    //  Commercial structures:
+    STOCK_EXCHANGE.name = "Stock Exchange";
+    STOCK_EXCHANGE.tint = TINT_COMMERCIAL;
+    STOCK_EXCHANGE.setDimensions(4, 4, 1);
+    STOCK_EXCHANGE.setBuildMaterials(PLASTICS, 4, PARTS, 2);
+    STOCK_EXCHANGE.setWorkerTypes(MERCHANT);
+    STOCK_EXCHANGE.needed   = MARKET_GOODS;
+    STOCK_EXCHANGE.features = new Good[] { IS_VENDOR };
+    
+    SUPPLY_DEPOT.name = "Supply Depot";
+    SUPPLY_DEPOT.tint = TINT_COMMERCIAL;
+    SUPPLY_DEPOT.setDimensions(3, 3, 1);
+    SUPPLY_DEPOT.setBuildMaterials(PLASTICS, 4, PARTS, 2);
+    SUPPLY_DEPOT.setWorkerTypes(PORTER, WORKER);
+    SUPPLY_DEPOT.worksBeforeBuilt = true;
+    SUPPLY_DEPOT.features = new Good[] { IS_TRADER };
+    
+    //
     //  Religious structures:
-    //
-    //  Day/Order and Night/Freedom : Qz / Tz
-    TEMPLE_QZ .name = "Temple to Quetzalcoatl";
-    TEMPLE_TZ .name = "Temple to Tezcatlipoca";
-    //
-    //  Fire and Water: Hu / Tl
-    TEMPLE_HU .name = "Temple to Huitzilopochtli";
-    TEMPLE_TL .name = "Temple to Tlaloc";
-    //
-    //  Life and Death: Om / Mi
-    TEMPLE_MI .name = "Temple to Mictecacehuatl";
-    //
-    //  Balancing/tension: Xt
-    TEMPLE_XT .name = "Temple to Xipe Totec";
+    SCHOOL_LOG.name = "Logician School";
+    SCHOOL_COL.name = "Collective School";
+    SCHOOL_LEN.name = "LENSR School";
+    SCHOOL_SHA.name = "Shaper School";
+    SCHOOL_TEK.name = "Tek Priest School";
+    SCHOOL_SPA.name = "Spacer School";
     
     for (Type t : PSI_SCHOOL_BUILDINGS) {
       t.tint = TINT_RELIGIOUS;
@@ -521,6 +406,115 @@ public class GameContent {
       t.homeSocialClass = CLASS_NOBLE;
       t.features        = new Good[] { RELIGION };
     }
+    
+    
+    //
+    WALKWAY.name = "Walkway";
+    WALKWAY.tint = PAVE_COLOR;
+    WALKWAY.pathing = PATH_PAVE;
+    WALKWAY.setDimensions(1, 1, 0);
+    WALKWAY.setBuildMaterials(PARTS, 1);
+    
+    SHIELD_WALL.name = "Shield Wall";
+    SHIELD_WALL.tint = TINT_LITE_MILITARY;
+    SHIELD_WALL.pathing = PATH_WALLS;
+    SHIELD_WALL.isWall  = true;
+    SHIELD_WALL.setDimensions(1, 1, 2);
+    SHIELD_WALL.setBuildMaterials(PARTS, 2);
+    
+    BLAST_DOOR.name = "Blast Door";
+    BLAST_DOOR.tint = TINT_MILITARY;
+    BLAST_DOOR.pathing = PATH_WALLS;
+    BLAST_DOOR.isWall  = true;
+    BLAST_DOOR.setDimensions(2, 2, 2);
+    BLAST_DOOR.setBuildMaterials(PARTS, 10);
+    BLAST_DOOR.setFeatures(IS_GATE);
+    
+    TURRET.name = "Turret";
+    TURRET.tint = TINT_MILITARY;
+    TURRET.pathing = PATH_BLOCK;
+    TURRET.isWall  = true;
+    TURRET.setDimensions(2, 2, 4);
+    TURRET.setBuildMaterials(PARTS, 10);
+    TURRET.setFeatures(IS_TOWER);
+    
+    
+    
+    HOLDING.name = "Holding";
+    HOLDING.tint = TINT_LITE_RESIDENTIAL;
+    HOLDING.setDimensions(2, 2, 1);
+    HOLDING.setBuildMaterials(PLASTICS, 1);
+    HOLDING.setWorkerTypes(CITIZEN);
+    HOLDING.homeFoods    = FOOD_TYPES;
+    HOLDING.maxResidents = 4;
+    HOLDING.maxStock     = 1;
+    HOLDING.buildsWith   = new Good[] { PLASTICS, PARTS };
+    HOLDING.features     = new Good[] { IS_HOUSING };
+    HOLDING.setUpgradeTiers(HOLDING, HOUSE_T1, HOUSE_T2);
+    
+    HOUSE_T1.name = "Improved Holding";
+    HOUSE_T1.setBuildMaterials(PLASTICS, 2, PARTS, 1);
+    HOUSE_T1.maxStock = 2;
+    HOUSE_T1.setUpgradeNeeds(DIVERSION, 10);
+    
+    HOUSE_T2.name = "Fancy Holding";
+    HOUSE_T2.setBuildMaterials(PLASTICS, 3, PARTS, 2);
+    HOUSE_T2.setHomeUsage(MEDICINE, 1);
+    HOUSE_T2.maxStock = 2;
+    HOUSE_T2.setUpgradeNeeds(DIVERSION, 15, PHYSICIAN_STATION, 1);
+    
+    CANTINA.name = "Cantina";
+    CANTINA.tint = TINT_AMENITY;
+    CANTINA.setDimensions(3, 3, 1);
+    CANTINA.setBuildMaterials(PARTS, 10);
+    CANTINA.setFeatures(DIVERSION);
+    CANTINA.featureAmount = 15;
+    
+    //
+    //  Industrial structures:
+    NURSERY.name = "Nursery";
+    NURSERY.tint = TINT_LITE_INDUSTRIAL;
+    NURSERY.setDimensions(2, 2, 1);
+    NURSERY.setBuildMaterials(PLASTICS, 5, PARTS, 2);
+    NURSERY.setWorkerTypes(WORKER);
+    NURSERY.worksBeforeBuilt = true;
+    NURSERY.gatherFlag = IS_CROP;
+    NURSERY.produced   = CROP_TYPES;
+    NURSERY.maxStock   = 25;
+    NURSERY.maxWorkers = 2;
+    NURSERY.craftSkill = SKILL_FARM;
+    
+    FORMER_BAY.name = "Former Bay";
+    FORMER_BAY.tint = TINT_LITE_INDUSTRIAL;
+    FORMER_BAY.setDimensions(2, 2, 1);
+    FORMER_BAY.setBuildMaterials(PLASTICS, 5, PARTS, 2);
+    FORMER_BAY.setWorkerTypes(WORKER);
+    FORMER_BAY.worksBeforeBuilt = true;
+    FORMER_BAY.gatherFlag = IS_TREE;
+    FORMER_BAY.maxStock   = 25;
+    FORMER_BAY.produced   = new Good[] { CARBONS };
+    FORMER_BAY.maxWorkers = 2;
+    FORMER_BAY.craftSkill = SKILL_CRAFT;
+    
+    ORE_SMELTER.name = "Ore Smelter";
+    ORE_SMELTER.tint = TINT_LITE_INDUSTRIAL;
+    ORE_SMELTER.setDimensions(2, 2, 1);
+    ORE_SMELTER.setBuildMaterials(PLASTICS, 2, PARTS, 5);
+    ORE_SMELTER.setWorkerTypes(WORKER);
+    ORE_SMELTER.worksBeforeBuilt = true;
+    ORE_SMELTER.gatherFlag = IS_STONE;
+    ORE_SMELTER.maxStock   = 25;
+    ORE_SMELTER.produced   = new Good[] { CARBONS, ORES };
+    ORE_SMELTER.maxWorkers = 2;
+    ORE_SMELTER.craftSkill = SKILL_CRAFT;
+    
+    SOLAR_TOWER.name = "Solar Tower";
+    SOLAR_TOWER.tint = TINT_LITE_INDUSTRIAL;
+    SOLAR_TOWER.setDimensions(2, 2, 1);
+    SOLAR_TOWER.setBuildMaterials(PLASTICS, 2, PARTS, 2);
+    SOLAR_TOWER.maxStock   = 25;
+    SOLAR_TOWER.produced   = new Good[] {};
+    SOLAR_TOWER.maxWorkers = 0;
   }
   
   
@@ -540,8 +534,8 @@ public class GameContent {
       MEDICINE , 10f
     );
     cityA.initBuildLevels(
-      GARRISON, 2f ,
-      HOUSE   , 10f
+      TROOPER_LODGE, 2f ,
+      HOLDING   , 10f
     );
     world.addCities(cityA);
     
@@ -552,8 +546,8 @@ public class GameContent {
       ORES , 10f
     );
     cityA.initBuildLevels(
-      GARRISON, 0.75f,
-      HOUSE   , 5f
+      TROOPER_LODGE, 0.75f,
+      HOLDING   , 5f
     );
     world.addCities(cityB);
     

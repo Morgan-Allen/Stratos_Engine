@@ -310,7 +310,7 @@ public class TestWorld extends Test {
       }
       
       for (City c : world.cities()) {
-        c.initBuildLevels(HOUSE, 2f, GARRISON, 2f);
+        c.initBuildLevels(HOLDING, 2f, TROOPER_LODGE, 2f);
         for (City o : world.cities()) if (c != o) City.setupRoute(c, o, 1);
       }
       
@@ -389,8 +389,8 @@ public class TestWorld extends Test {
         city.setTradeLevel(g, amount);
       }
       city.initBuildLevels(
-        GARRISON, 2f + Rand.index(3),
-        HOUSE   , 6f + Rand.index(10)
+        TROOPER_LODGE, 2f + Rand.index(3),
+        HOLDING   , 6f + Rand.index(10)
       );
       world.addCities(city);
     }
@@ -517,8 +517,8 @@ public class TestWorld extends Test {
     b.setName("Invader City");
     world.addCities(a, b);
     setupRoute(a, b, 1);
-    a.initBuildLevels(HOUSE, 1f, GARRISON, 1f);
-    b.initBuildLevels(HOUSE, 9f, GARRISON, 6f);
+    a.initBuildLevels(HOLDING, 1f, TROOPER_LODGE, 1f);
+    b.initBuildLevels(HOLDING, 9f, TROOPER_LODGE, 6f);
     a.council.setTypeAI(CityCouncil.AI_OFF);
     b.council.setTypeAI(CityCouncil.AI_OFF);
     return new City[] { a, b };

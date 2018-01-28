@@ -22,7 +22,7 @@ public class TestExploring extends Test {
     CityMap map = Test.setupTestCity(32, ALL_GOODS, true, JUNGLE, MEADOW);
     
     CityMapPlanning.markDemolish(map, true, 3, 3, 6, 6);
-    Building lodge = (Building) HUNTER_LODGE.generate();
+    Building lodge = (Building) ECOLOGIST_STATION.generate();
     lodge.enterMap(map, 4, 4, 1);
     Test.fillWorkVacancies(lodge);
     

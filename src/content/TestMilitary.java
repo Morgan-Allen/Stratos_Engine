@@ -36,13 +36,13 @@ public class TestMilitary extends Test {
     City.setPosture(homeC, awayC, City.POSTURE.ENEMY, true);
     
     
-    BuildingForArmy fort = (BuildingForArmy) GARRISON.generate();
+    BuildingForArmy fort = (BuildingForArmy) TROOPER_LODGE.generate();
     fort.enterMap(map, 10, 10, 1);
     fillWorkVacancies(fort);
-    CityMapPlanning.placeStructure(ROAD, map, true, 2, 9, 30, 1);
+    CityMapPlanning.placeStructure(WALKWAY, map, true, 2, 9, 30, 1);
     
     for (int n = 8; n-- > 0;) {
-      Building house = (Building) HOUSE.generate();
+      Building house = (Building) HOLDING.generate();
       house.enterMap(map, 2 + (n * 3), 7, 1);
       fillHomeVacancies(house, CITIZEN);
       for (Actor a : house.residents()) a.setSexData(SEX_MALE);
