@@ -32,7 +32,7 @@ public class TestWorld extends Test {
       City vassal = pair[0], lord = pair[1];
       World world = vassal.world;
       
-      vassal.initTradeLevels(MAIZE, 10f, COTTON, -5f);
+      vassal.initTradeLevels(CARBS, 10f, MEDICINE, -5f);
       for (Good g : vassal.tradeLevel().keys()) {
         float demand = vassal.tradeLevel(g);
         if (demand > 0) vassal.setInventory(g, demand);
@@ -258,7 +258,7 @@ public class TestWorld extends Test {
       City vassal = pair[0], lord = pair[1];
       World world = vassal.world;
       setPosture(vassal, lord, POSTURE.LORD, true);
-      setSuppliesDue(vassal, lord, new Tally().setWith(STONE, 10));
+      setSuppliesDue(vassal, lord, new Tally().setWith(SPYCE, 10));
       vassal.council.setTypeAI(CityCouncil.AI_COMPLIANT);
       
       int time = 0;
@@ -266,7 +266,7 @@ public class TestWorld extends Test {
         world.updateWithTime(time++);
       }
       
-      float tributeSent = City.suppliesDue(vassal, lord, STONE);
+      float tributeSent = City.suppliesDue(vassal, lord, SPYCE);
       if (tributeSent < 5) {
         I.say("\nInsufficient tribute dispatched!");
         return false;
@@ -318,8 +318,8 @@ public class TestWorld extends Test {
       City main = from[0];
       
       //  Establish trade-options with city 3...
-      main   .initTradeLevels(RAW_COTTON,  5, POTTERY,  5);
-      from[2].initTradeLevels(RAW_COTTON, -5, POTTERY, -5);
+      main   .initTradeLevels(GREENS,  5, PARTS,  5);
+      from[2].initTradeLevels(GREENS, -5, PARTS, -5);
       
       //  Establish enmity with city 5...
       incLoyalty(main, from[4], -0.5f);
@@ -366,7 +366,7 @@ public class TestWorld extends Test {
     
     final int NUM_CITIES = 4;
     final String names[] = { "Tollan", "Texcoco", "Tlacopan", "Tlaxcala" };
-    final Good goods[] = { CLAY, MAIZE, WOOD, RAW_COTTON, POTTERY, COTTON };
+    final Good goods[] = { ORES, CARBS, CARBONS, GREENS, PARTS, MEDICINE };
     final int tints[] = {
       colour(9, 0, 0),
       colour(2, 2, 2),

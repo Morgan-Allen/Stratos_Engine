@@ -11,7 +11,7 @@ import static game.GameConstants.*;
 
 public class TestTrading extends Test {
   
-
+  
   public static void main(String args[]) {
     testTrading(true);
   }
@@ -31,20 +31,19 @@ public class TestTrading extends Test {
     City.setupRoute(homeC, awayC, 1);
     City.setPosture(homeC, awayC, City.POSTURE.VASSAL, true);
     
-    Tally <Good> supplies = new Tally().setWith(FRUIT, 10, STONE, 5);
+    Tally <Good> supplies = new Tally().setWith(GREENS, 10, SPYCE, 5);
     City.setSuppliesDue(awayC, homeC, supplies);
     
     awayC.initTradeLevels(
-      COTTON    ,  50,
-      POTTERY   ,  50,
-      RAW_COTTON, -50,
-      CLAY      , -50
+      MEDICINE  ,  50,
+      PARTS     ,  50,
+      GREENS    , -50,
+      ORES      , -50
     );
     awayC.initInventory(
-      RAW_COTTON,  20,
-      CLAY      ,  20,
-      FRUIT     ,  15,
-      STONE     ,  5 
+      GREENS    ,  35,
+      ORES      ,  20,
+      SPYCE     ,  5 
     );
     
     
@@ -58,18 +57,18 @@ public class TestTrading extends Test {
     post1.enterMap(map, 1, 6, 1);
     post1.setID("(Does Trading)");
     post1.setTradeLevels(false,
-      RAW_COTTON,  2 ,
-      CLAY      ,  2 ,
-      COTTON    , -5 ,
-      POTTERY   , -5 
+      GREENS    ,  2 ,
+      ORES      ,  2 ,
+      MEDICINE  , -5 ,
+      PARTS     , -5 
     );
     
     BuildingForTrade post2 = (BuildingForTrade) PORTER_POST.generate();
     post2.enterMap(map, 5, 6, 1);
     post2.setID("(Gets Supplies)");
     post2.setTradeLevels(false,
-      FRUIT     , 15,
-      STONE     , 5 
+      GREENS    , 15,
+      SPYCE     , 5 
     );
     
     Building kiln = (Building) ENGINEER_STATION.generate();
@@ -91,7 +90,7 @@ public class TestTrading extends Test {
     boolean moneyOkay  = false;
     
     while (map.time() < RUN_TIME || graphics) {
-      map = test.runLoop(map, 100, graphics, "saves/test_trading.tlt");
+      map = test.runLoop(map, 1, graphics, "saves/test_trading.tlt");
       
       boolean allHome = true;
       for (Building b : map.buildings()) for (Actor a : b.workers()) {
@@ -111,16 +110,16 @@ public class TestTrading extends Test {
       
       if (! tradeOkay) {
         boolean check = true;
-        check &= City.goodsSent(homeC, awayC, POTTERY) > 1;
-        check &= City.goodsSent(homeC, awayC, COTTON ) > 1;
+        check &= City.goodsSent(homeC, awayC, PARTS) > 1;
+        check &= City.goodsSent(homeC, awayC, MEDICINE ) > 1;
         check &= homeC.funds() > 0;
         tradeOkay = check;
       }
       
       if (! supplyOkay) {
         boolean check = true;
-        check &= post2.inventory(STONE) >= 5;
-        check &= post2.inventory(FRUIT) >= 15;
+        check &= post2.inventory(SPYCE ) >= 5 ;
+        check &= post2.inventory(GREENS) >= 15;
         supplyOkay = check;
       }
       
@@ -167,7 +166,7 @@ public class TestTrading extends Test {
   
   
   static void reportOnMap(City a, City b, boolean okay) {
-    final Good GOODS[] = { CLAY, RAW_COTTON, POTTERY, COTTON, FRUIT, STONE };
+    final Good GOODS[] = { ORES, PARTS, MEDICINE, GREENS, SPYCE };
     
     I.say("\nGoods report:");
     for (Good g : GOODS) {

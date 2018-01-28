@@ -438,9 +438,9 @@ public class Test {
   private String reportFor(City c) {
     StringBuffer report = new StringBuffer(""+c);
     
-    report.append("\n  Population: "+c.population);
-    report.append("\n  Military: "+c.armyPower);
-    report.append("\n  Prestige: "+c.prestige);
+    report.append("\n  Population: "+c.population());
+    report.append("\n  Military: "+c.armyPower());
+    report.append("\n  Prestige: "+c.prestige());
     
     List <String> borderRep = new List();
     for (City other : c.world.cities) if (other != c) {
@@ -707,7 +707,7 @@ public class Test {
     StringBuffer report = new StringBuffer("Home City: "+map.city);
     WorldSettings settings = map.city.world.settings;
     
-    report.append("\n\nFunds: "+map.city.currentFunds);
+    report.append("\n\nFunds: "+map.city.funds());
     report.append("\n\nTime: "+map.time);
     report.append("\nPaused: "+settings.paused);
     report.append("\n");

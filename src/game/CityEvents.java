@@ -26,7 +26,7 @@ public class CityEvents {
     Formation formation, City from, City goes
   ) {
     City belongs = formation.homeCity();
-    belongs.armyPower -= formation.powerSum();
+    belongs.incArmyPower(0 - formation.powerSum());
     belongs.formations.include(formation);
     formation.beginSecuring(goes);
   }
@@ -50,7 +50,7 @@ public class CityEvents {
     IA.fromC     = from;
     IA.goesC     = goes;
     IA.fromPower = formation.powerSum() / POP_PER_CITIZEN;
-    IA.goesPower = goes.armyPower / POP_PER_CITIZEN;
+    IA.goesPower = goes.armyPower() / POP_PER_CITIZEN;
     from.council.calculateChances(IA, true);
     
     float chance = IA.winChance, fromLost = 0, goesLost = 0;
@@ -118,9 +118,9 @@ public class CityEvents {
   
   
   static int inflictCasualties(City defends, float casualties) {
-    casualties = Nums.min(casualties, defends.armyPower);
-    defends.armyPower  -= casualties * POP_PER_CITIZEN;
-    defends.population -= casualties * POP_PER_CITIZEN;
+    casualties = Nums.min(casualties, defends.armyPower());
+    defends.incArmyPower (0 - casualties * POP_PER_CITIZEN);
+    defends.incPopulation(0 - casualties * POP_PER_CITIZEN);
     return (int) casualties;
   }
   
@@ -144,7 +144,7 @@ public class CityEvents {
     Formation formation, City from, World.Journey journey
   ) {
     City belongs = formation.homeCity();
-    belongs.armyPower += formation.powerSum();
+    belongs.incArmyPower(formation.powerSum());
     formation.disbandFormation();
   }
   

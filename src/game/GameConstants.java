@@ -8,11 +8,6 @@ import java.awt.Color;
 
 
 
-
-//  Trooper.  Runner.  Enforcer.
-//  
-
-
 public class GameConstants {
   
   
@@ -290,7 +285,7 @@ public class GameConstants {
     HEALTHCARE = new Good("Healthcare"  , -1 ),
     RELIGION   = new Good("Religion"    , -1 ),
     
-    CASH       = new Good("Cash"        , 1  ),
+    CASH       = new Good("Cash"        ,  1 ),
     
     EMPTY_MATERIAL[] = { VOID },
     NO_GOODS      [] = new Good[0],

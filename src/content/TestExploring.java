@@ -50,7 +50,7 @@ public class TestExploring extends Test {
       }
       
       if (! huntingOkay) {
-        huntingOkay = lodge.inventory(MEAT) > lodge.type().maxStock;
+        huntingOkay = lodge.inventory(PROTEIN) > lodge.type().maxStock;
       }
       
       if (exploreOkay && huntingOkay && ! testOkay) {

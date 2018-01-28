@@ -69,8 +69,8 @@ public class TestCity extends Test {
         b.setInventory(CASH, 20);
       }
       if (b.type() == ENGINEER_STATION) {
-        b.setInventory(CLAY   , 1);
-        b.setInventory(POTTERY, 1);
+        b.setInventory(ORES   , 1);
+        b.setInventory(PARTS, 1);
       }
       map.planning.placeObject(b);
     }
@@ -113,16 +113,15 @@ public class TestCity extends Test {
         boolean allNeeds = true;
         for (Building b : map.buildings()) {
           if (b.type() == MARKET) {
-            b.setInventory(COTTON, 10);
-            b.setInventory(MAIZE , 10);
+            b.setInventory(MEDICINE, 10);
+            b.setInventory(CARBS   , 10);
+            b.setInventory(GREENS  , 10);
           }
           if (b.type() == PALACE) {
             for (Good g : b.type().homeUseGoods) {
               b.setInventory(g, 15);
             }
-            b.setInventory(STONE, 10);
-            b.setInventory(WOOD , 10);
-            b.setInventory(CLAY , 10);
+            b.setInventory(PLASTICS, 10);
           }
           if (b.type() == HOUSE) {
             BuildingForHome home = (BuildingForHome) b;
@@ -132,7 +131,7 @@ public class TestCity extends Test {
           if (b.type() == ENGINEER_STATION) {
             boolean isCrafting = false;
             for (Actor a : b.workers()) {
-              if (b.inventory(CLAY) <= 0) break;
+              if (b.inventory(ORES) <= 0) break;
               if (a.inside() == b && a.jobType() == JOB.CRAFTING) {
                 isCrafting = true;
               }
@@ -151,7 +150,7 @@ public class TestCity extends Test {
       if (housesOkay && goodsOkay && ! testOkay) {
         I.say("\nCITY SERVICES TEST CONCLUDED SUCCESSFULLY!");
         testOkay = true;
-        reportOnMap(map, true);
+        reportOnMap(map, true, PARTS, MEDICINE);
         if (! graphics) return true;
       }
     }
@@ -166,12 +165,12 @@ public class TestCity extends Test {
     I.say("  TOTAL PROGRESS:   "+TaskCrafting.totalProgInc  );
     I.say("");
     
-    reportOnMap(map, false);
+    reportOnMap(map, false, PARTS, MEDICINE);
     return false;
   }
   
   
-  static void reportOnMap(CityMap map, boolean okay) {
+  static void reportOnMap(CityMap map, boolean okay, Good... goods) {
     I.say("  Current time: "+map.time());
     if (! okay) for (Building b : map.buildings()) {
       if (b.type().isHomeBuilding()) {
@@ -182,11 +181,11 @@ public class TestCity extends Test {
       }
     }
     I.say("\nTotal goods produced:");
-    for (Good g : HOUSE_T2.homeUseGoods) {
+    for (Good g : goods) {
       I.say("  "+g+": "+map.city.totalMade(g));
     }
     I.say("\nTotal goods consumed:");
-    for (Good g : HOUSE_T2.homeUseGoods) {
+    for (Good g : goods) {
       I.say("  "+g+": "+map.city.totalMade(g));
     }
   }

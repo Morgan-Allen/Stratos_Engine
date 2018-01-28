@@ -31,7 +31,7 @@ public class TestFarming extends Test {
     fillWorkVacancies(farm);
     CityMapPlanning.placeStructure(ROAD, map, true, 9, 8, 10, 1);
     
-    Good needed[] = { MAIZE, RAW_COTTON };
+    Good needed[] = { CARBS, GREENS };
     Tile plantTiles[] = BuildingForGather.applyPlanting(
       map, 6, 6, 10, 10, needed
     );

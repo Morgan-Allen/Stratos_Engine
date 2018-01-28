@@ -33,7 +33,7 @@ public class TestForests extends Test {
       map = test.runLoop(map, 10, graphics, "saves/test_forests.tlt");
       
       if (! loggingDone) {
-        loggingDone = logs.inventory(WOOD) >= logs.type().maxStock;
+        loggingDone = logs.inventory(CARBONS) >= logs.type().maxStock;
         
         if (loggingDone) {
           I.say("\nFOREST TEST CONCLUDED SUCCESSFULLY!");

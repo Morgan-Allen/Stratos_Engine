@@ -72,7 +72,7 @@ public class BuildingForCollect extends BuildingForCrafts {
       
       boolean taxes = made == CASH;
       if (taxes && amount > 0) {
-        map.city.currentFunds += amount;
+        map.city.incFunds((int) amount);
         addInventory(0 - amount, made);
       }
       else if (amount > type().maxStock) {

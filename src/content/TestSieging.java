@@ -82,7 +82,7 @@ public class TestSieging extends Test {
     
     Building store = (Building) PORTER_POST.generate();
     store.enterMap(map, 10, 6, 1);
-    store.setInventory(COTTON, 10);
+    store.setInventory(MEDICINE, 10);
     
     float initPrestige = awayC.prestige();
     float initLoyalty  = homeC.loyalty(awayC);

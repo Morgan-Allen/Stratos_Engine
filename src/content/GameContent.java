@@ -17,9 +17,6 @@ public class GameContent {
     //  Industrial in brown.
     TINT_LITE_INDUSTRIAL  = colour(6, 3, 3),
     TINT_INDUSTRIAL       = colour(5, 2, 2),
-    //  Aquatic in cyan.
-    TINT_LITE_AQUATIC     = colour(7, 8, 9),
-    TINT_AQUATIC          = colour(0, 5, 7),
     //  Military in red.
     TINT_LITE_MILITARY    = colour(8, 1, 1),
     TINT_MILITARY         = colour(7, 0, 0),
@@ -49,30 +46,30 @@ public class GameContent {
   
   
   final public static Good
-    MAIZE      = new Good("Maize"       , 10 ),
-    FRUIT      = new Good("Fruit"       , 12 ),
-    MEAT       = new Good("Meat"        , 35 ),
-    RAW_COTTON = new Good("Raw Cotton"  , 15 ),
+    CARBS      = new Good("Carbs"       , 10 ),
+    GREENS     = new Good("Greens"      , 12 ),
+    PROTEIN    = new Good("Protein"     , 35 ),
     
-    WOOD       = new Good("Wood"        , 10 ),
-    CLAY       = new Good("Clay"        , 10 ),
-    STONE      = new Good("Stone"       , 20 ),
+    CARBONS    = new Good("Carbons"     , 10 ),
+    ORES       = new Good("Ores"        , 10 ),
+    SPYCE      = new Good("Spyce"       , 50 ),
     
-    POTTERY    = new Good("Pottery"     , 50 ),
-    COTTON     = new Good("Cotton"      , 75 ),
+    PLASTICS   = new Good("Plastics"    , 30 ),
+    PARTS      = new Good("Parts"       , 50 ),
+    SOMA       = new Good("Soma"        , 45 ),
+    MEDICINE   = new Good("Medicine"    , 75 ),
     
-    CROP_TYPES  [] = { MAIZE, FRUIT, RAW_COTTON },
-    FOOD_TYPES  [] = { MAIZE, FRUIT, MEAT },
-    STONE_TYPES [] = { CLAY, STONE },
-    BUILD_GOODS [] = { CLAY, WOOD, STONE },
-    HOME_GOODS  [] = { POTTERY, COTTON },
+    CROP_TYPES  [] = { CARBS, GREENS, CARBONS },
+    FOOD_TYPES  [] = { CARBS, GREENS, PROTEIN },
+    STONE_TYPES [] = { CARBONS, ORES },
+    BUILD_GOODS [] = { PLASTICS, PARTS },
+    HOME_GOODS  [] = { PLASTICS, PARTS, MEDICINE },
     MARKET_GOODS[] = (Good[]) Visit.compose(Good.class, FOOD_TYPES, HOME_GOODS),
     
     ALL_GOODS[] = new Good[] {
       CASH,
-      MAIZE, FRUIT, MEAT,
-      RAW_COTTON, WOOD, CLAY, STONE,
-      POTTERY, COTTON
+      CARBS, GREENS, PROTEIN, CARBONS, ORES, SPYCE,
+      PLASTICS, PARTS, SOMA, MEDICINE
     };
   
   
@@ -94,7 +91,7 @@ public class GameContent {
     
     ALL_TREES[] = { JUNGLE_TREE1 },
     ALL_ROCKS[] = { DESERT_ROCK1, DESERT_ROCK2 },
-    ALL_CLAYS[] = { CLAY_BANK1 }
+    ALL_OILS[] = { CLAY_BANK1 }
   ;
   final static WalkerType
     TAPIR   = new WalkerType(ActorAsAnimal.class, "animal_tapir" , IS_ANIMAL_ACT),
@@ -148,7 +145,7 @@ public class GameContent {
     for (Type s : ALL_ANIMALS) {
       s.rangeDamage = -1;
       s.lifespan = s.predator ? HUNTER_LIFESPAN : GRAZER_LIFESPAN;
-      s.meatType = MEAT;
+      s.meatType = PROTEIN;
     }
     
     int i = 0;
@@ -164,19 +161,19 @@ public class GameContent {
       t.name = "Forest";
       t.growRate    = CROP_YIELD * 0.5f / 100f;
       t.flagKey     = IS_TREE;
-      t.yields      = WOOD;
+      t.yields      = CARBONS;
       t.yieldAmount = 1f;
     }
     for (Type r : ALL_ROCKS) {
-      r.name = "Rocks";
+      r.name = "Ore Deposit";
       r.flagKey     = IS_STONE;
-      r.yields      = STONE;
+      r.yields      = ORES;
       r.yieldAmount = 1f;
     }
-    for (Type c : ALL_CLAYS) {
-      c.name = "Clay Bank";
+    for (Type c : ALL_OILS) {
+      c.name = "Oil Deposit";
       c.flagKey     = IS_STONE;
-      c.yields      = CLAY;
+      c.yields      = CARBONS;
       c.yieldAmount = 1f;
     }
   }
@@ -315,21 +312,21 @@ public class GameContent {
     ROAD.tint = PAVE_COLOR;
     ROAD.pathing = PATH_PAVE;
     ROAD.setDimensions(1, 1, 0);
-    ROAD.setBuildMaterials(STONE, 1);
+    ROAD.setBuildMaterials(PARTS, 1);
     
     WALL.name = "Wall";
     WALL.tint = TINT_LITE_MILITARY;
     WALL.pathing = PATH_WALLS;
     WALL.isWall  = true;
     WALL.setDimensions(1, 1, 2);
-    WALL.setBuildMaterials(STONE, 2);
+    WALL.setBuildMaterials(PARTS, 2);
     
     GATE.name = "Gate";
     GATE.tint = TINT_MILITARY;
     GATE.pathing = PATH_WALLS;
     GATE.isWall  = true;
     GATE.setDimensions(2, 2, 2);
-    GATE.setBuildMaterials(STONE, 10);
+    GATE.setBuildMaterials(PARTS, 10);
     GATE.setFeatures(IS_GATE);
     
     TOWER.name = "Tower";
@@ -337,7 +334,7 @@ public class GameContent {
     TOWER.pathing = PATH_BLOCK;
     TOWER.isWall  = true;
     TOWER.setDimensions(2, 2, 4);
-    TOWER.setBuildMaterials(STONE, 10);
+    TOWER.setBuildMaterials(PARTS, 10);
     TOWER.setFeatures(IS_TOWER);
     
     //
@@ -346,44 +343,43 @@ public class GameContent {
     PALACE.tint = TINT_RESIDENTIAL;
     PALACE.setDimensions(5, 5, 2);
     PALACE.maxHealth = 300;
-    PALACE.setBuildMaterials(CLAY, 5, WOOD, 15, STONE, 25);
+    PALACE.setBuildMaterials(PLASTICS, 10, PARTS, 25);
     ///PALACE.setHomeUsage(POTTERY, 5, COTTON, 10);
     PALACE.setWorkerTypes(NOBLE, SERVANT);
     PALACE.homeSocialClass = CLASS_NOBLE;
     PALACE.maxResidents = 2;
     PALACE.maxWorkers   = 2;
-    PALACE.buildsWith   = new Good[] { WOOD, CLAY, STONE };
+    PALACE.buildsWith   = new Good[] { PLASTICS, PARTS };
     PALACE.setFeatures(IS_HOUSING);
     PALACE.worksBeforeBuilt = true;
     
     HOUSE.name = "House";
     HOUSE.tint = TINT_LITE_RESIDENTIAL;
     HOUSE.setDimensions(2, 2, 1);
-    HOUSE.setBuildMaterials(WOOD, 2, CLAY, 1);
+    HOUSE.setBuildMaterials(PLASTICS, 1);
     HOUSE.setWorkerTypes(CITIZEN);
     HOUSE.homeFoods    = FOOD_TYPES;
     HOUSE.maxResidents = 4;
     HOUSE.maxStock     = 1;
-    HOUSE.buildsWith   = new Good[] { WOOD, CLAY };
+    HOUSE.buildsWith   = new Good[] { PLASTICS, PARTS };
     HOUSE.features     = new Good[] { IS_HOUSING };
     HOUSE.setUpgradeTiers(HOUSE, HOUSE_T1, HOUSE_T2);
     
     HOUSE_T1.name = "Improved House";
-    HOUSE_T1.setBuildMaterials(WOOD, 4, CLAY, 2);
-    HOUSE_T1.setHomeUsage(POTTERY, 1);
+    HOUSE_T1.setBuildMaterials(PLASTICS, 2, PARTS, 1);
     HOUSE_T1.maxStock = 2;
     HOUSE_T1.setUpgradeNeeds(DIVERSION, 10);
     
     HOUSE_T2.name = "Fancy House";
-    HOUSE_T2.setBuildMaterials(WOOD, 6, CLAY, 3);
-    HOUSE_T2.setHomeUsage(POTTERY, 1, COTTON, 1);
+    HOUSE_T2.setBuildMaterials(PLASTICS, 3, PARTS, 2);
+    HOUSE_T2.setHomeUsage(MEDICINE, 1);
     HOUSE_T2.maxStock = 2;
     HOUSE_T2.setUpgradeNeeds(DIVERSION, 15, PHYSICIAN_STATION, 1);
     
     BALL_COURT.name = "Ball Court";
     BALL_COURT.tint = TINT_AMENITY;
     BALL_COURT.setDimensions(3, 3, 1);
-    BALL_COURT.setBuildMaterials(STONE, 10);
+    BALL_COURT.setBuildMaterials(PARTS, 10);
     BALL_COURT.setFeatures(DIVERSION);
     BALL_COURT.featureAmount = 15;
 
@@ -393,7 +389,7 @@ public class GameContent {
     FARM_PLOT.name = "Farm Plot";
     FARM_PLOT.tint = TINT_LITE_INDUSTRIAL;
     FARM_PLOT.setDimensions(2, 2, 1);
-    FARM_PLOT.setBuildMaterials(WOOD, 5, CLAY, 2);
+    FARM_PLOT.setBuildMaterials(PLASTICS, 5, PARTS, 2);
     FARM_PLOT.setWorkerTypes(WORKER);
     FARM_PLOT.worksBeforeBuilt = true;
     FARM_PLOT.gatherFlag = IS_CROP;
@@ -405,24 +401,24 @@ public class GameContent {
     SAWYER.name = "Sawyer";
     SAWYER.tint = TINT_LITE_INDUSTRIAL;
     SAWYER.setDimensions(2, 2, 1);
-    SAWYER.setBuildMaterials(WOOD, 5, CLAY, 2);
+    SAWYER.setBuildMaterials(PLASTICS, 5, PARTS, 2);
     SAWYER.setWorkerTypes(WORKER);
     SAWYER.worksBeforeBuilt = true;
     SAWYER.gatherFlag = IS_TREE;
     SAWYER.maxStock   = 25;
-    SAWYER.produced   = new Good[] { WOOD };
+    SAWYER.produced   = new Good[] { CARBONS };
     SAWYER.maxWorkers = 2;
     SAWYER.craftSkill = SKILL_CRAFT;
     
     QUARRY_PIT.name = "Quarry Pit";
     QUARRY_PIT.tint = TINT_LITE_INDUSTRIAL;
     QUARRY_PIT.setDimensions(2, 2, 1);
-    QUARRY_PIT.setBuildMaterials(WOOD, 5, CLAY, 2);
+    QUARRY_PIT.setBuildMaterials(PLASTICS, 2, PARTS, 5);
     QUARRY_PIT.setWorkerTypes(WORKER);
     QUARRY_PIT.worksBeforeBuilt = true;
     QUARRY_PIT.gatherFlag = IS_STONE;
     QUARRY_PIT.maxStock   = 25;
-    QUARRY_PIT.produced   = new Good[] { CLAY, STONE };
+    QUARRY_PIT.produced   = new Good[] { CARBONS, ORES };
     QUARRY_PIT.maxWorkers = 2;
     QUARRY_PIT.craftSkill = SKILL_CRAFT;
     
@@ -431,7 +427,7 @@ public class GameContent {
     MARKET.name = "Marketplace";
     MARKET.tint = TINT_COMMERCIAL;
     MARKET.setDimensions(4, 4, 1);
-    MARKET.setBuildMaterials(WOOD, 4, STONE, 2);
+    MARKET.setBuildMaterials(PLASTICS, 4, PARTS, 2);
     MARKET.setWorkerTypes(MERCHANT);
     MARKET.needed   = MARKET_GOODS;
     MARKET.features = new Good[] { IS_VENDOR };
@@ -439,7 +435,7 @@ public class GameContent {
     PORTER_POST.name = "Porter Post";
     PORTER_POST.tint = TINT_COMMERCIAL;
     PORTER_POST.setDimensions(3, 3, 1);
-    PORTER_POST.setBuildMaterials(WOOD, 4, STONE, 2);
+    PORTER_POST.setBuildMaterials(PLASTICS, 4, PARTS, 2);
     PORTER_POST.setWorkerTypes(PORTER, WORKER);
     PORTER_POST.worksBeforeBuilt = true;
     PORTER_POST.features = new Good[] { IS_TRADER };
@@ -448,7 +444,7 @@ public class GameContent {
     COLLECTOR.name = "Collector";
     COLLECTOR.tint = TINT_COMMERCIAL;
     COLLECTOR.setDimensions(2, 2, 1);
-    COLLECTOR.setBuildMaterials(STONE, 2, WOOD, 2, CLAY, 2);
+    COLLECTOR.setBuildMaterials(PARTS, 4);
     COLLECTOR.setWorkerTypes(MERCHANT);
     COLLECTOR.produced = new Good[] { CASH };
     COLLECTOR.features = new Good[] { IS_ADMIN };
@@ -458,17 +454,17 @@ public class GameContent {
     HUNTER_LODGE.name = "Hunter Lodge";
     HUNTER_LODGE.tint = TINT_MILITARY;
     HUNTER_LODGE.setDimensions(4, 4, 1);
-    HUNTER_LODGE.setBuildMaterials(WOOD, 10);
+    HUNTER_LODGE.setBuildMaterials(PLASTICS, 7, PARTS, 1);
     HUNTER_LODGE.setWorkerTypes(HUNTER);
     HUNTER_LODGE.worksBeforeBuilt = true;
     HUNTER_LODGE.maxWorkers = 2;
     HUNTER_LODGE.maxHealth  = 100;
-    HUNTER_LODGE.produced   = new Good[] { MEAT };
+    HUNTER_LODGE.produced   = new Good[] { PROTEIN };
     
     GARRISON.name = "Garrison";
     GARRISON.tint = TINT_MILITARY;
     GARRISON.setDimensions(6, 6, 2);
-    GARRISON.setBuildMaterials(STONE, 10, WOOD, 5);
+    GARRISON.setBuildMaterials(PLASTICS, 1, PARTS, 7);
     GARRISON.setWorkerTypes(SOLDIER);
     GARRISON.maxWorkers = 2;
     GARRISON.maxHealth  = 250;
@@ -478,20 +474,20 @@ public class GameContent {
     ENGINEER_STATION.name = "Engineer Station";
     ENGINEER_STATION.tint = TINT_INDUSTRIAL;
     ENGINEER_STATION.setDimensions(2, 2, 1);
-    ENGINEER_STATION.setBuildMaterials(STONE, 2, WOOD, 2, CLAY, 1);
+    ENGINEER_STATION.setBuildMaterials(PARTS, 8);
     ENGINEER_STATION.setWorkerTypes(WORKER);
-    ENGINEER_STATION.needed   = new Good[] { CLAY };
-    ENGINEER_STATION.produced = new Good[] { POTTERY };
+    ENGINEER_STATION.needed   = new Good[] { ORES };
+    ENGINEER_STATION.produced = new Good[] { PARTS };
     ENGINEER_STATION.maxStock = 3;
     ENGINEER_STATION.craftSkill = SKILL_CRAFT;
     
     PHYSICIAN_STATION.name = "Physician Station";
     PHYSICIAN_STATION.tint = TINT_INDUSTRIAL;
     PHYSICIAN_STATION.setDimensions(2, 2, 1);
-    PHYSICIAN_STATION.setBuildMaterials(WOOD, 2, CLAY, 1);
+    PHYSICIAN_STATION.setBuildMaterials(PLASTICS, 4, PARTS, 2);
     PHYSICIAN_STATION.setWorkerTypes(WORKER);
-    PHYSICIAN_STATION.needed   = new Good[] { RAW_COTTON };
-    PHYSICIAN_STATION.produced = new Good[] { COTTON };
+    PHYSICIAN_STATION.needed   = new Good[] { GREENS };
+    PHYSICIAN_STATION.produced = new Good[] { MEDICINE };
     PHYSICIAN_STATION.maxStock = 3;
     PHYSICIAN_STATION.craftSkill = SKILL_CRAFT;
     PHYSICIAN_STATION.setFeatures(HEALTHCARE);
@@ -517,7 +513,7 @@ public class GameContent {
     for (Type t : PSI_SCHOOL_BUILDINGS) {
       t.tint = TINT_RELIGIOUS;
       t.setDimensions(6, 6, 3);
-      t.setBuildMaterials(STONE, 15);
+      t.setBuildMaterials(PARTS, 15);
       t.setWorkerTypes(PRIEST);
       t.maxWorkers      = 1;
       t.maxHealth       = 100;
@@ -540,8 +536,8 @@ public class GameContent {
     cityA.setName("Xochimilco");
     cityA.setWorldCoords(1, 1);
     cityA.initTradeLevels(
-      POTTERY, 5f ,
-      COTTON , 10f
+      PARTS, 5f ,
+      MEDICINE , 10f
     );
     cityA.initBuildLevels(
       GARRISON, 2f ,
@@ -552,8 +548,8 @@ public class GameContent {
     cityB.setName("Tlacopan");
     cityB.setWorldCoords(3, 3);
     cityB.initTradeLevels(
-      MAIZE, 5f ,
-      CLAY , 10f
+      CARBS, 5f ,
+      ORES , 10f
     );
     cityA.initBuildLevels(
       GARRISON, 0.75f,

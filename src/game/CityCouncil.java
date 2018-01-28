@@ -364,7 +364,7 @@ public class CityCouncil {
     //  We also weight the value of hostility, roughly speaking, based on the
     //  cost of retaliation by the opponent:
     float loseChance = 1 - a.winChance;
-    float angerValue = a.goesC.population * (casValueA + casValueD) / 2f;
+    float angerValue = a.goesC.population() * (casValueA + casValueD) / 2f;
     angerValue /= 4 * POP_PER_CITIZEN;
     //
     //  And account for pre-existing hostility/loyalty:
@@ -399,8 +399,8 @@ public class CityCouncil {
     MA.objective = Formation.OBJECTIVE_CONQUER;
     MA.fromC     = attack;
     MA.goesC     = defend;
-    MA.fromPower = attack.armyPower * commitLevel / POP_PER_CITIZEN;
-    MA.goesPower = defend.armyPower               / POP_PER_CITIZEN;
+    MA.fromPower = attack.armyPower() * commitLevel / POP_PER_CITIZEN;
+    MA.goesPower = defend.armyPower()               / POP_PER_CITIZEN;
     
     MA.postureDemand = POSTURE.VASSAL;
     MA.tributeDemand = calculateTribute(MA);
@@ -572,7 +572,7 @@ public class CityCouncil {
     //
     //  This is something of a hack at the moment, but it helps prevent some
     //  of the more bitty exchanges...
-    if (city.armyPower < AVG_ARMY_POWER / 2) {
+    if (city.armyPower() < AVG_ARMY_POWER / 2) {
       return choices;
     }
     //
@@ -612,7 +612,7 @@ public class CityCouncil {
     Type noble   = (Type) Visit.first(city.world.nobleTypes  );
     
     int n = 0;
-    while (force.powerSum() < city.armyPower / 2) {
+    while (force.powerSum() < city.armyPower() / 2) {
       Type  type   = (n++ % 4 == 0) ? soldier : citizen;
       Actor fights = (Actor) type.generate();
       fights.assignHomeCity(IA.fromC);

@@ -74,7 +74,7 @@ public class TaskTrading extends Task {
     //  then determine if you're visiting a city or another trading post:
     if (visits == tradeFrom && actor.cargo() == null) {
       if (reports()) {
-        I.say("\nSETTING OFF FROM "+visits);
+        I.say("\n"+actor+" SETTING OFF FROM "+visits);
       }
       City city = tradeGoes.homeCity();
       takeOnGoods(tradeFrom, taken);
@@ -93,7 +93,7 @@ public class TaskTrading extends Task {
     //  (The case of reaching a city off-map is handled below.)
     else if (visits == tradeGoes) {
       if (reports()) {
-        I.say("\nREACHED "+tradeGoes);
+        I.say("\n"+actor+" REACHED "+tradeGoes);
       }
       offloadGoods(tradeGoes);
     }
@@ -102,10 +102,9 @@ public class TaskTrading extends Task {
     //  brought back, including any profits from exports.
     else if (visits == tradeFrom && actor.cargo() != null) {
       float profits = actor.cargo().valueFor(CASH);
-      homeCity.currentFunds += profits;
-      
+      homeCity.incFunds((int) profits);
       if (reports()) {
-        I.say("\nRETURNED TO "+visits);
+        I.say("\n"+actor+" RETURNED TO "+visits);
         I.say("  ADDING TRADE PROFITS: "+profits);
       }
       offloadGoods(tradeFrom);
@@ -197,6 +196,8 @@ public class TaskTrading extends Task {
       else {
         totalCost += amount * g.price;
       }
+      
+      r.suppliesSent.add(amount, g);
     }
     
     boolean doPayment = city != homeCity;
@@ -204,7 +205,7 @@ public class TaskTrading extends Task {
     actor.assignCargo(cargo);
     
     if (reports()) {
-      I.say("\nTaking on goods from "+store);
+      I.say("\n"+actor+" taking on goods from "+store);
       I.say("  New cargo: "+cargo);
       I.say("  Cost: "+totalCost+" Profit: "+cargo.valueFor(CASH));
     }
@@ -236,19 +237,23 @@ public class TaskTrading extends Task {
       else {
         totalValue += amount * g.price;
       }
-      
-      r.suppliesSent.add(amount, g);
+    }
+    
+    if (reports()) {
+      I.say("\n"+actor+" depositing goods at "+store);
+      I.say("  Cargo: "+actor.cargo());
+      I.say("  Value: "+totalValue+" Profit: "+actor.cargo().valueFor(CASH));
     }
     
     boolean doPayment = city != homeCity;
     actor.cargo().clear();
     actor.cargo().add(cash + (doPayment ? totalValue : 0), CASH);
-    
-    if (reports()) {
-      I.say("\nDepositing goods at "+store);
-      I.say("  Cargo: "+actor.cargo());
-      I.say("  Value: "+totalValue+" Profit: "+actor.cargo().valueFor(CASH));
-    }
+  }
+  
+  
+  boolean reports() {
+    //return tradeFrom instanceof City || tradeGoes instanceof City;
+    return super.reports();
   }
   
 }

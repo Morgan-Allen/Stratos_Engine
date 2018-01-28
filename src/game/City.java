@@ -74,9 +74,9 @@ public class City implements Session.Saveable, Trader {
   Table <City, Integer > distances = new Table();
   Table <City, Relation> relations = new Table();
   
-  int   currentFunds = 0;
-  float population   = 0;
-  float armyPower    = 0;
+  private int   currentFunds = 0;
+  private float population   = 0;
+  private float armyPower    = 0;
   Tally <Good> tradeLevel = new Tally();
   Tally <Good> inventory  = new Tally();
   Tally <Type> buildLevel = new Tally();
@@ -534,6 +534,16 @@ public class City implements Session.Saveable, Trader {
   
   public void setArmyPower(float power) {
     this.armyPower = power;
+  }
+  
+  
+  public void incPopulation(float inc) {
+    this.population += inc;
+  }
+  
+  
+  public void incArmyPower(float inc) {
+    this.armyPower += inc;
   }
   
   

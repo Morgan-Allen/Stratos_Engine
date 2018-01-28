@@ -41,11 +41,9 @@ public class TestBuilding extends Test {
     post.enterMap(map, 2, 10, 0);
     post.setID("(Stock of Goods)");
     post.setTradeLevels(true,
-      CLAY   , 40,
-      STONE  , 80,
-      WOOD   , 60,
-      COTTON , 20,
-      POTTERY, 20
+      PARTS   , 80,
+      PLASTICS, 60,
+      MEDICINE, 20
     );
     fillWorkVacancies(post);
     map.planning.placeObject(post);
@@ -61,7 +59,7 @@ public class TestBuilding extends Test {
     );
     
     Tally <Good> startingMaterials = totalMaterials(map, false, BUILD_GOODS);
-    Tally <Good> endMaterials = null;
+    Tally <Good> endMaterials = startingMaterials;
     
     int     numPaved     = 0;
     boolean razingOkay   = false;

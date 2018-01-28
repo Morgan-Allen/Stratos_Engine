@@ -118,14 +118,14 @@ public class TestLifeCycle extends Test {
         
         for (Building b : map.buildings()) {
           if (b.type() == ENGINEER_STATION) {
-            b.setInventory(CLAY   , 5);
-            b.setInventory(POTTERY, 5);
+            b.setInventory(ORES   , 5);
+            b.setInventory(PARTS, 5);
           }
           if (b.type() == HOUSE || b.type() == PALACE) {
-            b.setInventory(MAIZE  , 5);
-            b.setInventory(FRUIT  , 5);
-            b.setInventory(POTTERY, 5);
-            b.setInventory(COTTON , 5);
+            b.setInventory(CARBS  , 5);
+            b.setInventory(GREENS  , 5);
+            b.setInventory(PARTS, 5);
+            b.setInventory(MEDICINE , 5);
           }
         }
         //  TODO:  Restore this later- it may take time to update employment
