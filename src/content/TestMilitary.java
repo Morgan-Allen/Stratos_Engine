@@ -44,7 +44,7 @@ public class TestMilitary extends Test {
     for (int n = 8; n-- > 0;) {
       Building house = (Building) HOLDING.generate();
       house.enterMap(map, 2 + (n * 3), 7, 1);
-      fillHomeVacancies(house, CITIZEN);
+      fillHomeVacancies(house, PYON);
       for (Actor a : house.residents()) a.setSexData(SEX_MALE);
     }
     
@@ -55,7 +55,7 @@ public class TestMilitary extends Test {
     Formation troops  = null;
     Formation enemies = new Formation(Formation.OBJECTIVE_CONQUER, awayC, true);
     for (int n = 4; n-- > 0;) {
-      Actor fights = (Actor) ((n == 0) ? SOLDIER : CITIZEN).generate();
+      Actor fights = (Actor) ((n == 0) ? TROOPER : PYON).generate();
       fights.assignHomeCity(awayC);
       enemies.toggleRecruit(fights, true);
     }
@@ -102,7 +102,7 @@ public class TestMilitary extends Test {
         homeWin = ! survivors;
         if (homeWin) {
           troops.disbandFormation();
-          fillAllVacancies(map, CITIZEN);
+          fillAllVacancies(map, PYON);
         }
       }
       

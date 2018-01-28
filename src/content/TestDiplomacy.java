@@ -64,13 +64,13 @@ public class TestDiplomacy extends Test {
     
     Building garrison = (Building) TROOPER_LODGE.generate();
     garrison.enterMap(map, 12, 1, 1);
-    Test.fillAllVacancies(map, CITIZEN);
+    Test.fillAllVacancies(map, PYON);
     
     
     Formation escort;
     escort = new Formation(Formation.OBJECTIVE_DIALOG, awayC, true);
     for (int n = 4; n-- > 0;) {
-      Actor s = (Actor) SOLDIER.generate();
+      Actor s = (Actor) TROOPER.generate();
       s.assignHomeCity(awayC);
       escort.toggleRecruit(s, true);
     }

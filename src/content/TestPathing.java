@@ -131,7 +131,7 @@ public class TestPathing extends Test {
     Tile initPoints[] = { cornerWall, innerGround, outerGround };
     
     for (int n = 3; n-- > 0;) {
-      Actor a = (Actor) CITIZEN.generate();
+      Actor a = (Actor) PYON.generate();
       Tile point = initPoints[n];
       a.enterMap(map, point.x, point.y, 1);
       actors.add(a);

@@ -65,7 +65,7 @@ public class TestSieging extends Test {
     for (int n = 3, s = 0; n-- > 0;) {
       Building home = (Building) HOLDING.generate();
       home.enterMap(map, 17, 10 + (n * 3), 1);
-      fillHomeVacancies(home, CITIZEN);
+      fillHomeVacancies(home, PYON);
       for (Actor a : home.residents()) {
         a.setSexData((s++ % 2 == 0) ? SEX_MALE : SEX_FEMALE);
         if (fort.eligible(a, false)) fort.toggleRecruit(a, true);

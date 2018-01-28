@@ -94,7 +94,6 @@ public class Test {
     if (b.complete()) {
       actor.enterMap(b.map, at.x, at.y, 1);
       actor.setInside(b, true);
-      b.visitors.add(actor);
     }
     else {
       Tile t = b.centre();

@@ -24,7 +24,7 @@ public class TestLifeCycle extends Test {
     Test test = new TestLifeCycle();
     
     I.say("\nTesting XP gain...");
-    ActorAsPerson single = (ActorAsPerson) CITIZEN.generate();
+    ActorAsPerson single = (ActorAsPerson) PYON.generate();
     for (int n = MAX_TRAIN_TIME; n-- > 0;) {
       single.gainXP(SKILL_BUILD, 1);
       if (n % MONTH_LENGTH == 0) I.say("  "+single.levelOf(SKILL_BUILD));

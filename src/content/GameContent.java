@@ -180,74 +180,91 @@ public class GameContent {
   
   
   final static WalkerType
-    VAGRANT  = new WalkerType(ActorAsPerson.class, "type_vagrant" , IS_PERSON_ACT, CLASS_COMMON),
-    CITIZEN  = new WalkerType(ActorAsPerson.class, "type_citizen" , IS_PERSON_ACT, CLASS_COMMON),
-    SERVANT  = new WalkerType(ActorAsPerson.class, "type_servant" , IS_PERSON_ACT, CLASS_SLAVE ),
-    NOBLE    = new WalkerType(ActorAsPerson.class, "type_noble"   , IS_PERSON_ACT, CLASS_NOBLE ),
-    CONSORT  = new WalkerType(ActorAsPerson.class, "type_consort" , IS_PERSON_ACT, CLASS_NOBLE ),
-    WORKER   = new WalkerType(ActorAsPerson.class, "type_worker"  , IS_PERSON_ACT, CLASS_COMMON),
-    MERCHANT = new WalkerType(ActorAsPerson.class, "type_merchant", IS_PERSON_ACT, CLASS_TRADER),
-    PORTER   = new WalkerType(ActorAsPerson.class, "type_porter"  , IS_PERSON_ACT, CLASS_SLAVE ),
-    HUNTER   = new WalkerType(ActorAsPerson.class, "type_hunter"  , IS_PERSON_ACT, CLASS_NOBLE ),
-    SOLDIER  = new WalkerType(ActorAsPerson.class, "type_soldier" , IS_PERSON_ACT, CLASS_NOBLE ),
-    PRIEST   = new WalkerType(ActorAsPerson.class, "type_priest"  , IS_PERSON_ACT, CLASS_NOBLE ),
+    NOBLE     = new WalkerType(ActorAsPerson.class, "actor_noble"    , IS_PERSON_ACT, CLASS_NOBLE ),
+    CONSORT   = new WalkerType(ActorAsPerson.class, "actor_consort"  , IS_PERSON_ACT, CLASS_NOBLE ),
     
-    ALL_CITIZENS[] = {
-      CITIZEN, VAGRANT, SERVANT, WORKER, MERCHANT, PORTER
-    },
-    ALL_SOLDIERS[] = {
-      SOLDIER, HUNTER
-    },
-    ALL_NOBLES[] = {
-      NOBLE, CONSORT, PRIEST
-    },
+    TROOPER   = new WalkerType(ActorAsPerson.class, "actor_trooper"  , IS_PERSON_ACT, CLASS_COMMON),
+    ENFORCER  = new WalkerType(ActorAsPerson.class, "actor_enforcer" , IS_PERSON_ACT, CLASS_COMMON),
+    RUNNER    = new WalkerType(ActorAsPerson.class, "actor_runner"   , IS_PERSON_ACT, CLASS_COMMON),
+    
+    ECOLOGIST = new WalkerType(ActorAsPerson.class, "actor_ecologist", IS_PERSON_ACT, CLASS_COMMON),
+    ENGINEER  = new WalkerType(ActorAsPerson.class, "actor_engineer" , IS_PERSON_ACT, CLASS_COMMON),
+    PHYSICIAN = new WalkerType(ActorAsPerson.class, "actor_physician", IS_PERSON_ACT, CLASS_COMMON),
+    
+    AUDITOR   = new WalkerType(ActorAsPerson.class, "actor_auditor"  , IS_PERSON_ACT, CLASS_TRADER),
+    VENDOR    = new WalkerType(ActorAsPerson.class, "actor_vendor"   , IS_PERSON_ACT, CLASS_TRADER),
+    PYON      = new WalkerType(ActorAsPerson.class, "actor_pyon"     , IS_PERSON_ACT, CLASS_TRADER),
+    
+    ALL_CITIZENS[] = { PYON, VENDOR },
+    ALL_SOLDIERS[] = { TROOPER, RUNNER, NOBLE },
+    ALL_NOBLES  [] = { NOBLE },
     ALL_PEOPLE[] = (WalkerType[]) Visit.compose(
       WalkerType.class, ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES
     )
   ;
   static {
-    //  TODO:  Get rid of this background as a starting option.
-    VAGRANT .name = "Vagrant";
     
-    CITIZEN .name = "Citizen";
-    CITIZEN.setInitTraits(SKILL_FARM, 1, SKILL_BUILD, 1, SKILL_CRAFT, 1);
-    
-    SERVANT .name = "Servant";
-    SERVANT.setInitTraits(SKILL_SPEAK, 1, SKILL_WRITE, 1, SKILL_BUILD, 1);
-    
-    NOBLE   .name = "Noble";
+    NOBLE.name = "Noble";
     NOBLE.setInitTraits(SKILL_MELEE, 1, SKILL_SPEAK, 2, SKILL_WRITE, 2);
     
-    CONSORT .name = "Consort";
+    CONSORT.name = "Consort";
     CONSORT.setInitTraits(SKILL_SPEAK, 2, SKILL_WRITE, 1, SKILL_EVADE, 2);
     
-    WORKER  .name = "Worker";
-    WORKER.setInitTraits(SKILL_FARM, 1, SKILL_BUILD, 1, SKILL_CRAFT, 1);
     
-    MERCHANT.name = "Merchant";
-    MERCHANT.setInitTraits(SKILL_SPEAK, 2, SKILL_WRITE, 2);
+    TROOPER.name = "Trooper";
+    TROOPER.meleeDamage = 2;
+    TROOPER.rangeDamage = 5;
+    TROOPER.rangeDist   = 4;
+    TROOPER.armourClass = 4;
+    TROOPER.maxHealth   = 6;
+    TROOPER.setInitTraits(SKILL_MELEE, 3, SKILL_RANGE, 4, SKILL_EVADE, 1);
     
-    PORTER  .name = "Porter";
-    PORTER.setInitTraits();
+    ENFORCER.name = "Enforcer";
+    ENFORCER.meleeDamage = 2;
+    ENFORCER.rangeDamage = 4;
+    ENFORCER.rangeDist   = 6;
+    ENFORCER.armourClass = 3;
+    ENFORCER.maxHealth   = 4;
+    ENFORCER.setInitTraits(SKILL_MELEE, 2, SKILL_RANGE, 5, SKILL_EVADE, 3);
     
-    HUNTER  .name = "Hunter";
-    HUNTER .rangeDamage = 4;
-    HUNTER .armourClass = 3;
-    HUNTER .rangeDist   = 6;
-    HUNTER .genderRole  = SEX_MALE;
-    HUNTER.setInitTraits(SKILL_RANGE, 2, SKILL_EVADE, 2);
-
-    SOLDIER .name = "Soldier";
-    SOLDIER.meleeDamage = 5;
-    SOLDIER.rangeDamage = 2;
-    SOLDIER.rangeDist   = 4;
-    SOLDIER.armourClass = 4;
-    SOLDIER.maxHealth   = 6;
-    SOLDIER.genderRole  = SEX_MALE;
-    SOLDIER.setInitTraits(SKILL_MELEE, 2, SKILL_RANGE, 1, SKILL_EVADE, 1);
+    RUNNER.name = "Runner";
+    RUNNER.rangeDamage = 6;
+    RUNNER.rangeDist   = 8;
+    RUNNER.armourClass = 3;
+    RUNNER.maxHealth   = 3;
+    RUNNER.setInitTraits(SKILL_RANGE, 5, SKILL_EVADE, 4);
     
-    PRIEST  .name = "Priest";
-    PRIEST.setInitTraits(SKILL_PRAY, 2, SKILL_WRITE, 2, SKILL_SPEAK, 2);
+    
+    ECOLOGIST.name = "Ecologist";
+    ECOLOGIST.rangeDamage = 4;
+    ECOLOGIST.armourClass = 3;
+    ECOLOGIST.rangeDist   = 6;
+    ECOLOGIST.maxHealth   = 4;
+    ECOLOGIST.setInitTraits(SKILL_RANGE, 5, SKILL_EVADE, 3, SKILL_FARM, 4);
+    
+    ENGINEER.name = "Engineer";
+    ENGINEER.meleeDamage = 5;
+    ENGINEER.armourClass = 5;
+    ENGINEER.maxHealth   = 4;
+    ENGINEER.setInitTraits(SKILL_MELEE, 3, SKILL_CRAFT, 5, SKILL_BUILD, 5);
+    
+    PHYSICIAN.name = "Physician";
+    PHYSICIAN.meleeDamage = 0;
+    PHYSICIAN.rangeDamage = 0;
+    PHYSICIAN.armourClass = 1;
+    PHYSICIAN.maxHealth   = 3;
+    PHYSICIAN.setInitTraits(SKILL_CRAFT, 6, SKILL_WRITE, 4, SKILL_SPEAK, 3);
+    
+    
+    AUDITOR.name = "Auditor";
+    AUDITOR.setInitTraits(SKILL_SPEAK, 4, SKILL_WRITE, 4);
+    
+    VENDOR.name = "Vendor";
+    VENDOR.setInitTraits(SKILL_SPEAK, 2, SKILL_WRITE, 2);
+    
+    PYON.name = "Pyon";
+    PYON.setInitTraits(SKILL_FARM, 1, SKILL_BUILD, 1, SKILL_CRAFT, 1);
+    
     
     for (Type t : ALL_PEOPLE) {
       t.foodsAllowed = FOOD_TYPES;
@@ -310,7 +327,7 @@ public class GameContent {
     BASTION.setDimensions(5, 5, 2);
     BASTION.maxHealth = 300;
     BASTION.setBuildMaterials(PLASTICS, 10, PARTS, 25);
-    BASTION.setWorkerTypes(NOBLE, SERVANT);
+    BASTION.setWorkerTypes(NOBLE, AUDITOR, PYON);
     BASTION.homeSocialClass = CLASS_NOBLE;
     BASTION.maxResidents = 2;
     BASTION.maxWorkers   = 2;
@@ -322,7 +339,7 @@ public class GameContent {
     TROOPER_LODGE.tint = TINT_MILITARY;
     TROOPER_LODGE.setDimensions(6, 6, 2);
     TROOPER_LODGE.setBuildMaterials(PLASTICS, 1, PARTS, 7);
-    TROOPER_LODGE.setWorkerTypes(SOLDIER);
+    TROOPER_LODGE.setWorkerTypes(TROOPER);
     TROOPER_LODGE.maxWorkers = 2;
     TROOPER_LODGE.maxHealth  = 250;
     
@@ -330,7 +347,7 @@ public class GameContent {
     ENFORCER_BLOC.tint = TINT_COMMERCIAL;
     ENFORCER_BLOC.setDimensions(2, 2, 1);
     ENFORCER_BLOC.setBuildMaterials(PARTS, 4);
-    ENFORCER_BLOC.setWorkerTypes(MERCHANT);
+    ENFORCER_BLOC.setWorkerTypes(ENFORCER);
     ENFORCER_BLOC.produced = new Good[] { CASH };
     ENFORCER_BLOC.features = new Good[] { IS_ADMIN };
     
@@ -340,7 +357,7 @@ public class GameContent {
     ECOLOGIST_STATION.tint = TINT_MILITARY;
     ECOLOGIST_STATION.setDimensions(4, 4, 1);
     ECOLOGIST_STATION.setBuildMaterials(PLASTICS, 7, PARTS, 1);
-    ECOLOGIST_STATION.setWorkerTypes(HUNTER);
+    ECOLOGIST_STATION.setWorkerTypes(ECOLOGIST);
     ECOLOGIST_STATION.worksBeforeBuilt = true;
     ECOLOGIST_STATION.maxWorkers = 2;
     ECOLOGIST_STATION.maxHealth  = 100;
@@ -350,7 +367,7 @@ public class GameContent {
     ENGINEER_STATION.tint = TINT_INDUSTRIAL;
     ENGINEER_STATION.setDimensions(2, 2, 1);
     ENGINEER_STATION.setBuildMaterials(PARTS, 8);
-    ENGINEER_STATION.setWorkerTypes(WORKER);
+    ENGINEER_STATION.setWorkerTypes(ENGINEER);
     ENGINEER_STATION.needed   = new Good[] { ORES };
     ENGINEER_STATION.produced = new Good[] { PARTS };
     ENGINEER_STATION.maxStock = 3;
@@ -360,7 +377,7 @@ public class GameContent {
     PHYSICIAN_STATION.tint = TINT_INDUSTRIAL;
     PHYSICIAN_STATION.setDimensions(2, 2, 1);
     PHYSICIAN_STATION.setBuildMaterials(PLASTICS, 4, PARTS, 2);
-    PHYSICIAN_STATION.setWorkerTypes(WORKER);
+    PHYSICIAN_STATION.setWorkerTypes(PHYSICIAN);
     PHYSICIAN_STATION.needed   = new Good[] { GREENS };
     PHYSICIAN_STATION.produced = new Good[] { MEDICINE };
     PHYSICIAN_STATION.maxStock = 3;
@@ -374,7 +391,7 @@ public class GameContent {
     STOCK_EXCHANGE.tint = TINT_COMMERCIAL;
     STOCK_EXCHANGE.setDimensions(4, 4, 1);
     STOCK_EXCHANGE.setBuildMaterials(PLASTICS, 4, PARTS, 2);
-    STOCK_EXCHANGE.setWorkerTypes(MERCHANT);
+    STOCK_EXCHANGE.setWorkerTypes(VENDOR);
     STOCK_EXCHANGE.needed   = MARKET_GOODS;
     STOCK_EXCHANGE.features = new Good[] { IS_VENDOR };
     
@@ -382,7 +399,8 @@ public class GameContent {
     SUPPLY_DEPOT.tint = TINT_COMMERCIAL;
     SUPPLY_DEPOT.setDimensions(3, 3, 1);
     SUPPLY_DEPOT.setBuildMaterials(PLASTICS, 4, PARTS, 2);
-    SUPPLY_DEPOT.setWorkerTypes(PORTER, WORKER);
+    SUPPLY_DEPOT.setWorkerTypes(PYON);
+    SUPPLY_DEPOT.maxWorkers = 2;
     SUPPLY_DEPOT.worksBeforeBuilt = true;
     SUPPLY_DEPOT.features = new Good[] { IS_TRADER };
     
@@ -399,7 +417,7 @@ public class GameContent {
       t.tint = TINT_RELIGIOUS;
       t.setDimensions(6, 6, 3);
       t.setBuildMaterials(PARTS, 15);
-      t.setWorkerTypes(PRIEST);
+      //t.setWorkerTypes(PRIEST);
       t.maxWorkers      = 1;
       t.maxHealth       = 100;
       t.maxResidents    = 1;
@@ -444,7 +462,7 @@ public class GameContent {
     HOLDING.tint = TINT_LITE_RESIDENTIAL;
     HOLDING.setDimensions(2, 2, 1);
     HOLDING.setBuildMaterials(PLASTICS, 1);
-    HOLDING.setWorkerTypes(CITIZEN);
+    HOLDING.setWorkerTypes(PYON);
     HOLDING.homeFoods    = FOOD_TYPES;
     HOLDING.maxResidents = 4;
     HOLDING.maxStock     = 1;
@@ -476,7 +494,7 @@ public class GameContent {
     NURSERY.tint = TINT_LITE_INDUSTRIAL;
     NURSERY.setDimensions(2, 2, 1);
     NURSERY.setBuildMaterials(PLASTICS, 5, PARTS, 2);
-    NURSERY.setWorkerTypes(WORKER);
+    NURSERY.setWorkerTypes(PYON);
     NURSERY.worksBeforeBuilt = true;
     NURSERY.gatherFlag = IS_CROP;
     NURSERY.produced   = CROP_TYPES;
@@ -488,7 +506,7 @@ public class GameContent {
     FORMER_BAY.tint = TINT_LITE_INDUSTRIAL;
     FORMER_BAY.setDimensions(2, 2, 1);
     FORMER_BAY.setBuildMaterials(PLASTICS, 5, PARTS, 2);
-    FORMER_BAY.setWorkerTypes(WORKER);
+    FORMER_BAY.setWorkerTypes(PYON);
     FORMER_BAY.worksBeforeBuilt = true;
     FORMER_BAY.gatherFlag = IS_TREE;
     FORMER_BAY.maxStock   = 25;
@@ -500,7 +518,7 @@ public class GameContent {
     ORE_SMELTER.tint = TINT_LITE_INDUSTRIAL;
     ORE_SMELTER.setDimensions(2, 2, 1);
     ORE_SMELTER.setBuildMaterials(PLASTICS, 2, PARTS, 5);
-    ORE_SMELTER.setWorkerTypes(WORKER);
+    ORE_SMELTER.setWorkerTypes(PYON);
     ORE_SMELTER.worksBeforeBuilt = true;
     ORE_SMELTER.gatherFlag = IS_STONE;
     ORE_SMELTER.maxStock   = 25;

@@ -79,7 +79,7 @@ public class TestTrading extends Test {
     
     CityMapPlanning.placeStructure(WALKWAY, map, true, 1, 5, 8, 1);
     
-    fillAllVacancies(map, CITIZEN);
+    fillAllVacancies(map, PYON);
     int initFunds = 100;
     homeC.initFunds(initFunds);
     
