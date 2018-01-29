@@ -55,7 +55,11 @@ public class Selection {
       hoverSpot = stage.tileAt(groundPoint.x, groundPoint.y);
       
       final Element owner = stage.above(hoverSpot);
-      if (owner != null && owner.canRender(base, port) && owner.isVenue()) {
+      if (
+        owner != null &&
+        owner.canRender(base, port) &&
+        owner.type().isBuilding()
+      ) {
         hoverVenue = (Building) owner;
       }
       else hoverVenue = null;

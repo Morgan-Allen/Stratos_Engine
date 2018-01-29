@@ -26,7 +26,7 @@ public class TestExploring extends Test {
     lodge.enterMap(map, 4, 4, 1);
     Test.fillWorkVacancies(lodge);
     
-    CityMapTerrain.populateAnimals(map, TAPIR);
+    CityMapTerrain.populateAnimals(map, QUDU);
     
     int tilesSeen = 0, tilesOpen = 0;
     boolean exploreOkay = false;

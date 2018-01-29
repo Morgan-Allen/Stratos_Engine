@@ -23,7 +23,7 @@ public class TestEcology extends Test {
     CityMap map = Test.setupTestCity(64, ALL_GOODS, true, JUNGLE, MEADOW);
     ActorAsAnimal.reportCycle = graphics;
     
-    Type species[] = { QUAIL, JAGUAR };
+    Type species[] = { VAREEN, MICOVORE };
     Tally <Type> realPops  = new Tally();
     Tally <Type> popLevels = new Tally();
     

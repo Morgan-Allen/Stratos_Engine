@@ -2,6 +2,7 @@
 
 package content;
 import game.*;
+import graphics.cutout.*;
 import util.*;
 import static game.CityMap.*;
 import static game.GameConstants.*;
@@ -73,7 +74,7 @@ public class GameContent {
     };
   
   
-  final static Terrain
+  final public static Terrain
     MEADOW = new Terrain("Meadow", 1),
     JUNGLE = new Terrain("Jungle", 2),
     DESERT = new Terrain("Desert", 3),
@@ -83,7 +84,7 @@ public class GameContent {
       EMPTY, MEADOW, JUNGLE, DESERT, LAKE, OCEAN
     }
   ;
-  final static Type
+  final public static Type
     JUNGLE_TREE1 = new Type(Element.class, "fixture_j_tree1", IS_FIXTURE),
     DESERT_ROCK1 = new Type(Element.class, "fixture_d_rock1", IS_FIXTURE),
     DESERT_ROCK2 = new Type(Element.class, "fixture_d_rock2", IS_FIXTURE),
@@ -93,11 +94,11 @@ public class GameContent {
     ALL_ROCKS[] = { DESERT_ROCK1, DESERT_ROCK2 },
     ALL_OILS[] = { CLAY_BANK1 }
   ;
-  final static WalkerType
-    TAPIR   = new WalkerType(ActorAsAnimal.class, "animal_tapir" , IS_ANIMAL_ACT),
-    QUAIL   = new WalkerType(ActorAsAnimal.class, "animal_quail" , IS_ANIMAL_ACT),
-    JAGUAR  = new WalkerType(ActorAsAnimal.class, "animal_jaguar", IS_ANIMAL_ACT),
-    ALL_ANIMALS[] = { TAPIR, QUAIL, JAGUAR }
+  final public static WalkerType
+    QUDU     = new WalkerType(ActorAsAnimal.class, "animal_qudu"    , IS_ANIMAL_ACT),
+    VAREEN   = new WalkerType(ActorAsAnimal.class, "animal_vareen"  , IS_ANIMAL_ACT),
+    MICOVORE = new WalkerType(ActorAsAnimal.class, "animal_micovore", IS_ANIMAL_ACT),
+    ALL_ANIMALS[] = { QUDU, VAREEN, MICOVORE }
   ;
   static {
     JUNGLE.attachFixtures(JUNGLE_TREE1, 0.50f);
@@ -121,26 +122,26 @@ public class GameContent {
     LAKE.isWater = true;
     
     //  TODO:  UNIFY WITH WALKER-TYPES BELOW!
-    TAPIR .name        = "Tapir";
-    TAPIR .habitats    = new Terrain[] { JUNGLE, MEADOW };
-    TAPIR .predator    = false;
-    TAPIR .meleeDamage = 1;
-    TAPIR .armourClass = 2;
-    TAPIR .maxHealth   = 8;
+    QUDU .name        = "Qudu";
+    QUDU .habitats    = new Terrain[] { JUNGLE, MEADOW };
+    QUDU .predator    = false;
+    QUDU .meleeDamage = 1;
+    QUDU .armourClass = 2;
+    QUDU .maxHealth   = 8;
     
-    QUAIL .name        = "Quail";
-    QUAIL .habitats    = new Terrain[] { MEADOW, DESERT };
-    QUAIL .predator    = false;
-    QUAIL .meleeDamage = 0;
-    QUAIL .armourClass = 0;
-    QUAIL .maxHealth   = 2;
+    VAREEN .name        = "Vareen";
+    VAREEN .habitats    = new Terrain[] { MEADOW, DESERT };
+    VAREEN .predator    = false;
+    VAREEN .meleeDamage = 0;
+    VAREEN .armourClass = 0;
+    VAREEN .maxHealth   = 2;
     
-    JAGUAR.name        = "Jaguar";
-    JAGUAR.habitats    = new Terrain[] { JUNGLE };
-    JAGUAR.predator    = true;
-    JAGUAR.meleeDamage = 5;
-    JAGUAR.armourClass = 1;
-    JAGUAR.maxHealth   = 6;
+    MICOVORE.name        = "Micovore";
+    MICOVORE.habitats    = new Terrain[] { JUNGLE };
+    MICOVORE.predator    = true;
+    MICOVORE.meleeDamage = 5;
+    MICOVORE.armourClass = 1;
+    MICOVORE.maxHealth   = 6;
     
     for (Type s : ALL_ANIMALS) {
       s.rangeDamage = -1;
@@ -179,7 +180,7 @@ public class GameContent {
   }
   
   
-  final static WalkerType
+  final public static WalkerType
     NOBLE     = new WalkerType(ActorAsPerson.class, "actor_noble"    , IS_PERSON_ACT, CLASS_NOBLE ),
     CONSORT   = new WalkerType(ActorAsPerson.class, "actor_consort"  , IS_PERSON_ACT, CLASS_NOBLE ),
     
@@ -272,7 +273,7 @@ public class GameContent {
   }
   
   
-  final static BuildType
+  final public static BuildType
     
     //  TODO:  Add Runner Market and Pseer/Kommando School.
     
@@ -318,12 +319,23 @@ public class GameContent {
     SCIENCE_BUILDINGS[] = { ENGINEER_STATION, PHYSICIAN_STATION },
     PSI_SCHOOL_BUILDINGS[] = {
       SCHOOL_LOG, SCHOOL_COL, SCHOOL_LEN, SCHOOL_SHA, SCHOOL_TEK, SCHOOL_SPA
-    }
+    },
+    ALL_BUILDINGS[] = (BuildType[]) Visit.compose(BuildType.class,
+      MILITARY_BUILDINGS, SCIENCE_BUILDINGS, ECONOMIC_BUILDINGS,
+      //RESIDENTIAL_BUILDINGS,
+      //RESOURCE_BUILDINGS,
+      INFRASTRUCTURE_BUILDINGS
+    )
   ;
   static {
 
     BASTION.name = "Bastion";
     BASTION.tint = TINT_MILITARY;
+    BASTION.model = CutoutModel.fromImage(
+      GameContent.class, "bastion_model",
+      "media/Buildings/bastion.png", 5, 2
+    );
+    
     BASTION.setDimensions(5, 5, 2);
     BASTION.maxHealth = 300;
     BASTION.setBuildMaterials(PLASTICS, 10, PARTS, 25);
@@ -543,7 +555,7 @@ public class GameContent {
     World world = new World(ALL_GOODS);
     City  cityA = new City(world);
     City  cityB = new City(world);
-    world.assignCitizenTypes(ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES);
+    world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES);
     
     cityA.setName("Xochimilco");
     cityA.setWorldCoords(1, 1);

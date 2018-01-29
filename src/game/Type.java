@@ -1,8 +1,9 @@
 
 
 package game;
-import static game.GameConstants.*;
+import graphics.common.*;
 import util.*;
+import static game.GameConstants.*;
 import java.lang.reflect.*;
 
 
@@ -95,7 +96,7 @@ public class Type extends Index.Entry implements Session.Saveable {
     */
   public String name, namesRange[];
   public int tint = BLACK_COLOR;
-  
+  public ModelAsset model = null;
   
   public Class baseClass;
   public int category;
@@ -347,7 +348,26 @@ public class Type extends Index.Entry implements Session.Saveable {
   public String toString() {
     return name;
   }
+  
+  
+  public Sprite makeSpriteFor(Element e) {
+    if (model == null) return null;
+    return model.makeSprite();
+  }
+  
+  
+  public void prepareMedia(Sprite s, Element e) {
+    return;
+  }
+  
 }
+
+
+
+
+
+
+
 
 
 

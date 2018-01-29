@@ -7,7 +7,6 @@ package start;
 import graphics.common.*;
 import graphics.widgets.*;
 import util.*;
-
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.GL20;
 
@@ -18,7 +17,7 @@ public final class PlayLoop implements ApplicationListener {
   
   /**  Fields and constant definitions-
     */
-  private static boolean
+  public static boolean
     verbose = false;
   
   final public static String DEFAULT_INIT_PACKAGES[] = {
@@ -26,7 +25,7 @@ public final class PlayLoop implements ApplicationListener {
   };
   
   public final static int
-    UPDATES_PER_SECOND = 10,
+    UPDATES_PER_SECOND = 1,
     FRAMES_PER_SECOND  = 60,
     
     MIN_SLEEP    = 10,
@@ -200,6 +199,7 @@ public final class PlayLoop implements ApplicationListener {
   
   
   private static boolean advanceLoop() {
+    
     final long time = timeMS(), frameGap = time - lastFrame, updateGap;
     final int FRAME_INTERVAL  = 1000 / FRAMES_PER_SECOND;
     final int UPDATE_INTERVAL = (int) (
@@ -272,7 +272,7 @@ public final class PlayLoop implements ApplicationListener {
       lastUpdate = lastFrame = time;
       return true;
     }
-    
+
     //  TODO:  I'm updating graphics as fast as possible for the moment, since
     //  I get occasional flicker problems otherwise.  Still seems wasteful,
     //  mind...
@@ -286,14 +286,17 @@ public final class PlayLoop implements ApplicationListener {
       if (playing != null) {
         playing.renderVisuals(rendering);
       }
-      final HUD UI = playing.UI(false);
+      
+      final HUD UI = playing == null ? null : playing.UI(false);
       if (UI != null) {
         UI.updateInput();
         UI.renderWorldFX();
       }
+      
       rendering.renderDisplay(FRAMES_PER_SECOND);
       rendering.renderUI(UI);
       KeyInput.updateInputs();
+      
       lastFrame = time;
       numFrameUpdates++;
       
@@ -325,6 +328,7 @@ public final class PlayLoop implements ApplicationListener {
         lastUpdate += UPDATE_INTERVAL;
       }
     }
+    
     return true;
   }
   

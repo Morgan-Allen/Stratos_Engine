@@ -21,7 +21,7 @@ public class PlayUI extends HUD implements UIConstants {
     );
   
   CityMap stage;
-  City base;
+  City    base;
   Element home;
   
   Button     installTab ;
@@ -43,17 +43,19 @@ public class PlayUI extends HUD implements UIConstants {
   public PlayUI(Rendering rendering) {
     super(rendering);
     
-    installTab = new Button(
-      this, "install_button", INSTALL_TAB_IMG, "Install Facilities"
-    ) {
-      protected void whenClicked() {
-        if (installPane == detailPane) setDetailPane(null);
-        else setDetailPane(installPane);
-      }
-    };
-    installTab.alignLeft  (0, PANEL_TAB_SIZE );
-    installTab.alignBottom(0, BAR_BUTTON_SIZE);
-    installTab.attachTo(this);
+    if (INSTALL_TAB_IMG != null) {
+      installTab = new Button(
+        this, "install_button", INSTALL_TAB_IMG, "Install Facilities"
+      ) {
+        protected void whenClicked() {
+          if (installPane == detailPane) setDetailPane(null);
+          else setDetailPane(installPane);
+        }
+      };
+      installTab.alignLeft  (0, PANEL_TAB_SIZE );
+      installTab.alignBottom(0, BAR_BUTTON_SIZE);
+      installTab.attachTo(this);
+    }
     
     installPane = new InstallPane(this);
     
@@ -70,14 +72,22 @@ public class PlayUI extends HUD implements UIConstants {
   
   
   public void assignParameters(CityMap stage, City base) {
+    if (stage == null || base == null) {
+      I.complain("\nCANNOT ASSIGN NULL STAGE/BASE TO UI!");
+      return;
+    }
     this.stage = stage;
     this.base  = base ;
   }
   
   
   public void assignHomePoint(Element home) {
+    if (home == null) {
+      I.complain("\nCANNOT ASSIGN NULL HOME TO UI!");
+      return;
+    }
     this.home = home;
-    rendering.view.lookedAt.setTo(home.position());
+    rendering.view.lookedAt.setTo(home.trackPosition());
   }
   
   
@@ -161,8 +171,11 @@ public class PlayUI extends HUD implements UIConstants {
     */
   public void updateInput() {
     super.updateInput();
-    selection.updateSelection(stage, base);
-    tracking.updateTracking(stage, selectionFocus());
+    
+    if (stage != null && base != null) {
+      selection.updateSelection(stage, base);
+      tracking.updateTracking(stage, selectionFocus());
+    }
   }
   
   

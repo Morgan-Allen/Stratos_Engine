@@ -35,6 +35,7 @@ public class World implements Session.Saveable {
   final public WorldSettings settings = new WorldSettings(this);
   
   Good goodTypes   [] = {};
+  Type buildTypes  [] = {};
   Type citizenTypes[] = {};
   Type soldierTypes[] = {};
   Type nobleTypes  [] = {};
@@ -49,7 +50,17 @@ public class World implements Session.Saveable {
   
   
   public World(Good goodTypes[]) {
-    this.goodTypes = goodTypes;
+    this.goodTypes  = goodTypes ;
+  }
+  
+  
+  public void assignTypes(
+    Type buildTypes[], Type citizens[], Type soldiers[], Type nobles[]
+  ) {
+    this.buildTypes   = buildTypes;
+    this.citizenTypes = citizens  ;
+    this.soldierTypes = soldiers  ;
+    this.nobleTypes   = nobles    ;
   }
   
   
@@ -58,6 +69,7 @@ public class World implements Session.Saveable {
     
     settings.loadState(s);
     goodTypes    = (Good[]) s.loadObjectArray(Good.class);
+    buildTypes   = (Type[]) s.loadObjectArray(Type.class);
     citizenTypes = (Type[]) s.loadObjectArray(Type.class);
     soldierTypes = (Type[]) s.loadObjectArray(Type.class);
     nobleTypes   = (Type[]) s.loadObjectArray(Type.class);
@@ -92,6 +104,7 @@ public class World implements Session.Saveable {
     
     settings.saveState(s);
     s.saveObjectArray(goodTypes   );
+    s.saveObjectArray(buildTypes  );
     s.saveObjectArray(citizenTypes);
     s.saveObjectArray(soldierTypes);
     s.saveObjectArray(nobleTypes  );
@@ -120,15 +133,10 @@ public class World implements Session.Saveable {
   }
   
   
-  /**  Assign citizen types:
+  
+  /**  Accessing types:
     */
-  public void assignCitizenTypes(
-    Type citizens[], Type soldiers[], Type nobles[]
-  ) {
-    this.citizenTypes = citizens;
-    this.soldierTypes = soldiers;
-    this.nobleTypes   = nobles  ;
-  }
+  public Type[] buildTypes() { return buildTypes; }
   
   
   

@@ -1,25 +1,8 @@
 
-/*
-package src.stratos.desktop;
 
-import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import start.MyGdxGame;
-
-
-
-public class DesktopLauncher {
-  public static void main (String[] arg) {
-    LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-    new LwjglApplication(new MyGdxGame(), config);
-  }
-}
-//*/
-
-
-//*
 
 package start;
+import content.*;
 import util.*;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
@@ -37,9 +20,13 @@ public class DesktopLauncher {
   
   
   public static void main (String[] arg) {
-    //new LwjglApplication(new MyGdxGame(), getConfig());
+    
+    //Assets.callsVerbose = true;
+    //Assets.extraVerbose = true;
+    //PlayLoop.verbose = true;
+    
     new LwjglApplication(new PlayLoop(), getConfig());
-    ///MainGame.playScenario(new DebugStage());
+    MainGame.playScenario(new ScenarioBlankMap());
   }
   
   
@@ -51,12 +38,8 @@ public class DesktopLauncher {
       config = new LwjglApplicationConfiguration()
     ;
     config.title = "Stratos";
-    //config.useGL30      = false;
-    //config.vSyncEnabled = true;
     config.width  = Nums.min(DEFAULT_WIDTH , SS.width  - 100);
     config.height = Nums.min(DEFAULT_HEIGHT, SS.height - 100);
-    //config.foregroundFPS = DEFAULT_HERTZ;
-    //config.backgroundFPS = DEFAULT_HERTZ;
     config.resizable  = false;
     config.fullscreen = false;
     
@@ -70,7 +53,6 @@ public class DesktopLauncher {
     return config;
   }
 }
-//*/
 
 
 

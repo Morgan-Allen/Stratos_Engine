@@ -29,7 +29,7 @@ public class TestSieging extends Test {
     );
     homeC.setName("Home City");
     awayC.setName("Away City");
-    world.assignCitizenTypes(ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES);
+    world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES);
     world.addCities(homeC, awayC);
     
     world.settings.toggleFog     = false;

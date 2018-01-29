@@ -1,6 +1,8 @@
-
+  
 
 package game;
+import graphics.common.*;
+import start.*;
 import util.*;
 import static game.GameConstants.*;
 import static util.TileConstants.*;
@@ -34,6 +36,7 @@ public class CityMap implements Session.Saveable {
   
   final public City city;
   int time = 0;
+  int numUpdates = 0, ticksPS = PlayLoop.UPDATES_PER_SECOND;
   
   final public CityMapPlanning planning = new CityMapPlanning(this);
   final public CityMapFog      fog      = new CityMapFog     (this);
@@ -70,6 +73,9 @@ public class CityMap implements Session.Saveable {
     
     city = (City) s.loadObject();
     time = s.loadInt();
+    
+    numUpdates = s.loadInt();
+    ticksPS    = s.loadInt();
     
     planning.loadState(s);
     fog     .loadState(s);
@@ -118,6 +124,9 @@ public class CityMap implements Session.Saveable {
     
     s.saveObject(city);
     s.saveInt(time);
+    
+    s.saveInt(numUpdates);
+    s.saveInt(ticksPS   );
     
     planning.saveState(s);
     fog     .saveState(s);
@@ -357,11 +366,13 @@ public class CityMap implements Session.Saveable {
   
   
   public Element above(Tile t) {
+    if (t == null) return null;
     return above(t.x, t.y);
   }
   
   
   public Element above(Coord c) {
+    if (c == null) return null;
     return above(c.x, c.y);
   }
   
@@ -373,6 +384,7 @@ public class CityMap implements Session.Saveable {
   
   
   public int pathType(Coord c) {
+    if (c == null) return PATH_BLOCK;
     return pathType(c.x, c.y);
   }
   
@@ -436,7 +448,7 @@ public class CityMap implements Session.Saveable {
   
   /**  Active updates:
     */
-  void update() {
+  public void update() {
     
     if (city != null) {
       city.world.updateWithTime(time);
@@ -520,6 +532,54 @@ public class CityMap implements Session.Saveable {
     
     return all;
   }
+  
+  
+  
+  /**  Rendering, debug and interface methods-
+    */
+  public void renderStage(Rendering rendering, City playing) {
+    float renderTime = (numUpdates + Rendering.frameAlpha()) / ticksPS;
+    
+    /*
+    terrain.readyAllMeshes();
+    terrain.renderFor(area(), rendering, Rendering.activeTime());
+    
+    final FogMap fog = playing.fogMap();
+    if (fog != null) fog.updateAndRender(renderTime, rendering);
+    
+    for (Ghost ghost : ephemera.visibleFor(rendering, playing, renderTime)) {
+      ghost.renderFor(rendering, playing);
+    }
+    //*/
+    
+    //  TODO:  All the elements need to be rendered as well.  (You need to do
+    //  some gradient descent, basically.)
+    
+    for (Building venue : buildings) {
+      if (! venue.canRender(playing, rendering.view)) continue;
+      venue.renderElement(rendering, playing);
+    }
+    
+    for (Actor actor : actors) {
+      if (! actor.canRender(playing, rendering.view)) continue;
+      actor.renderElement(rendering, playing);
+    }
+    
+    /*
+    for (Base base : allBases) {
+      for (Mission mission : base.missions()) {
+        if (! mission.canRender(playing, rendering.view)) continue;
+        mission.renderFlag(rendering);
+      }
+    }
+    //*/
+    
+  }
+  
+  
+  //public Ephemera ephemera() {
+    //return ephemera;
+  //}
 }
 
 

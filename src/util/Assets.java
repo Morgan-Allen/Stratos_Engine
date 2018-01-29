@@ -16,7 +16,7 @@ public class Assets {
   
   final static boolean EXCLUDE_BASE_DIR = false;
   final public static char REP_SEP = '/';
-  private static boolean
+  public static boolean
     callsVerbose = false,
     extraVerbose = false;
   
@@ -125,8 +125,10 @@ public class Assets {
     while (true) {
       final long time = System.currentTimeMillis(), timeSpent = time - initTime;
       if (extraVerbose) {
-        I.say("  Advancing load loop, time: "+timeSpent+"/"+timeLimit);
+        I.say("\nAdvancing load loop, time: "+timeSpent+"/"+timeLimit);
         I.say("  Current system time: "+time+", init: "+initTime);
+        I.say("  Classes to load: "+classesToLoad.size());
+        I.say("  Assets to load:  "+assetsToLoad .size());
       }
       
       if (timeLimit > 0 && timeSpent >= timeLimit) {
@@ -134,8 +136,17 @@ public class Assets {
         return;
       }
       
-      //  While there are still classes to load, load those-
-      if (classesToLoad.size() > 0) {
+      //  Try loading any registered assets first-
+      if (assetsToLoad.size() > 0) {
+        final Loadable asset = assetsToLoad.first();
+        if (extraVerbose) {
+          I.say("  Begun loading of:  "+asset.assetID+"...");
+        }
+        loadNow(asset);
+      }
+      
+      //  Otherwise, while there are still classes to load, load those-
+      else if (classesToLoad.size() > 0) {
         final String className = classesToLoad.removeFirst();
         try {
           final Class match = Class.forName(className);
@@ -147,13 +158,7 @@ public class Assets {
         }
       }
       
-      //  Otherwise, move on to loading any registered assets-
-      else if (assetsToLoad.size() > 0) {
-        final Loadable asset = assetsToLoad.first();
-        if (extraVerbose) I.say("  Begun loading of:  "+asset.assetID+"...");
-        loadNow(asset);
-      }
-      
+      //  Otherwise, return-
       else {
         if (extraVerbose) I.say("  ...Load loop done for now.");
         return;
@@ -163,21 +168,16 @@ public class Assets {
   
   
   public static float loadProgress() {
-    final int classTotal = classesToLoad.size() + classesLoaded.size();
-    final float classProgress = (classTotal == 0) ?
-      1 : classesLoaded.size() * 1f / classTotal;
     
-    final int assetTotal = assetsToLoad.size() + assetsLoaded.size();
-    final float assetProgress = (assetTotal == 0) ?
-      1 : assetsLoaded.size() * 1f / assetTotal;
+    int classTotal = classesToLoad.size() + classesLoaded.size();
+    if (classTotal == 0) return 1;
     
-    if (classProgress == 1 && assetTotal == 0) return 1;
-    float progress = 0;
-    progress += classProgress * 0.1f;
-    progress += assetProgress * 0.9f;
+    int classDone = classesLoaded.size();
+    if (assetsToLoad.size() > 0) classDone = Nums.max(0, classDone - 1);
+    
+    float progress = classDone * 1f / classTotal;
     
     if (extraVerbose && progress < 1) {
-      I.say("Class/assets load progress: "+classProgress+"/"+assetProgress);
       I.say("Total load progress: "+progress);
     }
     return progress;
@@ -200,7 +200,7 @@ public class Assets {
   
   public static void loadNow(Loadable asset) {
     if (asset == null) return;
-    if (extraVerbose) I.say("  Begun loading of:  "+asset.assetID+"...");
+    if (extraVerbose) I.say("  Loading asset now:  "+asset.assetID+"...");
     //
     //  We have some safety-checks to ensure assets don't get loaded twice, but
     //  to avoid the queue being blocked we remove them either way.

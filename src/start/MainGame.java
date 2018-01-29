@@ -1,18 +1,16 @@
 
 
 package start;
-//import game.stage.*;
-//import gameUI.play.*;
+import game.*;
+import gameUI.play.*;
 import graphics.common.*;
 import graphics.widgets.*;
 import util.*;
 
 
 
-/*
-
 public class MainGame implements Playable {
-
+  
   final static int
     DO_PLAY      = -1,
     DO_SAVE      =  0,
@@ -24,32 +22,29 @@ public class MainGame implements Playable {
   static MainGame current;
   int nextOp = DO_PLAY;
   
-  Scenario scenario;
-  //MainUI mainUI;
-  //LoadingScreen loadScreen;
+  CityMapScenario scenario;
   
   
   
   /**  Static setup methods for convenience-
     */
-/*
-  static MainGame initGame() {
+  static MainGame mainGame() {
     if (current != null) return current;
     PlayLoop.setupAndLoop(current = new MainGame());
     return current;
   }
   
   
-  public static Scenario currentScenario() {
-    if (current == null || current.scenario == null) return null;
-    return current.scenario;
+  public static void playScenario(CityMapScenario s) {
+    mainGame();
+    current.scenario = s;
+    current.nextOp   = DO_LOAD;
   }
   
   
-  public static void playScenario(Scenario s) {
-    initGame();
-    current.scenario = s;
-    current.nextOp   = DO_LOAD;
+  public static CityMapScenario currentScenario() {
+    if (current == null || current.scenario == null) return null;
+    return current.scenario;
   }
   
   
@@ -67,7 +62,7 @@ public class MainGame implements Playable {
   
   public static PlayUI playUI() {
     if (currentScenario() == null) return null;
-    return current.scenario.UI;
+    return current.scenario.playUI();
   }
   
   
@@ -81,7 +76,7 @@ public class MainGame implements Playable {
   protected boolean loadScenario(String savePath) {
     if (Assets.exists(savePath)) try {
       Session s = Session.loadSession(savePath, true);
-      Scenario loaded = (Scenario) s.loaded()[0];
+      CityMapScenario loaded = (CityMapScenario) s.loaded()[0];
       scenario = loaded;
       scenario.afterLoading(this);
       
@@ -112,11 +107,8 @@ public class MainGame implements Playable {
   
   
   
-  
-  
   /**  PlayLoop implementation-
     */
-/*
   public void beginGameSetup() {
     //  TODO:  Set up main menu and other auxiliary data.
   }
@@ -197,8 +189,6 @@ public class MainGame implements Playable {
     return false;
   }
 }
-
-//*/
 
 
 

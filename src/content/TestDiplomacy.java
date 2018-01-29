@@ -29,7 +29,7 @@ public class TestDiplomacy extends Test {
     CityMap map   = CityMapTerrain.generateTerrain(
       homeC, 32, 0, MEADOW, JUNGLE
     );
-    world.assignCitizenTypes(ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES);
+    world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES);
     world.addCities(homeC, awayC, neutC);
     homeC.setName("Home City");
     awayC.setName("Away City");

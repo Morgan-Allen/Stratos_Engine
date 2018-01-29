@@ -279,7 +279,7 @@ public class TestWorld extends Test {
     {
       //final Good goods[] = { CLAY, MAIZE, WOOD, RAW_COTTON, POTTERY, COTTON };
       World world = new World(ALL_GOODS);
-      world.assignCitizenTypes(ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES);
+      world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES);
       
       City from[] = new City[6];
       City goes[] = new City[4];
@@ -362,7 +362,7 @@ public class TestWorld extends Test {
     //  each of the compass-points on the map, and run the simulation for a
     //  while to ensure that invasions take place at reasonable frequency-
     World world = new World(ALL_GOODS);
-    world.assignCitizenTypes(ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES);
+    world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES);
     
     final int NUM_CITIES = 4;
     final String names[] = { "Tollan", "Texcoco", "Tlacopan", "Tlaxcala" };
@@ -510,7 +510,7 @@ public class TestWorld extends Test {
   
   static City[] configWeakStrongCityPair() {
     World world = new World(ALL_GOODS);
-    world.assignCitizenTypes(ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES);
+    world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES);
     City a = new City(world);
     City b = new City(world);
     a.setName("Victim City" );

@@ -1,8 +1,8 @@
 
 
+
 package gameUI.play;
 import game.*;
-import gameUI.debug.*;
 import graphics.widgets.*;
 import util.*;
 import com.badlogic.gdx.Input.Keys;
@@ -21,48 +21,48 @@ public class InstallPane extends DetailPane {
   }
   
   
-  
   protected void updateState() {
     
     this.text.setText("");
     final Description d = this.text;
     
     d.append("\nFacilities: ");
-    for (final Blueprint type : UI.base.faction().canBuild()) {
-      if (! type.canBuildManually(UI.base)) continue;
+    for (final Type type : UI.base.world.buildTypes()) {
+      //if (! type.canBuildManually(UI.base)) continue;
       d.append("\n  ");
       d.append(type.name, new Description.Link() {
         public void whenClicked(Object context) {
           beginInstallTask(type);
         }
       });
-      d.append(" ("+type.buildCost+" Cr)");
+      //d.append(" ("+type.buildCost+" Cr)");
     }
     
     super.updateState();
   }
   
   
-  private void beginInstallTask(Blueprint type) {
-    final Venue placed = type.sampleFor(UI.base.faction());
-    final Stage stage  = UI.stage;
+  private void beginInstallTask(Type type) {
+    final Building placed = (Building) type.generate();
+    final CityMap stage  = UI.stage;
     
     final PlayTask task = new PlayTask() {
       public void doTask(PlayUI UI) {
-        final Spot puts = UI.selection.hoverSpot();
-        final Account reasons = new Account();
+        final Tile puts = UI.selection.hoverSpot();
+        //final Account reasons = new Account();
         boolean canPlace = false;
         
         if (puts != null) {
-          placed.setPosition(stage, puts.x + 0.5f, puts.y + 0.5f);
-          if (placed.canPlace(reasons)) canPlace = true;
+          placed.setLocation(puts, stage);
+          if (placed.canPlace(stage, puts.x, puts.y)) canPlace = true;
           placed.renderPreview(UI.rendering, canPlace);
         }
         
         if (UI.mouseClicked()) {
           if (canPlace) {
-            placed.enterStage(stage, puts.x + 0.5f, puts.y + 0.5f, false);
-            UI.base.incCredits(0 - placed.blueprint().buildCost);
+            placed.enterMap(stage, puts.x, puts.y, 0.0f);
+            //placed.enterStage(stage, puts.x + 0.5f, puts.y + 0.5f, false);
+            //UI.base.incCredits(0 - placed.blueprint().buildCost);
           }
           UI.assignTask(null);
         }

@@ -2,7 +2,7 @@
 
 package game;
 import gameUI.play.*;
-import graphics.common.Viewport;
+import graphics.common.*;
 import util.*;
 import static game.CityMap.*;
 import static game.GameConstants.*;
@@ -33,6 +33,8 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   
   private List <Actor> focused = null;
   private Object pathFlag;  //  Note- used during temporary search.
+  
+  private Sprite sprite = null;
   
   
   public Element(Type type) {
@@ -84,25 +86,25 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   
   /**  Entering and exiting the map-
     */
-  Visit <Tile> footprint(CityMap map) {
+  public Visit <Tile> footprint(CityMap map) {
     if (at == null) return map.tilesAround(0, 0, 0, 0);
     return map.tilesUnder(at.x, at.y, type.wide, type.high);
   }
   
   
-  Visit <Tile> perimeter(CityMap map) {
+  public Visit <Tile> perimeter(CityMap map) {
     if (at == null) return map.tilesAround(0, 0, 0, 0);
     return map.tilesAround(at.x, at.y, type.wide, type.high);
   }
   
   
-  Box2D area() {
+  public Box2D area() {
     if (at == null) return null;
     return new Box2D(at.x - 0.5f, at.y - 0.5f, type.wide, type.high);
   }
   
   
-  Tile centre() {
+  public Tile centre() {
     if (at == null) return null;
     return map.tileAt(
       at.x + (type.wide / 2),
@@ -467,6 +469,52 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   public Vec3D trackPosition() {
     if (at == null) return new Vec3D();
     return new Vec3D(at.x, at.y, 0);
+  }
+  
+  
+  public Sprite sprite() {
+    if (sprite == null) {
+      sprite = type.makeSpriteFor(this);
+      if (sprite != null) type.prepareMedia(sprite, this);
+    }
+    return sprite;
+  }
+  
+  
+  public boolean canRender(City base, Viewport view) {
+    final Sprite s = sprite();
+    if (s == null) return false;
+    
+    s.position.set(at.x + 0.5f, at.y + 0.5f, 0);
+    float height = type.deep;
+    float radius = 1.5f * Nums.max(type.wide, type.high) / 2;
+    return s != null && view.intersects(s.position, radius + height + 1);
+  }
+  
+  
+  public void renderElement(Rendering rendering, City base) {
+    final Sprite s = sprite();
+    if (onMap()) {
+      final float fog = renderedFog(base);
+      s.fog    = fog;
+      s.colour = Colour.WHITE;
+    }
+    s.readyFor(rendering);
+  }
+  
+  
+  protected float renderedFog(City base) {
+    return sightLevel();
+    //return map.fog.sightLevel(at);
+    //final Vec3D p = trackPosition();
+    //return base.fogMap().renderedFog(p.x, p.y, this);
+  }
+  
+  
+  public void renderPreview(Rendering rendering, boolean canPlace) {
+    final Sprite s = sprite();
+    s.colour = canPlace ? Colour.SOFT_GREEN : Colour.SOFT_RED;
+    renderElement(rendering, null);
   }
   
 }

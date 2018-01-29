@@ -1,40 +1,37 @@
 
 
-//*
 
 package start;
-//import game.stage.*;
-//import game.verse.*;
+import game.*;
 import gameUI.play.*;
 import graphics.common.*;
 import graphics.widgets.*;
 import util.*;
 
 
-/*
 
-public abstract class Scenario implements Session.Saveable {
+public abstract class CityMapScenario implements Session.Saveable {
   
   
   MainGame game;
   boolean setupDone = false;
   
-  Verse verse = null;
-  Stage stage = null;
-  Base  base  = null;
+  World   verse = null;
+  CityMap stage = null;
+  City    base  = null;
   
   PlayUI UI;
   
   
-  protected Scenario() {
+  protected CityMapScenario() {
   }
   
   
-  public Scenario(Session s) throws Exception {
+  public CityMapScenario(Session s) throws Exception {
     s.cacheInstance(this);
-    verse = (Verse) s.loadObject();
-    stage = (Stage) s.loadObject();
-    base  = (Base ) s.loadObject();
+    verse = (World  ) s.loadObject();
+    stage = (CityMap) s.loadObject();
+    base  = (City   ) s.loadObject();
     UI = new PlayUI(PlayLoop.rendering());
     UI.loadState(s);
   }
@@ -51,7 +48,6 @@ public abstract class Scenario implements Session.Saveable {
   
   /**  Initial setup methods-
     */
-/*
   protected void initScenario(MainGame game) {
     setupDone = false;
     this.game = game;
@@ -59,16 +55,13 @@ public abstract class Scenario implements Session.Saveable {
     verse = null;
     stage = null;
     base  = null;
-    
-    verse = createVerse();
+    UI    = null;
+    verse = createWorld();
     stage = createStage(verse);
     base  = createBase(stage, verse);
+    UI    = new PlayUI(PlayLoop.rendering());
     
-    UI = new PlayUI(PlayLoop.rendering());
-    UI.assignPlayer(stage, base);
-    
-    verse.assignStage(stage);
-    stage.setupLocale(base.location(), verse, base);
+    UI.assignParameters(stage, base);
     configScenario(verse, stage, base);
     
     setupDone = true;
@@ -82,10 +75,10 @@ public abstract class Scenario implements Session.Saveable {
   
   
   protected abstract String savePath();
-  protected abstract Verse createVerse();
-  protected abstract Stage createStage(Verse verse);
-  protected abstract Base createBase(Stage stage, Verse verse);
-  protected abstract void configScenario(Verse verse, Stage stage, Base base);
+  protected abstract World createWorld();
+  protected abstract CityMap createStage(World verse);
+  protected abstract City createBase(CityMap stage, World verse);
+  protected abstract void configScenario(World verse, CityMap stage, City base);
   
   
   public float loadProgress() {
@@ -94,7 +87,8 @@ public abstract class Scenario implements Session.Saveable {
   
   
   public void updateScenario() {
-    stage.updateStage(PlayLoop.UPDATES_PER_SECOND);
+    stage.update();
+    //stage.updateStage(PlayLoop.UPDATES_PER_SECOND);
   }
   
   
@@ -107,7 +101,6 @@ public abstract class Scenario implements Session.Saveable {
     return UI;
   }
 }
-//*/
 
 
 
