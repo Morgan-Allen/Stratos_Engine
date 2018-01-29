@@ -1,13 +1,15 @@
 
 
 package game;
+import gameUI.play.*;
+import graphics.common.Viewport;
 import util.*;
 import static game.CityMap.*;
 import static game.GameConstants.*;
 
 
 
-public class Element implements Session.Saveable, Target {
+public class Element implements Session.Saveable, Target, Selection.Focus {
   
   
   /**  Data fields, construction and save/load methods-
@@ -435,6 +437,38 @@ public class Element implements Session.Saveable, Target {
   public int debugTint() {
     return type.tint;
   }
+  
+  
+  public String fullName() {
+    return type.name;
+  }
+  
+  
+  public void whenClicked(Object context) {
+    // TODO Auto-generated method stub
+  }
+  
+  
+  public boolean testSelection(PlayUI UI, City base, Viewport port) {
+    return false;
+  }
+
+
+  public boolean setSelected(PlayUI UI) {
+    return false;
+  }
+  
+  
+  public boolean trackSelection() {
+    return false;
+  }
+  
+  
+  public Vec3D trackPosition() {
+    if (at == null) return new Vec3D();
+    return new Vec3D(at.x, at.y, 0);
+  }
+  
 }
 
 

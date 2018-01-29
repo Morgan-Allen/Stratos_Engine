@@ -1,6 +1,8 @@
 
 
 package game;
+import gameUI.play.*;
+import graphics.common.Viewport;
 import util.*;
 import static game.CityMap.*;
 import static game.GameConstants.*;
@@ -8,7 +10,7 @@ import static util.TileConstants.*;
 
 
 
-public class Tile implements Pathing {
+public class Tile implements Pathing, Selection.Focus {
   
   final public int x, y;
   
@@ -225,6 +227,40 @@ public class Tile implements Pathing {
   public String toString() {
     return "T"+x+"|"+y;
   }
+  
+  
+  public String fullName() {
+    return terrain.name;
+  }
+  
+  
+  public void whenClicked(Object context) {
+    // TODO Auto-generated method stub
+  }
+  
+  
+  public boolean testSelection(PlayUI UI, City base, Viewport port) {
+    return false;
+  }
+
+
+  public boolean setSelected(PlayUI UI) {
+    return false;
+  }
+  
+  
+  public boolean trackSelection() {
+    return false;
+  }
+  
+  
+  public Vec3D trackPosition() {
+    return new Vec3D(x, y, 0);
+  }
 }
+
+
+
+
 
 

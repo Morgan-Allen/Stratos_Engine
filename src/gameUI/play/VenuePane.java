@@ -1,0 +1,132 @@
+
+
+package gameUI.play;
+import game.*;
+import graphics.widgets.*;
+import util.*;
+
+
+
+public class VenuePane extends DetailPane {
+  
+  
+  final Building venue;
+  
+  
+  public VenuePane(HUD UI, Building venue) {
+    super(UI, venue);
+    this.venue = venue;
+  }
+
+  
+  
+  protected void updateState() {
+    
+    this.text.setText("");
+    final Description d = this.text;
+    
+    //  TODO:  RESTORE THIS
+    /*
+    
+    d.append(""+venue.toString()+" (Level "+venue.structure.venueLevel()+")");
+    d.append("\n");
+    
+    d.append("\nHP: ");
+    final int
+      maxHP = venue.structure.maxHP(),
+      HP    = (int) (maxHP - venue.structure.injury())
+    ;
+    d.append(HP+"/"+maxHP);
+    d.append("\nDamage: "+venue.structure.damage());
+    d.append("\nArmour: "+venue.structure.armour());
+    d.append("\nCredits: "+venue.stocks.credits());
+    
+    
+    Series <Upgrade> upgrades = venue.blueprint().upgradesAvailable();
+    if (! upgrades.empty()) {
+      int num = venue.structure.numUpgrades(), max = venue.structure.maxUpgrades();
+      d.append("\n\nUpgrades: ("+num+"/"+max+")");
+      
+      for (final Upgrade u : upgrades) {
+        if (venue.structure.canUpgrade(u) && ! venue.structure.busyUpgrading()) {
+          d.append("\n  ");
+          d.append(new Description.Link(u.name+" ("+u.upgradeCost+")") {
+            public void whenClicked(Object context) {
+              venue.structure.startUpgrade(u);
+            }
+          });
+        }
+        else {
+          continue;
+          //d.append("\n  ");
+          //d.append(u.name);
+        }
+      }
+      for (Upgrade u : venue.structure.upgradesQueued()) {
+        d.append("\n  Upgrading: "+u.name);
+        int prog = (int) (venue.structure.upgradeProgress(u) * 100);
+        d.append(" ("+prog+"%)");
+      }
+      for (Upgrade u : venue.structure.allUpgrades()) {
+        d.append("\n  "+u.name+" (installed)");
+      }
+    }
+    
+    final Blueprint nextLevel = venue.structure.nextVenueLevel();
+    if (nextLevel != null && venue.structure.canUpgradeVenue(nextLevel)) {
+      d.append("\n  Upgrade to ");
+      d.append(new Description.Link(nextLevel.name) {
+        public void whenClicked(Object context) {
+          venue.structure.startVenueUpgrade(nextLevel);
+        }
+      });
+    }
+    
+    for (final Species role : venue.rolesAvailable()) {
+      int num = venue.staff.numMembers(role), max = venue.numOpenings(role);
+      d.append("\n\n"+role.name+" ("+num+"/"+max+")");
+      
+      for (Actor a : venue.staff.members(role)) {
+        d.appendAll("\n  ", a);
+      }
+      if (venue.staff.canHire(role) && ! venue.staff.isBusyHiring()) {
+        final int cost = role.hireCost;
+        d.append("\n  ");
+        d.append(new Description.Link("Hire "+role.name+" ("+cost+" Cr)") {
+          public void whenClicked(Object context) {
+            venue.staff.startHiring(role.sampleFor(venue.faction()), role);
+          }
+        });
+      }
+    }
+    for (Actor a : venue.staff.hiring()) {
+      d.append("\n  Hiring: "+a);
+      int prog = (int) (venue.staff.hiringProgress(a) * 100);
+      d.append(" ("+prog+"%)");
+    }
+    
+    d.append("\n\nVisitors:");
+    for (Element i : venue.inside()) {
+      d.appendAll("\n  ", i);
+    }
+    //*/
+    
+    super.updateState();
+  }
+  
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

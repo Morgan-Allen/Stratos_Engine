@@ -1,6 +1,8 @@
 
 
 package game;
+import gameUI.play.*;
+import graphics.common.Viewport;
 import util.*;
 import static game.CityMap.*;
 import static game.City.*;
@@ -10,7 +12,7 @@ import static game.GameConstants.*;
 
 
 public class Formation implements
-  Session.Saveable, Journeys, TileConstants, Employer
+  Session.Saveable, Journeys, TileConstants, Employer, Selection.Focus
 {
   
   /**  Data fields, setup and save/load methods-
@@ -612,6 +614,43 @@ public class Formation implements
   public String toString() {
     return "Formation ("+homeCity+")";
   }
+  
+  
+  public String fullName() {
+    return "Formation: "+OBJECTIVE_NAMES[objective]+": "+secureFocus;
+  }
+  
+  
+  public void whenClicked(Object context) {
+  }
+  
+  
+  public boolean testSelection(PlayUI UI, City base, Viewport port) {
+    return false;
+  }
+  
+  
+  public boolean setSelected(PlayUI UI) {
+    return false;
+  }
+  
+  
+  public boolean trackSelection() {
+    return false;
+  }
+  
+  
+  public Vec3D trackPosition() {
+    if (secureFocus instanceof Element) {
+      return ((Element) secureFocus).trackPosition();
+    }
+    else {
+      return new Vec3D();
+    }
+  }
+  
+  
+  
 }
 
 
