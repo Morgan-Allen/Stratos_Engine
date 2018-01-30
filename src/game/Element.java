@@ -151,6 +151,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
     stateBits |= FLAG_ON_MAP;
     setLocation(map.tileAt(x, y), map);
     
+    ///I.say("\nEntered map at "+at+": "+this);
     if (! type.mobile) {
       for (Good g : materials()) {
         float need = materialNeed(g);
@@ -158,6 +159,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
       }
       
       for (Tile t : footprint(map)) {
+        ///I.say("  Footprint: "+t);
         if (t.above != null) t.above.exitMap(map);
         map.setAbove(t, this);
       }
@@ -482,7 +484,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   
   public Vec3D trackPosition() {
     if (at == null) return new Vec3D();
-    return new Vec3D(at.x, at.y, 0);
+    return new Vec3D(at.x + (type.wide / 2f), at.y + (type.high / 2f), 0);
   }
   
   
@@ -499,7 +501,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
     final Sprite s = sprite();
     if (s == null) return false;
     
-    s.position.set(at.x + 0.5f, at.y + 0.5f, 0);
+    s.position.set(at.x + (type.wide / 2f), at.y + (type.high / 2f), 0);
     float height = type.deep;
     float radius = 1.5f * Nums.max(type.wide, type.high) / 2;
     return s != null && view.intersects(s.position, radius + height + 1);
@@ -528,7 +530,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   public void renderPreview(Rendering rendering, boolean canPlace, Tile puts) {
     final Sprite s = sprite();
     if (s == null) return;
-    s.position.set(puts.x + 0.5f, puts.y + 0.5f, 0);
+    s.position.set(puts.x + (type.wide / 2f), puts.y + (type.high / 2f), 0);
     s.colour = canPlace ? Colour.SOFT_GREEN : Colour.SOFT_RED;
     renderElement(rendering, null);
   }

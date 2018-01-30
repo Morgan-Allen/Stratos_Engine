@@ -87,6 +87,10 @@ public class Selection {
       else if (hoverVenue != null) hovered = hoverVenue;
       else hovered = hoverSpot;
       
+      if (I.used60Frames) {
+        //I.say("\nHovering over: "+hovered);
+      }
+      
       if (UI.mouseClicked()) presentSelectionPane(hovered);
     }
     

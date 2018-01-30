@@ -589,7 +589,7 @@ public class CityMap implements Session.Saveable {
     
     totalChunks = (size / 4) * (size / 4);
     if (I.used60Frames) {
-      I.say("Displayed "+chunksShown+" chunks out of "+totalChunks);
+      //I.say("Displayed "+chunksShown+" chunks out of "+totalChunks);
     }
     
     /*

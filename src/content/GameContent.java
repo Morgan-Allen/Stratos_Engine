@@ -105,13 +105,13 @@ public class GameContent {
     
     JUNGLE.attachGroundTex(
       GameContent.class, "media/Terrain/",
-      "jungle_ground.png"
+      "meadows_ground.gif"
     );
-    JUNGLE.attachFixtures(JUNGLE_TREE1, 0.50f);
+    JUNGLE.attachFixtures(JUNGLE_TREE1, 0.25f);
     
     MEADOW.attachGroundTex(
       GameContent.class, "media/Terrain/",
-      "meadows_ground.gif"
+      "barrens_ground.gif"
     );
     MEADOW.attachFixtures(JUNGLE_TREE1, 0.05f);
 
@@ -133,9 +133,11 @@ public class GameContent {
     ModelAsset JUNGLE_TREE_MODELS[][] = CutoutModel.fromImageGrid(
       GameContent.class, "model_jungle_tree",
       "media/Terrain/basic_flora.png", 4, 4,
-      1.25f, 1, false
+      1.33f, 1, false
     );
-    JUNGLE_TREE1.modelVariants = JUNGLE_TREE_MODELS[0];
+    JUNGLE_TREE1.modelVariants = (ModelAsset[]) Visit.compose(
+      ModelAsset.class, (Object[][]) JUNGLE_TREE_MODELS
+    );
     
     //  TODO:  UNIFY WITH CROPS BELOW!
     JUNGLE_TREE1.growRate = 0.5f;
