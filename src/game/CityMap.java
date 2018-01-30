@@ -550,7 +550,47 @@ public class CityMap implements Session.Saveable {
     
     Box2D area = new Box2D(0, 0, size, size);
     terrain.readyAllMeshes();
-    terrain.renderFor(area, rendering, Rendering.activeTime());
+    int totalChunks = 0, chunksShown = 0;
+    
+    List <Box2D> descent = new List();
+    descent.add(area);
+    Vec3D centre = new Vec3D();
+    
+    while (descent.size() > 0) {
+      Box2D b = descent.removeFirst();
+      centre.x = (b.xpos() + b.xmax()) / 2;
+      centre.y = (b.ypos() + b.ymax()) / 2;
+      float radius = 1.5f * b.xdim() / 2;
+      
+      if (! rendering.view.intersects(centre, radius)) continue;
+      
+      if (b.xdim() <= 4) {
+        int x = (int) b.xpos(), y = (int) b.ypos();
+        for (Tile t : tilesUnder(x, y, 4, 4)) {
+          if (t.above == null || t.above.type().isBuilding()) continue;
+          
+          if (t.above.at() == t) {
+            if (t.above.canRender(playing, rendering.view)) {
+              t.above.renderElement(rendering, playing);
+            }
+          }
+        }
+        terrain.renderFor(b, rendering, Rendering.activeTime());
+        chunksShown += 1;
+      }
+      else {
+        float hS = b.xdim() / 2;
+        descent.add(new Box2D(b.xpos(), b.ypos(), hS, hS));
+        descent.add(new Box2D(centre.x, b.ypos(), hS, hS));
+        descent.add(new Box2D(b.xpos(), centre.y, hS, hS));
+        descent.add(new Box2D(centre.x, centre.y, hS, hS));
+      }
+    }
+    
+    totalChunks = (size / 4) * (size / 4);
+    if (I.used60Frames) {
+      I.say("Displayed "+chunksShown+" chunks out of "+totalChunks);
+    }
     
     /*
     final FogMap fog = playing.fogMap();

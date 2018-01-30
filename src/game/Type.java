@@ -97,6 +97,7 @@ public class Type extends Index.Entry implements Session.Saveable {
   public String name, namesRange[];
   public int tint = BLACK_COLOR;
   public ModelAsset model = null;
+  public ModelAsset modelVariants[] = {};
   
   public Class baseClass;
   public int category;
@@ -351,8 +352,15 @@ public class Type extends Index.Entry implements Session.Saveable {
   
   
   public Sprite makeSpriteFor(Element e) {
-    if (model == null) return null;
-    return model.makeSprite();
+    if (model != null) {
+      return model.makeSprite();
+    }
+    if (! Visit.empty(modelVariants)) {
+      int index = e.varID() % modelVariants.length;
+      ModelAsset pick = modelVariants[index];
+      return pick.makeSprite();
+    }
+    return null;
   }
   
   

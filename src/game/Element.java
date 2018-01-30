@@ -23,7 +23,10 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
     FLAG_DEST   = 1 << 5
   ;
   
+  private static int nextVarID = 0;
+  
   private Type type;
+  private int varID;
   
   CityMap map;
   private Tile at;
@@ -38,7 +41,8 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   
   
   public Element(Type type) {
-    this.type = type;
+    this.type  = type;
+    this.varID = nextVarID++;
   }
   
   
@@ -46,6 +50,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
     s.cacheInstance(this);
     
     type   = (Type) s.loadObject();
+    varID  = s.loadInt();
     map    = (CityMap) s.loadObject();
     at     = loadTile(map, s);
     
@@ -60,6 +65,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   public void saveState(Session s) throws Exception {
     
     s.saveObject(type);
+    s.saveInt(varID);
     s.saveObject(map);
     saveTile(at, map, s);
     
@@ -75,6 +81,11 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   
   public Type type() {
     return type;
+  }
+  
+  
+  public int varID() {
+    return varID;
   }
   
   

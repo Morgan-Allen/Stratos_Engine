@@ -2,6 +2,7 @@
 
 package content;
 import game.*;
+import graphics.common.*;
 import graphics.cutout.*;
 import util.*;
 import static game.CityMap.*;
@@ -128,6 +129,13 @@ public class GameContent {
     DESERT      .tint = colour(5, 4, 3);
     MEADOW      .tint = colour(2, 5, 2);
     LAKE        .tint = colour(0, 0, 3);
+    
+    ModelAsset JUNGLE_TREE_MODELS[][] = CutoutModel.fromImageGrid(
+      GameContent.class, "model_jungle_tree",
+      "media/Terrain/basic_flora.png", 4, 4,
+      1.25f, 1, false
+    );
+    JUNGLE_TREE1.modelVariants = JUNGLE_TREE_MODELS[0];
     
     //  TODO:  UNIFY WITH CROPS BELOW!
     JUNGLE_TREE1.growRate = 0.5f;
