@@ -520,8 +520,8 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   
   
   protected float renderedFog(City base) {
-    return 1;//sightLevel();
-    //return map.fog.sightLevel(at);
+    //return 1;//sightLevel();
+    return sightLevel();
     //final Vec3D p = trackPosition();
     //return base.fogMap().renderedFog(p.x, p.y, this);
   }

@@ -592,10 +592,9 @@ public class CityMap implements Session.Saveable {
       //I.say("Displayed "+chunksShown+" chunks out of "+totalChunks);
     }
     
-    /*
-    final FogMap fog = playing.fogMap();
-    if (fog != null) fog.updateAndRender(renderTime, rendering);
+    fog.renderFor(renderTime, rendering);
     
+    /*
     for (Ghost ghost : ephemera.visibleFor(rendering, playing, renderTime)) {
       ghost.renderFor(rendering, playing);
     }

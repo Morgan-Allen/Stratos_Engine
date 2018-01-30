@@ -1,6 +1,8 @@
 
 
 package game;
+import graphics.common.*;
+import graphics.terrain.*;
 import util.*;
 import static game.CityMap.*;
 import static game.WorldCalendar.*;
@@ -21,6 +23,10 @@ public class CityMapFog {
   byte fogVals[][];
   byte oldVals[][];
   CityMapFlagging maxMap;
+  
+  float floatVals[][];
+  private FogOverlay fogOver;
+  
   
   
   
@@ -54,6 +60,8 @@ public class CityMapFog {
     for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
       maxMap.setFlagVal(c.x, c.y, MAX_FOG);
     }
+    
+    this.floatVals = new float[size][size];
   }
   
   
@@ -88,6 +96,8 @@ public class CityMapFog {
       int oldVal = maxMap.flagVal(c.x, c.y);
       int newVal = MAX_FOG - val;
       if (oldVal > newVal) maxMap.setFlagVal(c.x, c.y, newVal);
+      
+      floatVals[c.x][c.y] = 1 - (newVal * 1f / MAX_FOG);
     }
   }
   
@@ -145,7 +155,28 @@ public class CityMapFog {
     return 0.5f;
   }
   
+  
+  
+  /**  Rendering, debug and interface methods-
+    */
+  public void renderFor(float renderTime, Rendering rendering) {
+    if (fogOver == null) {
+      fogOver = new FogOverlay(map.size, map.size);
+    }
+    fogOver.updateVals(renderTime, floatVals);
+    fogOver.registerFor(rendering);
+  }
 }
+
+
+
+
+
+
+
+
+
+
 
 
 

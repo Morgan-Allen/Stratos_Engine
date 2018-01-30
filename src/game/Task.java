@@ -84,6 +84,8 @@ public class Task implements Session.Saveable {
     offMap    = s.loadBool();
     target    = loadTarget(actor.map, s);
     visits    = (Building) s.loadObject();
+    
+    inContact = s.loadBool();
   }
   
   
@@ -113,6 +115,8 @@ public class Task implements Session.Saveable {
     s.saveBool(offMap);
     saveTarget(target, actor.map, s);
     s.saveObject(visits);
+    
+    s.saveBool(inContact);
   }
   
   
