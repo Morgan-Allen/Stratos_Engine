@@ -53,9 +53,8 @@ public class InstallPane extends DetailPane {
         boolean canPlace = false;
         
         if (puts != null) {
-          placed.setLocation(puts, stage);
-          if (placed.canPlace(stage, puts.x, puts.y)) canPlace = true;
-          placed.renderPreview(UI.rendering, canPlace);
+          if (placed.canPlace(stage, puts.x, puts.y, 1)) canPlace = true;
+          placed.renderPreview(UI.rendering, canPlace, puts);
         }
         
         if (UI.mouseClicked()) {

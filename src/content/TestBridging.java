@@ -39,10 +39,10 @@ public class TestBridging extends Test {
     for (Tile t : map.allTiles()) {
       Terrain ter = terrTypes[terrIDs[t.y]];
       int high = elevation[t.y];
-      map.setTerrain(t, ter, high);
+      map.setTerrain(t, ter, (byte) 0, high);
     }
     for (Tile t : map.tilesUnder(4, 0, 2, 8)) {
-      map.setTerrain(t, LAKE, t.elevation());
+      map.setTerrain(t, LAKE, (byte) 0, t.elevation());
     }
     
     

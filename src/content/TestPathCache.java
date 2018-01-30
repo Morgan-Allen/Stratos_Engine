@@ -55,7 +55,7 @@ public class TestPathCache extends Test {
     for (Coord c : Visit.grid(0, 0, miniSize, miniSize, 1)) {
       byte l = layout[c.x][c.y];
       Tile t = miniMap.tileAt(c);
-      miniMap.setTerrain(t, l == 0 ? LAKE : MEADOW, 0);
+      miniMap.setTerrain(t, l == 0 ? LAKE : MEADOW, (byte) 0, 0);
     }
     //
     //  First, verify that an area's tiles conform to an expected shape:
@@ -103,7 +103,7 @@ public class TestPathCache extends Test {
     for (Coord c : Visit.grid(0, 0, miniSize, miniSize, 1)) {
       byte l = newLayout[c.x][c.y];
       Tile t = miniMap.tileAt(c);
-      miniMap.setTerrain(t, l == 0 ? LAKE : MEADOW, 0);
+      miniMap.setTerrain(t, l == 0 ? LAKE : MEADOW, (byte) 0, 0);
     }
     miniMap.pathCache.updatePathCache();
     if (! verifyConnectionQueries(miniMap)) {
@@ -115,7 +115,7 @@ public class TestPathCache extends Test {
     //  queries hold:
     for (Tile t : miniMap.allTiles()) {
       if (Rand.yes()) {
-        miniMap.setTerrain(t, miniMap.blocked(t) ? MEADOW : LAKE, 0);
+        miniMap.setTerrain(t, miniMap.blocked(t) ? MEADOW : LAKE, (byte) 0, 0);
       }
     }
     miniMap.pathCache.updatePathCache();
@@ -142,7 +142,7 @@ public class TestPathCache extends Test {
       y = Nums.clamp(y, map.size());
       
       byte l = layout[x / div][y / div];
-      map.setTerrain(t, l == 0 ? LAKE : MEADOW, 0);
+      map.setTerrain(t, l == 0 ? LAKE : MEADOW, (byte) 0, 0);
     }
     CityMapTerrain.populateFixtures(map);
     

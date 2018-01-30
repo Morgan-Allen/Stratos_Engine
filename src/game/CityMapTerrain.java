@@ -100,6 +100,11 @@ public class CityMapTerrain implements TileConstants {
   }
   
   
+  void setVariant(Tile t, byte var) {
+    varsIndex[t.x][t.y] = var;
+  }
+  
+  
   HabitatScan initHabitatScan() {
     HabitatScan scan = new HabitatScan();
     scan.densities = new int[map.scanSize][map.scanSize];
@@ -181,8 +186,9 @@ public class CityMapTerrain implements TileConstants {
     
     for (Tile tile : map.allTiles()) {
       float   high = mapH.value()[tile.x][tile.y];
+      byte    var  = (byte) Rand.index(8);
       Terrain terr = gradient[Nums.clamp((int) (high * numG), numG)];
-      map.setTerrain(tile, terr, (int) (high * maxHigh));
+      map.setTerrain(tile, terr, var, (int) (high * maxHigh));
     }
   }
   
@@ -346,7 +352,7 @@ public class CityMapTerrain implements TileConstants {
         
         protected int variantAt(int tx, int ty, TerrainSet terrain) {
           final int var = varsIndex[tx][ty];
-          return var <= 4 ? (var / 3) : var;
+          return var <= 4 ? 0 : (var - 3);
         }
       };
       layers[h.layerID] = layer;

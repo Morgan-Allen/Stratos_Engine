@@ -410,22 +410,23 @@ public class CityMap implements Session.Saveable {
   }
   
   
-  public void setTerrain(Tile t, Terrain ter, int elevation) {
+  public void setTerrain(Tile t, Terrain ter, byte var, int elevation) {
     int oldP = t.pathType();
     t.terrain   = ter;
     t.elevation = elevation;
     this.terrain.updateFrom(t);
+    this.terrain.setVariant(t, var);
     if (oldP != t.pathType()) pathCache.checkPathingChanged(t);
   }
   
   
-  public void setTerrain(Coord c, Terrain ter, int elevation) {
-    setTerrain(tileAt(c), ter, elevation);
+  public void setTerrain(Coord c, Terrain ter, byte var, int elevation) {
+    setTerrain(tileAt(c), ter, var, elevation);
   }
   
   
-  public void setTerrain(int x, int y, Terrain ter, int elevation) {
-    setTerrain(tileAt(x, y), ter, elevation);
+  public void setTerrain(int x, int y, Terrain ter, byte var, int elevation) {
+    setTerrain(tileAt(x, y), ter, var, elevation);
   }
   
   
@@ -541,7 +542,12 @@ public class CityMap implements Session.Saveable {
   public void renderStage(Rendering rendering, City playing) {
     float renderTime = (numUpdates + Rendering.frameAlpha()) / ticksPS;
     
-    //*
+    //  TODO:  Don't render all the chunks either.
+    
+    //  TODO:  All the elements need to be rendered as well.  (You need to do
+    //  some gradient descent, basically- and possibly punt this out to a
+    //  separate class.)
+    
     Box2D area = new Box2D(0, 0, size, size);
     terrain.readyAllMeshes();
     terrain.renderFor(area, rendering, Rendering.activeTime());
@@ -554,9 +560,6 @@ public class CityMap implements Session.Saveable {
       ghost.renderFor(rendering, playing);
     }
     //*/
-    
-    //  TODO:  All the elements need to be rendered as well.  (You need to do
-    //  some gradient descent, basically.)
     
     for (Building venue : buildings) {
       if (! venue.canRender(playing, rendering.view)) continue;

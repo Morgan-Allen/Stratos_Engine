@@ -46,7 +46,7 @@ public class Test {
     for (Tile t : map.allTiles()) {
       Terrain terr = gradient[layout[t.x][t.y]];
       int elev = elevation[t.x][t.y];
-      map.setTerrain(t, terr, elev);
+      map.setTerrain(t, terr, (byte) 0, elev);
     }
     
     return map;
@@ -215,7 +215,7 @@ public class Test {
       Building builds = (Building) placing;
       Type type = builds.type();
       int x = hover.x, y = hover.y, w = type.wide, h = type.high;
-      boolean canPlace = builds.canPlace(map, x, y);
+      boolean canPlace = builds.canPlace(map, x, y, 0);
       
       for (Coord c : Visit.grid(x, y, w, h, 1)) try {
         graphic[c.x][c.y] = canPlace ? type.tint : NO_BLD_COLOR;
@@ -640,7 +640,7 @@ public class Test {
       report.append("\n  (S) confirm site");
       
       int x = hover.x, y = hover.y;
-      if (pressed.includes('s') && builds.canPlace(map, x, y)) {
+      if (pressed.includes('s') && builds.canPlace(map, x, y, 0)) {
         builds.enterMap(map, x, y, 1);
         placing = (Building) builds.type().generate();
       }

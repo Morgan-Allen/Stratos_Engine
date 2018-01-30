@@ -104,7 +104,7 @@ public class GameContent {
     
     JUNGLE.attachGroundTex(
       GameContent.class, "media/Terrain/",
-      "rain_forest_ground.gif"
+      "jungle_ground.png"
     );
     JUNGLE.attachFixtures(JUNGLE_TREE1, 0.50f);
     
@@ -350,7 +350,6 @@ public class GameContent {
       GameContent.class, "bastion_model",
       "media/Buildings/bastion.png", 5, 2
     );
-    
     BASTION.setDimensions(5, 5, 2);
     BASTION.maxHealth = 300;
     BASTION.setBuildMaterials(PLASTICS, 10, PARTS, 25);
@@ -364,7 +363,11 @@ public class GameContent {
     
     TROOPER_LODGE.name = "Trooper Lodge";
     TROOPER_LODGE.tint = TINT_MILITARY;
-    TROOPER_LODGE.setDimensions(6, 6, 2);
+    TROOPER_LODGE.model = CutoutModel.fromImage(
+      GameContent.class, "trooper_lodge_model",
+      "media/Buildings/trooper_lodge.png", 3, 2
+    );
+    TROOPER_LODGE.setDimensions(3, 3, 2);
     TROOPER_LODGE.setBuildMaterials(PLASTICS, 1, PARTS, 7);
     TROOPER_LODGE.setWorkerTypes(TROOPER);
     TROOPER_LODGE.maxWorkers = 2;

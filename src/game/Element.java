@@ -113,9 +113,12 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
-  public boolean canPlace(CityMap map, int x, int y) {
-    for (Tile t : footprint(map)) {
-      if (t == null || t.above != null) return false;
+  public boolean canPlace(CityMap map, int x, int y, int margin) {
+    int w = type.wide, h = type.high, m = margin;
+    for (Tile t : map.tilesUnder(x - m, y - m, w + (m * 2), h + (m * 2))) {
+      if (t == null) return false;
+      if (t.above != null && ! t.above.type().isNatural()) return false;
+      if (t.terrain.pathing != PATH_FREE) return false;
     }
     return true;
   }
@@ -511,8 +514,10 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
-  public void renderPreview(Rendering rendering, boolean canPlace) {
+  public void renderPreview(Rendering rendering, boolean canPlace, Tile puts) {
     final Sprite s = sprite();
+    if (s == null) return;
+    s.position.set(puts.x + 0.5f, puts.y + 0.5f, 0);
     s.colour = canPlace ? Colour.SOFT_GREEN : Colour.SOFT_RED;
     renderElement(rendering, null);
   }
