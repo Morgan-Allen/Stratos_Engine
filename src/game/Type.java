@@ -94,10 +94,13 @@ public class Type extends Index.Entry implements Session.Saveable {
   
   /**  Common data fields and setup functions-
     */
-  public String name, namesRange[];
+  public String name;
+  public String traitRangeNames[];
   public int tint = BLACK_COLOR;
+  
   public ModelAsset model = null;
   public ModelAsset modelVariants[] = {};
+  public String firstNames[], lastNames[];
   
   public Class baseClass;
   public int category;

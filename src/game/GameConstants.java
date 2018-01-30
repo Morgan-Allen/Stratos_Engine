@@ -242,19 +242,19 @@ public class GameConstants {
     public Trait(String ID, String... names) {
       super(null, ID, IS_TRAIT);
       this.name = names[0];
-      this.namesRange = names;
+      this.traitRangeNames = names;
     }
   }
   
-  public static class WalkerType extends Type {
+  public static class ActorType extends Type {
     
-    public WalkerType(Class baseClass, String ID, int category, int socialClass) {
+    public ActorType(Class baseClass, String ID, int category, int socialClass) {
       super(baseClass, ID, category);
       this.socialClass = socialClass;
       this.mobile      = true;
     }
     
-    public WalkerType(Class baseClass, String ID, int category) {
+    public ActorType(Class baseClass, String ID, int category) {
       this(baseClass, ID, category, CLASS_COMMON);
     }
   }
@@ -307,9 +307,9 @@ public class GameConstants {
     NO_HABITAT[] = {},
     EMPTY = new Terrain("Empty", "terr_empty", -1);
   
-  final public static WalkerType
-    NO_WALKERS[] = new WalkerType[0],
-    CHILD = new WalkerType(ActorAsPerson.class, "type_child", IS_PERSON_ACT, CLASS_COMMON);
+  final public static ActorType
+    NO_WALKERS[] = new ActorType[0],
+    CHILD = new ActorType(ActorAsPerson.class, "type_child", IS_PERSON_ACT, CLASS_COMMON);
   
   static {
     CHILD.name = "Child";

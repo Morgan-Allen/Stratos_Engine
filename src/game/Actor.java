@@ -1,6 +1,7 @@
 
 
 package game;
+import graphics.common.*;
 import util.*;
 import static game.Task.*;
 import static game.CityMap.*;
@@ -659,7 +660,51 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     if (task == null) return "Idle";
     return task.toString();
   }
+  
+
+  public boolean canRender(City base, Viewport view) {
+    if (indoors()) return false;
+    return super.canRender(base, view);
+  }
+  
+  
+  public void renderElement(Rendering rendering, City base) {
+    Sprite s = sprite();
+    if (s == null) return;
+    
+    Tile from = at(), goes = from;
+    Pathing next = task == null ? null : task.nextOnPath();
+    if (next.isTile()) goes = (Tile) next;
+
+    float alpha = Rendering.frameAlpha(), rem = 1 - alpha;
+    s.position.set(
+      (from.x * rem) + (goes.x * alpha),
+      (from.y * rem) + (goes.y * alpha),
+    0);
+    if (goes != from) {
+      float angle = new Vec2D(goes.x - from.x, goes.y - from.y).toAngle();
+      s.rotation = angle;
+    }
+    
+    if (task != null && task.inContact) {
+      //  TODO:  Extract an animation name as well!
+      float animProg = Rendering.activeTime() % 1;
+      //final float animProg = progress + ((nextProg - progress) * frameAlpha);
+      s.setAnimation(AnimNames.STAND, animProg, true);
+    }
+    else {
+      s.setAnimation(AnimNames.MOVE, Rendering.activeTime() % 1, true);
+    }
+    super.renderElement(rendering, base);
+  }
 }
+
+
+
+
+
+
+
 
 
 

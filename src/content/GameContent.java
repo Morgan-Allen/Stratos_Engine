@@ -4,6 +4,7 @@ package content;
 import game.*;
 import graphics.common.*;
 import graphics.cutout.*;
+import graphics.solids.*;
 import util.*;
 import static game.CityMap.*;
 import static game.GameConstants.*;
@@ -95,10 +96,10 @@ public class GameContent {
     ALL_ROCKS[] = { DESERT_ROCK1, DESERT_ROCK2 },
     ALL_OILS [] = { CLAY_BANK1 }
   ;
-  final public static WalkerType
-    QUDU     = new WalkerType(ActorAsAnimal.class, "animal_qudu"    , IS_ANIMAL_ACT),
-    VAREEN   = new WalkerType(ActorAsAnimal.class, "animal_vareen"  , IS_ANIMAL_ACT),
-    MICOVORE = new WalkerType(ActorAsAnimal.class, "animal_micovore", IS_ANIMAL_ACT),
+  final public static ActorType
+    QUDU     = new ActorType(ActorAsAnimal.class, "animal_qudu"    , IS_ANIMAL_ACT),
+    VAREEN   = new ActorType(ActorAsAnimal.class, "animal_vareen"  , IS_ANIMAL_ACT),
+    MICOVORE = new ActorType(ActorAsAnimal.class, "animal_micovore", IS_ANIMAL_ACT),
     ALL_ANIMALS[] = { QUDU, VAREEN, MICOVORE }
   ;
   static {
@@ -205,39 +206,110 @@ public class GameContent {
   }
   
   
-  final public static WalkerType
-    NOBLE     = new WalkerType(ActorAsPerson.class, "actor_noble"    , IS_PERSON_ACT, CLASS_NOBLE ),
-    CONSORT   = new WalkerType(ActorAsPerson.class, "actor_consort"  , IS_PERSON_ACT, CLASS_NOBLE ),
+  
+  final static String
+    HUMAN_FILE_DIR = "media/Actors/human/",
+    HUMAN_XML_FILE = "HumanModels.xml"
+  ;
+  final static ModelAsset
+    HUMAN_MODEL_MALE = MS3DModel.loadFrom(
+      HUMAN_FILE_DIR, "male_final.ms3d",
+      GameContent.class, HUMAN_XML_FILE, "MalePrime"
+    ),
+    HUMAN_MODEL_FEMALE = MS3DModel.loadFrom(
+      HUMAN_FILE_DIR, "female_final.ms3d",
+      GameContent.class, HUMAN_XML_FILE, "FemalePrime"
+    ),
+    ALL_HUMAN_MODELS[] = { HUMAN_MODEL_MALE, HUMAN_MODEL_FEMALE },
+    HUMAN_MODEL_DEFAULT = (ModelAsset) Visit.last(ALL_HUMAN_MODELS)
+  ;
+  final static ImageAsset HUMAN_BLOOD_SKINS[] = ImageAsset.fromImages(
+    GameContent.class, "human_blood_skins", HUMAN_FILE_DIR,
+    "skin_blood_desert.gif",
+    "skin_blood_wastes.gif",
+    "skin_blood_tundra.gif",
+    "skin_blood_forest.gif"
+  );
+  
+  static class HumanType extends ActorType {
     
-    TROOPER   = new WalkerType(ActorAsPerson.class, "actor_trooper"  , IS_PERSON_ACT, CLASS_COMMON),
-    ENFORCER  = new WalkerType(ActorAsPerson.class, "actor_enforcer" , IS_PERSON_ACT, CLASS_COMMON),
-    RUNNER    = new WalkerType(ActorAsPerson.class, "actor_runner"   , IS_PERSON_ACT, CLASS_COMMON),
+    public ImageAsset costume;
     
-    ECOLOGIST = new WalkerType(ActorAsPerson.class, "actor_ecologist", IS_PERSON_ACT, CLASS_COMMON),
-    ENGINEER  = new WalkerType(ActorAsPerson.class, "actor_engineer" , IS_PERSON_ACT, CLASS_COMMON),
-    PHYSICIAN = new WalkerType(ActorAsPerson.class, "actor_physician", IS_PERSON_ACT, CLASS_COMMON),
+    public HumanType(String ID, int socialClass) {
+      super(ActorAsPerson.class, ID, IS_PERSON_ACT, socialClass);
+    }
     
-    AUDITOR   = new WalkerType(ActorAsPerson.class, "actor_auditor"  , IS_PERSON_ACT, CLASS_TRADER),
-    VENDOR    = new WalkerType(ActorAsPerson.class, "actor_vendor"   , IS_PERSON_ACT, CLASS_TRADER),
-    PYON      = new WalkerType(ActorAsPerson.class, "actor_pyon"     , IS_PERSON_ACT, CLASS_TRADER),
+    void attachCostume(String fileName) {
+      costume = ImageAsset.fromImage(
+        GameContent.class, "costume_"+entryKey(), HUMAN_FILE_DIR+fileName
+      );
+    }
     
-    ALL_CITIZENS[] = { PYON, VENDOR },
+    public Sprite makeSpriteFor(Element e) {
+      final ActorAsPerson a = (ActorAsPerson) e;
+      ModelAsset model = a.man() ? HUMAN_MODEL_MALE : HUMAN_MODEL_FEMALE;
+      ImageAsset skin = HUMAN_BLOOD_SKINS[a.varID() % 4];
+      
+      SolidSprite s = (SolidSprite) model.makeSprite();
+      s.setOverlaySkins(
+        AnimNames.MAIN_BODY,
+        skin   .asTexture(),
+        costume.asTexture()
+      );
+      String partsAllowed[] = {
+        AnimNames.MAIN_BODY,
+        //a.gear.device().modelPartID,
+        //a.gear.outfit().modelPartID
+      };
+      for (String groupName : ((SolidModel) model).partNames()) {
+        boolean valid = false;
+        for (String p : partsAllowed) if (groupName.equals(p)) valid = true;
+        if (! valid) s.togglePart(groupName, false);
+      }
+      return s;
+    }
+    
+    public void prepareMedia(Sprite s, Element e) {
+      super.prepareMedia(s, e);
+    }
+  }
+  
+  
+  final public static HumanType
+    NOBLE     = new HumanType("actor_noble"    , CLASS_NOBLE ),
+    CONSORT   = new HumanType("actor_consort"  , CLASS_NOBLE ),
+    
+    TROOPER   = new HumanType("actor_trooper"  , CLASS_COMMON),
+    ENFORCER  = new HumanType("actor_enforcer" , CLASS_COMMON),
+    RUNNER    = new HumanType("actor_runner"   , CLASS_COMMON),
+    
+    ECOLOGIST = new HumanType("actor_ecologist", CLASS_COMMON),
+    ENGINEER  = new HumanType("actor_engineer" , CLASS_COMMON),
+    PHYSICIAN = new HumanType("actor_physician", CLASS_COMMON),
+    
+    AUDITOR   = new HumanType("actor_auditor"  , CLASS_TRADER),
+    VENDOR    = new HumanType("actor_vendor"   , CLASS_TRADER),
+    PYON      = new HumanType("actor_pyon"     , CLASS_TRADER),
+    
+    ALL_CITIZENS[] = { PYON, VENDOR, AUDITOR },
     ALL_SOLDIERS[] = { TROOPER, RUNNER, NOBLE },
     ALL_NOBLES  [] = { NOBLE },
-    ALL_PEOPLE[] = (WalkerType[]) Visit.compose(
-      WalkerType.class, ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES
+    ALL_HUMANS[] = (HumanType[]) Visit.compose(
+      HumanType.class, ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES
     )
   ;
   static {
     
     NOBLE.name = "Noble";
+    NOBLE.attachCostume("noble_skin.gif");
     NOBLE.setInitTraits(SKILL_MELEE, 1, SKILL_SPEAK, 2, SKILL_WRITE, 2);
     
     CONSORT.name = "Consort";
+    CONSORT.attachCostume("consort_skin.gif");
     CONSORT.setInitTraits(SKILL_SPEAK, 2, SKILL_WRITE, 1, SKILL_EVADE, 2);
     
-    
     TROOPER.name = "Trooper";
+    TROOPER.attachCostume("trooper_skin.gif");
     TROOPER.meleeDamage = 2;
     TROOPER.rangeDamage = 5;
     TROOPER.rangeDist   = 4;
@@ -246,6 +318,7 @@ public class GameContent {
     TROOPER.setInitTraits(SKILL_MELEE, 3, SKILL_RANGE, 4, SKILL_EVADE, 1);
     
     ENFORCER.name = "Enforcer";
+    ENFORCER.attachCostume("enforcer_skin.gif");
     ENFORCER.meleeDamage = 2;
     ENFORCER.rangeDamage = 4;
     ENFORCER.rangeDist   = 6;
@@ -254,14 +327,15 @@ public class GameContent {
     ENFORCER.setInitTraits(SKILL_MELEE, 2, SKILL_RANGE, 5, SKILL_EVADE, 3);
     
     RUNNER.name = "Runner";
+    RUNNER.attachCostume("runner_skin.gif");
     RUNNER.rangeDamage = 6;
     RUNNER.rangeDist   = 8;
     RUNNER.armourClass = 3;
     RUNNER.maxHealth   = 3;
     RUNNER.setInitTraits(SKILL_RANGE, 5, SKILL_EVADE, 4);
     
-    
     ECOLOGIST.name = "Ecologist";
+    ECOLOGIST.attachCostume("ecologist_skin.gif");
     ECOLOGIST.rangeDamage = 4;
     ECOLOGIST.armourClass = 3;
     ECOLOGIST.rangeDist   = 6;
@@ -269,30 +343,33 @@ public class GameContent {
     ECOLOGIST.setInitTraits(SKILL_RANGE, 5, SKILL_EVADE, 3, SKILL_FARM, 4);
     
     ENGINEER.name = "Engineer";
+    ENGINEER.attachCostume("engineer_skin.gif");
     ENGINEER.meleeDamage = 5;
     ENGINEER.armourClass = 5;
     ENGINEER.maxHealth   = 4;
     ENGINEER.setInitTraits(SKILL_MELEE, 3, SKILL_CRAFT, 5, SKILL_BUILD, 5);
     
     PHYSICIAN.name = "Physician";
+    PHYSICIAN.attachCostume("physician_skin.gif");
     PHYSICIAN.meleeDamage = 0;
     PHYSICIAN.rangeDamage = 0;
     PHYSICIAN.armourClass = 1;
     PHYSICIAN.maxHealth   = 3;
     PHYSICIAN.setInitTraits(SKILL_CRAFT, 6, SKILL_WRITE, 4, SKILL_SPEAK, 3);
     
-    
     AUDITOR.name = "Auditor";
+    AUDITOR.attachCostume("auditor_skin.gif");
     AUDITOR.setInitTraits(SKILL_SPEAK, 4, SKILL_WRITE, 4);
     
     VENDOR.name = "Vendor";
+    VENDOR.attachCostume("vendor_skin.gif");
     VENDOR.setInitTraits(SKILL_SPEAK, 2, SKILL_WRITE, 2);
     
     PYON.name = "Pyon";
+    PYON.attachCostume("pyon_skin.gif");
     PYON.setInitTraits(SKILL_FARM, 1, SKILL_BUILD, 1, SKILL_CRAFT, 1);
     
-    
-    for (Type t : ALL_PEOPLE) {
+    for (Type t : ALL_HUMANS) {
       t.foodsAllowed = FOOD_TYPES;
     }
   }

@@ -51,6 +51,8 @@ public class Task implements Session.Saveable {
   Target   target;
   Building visits;
   
+  boolean inContact = false;
+  
   
   
   Task(Actor actor) {
@@ -180,9 +182,11 @@ public class Task implements Session.Saveable {
     float    minRange = actionRange();
     Building visits   = this.visits;
     Target   target   = this.target;
+    inContact = false;
     
     if (visits != null && inside == visits) {
       if (timeSpent++ <= maxTime) {
+        inContact = true;
         onVisit(visits);
         actor.onVisit(visits);
         visits.visitedBy(actor);
@@ -195,6 +199,7 @@ public class Task implements Session.Saveable {
     }
     else if (distance <= minRange) {
       if (target != null && timeSpent++ <= maxTime) {
+        inContact = true;
         onTarget(target);
         actor.onTarget(target);
         target.targetedBy(actor);
@@ -312,6 +317,13 @@ public class Task implements Session.Saveable {
       t = (Pathing) Visit.last(path);
     }
     return t;
+  }
+  
+  
+  Pathing nextOnPath() {
+    if (Visit.empty(path)) return null;
+    int index = Nums.clamp(pathIndex + 1, path.length);
+    return path[index];
   }
   
   
