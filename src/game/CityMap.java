@@ -414,6 +414,7 @@ public class CityMap implements Session.Saveable {
     int oldP = t.pathType();
     t.terrain   = ter;
     t.elevation = elevation;
+    this.terrain.updateFrom(t);
     if (oldP != t.pathType()) pathCache.checkPathingChanged(t);
   }
   
@@ -540,10 +541,12 @@ public class CityMap implements Session.Saveable {
   public void renderStage(Rendering rendering, City playing) {
     float renderTime = (numUpdates + Rendering.frameAlpha()) / ticksPS;
     
-    /*
+    //*
+    Box2D area = new Box2D(0, 0, size, size);
     terrain.readyAllMeshes();
-    terrain.renderFor(area(), rendering, Rendering.activeTime());
+    terrain.renderFor(area, rendering, Rendering.activeTime());
     
+    /*
     final FogMap fog = playing.fogMap();
     if (fog != null) fog.updateAndRender(renderTime, rendering);
     

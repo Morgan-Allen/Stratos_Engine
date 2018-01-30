@@ -196,6 +196,11 @@ public class ImageAsset extends Assets.Loadable {
     };
     return asset;
   }
+  
+  
+  public String toString() {
+    return filePath;
+  }
 }
 
 

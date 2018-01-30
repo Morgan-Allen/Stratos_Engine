@@ -75,11 +75,11 @@ public class GameContent {
   
   
   final public static Terrain
-    MEADOW = new Terrain("Meadow", 1),
-    JUNGLE = new Terrain("Jungle", 2),
-    DESERT = new Terrain("Desert", 3),
-    LAKE   = new Terrain("Lake"  , 4),
-    OCEAN  = new Terrain("Ocean" , 5),
+    MEADOW = new Terrain("Meadow", "terr_meadow", 5),
+    JUNGLE = new Terrain("Jungle", "terr_jungle", 4),
+    DESERT = new Terrain("Desert", "terr_desert", 3),
+    LAKE   = new Terrain("Lake"  , "terr_lake"  , 2),
+    OCEAN  = new Terrain("Ocean" , "terr_ocean" , 1),
     ALL_TERRAINS[] = {
       EMPTY, MEADOW, JUNGLE, DESERT, LAKE, OCEAN
     }
@@ -92,7 +92,7 @@ public class GameContent {
     
     ALL_TREES[] = { JUNGLE_TREE1 },
     ALL_ROCKS[] = { DESERT_ROCK1, DESERT_ROCK2 },
-    ALL_OILS[] = { CLAY_BANK1 }
+    ALL_OILS [] = { CLAY_BANK1 }
   ;
   final public static WalkerType
     QUDU     = new WalkerType(ActorAsAnimal.class, "animal_qudu"    , IS_ANIMAL_ACT),
@@ -101,8 +101,23 @@ public class GameContent {
     ALL_ANIMALS[] = { QUDU, VAREEN, MICOVORE }
   ;
   static {
+    
+    JUNGLE.attachGroundTex(
+      GameContent.class, "media/Terrain/",
+      "rain_forest_ground.gif"
+    );
     JUNGLE.attachFixtures(JUNGLE_TREE1, 0.50f);
+    
+    MEADOW.attachGroundTex(
+      GameContent.class, "media/Terrain/",
+      "meadows_ground.gif"
+    );
     MEADOW.attachFixtures(JUNGLE_TREE1, 0.05f);
+
+    DESERT.attachGroundTex(
+      GameContent.class, "media/Terrain/",
+      "desert_ground.gif"
+    );
     DESERT.attachFixtures(DESERT_ROCK1, 0.15f, DESERT_ROCK2, 0.20f);
     
     JUNGLE_TREE1.tint = colour(0, 3, 0);

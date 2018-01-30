@@ -61,16 +61,15 @@ public class TerrainPass {
     //  We first compile the sets of terrain chunks in each layer, along with
     //  any customised/impromptu overlays which are rendered last, in order of
     //  presentation-
-    final Batch <TerrainChunk>
-      layerBatches[] = new Batch[set.layers.length];
-    for (LayerType type : set.layers) {
+    final Batch <TerrainChunk> layerBatches[] = new Batch[set.layers.length];
+    for (LayerType type : set.layers) if (type != null) {
       layerBatches[type.layerID] = new Batch <TerrainChunk> ();
     }
     for (TerrainChunk chunk : chunks) {
       final LayerType type = chunk.layer;
       layerBatches[type.layerID].add(chunk);
     }
-    for (LayerType type : set.layers) {
+    for (LayerType type : set.layers) if (type != null) {
       renderChunks(layerBatches[type.layerID], type);
     }
     shader.end();
@@ -128,6 +127,8 @@ public class TerrainPass {
     final ImageAsset tex[] = layer.layerFrames;
     final float time = (Rendering.activeTime() % 1) * tex.length;
     final int index = (int) time, animIndex = (index + 1) % tex.length;
+    
+    if (tex[index] == null || tex[animIndex] == null) return;
     
     for (int i : new int[] { index, animIndex }) {
       //

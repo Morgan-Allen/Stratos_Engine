@@ -1,6 +1,8 @@
 
 
 package game;
+import graphics.common.*;
+import graphics.terrain.*;
 import util.*;
 import static game.CityMap.*;
 import static game.GameConstants.*;
@@ -18,11 +20,18 @@ public class CityMapTerrain implements TileConstants {
   }
   
   final CityMap map;
+
+  private byte
+    heightVals[][],
+    typeIndex [][],
+    varsIndex [][],
+    fertility [][];
   
   int growScanIndex = 0;
   int numTerrains = -1;
   HabitatScan scans[][] = new HabitatScan[2][1];
-  byte fertility[][];
+  
+  private TerrainSet meshSet;
   
   
   CityMapTerrain(CityMap map) {
@@ -31,6 +40,11 @@ public class CityMapTerrain implements TileConstants {
   
   
   void loadState(Session s) throws Exception {
+    
+    s.loadByteArray(heightVals);
+    s.loadByteArray(typeIndex );
+    s.loadByteArray(varsIndex );
+    s.loadByteArray(fertility );
     
     growScanIndex = s.loadInt();
     for (int i = 2; i-- > 0;) for (int h = numTerrains; h-- > 0;) {
@@ -45,12 +59,15 @@ public class CityMapTerrain implements TileConstants {
       }
       scans[i][h] = scan;
     }
-    
-    s.loadByteArray(fertility);
   }
   
   
   void saveState(Session s) throws Exception {
+    
+    s.saveByteArray(heightVals);
+    s.saveByteArray(typeIndex );
+    s.saveByteArray(varsIndex );
+    s.saveByteArray(fertility );
     
     s.saveInt(growScanIndex);
     for (int i = 2; i-- > 0;) for (int h = numTerrains; h-- > 0;) {
@@ -62,17 +79,24 @@ public class CityMapTerrain implements TileConstants {
         s.saveInt(scan.densities[c.x][c.y]);
       }
     }
-    
-    s.saveByteArray(fertility);
   }
   
   
   void performSetup(int size) {
-    this.fertility = new byte[size][size];
+    this.heightVals = new byte[size + 1][size + 1];
+    this.typeIndex  = new byte[size    ][size    ];
+    this.varsIndex  = new byte[size    ][size    ];
+    this.fertility  = new byte[size    ][size    ];
+    
     int maxID = 0;
-    for (Terrain t : map.terrainTypes) maxID = Nums.max(maxID, t.terrainID);
+    for (Terrain t : map.terrainTypes) maxID = Nums.max(maxID, t.layerID);
     this.numTerrains = maxID + 1;
     this.scans = new HabitatScan[2][numTerrains];
+  }
+  
+  
+  void updateFrom(Tile t) {
+    typeIndex[t.x][t.y] = (byte) t.terrain.layerID;
   }
   
   
@@ -86,7 +110,7 @@ public class CityMapTerrain implements TileConstants {
   HabitatScan scanFor(Terrain terrain) {
     int index = Visit.indexOf(terrain, map.terrainTypes);
     if (index == -1) return null;
-    return scans[0][terrain.terrainID];
+    return scans[0][terrain.layerID];
   }
   
   
@@ -123,13 +147,13 @@ public class CityMapTerrain implements TileConstants {
   
   void scanHabitat(Tile tile) {
     Terrain t = tile.terrain;
-    if (t == null) return;
+    if (t == null || t == EMPTY) return;
     
     Type above = tile.above == null ? null : tile.above.type();
     if (above != null && ! above.isNatural()) return;
     
-    HabitatScan scan = scans[1][t.terrainID];
-    if (scan == null) scan = scans[1][t.terrainID] = initHabitatScan();
+    HabitatScan scan = scans[1][t.layerID];
+    if (scan == null) scan = scans[1][t.layerID] = initHabitatScan();
     
     scan.numTiles += 1;
     scan.densities[tile.x / SCAN_RES][tile.y / SCAN_RES] += 1;
@@ -306,11 +330,45 @@ public class CityMapTerrain implements TileConstants {
     return point;
   }
   
+  
+  
+  /**  Rendering, debug and interface methods-
+    */
+  public void initTerrainMesh() {
+    LayerType layers[] = new LayerType[numTerrains];
+    
+    for (final Terrain h : map.terrainTypes) {
+      LayerType layer = new LayerType(h.animTex, false, h.layerID, h.name) {
+        
+        protected boolean maskedAt(int tx, int ty, TerrainSet terrain) {
+          return typeIndex[tx][ty] == h.layerID;
+        }
+        
+        protected int variantAt(int tx, int ty, TerrainSet terrain) {
+          final int var = varsIndex[tx][ty];
+          return var <= 4 ? (var / 3) : var;
+        }
+      };
+      layers[h.layerID] = layer;
+    }
+    
+    meshSet = new TerrainSet(
+      map.size, map.size, -1,
+      typeIndex, varsIndex, heightVals, layers
+    );
+  }
+  
+  
+  public void readyAllMeshes() {
+    if (meshSet == null) initTerrainMesh();
+    meshSet.refreshAllMeshes();
+  }
+  
+  
+  public void renderFor(Box2D area, Rendering rendering, float time) {
+    meshSet.renderWithin(area, rendering);
+  }
 }
-
-
-
-
 
 
 

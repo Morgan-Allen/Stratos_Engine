@@ -2,6 +2,7 @@
 
 package game;
 import util.*;
+import graphics.common.*;
 import static game.Type.*;
 import static game.CityMap.*;
 import java.awt.Color;
@@ -187,9 +188,6 @@ public class GameConstants {
   
   
   
-  //private static List <Good> GOODS_LIST = new List();
-  //private static List <Terrain> TERRAINS_LIST = new List();
-  
   /**  Specialise sub-type classes:
     */
   public static class Good extends Type {
@@ -198,7 +196,6 @@ public class GameConstants {
     
     public Good(String name, int price) {
       super(null, "good_"+name.toLowerCase().replace(' ', '_'), IS_GOOD);
-      //if (price != -1) GOODS_LIST.add(this);
       this.name    = name ;
       this.price   = price;
       this.pathing = PATH_HINDER;
@@ -207,22 +204,36 @@ public class GameConstants {
   
   public static class Terrain extends Type {
     
-    final public int terrainID;
+    final int layerID;
     Type  fixtures[] = new Type [0];
     Float weights [] = new Float[0];
     
-    public Terrain(String name, int index) {
-      super(null, "terrain_"+index, IS_TERRAIN);
-      this.name      = name ;
-      this.terrainID = index;
-      this.pathing   = PATH_FREE;
-      //TERRAINS_LIST.add(this);
+    ImageAsset animTex[], baseTex;
+    
+    public Terrain(String name, String ID, int layerID) {
+      super(null, "terrain_"+ID, IS_TERRAIN);
+      this.layerID = layerID;
+      this.name    = name;
+      this.pathing = PATH_FREE;
     }
     
     public void attachFixtures(Object... args) {
       Object split[][] = Visit.splitByModulus(args, 2);
       fixtures = (Type []) castArray(split[0], Type .class);
       weights  = (Float[]) castArray(split[1], Float.class);
+    }
+    
+    public void attachGroundTex(
+      Class baseClass, String basePath, String... groundTex
+    ) {
+      //I.say("\nGROUND TEXTURES:");
+      this.animTex = new ImageAsset[groundTex.length];
+      for (int i = animTex.length; i-- > 0;) {
+        final String path = basePath+groundTex[i];
+        animTex[i] = ImageAsset.fromImage(baseClass, "habitat_"+path, path);
+        //I.say("  "+animTex[i]);
+      }
+      this.baseTex = animTex[0];
     }
   }
   
@@ -294,7 +305,7 @@ public class GameConstants {
   
   final public static Terrain
     NO_HABITAT[] = {},
-    EMPTY = new Terrain("Empty", 0);
+    EMPTY = new Terrain("Empty", "terr_empty", -1);
   
   final public static WalkerType
     NO_WALKERS[] = new WalkerType[0],

@@ -27,11 +27,11 @@ public class TerrainSet implements TileConstants {
   
   
   public TerrainSet(
-      int sizeX, int sizeY, int chunkSize,
-      byte layerIndices[][],
-      byte varsIndices [][],
-      byte heightVals  [][],
-      LayerType layers[]
+    int sizeX, int sizeY, int chunkSize,
+    byte layerIndices[][],
+    byte varsIndices [][],
+    byte heightVals  [][],
+    LayerType layers[]
   ) {
     // Basic sanity checks first-
     if (chunkSize > MAX_CHUNK_SIZE) {
@@ -58,7 +58,7 @@ public class TerrainSet implements TileConstants {
   
   public void dispose() {
     for (Coord c : Visit.grid(0, 0, chunkGrid, chunkGrid, 1)) {
-      for (LayerType layer : layers) {
+      for (LayerType layer : layers) if (layer != null) {
         final TerrainChunk chunk = chunks[c.x][c.y][layer.layerID];
         chunk.dispose();
         if (chunk.fadeOut != null) chunk.fadeOut.dispose();
@@ -70,7 +70,7 @@ public class TerrainSet implements TileConstants {
   public void refreshAllMeshes() {
     
     for (Coord c : Visit.grid(0, 0, chunkGrid, chunkGrid, 1)) {
-      for (LayerType layer : layers) {
+      for (LayerType layer : layers) if (layer != null) {
         final TerrainChunk oldChunk = chunks[c.x][c.y][layer.layerID];
         if (oldChunk != null && ! oldChunk.needsRefresh()) continue;
         
@@ -118,7 +118,7 @@ public class TerrainSet implements TileConstants {
       dimX = 1 + (int) ((area.xmax() - 1) / chunkSize) - minX,
       dimY = 1 + (int) ((area.ymax() - 1) / chunkSize) - minY;
     for (Coord c : Visit.grid(minX, minY, dimX, dimY, 1)) {
-      for (TerrainChunk patch : chunks[c.x][c.y]) {
+      for (TerrainChunk patch : chunks[c.x][c.y]) if (patch != null) {
         patch.readyFor(rendering);
       }
     }
