@@ -146,13 +146,11 @@ public class Type extends Index.Entry implements Session.Saveable {
   /**  Building-specific data fields and setup methods-
     */
   public Type    upgradeTiers[] = NO_TIERS;
-  public Type    upgradeNeeds[] = NO_NEEDS;
-  public Integer upgradeUsage[] = {};
-  public Good    homeUseGoods[] = NO_GOODS;
-  public Integer homeUsage   [] = {};
   public Good    homeFoods   [] = {};
   public Good    buildsWith  [] = NO_GOODS;
   public boolean worksBeforeBuilt = false;
+  public Tally <Type> upgradeNeeds = new Tally();
+  public Tally <Good> homeUseGoods = new Tally();
   
   public int homeSocialClass  = CLASS_COMMON;
   public int homeAmbienceNeed = AMBIENCE_MIN;
@@ -171,8 +169,7 @@ public class Type extends Index.Entry implements Session.Saveable {
   public int homeUseTime     = HOME_USE_TIME   ;
   public int featureAmount   = AVG_SERVICE_GIVE;
   
-  public Type workerTypes[] = NO_WALKERS;
-  public int maxWorkers   = 1;
+  public Tally <Type> workerTypes = new Tally();
   public int maxResidents = 0;
   public int maxVisitors  = AVG_MAX_VISITORS;
   public int maxRecruits  = AVG_ARMY_SIZE;
@@ -180,25 +177,6 @@ public class Type extends Index.Entry implements Session.Saveable {
   
   public void setUpgradeTiers(Type... tiers) {
     this.upgradeTiers = tiers;
-  }
-  
-  
-  public void setUpgradeNeeds(Object... args) {
-    Object split[][] = Visit.splitByModulus(args, 2);
-    upgradeNeeds = (Type   []) castArray(split[0], Type   .class);
-    upgradeUsage = (Integer[]) castArray(split[1], Integer.class);
-  }
-  
-  
-  public void setHomeUsage(Object... args) {
-    Object split[][] = Visit.splitByModulus(args, 2);
-    homeUseGoods = (Good   []) castArray(split[0], Good   .class);
-    homeUsage    = (Integer[]) castArray(split[1], Integer.class);
-  }
-  
-  
-  public void setWorkerTypes(Type... types) {
-    this.workerTypes = types;
   }
   
   
@@ -291,27 +269,13 @@ public class Type extends Index.Entry implements Session.Saveable {
   public int armourClass = AVG_DEFEND;
   public int sightRange  = AVG_SIGHT;
   
-  public Trait   initTraits [] = {};
-  public Integer traitLevels[] = {};
+  public Tally <Trait> initTraits = new Tally();
   
   public Terrain habitats[]   = NO_HABITAT;
   public boolean predator     = false;
   public int     lifespan     = LIFESPAN_LENGTH;
   public Good[]  foodsAllowed = null;
   public Good    meatType     = null;
-  
-  
-  public void setInitTraits(Object... args) {
-    Object split[][] = Visit.splitByModulus(args, 2);
-    initTraits  = (Trait  []) castArray(split[0], Trait  .class);
-    traitLevels = (Integer[]) castArray(split[1], Integer.class);
-  }
-  
-  
-  public float initTraitLevel(Trait t) {
-    int index = Visit.indexOf(t, initTraits);
-    return index == -1 ? null : traitLevels[index];
-  }
   
   
   public void initAsMigrant(ActorAsPerson a) {
@@ -328,8 +292,8 @@ public class Type extends Index.Entry implements Session.Saveable {
     a.sexData    = sex;
     a.hunger     = Rand.num() - 0.5f;
     
-    for (int i = 0; i < initTraits.length; i++) {
-      a.setLevel(initTraits[i], traitLevels[i]);
+    for (Trait t : initTraits.keys()) {
+      a.setLevel(t, initTraits.valueFor(t));
     }
     
     for (Trait t : ALL_PERSONALITY) {

@@ -118,7 +118,7 @@ public class TestCity extends Test {
             b.setInventory(GREENS  , 10);
           }
           if (b.type() == BASTION) {
-            for (Good g : b.type().homeUseGoods) {
+            for (Good g : b.type().homeUseGoods.keys()) {
               b.setInventory(g, 15);
             }
             b.setInventory(PLASTICS, 10);

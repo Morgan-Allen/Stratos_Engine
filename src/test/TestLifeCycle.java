@@ -98,7 +98,7 @@ public class TestLifeCycle extends Test {
       if (! migrated) {
         boolean allFilled = true;
         for (Building b : map.buildings()) {
-          for (Type t : b.type().workerTypes) {
+          for (Type t : b.type().workerTypes.keys()) {
             if (b.numWorkers(t) < b.maxWorkers(t)) allFilled = false;
           }
         }

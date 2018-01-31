@@ -131,9 +131,8 @@ public class BuildingForHome extends Building {
   
   boolean performServicesCheck(Type tier, Tally <Type> access) {
     boolean allOK = true;
-    for (int i = tier.upgradeNeeds.length; i-- > 0;) {
-      Type need   = tier.upgradeNeeds[i];
-      int  amount = tier.upgradeUsage[i];
+    for (Type need : tier.upgradeNeeds.keys()) {
+      float amount = tier.upgradeNeeds.valueFor(need);
       if (access.valueFor(need) < amount) allOK = false;
     }
     return allOK;
@@ -157,7 +156,7 @@ public class BuildingForHome extends Building {
   /**  Stock and consumption-related checks:
     */
   boolean performConsumerCheck(Type tier, Tally <Type> access) {
-    for (Good g : tier.homeUseGoods) {
+    for (Good g : tier.homeUseGoods.keys()) {
       float amount = inventory(g);
       if (amount < maxTierStock(g, tier)) return false;
     }
@@ -183,16 +182,14 @@ public class BuildingForHome extends Building {
   
   float maxTierStock(Good g, Type tier) {
     if (Visit.arrayIncludes(type().homeFoods, g)) return 5;
-    int index = Visit.indexOf(g, tier.homeUseGoods);
-    if (index == -1) return 0;
-    return tier.homeUsage[index];
+    return tier.homeUseGoods.valueFor(g);
   }
   
   
   public Batch <Good> usedBy(Type tier) {
     Batch <Good> consumes = new Batch();
-    for (Good g : type().homeFoods ) consumes.add(g);
-    for (Good g : tier.homeUseGoods) consumes.add(g);
+    for (Good g : type().homeFoods        ) consumes.add(g);
+    for (Good g : tier.homeUseGoods.keys()) consumes.add(g);
     return consumes;
   }
   
@@ -252,7 +249,7 @@ public class BuildingForHome extends Building {
     conLevel *= type().updateTime;
     conLevel /= tier.homeUseTime;
     
-    for (Good cons : tier.homeUseGoods) {
+    for (Good cons : tier.homeUseGoods.keys()) {
       float oldAmount = inventory(cons);
       float used      = maxTierStock(cons, tier) * conLevel;
       float amount    = Nums.max(0, oldAmount - used);

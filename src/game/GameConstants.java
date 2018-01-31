@@ -313,7 +313,7 @@ public class GameConstants {
   
   static {
     CHILD.name = "Child";
-    CHILD.setInitTraits();
+    CHILD.initTraits.setWith();
   }
   
   

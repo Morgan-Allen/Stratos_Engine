@@ -67,7 +67,7 @@ public class CityBorders {
           homeFilled += NR = b.numResidents(socialClass);
           if (report) I.say("  Class "+socialClass+": "+NR+"/"+MR);
         }
-        for (Type t : b.type().workerTypes) {
+        for (Type t : b.type().workerTypes.keys()) {
           jobsTotal  += MW = b.maxWorkers(t);
           jobsFilled += NW = b.numWorkers(t);
           jobsDemand.add(MW, t);
@@ -133,13 +133,13 @@ public class CityBorders {
     final Pick <Opening> pick = new Pick();
     
     for (Building b : map.buildings) if (b.accessible()) {
-      for (Type t : b.type().workerTypes) {
+      for (Type t : b.type().workerTypes.keys()) {
         int space = b.maxWorkers(t) - b.numWorkers(t);
         if (space <= 0) continue;
         
         float fitness = 2;
-        for (Trait skill : t.initTraits) {
-          fitness += migrant.levelOf(skill) * t.initTraitLevel(skill);
+        for (Trait skill : t.initTraits.keys()) {
+          fitness += migrant.levelOf(skill) * t.initTraits.valueFor(skill);
         }
         
         float near = CityMap.distancePenalty(from, b);

@@ -503,12 +503,14 @@ public class City implements Session.Saveable, Trader {
     float sum = 0;
     for (Type t : buildLevel.keys()) {
       if (t.isArmyOrWallsBuilding()) {
-        float l = buildLevel.valueFor(t);
-        for (Type w : t.workerTypes) {
-          sum += l * TaskCombat.attackPower(w) * t.maxWorkers;
+        float l = buildLevel.valueFor(t), sumW = 0;
+        for (Type w : t.workerTypes.keys()) {
+          float maxW = t.workerTypes.valueFor(w);
+          sum += l * TaskCombat.attackPower(w) * maxW;
+          sumW += maxW;
         }
-        if (t.maxRecruits > t.maxWorkers) {
-          sum += l * (t.maxRecruits - t.maxWorkers) * powerC;
+        if (t.maxRecruits > sumW) {
+          sum += l * (t.maxRecruits - sumW) * powerC;
         }
       }
     }

@@ -68,7 +68,7 @@ public class Test {
   
   
   public static void fillWorkVacancies(Building b) {
-    for (Type t : b.type().workerTypes) {
+    for (Type t : b.type().workerTypes.keys()) {
       while (b.numWorkers(t) < b.maxWorkers(t)) {
         spawnWalker(b, t, false);
       }

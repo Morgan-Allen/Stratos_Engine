@@ -302,11 +302,11 @@ public class GameContent {
     
     NOBLE.name = "Noble";
     NOBLE.attachCostume("noble_skin.gif");
-    NOBLE.setInitTraits(SKILL_MELEE, 1, SKILL_SPEAK, 2, SKILL_WRITE, 2);
+    NOBLE.initTraits.setWith(SKILL_MELEE, 1, SKILL_SPEAK, 2, SKILL_WRITE, 2);
     
     CONSORT.name = "Consort";
     CONSORT.attachCostume("consort_skin.gif");
-    CONSORT.setInitTraits(SKILL_SPEAK, 2, SKILL_WRITE, 1, SKILL_EVADE, 2);
+    CONSORT.initTraits.setWith(SKILL_SPEAK, 2, SKILL_WRITE, 1, SKILL_EVADE, 2);
     
     TROOPER.name = "Trooper";
     TROOPER.attachCostume("trooper_skin.gif");
@@ -315,7 +315,7 @@ public class GameContent {
     TROOPER.rangeDist   = 4;
     TROOPER.armourClass = 4;
     TROOPER.maxHealth   = 6;
-    TROOPER.setInitTraits(SKILL_MELEE, 3, SKILL_RANGE, 4, SKILL_EVADE, 1);
+    TROOPER.initTraits.setWith(SKILL_MELEE, 3, SKILL_RANGE, 4, SKILL_EVADE, 1);
     
     ENFORCER.name = "Enforcer";
     ENFORCER.attachCostume("enforcer_skin.gif");
@@ -324,7 +324,7 @@ public class GameContent {
     ENFORCER.rangeDist   = 6;
     ENFORCER.armourClass = 3;
     ENFORCER.maxHealth   = 4;
-    ENFORCER.setInitTraits(SKILL_MELEE, 2, SKILL_RANGE, 5, SKILL_EVADE, 3);
+    ENFORCER.initTraits.setWith(SKILL_MELEE, 2, SKILL_RANGE, 5, SKILL_EVADE, 3);
     
     RUNNER.name = "Runner";
     RUNNER.attachCostume("runner_skin.gif");
@@ -332,7 +332,7 @@ public class GameContent {
     RUNNER.rangeDist   = 8;
     RUNNER.armourClass = 3;
     RUNNER.maxHealth   = 3;
-    RUNNER.setInitTraits(SKILL_RANGE, 5, SKILL_EVADE, 4);
+    RUNNER.initTraits.setWith(SKILL_RANGE, 5, SKILL_EVADE, 4);
     
     ECOLOGIST.name = "Ecologist";
     ECOLOGIST.attachCostume("ecologist_skin.gif");
@@ -340,14 +340,14 @@ public class GameContent {
     ECOLOGIST.armourClass = 3;
     ECOLOGIST.rangeDist   = 6;
     ECOLOGIST.maxHealth   = 4;
-    ECOLOGIST.setInitTraits(SKILL_RANGE, 5, SKILL_EVADE, 3, SKILL_FARM, 4);
+    ECOLOGIST.initTraits.setWith(SKILL_RANGE, 5, SKILL_EVADE, 3, SKILL_FARM, 4);
     
     ENGINEER.name = "Engineer";
     ENGINEER.attachCostume("engineer_skin.gif");
     ENGINEER.meleeDamage = 5;
     ENGINEER.armourClass = 5;
     ENGINEER.maxHealth   = 4;
-    ENGINEER.setInitTraits(SKILL_MELEE, 3, SKILL_CRAFT, 5, SKILL_BUILD, 5);
+    ENGINEER.initTraits.setWith(SKILL_MELEE, 3, SKILL_CRAFT, 5, SKILL_BUILD, 5);
     
     PHYSICIAN.name = "Physician";
     PHYSICIAN.attachCostume("physician_skin.gif");
@@ -355,19 +355,19 @@ public class GameContent {
     PHYSICIAN.rangeDamage = 0;
     PHYSICIAN.armourClass = 1;
     PHYSICIAN.maxHealth   = 3;
-    PHYSICIAN.setInitTraits(SKILL_CRAFT, 6, SKILL_WRITE, 4, SKILL_SPEAK, 3);
+    PHYSICIAN.initTraits.setWith(SKILL_CRAFT, 6, SKILL_WRITE, 4, SKILL_SPEAK, 3);
     
     AUDITOR.name = "Auditor";
     AUDITOR.attachCostume("auditor_skin.gif");
-    AUDITOR.setInitTraits(SKILL_SPEAK, 4, SKILL_WRITE, 4);
+    AUDITOR.initTraits.setWith(SKILL_SPEAK, 4, SKILL_WRITE, 4);
     
     VENDOR.name = "Vendor";
     VENDOR.attachCostume("vendor_skin.gif");
-    VENDOR.setInitTraits(SKILL_SPEAK, 2, SKILL_WRITE, 2);
+    VENDOR.initTraits.setWith(SKILL_SPEAK, 2, SKILL_WRITE, 2);
     
     PYON.name = "Pyon";
     PYON.attachCostume("pyon_skin.gif");
-    PYON.setInitTraits(SKILL_FARM, 1, SKILL_BUILD, 1, SKILL_CRAFT, 1);
+    PYON.initTraits.setWith(SKILL_FARM, 1, SKILL_BUILD, 1, SKILL_CRAFT, 1);
     
     for (Type t : ALL_HUMANS) {
       t.foodsAllowed = FOOD_TYPES;
@@ -440,10 +440,9 @@ public class GameContent {
     BASTION.setDimensions(5, 5, 2);
     BASTION.maxHealth = 300;
     BASTION.setBuildMaterials(PLASTICS, 10, PARTS, 25);
-    BASTION.setWorkerTypes(NOBLE, AUDITOR, PYON);
+    BASTION.workerTypes.setWith(NOBLE, 1, AUDITOR, 1, PYON, 2);
     BASTION.homeSocialClass = CLASS_NOBLE;
     BASTION.maxResidents = 2;
-    BASTION.maxWorkers   = 2;
     BASTION.buildsWith   = new Good[] { PLASTICS, PARTS };
     BASTION.setFeatures(IS_HOUSING);
     BASTION.worksBeforeBuilt = true;
@@ -456,15 +455,14 @@ public class GameContent {
     );
     TROOPER_LODGE.setDimensions(3, 3, 2);
     TROOPER_LODGE.setBuildMaterials(PLASTICS, 1, PARTS, 7);
-    TROOPER_LODGE.setWorkerTypes(TROOPER);
-    TROOPER_LODGE.maxWorkers = 2;
-    TROOPER_LODGE.maxHealth  = 250;
+    TROOPER_LODGE.workerTypes.setWith(TROOPER, 2);
+    TROOPER_LODGE.maxHealth = 250;
     
     ENFORCER_BLOC.name = "Enforcer Bloc";
     ENFORCER_BLOC.tint = TINT_COMMERCIAL;
     ENFORCER_BLOC.setDimensions(2, 2, 1);
     ENFORCER_BLOC.setBuildMaterials(PARTS, 4);
-    ENFORCER_BLOC.setWorkerTypes(ENFORCER);
+    ENFORCER_BLOC.workerTypes.setWith(ENFORCER, 2);
     ENFORCER_BLOC.produced = new Good[] { CASH };
     ENFORCER_BLOC.features = new Good[] { IS_ADMIN };
     
@@ -474,9 +472,8 @@ public class GameContent {
     ECOLOGIST_STATION.tint = TINT_MILITARY;
     ECOLOGIST_STATION.setDimensions(4, 4, 1);
     ECOLOGIST_STATION.setBuildMaterials(PLASTICS, 7, PARTS, 1);
-    ECOLOGIST_STATION.setWorkerTypes(ECOLOGIST);
+    ECOLOGIST_STATION.workerTypes.setWith(ECOLOGIST, 2);
     ECOLOGIST_STATION.worksBeforeBuilt = true;
-    ECOLOGIST_STATION.maxWorkers = 2;
     ECOLOGIST_STATION.maxHealth  = 100;
     ECOLOGIST_STATION.produced   = new Good[] { PROTEIN };
     
@@ -484,7 +481,7 @@ public class GameContent {
     ENGINEER_STATION.tint = TINT_INDUSTRIAL;
     ENGINEER_STATION.setDimensions(2, 2, 1);
     ENGINEER_STATION.setBuildMaterials(PARTS, 8);
-    ENGINEER_STATION.setWorkerTypes(ENGINEER);
+    ENGINEER_STATION.workerTypes.setWith(ENGINEER, 2);
     ENGINEER_STATION.needed   = new Good[] { ORES };
     ENGINEER_STATION.produced = new Good[] { PARTS };
     ENGINEER_STATION.maxStock = 3;
@@ -494,7 +491,7 @@ public class GameContent {
     PHYSICIAN_STATION.tint = TINT_INDUSTRIAL;
     PHYSICIAN_STATION.setDimensions(2, 2, 1);
     PHYSICIAN_STATION.setBuildMaterials(PLASTICS, 4, PARTS, 2);
-    PHYSICIAN_STATION.setWorkerTypes(PHYSICIAN);
+    PHYSICIAN_STATION.workerTypes.setWith(PHYSICIAN, 2);
     PHYSICIAN_STATION.needed   = new Good[] { GREENS };
     PHYSICIAN_STATION.produced = new Good[] { MEDICINE };
     PHYSICIAN_STATION.maxStock = 3;
@@ -508,7 +505,7 @@ public class GameContent {
     STOCK_EXCHANGE.tint = TINT_COMMERCIAL;
     STOCK_EXCHANGE.setDimensions(4, 4, 1);
     STOCK_EXCHANGE.setBuildMaterials(PLASTICS, 4, PARTS, 2);
-    STOCK_EXCHANGE.setWorkerTypes(VENDOR);
+    STOCK_EXCHANGE.workerTypes.setWith(VENDOR, 2);
     STOCK_EXCHANGE.needed   = MARKET_GOODS;
     STOCK_EXCHANGE.features = new Good[] { IS_VENDOR };
     
@@ -516,8 +513,7 @@ public class GameContent {
     SUPPLY_DEPOT.tint = TINT_COMMERCIAL;
     SUPPLY_DEPOT.setDimensions(3, 3, 1);
     SUPPLY_DEPOT.setBuildMaterials(PLASTICS, 4, PARTS, 2);
-    SUPPLY_DEPOT.setWorkerTypes(PYON);
-    SUPPLY_DEPOT.maxWorkers = 2;
+    SUPPLY_DEPOT.workerTypes.setWith(PYON, 2);
     SUPPLY_DEPOT.worksBeforeBuilt = true;
     SUPPLY_DEPOT.features = new Good[] { IS_TRADER };
     
@@ -535,7 +531,7 @@ public class GameContent {
       t.setDimensions(6, 6, 3);
       t.setBuildMaterials(PARTS, 15);
       //t.setWorkerTypes(PRIEST);
-      t.maxWorkers      = 1;
+      //t.maxWorkers      = 1;
       t.maxHealth       = 100;
       t.maxResidents    = 1;
       t.homeSocialClass = CLASS_NOBLE;
@@ -579,7 +575,7 @@ public class GameContent {
     HOLDING.tint = TINT_LITE_RESIDENTIAL;
     HOLDING.setDimensions(2, 2, 1);
     HOLDING.setBuildMaterials(PLASTICS, 1);
-    HOLDING.setWorkerTypes(PYON);
+    HOLDING.workerTypes.setWith(PYON, 1);
     HOLDING.homeFoods    = FOOD_TYPES;
     HOLDING.maxResidents = 4;
     HOLDING.maxStock     = 1;
@@ -590,13 +586,13 @@ public class GameContent {
     HOUSE_T1.name = "Improved Holding";
     HOUSE_T1.setBuildMaterials(PLASTICS, 2, PARTS, 1);
     HOUSE_T1.maxStock = 2;
-    HOUSE_T1.setUpgradeNeeds(DIVERSION, 10);
+    HOUSE_T1.upgradeNeeds.setWith(DIVERSION, 10);
     
     HOUSE_T2.name = "Fancy Holding";
     HOUSE_T2.setBuildMaterials(PLASTICS, 3, PARTS, 2);
-    HOUSE_T2.setHomeUsage(MEDICINE, 1);
+    HOUSE_T2.homeUseGoods.setWith(MEDICINE, 1);
     HOUSE_T2.maxStock = 2;
-    HOUSE_T2.setUpgradeNeeds(DIVERSION, 15, PHYSICIAN_STATION, 1);
+    HOUSE_T2.upgradeNeeds.setWith(DIVERSION, 15, PHYSICIAN_STATION, 1);
     
     CANTINA.name = "Cantina";
     CANTINA.tint = TINT_AMENITY;
@@ -611,36 +607,33 @@ public class GameContent {
     NURSERY.tint = TINT_LITE_INDUSTRIAL;
     NURSERY.setDimensions(2, 2, 1);
     NURSERY.setBuildMaterials(PLASTICS, 5, PARTS, 2);
-    NURSERY.setWorkerTypes(PYON);
+    NURSERY.workerTypes.setWith(PYON, 2);
     NURSERY.worksBeforeBuilt = true;
     NURSERY.gatherFlag = IS_CROP;
     NURSERY.produced   = CROP_TYPES;
     NURSERY.maxStock   = 25;
-    NURSERY.maxWorkers = 2;
     NURSERY.craftSkill = SKILL_FARM;
     
     FORMER_BAY.name = "Former Bay";
     FORMER_BAY.tint = TINT_LITE_INDUSTRIAL;
     FORMER_BAY.setDimensions(2, 2, 1);
     FORMER_BAY.setBuildMaterials(PLASTICS, 5, PARTS, 2);
-    FORMER_BAY.setWorkerTypes(PYON);
+    FORMER_BAY.workerTypes.setWith(PYON, 2);
     FORMER_BAY.worksBeforeBuilt = true;
     FORMER_BAY.gatherFlag = IS_TREE;
     FORMER_BAY.maxStock   = 25;
     FORMER_BAY.produced   = new Good[] { CARBONS };
-    FORMER_BAY.maxWorkers = 2;
     FORMER_BAY.craftSkill = SKILL_CRAFT;
     
     ORE_SMELTER.name = "Ore Smelter";
     ORE_SMELTER.tint = TINT_LITE_INDUSTRIAL;
     ORE_SMELTER.setDimensions(2, 2, 1);
     ORE_SMELTER.setBuildMaterials(PLASTICS, 2, PARTS, 5);
-    ORE_SMELTER.setWorkerTypes(PYON);
+    ORE_SMELTER.workerTypes.setWith(PYON, 2);
     ORE_SMELTER.worksBeforeBuilt = true;
     ORE_SMELTER.gatherFlag = IS_STONE;
     ORE_SMELTER.maxStock   = 25;
     ORE_SMELTER.produced   = new Good[] { CARBONS, ORES };
-    ORE_SMELTER.maxWorkers = 2;
     ORE_SMELTER.craftSkill = SKILL_CRAFT;
     
     SOLAR_TOWER.name = "Solar Tower";
@@ -649,7 +642,6 @@ public class GameContent {
     SOLAR_TOWER.setBuildMaterials(PLASTICS, 2, PARTS, 2);
     SOLAR_TOWER.maxStock   = 25;
     SOLAR_TOWER.produced   = new Good[] {};
-    SOLAR_TOWER.maxWorkers = 0;
   }
   
   

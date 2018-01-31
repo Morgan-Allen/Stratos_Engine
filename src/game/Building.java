@@ -365,8 +365,7 @@ public class Building extends Element implements Pathing, Employer {
   
   
   public int maxWorkers(Type w) {
-    if (! Visit.arrayIncludes(type().workerTypes, w)) return 0;
-    return type().maxWorkers;
+    return (int) type().workerTypes.valueFor(w);
   }
   
   
