@@ -162,9 +162,9 @@ public class GameConstants {
     MIGRANTS_PER_1KM = 10     //  per month per 1000 foreign citizens
   ;
   final public static int
-    CLASS_SLAVE    = 0,
-    CLASS_COMMON   = 1,
-    CLASS_TRADER   = 2,
+    CLASS_COMMON   = 0,
+    CLASS_TRADER   = 1,
+    CLASS_SOLDIER  = 2,
     CLASS_NOBLE    = 3,
     ALL_CLASSES[]  = { 0, 1, 2, 3 },
     TAX_VALUES []  = { 0, 25, 75, 250 },

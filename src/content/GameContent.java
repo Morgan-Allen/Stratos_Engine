@@ -279,17 +279,17 @@ public class GameContent {
     NOBLE     = new HumanType("actor_noble"    , CLASS_NOBLE ),
     CONSORT   = new HumanType("actor_consort"  , CLASS_NOBLE ),
     
-    TROOPER   = new HumanType("actor_trooper"  , CLASS_COMMON),
-    ENFORCER  = new HumanType("actor_enforcer" , CLASS_COMMON),
-    RUNNER    = new HumanType("actor_runner"   , CLASS_COMMON),
+    TROOPER   = new HumanType("actor_trooper"  , CLASS_SOLDIER),
+    ENFORCER  = new HumanType("actor_enforcer" , CLASS_SOLDIER),
+    RUNNER    = new HumanType("actor_runner"   , CLASS_SOLDIER),
     
-    ECOLOGIST = new HumanType("actor_ecologist", CLASS_COMMON),
-    ENGINEER  = new HumanType("actor_engineer" , CLASS_COMMON),
-    PHYSICIAN = new HumanType("actor_physician", CLASS_COMMON),
+    ECOLOGIST = new HumanType("actor_ecologist", CLASS_SOLDIER),
+    ENGINEER  = new HumanType("actor_engineer" , CLASS_SOLDIER),
+    PHYSICIAN = new HumanType("actor_physician", CLASS_SOLDIER),
     
     AUDITOR   = new HumanType("actor_auditor"  , CLASS_TRADER),
     VENDOR    = new HumanType("actor_vendor"   , CLASS_TRADER),
-    PYON      = new HumanType("actor_pyon"     , CLASS_TRADER),
+    PYON      = new HumanType("actor_pyon"     , CLASS_COMMON),
     
     ALL_CITIZENS[] = { PYON, VENDOR, AUDITOR },
     ALL_SOLDIERS[] = { TROOPER, RUNNER, NOBLE },
@@ -379,9 +379,9 @@ public class GameContent {
     
     //  TODO:  Add Runner Market and Pseer/Kommando School.
     
-    BASTION           = new BuildType(BuildingForHome.class   , "venue_bastion"  , IS_HOME_BLD   ),
+    BASTION           = new BuildType(BuildingForGovern.class , "venue_bastion"  , IS_GOVERN_BLD ),
     TROOPER_LODGE     = new BuildType(BuildingForArmy.class   , "venue_trooper"  , IS_ARMY_BLD   ),
-    ENFORCER_BLOC     = new BuildType(BuildingForCollect.class, "venue_enforcer" , IS_COLLECT_BLD),
+    ENFORCER_BLOC     = new BuildType(BuildingForGovern.class , "venue_enforcer" , IS_GOVERN_BLD ),
     
     ECOLOGIST_STATION = new BuildType(BuildingForHunt.class   , "venue_ecologist", IS_HUNTS_BLD  ),
     ENGINEER_STATION  = new BuildType(BuildingForCrafts.class , "venue_engineer" , IS_CRAFTS_BLD ),
@@ -414,11 +414,11 @@ public class GameContent {
     SOLAR_TOWER   = new BuildType(BuildingForGather.class , "type_solar_tower"  , IS_GATHER_BLD ),
     
     INFRASTRUCTURE_BUILDINGS[] = { WALKWAY, SHIELD_WALL, BLAST_DOOR, TURRET },
-    RESIDENTIAL_BUILDINGS[] = { BASTION, HOLDING, CANTINA },
-    RESOURCE_BUILDINGS[] = { NURSERY, FORMER_BAY, ORE_SMELTER },
-    ECONOMIC_BUILDINGS[] = { STOCK_EXCHANGE, SUPPLY_DEPOT, ENFORCER_BLOC },
-    MILITARY_BUILDINGS[] = { ECOLOGIST_STATION, TROOPER_LODGE },
-    SCIENCE_BUILDINGS[] = { ENGINEER_STATION, PHYSICIAN_STATION },
+    RESIDENTIAL_BUILDINGS   [] = { BASTION, HOLDING, CANTINA },
+    RESOURCE_BUILDINGS      [] = { NURSERY, FORMER_BAY, ORE_SMELTER },
+    ECONOMIC_BUILDINGS      [] = { STOCK_EXCHANGE, SUPPLY_DEPOT, ENFORCER_BLOC },
+    MILITARY_BUILDINGS      [] = { ECOLOGIST_STATION, TROOPER_LODGE },
+    SCIENCE_BUILDINGS       [] = { ENGINEER_STATION, PHYSICIAN_STATION },
     PSI_SCHOOL_BUILDINGS[] = {
       SCHOOL_LOG, SCHOOL_COL, SCHOOL_LEN, SCHOOL_SHA, SCHOOL_TEK, SCHOOL_SPA
     },

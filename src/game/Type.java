@@ -28,7 +28,7 @@ public class Type extends Index.Entry implements Session.Saveable {
     IS_TRADE_BLD   = 9,
     IS_HOME_BLD    = 10,
     IS_AMENITY_BLD = 11,
-    IS_COLLECT_BLD = 12,
+    IS_GOVERN_BLD  = 12,
     IS_HUNTS_BLD   = 13,
     IS_ARMY_BLD    = 14,
     IS_WALLS_BLD   = 15,
@@ -344,6 +344,12 @@ public class Type extends Index.Entry implements Session.Saveable {
     a.hunger     = Rand.num() - 0.5f;
     return;
   }
+  
+  
+  public boolean isCommoner() { return socialClass == CLASS_COMMON ; }
+  public boolean isTrader  () { return socialClass == CLASS_TRADER ; }
+  public boolean isSoldier () { return socialClass == CLASS_SOLDIER; }
+  public boolean isNoble   () { return socialClass == CLASS_NOBLE  ; }
   
   
   

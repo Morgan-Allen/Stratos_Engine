@@ -459,6 +459,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   
   public float carryAmount() {
+    if (carried == null) return 0;
     return carryAmount;
   }
   
