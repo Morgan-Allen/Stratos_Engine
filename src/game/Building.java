@@ -2,6 +2,8 @@
 
 package game;
 import gameUI.play.*;
+import graphics.common.*;
+import graphics.sfx.*;
 import util.*;
 import static game.CityMap.*;
 import static game.GameConstants.*;
@@ -536,6 +538,24 @@ public class Building extends Element implements Pathing, Employer {
     UI.setDetailPane(new VenuePane (UI, this));
     UI.setOptionList(new OptionList(UI, this));
     return true;
+  }
+  
+  
+  public void renderElement(Rendering rendering, City base) {
+    super.renderElement(rendering, base);
+    
+    Sprite s = sprite();
+    if (s != null) {
+      Healthbar h = new Healthbar();
+      h.fog = s.fog;
+      h.colour = Colour.BLUE;
+      h.hurtLevel = 1 - buildLevel();
+      h.size = type().maxHealth;
+      h.position.setTo(s.position);
+      h.position.z += type().deep + 0.5f;
+      //h.position.z -= (type().wide - 1) / 2f;
+      h.readyFor(rendering);
+    }
   }
 }
 

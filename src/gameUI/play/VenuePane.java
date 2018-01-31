@@ -4,6 +4,7 @@ package gameUI.play;
 import game.*;
 import graphics.widgets.*;
 import util.*;
+import static game.GameConstants.*;
 
 
 
@@ -42,10 +43,17 @@ public class VenuePane extends DetailPane {
     //d.append("\nCredits: "+venue.stocks.credits());
     
     if (venue.workers().size() > 0) {
-      d.append("\nMembers:");
+      d.append("\n\nMembers:");
       for (Actor a : venue.workers()) {
         //d.append("\n  ");
         d.appendAll("\n  ", a, "  ", a.task());
+      }
+    }
+    
+    if (! venue.inventory().empty()) {
+      d.append("\n\nInventory:");
+      for (Good g : venue.inventory().keys()) {
+        d.appendAll("\n  ", g, ": ", venue.inventory(g));
       }
     }
     

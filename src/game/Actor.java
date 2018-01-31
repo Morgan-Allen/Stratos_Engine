@@ -3,6 +3,7 @@
 package game;
 import gameUI.play.*;
 import graphics.common.*;
+import graphics.sfx.Healthbar;
 import util.*;
 import static game.Task.*;
 import static game.CityMap.*;
@@ -742,6 +743,21 @@ public class Actor extends Element implements Session.Saveable, Journeys {
       s.setAnimation(AnimNames.MOVE, Rendering.activeTime() % 1, true);
     }
     super.renderElement(rendering, base);
+    
+    
+    //  Add a health-bar for general display
+    Healthbar h = new Healthbar();
+    h.fog = s.fog;
+    h.colour = Colour.BLUE;
+    h.size = 30;
+    h.hurtLevel = injury () / type().maxHealth;
+    h.tireLevel = fatigue() / type().maxHealth;
+    h.position.setTo(s.position);
+    h.position.z += type().deep + 0.1f;
+    h.readyFor(rendering);
+    
+    //  TODO:  Add a chat-bar in cases of conversation, to represent how
+    //  persuaded/converted/loyal a subject is.
   }
   
   

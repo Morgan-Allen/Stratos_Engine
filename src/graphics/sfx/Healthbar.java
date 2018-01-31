@@ -84,7 +84,7 @@ public class Healthbar extends SFX {
     //  Then, establish correct colours for the fill, back, and warning-
     final ImageAsset blank = Image.SOLID_WHITE;
     Colour back = new Colour(this.back);
-    back.blend(Colour.BLACK, fog);
+    back.blend(Colour.BLACK, 1 - fog);
     back.calcFloatBits();
     renderPortion(back, blank, x, y, size, z, passS, passW, basis, widget);
     
@@ -109,6 +109,7 @@ public class Healthbar extends SFX {
     if (fillLevel > 0) {
       float across = size * fillLevel;
       Colour mix = new Colour(colour);
+      mix.blend(Colour.BLACK, 1 - fog);
       mix.calcFloatBits();
       renderPortion(mix, blank, x, y, across, z, passS, passW, basis, widget);
     }
