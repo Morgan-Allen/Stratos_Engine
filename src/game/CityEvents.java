@@ -176,8 +176,8 @@ public class CityEvents {
     if (monarch == null || monarch.dead()) return;
     
     setBond(monarch, marries, BOND_MARRIED, BOND_MARRIED, 0);
-    marries.homeCity = monarch.homeCity;
-    if (monarch.home != null) monarch.home.setResident(marries, true);
+    marries.assignHomeCity(monarch.homeCity());
+    if (monarch.home() != null) monarch.home().setResident(marries, true);
   }
   
   

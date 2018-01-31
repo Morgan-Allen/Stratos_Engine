@@ -1,6 +1,7 @@
 
 
 package game;
+import gameUI.play.*;
 import util.*;
 import static game.CityMap.*;
 import static game.GameConstants.*;
@@ -101,11 +102,11 @@ public class Building extends Element implements Pathing, Employer {
     refreshEntrances(new Tile[0]);
     super.exitMap(map);
     map.buildings.remove(this);
-    for (Actor w : workers) if (w.work == this) {
-      w.work = null;
+    for (Actor w : workers) if (w.work() == this) {
+      w.setWork(null);
     }
-    for (Actor w : residents) if (w.home == this) {
-      w.home = null;
+    for (Actor w : residents) if (w.home() == this) {
+      w.setHome(null);
     }
     for (Actor a : visitors) if (a.inside() == this) {
       a.setInside(this, false);
@@ -385,13 +386,13 @@ public class Building extends Element implements Pathing, Employer {
   
   
   public void setWorker(Actor a, boolean is) {
-    a.work = is ? this : null;
+    a.setWork(is ? this : null);
     workers.toggleMember(a, is);
   }
   
   
   public void setResident(Actor a, boolean is) {
-    a.home = is ? this : null;
+    a.setHome(is ? this : null);
     residents.toggleMember(a, is);
   }
   
@@ -521,10 +522,38 @@ public class Building extends Element implements Pathing, Employer {
   }
   
   
+  public String fullName() {
+    return toString();
+  }
+  
+  
   public String toString() {
     return type().name+" "+ID;
   }
+  
+  
+  public boolean setSelected(PlayUI UI) {
+    UI.setDetailPane(new VenuePane (UI, this));
+    UI.setOptionList(new OptionList(UI, this));
+    return true;
+  }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

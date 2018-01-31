@@ -542,12 +542,6 @@ public class CityMap implements Session.Saveable {
   public void renderStage(Rendering rendering, City playing) {
     float renderTime = (numUpdates + Rendering.frameAlpha()) / ticksPS;
     
-    //  TODO:  Don't render all the chunks either.
-    
-    //  TODO:  All the elements need to be rendered as well.  (You need to do
-    //  some gradient descent, basically- and possibly punt this out to a
-    //  separate class.)
-    
     Box2D area = new Box2D(0, 0, size, size);
     terrain.readyAllMeshes();
     int totalChunks = 0, chunksShown = 0;

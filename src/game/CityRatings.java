@@ -33,7 +33,7 @@ public class CityRatings {
     int totalPop = 0;
     
     for (Actor a : map.actors) {
-      if (a.homeCity != city) continue;
+      if (a.homeCity() != city) continue;
       totalPop += 1;
     }
   }

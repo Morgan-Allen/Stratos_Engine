@@ -44,8 +44,8 @@ public class TaskCombat extends Task {
   
   
   static boolean hostile(Actor a, Actor b, CityMap map) {
-    City CA = a.homeCity , CB = b.homeCity ;
-    City GA = a.guestCity, GB = b.guestCity;
+    City CA = a.homeCity (), CB = b.homeCity ();
+    City GA = a.guestCity(), GB = b.guestCity();
     if (CA == null) CA = map.city;
     if (CB == null) CB = map.city;
     if (GA == null) GA = CA;

@@ -573,7 +573,7 @@ public class City implements Session.Saveable, Trader {
       council.updateCouncil(true);
       
       int citizens = 0;
-      for (Actor a : map.actors) if (a.homeCity == this) {
+      for (Actor a : map.actors) if (a.homeCity() == this) {
         citizens += 1;
       }
       population = citizens * POP_PER_CITIZEN;

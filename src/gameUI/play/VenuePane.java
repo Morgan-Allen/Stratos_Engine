@@ -26,22 +26,31 @@ public class VenuePane extends DetailPane {
     final Description d = this.text;
     
     //  TODO:  RESTORE THIS
-    /*
+    //*
     
-    d.append(""+venue.toString()+" (Level "+venue.structure.venueLevel()+")");
+    d.append(""+venue.toString());//+" (Level "+venue.structure.venueLevel()+")");
     d.append("\n");
     
     d.append("\nHP: ");
     final int
-      maxHP = venue.structure.maxHP(),
-      HP    = (int) (maxHP - venue.structure.injury())
+      maxHP = venue.type().maxHealth,
+      HP    = (int) (maxHP * venue.buildLevel())
     ;
     d.append(HP+"/"+maxHP);
-    d.append("\nDamage: "+venue.structure.damage());
-    d.append("\nArmour: "+venue.structure.armour());
-    d.append("\nCredits: "+venue.stocks.credits());
+    //d.append("\nDamage: "+venue.structure.damage());
+    //d.append("\nArmour: "+venue.structure.armour());
+    //d.append("\nCredits: "+venue.stocks.credits());
+    
+    if (venue.workers().size() > 0) {
+      d.append("\nMembers:");
+      for (Actor a : venue.workers()) {
+        //d.append("\n  ");
+        d.appendAll("\n  ", a, "  ", a.task());
+      }
+    }
     
     
+    /*
     Series <Upgrade> upgrades = venue.blueprint().upgradesAvailable();
     if (! upgrades.empty()) {
       int num = venue.structure.numUpgrades(), max = venue.structure.maxUpgrades();

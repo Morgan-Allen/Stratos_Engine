@@ -97,7 +97,7 @@ public class ActorAsPerson extends Actor {
   
   public void setLevel(Trait trait, float level) {
     Level l = levelFor(trait, true);
-    l.level = level = Nums.clamp(level, 0, MAX_SKILL_LEVEL);
+    l.level = level = Nums.clamp(level, -1, MAX_SKILL_LEVEL);
     l.XP =  BASE_LEVEL_XP * SKILL_XP_TOTAL[(int) level];
     l.XP += BASE_LEVEL_XP * SKILL_XP_MULTS[(int) level] * (l.level % 1);
   }
@@ -116,6 +116,13 @@ public class ActorAsPerson extends Actor {
   public void gainXP(Trait trait, float XP) {
     Level l = levelFor(trait, true);
     setXP(trait, l.XP + XP);
+  }
+  
+  
+  public Series <Trait> allTraits() {
+    Batch <Trait> traits = new Batch();
+    for (Level l : levels) traits.add(l.trait);
+    return traits;
   }
   
   
@@ -203,24 +210,24 @@ public class ActorAsPerson extends Actor {
     assignTask(null);
     
     //  Adults will search for work and a place to live:
-    if ((homeCity == null || homeCity == map.city) && adult) {
-      if (work == null) CityBorders.findWork(map, this);
-      if (home == null) CityBorders.findHome(map, this);
+    if ((homeCity() == null || homeCity() == map.city) && adult) {
+      if (work() == null) CityBorders.findWork(map, this);
+      if (home() == null) CityBorders.findHome(map, this);
     }
     
     //  Children and retirees don't work:
-    if (work != null && ! adult) {
-      work.setWorker(this, false);
+    if (work() != null && ! adult) {
+      work().setWorker(this, false);
     }
     
     //  TODO:  You will need to ensure that work/home/formation venues are
     //  present on the same map to derive related bahaviours!
     
     //  If you're seriously hungry/beat/tired, try going home:
-    Batch <Good> menu = menuAt(home);
+    Batch <Good> menu = menuAt(home());
     float hurtRating = fatigue + injury + (menu.size() > 0 ? hunger : 0);
     if (hurtRating > (type().maxHealth * (Rand.num() + 0.5f))) {
-      beginResting(home);
+      beginResting(home());
     }
     
     //  Once home & work have been established, try to derive a task to
@@ -228,14 +235,14 @@ public class ActorAsPerson extends Actor {
     if (idle() && formation != null && formation.active) {
       formation.selectActorBehaviour(this);
     }
-    if (idle() && work != null && work.accessible()) {
-      work.selectActorBehaviour(this);
+    if (idle() && work() != null && work().accessible()) {
+      work().selectActorBehaviour(this);
     }
-    if (idle() && home != null && home.accessible()) {
-      home.selectActorBehaviour(this);
+    if (idle() && home() != null && home().accessible()) {
+      home().selectActorBehaviour(this);
     }
     if (idle() && (hurtRating >= 1 || injury > 0)) {
-      beginResting(home);
+      beginResting(home());
     }
     if (idle()) {
       startRandomWalk();
@@ -318,14 +325,14 @@ public class ActorAsPerson extends Actor {
     WorldSettings settings = city.world.settings;
     
     if (pregnancy > 0) {
-      boolean canBirth = (home != null && inside() == home) || ! onMap;
+      boolean canBirth = (home() != null && inside() == home()) || ! onMap;
       pregnancy += 1;
       if (pregnancy > PREGNANCY_LENGTH && canBirth) {
         float dieChance = AVG_CHILD_MORT / 100f;
         if (! settings.toggleChildMort) dieChance = 0;
         
         if (Rand.num() >= dieChance) {
-          completePregnancy(home, onMap);
+          completePregnancy(home(), onMap);
         }
         else {
           pregnancy = 0;
@@ -343,7 +350,7 @@ public class ActorAsPerson extends Actor {
         setAsKilled("Old age");
       }
       
-      boolean canConceive = home != null || ! onMap;
+      boolean canConceive = home() != null || ! onMap;
       if (woman() && fertile() && pregnancy == 0 && canConceive) {
         float
           ageYears   = ageSeconds / (YEAR_LENGTH * 1f),

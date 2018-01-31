@@ -463,28 +463,33 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   
   
   public void whenClicked(Object context) {
-    // TODO Auto-generated method stub
-  }
-  
-  
-  public boolean testSelection(PlayUI UI, City base, Viewport port) {
-    return false;
-  }
-
-
-  public boolean setSelected(PlayUI UI) {
-    return false;
+    PlayUI.pushSelection(this);
   }
   
   
   public boolean trackSelection() {
-    return false;
+    return true;
   }
   
   
   public Vec3D trackPosition() {
     if (at == null) return new Vec3D();
     return new Vec3D(at.x + (type.wide / 2f), at.y + (type.high / 2f), 0);
+  }
+  
+  
+  public boolean testSelection(PlayUI UI, City base, Viewport port) {
+    float height = type.deep;
+    float radius = 1.5f * Nums.max(type.wide, type.high) / 2;
+    float selRad = (height + radius) / 2;
+    Vec3D selPos = trackPosition();
+    if (! port.mouseIntersects(selPos, selRad, UI)) return false;
+    return true;
+  }
+
+
+  public boolean setSelected(PlayUI UI) {
+    return false;
   }
   
   

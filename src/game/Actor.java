@@ -1,6 +1,7 @@
 
 
 package game;
+import gameUI.play.*;
 import graphics.common.*;
 import util.*;
 import static game.Task.*;
@@ -32,10 +33,10 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   private String ID;
   
-  Building  work;
-  Building  home;
-  City      homeCity;
-  City      guestCity;
+  private Building  work;
+  private Building  home;
+  private City      homeCity;
+  private City      guestCity;
   Building  recruiter;
   Formation formation;
   
@@ -182,6 +183,26 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   public boolean onMap(CityMap map) {
     return map != null && map == this.map;
+  }
+  
+  
+  public Building home() {
+    return home;
+  }
+  
+  
+  public Building work() {
+    return work;
+  }
+  
+  
+  public void setHome(Building home) {
+    this.home = home;
+  }
+  
+  
+  public void setWork(Building work) {
+    this.work = work;
   }
   
   
@@ -465,6 +486,11 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   }
   
   
+  public City guestCity() {
+    return guestCity;
+  }
+  
+  
   
   /**  Combat and survival-related code:
     */
@@ -542,14 +568,10 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   }
   
   
-  public boolean alive() {
-    return state != STATE_DEAD;
-  }
-  
-  
-  public boolean dead() {
-    return state == STATE_DEAD;
-  }
+  public float injury () { return injury ; }
+  public float fatigue() { return fatigue; }
+  public boolean alive() { return state != STATE_DEAD; }
+  public boolean dead () { return state == STATE_DEAD; }
   
   
   
@@ -557,6 +579,11 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     */
   public void gainXP(Trait trait, float XP) {
     return;
+  }
+  
+  
+  public Series <Trait> allTraits() {
+    return new List();
   }
   
   
@@ -643,6 +670,11 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   }
   
   
+  public String fullName() {
+    return toString();
+  }
+  
+  
   public String toString() {
     String from = "";
     if (map != null && map.city != null && homeCity != null) {
@@ -662,6 +694,19 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   }
   
 
+  public boolean testSelection(PlayUI UI, City base, Viewport port) {
+    if (indoors()) return false;
+    return super.testSelection(UI, base, port);
+  }
+  
+  
+  public boolean setSelected(PlayUI UI) {
+    UI.setDetailPane(new ActorPane (UI, this));
+    UI.setOptionList(new OptionList(UI, this));
+    return true;
+  }
+  
+
   public boolean canRender(City base, Viewport view) {
     if (indoors()) return false;
     return super.canRender(base, view);
@@ -675,7 +720,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     Tile from = at(), goes = from;
     Pathing next = task == null ? null : task.nextOnPath();
     if (next.isTile()) goes = (Tile) next;
-
+    
     float alpha = Rendering.frameAlpha(), rem = 1 - alpha;
     s.position.set(
       (from.x * rem) + (goes.x * alpha),
@@ -696,6 +741,24 @@ public class Actor extends Element implements Session.Saveable, Journeys {
       s.setAnimation(AnimNames.MOVE, Rendering.activeTime() % 1, true);
     }
     super.renderElement(rendering, base);
+  }
+  
+  
+  public Vec3D trackPosition() {
+    if (indoors()) {
+      return ((Element) inside).trackPosition();
+    }
+    else {
+      Tile from = at(), goes = from;
+      Pathing next = task == null ? null : task.nextOnPath();
+      if (next.isTile()) goes = (Tile) next;
+      
+      float alpha = Rendering.frameAlpha(), rem = 1 - alpha;
+      return new Vec3D(
+        (from.x * rem) + (goes.x * alpha),
+        (from.y * rem) + (goes.y * alpha),
+      0);
+    }
   }
 }
 

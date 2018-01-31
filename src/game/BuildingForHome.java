@@ -274,7 +274,7 @@ public class BuildingForHome extends Building {
   
   static float wealthLevel(Actor actor) {
     if (actor.onMap()) {
-      Building home = actor.home;
+      Building home = actor.home();
       if (home == null) return 0;
       Type type = home.type();
       if (type.category != Type.IS_HOME_BLD) return 0;

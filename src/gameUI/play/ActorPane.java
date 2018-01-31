@@ -2,10 +2,9 @@
 
 package gameUI.play;
 import game.*;
-//import game.actor.*;
-//import game.venue.*;
 import graphics.widgets.*;
 import util.*;
+import static game.GameConstants.*;
 
 
 
@@ -25,6 +24,32 @@ public class ActorPane extends DetailPane {
     
     this.text.setText("");
     final Description d = this.text;
+    
+    d.append(""+actor.toString());
+    d.append("\n");
+    
+    int maxHP = actor.type().maxHealth;
+    float hurt = actor.injury(), tire = actor.fatigue();
+    int HP = (int) (maxHP - (hurt + tire));
+    
+    Type type = actor.type();
+    d.append("\n  HP: "+HP+"/"+maxHP);
+    d.append("\n  Melee/Range dmg:  "+type.meleeDamage+"/"+type.rangeDamage);
+    d.append("\n  Armour class:     "+type.armourClass);
+    d.append("\n  Sight/attack rng: "+type.sightRange+"/"+type.rangeDist);
+    
+    d.append("\n");
+    d.appendAll("\n  Works at:  ", actor.work());
+    d.appendAll("\n  Lives at:  ", actor.home());
+    d.appendAll("\n  Currently: ", actor.task());
+    
+    Series <Trait> traits = actor.allTraits();
+    if (traits.size() > 0) {
+      d.append("\n\nTraits:");
+      for (Trait t : actor.allTraits()) {
+        d.appendAll("\n  ", t, ":"+actor.levelOf(t));
+      }
+    }
     
     /*
     final int
@@ -81,12 +106,9 @@ public class ActorPane extends DetailPane {
       d.append("\n  "+t+": "+skillL);
     }
     //*/
-    
     super.updateState();
   }
-  
 }
-
 
 
 
