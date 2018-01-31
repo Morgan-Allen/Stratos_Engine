@@ -60,7 +60,7 @@ public class InstallPane extends DetailPane {
         if (UI.mouseClicked()) {
           if (canPlace) {
             placed.enterMap(stage, puts.x, puts.y, 0.0f);
-            //placed.enterStage(stage, puts.x + 0.5f, puts.y + 0.5f, false);
+            stage.planning.placeObject(placed);
             //UI.base.incCredits(0 - placed.blueprint().buildCost);
           }
           UI.assignTask(null);

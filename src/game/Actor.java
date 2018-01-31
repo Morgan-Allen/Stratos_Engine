@@ -719,12 +719,13 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     
     Tile from = at(), goes = from;
     Pathing next = task == null ? null : task.nextOnPath();
-    if (next.isTile()) goes = (Tile) next;
+    if (next != null && next.isTile()) goes = (Tile) next;
     
+    //  TODO:  Factor this out below!
     float alpha = Rendering.frameAlpha(), rem = 1 - alpha;
     s.position.set(
-      (from.x * rem) + (goes.x * alpha),
-      (from.y * rem) + (goes.y * alpha),
+      (from.x * rem) + (goes.x * alpha) + 0.5f,
+      (from.y * rem) + (goes.y * alpha) + 0.5f,
     0);
     if (goes != from) {
       float angle = new Vec2D(goes.x - from.x, goes.y - from.y).toAngle();
@@ -751,12 +752,12 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     else {
       Tile from = at(), goes = from;
       Pathing next = task == null ? null : task.nextOnPath();
-      if (next.isTile()) goes = (Tile) next;
+      if (next != null && next.isTile()) goes = (Tile) next;
       
       float alpha = Rendering.frameAlpha(), rem = 1 - alpha;
       return new Vec3D(
-        (from.x * rem) + (goes.x * alpha),
-        (from.y * rem) + (goes.y * alpha),
+        (from.x * rem) + (goes.x * alpha) + 0.5f,
+        (from.y * rem) + (goes.y * alpha) + 0.5f,
       0);
     }
   }
