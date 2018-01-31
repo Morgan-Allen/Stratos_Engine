@@ -3,7 +3,7 @@
 
 package content;
 import game.*;
-import start.CityMapScenario;
+import start.*;
 import util.*;
 import static game.GameConstants.*;
 import static content.GameContent.*;
@@ -11,6 +11,23 @@ import static content.GameContent.*;
 
 
 public class ScenarioBlankMap extends CityMapScenario {
+  
+  
+  
+  public ScenarioBlankMap() {
+    super();
+  }
+  
+  
+  public ScenarioBlankMap(Session s) throws Exception {
+    super(s);
+  }
+  
+  
+  public void saveState(Session s) throws Exception {
+    super.saveState(s);
+  }
+  
   
   
   protected String savePath() {

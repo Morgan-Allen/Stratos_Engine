@@ -26,8 +26,7 @@ public class VenuePane extends DetailPane {
     this.text.setText("");
     final Description d = this.text;
     
-    //  TODO:  RESTORE THIS
-    //*
+    Type type = venue.type();
     
     d.append(""+venue.toString());//+" (Level "+venue.structure.venueLevel()+")");
     d.append("\n");
@@ -42,12 +41,24 @@ public class VenuePane extends DetailPane {
     //d.append("\nArmour: "+venue.structure.armour());
     //d.append("\nCredits: "+venue.stocks.credits());
     
-    if (venue.workers().size() > 0) {
-      d.append("\n\nMembers:");
-      for (Actor a : venue.workers()) {
-        //d.append("\n  ");
+    for (Type w : type.workerTypes.keys()) {
+      int num = venue.numWorkers(w), max = (int) type.workerTypes.valueFor(w);
+      d.append("\n\n"+w.name+": ("+num+"/"+max+")");
+      for (Actor a : venue.workers()) if (a.type() == w) {
         d.appendAll("\n  ", a, "  ", a.task());
       }
+      
+      /*
+      if (venue.canHire(w) && ! venue.isBusyHiring()) {
+        final int cost = w.hireCost;
+        d.append("\n  ");
+        d.append(new Description.Link("Hire "+w.name+" ("+cost+" Cr)") {
+          public void whenClicked(Object context) {
+            venue.startHiring((Actor) w.generate(), w);
+          }
+        });
+      }
+      ///*/
     }
     
     if (! venue.inventory().empty()) {
@@ -99,23 +110,6 @@ public class VenuePane extends DetailPane {
       });
     }
     
-    for (final Species role : venue.rolesAvailable()) {
-      int num = venue.staff.numMembers(role), max = venue.numOpenings(role);
-      d.append("\n\n"+role.name+" ("+num+"/"+max+")");
-      
-      for (Actor a : venue.staff.members(role)) {
-        d.appendAll("\n  ", a);
-      }
-      if (venue.staff.canHire(role) && ! venue.staff.isBusyHiring()) {
-        final int cost = role.hireCost;
-        d.append("\n  ");
-        d.append(new Description.Link("Hire "+role.name+" ("+cost+" Cr)") {
-          public void whenClicked(Object context) {
-            venue.staff.startHiring(role.sampleFor(venue.faction()), role);
-          }
-        });
-      }
-    }
     for (Actor a : venue.staff.hiring()) {
       d.append("\n  Hiring: "+a);
       int prog = (int) (venue.staff.hiringProgress(a) * 100);
