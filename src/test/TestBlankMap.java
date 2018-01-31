@@ -1,6 +1,6 @@
 
 
-package content;
+package test;
 import game.*;
 import static game.GameConstants.*;
 import static content.GameContent.*;

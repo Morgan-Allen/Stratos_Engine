@@ -1,7 +1,7 @@
 
 
 
-package content;
+package test;
 import game.*;
 import util.*;
 import static content.GameContent.*;

@@ -231,7 +231,7 @@ public class GameContent {
     "skin_blood_forest.gif"
   );
   
-  static class HumanType extends ActorType {
+  public static class HumanType extends ActorType {
     
     public ImageAsset costume;
     
