@@ -274,7 +274,9 @@ public class TaskBuilding extends Task {
       return;
     }
     if (amountGap > 0 && ! b.onMap()) {
-      b.enterMap(map, at.x, at.y, 0);
+      City owns = store.homeCity();
+      if (b.type().isBuilding()) owns = ((Building) b).homeCity();
+      b.enterMap(map, at.x, at.y, 0, owns);
     }
     //
     //  We see how much work we can do in this action, either to raze or

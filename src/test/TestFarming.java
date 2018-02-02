@@ -19,21 +19,22 @@ public class TestFarming extends Test {
   
   static boolean testFarming(boolean graphics) {
     Test test = new TestFarming();
-    
-    CityMap map = setupTestCity(20, ALL_GOODS, true, DESERT, MEADOW, JUNGLE);
-    World world = map.city.world;
+
+    City base = setupTestCity(20, ALL_GOODS, true, DESERT, MEADOW, JUNGLE);
+    CityMap map = base.activeMap();
+    World world = map.world;
     world.settings.toggleFog    = false;
     world.settings.toggleHunger = false;
     world.settings.toggleHunger = false;
     
     BuildingForGather farm = (BuildingForGather) NURSERY.generate();
-    farm.enterMap(map, 9, 9, 1);
+    farm.enterMap(map, 9, 9, 1, base);
     fillWorkVacancies(farm);
-    CityMapPlanning.placeStructure(WALKWAY, map, true, 9, 8, 10, 1);
+    CityMapPlanning.placeStructure(WALKWAY, base, true, 9, 8, 10, 1);
     
     Good needed[] = { CARBS, GREENS };
     Tile plantTiles[] = BuildingForGather.applyPlanting(
-      map, 6, 6, 10, 10, needed
+      base, 6, 6, 10, 10, needed
     );
     
     CityMapFlagging forCrops = map.flagMap(NEED_PLANT, true);
@@ -48,7 +49,7 @@ public class TestFarming extends Test {
     boolean badFocus = false;
     
     while (map.time() < 1000 || graphics) {
-      map = test.runLoop(map, 10, graphics, "saves/test_farming.tlt");
+      test.runLoop(base, 10, graphics, "saves/test_farming.tlt");
       
       //
       //  Ensure that every actor has exactly one focus-target:

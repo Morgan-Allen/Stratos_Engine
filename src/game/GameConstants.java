@@ -408,7 +408,7 @@ public class GameConstants {
   
   
   public static interface Employer {
-    void selectActorBehaviour(Actor actor);
+    Task selectActorBehaviour(Actor actor);
     void actorUpdates(Actor actor);
     void actorPasses (Actor actor, Building other );
     void actorTargets(Actor actor, Target   other );

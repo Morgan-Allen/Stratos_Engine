@@ -121,7 +121,7 @@ public class CityMapFog {
   /**  Common queries-
     */
   private boolean isToggled() {
-    return map.city.world.settings.toggleFog;
+    return map.world.settings.toggleFog;
   }
   
   

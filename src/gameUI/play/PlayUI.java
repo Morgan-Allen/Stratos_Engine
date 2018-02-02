@@ -131,6 +131,13 @@ public class PlayUI extends HUD implements UIConstants {
   }
   
   
+  public static City playerBase() {
+    final PlayUI UI = MainGame.playUI();
+    if (UI == null) return null;
+    return UI.base;
+  }
+  
+  
   
   /**  Custom methods-
     */

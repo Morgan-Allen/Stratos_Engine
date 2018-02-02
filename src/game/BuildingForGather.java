@@ -32,9 +32,10 @@ public class BuildingForGather extends Building {
   /**  Utility methods for filling up crop areas:
     */
   public static Tile[] applyPlanting(
-    CityMap map, int x, int y, int w, int h, Good... crops
+    City city, int x, int y, int w, int h, Good... crops
   ) {
     Batch <Tile> planted = new Batch();
+    CityMap map = city.activeMap();
     for (Coord c : Visit.grid(x, y, w, h, 1)) {
       
       Tile t = map.tileAt(c);
@@ -43,7 +44,7 @@ public class BuildingForGather extends Building {
       
       Good seed = seedType(t, crops);
       Element crop = new Element(seed);
-      crop.enterMap(map, c.x, c.y, 1);
+      crop.enterMap(map, c.x, c.y, 1, city);
       crop.setGrowLevel(-1);
       planted.add(t);
     }
@@ -62,22 +63,27 @@ public class BuildingForGather extends Building {
   
   /**  Life-cycle, update and economic functions-
     */
-  public void selectActorBehaviour(Actor actor) {
-    
-    if (! actorIsHereWithPrompt(actor)) return;
+  public Task selectActorBehaviour(Actor actor) {
+    Task coming = returnActorHere(actor);
+    if (coming != null) return coming;
     
     Task delivery = TaskDelivery.pickNextDelivery(actor, this, produced());
     if (delivery != null) {
-      actor.assignTask(delivery);
-      return;
+      return delivery;
     }
     
-    if (TaskGathering.pickNextCrop(this, actor, false, (Object[]) type().produced)) {
-      return;
+    Object[] crops = type().produced;
+    Task pick = TaskGathering.pickNextCrop(this, actor, false, crops);
+    if (pick != null) {
+      return pick;
     }
-    if (TaskGathering.pickPlantPoint(this, actor, false, true)) {
-      return;
+    
+    Task plant = TaskGathering.pickPlantPoint(this, actor, false, true);
+    if (plant != null) {
+      return plant;
     }
+    
+    return null;
   }
 }
 

@@ -50,7 +50,8 @@ public class TestPathCache extends Test {
       { 1, 1, 1, 1, 1, 1, 1, 1 },
     };
     int miniSize = 8;
-    CityMap miniMap = setupTestCity(miniSize, ALL_GOODS, false, ALL_TERRAINS);
+    City miniBase = setupTestCity(miniSize, ALL_GOODS, false, ALL_TERRAINS);
+    CityMap miniMap = miniBase.activeMap();
     
     for (Coord c : Visit.grid(0, 0, miniSize, miniSize, 1)) {
       byte l = layout[c.x][c.y];
@@ -127,8 +128,9 @@ public class TestPathCache extends Test {
     //
     //  Now, set up a larger map for testing of connections between
     //  more distant areas:
-    CityMap map = setupTestCity(128, ALL_GOODS, false, ALL_TERRAINS);
-    World world = map.city.world;
+    City base = setupTestCity(128, ALL_GOODS, false, ALL_TERRAINS);
+    CityMap map = base.activeMap();
+    World world = map.world;
     world.settings.toggleFog   = false;
     world.settings.viewPathMap = true ;
     
@@ -177,7 +179,7 @@ public class TestPathCache extends Test {
       if (! graphics) return false;
     }
     
-    CityMapPlanning.placeStructure(SHIELD_WALL, map, true, 88, 20, 48, 8);
+    CityMapPlanning.placeStructure(SHIELD_WALL, base, true, 88, 20, 48, 8);
     map.pathCache.updatePathCache();
     landLinked = map.pathCache.pathConnects(land1, land2);
     if (landLinked) {
@@ -186,7 +188,7 @@ public class TestPathCache extends Test {
       if (! graphics) return false;
     }
     
-    CityMapPlanning.placeStructure(WALKWAY, map, true, 20, 24, 8, 48);
+    CityMapPlanning.placeStructure(WALKWAY, base, true, 20, 24, 8, 48);
     map.pathCache.updatePathCache();
     islandLinked = map.pathCache.pathConnects(land1, island0);
     if (! islandLinked) {
@@ -198,7 +200,7 @@ public class TestPathCache extends Test {
     CityMapPlanning.markDemolish(map, true, 120, 20, 2, 8);
     Building gate = (Building) BLAST_DOOR.generate();
     gate.setFacing(TileConstants.N);
-    gate.enterMap(map, 120, 23, 1);
+    gate.enterMap(map, 120, 23, 1, base);
     map.pathCache.updatePathCache();
     landLinked = map.pathCache.pathConnects(land1, land2);
     if (! landLinked) {
@@ -216,7 +218,7 @@ public class TestPathCache extends Test {
     
     Building tower = (Building) TURRET.generate();
     tower.setFacing(TileConstants.N);
-    tower.enterMap(map, 110, 20, 1);
+    tower.enterMap(map, 110, 20, 1, base);
     map.pathCache.updatePathCache();
     
     CityMapPlanning.markDemolish(map, true, 100, 19, 20, 1);
@@ -268,7 +270,7 @@ public class TestPathCache extends Test {
     
     if (graphics) world.settings.paused = true;
     while (map.time() < 10 || graphics) {
-      map = test.runLoop(map, 1, graphics, "saves/test_path_cache.tlt");
+      test.runLoop(base, 1, graphics, "saves/test_path_cache.tlt");
     }
     
     return allOkay;

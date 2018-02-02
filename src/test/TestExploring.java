@@ -18,12 +18,14 @@ public class TestExploring extends Test {
   
   static boolean testExploring(boolean graphics) {
     Test test = new TestExploring();
-    
-    CityMap map = Test.setupTestCity(32, ALL_GOODS, true, JUNGLE, MEADOW);
+
+    City base = setupTestCity(16, ALL_GOODS, true, JUNGLE, MEADOW);
+    CityMap map = base.activeMap();
+    World world = map.world;
     
     CityMapPlanning.markDemolish(map, true, 3, 3, 6, 6);
     Building lodge = (Building) ECOLOGIST_STATION.generate();
-    lodge.enterMap(map, 4, 4, 1);
+    lodge.enterMap(map, 4, 4, 1, base);
     Test.fillWorkVacancies(lodge);
     
     CityMapTerrain.populateAnimals(map, QUDU);
@@ -34,7 +36,7 @@ public class TestExploring extends Test {
     boolean testOkay    = false;
     
     while (map.time() < 1000 || graphics) {
-      map = test.runLoop(map, 10, graphics, "saves/test_gathering.tlt");
+      test.runLoop(base, 10, graphics, "saves/test_gathering.tlt");
       
       if (! exploreOkay) {
         tilesSeen = 0;

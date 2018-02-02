@@ -20,36 +20,36 @@ public class TestMilitary extends Test {
     Test test = new TestMilitary();
 
     World   world = new World(ALL_GOODS);
-    City    homeC = new City(world);
-    City    awayC = new City(world);
+    City    baseC = new City(world, world.addLocale(2, 2));
+    City    awayC = new City(world, world.addLocale(3, 3));
     CityMap map   = CityMapTerrain.generateTerrain(
-      homeC, 32, 0, MEADOW, JUNGLE
+      baseC, 32, 0, MEADOW, JUNGLE
     );
     world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES);
-    world.addCities(homeC, awayC);
-    homeC.setName("Home City");
+    world.addCities(baseC, awayC);
+    baseC.setName("Home City");
     awayC.setName("Away City");
     awayC.council.setTypeAI(CityCouncil.AI_OFF);
     world.settings.toggleFog = false;
     
-    City.setupRoute(homeC, awayC, 1);
-    City.setPosture(homeC, awayC, City.POSTURE.ENEMY, true);
+    World.setupRoute(baseC.locale, awayC.locale, 1);
+    City.setPosture(baseC, awayC, City.POSTURE.ENEMY, true);
     
     
     BuildingForArmy fort = (BuildingForArmy) TROOPER_LODGE.generate();
-    fort.enterMap(map, 10, 10, 1);
+    fort.enterMap(map, 10, 10, 1, baseC);
     fillWorkVacancies(fort);
-    CityMapPlanning.placeStructure(WALKWAY, map, true, 2, 9, 30, 1);
+    CityMapPlanning.placeStructure(WALKWAY, baseC, true, 2, 9, 30, 1);
     
     for (int n = 8; n-- > 0;) {
       Building house = (Building) HOLDING.generate();
-      house.enterMap(map, 2 + (n * 3), 7, 1);
+      house.enterMap(map, 2 + (n * 3), 7, 1, baseC);
       fillHomeVacancies(house, PYON);
       for (Actor a : house.residents()) a.setSexData(SEX_MALE);
     }
     
-    float initPrestige = homeC.prestige();
-    float initLoyalty  = awayC.loyalty(homeC);
+    float initPrestige = baseC.prestige();
+    float initLoyalty  = awayC.loyalty(baseC);
     
     
     Formation troops  = null;
@@ -74,10 +74,10 @@ public class TestMilitary extends Test {
     Batch <Actor> fromTroops = new Batch();
     
     while (map.time() < 1000 || graphics) {
-      map = test.runLoop(map, 10, graphics, "saves/test_military.tlt");
+      test.runLoop(baseC, 10, graphics, "saves/test_military.tlt");
       
       if (fort.recruits().size() >= 8 && ! recruited) {
-        troops = new Formation(Formation.OBJECTIVE_GARRISON, homeC, false);
+        troops = new Formation(Formation.OBJECTIVE_GARRISON, baseC, false);
         fort.deployInFormation(troops, true);
         troops.beginSecuring(map.tileAt(25, 25), TileConstants.E, map);
         
@@ -87,7 +87,7 @@ public class TestMilitary extends Test {
       }
       
       if (troops != null && troops.formationReady() && ! invaded) {
-        enemies.beginSecuring(homeC);
+        enemies.beginSecuring(baseC);
         World.Journey j = world.journeyFor(enemies);
         world.completeJourney(j);
         enemies.beginSecuring(troops, TileConstants.W, map);
@@ -107,14 +107,14 @@ public class TestMilitary extends Test {
       }
       
       if (homeWin && fort.recruits().size() >= 12 && ! invading) {
-        troops = new Formation(Formation.OBJECTIVE_CONQUER, homeC, false);
+        troops = new Formation(Formation.OBJECTIVE_CONQUER, baseC, false);
         fort.deployInFormation(troops, true);
         troops.beginSecuring(awayC);
         troops.assignTerms(City.POSTURE.VASSAL, null, null, null);
         invading = true;
       }
       
-      if (invading && homeC.isLordOf(awayC)) {
+      if (invading && baseC.isLordOf(awayC)) {
         awayWin = true;
       }
       
@@ -125,12 +125,12 @@ public class TestMilitary extends Test {
         }
         backHome = fort.recruits().size() > 8 && ! someAway;
         
-        if (homeC.prestige() <= initPrestige) {
+        if (baseC.prestige() <= initPrestige) {
           I.say("\nPrestige should be boosted by conquest!");
           break;
         }
         
-        if (awayC.loyalty(homeC) >= initLoyalty) {
+        if (awayC.loyalty(baseC) >= initLoyalty) {
           I.say("\nLoyalty should be reduced by conquest!");
           break;
         }
@@ -142,7 +142,7 @@ public class TestMilitary extends Test {
         }
       }
     }
-
+    
     I.say("\nMILITARY TEST FAILED!");
     I.say("  Recruited: "+recruited);
     I.say("  Invaded:   "+invaded  );

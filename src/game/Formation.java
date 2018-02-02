@@ -2,7 +2,7 @@
 
 package game;
 import gameUI.play.*;
-import graphics.common.Viewport;
+import graphics.common.*;
 import util.*;
 import static game.CityMap.*;
 import static game.City.*;
@@ -28,14 +28,18 @@ public class Formation implements
   };
   
   final public int objective;
-  boolean activeAI = false;
+  boolean tacticalAI = false;
   
+  int     timeArrived   = -1;
   int     timeTermsSent = -1;
   boolean termsAccepted = false;
   boolean termsRefused  = false;
   boolean victorious    = false;
   boolean defeated      = false;
   boolean complete      = false;
+  
+  boolean isBounty = false;
+  int cashReward = -1;
   
   City.POSTURE postureDemand  = null;
   Formation    actionDemand   = null;
@@ -49,7 +53,7 @@ public class Formation implements
   boolean away   = false;
   boolean active = false;
   City    homeCity    ;
-  City    secureCity  ;
+  City    awayCity    ;
   CityMap map         ;
   Tile    transitPoint;
   Tile    standPoint  ;
@@ -61,10 +65,10 @@ public class Formation implements
   
   
   public Formation(int objective, City belongs, boolean activeAI) {
-    this.objective = objective;
-    this.activeAI  = activeAI;
-    this.homeCity  = belongs;
-    this.map       = belongs.map;
+    this.objective  = objective;
+    this.tacticalAI = activeAI;
+    this.homeCity   = belongs;
+    this.map        = belongs.activeMap();
   }
   
   
@@ -72,12 +76,16 @@ public class Formation implements
     s.cacheInstance(this);
     
     objective     = s.loadInt ();
+    timeArrived   = s.loadInt ();
     timeTermsSent = s.loadInt ();
     termsAccepted = s.loadBool();
     termsRefused  = s.loadBool();
     victorious    = s.loadBool();
     defeated      = s.loadBool();
     complete      = s.loadBool();
+    
+    isBounty      = s.loadBool();
+    cashReward    = s.loadInt ();
     
     postureDemand  = (City.POSTURE) s.loadEnum(City.POSTURE.values());
     actionDemand   = (Formation   ) s.loadObject();
@@ -90,7 +98,7 @@ public class Formation implements
     
     away         = s.loadBool();
     homeCity     = (City   ) s.loadObject();
-    secureCity   = (City   ) s.loadObject();
+    awayCity     = (City   ) s.loadObject();
     map          = (CityMap) s.loadObject();
     
     active       = s.loadBool();
@@ -110,12 +118,16 @@ public class Formation implements
   public void saveState(Session s) throws Exception {
     
     s.saveInt (objective    );
+    s.saveInt (timeArrived  );
     s.saveInt (timeTermsSent);
     s.saveBool(termsAccepted);
     s.saveBool(termsRefused );
     s.saveBool(victorious   );
     s.saveBool(defeated     );
     s.saveBool(complete     );
+    
+    s.saveBool(isBounty  );
+    s.saveInt (cashReward);
     
     s.saveEnum  (postureDemand );
     s.saveObject(actionDemand  );
@@ -126,10 +138,10 @@ public class Formation implements
     s.saveObjects(recruits  );
     s.saveObjects(casualties);
     
-    s.saveBool  (away      );
-    s.saveObject(homeCity  );
-    s.saveObject(secureCity);
-    s.saveObject(map       );
+    s.saveBool  (away    );
+    s.saveObject(homeCity);
+    s.saveObject(awayCity);
+    s.saveObject(map     );
     
     s.saveBool(active);
     saveTile(transitPoint, map, s);
@@ -147,6 +159,35 @@ public class Formation implements
   /**  Supplemental utility methods for setting objectives, demands and
     *  marching orders:
     */
+  public void setAsBounty(int cashReward) {
+    this.isBounty = true;
+    this.cashReward = 0;
+    incReward(cashReward);
+  }
+  
+  
+  public boolean incReward(int inc) {
+    if (! isBounty) return false;
+    
+    if (inc > homeCity.funds()) return false;
+    if (inc < 0 - cashReward) inc = 0 - cashReward;
+    
+    homeCity.incFunds(0 - inc);
+    this.cashReward += inc;
+    return true;
+  }
+  
+  
+  public boolean isBounty() {
+    return isBounty;
+  }
+  
+  
+  public int cashReward() {
+    return this.cashReward;
+  }
+  
+  
   public void assignTerms(
     City.POSTURE posture,
     Formation actionTaken,
@@ -179,7 +220,7 @@ public class Formation implements
   public void setTermsAccepted(boolean accepted) {
     if (accepted) {
       termsAccepted = true;
-      CityEvents.imposeTerms(secureCity, homeCity, this);
+      CityEvents.imposeTerms(awayCity, homeCity, this);
       setMissionComplete(true);
     }
     else {
@@ -230,17 +271,28 @@ public class Formation implements
   
   
   public void beginSecuring(City city) {
+    
     homeCity.formations.toggleMember(this, true);
+    this.active = true;
     
-    this.secureCity = city;
-    this.active     = true;
-    
-    if (this.map != null) {
-      this.transitPoint = findTransitPoint(map, city);
-      beginSecuring(city, 0, map); //  Make this face the border?
+    City from, goes;
+    if (city != homeCity) {
+      this.awayCity = city;
+      from = homeCity;
+      goes = city;
     }
     else {
-      beginJourney(homeCity, secureCity);
+      from = awayCity;
+      goes = homeCity;
+    }
+    
+    if (onMap()) {
+      this.transitPoint = findTransitPoint(map, from, goes);
+      beginSecuring(city, 0, map);
+    }
+    else {
+      this.secureFocus = city;
+      beginJourney(from, goes);
     }
   }
   
@@ -260,7 +312,7 @@ public class Formation implements
   public void disbandFormation() {
     homeCity.formations.toggleMember(this, false);
     
-    this.secureCity  = null  ;
+    this.awayCity    = null  ;
     this.secureFocus = null  ;
     this.facing      = CENTRE;
     this.active      = false ;
@@ -270,6 +322,9 @@ public class Formation implements
   }
   
   
+  
+  /**  Pathing and stand-point related methods-
+    */
   Tile standPointFrom(Object focus) {
     
     //  TODO:  Get the nearest open tile, just for good measure?
@@ -344,29 +399,37 @@ public class Formation implements
     }
     //
     //  Check to see if an offer has expired-
-    int timeGone = CityMap.timeSince(timeTermsSent, homeCity.world.time);
+    City local   = away ? awayCity : homeCity;
+    City distant = away ? homeCity : awayCity;
+    int sinceArrive = CityMap.timeSince(timeArrived  , homeCity.world.time);
+    int sinceTerms  = CityMap.timeSince(timeTermsSent, homeCity.world.time);
     boolean hasEnvoy = escorted.size() > 0;
-    if ((! hasEnvoy) || timeGone > MONTH_LENGTH) {
+    
+    if (hasEnvoy && (
+      sinceTerms > MONTH_LENGTH ||
+      (timeTermsSent == -1 && sinceArrive > MONTH_LENGTH * 2)
+    )) {
       timeTermsSent = homeCity.world.time;
       termsRefused  = true;
     }
     //
     //  Update your target and stand-point while you're on the map...
     if (map != null) {
-      if (activeAI) {
+      if (tacticalAI) {
         FormationUtils.updateTacticalTarget(this);
       }
       this.standPoint = standPointFrom(secureFocus);
       //
       //  This is a hacky way of saying "I want to go to a different city, is
       //  everyone ready yet?"
-      if (secureCity != null && secureCity != map.city && formationReady()) {
-        beginJourney(map.city, secureCity);
+      boolean ready = formationReady();
+      if (secureFocus == distant && distant.activeMap() != map && ready) {
+        beginJourney(local, distant);
       }
     }
     //
     //  And see if it's time to leave otherwise-
-    else if (secureCity != homeCity) {
+    else if (secureFocus == awayCity) {
       boolean shouldLeave = false;
       shouldLeave |= termsAccepted;
       shouldLeave |= termsRefused && objective == OBJECTIVE_DIALOG;
@@ -389,7 +452,6 @@ public class Formation implements
     }
     away         = true;
     map          = null;
-    secureFocus  = null;
     transitPoint = null;
     return goes.world.beginJourney(from, goes, this);
   }
@@ -400,7 +462,7 @@ public class Formation implements
     //  There are 4 cases here: arriving home or away, and arriving on a map or
     //  not.
     boolean home  = goes == homeCity;
-    boolean onMap = goes.map != null;
+    boolean onMap = goes.activeMap() != null;
     //
     //  In the event that a formation arrives on the map, either it's a foreign
     //  invader threatening the city, or one of the player's legions returning
@@ -408,15 +470,15 @@ public class Formation implements
     if (onMap) {
       if (reports()) I.say("\nARRIVED ON MAP: "+goes+" FROM "+journey.from);
       
-      Tile transits     = findTransitPoint(goes.map, journey.from);
-      this.map          = goes.map;
+      Tile transits     = findTransitPoint(goes.activeMap(), goes, journey.from);
+      this.map          = goes.activeMap();
       this.transitPoint = transits;
       
       for (Actor r : recruits) {
-        r.enterMap(map, transits.x, transits.y, 1);
+        r.enterMap(map, transits.x, transits.y, 1, r.homeCity());
       }
       for (Actor e : escorted) {
-        e.enterMap(map, transits.x, transits.y, 1);
+        e.enterMap(map, transits.x, transits.y, 1, e.homeCity());
         e.assignGuestCity(goes);
       }
       beginSecuring(transitPoint, N, map);
@@ -427,7 +489,8 @@ public class Formation implements
       }
       else {
         this.away = true;
-        if (activeAI) FormationUtils.updateTacticalTarget(this);
+        this.timeArrived = map.time;
+        if (tacticalAI) FormationUtils.updateTacticalTarget(this);
       }
     }
     //
@@ -463,27 +526,24 @@ public class Formation implements
   
   /**  Organising actors and other basic query methods-
     */
-  public void selectActorBehaviour(Actor actor) {
+  public Task selectActorBehaviour(Actor actor) {
     
     boolean haveTerms  = hasTerms();
     boolean isEnvoy    = escorted.includes(actor);
     boolean diplomatic = objective == OBJECTIVE_DIALOG;
+    boolean onAwayMap  = awayCity != null && map == awayCity.activeMap();
     
-    if (haveTerms && isEnvoy && timeTermsSent == -1) {
+    if (onAwayMap && haveTerms && isEnvoy && timeTermsSent == -1) {
       Actor offersTerms = FormationUtils.findOfferRecipient(this);
-      actor.embarkOnTarget(offersTerms, 1, Task.JOB.DIALOG, this);
-      if (actor.idle()) {
-        timeTermsSent = map.time;
-        termsRefused  = true;
-      }
-      else return;
+      Task t = actor.targetTask(offersTerms, 1, Task.JOB.DIALOG, this);
+      if (t != null) return t;
     }
     
-    if (defeated || victorious || (diplomatic && termsRefused)) {
+    //  TODO:  Merge with 'shouldLeave' criteria above.
+    if (complete || termsAccepted || (diplomatic && termsRefused)) {
       Tile exits = standLocation(actor);
       if (exits != null) {
-        actor.embarkOnTarget(exits, 10, Task.JOB.RETURNING, this);
-        return;
+        return actor.targetTask(exits, 10, Task.JOB.RETURNING, this);
       }
     }
     
@@ -491,29 +551,29 @@ public class Formation implements
       TaskCombat.nextReaction(actor, this)
     ;
     if (taskC != null) {
-      actor.assignTask(taskC);
-      return;
+      return taskC;
     }
     
     TaskCombat taskS = (actor.inCombat() || isEnvoy) ? null :
       TaskCombat.nextSieging(actor, this)
     ;
     if (taskS != null) {
-      actor.assignTask(taskS);
-      return;
+      return taskS;
     }
     
     Tile stands = standLocation(actor);
-    if (stands != null) {
-      actor.embarkOnTarget(stands, 10, Task.JOB.MILITARY, this);
-      return;
+    Task standT = actor.targetTask(stands, 10, Task.JOB.MILITARY, this);
+    if (standT != null) {
+      return standT;
     }
+    
+    return null;
   }
   
   
   public void actorTargets(Actor actor, Target other) {
     if (actor.jobType() == Task.JOB.DIALOG) {
-      dispatchTerms(map.city);
+      dispatchTerms(awayCity);
     }
     if (actor.jobType() == Task.JOB.MILITARY) {
       return;

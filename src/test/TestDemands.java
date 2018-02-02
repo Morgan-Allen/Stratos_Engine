@@ -17,7 +17,10 @@ public class TestDemands extends Test {
   
   
   static boolean testDemands(boolean graphics) {
-    CityMap map = setupTestCity(32, ALL_GOODS, false);
+    
+    City base = setupTestCity(32, ALL_GOODS, false);
+    CityMap map = base.activeMap();
+    World world = map.world;
     CityMapDemands demands = new CityMapDemands(map, "AAA");
     
     class TestItem {
@@ -35,7 +38,7 @@ public class TestDemands extends Test {
       
       if (map.above(i.x, i.y) != null) continue;
       Element e = new Element(JUNGLE_TREE1);
-      e.enterMap(map, i.x, i.y, 1);
+      e.enterMap(map, i.x, i.y, 1, map.locals);
       
       i.amount = 1 + Rand.index(4);
       trueSum += i.amount;

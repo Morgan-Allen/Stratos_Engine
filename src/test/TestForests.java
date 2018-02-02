@@ -19,18 +19,20 @@ public class TestForests extends Test {
   static boolean testForests(boolean graphics) {
     Test test = new TestForests();
     
-    CityMap map = setupTestCity(32, ALL_GOODS, true, JUNGLE, MEADOW);
-    World world = map.city.world;
+
+    City base = setupTestCity(32, ALL_GOODS, true, JUNGLE, MEADOW);
+    CityMap map = base.activeMap();
+    World world = map.world;
     world.settings.toggleFog = false;
     
     Building logs = (Building) FORMER_BAY.generate();
-    logs.enterMap(map, 5, 5, 1);
+    logs.enterMap(map, 5, 5, 1, base);
     fillWorkVacancies(logs);
     
     boolean loggingDone = false;
     
     while (map.time() < 1000 || graphics) {
-      map = test.runLoop(map, 10, graphics, "saves/test_forests.tlt");
+      test.runLoop(base, 10, graphics, "saves/test_forests.tlt");
       
       if (! loggingDone) {
         loggingDone = logs.inventory(CARBONS) >= logs.type().maxStock;

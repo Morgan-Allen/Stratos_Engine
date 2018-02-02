@@ -12,7 +12,7 @@ public class CityBorders {
   
   /**  General migration utilities-
     */
-  static Tile findTransitPoint(CityMap map, City with) {
+  static Tile findTransitPoint(CityMap map, City base, City with) {
     
     //  TODO:  Make sure there's a pathing connection to the main settlement
     //  here!
@@ -22,8 +22,8 @@ public class CityBorders {
     
     Pick <Tile> pick = new Pick();
     Vec2D cityDir = new Vec2D(
-      with.mapX - map.city.mapX,
-      with.mapY - map.city.mapY
+      with.locale.mapX - base.locale.mapX,
+      with.locale.mapY - base.locale.mapY
     ).normalise(), temp = new Vec2D();
     
     for (Coord c : Visit.perimeter(1, 1, map.size - 2, map.size - 2)) {
@@ -82,8 +82,8 @@ public class CityBorders {
   }
   
   
-  static void spawnMigrants(CityMap map, int period) {
-    if (map == null || ! map.city.world.settings.toggleMigrate) return;
+  static void spawnMigrants(CityMap map, City city, int period) {
+    if (map == null || ! map.world.settings.toggleMigrate) return;
     Assessment a = new Assessment(map);
     
     float crowding = Nums.max(a.jobsCrowding, a.homeCrowding);
@@ -94,7 +94,7 @@ public class CityBorders {
     //  Tally up the number of migrants available to arrive this month-
     //  TODO:  Do this with each neighbouring city, based on their own
     //    population/crowding levels, current relations, and proximity.
-    City from = map.city;
+    City from = city;
     Batch <Actor> migrants = new Batch();
     float months   = period * 1f / MONTH_LENGTH;
     float numSpawn = ((1 - crowding) * MIGRANTS_PER_1KM * months);
@@ -120,9 +120,10 @@ public class CityBorders {
       Type job = (Type) Rand.pickFrom(jobTypes, jobNeeds);
       ActorAsPerson w = (ActorAsPerson) job.generate();
       w.type().initAsMigrant(w);
+      w.assignHomeCity(city);
       migrants.add(w);
     }
-    map.city.world.beginJourney(from, map.city, (Batch) migrants);
+    map.world.beginJourney(from, city, (Batch) migrants);
   }
   
   
@@ -130,9 +131,12 @@ public class CityBorders {
     
     class Opening { Building b; Type position; }
     Tile from = migrant.at();
+    City homeC = migrant.homeCity();
     final Pick <Opening> pick = new Pick();
     
     for (Building b : map.buildings) if (b.accessible()) {
+      if (homeC != null && b.homeCity() != homeC) continue;
+      
       for (Type t : b.type().workerTypes.keys()) {
         int space = b.maxWorkers(t) - b.numWorkers(t);
         if (space <= 0) continue;
@@ -228,7 +232,7 @@ public class CityBorders {
   static float distanceRating(Trader from, Trader goes) {
     
     City fromC = from.homeCity(), goesC = goes.homeCity();
-    Integer distance = fromC.distances.get(goesC);
+    Integer distance = fromC.locale.distances.get(goesC.locale);
     float distRating = distance == null ? MAX_TRADER_RANGE : distance;
     
     if (

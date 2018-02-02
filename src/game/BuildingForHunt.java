@@ -31,28 +31,25 @@ public class BuildingForHunt extends Building {
   
   /**  Handling walker behaviours-
     */
-  public void selectActorBehaviour(Actor actor) {
+  public Task selectActorBehaviour(Actor actor) {
     
     Task delivery = TaskDelivery.pickNextDelivery(actor, this, produced());
-    if (actor.idle() && delivery != null) {
-      actor.assignTask(delivery);
+    if (delivery != null) {
+      return delivery;
     }
     
-    if (actor.idle() && ! actorIsHere(actor)) {
-      returnActorHere(actor);
-    }
+    Task coming = returnActorHere(actor);
+    if (coming != null) return coming;
     
-    if (actor.idle()) {
-      TaskHunting hunting = new TaskHunting(actor);
-      hunting = hunting.configHunting(this, produced());
-      if (hunting != null) actor.assignTask(hunting);
-    }
+    TaskHunting hunting = new TaskHunting(actor);
+    hunting = hunting.configHunting(this, produced());
+    if (hunting != null) return hunting;
     
-    if (actor.idle()) {
-      TaskExplore exploring = new TaskExplore(actor);
-      exploring = exploring.configExploration();
-      if (exploring != null) actor.assignTask(exploring);
-    }
+    TaskExplore exploring = new TaskExplore(actor);
+    exploring = exploring.configExploration();
+    if (exploring != null) return exploring;
+    
+    return null;
   }
   
 }

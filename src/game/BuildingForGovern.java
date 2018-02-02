@@ -31,13 +31,12 @@ public class BuildingForGovern extends Building {
   
   /**  Assigning actor behaviours:
     */
-  public void selectActorBehaviour(Actor actor) {
+  public Task selectActorBehaviour(Actor actor) {
     
     if (actor.type().isCommoner()) {
       Task building = TaskBuilding.nextBuildingTask(this, actor);
       if (building != null) {
-        actor.assignTask(building);
-        return;
+        return building;
       }
     }
     
@@ -48,12 +47,14 @@ public class BuildingForGovern extends Building {
     
     if (actor.type().isTrader()) {
       Task taxing = TaskAssessTax.nextAssessment(actor, this, 100);
-      if (taxing != null) actor.assignTask(taxing);
+      if (taxing != null) return taxing;
     }
     
     if (actor.type().isNoble()) {
-      actor.beginResting(this);
+      return actor.restingTask(this);
     }
+    
+    return null;
   }
   
   

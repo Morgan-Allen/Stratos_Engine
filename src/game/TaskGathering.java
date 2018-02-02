@@ -33,63 +33,60 @@ public class TaskGathering extends Task {
   
   
   
-  static boolean pickPlantPoint(
+  static Task pickPlantPoint(
     Building store, Actor actor, boolean close, boolean start
   ) {
-    if (start && actor.inside() != store) return false;
+    if (start && actor.inside() != store) return null;
     
     boolean canPlant = false;
     for (Good g : store.type().produced) if (g.isCrop) canPlant = true;
-    if (! canPlant) return false;
+    if (! canPlant) return null;
     
     CityMapFlagging flagging = store.map.flagging.get(NEED_PLANT);
-    if (flagging == null) return false;
+    if (flagging == null) return null;
     
     Tile goes = null;
     if (close) goes = flagging.findNearbyPoint(actor, AVG_GATHER_RANGE);
     else goes = flagging.pickRandomPoint(store, store.type().maxDeliverRange);
-    
-    if (goes == null) return false;
+    if (goes == null) return null;
     
     TaskGathering task = new TaskGathering(actor, store);
     if (task.configTask(store, null, goes, JOB.PLANTING, 2) != null) {
-      actor.assignTask(task);
-      return true;
+      return task;
     }
     
-    return false;
+    return null;
   }
   
   
-  static boolean pickNextCrop(
+  static Task pickNextCrop(
     Building store, Actor actor, boolean close, Object... cropTypes
   ) {
-    if (Visit.empty(cropTypes)) return false;
+    if (Visit.empty(cropTypes)) return null;
     
     int spaceTaken = 0;
     for (Good g : store.type().produced) {
       spaceTaken += store.inventory(g);
     }
-    if (spaceTaken >= store.type().maxStock) return false;
+    if (spaceTaken >= store.type().maxStock) return null;
     
     CityMapFlagging flagging = store.map.flagging.get(store.type().gatherFlag);
-    if (flagging == null) return false;
+    if (flagging == null) return null;
     
     Tile goes = null;
     if (close) goes = flagging.findNearbyPoint(actor, AVG_GATHER_RANGE);
     else goes = flagging.pickRandomPoint(store, store.type().maxDeliverRange);
     Element above = goes == null ? null : goes.above;
     
-    if (above == null) return false;
-    if (! Visit.arrayIncludes(cropTypes, above.type().yields)) return false;
+    if (above == null) return null;
+    if (! Visit.arrayIncludes(cropTypes, above.type().yields)) return null;
     
     TaskGathering task = new TaskGathering(actor, store);
     if (task.configTask(store, null, goes, JOB.HARVEST, 2) != null) {
-      actor.assignTask(task);
-      return true;
+      return task;
     }
     
-    return false;
+    return null;
   }
   
   
@@ -115,7 +112,11 @@ public class TaskGathering extends Task {
       actor.gainXP(skill, 1 * multXP / 100);
       //
       //  Then pick another point to sow:
-      if (! pickPlantPoint(store, actor, true, false)) {
+      Task plant = pickPlantPoint(store, actor, true, false);
+      if (plant != null) {
+        actor.assignTask(plant);
+      }
+      else {
         returnToStore();
       }
     }
@@ -134,8 +135,14 @@ public class TaskGathering extends Task {
       if (actor.carryAmount() >= 2) {
         returnToStore();
       }
-      else if (! pickNextCrop(store, actor, true, actor.carried())) {
-        returnToStore();
+      else {
+        Task pick = pickNextCrop(store, actor, true, actor.carried());
+        if (pick != null) {
+          actor.assignTask(pick);
+        }
+        else {
+          returnToStore();
+        }
       }
     }
   }

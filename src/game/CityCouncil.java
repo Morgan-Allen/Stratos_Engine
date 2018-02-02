@@ -580,7 +580,7 @@ public class CityCouncil {
     //  want your own city to be vulnerable?  And multiple options for terms
     //  during diplomacy?
     for (City other : city.world.cities) if (other != city) {
-      Integer distance = city.distances.get(other);
+      Integer distance = city.locale.distances.get(other.locale);
       if (distance == null) continue;
       
       if (! (

@@ -66,12 +66,11 @@ public class City implements Session.Saveable, Trader {
   int tint = CITY_COLOR;
   
   final public World world;
-  float mapX, mapY;
+  final public World.Locale locale;
   
   GOVERNMENT government = GOVERNMENT.FEUDAL;
   float prestige = PRESTIGE_AVG;
   final public CityCouncil council = new CityCouncil(this);
-  Table <City, Integer > distances = new Table();
   Table <City, Relation> relations = new Table();
   
   private int   currentFunds = 0;
@@ -83,22 +82,24 @@ public class City implements Session.Saveable, Trader {
   
   List <Formation> formations = new List();
   
-  boolean active;
-  CityMap map;
+  private boolean active;
+  private CityMap map;
   
   Tally <Type> makeTotals = new Tally();
   Tally <Type> usedTotals = new Tally();
   
   
   
-  public City(World world) {
-    this.world = world;
+  public City(World world, World.Locale locale) {
+    this.world  = world;
+    this.locale = locale;
   }
   
   
-  public City(World world, String name) {
-    this.world = world;
-    this.name  = name;
+  public City(World world, World.Locale locale, String name) {
+    this.world  = world ;
+    this.locale = locale;
+    this.name   = name  ;
   }
   
   
@@ -108,15 +109,12 @@ public class City implements Session.Saveable, Trader {
     name = s.loadString();
     
     world = (World) s.loadObject();
-    mapX  = s.loadFloat();
-    mapY  = s.loadFloat();
+    locale = world.locales.atIndex(s.loadInt());
     
     government = GOVERNMENT.values()[s.loadInt()];
     prestige = s.loadFloat();
     council.loadState(s);
-    for (int n = s.loadInt(); n-- > 0;) {
-      distances.put((City) s.loadObject(), s.loadInt());
-    }
+    
     for (int n = s.loadInt(); n-- > 0;) {
       Relation r = new Relation();
       r.with    = (City) s.loadObject();
@@ -151,17 +149,12 @@ public class City implements Session.Saveable, Trader {
     s.saveString(name);
     
     s.saveObject(world);
-    s.saveFloat(mapX);
-    s.saveFloat(mapY);
+    s.saveInt(world.locales.indexOf(locale));
     
     s.saveInt(government.ordinal());
     s.saveFloat(prestige);
     council.saveState(s);
-    s.saveInt(distances.size());
-    for (City c : distances.keySet()) {
-      s.saveObject(c);
-      s.saveInt(distances.get(c));
-    }
+    
     s.saveInt(relations.size());
     for (Relation r : relations.values()) {
       s.saveObject(r.with);
@@ -193,26 +186,14 @@ public class City implements Session.Saveable, Trader {
   
   /**  Supplemental setup/query methods for economy, trade and geography-
     */
-  public static void setupRoute(City a, City b, int distance) {
-    a.distances.put(b, distance);
-    b.distances.put(a, distance);
-  }
-  
-  
-  public void setWorldCoords(float mapX, float mapY) {
-    this.mapX = mapX;
-    this.mapY = mapY;
-  }
-  
-  
-  public Vec2D worldCoords() {
-    return new Vec2D(mapX, mapY);
-  }
-  
-  
   public void attachMap(CityMap map) {
     this.map    = map ;
-    this.active = true;
+    this.active = map == null ? false : true;
+  }
+  
+  
+  public CityMap activeMap() {
+    return map;
   }
   
   
@@ -229,7 +210,7 @@ public class City implements Session.Saveable, Trader {
   
   
   public float distance(City other) {
-    Integer dist = distances.get(other);
+    Integer dist = locale.distances.get(other.locale);
     return dist == null ? -1 : (float) dist;
   }
   

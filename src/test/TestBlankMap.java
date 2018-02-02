@@ -1,10 +1,10 @@
 
 
+
 package test;
 import game.*;
 import static game.GameConstants.*;
 import static content.GameContent.*;
-
 
 
 
@@ -21,7 +21,7 @@ public class TestBlankMap extends Test {
   };
   final static String BUILD_MENU_NAMES[] = {
     "Military"   , "Science"   , "Economic" ,
-    "Residential", "Psi School", "Resource"
+    "Residential", "Psi School", "Resource" 
   };
   
   
@@ -31,11 +31,11 @@ public class TestBlankMap extends Test {
     Test test = new TestBlankMap();
     test.attachBuildMenu(BUILD_MENUS, BUILD_MENU_NAMES);
     
-    CityMap map = loadMap(null, filename);
-    if (map == null) map = setupTestCity(32, ALL_GOODS, true, MEADOW, JUNGLE);
+    City base = loadCity(null, filename);
+    if (base == null) base = setupTestCity(32, ALL_GOODS, true, MEADOW, JUNGLE);
     
     while (true) {
-      map = test.runLoop(map, 10, true, filename);
+      test.runLoop(base, 10, true, filename);
     }
   }
   

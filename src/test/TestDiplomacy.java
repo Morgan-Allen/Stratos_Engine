@@ -23,15 +23,15 @@ public class TestDiplomacy extends Test {
     Test test = new TestDiplomacy();
     
     World   world = new World(ALL_GOODS);
-    City    homeC = new City(world);
-    City    awayC = new City(world);
-    City    neutC = new City(world);
+    City    baseC = new City(world, world.addLocale(2, 2));
+    City    awayC = new City(world, world.addLocale(2, 3));
+    City    neutC = new City(world, world.addLocale(3, 2));
     CityMap map   = CityMapTerrain.generateTerrain(
-      homeC, 32, 0, MEADOW, JUNGLE
+      baseC, 32, 0, MEADOW, JUNGLE
     );
     world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES);
-    world.addCities(homeC, awayC, neutC);
-    homeC.setName("Home City");
+    world.addCities(baseC, awayC, neutC);
+    baseC.setName("Home City");
     awayC.setName("Away City");
     neutC.setName("Neutral City");
     awayC.council.setTypeAI(AI_OFF);
@@ -40,30 +40,31 @@ public class TestDiplomacy extends Test {
     world.settings.toggleMigrate = false;
     
     
-    CityMapPlanning.placeStructure(SHIELD_WALL, map, true, 7, 7, 12, 12);
+    CityMapPlanning.placeStructure(SHIELD_WALL, baseC, true, 7, 7, 12, 12);
     CityMapPlanning.markDemolish(map, true, 8, 8, 10, 10);
     
     Building gate = (Building) BLAST_DOOR.generate();
     gate.setFacing(TileConstants.N);
-    gate.enterMap(map, 12, 17, 1);
+    gate.enterMap(map, 12, 17, 1, baseC);
     
     Building palace = (Building) BASTION.generate();
-    CityCouncil council = map.city.council;
-    palace.enterMap(map, 10, 10, 1);
-    CityMapPlanning.placeStructure(WALKWAY, map, true, 12, 19, 1, 13);
+    CityCouncil council = baseC.council;
+    palace.enterMap(map, 10, 10, 1, baseC);
+    CityMapPlanning.placeStructure(WALKWAY, baseC, true, 12, 19, 1, 13);
     
     ActorAsPerson monarch = (ActorAsPerson) NOBLE.generate();
     council.toggleMember(monarch, Role.MONARCH, true);
     palace.setResident(monarch, true);
-    monarch.enterMap(map, 12, 9, 1);
+    monarch.enterMap(map, 12, 9, 1, baseC);
     
     ActorAsPerson minister = (ActorAsPerson) NOBLE.generate();
     council.toggleMember(minister, Role.PRIME_MINISTER, true);
     palace.setResident(minister, true);
-    minister.enterMap(map, 12, 9, 1);
+    minister.enterMap(map, 12, 9, 1, baseC);
     
     Building garrison = (Building) TROOPER_LODGE.generate();
-    garrison.enterMap(map, 12, 1, 1);
+    garrison.enterMap(map, 12, 1, 1, baseC);
+    
     Test.fillAllVacancies(map, PYON);
     
     
@@ -83,7 +84,7 @@ public class TestDiplomacy extends Test {
     for (Actor e : escort.escorted()) e.assignHomeCity(awayC);
     
     escort.assignTerms(City.POSTURE.ALLY, null, bride, null);
-    escort.beginSecuring(homeC);
+    escort.beginSecuring(baseC);
     
     boolean escortArrived  = false;
     boolean offerGiven     = false;
@@ -97,7 +98,7 @@ public class TestDiplomacy extends Test {
     boolean testOkay       = false;
     
     while (map.time() < 1000 || graphics) {
-      map = test.runLoop(map, 1, graphics, "saves/test_diplomacy.tlt");
+      test.runLoop(baseC, 1, graphics, "saves/test_diplomacy.tlt");
       
       if (! escortArrived) {
         escortArrived = escort.onMap(map);
@@ -115,7 +116,7 @@ public class TestDiplomacy extends Test {
       if (offerAccepted && ! termsOkay) {
         boolean termsFilled = true;
         termsFilled &= monarch.hasBondType(bride, BOND_MARRIED);
-        termsFilled &= homeC.isAllyOf(awayC);
+        termsFilled &= baseC.isAllyOf(awayC);
         termsOkay = termsFilled;
       }
       
@@ -124,7 +125,7 @@ public class TestDiplomacy extends Test {
       }
       
       if (escortDeparted && ! escortSent) {
-        escort = new Formation(Formation.OBJECTIVE_DIALOG, homeC, true);
+        escort = new Formation(Formation.OBJECTIVE_DIALOG, baseC, true);
         escort.assignTerms(POSTURE.TRADING, null, null, null);
         garrison.deployInFormation(escort, true);
         escort.toggleEscorted(minister, true);

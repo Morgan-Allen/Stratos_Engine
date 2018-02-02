@@ -3,7 +3,7 @@
 package game;
 import gameUI.play.*;
 import graphics.common.*;
-import graphics.sfx.Healthbar;
+import graphics.sfx.*;
 import util.*;
 import static game.Task.*;
 import static game.CityMap.*;
@@ -34,10 +34,10 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   private String ID;
   
-  private Building  work;
-  private Building  home;
-  private City      homeCity;
-  private City      guestCity;
+  private Building work;
+  private Building home;
+  private City     homeCity;
+  private City     guestCity;
   Building  recruiter;
   Formation formation;
   
@@ -137,13 +137,19 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   /**  World entry and exit-
     */
-  public void enterMap(CityMap map, int x, int y, float buildLevel) {
+  public void enterMap(CityMap map, int x, int y, float buildLevel, City owns) {
     if (onMap()) {
       I.complain("\nALREADY ON MAP: "+this);
       return;
     }
-    super.enterMap(map, x, y, buildLevel);
+    if (owns == null) {
+      I.complain("\nCANNOT ASSIGN NULL OWNER! "+this);
+      return;
+    }
+    
+    super.enterMap(map, x, y, buildLevel, owns);
     map.actors.add(this);
+    assignHomeCity(owns);
   }
   
   
@@ -237,7 +243,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     //  And update your current vision and health-
     if (onMap()) updateVision();
     if (onMap()) checkHealthState();
-    if (onMap()) updateLifeCycle(map.city, true);
+    if (onMap()) updateLifeCycle(homeCity(), true);
   }
   
   
@@ -248,11 +254,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   void beginNextBehaviour() {
     assignTask(null);
-    
-    //  NOTE:  Subclasses are expected to override this behaviour!
-    if (idle()) {
-      startRandomWalk();
-    }
+    assignTask(wanderTask());
   }
   
   
@@ -333,52 +335,53 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   }
   
   
+  public Formation formation() {
+    return formation;
+  }
+  
+  
   public Pathing[] currentPath() {
     if (task == null || task.path == null) return new Pathing[0];
     return task.path;
   }
   
   
-  public Task embarkOnVisit(
+  public Task visitTask(
     Building goes, int maxTime, JOB jobType, Employer e
   ) {
     if (goes == null) return null;
     if (reports()) I.say(this+" will visit "+goes+" for time "+maxTime);
     
     Task t = new Task(this);
-    assignTask(t.configTask(e, goes, null, jobType, maxTime));
-    return task;
+    return t.configTask(e, goes, null, jobType, maxTime);
   }
   
   
-  public Task embarkOnTarget(
+  public Task targetTask(
     Target goes, int maxTime, JOB jobType, Employer e
   ) {
     if (goes == null) return null;
     if (reports()) I.say(this+" will target "+goes+" for time "+maxTime);
     
     Task t = new Task(this);
-    assignTask(t.configTask(e, null, goes, jobType, maxTime));
-    return task;
+    return t.configTask(e, null, goes, jobType, maxTime);
   }
   
   
-  //  TODO:  Start moving these all out into dedicated sub-tasks.
-  
-  void beginResting(Building rests) {
-    if (rests == null) return;
-    if (reports()) I.say(this+" will rest at "+rests);
-    
-    Task t = new Task(this);
-    assignTask(t.configTask(rests, rests, null, JOB.RESTING, -1));
-  }
-  
-  
-  void startRandomWalk() {
+  public Task wanderTask() {
     if (reports()) I.say(this+" beginning random walk...");
     
     Task t = new TaskWander(this);
-    assignTask(t.configTask(null, null, null, JOB.WANDERING, 0));
+    return t.configTask(null, null, null, JOB.WANDERING, 0);
+  }
+  
+  
+  public Task restingTask(Building rests) {
+    if (rests == null) return null;
+    if (reports()) I.say(this+" will rest at "+rests);
+    
+    Task t = new Task(this);
+    return t.configTask(rests, rests, null, JOB.RESTING, -1);
   }
   
   
@@ -473,9 +476,11 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   
   public void onArrival(City goes, World.Journey journey) {
-    if (goes.map != null) {
-      Tile entry = CityBorders.findTransitPoint(goes.map, journey.from);
-      enterMap(goes.map, entry.x, entry.y, 1);
+    if (goes.activeMap() != null) {
+      Tile entry = CityBorders.findTransitPoint(
+        goes.activeMap(), goes, journey.from
+      );
+      enterMap(goes.activeMap(), entry.x, entry.y, 1, homeCity);
     }
     if (task != null) {
       task.onArrival(goes, journey);
@@ -545,7 +550,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   
   public void takeDamage(float damage) {
-    if (map == null || ! map.city.world.settings.toggleInjury) return;
+    if (map == null || ! map.world.settings.toggleInjury) return;
     injury += damage;
     checkHealthState();
   }
@@ -678,9 +683,10 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   
   public String toString() {
+    City player = PlayUI.playerBase();
     String from = "";
-    if (map != null && map.city != null && homeCity != null) {
-      City.POSTURE p = map.city.posture(homeCity);
+    if (map != null && player != null && homeCity != null) {
+      City.POSTURE p = player.posture(homeCity);
       if (p == City.POSTURE.ENEMY ) from = " (E)";
       if (p == City.POSTURE.ALLY  ) from = " (A)";
       if (p == City.POSTURE.VASSAL) from = " (V)";
@@ -734,11 +740,10 @@ public class Actor extends Element implements Session.Saveable, Journeys {
       s.rotation = angle;
     }
     
-    if (task != null && task.inContact) {
-      //  TODO:  Extract an animation name as well!
+    if (task != null && task.inContact()) {
       float animProg = Rendering.activeTime() % 1;
       //final float animProg = progress + ((nextProg - progress) * frameAlpha);
-      s.setAnimation(AnimNames.STAND, animProg, true);
+      s.setAnimation(task.animName(), animProg, true);
     }
     else {
       s.setAnimation(AnimNames.MOVE, Rendering.activeTime() % 1, true);

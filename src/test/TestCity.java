@@ -21,41 +21,42 @@ public class TestCity extends Test {
   static boolean testCity(boolean graphics) {
     Test test = new TestCity();
     
-    CityMap map = setupTestCity(32, ALL_GOODS, false);
-    World world = map.city.world;
+    City base = setupTestCity(32, ALL_GOODS, false);
+    CityMap map = base.activeMap();
+    World world = map.world;
     world.settings.toggleFog = false;
     
-    CityMapPlanning.placeStructure(WALKWAY, map, true, 3, 8, 25 , 1);
-    CityMapPlanning.placeStructure(WALKWAY, map, true, 8, 2 , 1, 25);
+    CityMapPlanning.placeStructure(WALKWAY, base, true, 3, 8, 25 , 1);
+    CityMapPlanning.placeStructure(WALKWAY, base, true, 8, 2 , 1, 25);
     
-    Building palace = (Building) BASTION.generate();
+    Building palace = (Building) BASTION          .generate();
     Building school = (Building) PHYSICIAN_STATION.generate();
-    Building court  = (Building) CANTINA.generate();
-    Building admin  = (Building) ENFORCER_BLOC .generate();
+    Building court  = (Building) CANTINA          .generate();
+    Building admin  = (Building) ENFORCER_BLOC    .generate();
     
-    palace.enterMap(map, 3 , 3 , 1);
-    court .enterMap(map, 9 , 9 , 1);
-    school.enterMap(map, 9 , 3 , 1);
-    admin .enterMap(map, 18, 9 , 1);
+    palace.enterMap(map, 3 , 3 , 1, base);
+    court .enterMap(map, 9 , 9 , 1, base);
+    school.enterMap(map, 9 , 3 , 1, base);
+    admin .enterMap(map, 18, 9 , 1, base);
     
     for (int n = 4; n-- > 0;) {
       Building house = (Building) HOLDING.generate();
-      house.enterMap(map, 9 + (n * 3), 6, 1f);
+      house.enterMap(map, 9 + (n * 3), 6, 1f, base);
     }
     
-    Building quarry = (Building) ORE_SMELTER.generate();
-    Building kiln1  = (Building) ENGINEER_STATION      .generate();
-    Building kiln2  = (Building) ENGINEER_STATION      .generate();
-    Building market = (Building) STOCK_EXCHANGE    .generate();
+    Building quarry = (Building) ORE_SMELTER     .generate();
+    Building kiln1  = (Building) ENGINEER_STATION.generate();
+    Building kiln2  = (Building) ENGINEER_STATION.generate();
+    Building market = (Building) STOCK_EXCHANGE  .generate();
     
-    quarry.enterMap(map, 4 , 15, 1);
-    kiln1 .enterMap(map, 9 , 17, 1);
-    kiln2 .enterMap(map, 9 , 14, 1);
-    market.enterMap(map, 4 , 9 , 1);
+    quarry.enterMap(map, 4 , 15, 1, base);
+    kiln1 .enterMap(map, 9 , 17, 1, base);
+    kiln2 .enterMap(map, 9 , 14, 1, base);
+    market.enterMap(map, 4 , 9 , 1, base);
     
     for (int n = 4; n-- > 0;) {
       Element rock = new Element(CLAY_BANK1);
-      rock.enterMap(map, 1 + (n * 3), 28, 1);
+      rock.enterMap(map, 1 + (n * 3), 28, 1, base);
     }
     
     CityMapFlagging forRock = map.flagMap(IS_STONE, true);
@@ -69,7 +70,7 @@ public class TestCity extends Test {
         b.setInventory(CASH, 20);
       }
       if (b.type() == ENGINEER_STATION) {
-        b.setInventory(ORES   , 1);
+        b.setInventory(ORES , 1);
         b.setInventory(PARTS, 1);
       }
       map.planning.placeObject(b);
@@ -94,7 +95,7 @@ public class TestCity extends Test {
     boolean testOkay   = false;
     
     while (map.time() < RUN_TIME || graphics) {
-      map = test.runLoop(map, 1, graphics, "saves/test_city.tlt");
+      test.runLoop(base, 1, graphics, "saves/test_city.tlt");
       
       if (goodsOkay) {
         for (Building b : map.buildings()) {
@@ -150,7 +151,7 @@ public class TestCity extends Test {
       if (housesOkay && goodsOkay && ! testOkay) {
         I.say("\nCITY SERVICES TEST CONCLUDED SUCCESSFULLY!");
         testOkay = true;
-        reportOnMap(map, true, PARTS, MEDICINE);
+        reportOnMap(map, base, true, PARTS, MEDICINE);
         if (! graphics) return true;
       }
     }
@@ -165,12 +166,12 @@ public class TestCity extends Test {
     I.say("  TOTAL PROGRESS:   "+TaskCrafting.totalProgInc  );
     I.say("");
     
-    reportOnMap(map, false, PARTS, MEDICINE);
+    reportOnMap(map, base, false, PARTS, MEDICINE);
     return false;
   }
   
   
-  static void reportOnMap(CityMap map, boolean okay, Good... goods) {
+  static void reportOnMap(CityMap map, City base, boolean okay, Good... goods) {
     I.say("  Current time: "+map.time());
     if (! okay) for (Building b : map.buildings()) {
       if (b.type().isHomeBuilding()) {
@@ -182,11 +183,11 @@ public class TestCity extends Test {
     }
     I.say("\nTotal goods produced:");
     for (Good g : goods) {
-      I.say("  "+g+": "+map.city.totalMade(g));
+      I.say("  "+g+": "+base.totalMade(g));
     }
     I.say("\nTotal goods consumed:");
     for (Good g : goods) {
-      I.say("  "+g+": "+map.city.totalMade(g));
+      I.say("  "+g+": "+base.totalMade(g));
     }
   }
   

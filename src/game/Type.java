@@ -33,9 +33,10 @@ public class Type extends Index.Entry implements Session.Saveable {
     IS_ARMY_BLD    = 14,
     IS_WALLS_BLD   = 15,
     IS_FAITH_BLD   = 16,
-    IS_ACTOR       = 17,
-    IS_PERSON_ACT  = 18,
-    IS_ANIMAL_ACT  = 19
+    IS_NEST_BLD    = 17,
+    IS_ACTOR       = 18,
+    IS_PERSON_ACT  = 19,
+    IS_ANIMAL_ACT  = 20
   ;
   
   final static Index <Type> INDEX = new Index();
@@ -196,6 +197,11 @@ public class Type extends Index.Entry implements Session.Saveable {
       category == IS_TERRAIN ||
       category == IS_ANIMAL_ACT
     ;
+  }
+  
+  
+  public boolean isClearable() {
+    return category == IS_FIXTURE;
   }
   
   

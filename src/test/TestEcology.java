@@ -20,7 +20,9 @@ public class TestEcology extends Test {
   static void testAnimals(boolean graphics) {
     Test test = new TestEcology();
     
-    CityMap map = Test.setupTestCity(64, ALL_GOODS, true, JUNGLE, MEADOW);
+    City base = setupTestCity(64, ALL_GOODS, true, JUNGLE, MEADOW);
+    CityMap map = base.activeMap();
+    World world = map.world;
     ActorAsAnimal.reportCycle = graphics;
     
     Type species[] = { VAREEN, MICOVORE };
@@ -74,7 +76,7 @@ public class TestEcology extends Test {
         break;
       }
       
-      map = test.runLoop(map, 100, graphics, "saves/test_animals.tlt");
+      test.runLoop(base, 100, graphics, "saves/test_animals.tlt");
     }
     
     int grazeFail = (int) ActorAsAnimal.grazeFail;

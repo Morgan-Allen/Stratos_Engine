@@ -70,10 +70,10 @@ public class FormationUtils {
   }
   
   
-  //  TODO:  Move this to the Council class...
+  //  TODO:  Move this to the Council class?
   
   static Actor findOfferRecipient(Formation parent) {
-    CityCouncil council = parent.map.city.council;
+    CityCouncil council = parent.awayCity.council;
     
     Actor monarch = council.memberWithRole(Role.MONARCH);
     if (monarch != null && monarch.onMap()) return monarch;
@@ -182,7 +182,8 @@ public class FormationUtils {
     Pathing from   = parent.pathFrom();
     Tile    stands = parent.standPoint;
     Object  focus  = parent.secureFocus;
-    City    sieges = parent.secureCity;
+    City    sieges = parent.awayCity;
+    boolean envoy  = parent.escorted.size() > 0;
     
     //
     //  If this is a diplomatic mission, stay in camp unless and until terms
@@ -192,7 +193,7 @@ public class FormationUtils {
       return true;
     }
     
-    if (parent.hasTerms() && ! parent.termsRefused) {
+    if (parent.hasTerms() && envoy && ! parent.termsRefused) {
       if (rateCampingPoint(stands, parent) > 0) {
         return false;
       }
@@ -225,7 +226,7 @@ public class FormationUtils {
     //  a building to tear down:
     Pick <Option> pick = new Pick();
     
-    for (Formation f : map.city.formations) {
+    for (City c : map.cities) for (Formation f : c.formations) {
       Option o = tacticalOptionFor(f, map, from, false);
       if (o != null && o.secures != null) pick.compare(o, o.rating);
     }

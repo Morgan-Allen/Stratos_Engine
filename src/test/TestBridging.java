@@ -22,8 +22,9 @@ public class TestBridging extends Test {
     Test test = new TestBridging();
     
     Terrain terrTypes[] = { LAKE, MEADOW, JUNGLE };
-    CityMap map = setupTestCity(16, ALL_GOODS, false, terrTypes);
-    World world = map.city.world;
+    City base = setupTestCity(16, ALL_GOODS, false, terrTypes);
+    CityMap map = base.activeMap();
+    World world = base.world;
     world.settings.toggleFog     = false;
     world.settings.toggleFatigue = false;
     world.settings.toggleHunger  = false;
@@ -47,26 +48,26 @@ public class TestBridging extends Test {
     
     
     Building palace = (Building) BASTION.generate();
-    palace.enterMap(map, 8, 10, 1);
+    palace.enterMap(map, 8, 10, 1, base);
     for (Good g : palace.type().buildsWith) {
       palace.setInventory(g, 100);
     }
     fillWorkVacancies(palace);
     
     
-    CityMapPlanning.placeStructure(SHIELD_WALL, map, false, 14, 2, 2, 10);
-    CityMapPlanning.placeStructure(WALKWAY, map, false, 2 , 2, 1, 10);
+    CityMapPlanning.placeStructure(SHIELD_WALL, base, false, 14, 2, 2, 10);
+    CityMapPlanning.placeStructure(WALKWAY, base, false, 2 , 2, 1, 10);
     
     Building tower1 = (Building) TURRET.generate();
     tower1.setFacing(TileConstants.E);
-    map.planning.placeObject(tower1, 14, 12);
+    map.planning.placeObject(tower1, 14, 12, base);
     
     Building tower2 = (Building) TURRET.generate();
     tower2.setFacing(TileConstants.E);
-    map.planning.placeObject(tower2, 14, 2);
+    map.planning.placeObject(tower2, 14, 2, base);
     
     Building kiln = (Building) ENGINEER_STATION.generate();
-    map.planning.placeObject(kiln, 10, 2);
+    map.planning.placeObject(kiln, 10, 2, base);
     
     //
     //  First, we simulate the entire construction process by picking
@@ -96,7 +97,7 @@ public class TestBridging extends Test {
       
       Tile at = builds.at();
       Type type = builds.type();
-      if (! builds.onMap()) builds.enterMap(map, at.x, at.y, 0);
+      if (! builds.onMap()) builds.enterMap(map, at.x, at.y, 0, base);
       
       float l = builds.buildLevel();
       for (Good b : type.builtFrom) {
@@ -146,7 +147,9 @@ public class TestBridging extends Test {
         
         Element copy = (Element) e.type().generate();
         if (e.type().isBuilding()) {
-          ((Building) copy).setFacing(((Building) e).facing());
+          Building b = (Building) e, c = (Building) copy;
+          c.setFacing(b.facing());
+          c.assignHomeCity(b.homeCity());
         }
         copy.setLocation(at, map);
         freshBuilt.add(copy);
@@ -170,7 +173,7 @@ public class TestBridging extends Test {
     
     
     while (map.time() < RUN_TIME || graphics) {
-      map = test.runLoop(map, 1, graphics, "saves/test_build_path.tlt");
+      test.runLoop(base, 1, graphics, "saves/test_build_path.tlt");
       
       if (! buildOkay) {
         boolean buildDone = true;

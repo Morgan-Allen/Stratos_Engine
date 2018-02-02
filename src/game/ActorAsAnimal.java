@@ -50,7 +50,7 @@ public class ActorAsAnimal extends Actor {
     //
     //  If you're seriously tired or hurt, but not hungry, find a place to rest:
     if (hurtRating > type().maxHealth / 2 && hunger < 1 && rests != null) {
-      embarkOnTarget(rests, 10, JOB.RESTING, null);
+      assignTask(targetTask(rests, 10, JOB.RESTING, null));
     }
     //
     //  If you're hungry, look for food, either by grazing within your habitat
@@ -62,18 +62,18 @@ public class ActorAsAnimal extends Actor {
         if (hunt != null) assignTask(hunt);
       }
       else if (rests != null) {
-        embarkOnTarget(rests, 1, JOB.FORAGING, null);
+        assignTask(targetTask(rests, 1, JOB.FORAGING, null));
       }
     }
     //
     //  If you're still in pain, rest up-
     if (idle() && hurtRating >= 0.5 && rests != null) {
-      embarkOnTarget(at(), 10, JOB.RESTING, null);
+      assignTask(targetTask(at(), 10, JOB.RESTING, null));
     }
     //
     //  If that all fails, wander about a little-
     if (idle()) {
-      startRandomWalk();
+      assignTask(wanderTask());
     }
   }
   
@@ -172,7 +172,7 @@ public class ActorAsAnimal extends Actor {
   
   
   void update() {
-    WorldSettings settings = map.city.world.settings;
+    WorldSettings settings = map.world.settings;
     
     hunger += settings.toggleHunger ? (1f / STARVE_INTERVAL ) : 0;
     if (jobType() == JOB.RESTING) {
@@ -231,7 +231,7 @@ public class ActorAsAnimal extends Actor {
         
         Actor child = (ActorAsAnimal) type().generate();
         Tile at = this.at();
-        child.enterMap(map, at.x, at.y, 1);
+        child.enterMap(map, at.x, at.y, 1, homeCity());
         if (reportCycle) I.say(this+" GAVE BIRTH");
       }
     }

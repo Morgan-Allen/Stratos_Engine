@@ -20,8 +20,9 @@ public class TestBuilding extends Test {
   static boolean testBuilding(boolean graphics) {
     Test test = new TestBuilding();
     
-    CityMap map = setupTestCity(16, ALL_GOODS, false);
-    World world = map.city.world;
+    City base = setupTestCity(16, ALL_GOODS, false);
+    CityMap map = base.activeMap();
+    World world = map.world;
     world.settings.toggleFog         = false;
     world.settings.toggleFatigue     = false;
     world.settings.toggleHunger      = false;
@@ -29,16 +30,16 @@ public class TestBuilding extends Test {
     world.settings.toggleBuildEvolve = false;
     
     Building farm = (Building) NURSERY.generate();
-    farm.enterMap(map, 1, 1, 1);
+    farm.enterMap(map, 1, 1, 1, base);
     Element tree = (Element) JUNGLE_TREE1.generate();
-    tree.enterMap(map, 6, 2, 1);
+    tree.enterMap(map, 6, 2, 1, base);
     Element toRaze[] = { farm, tree };
     
     BuildingForHome home = (BuildingForHome) HOLDING.generate();
-    map.planning.placeObject(home, 6, 3);
+    map.planning.placeObject(home, 6, 3, base);
     
     BuildingForTrade post = (BuildingForTrade) SUPPLY_DEPOT.generate();
-    post.enterMap(map, 2, 10, 0);
+    post.enterMap(map, 2, 10, 0, base);
     post.setID("(Stock of Goods)");
     post.setTradeLevels(true,
       PARTS   , 80,
@@ -49,13 +50,13 @@ public class TestBuilding extends Test {
     map.planning.placeObject(post);
     
     Building palace = (Building) BASTION.generate();
-    palace.enterMap(map, 9, 6, 0);
+    palace.enterMap(map, 9, 6, 0, base);
     fillWorkVacancies(palace);
     map.planning.placeObject(palace);
     
     Building toBuild[] = { post, home, palace };
     Series <Element> road = CityMapPlanning.placeStructure(
-      WALKWAY, map, false, 2, 2, 10, 1
+      WALKWAY, base, false, 2, 2, 10, 1
     );
     
     Tally <Good> startingMaterials = totalMaterials(map, false, BUILD_GOODS);
@@ -75,7 +76,7 @@ public class TestBuilding extends Test {
     final int RUN_TIME = YEAR_LENGTH;
     
     while (map.time() < RUN_TIME || graphics) {
-      map = test.runLoop(map, 1, graphics, "saves/test_building.tlt");
+      test.runLoop(base, 1, graphics, "saves/test_building.tlt");
       
       if (! razingOkay) {
         boolean allRazed = true;

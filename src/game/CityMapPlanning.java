@@ -92,8 +92,9 @@ public class CityMapPlanning {
   }
   
   
-  public void placeObject(Element e, int x, int y) {
+  public void placeObject(Element e, int x, int y, City owns) {
     e.setLocation(map.tileAt(x, y), map);
+    if (e.type().isBuilding()) ((Building) e).assignHomeCity(owns);
     toBuild.add(e);
   }
   
@@ -147,10 +148,10 @@ public class CityMapPlanning {
   /**  Some helper methods for dealing with infrastructure:
     */
   public static Series <Element> placeStructure(
-    Type s, CityMap map, Box2D area, boolean built
+    Type s, City city, Box2D area, boolean built
   ) {
     return placeStructure(
-      s, map, built,
+      s, city, built,
       (int) area.xpos(), (int) area.ypos(),
       (int) area.xdim(), (int) area.ydim()
     );
@@ -158,18 +159,19 @@ public class CityMapPlanning {
   
   
   public static Series <Element> placeStructure(
-    Type s, CityMap map, boolean built, int x, int y, int w, int h
+    Type s, City city, boolean built, int x, int y, int w, int h
   ) {
     Batch <Element> placed = new Batch();
+    CityMap map = city.activeMap();
     for (Coord c : Visit.grid(x, y, w, h, 1)) {
       Tile t = map.tileAt(c.x, c.y);
       if (t == null) continue;
       Element e = (Element) s.generate();
       if (built) {
-        e.enterMap(map, t.x, t.y, 1);
+        e.enterMap(map, t.x, t.y, 1, city);
       }
       else {
-        map.planning.placeObject(e, t.x, t.y);
+        map.planning.placeObject(e, t.x, t.y, city);
       }
       placed.add(e);
     }

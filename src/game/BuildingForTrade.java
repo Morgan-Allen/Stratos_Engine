@@ -86,43 +86,39 @@ public class BuildingForTrade extends Building implements Trader {
   }
   
   
-  public City homeCity() {
-    return map.city;
-  }
-  
-  
   
   /**  Selecting behaviour for walkers-
     */
-  public void selectActorBehaviour(Actor actor) {
+  public Task selectActorBehaviour(Actor actor) {
     
     if (actor == workers.first()) {
-      selectTraderBehaviour(actor);
+      return selectTraderBehaviour(actor);
     }
     else {
-      if (! actorIsHereWithPrompt(actor)) return;
+      Task coming = returnActorHere(actor);
+      if (coming != null) return coming;
       
       Task delivery = TaskDelivery.pickNextDelivery(actor, this, produced());
       if (delivery != null) {
-        actor.assignTask(delivery);
-        return;
+        return delivery;
       }
       
       Task building = TaskBuilding.nextBuildingTask(this, actor);
       if (building != null) {
-        actor.assignTask(building);
-        return;
+        return building;
       }
     }
+    
+    return null;
   }
   
   
-  void selectTraderBehaviour(Actor trader) {
+  Task selectTraderBehaviour(Actor trader) {
     
     class Order { Tally <Good> cargo; Trader goes; float rating; }
     List <Trader> targets = new List();
     List <Order> orders = new List();
-    City homeCity = map.city;
+    City homeCity = homeCity();
     World world = homeCity.world;
     
     for (Building b : map.buildings) {
@@ -141,7 +137,7 @@ public class BuildingForTrade extends Building implements Trader {
     }
     
     for (Trader t : targets) {
-      World w = map.city.world;
+      World w = map.world;
       City c = (t == t.homeCity()) ? ((City) t) : null;
       Tally <Good> cargoAway = configureCargo(this, t, false, w);
       Tally <Good> cargoBack = configureCargo(t, this, true , w);
@@ -190,10 +186,11 @@ public class BuildingForTrade extends Building implements Trader {
       }
       
       TaskTrading t = new TaskTrading(trader);
-      t.configTrading(this, o.goes, o.cargo);
-      trader.assignTask(t);
+      t = t.configTrading(this, o.goes, o.cargo);
+      return t;
     }
     
+    return null;
   }
   
   

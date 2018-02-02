@@ -11,6 +11,11 @@ public class World implements Session.Saveable {
   
   /**  Public interfaces-
     */
+  public static class Locale {
+    float mapX, mapY;
+    Table <Locale, Integer> distances = new Table();
+  }
+  
   public static class Journey {
     City from;
     City goes;
@@ -41,9 +46,10 @@ public class World implements Session.Saveable {
   Type nobleTypes  [] = {};
   
   int time = 0;
-  List <City> cities = new List();
+  List <Locale > locales  = new List();
+  List <City   > cities   = new List();
   List <Journey> journeys = new List();
-  List <Event> history = new List();
+  List <Event  > history  = new List();
   
   //  Only used for graphical reference...
   int mapWide = 10, mapHigh = 10;
@@ -75,6 +81,17 @@ public class World implements Session.Saveable {
     nobleTypes   = (Type[]) s.loadObjectArray(Type.class);
     
     time = s.loadInt();
+    
+    for (int n = s.loadInt(); n-- > 0;) {
+      Locale l = new Locale();
+      l.mapX = s.loadFloat();
+      l.mapY = s.loadFloat();
+      locales.add(l);
+    }
+    for (Locale l : locales) for (int d = s.loadInt(); d-- > 0;) {
+      l.distances.put(locales.atIndex(s.loadInt()), s.loadInt());
+    }
+    
     s.loadObjects(cities);
     
     for (int n = s.loadInt(); n-- > 0;) {
@@ -110,6 +127,20 @@ public class World implements Session.Saveable {
     s.saveObjectArray(nobleTypes  );
     
     s.saveInt(time);
+    
+    s.saveInt(locales.size());
+    for (Locale l : locales) {
+      s.saveFloat(l.mapX);
+      s.saveFloat(l.mapY);
+    }
+    for (Locale l : locales) {
+      s.saveInt(l.distances.size());
+      for (Locale d : l.distances.keySet()) {
+        s.saveInt(locales.indexOf(l));
+        s.saveInt(l.distances.get(d));
+      }
+    }
+    
     s.saveObjects(cities);
     
     s.saveInt(journeys.size());
@@ -140,8 +171,27 @@ public class World implements Session.Saveable {
   
   
   
-  /**  Managing cities:
+  /**  Managing Cities and Locales:
     */
+  public static void setupRoute(Locale a, Locale b, int distance) {
+    a.distances.put(b, distance);
+    b.distances.put(a, distance);
+  }
+  
+  
+  public Locale addLocale(float mapX, float mapY) {
+    Locale l = new Locale();
+    l.mapX = mapX;
+    l.mapY = mapY;
+    return l;
+  }
+  
+  
+  public static Vec2D mapCoords(City c) {
+    return new Vec2D(c.locale.mapX, c.locale.mapY);
+  }
+  
+  
   public void addCities(City... cities) {
     Visit.appendTo(this.cities, cities);
   }
@@ -154,7 +204,7 @@ public class World implements Session.Saveable {
   
   
   public CityMap activeCityMap() {
-    for (City c : cities) if (c.map != null) return c.map;
+    for (City c : cities) if (c.activeMap() != null) return c.activeMap();
     return null;
   }
   
@@ -170,10 +220,10 @@ public class World implements Session.Saveable {
   public Journey beginJourney(City from, City goes, Journeys... going) {
     if (from == null || goes == null) return null;
     
-    Integer distance = from.distances.get(goes);
+    Integer distance = from.locale.distances.get(goes.locale);
     if (distance == null) {
-      float dx = from.mapX - goes.mapX;
-      float dy = from.mapY - goes.mapY;
+      float dx = from.locale.mapX - goes.locale.mapX;
+      float dy = from.locale.mapY - goes.locale.mapY;
       distance = (int) Nums.sqrt((dx * dx) + (dy * dy));
     }
     
@@ -299,8 +349,8 @@ public class World implements Session.Saveable {
     float timeGone = time - j.startTime;
     float a = timeGone / (j.arriveTime - j.startTime), i = 1 - a;
     
-    float initX = j.from.mapX, initY = j.from.mapY;
-    float destX = j.goes.mapX, destY = j.goes.mapY;
+    float initX = j.from.locale.mapX, initY = j.from.locale.mapY;
+    float destX = j.goes.locale.mapX, destY = j.goes.locale.mapY;
     
     Vec2D c = new Vec2D();
     c.x = (destX * a) + (initX * i);
@@ -322,7 +372,7 @@ public class World implements Session.Saveable {
   
   City onMap(int mapX, int mapY) {
     for (City city : cities) {
-      int x = (int) city.mapX, y = (int) city.mapY;
+      int x = (int) city.locale.mapX, y = (int) city.locale.mapY;
       if (x == mapX && y == mapY) return city;
     }
     return null;

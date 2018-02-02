@@ -209,7 +209,7 @@ public class BuildingForHome extends Building {
   void updateOnPeriod(int period) {
     super.updateOnPeriod(period);
     
-    if (! this.map.city.world.settings.toggleBuildEvolve) {
+    if (period == 0 || ! map.world.settings.toggleBuildEvolve) {
       return;
     }
     
@@ -254,7 +254,7 @@ public class BuildingForHome extends Building {
       float used      = maxTierStock(cons, tier) * conLevel;
       float amount    = Nums.max(0, oldAmount - used);
       setInventory(cons, amount);
-      map.city.usedTotals.add(oldAmount - amount, cons);
+      homeCity().usedTotals.add(oldAmount - amount, cons);
     }
   }
   
@@ -265,7 +265,7 @@ public class BuildingForHome extends Building {
     taxLevel *= type().updateTime;
     taxLevel /= TAX_INTERVAL;
     addInventory(taxLevel, CASH);
-    map.city.makeTotals.add(taxLevel, CASH);
+    homeCity().makeTotals.add(taxLevel, CASH);
   }
   
   
@@ -291,11 +291,11 @@ public class BuildingForHome extends Building {
   
   /**  Orchestrating actor behaviour-
     */
-  public void selectActorBehaviour(Actor actor) {
+  public Task selectActorBehaviour(Actor actor) {
     //
     //  Non-adults don't do much-
     if (! actor.adult()) {
-      returnActorHere(actor);
+      return returnActorHere(actor);
     }
     //
     //  Non-nobles have work to do-
@@ -304,8 +304,7 @@ public class BuildingForHome extends Building {
       //  See if you can assist with building-projects:
       Task building = TaskBuilding.nextBuildingTask(this, actor);
       if (building != null) {
-        actor.assignTask(building);
-        return;
+        return building;
       }
       //
       //  Failing that, see if you can go shopping:
@@ -342,9 +341,7 @@ public class BuildingForHome extends Building {
         TaskDelivery d = new TaskDelivery(actor);
         d.configDelivery(o.b, this, JOB.SHOPPING, o.g, o.amount, this);
         if (d != null) {
-          //I.say("Delivering "+o.amount+" "+o.g+" from "+o.b+" to "+this);
-          actor.assignTask(d);
-          return;
+          return d;
         }
       }
     }
@@ -363,16 +360,18 @@ public class BuildingForHome extends Building {
     goes = pickV.result();
     
     if (goes != this && goes != null) {
-      actor.embarkOnVisit(goes, 10, JOB.VISITING, this);
+      Task visit = actor.visitTask(goes, 10, JOB.VISITING, this);
+      if (visit != null) return visit;
     }
-    else if (goes == this && Rand.yes()) {
-      actor.embarkOnVisit(this, 10, JOB.RESTING, this);
+    if (goes == this && Rand.yes()) {
+      Task visit = actor.visitTask(this, 10, JOB.VISITING, this);
+      if (visit != null) return visit;
     }
-    else if (goes == this) {
-      actor.startRandomWalk();
+    if (goes == this) {
+      return actor.wanderTask();
     }
     else {
-      super.selectActorBehaviour(actor);
+      return super.selectActorBehaviour(actor);
     }
   }
   

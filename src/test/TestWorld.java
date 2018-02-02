@@ -168,10 +168,10 @@ public class TestWorld extends Test {
       City weak = pair[0], strong = pair[1];
       World world = strong.world;
       
-      City lord = new City(world);
+      City lord = new City(world, world.addLocale(0, 1));
       world.addCities(lord);
       City.setPosture(lord, weak, City.POSTURE.VASSAL, true);
-      City capital = new City(world);
+      City capital = new City(world, world.addLocale(1, 1));
       world.addCities(capital);
       City.setPosture(capital, lord, City.POSTURE.VASSAL, true);
       
@@ -294,10 +294,10 @@ public class TestWorld extends Test {
       };
       
       for (int i = from.length; i-- > 0;) {
-        from[i] = new City(world, "From_"+i);
+        from[i] = new City(world, world.addLocale(0, i), "From_"+i);
       }
       for (int i = goes.length; i-- > 0;) {
-        goes[i] = new City(world, "Goes_"+i);
+        goes[i] = new City(world, world.addLocale(1, i), "Goes_"+i);
       }
       world.addCities(from);
       world.addCities(goes);
@@ -311,7 +311,9 @@ public class TestWorld extends Test {
       
       for (City c : world.cities()) {
         c.initBuildLevels(HOLDING, 2f, TROOPER_LODGE, 2f);
-        for (City o : world.cities()) if (c != o) City.setupRoute(c, o, 1);
+        for (City o : world.cities()) if (c != o) {
+          World.setupRoute(c.locale, o.locale, 1);
+        }
       }
       
       
@@ -375,14 +377,14 @@ public class TestWorld extends Test {
     };
     
     for (int n = 0; n < 4; n++) {
-      City city = new City(world);
-      city.setName(names[n]);
-      city.setTint(tints[n]);
-      
-      city.setWorldCoords(
+      Locale l = world.addLocale(
         2 + (2 * TileConstants.T_X[n * 2]),
         2 + (2 * TileConstants.T_Y[n * 2])
       );
+      City city = new City(world, l);
+      city.setName(names[n]);
+      city.setTint(tints[n]);
+      
       for (Good g : goods) {
         float amount = (Rand.num() - 0.5f) * 10;
         amount = Nums.round(amount, 2, amount >= 0);
@@ -398,15 +400,15 @@ public class TestWorld extends Test {
     
     for (City c : world.cities()) for (City o : world.cities()) {
       if (c == o) continue;
-      float dist = c.worldCoords().lineDist(o.worldCoords());
-      City.setupRoute(c, o, (int) dist);
+      float dist = World.mapCoords(c).lineDist(World.mapCoords(o));
+      World.setupRoute(c.locale, o.locale, (int) dist);
     }
     
     //
     //  Note:  This map is initialised purely to meet the requirements of the
     //  visual debugger...
-    City mapCity = new City(world);
-    CityMap map = new CityMap(mapCity);
+    City mapCity = new City(world, world.addLocale(0, 0));
+    CityMap map = new CityMap(world, mapCity.locale, mapCity);
     map.performSetup(8, new Terrain[0]);
     world.settings.worldView    = true;
     world.settings.speedUp      = true;
@@ -418,7 +420,7 @@ public class TestWorld extends Test {
     
     I.say("\nRunning world simulation...");
     while (map.time() < MAX_TIME) {
-      map = test.runLoop(map, 10, graphics, "saves/test_world.tlt");
+      test.runLoop(mapCity, 10, graphics, "saves/test_world.tlt");
       //
       //  Ensure that any forces being sent are of reasonable size:
       for (World.Journey j : world.journeys()) {
@@ -511,12 +513,12 @@ public class TestWorld extends Test {
   static City[] configWeakStrongCityPair() {
     World world = new World(ALL_GOODS);
     world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES);
-    City a = new City(world);
-    City b = new City(world);
+    City a = new City(world, world.addLocale(0, 0));
+    City b = new City(world, world.addLocale(1, 0));
     a.setName("Victim City" );
     b.setName("Invader City");
     world.addCities(a, b);
-    setupRoute(a, b, 1);
+    setupRoute(a.locale, b.locale, 1);
     a.initBuildLevels(HOLDING, 1f, TROOPER_LODGE, 1f);
     b.initBuildLevels(HOLDING, 9f, TROOPER_LODGE, 6f);
     a.council.setTypeAI(CityCouncil.AI_OFF);

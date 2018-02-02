@@ -4,6 +4,7 @@ package game;
 import util.*;
 import static game.CityMapPathCache.*;
 import static game.GameConstants.*;
+import static game.World.*;
 
 
 
@@ -12,15 +13,16 @@ public class Test {
   
   /**  Initial setup utilities:
     */
-  protected static CityMap setupTestCity(
+  protected static City setupTestCity(
     int size, Good goods[], boolean genTerrain, Terrain... gradient
   ) {
-    World   world = new World(goods);
-    City    city  = new City(world);
-    CityMap map   = null;
+    World   world  = new World(goods);
+    Locale  locale = world.addLocale(5, 5);
+    City    city   = new City(world, locale);
+    CityMap map    = null;
     
     if (! genTerrain) {
-      map = new CityMap(city);
+      map = new CityMap(world, locale, city);
       map.performSetup(size, gradient);
     }
     else {
@@ -30,18 +32,18 @@ public class Test {
     
     world.mapHigh = 10;
     world.mapWide = 10;
-    city.mapX = 5;
-    city.mapY = 5;
     world.addCities(city);
-    return map;
+    
+    return city;
   }
   
   
-  protected static CityMap setupTestCity(
+  protected static City setupTestCity(
     byte layout[][], byte elevation[][], Good goods[], Terrain... gradient
   ) {
     int wide = layout.length, high = layout[0].length;
-    CityMap map = setupTestCity(Nums.max(wide, high), goods, false, gradient);
+    City city = setupTestCity(Nums.max(wide, high), goods, false, gradient);
+    CityMap map = city.activeMap();
     
     for (Tile t : map.allTiles()) {
       Terrain terr = gradient[layout[t.x][t.y]];
@@ -49,7 +51,7 @@ public class Test {
       map.setTerrain(t, terr, (byte) 0, elev);
     }
     
-    return map;
+    return city;
   }
   
   
@@ -95,12 +97,12 @@ public class Test {
     else          b.setWorker  (actor, true);
     
     if (b.complete()) {
-      actor.enterMap(b.map, at.x, at.y, 1);
+      actor.enterMap(b.map, at.x, at.y, 1, b.homeCity());
       actor.setInside(b, true);
     }
     else {
       Tile t = b.centre();
-      actor.enterMap(b.map, t.x, t.y, 1);
+      actor.enterMap(b.map, t.x, t.y, 1, b.homeCity());
     }
     
     return actor;
@@ -289,7 +291,7 @@ public class Test {
   
   
   private void updateWorldMapView(CityMap map) {
-    World world = map.city.world;
+    World world = map.world;
     int wide = world.mapWide * 2, high = world.mapHigh * 2;
     configGraphic(wide, high);
     
@@ -308,7 +310,7 @@ public class Test {
     
     for (City city : world.cities) {
       City lord = city.currentLord();
-      int x = (int) city.mapX * 2, y = (int) city.mapY * 2;
+      int x = (int) city.locale.mapX * 2, y = (int) city.locale.mapY * 2;
       for (Coord c : Visit.grid(x, y, 2, 2, 1)) graphic[c.x][c.y] = city.tint;
       if (lord != null) graphic[x + 1][y] = lord.tint;
     }
@@ -318,9 +320,10 @@ public class Test {
   }
   
   
-  public CityMap runLoop(
-    CityMap map, int numUpdates, boolean graphics, String filename
+  public City runLoop(
+    City city, int numUpdates, boolean graphics, String filename
   ) {
+    CityMap map = city.activeMap();
     int skipUpdate = 0;
     boolean doQuit = false;
     this.filename = filename;
@@ -328,7 +331,7 @@ public class Test {
     while (! doQuit) {
       
       if (graphics) {
-        World world = map.city.world;
+        World world = map.world;
         if (! world.settings.worldView) {
           if (world.settings.viewPathMap) {
             updateCityPathingView(map);
@@ -356,13 +359,13 @@ public class Test {
           }
         }
         else {
-          above = map.city.world.onMap(hover.x / 2, hover.y / 2);
+          above = map.world.onMap(hover.x / 2, hover.y / 2);
         }
         I.talkAbout = above;
         I.used60Frames = (frames++ % 60) == 0;
         
         if (doBuild) {
-          I.presentInfo(reportForBuildMenu(map), VIEW_NAME);
+          I.presentInfo(reportForBuildMenu(map, city), VIEW_NAME);
         }
         else if (above instanceof City) {
           I.presentInfo(reportFor((City) above), VIEW_NAME);
@@ -374,20 +377,20 @@ public class Test {
           I.presentInfo(reportFor((Element) above), VIEW_NAME);
         }
         else {
-          I.presentInfo(baseReport(map), VIEW_NAME);
+          I.presentInfo(baseReport(map, city), VIEW_NAME);
         }
         
         if (pressed.includes('p')) {
           world.settings.paused = ! world.settings.paused;
         }
         if (doLoad) {
-          map = loadMap(map, filename);
+          city = loadCity(city, filename);
           doLoad = false;
-          return map;
+          return city;
         }
       }
       
-      World world = map.city.world;
+      World world = map.world;
       if (skipUpdate <= 0 && ! world.settings.paused) {
         int iterUpdates = world.settings.speedUp ? 10 : 1;
         for (int i = iterUpdates; i-- > 0;) map.update();
@@ -402,35 +405,35 @@ public class Test {
       }
       skipUpdate -= 1;
     }
-    return map;
+    return city;
   }
   
   
   
   /**  Saving and loading-
     */
-  protected static void saveMap(CityMap map, String filename) {
+  protected static void saveCity(City city, String filename) {
     try {
-      I.say("\nWILL SAVE CURRENT MAP...");
-      Session.saveSession(filename, map);
+      I.say("\nWILL SAVE CURRENT CITY...");
+      Session.saveSession(filename, city);
     }
     catch (Exception e) { I.report(e); }
   }
   
   
-  protected static CityMap loadMap(CityMap oldMap, String filename) {
+  protected static City loadCity(City oldCity, String filename) {
     if (! Session.fileExists(filename)) {
-      return oldMap;
+      return oldCity;
     }
     try {
-      I.say("\nWILL LOAD SAVED MAP...");
+      I.say("\nWILL LOAD SAVED CITY...");
       Session s = Session.loadSession(filename, true);
-      CityMap map = (CityMap) s.loaded()[0];
-      if (map == null) throw new Exception("No map loaded!");
-      return map;
+      City city = (City) s.loaded()[0];
+      if (city == null) throw new Exception("No map loaded!");
+      return city;
     }
     catch (Exception e) { I.report(e); }
-    return oldMap;
+    return oldCity;
   }
   
   
@@ -567,7 +570,7 @@ public class Test {
     Tally <Good> homeCons = b.homeUsed();
     List <String> goodRep = new List();
     
-    for (Good g : b.map.city.world.goodTypes) {
+    for (Good g : b.map.world.goodTypes) {
       float amount   = b.inventory(g);
       float demand   = b.demandFor(g) + amount;
       float consumes = homeCons.valueFor(g);
@@ -586,7 +589,7 @@ public class Test {
   }
   
   
-  private String reportForBuildMenu(CityMap map) {
+  private String reportForBuildMenu(CityMap map, City city) {
     StringBuffer report = new StringBuffer("");
     
     /*
@@ -644,7 +647,7 @@ public class Test {
       
       int x = hover.x, y = hover.y;
       if (pressed.includes('s') && builds.canPlace(map, x, y, 0)) {
-        builds.enterMap(map, x, y, 1);
+        builds.enterMap(map, x, y, 1, city);
         placing = (Building) builds.type().generate();
       }
       
@@ -705,11 +708,11 @@ public class Test {
   }
   
   
-  private String baseReport(CityMap map) {
-    StringBuffer report = new StringBuffer("Home City: "+map.city);
-    WorldSettings settings = map.city.world.settings;
+  private String baseReport(CityMap map, City city) {
+    StringBuffer report = new StringBuffer("Home City: "+city);
+    WorldSettings settings = map.world.settings;
     
-    report.append("\n\nFunds: "+map.city.funds());
+    report.append("\n\nFunds: "+city.funds());
     report.append("\n\nTime: "+map.time);
     report.append("\nPaused: "+settings.paused);
     report.append("\n");
@@ -741,7 +744,7 @@ public class Test {
     report.append("\n(P) un/pause");
     report.append("\n(S) save");
     if (pressed.includes('s')) {
-      saveMap(map, filename);
+      saveCity(city, filename);
     }
     report.append("\n(L) load");
     if (pressed.includes('l')) {

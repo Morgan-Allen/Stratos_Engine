@@ -1,6 +1,7 @@
 
 
 package game;
+import graphics.common.*;
 import util.*;
 import static game.CityMap.*;
 import static game.GameConstants.*;
@@ -37,6 +38,13 @@ public class Task implements Session.Saveable {
     RETREAT   ,
     DIALOG    ,
   };
+  final public static float
+    NO_PRIORITY = -1.0f,
+    CASUAL      =  2.5f,
+    ROUTINE     =  5.0f,
+    URGENT      =  7.5f,
+    PARAMOUNT   =  10.0f
+  ;
   
   Actor actor;
   Employer origin;
@@ -51,7 +59,8 @@ public class Task implements Session.Saveable {
   Target   target;
   Building visits;
   
-  boolean inContact = false;
+  private float priorityEval = NO_PRIORITY;
+  private boolean inContact = false;
   
   
   
@@ -85,6 +94,7 @@ public class Task implements Session.Saveable {
     target    = loadTarget(actor.map, s);
     visits    = (Building) s.loadObject();
     
+    priorityEval = s.loadFloat();
     inContact = s.loadBool();
   }
   
@@ -116,6 +126,7 @@ public class Task implements Session.Saveable {
     saveTarget(target, actor.map, s);
     s.saveObject(visits);
     
+    s.saveFloat(priorityEval);
     s.saveBool(inContact);
   }
   
@@ -156,6 +167,37 @@ public class Task implements Session.Saveable {
   
   
   
+  /**  Evaluating priority and win-chance:
+    */
+  protected float successChance() {
+    return 1.0f;
+  }
+  
+  
+  protected float successPriority() {
+    return ROUTINE;
+  }
+  
+  
+  protected float failCostPriority() {
+    return 0;
+  }
+  
+  
+  public float priority() {
+    if (priorityEval == NO_PRIORITY) {
+      float
+        chance  = successChance(),
+        success = successPriority(),
+        failure = failCostPriority()
+      ;
+      priorityEval = (chance * success) + ((1 - chance) * failure);
+    }
+    return priorityEval;
+  }
+  
+  
+  
   /**  Regular updates:
     */
   boolean checkAndUpdateTask() {
@@ -186,6 +228,8 @@ public class Task implements Session.Saveable {
     float    minRange = actionRange();
     Building visits   = this.visits;
     Target   target   = this.target;
+    
+    priorityEval = NO_PRIORITY;
     inContact = false;
     
     if (visits != null && inside == visits) {
@@ -217,10 +261,6 @@ public class Task implements Session.Saveable {
     else {
       int index = Nums.clamp(pathIndex + 1, path.length);
       Pathing ahead = path[pathIndex = index];
-      
-      //  TODO:  You should allow for climbing attempts, if the ensuing tile
-      //  is a wall and the last tile wasn't, or vice versa.
-      
       if (ahead.isTile()) actor.setInside(inside, false);
       else actor.setInside(ahead, true);
       actor.setLocation(ahead.at(), map);
@@ -306,6 +346,11 @@ public class Task implements Session.Saveable {
   
   float actionRange() {
     return 0.1f;
+  }
+  
+  
+  boolean inContact() {
+    return inContact;
   }
   
   
@@ -431,6 +476,11 @@ public class Task implements Session.Saveable {
   
   boolean reports() {
     return actor.reports();
+  }
+  
+  
+  String animName() {
+    return AnimNames.STAND;
   }
 }
 

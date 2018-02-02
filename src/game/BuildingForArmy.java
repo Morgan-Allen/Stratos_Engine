@@ -44,7 +44,7 @@ public class BuildingForArmy extends BuildingForCrafts {
   }
   
   
-  public void selectActorBehaviour(Actor actor) {
+  public Task selectActorBehaviour(Actor actor) {
     Pick <Building> pick = new Pick(0);
     
     //  TODO:  On larger maps you will need a more efficient protocol
@@ -66,11 +66,10 @@ public class BuildingForArmy extends BuildingForCrafts {
     
     Building goes = pick.result();
     if (goes != null) {
-      actor.embarkOnVisit(goes, 2, Task.JOB.VISITING, this);
+      return actor.visitTask(goes, 2, Task.JOB.VISITING, this);
     }
-    if (actor.idle()) {
-      super.selectActorBehaviour(actor);
-    }
+    
+    return super.selectActorBehaviour(actor);
   }
   
   

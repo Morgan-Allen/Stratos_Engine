@@ -651,7 +651,7 @@ public class CityMapPathCache {
   /**  Rendering, debug and interface methods.
     */
   boolean report() {
-    return map.city.world.settings.reportPathCache;
+    return map.world.settings.reportPathCache;
   }
   
 }

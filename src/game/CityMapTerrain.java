@@ -169,11 +169,20 @@ public class CityMapTerrain implements TileConstants {
   /**  Initial terrain setup-
     */
   public static CityMap generateTerrain(
-    City city, int size, int maxHigh, Terrain... gradient
+    World world, World.Locale locale, int size, int maxHigh, Terrain... gradient
   ) {
-    CityMap map = new CityMap(city);
+    CityMap map = new CityMap(world, locale);
     map.performSetup(size, gradient);
     populateTerrain(map, maxHigh, gradient);
+    return map;
+  }
+  
+  
+  public static CityMap generateTerrain(
+    City city, int size, int maxHigh, Terrain... gradient
+  ) {
+    CityMap map = generateTerrain(city.world, city.locale, size, maxHigh, gradient);
+    map.addCity(city);
     return map;
   }
   
@@ -211,7 +220,7 @@ public class CityMapTerrain implements TileConstants {
         if (Rand.num() < w && checkPlacingOkay(tile, t, map)) {
           Element f = (Element) t.generate();
           float level = t.growRate > 0 ? (Rand.num() + 0.5f) : 1;
-          f.enterMap(map, tile.x, tile.y, 1);
+          f.enterMap(map, tile.x, tile.y, 1, map.locals);
           f.setGrowLevel(level);
         }
       }
@@ -221,7 +230,7 @@ public class CityMapTerrain implements TileConstants {
   
   public static void populateFixture(Type t, int x, int y, CityMap map) {
     Element f = (Element) t.generate();
-    f.enterMap(map, x, y, 1);
+    f.enterMap(map, x, y, 1, map.locals);
   }
   
   
@@ -280,7 +289,7 @@ public class CityMapTerrain implements TileConstants {
         
         ActorAsAnimal a = (ActorAsAnimal) s.generate();
         s.initAsAnimal(a);
-        a.enterMap(map, point.x, point.y, 1);
+        a.enterMap(map, point.x, point.y, 1, map.locals);
       }
     }
   }

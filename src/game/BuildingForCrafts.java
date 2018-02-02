@@ -34,11 +34,6 @@ public class BuildingForCrafts extends Building {
   
   /**  Life-cycle, update and economic functions-
     */
-  public void enterMap(CityMap map, int x, int y, float buildLevel) {
-    super.enterMap(map, x, y, buildLevel);
-  }
-  
-  
   public float demandFor(Good g) {
     boolean consumes = accessible() && Visit.arrayIncludes(needed(), g);
     float need = consumes ? stockNeeded(g) : 0;
@@ -68,31 +63,30 @@ public class BuildingForCrafts extends Building {
   
   /**  Handling actor behaviours:
     */
-  public void selectActorBehaviour(Actor actor) {
+  public Task selectActorBehaviour(Actor actor) {
     //
     //  Different construction approach...
     Task building = TaskBuilding.nextBuildingTask(this, actor);
     if (building != null) {
-      actor.assignTask(building);
-      return;
+      return building;
     }
     //
     //  Go here if you aren't already:
-    if (! actorIsHereWithPrompt(actor)) return;
+    Task coming = returnActorHere(actor);
+    if (coming != null) return coming;
     //
     //  If you're already home, see if any deliveries are required:
     Task delivery = TaskDelivery.pickNextDelivery(actor, this, produced());
     if (delivery != null) {
-      actor.assignTask(delivery);
-      return;
+      return delivery;
     }
     //
     //  And failing all that, start crafting:
     if (canAdvanceCrafting()) {
       TaskCrafting task = TaskCrafting.configCrafting(actor, this);
-      actor.assignTask(task);
-      return;
+      if (task != null) return task;
     }
+    return null;
   }
   
   

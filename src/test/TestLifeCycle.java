@@ -35,23 +35,24 @@ public class TestLifeCycle extends Test {
       return false;
     }
     
-    CityMap map = setupTestCity(16, ALL_GOODS, false);
-    World world = map.city.world;
+    City base = setupTestCity(16, ALL_GOODS, false);
+    CityMap map = base.activeMap();
+    World world = map.world;
     world.settings.toggleFog = false;
     
     for (int x = 7; x > 0; x -= 3) {
       for (int y = 7; y > 0; y -= 3) {
         Type type = y == 7 ? HOLDING : ENGINEER_STATION;
         Building built = (Building) type.generate();
-        built.enterMap(map, x, y, 1);
+        built.enterMap(map, x, y, 1, base);
       }
-      placeStructure(WALKWAY, map, true, x - 1, 0, 1, 10);
+      placeStructure(WALKWAY, base, true, x - 1, 0, 1, 10);
     }
-    placeStructure(WALKWAY, map, true, 0, 0, 10, 1);
-    placeStructure(WALKWAY, map, true, 0, 9, 16, 1);
+    placeStructure(WALKWAY, base, true, 0, 0, 10, 1);
+    placeStructure(WALKWAY, base, true, 0, 9, 16, 1);
     
     Building palace = (Building) BASTION.generate();
-    CityCouncil council = map.city.council;
+    CityCouncil council = base.council;
     
     ActorAsPerson oldKing = (ActorAsPerson) NOBLE  .generate();
     ActorAsPerson consort = (ActorAsPerson) CONSORT.generate();
@@ -66,9 +67,9 @@ public class TestLifeCycle extends Test {
     
     palace.setResident(oldKing, true);
     palace.setResident(consort, true);
-    palace .enterMap(map, 10, 10, 1);
-    oldKing.enterMap(map, 12, 9 , 1);
-    consort.enterMap(map, 12, 9 , 1);
+    palace .enterMap(map, 10, 10, 1, base);
+    oldKing.enterMap(map, 12, 9 , 1, base);
+    consort.enterMap(map, 12, 9 , 1, base);
     
     final int RUN_TIME  = LIFESPAN_LENGTH;
     final int MAX_DELAY = ((RUN_TIME * 1) / 3) - Rand.index(YEAR_LENGTH);
@@ -89,7 +90,7 @@ public class TestLifeCycle extends Test {
     I.say("\nTOTAL LIFE CYCLE RUN TIME: "+RUN_TIME);
     
     while (map.time() < RUN_TIME || graphics) {
-      map = test.runLoop(map, 1, graphics, "saves/test_cycle.tlt");
+      test.runLoop(base, 1, graphics, "saves/test_cycle.tlt");
       
       if (map.time() % 1000 == 0) {
         I.say("  Time: "+map.time());

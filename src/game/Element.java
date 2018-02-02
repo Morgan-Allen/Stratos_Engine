@@ -128,7 +128,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
     int w = type.wide, h = type.high, m = margin;
     for (Tile t : map.tilesUnder(x - m, y - m, w + (m * 2), h + (m * 2))) {
       if (t == null) return false;
-      if (t.above != null && ! t.above.type().isNatural()) return false;
+      if (t.above != null && ! t.above.type().isClearable()) return false;
       if (t.terrain.pathing != PATH_FREE) return false;
     }
     return true;
@@ -147,7 +147,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
-  public void enterMap(CityMap map, int x, int y, float buildLevel) {
+  public void enterMap(CityMap map, int x, int y, float buildLevel, City owns) {
     stateBits |= FLAG_ON_MAP;
     setLocation(map.tileAt(x, y), map);
     
@@ -195,6 +195,12 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   
   public boolean destroyed() {
     return (stateBits & FLAG_DEST) != 0;
+  }
+  
+  
+  public City homeCity() {
+    if (! onMap()) return null;
+    return map.locals;
   }
   
   

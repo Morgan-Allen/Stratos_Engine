@@ -645,17 +645,30 @@ public class GameContent {
   }
   
   
+  final public static BuildType
+    RUINS_LAIR = new BuildType(BuildingForNest.class, "nest_ruins_lair", IS_NEST_BLD),
+    
+    ALL_NESTS[] = { RUINS_LAIR };
+  
+  static {
+    RUINS_LAIR.name = "Ruins";
+    RUINS_LAIR.tint = TINT_LITE_INDUSTRIAL;
+    RUINS_LAIR.setDimensions(3, 3, 1);
+    RUINS_LAIR.setBuildMaterials(VOID, 10);
+    RUINS_LAIR.maxHealth = 300;
+  }
+  
+  
   
   /**  Default geography:
     */
   static World setupDefaultWorld() {
     World world = new World(ALL_GOODS);
-    City  cityA = new City(world);
-    City  cityB = new City(world);
+    City  cityA = new City(world, world.addLocale(1, 1));
+    City  cityB = new City(world, world.addLocale(3, 3));
     world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES);
     
-    cityA.setName("Xochimilco");
-    cityA.setWorldCoords(1, 1);
+    cityA.setName("Elysium Sector");
     cityA.initTradeLevels(
       PARTS, 5f ,
       MEDICINE , 10f
@@ -666,8 +679,7 @@ public class GameContent {
     );
     world.addCities(cityA);
     
-    cityB.setName("Tlacopan");
-    cityB.setWorldCoords(3, 3);
+    cityB.setName("Pavonis Sector");
     cityB.initTradeLevels(
       CARBS, 5f ,
       ORES , 10f
@@ -678,7 +690,7 @@ public class GameContent {
     );
     world.addCities(cityB);
     
-    City.setupRoute(cityA, cityB, AVG_CITY_DIST / 2);
+    World.setupRoute(cityA.locale, cityB.locale, AVG_CITY_DIST / 2);
     world.setMapSize(10, 10);
     
     return world;

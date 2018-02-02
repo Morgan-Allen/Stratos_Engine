@@ -210,10 +210,8 @@ public class ActorAsPerson extends Actor {
     assignTask(null);
     
     //  Adults will search for work and a place to live:
-    if ((homeCity() == null || homeCity() == map.city) && adult) {
-      if (work() == null) CityBorders.findWork(map, this);
-      if (home() == null) CityBorders.findHome(map, this);
-    }
+    if (adult && work() == null) CityBorders.findWork(map, this);
+    if (adult && home() == null) CityBorders.findHome(map, this);
     
     //  Children and retirees don't work:
     if (work() != null && ! adult) {
@@ -227,25 +225,39 @@ public class ActorAsPerson extends Actor {
     Batch <Good> menu = menuAt(home());
     float hurtRating = fatigue + injury + (menu.size() > 0 ? hunger : 0);
     if (hurtRating > (type().maxHealth * (Rand.num() + 0.5f))) {
-      beginResting(home());
+      assignTask(restingTask(home()));
+    }
+    
+    //  See if there's a formation worth joining:
+    if (idle() && formation == null && homeCity() != null) {
+      Pick <Formation> pick = new Pick(Task.ROUTINE * Rand.num());
+      
+      for (Formation f : homeCity().formations) {
+        if (! f.isBounty()) continue;
+        Task t = f.selectActorBehaviour(this);
+        float priority = t == null ? 0 : t.priority();
+        pick.compare(f, priority * (0.5f + Rand.num()));
+      }
+      
+      formation = pick.result();
     }
     
     //  Once home & work have been established, try to derive a task to
     //  perform-
     if (idle() && formation != null && formation.active) {
-      formation.selectActorBehaviour(this);
+      assignTask(formation.selectActorBehaviour(this));
     }
     if (idle() && work() != null && work().accessible()) {
-      work().selectActorBehaviour(this);
+      assignTask(work().selectActorBehaviour(this));
     }
     if (idle() && home() != null && home().accessible()) {
-      home().selectActorBehaviour(this);
+      assignTask(home().selectActorBehaviour(this));
     }
     if (idle() && (hurtRating >= 1 || injury > 0)) {
-      beginResting(home());
+      assignTask(restingTask(home()));
     }
     if (idle()) {
-      startRandomWalk();
+      assignTask(wanderTask());
     }
   }
   
@@ -254,7 +266,7 @@ public class ActorAsPerson extends Actor {
   /**  Handling hunger, injury, healing and eating, etc:
     */
   void update() {
-    WorldSettings settings = map.city.world.settings;
+    WorldSettings settings = map.world.settings;
     
     hunger += settings.toggleHunger ? (1f / STARVE_INTERVAL ) : 0;
     if (jobType() == JOB.RESTING) {
@@ -389,7 +401,7 @@ public class ActorAsPerson extends Actor {
     
     if (onMap) {
       Tile at = venue.at();
-      child.enterMap(map, at.x, at.y, 1);
+      child.enterMap(map, at.x, at.y, 1, homeCity());
       child.setInside(venue, true);
       venue.setResident(child, true);
     }

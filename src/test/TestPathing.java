@@ -22,8 +22,9 @@ public class TestPathing extends Test {
     
     boolean testOkay = true;
     
-    CityMap map = setupTestCity(32, ALL_GOODS, false);
-    World world = map.city.world;
+    City base = setupTestCity(32, ALL_GOODS, false);
+    CityMap map = base.activeMap();
+    World world = map.world;
     world.settings.toggleFog     = false;
     world.settings.toggleHunger  = false;
     world.settings.toggleHunger  = false;
@@ -34,23 +35,23 @@ public class TestPathing extends Test {
     //  ensure that pathing-checks function correctly between various
     //  points on the ground, walls, between gates, et cetera:
     
-    CityMapPlanning.placeStructure(SHIELD_WALL, map, true, 4, 4, 20, 20);
+    CityMapPlanning.placeStructure(SHIELD_WALL, base, true, 4, 4, 20, 20);
     CityMapPlanning.markDemolish(map, true, 6, 6, 16, 16);
     
     Building gate = (Building) BLAST_DOOR.generate();
     gate.setFacing(TileConstants.N);
-    gate.enterMap(map, 14, 22, 1);
+    gate.enterMap(map, 14, 22, 1, base);
     
     Building tower1 = (Building) TURRET.generate();
     tower1.setFacing(TileConstants.W);
-    tower1.enterMap(map, 4, 14, 1);
+    tower1.enterMap(map, 4, 14, 1, base);
     
     Building tower2 = (Building) TURRET.generate();
     tower2.setFacing(TileConstants.E);
-    tower2.enterMap(map, 22, 14, 1);
+    tower2.enterMap(map, 22, 14, 1, base);
     
     Building home = (Building) HOLDING.generate();
-    home.enterMap(map, 10, 10, 1);
+    home.enterMap(map, 10, 10, 1, base);
     
     Tile cornerWall   = map.tileAt(4 , 4 );
     Tile endWall      = map.tileAt(20, 4 );
@@ -133,7 +134,7 @@ public class TestPathing extends Test {
     for (int n = 3; n-- > 0;) {
       Actor a = (Actor) PYON.generate();
       Tile point = initPoints[n];
-      a.enterMap(map, point.x, point.y, 1);
+      a.enterMap(map, point.x, point.y, 1, base);
       actors.add(a);
       destinations.put(a, a.at());
     }
@@ -177,11 +178,11 @@ public class TestPathing extends Test {
           Pathing goes;
           if (a.inside() != home && ! home.hasFocus()) {
             goes = home;
-            a.embarkOnVisit(home, 0, Task.JOB.RETURNING, null);
+            a.assignTask(a.visitTask(home, 0, Task.JOB.RETURNING, null));
           }
           else {
             goes = map.tileAt(Rand.index(map.size()), Rand.index(map.size()));
-            a.embarkOnTarget(goes, 0, Task.JOB.EXPLORING, null);
+            a.assignTask(a.targetTask(goes, 0, Task.JOB.EXPLORING, null));
           }
           destinations.put(a, goes);
           
@@ -211,7 +212,7 @@ public class TestPathing extends Test {
         }
       }
       
-      map = test.runLoop(map, 1, graphics, "saves/test_pathing.tlt");
+      test.runLoop(base, 1, graphics, "saves/test_pathing.tlt");
     }
     
     I.say("\nPATHING TEST FAILED!");

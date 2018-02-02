@@ -46,8 +46,6 @@ public class TaskCombat extends Task {
   static boolean hostile(Actor a, Actor b, CityMap map) {
     City CA = a.homeCity (), CB = b.homeCity ();
     City GA = a.guestCity(), GB = b.guestCity();
-    if (CA == null) CA = map.city;
-    if (CB == null) CB = map.city;
     if (GA == null) GA = CA;
     if (GB == null) GB = CB;
     if (CA == CB  ) return false;
@@ -81,7 +79,7 @@ public class TaskCombat extends Task {
     if (formation.secureFocus instanceof Element) {
       Element e = (Element) formation.secureFocus;
       if (e.destroyed() || ! e.onMap()) return null;
-      if (e.map.city == formation.homeCity) return null;
+      if (e.homeCity() == formation.homeCity) return null;
       return configCombat(actor, e, formation, null, JOB.COMBAT);
     }
     else return null;

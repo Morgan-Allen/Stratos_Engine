@@ -16,7 +16,7 @@ public class CityMap implements Session.Saveable {
     */
   final public static int
     SCAN_RES    = 16,
-    FLAG_RES    = 4,
+    FLAG_RES    =  4,
     
     PATH_NONE   = -1,
     PATH_WATER  =  0,
@@ -28,13 +28,16 @@ public class CityMap implements Session.Saveable {
   ;
   
   Terrain terrainTypes[] = { EMPTY };
-  Good goodTypes[] = {};
+  
+  final public World world;
+  final public World.Locale locale;
+  final public City locals;
+  List <City> cities = new List();
   
   int size, scanSize, flagSize;
   Tile grid[][];
   List <Actor> actorGrid[][];
   
-  final public City city;
   int time = 0;
   int numUpdates = 0, ticksPS = PlayLoop.UPDATES_PER_SECOND;
   
@@ -53,8 +56,12 @@ public class CityMap implements Session.Saveable {
   String saveName;
   
   
-  public CityMap(City city) {
-    this.city = city;
+  public CityMap(World world, World.Locale locale, City... cities) {
+    this.world = world;
+    this.locale = locale;
+    this.locals = new City(world, locale, "Locals: "+locale);
+    addCity(locals);
+    for (City c : cities) addCity(c);
   }
   
   
@@ -62,6 +69,11 @@ public class CityMap implements Session.Saveable {
     s.cacheInstance(this);
     
     terrainTypes = (Terrain[]) s.loadObjectArray(Terrain.class);
+    
+    world = (World) s.loadObject();
+    locale = world.locales.atIndex(s.loadInt());
+    locals = (City) s.loadObject();
+    s.loadObjects(cities);
     
     performSetup(s.loadInt(), terrainTypes);
     for (Coord c : Visit.grid(0, 0, size, size, 1)) {
@@ -71,9 +83,7 @@ public class CityMap implements Session.Saveable {
       s.loadObjects(actorGrid[c.x][c.y]);
     }
     
-    city = (City) s.loadObject();
     time = s.loadInt();
-    
     numUpdates = s.loadInt();
     ticksPS    = s.loadInt();
     
@@ -114,6 +124,11 @@ public class CityMap implements Session.Saveable {
     
     s.saveObjectArray(terrainTypes);
     
+    s.saveObject(world);
+    s.saveInt(world.locales.indexOf(locale));
+    s.saveObject(locals);
+    s.saveObjects(cities);
+    
     s.saveInt(size);
     for (Coord c : Visit.grid(0, 0, size, size, 1)) {
       grid[c.x][c.y].saveState(s, this);
@@ -122,9 +137,7 @@ public class CityMap implements Session.Saveable {
       s.saveObjects(actorGrid[c.x][c.y]);
     }
     
-    s.saveObject(city);
     s.saveInt(time);
-    
     s.saveInt(numUpdates);
     s.saveInt(ticksPS   );
     
@@ -184,9 +197,12 @@ public class CityMap implements Session.Saveable {
     planning .performSetup(size);
     fog      .performSetup(size);
     pathCache.performSetup(size);
-    
-    //  Note: this might occur when setup is performed during saving/loading...
-    if (city != null) city.attachMap(this);
+  }
+  
+  
+  public void addCity(City city) {
+    cities.include(city);
+    city.attachMap(this);
   }
   
   
@@ -452,9 +468,8 @@ public class CityMap implements Session.Saveable {
     */
   public void update() {
     
-    if (city != null) {
-      city.world.updateWithTime(time);
-    }
+    world.updateWithTime(time);
+    
     for (Building b : buildings) {
       if (b.map == null) {
         I.complain("\n"+b+" has no map but still registered on map!");
@@ -474,7 +489,10 @@ public class CityMap implements Session.Saveable {
       transitPoints.clear();
     }
     if (time % MONTH_LENGTH == 0) {
-      CityBorders.spawnMigrants(this, MONTH_LENGTH);
+      //  TODO:  REVISE THIS!  ALLOW BUILDINGS TO SCHEDULE THEIR OWN ARRIVALS!
+      for (City city : cities) {
+        CityBorders.spawnMigrants(this, city, MONTH_LENGTH);
+      }
     }
     
     time += 1;

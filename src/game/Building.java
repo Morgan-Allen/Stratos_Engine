@@ -22,8 +22,9 @@ public class Building extends Element implements Pathing, Employer {
   
   private int facing = TileConstants.N;
   private Tile entrances[] = new Tile[0];
-  private int updateGap = 0;
   
+  private int updateGap = 0;
+  private City homeCity = null;
   List <Actor> workers   = new List();
   List <Actor> residents = new List();
   List <Actor> visitors  = new List();
@@ -46,8 +47,9 @@ public class Building extends Element implements Pathing, Employer {
     int numE = s.loadInt();
     entrances = new Tile[numE];
     for (int i = 0; i < numE; i++) entrances[i] = loadTile(map, s);
-    updateGap = s.loadInt();
     
+    updateGap = s.loadInt();
+    homeCity = (City) s.loadObject();
     s.loadObjects(workers  );
     s.loadObjects(residents);
     s.loadObjects(visitors );
@@ -64,8 +66,9 @@ public class Building extends Element implements Pathing, Employer {
     s.saveInt(facing);
     s.saveInt(entrances.length);
     for (Tile e : entrances) saveTile(e, map, s);
-    s.saveInt(updateGap);
     
+    s.saveInt(updateGap);
+    s.saveObject(homeCity);
     s.saveObjects(workers  );
     s.saveObjects(residents);
     s.saveObjects(visitors );
@@ -88,12 +91,29 @@ public class Building extends Element implements Pathing, Employer {
   }
   
   
-  public void enterMap(CityMap map, int x, int y, float buildLevel) {
+  public void assignHomeCity(City belongs) {
+    this.homeCity = belongs;
+  }
+  
+  
+  public City homeCity() {
+    return homeCity;
+  }
+  
+  
+  public void enterMap(CityMap map, int x, int y, float buildLevel, City owns) {
+    if (onMap()) {
+      I.complain("\nALREADY ON MAP: "+this);
+      return;
+    }
+    if (owns == null) {
+      I.complain("\nCANNOT ASSIGN NULL OWNER! "+this);
+      return;
+    }
     
-    //I.say("ENTERING MAP: "+this);
-    
-    super.enterMap(map, x, y, buildLevel);
+    super.enterMap(map, x, y, buildLevel, owns);
     map.buildings.add(this);
+    assignHomeCity(owns);
   }
   
   
@@ -421,20 +441,13 @@ public class Building extends Element implements Pathing, Employer {
   
   /**  Customising actor behaviour-
     */
-  public void selectActorBehaviour(Actor actor) {
-    returnActorHere(actor);
+  public Task selectActorBehaviour(Actor actor) {
+    return returnActorHere(actor);
   }
   
   
-  boolean actorIsHereWithPrompt(Actor actor) {
-    if (actorIsHere(actor)) return true;
-    returnActorHere(actor);
-    return false;
-  }
-  
-  
-  void returnActorHere(Actor actor) {
-    if (actorIsHere(actor)) return;
+  Task returnActorHere(Actor actor) {
+    if (actorIsHere(actor)) return null;
     Task t = new Task(actor);
     if (complete()) {
       t.configTask(this, this, null, Task.JOB.RETURNING, 0);
@@ -442,7 +455,7 @@ public class Building extends Element implements Pathing, Employer {
     else {
       t.configTask(this, null, mainEntrance(), Task.JOB.RETURNING, 0);
     }
-    actor.assignTask(t);
+    return t;
   }
   
   

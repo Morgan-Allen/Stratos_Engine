@@ -31,7 +31,7 @@ public class ScenarioBlankMap extends CityMapScenario {
   
   
   protected String savePath() {
-    return "Test_Blank_Map.str";
+    return "saves/Test_Blank_Map.str";
   }
   
   
@@ -43,24 +43,27 @@ public class ScenarioBlankMap extends CityMapScenario {
   
   
   protected CityMap createStage(World world) {
-    City city = new City(world);
-    city.setName("Player Base");
     
     final int MAP_SIZE = 64;
     final Terrain GRADIENT[] = { JUNGLE, MEADOW, DESERT };
     
-    CityMap map = CityMapTerrain.generateTerrain(city, MAP_SIZE, 0, GRADIENT);
+    World.Locale locale = world.addLocale(5, 5);
+    
+    CityMap map = CityMapTerrain.generateTerrain(world, locale, MAP_SIZE, 0, GRADIENT);
     CityMapTerrain.populateFixtures(map);
     return map;
   }
   
   
-  protected City createBase(CityMap stage, World verse) {
-    return stage.city;
+  protected City createBase(CityMap stage, World world) {
+    City city = new City(world, stage.locale);
+    city.setName("Player Base");
+    stage.addCity(city);
+    return city;
   }
   
   
-  protected void configScenario(World verse, CityMap stage, City base) {
+  protected void configScenario(World world, CityMap stage, City base) {
     
     Building bastion = (Building) BASTION.generate();
     int w = bastion.type().wide, h = bastion.type().high;
@@ -91,7 +94,7 @@ public class ScenarioBlankMap extends CityMapScenario {
     if (! pickLanding.empty()) {
       Tile at = pickLanding.result();
       CityMapPlanning.markDemolish(stage, true, at.x - 1, at.y - 1, w + 2, h + 2);
-      bastion.enterMap(stage, at.x, at.y, 1);
+      bastion.enterMap(stage, at.x, at.y, 1, base);
       
       base.initFunds(4000);
       bastion.addInventory(100, PLASTICS);

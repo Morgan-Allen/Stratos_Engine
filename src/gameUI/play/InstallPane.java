@@ -44,7 +44,8 @@ public class InstallPane extends DetailPane {
   
   private void beginInstallTask(Type type) {
     final Building placed = (Building) type.generate();
-    final CityMap stage  = UI.stage;
+    final CityMap  stage  = UI.stage;
+    final City     base   = UI.base;
     
     final PlayTask task = new PlayTask() {
       public void doTask(PlayUI UI) {
@@ -59,7 +60,7 @@ public class InstallPane extends DetailPane {
         
         if (UI.mouseClicked()) {
           if (canPlace) {
-            placed.enterMap(stage, puts.x, puts.y, 0.0f);
+            placed.enterMap(stage, puts.x, puts.y, 0.0f, base);
             stage.planning.placeObject(placed);
             //UI.base.incCredits(0 - placed.blueprint().buildCost);
           }

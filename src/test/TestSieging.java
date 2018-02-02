@@ -14,7 +14,7 @@ public class TestSieging extends Test {
   
   
   public static void main(String args[]) {
-    testSieging(true);
+    testSieging(false);
   }
   
   
@@ -22,15 +22,15 @@ public class TestSieging extends Test {
     Test test = new TestSieging();
     
     World   world = new World(ALL_GOODS);
-    City    homeC = new City(world);
-    City    awayC = new City(world);
+    City    baseC = new City(world, world.addLocale(2, 2));
+    City    awayC = new City(world, world.addLocale(3, 3));
     CityMap map   = CityMapTerrain.generateTerrain(
-      homeC, 32, 0, MEADOW, JUNGLE
+      baseC, 32, 0, MEADOW, JUNGLE
     );
-    homeC.setName("Home City");
+    baseC.setName("Home City");
     awayC.setName("Away City");
     world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES);
-    world.addCities(homeC, awayC);
+    world.addCities(baseC, awayC);
     
     world.settings.toggleFog     = false;
     world.settings.toggleFatigue = false;
@@ -39,32 +39,32 @@ public class TestSieging extends Test {
     awayC.initBuildLevels(TROOPER_LODGE, 5, HOLDING, 1);
     awayC.council.setTypeAI(CityCouncil.AI_OFF);
     
-    City.setupRoute(homeC, awayC, 1);
-    City.setPosture(homeC, awayC, City.POSTURE.ENEMY, true);
+    World.setupRoute(baseC.locale, awayC.locale, 1);
+    City.setPosture(baseC, awayC, City.POSTURE.ENEMY, true);
     
-    CityMapPlanning.placeStructure(SHIELD_WALL, map, true, 4, 4, 20, 20);
+    CityMapPlanning.placeStructure(SHIELD_WALL, baseC, true, 4, 4, 20, 20);
     CityMapPlanning.markDemolish(map, true, 6, 6, 16, 16);
     
     Building gate = (Building) BLAST_DOOR.generate();
     gate.setFacing(TileConstants.E);
-    gate.enterMap(map, 22, 9, 1);
+    gate.enterMap(map, 22, 9, 1, baseC);
     
     Building tower = (Building) TURRET.generate();
     tower.setFacing(TileConstants.E);
-    tower.enterMap(map, 22, 12, 1);
+    tower.enterMap(map, 22, 12, 1, baseC);
     
     
     BuildingForArmy fort = (BuildingForArmy) TROOPER_LODGE.generate();
-    fort.enterMap(map, 10, 10, 1);
+    fort.enterMap(map, 10, 10, 1, baseC);
     fillWorkVacancies(fort);
-    CityMapPlanning.placeStructure(WALKWAY, map, true, 10, 9, 12, 1 );
-    CityMapPlanning.placeStructure(WALKWAY, map, true, 21, 9, 1 , 5 );
-    CityMapPlanning.placeStructure(WALKWAY, map, true, 16, 9, 1 , 9 );
-    CityMapPlanning.placeStructure(WALKWAY, map, true, 24, 9, 8 , 1 );
+    CityMapPlanning.placeStructure(WALKWAY, baseC, true, 10, 9, 12, 1 );
+    CityMapPlanning.placeStructure(WALKWAY, baseC, true, 21, 9, 1 , 5 );
+    CityMapPlanning.placeStructure(WALKWAY, baseC, true, 16, 9, 1 , 9 );
+    CityMapPlanning.placeStructure(WALKWAY, baseC, true, 24, 9, 8 , 1 );
     
     for (int n = 3, s = 0; n-- > 0;) {
       Building home = (Building) HOLDING.generate();
-      home.enterMap(map, 17, 10 + (n * 3), 1);
+      home.enterMap(map, 17, 10 + (n * 3), 1, baseC);
       fillHomeVacancies(home, PYON);
       for (Actor a : home.residents()) {
         a.setSexData((s++ % 2 == 0) ? SEX_MALE : SEX_FEMALE);
@@ -76,16 +76,16 @@ public class TestSieging extends Test {
     }
     
     Formation guarding;
-    guarding = new Formation(Formation.OBJECTIVE_GARRISON, homeC, false);
+    guarding = new Formation(Formation.OBJECTIVE_GARRISON, baseC, false);
     fort.deployInFormation(guarding, true);
     guarding.beginSecuring(tower, TileConstants.E, map);
     
     Building store = (Building) SUPPLY_DEPOT.generate();
-    store.enterMap(map, 10, 6, 1);
+    store.enterMap(map, 10, 6, 1, baseC);
     store.setInventory(MEDICINE, 10);
     
     float initPrestige = awayC.prestige();
-    float initLoyalty  = homeC.loyalty(awayC);
+    float initLoyalty  = baseC.loyalty(awayC);
     Table <Actor, Tile> initPatrolPoints = new Table();
     Formation enemy = null;
     Tally <Good> tribute = null;
@@ -105,7 +105,7 @@ public class TestSieging extends Test {
     final int MIN_INVADERS  = 8;
     
     while (map.time() < RUN_TIME || graphics) {
-      map = test.runLoop(map, 1, graphics, "saves/test_sieging.tlt");
+      test.runLoop(baseC, 1, graphics, "saves/test_sieging.tlt");
       
       if (! patrolInit) {
         int numPatrol = 0;
@@ -143,7 +143,7 @@ public class TestSieging extends Test {
       }
       
       if (patrolDone && ! siegeComing) {
-        for (World.Journey j : map.city.world.journeys()) {
+        for (World.Journey j : map.world.journeys()) {
           for (Journeys g : j.going()) if (g instanceof Formation) {
             enemy = (Formation) g;
             tribute = enemy.tributeDemand();
@@ -233,7 +233,7 @@ public class TestSieging extends Test {
       }
       
       if (siegeBegun && ! victorious) {
-        if (homeC.isVassalOf(awayC)) {
+        if (baseC.isVassalOf(awayC)) {
           victorious = true;
           store.addInventory(tribute);
           fillWorkVacancies(store);
@@ -245,12 +245,12 @@ public class TestSieging extends Test {
         boolean allSent = true;
         for (Good g : tribute.keys()) {
           float need = tribute.valueFor(g);
-          float sent = City.suppliesDue(homeC, awayC, g);
+          float sent = City.goodsSent(baseC, awayC, g);
           if (sent < need) allSent = false;
         }
         tributePaid = allSent;
         
-        if (homeC.funds() > 0) {
+        if (baseC.funds() > 0) {
           I.say("\nShould not receive payment for tribute!");
           break;
         }
@@ -260,7 +260,7 @@ public class TestSieging extends Test {
           break;
         }
         
-        if (homeC.loyalty(awayC) >= initLoyalty) {
+        if (baseC.loyalty(awayC) >= initLoyalty) {
           I.say("\nLoyalty should be reduced by conquest!");
           break;
         }

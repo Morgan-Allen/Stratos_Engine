@@ -16,7 +16,7 @@ public class CityEvents {
     */
   static boolean reportEvents(CityMap map) {
     if (map == null) return false;
-    return map.city.world.settings.reportBattle;
+    return map.world.settings.reportBattle;
   }
   
   
@@ -160,14 +160,6 @@ public class CityEvents {
     setPosture(from, upon, formation.postureDemand, true);
     setSuppliesDue (upon, from, formation.tributeDemand );
     arrangeMarriage(upon, from, formation.marriageDemand);
-    
-    //  TODO:  These should not be required- signalling victory or loss should
-    //  do the trick.
-    /*
-    upon.toggleRebellion(from, false);
-    incPrestige(from, PRES_VICTORY_GAIN);
-    incPrestige(upon, PRES_DEFEAT_LOSS );
-    //*/
   }
   
   
@@ -178,6 +170,12 @@ public class CityEvents {
     setBond(monarch, marries, BOND_MARRIED, BOND_MARRIED, 0);
     marries.assignHomeCity(monarch.homeCity());
     if (monarch.home() != null) monarch.home().setResident(marries, true);
+    
+    Formation party = marries.formation;
+    if (party != null) {
+      party.toggleRecruit (marries, false);
+      party.toggleEscorted(marries, false);
+    }
   }
   
   

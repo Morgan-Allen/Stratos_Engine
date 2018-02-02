@@ -21,18 +21,18 @@ public class TestTrading extends Test {
     Test test = new TestTrading();
 
     World world = new World(ALL_GOODS);
-    City  homeC = new City(world);
-    City  awayC = new City(world);
-    world.addCities(homeC, awayC);
+    City  baseC = new City(world, world.addLocale(2, 2));
+    City  awayC = new City(world, world.addLocale(3, 3));
+    world.addCities(baseC, awayC);
     awayC.council.setTypeAI(CityCouncil.AI_OFF);
-    homeC.setName("(Home City)");
+    baseC.setName("(Home City)");
     awayC.setName("(Away City)");
     
-    City.setupRoute(homeC, awayC, 1);
-    City.setPosture(homeC, awayC, City.POSTURE.VASSAL, true);
+    World.setupRoute(baseC.locale, awayC.locale, 1);
+    City.setPosture(baseC, awayC, City.POSTURE.VASSAL, true);
     
     Tally <Good> supplies = new Tally().setWith(GREENS, 10, SPYCE, 5);
-    City.setSuppliesDue(awayC, homeC, supplies);
+    City.setSuppliesDue(awayC, baseC, supplies);
     
     awayC.initTradeLevels(
       MEDICINE  ,  50,
@@ -47,14 +47,14 @@ public class TestTrading extends Test {
     );
     
     
-    CityMap map = new CityMap(homeC);
+    CityMap map = new CityMap(world, baseC.locale, baseC);
     map.performSetup(10, new Terrain[0]);
     world.settings.toggleFog     = false;
     world.settings.toggleHunger  = false;
     world.settings.toggleFatigue = false;
     
     BuildingForTrade post1 = (BuildingForTrade) SUPPLY_DEPOT.generate();
-    post1.enterMap(map, 1, 6, 1);
+    post1.enterMap(map, 1, 6, 1, baseC);
     post1.setID("(Does Trading)");
     post1.setTradeLevels(false,
       GREENS    ,  2 ,
@@ -64,7 +64,7 @@ public class TestTrading extends Test {
     );
     
     BuildingForTrade post2 = (BuildingForTrade) SUPPLY_DEPOT.generate();
-    post2.enterMap(map, 5, 6, 1);
+    post2.enterMap(map, 5, 6, 1, baseC);
     post2.setID("(Gets Supplies)");
     post2.setTradeLevels(false,
       GREENS    , 15,
@@ -72,16 +72,16 @@ public class TestTrading extends Test {
     );
     
     Building kiln = (Building) ENGINEER_STATION.generate();
-    kiln.enterMap(map, 2, 3, 1);
+    kiln.enterMap(map, 2, 3, 1, baseC);
     
     Building weaver = (Building) PHYSICIAN_STATION.generate();
-    weaver.enterMap(map, 5, 3, 1);
+    weaver.enterMap(map, 5, 3, 1, baseC);
     
-    CityMapPlanning.placeStructure(WALKWAY, map, true, 1, 5, 8, 1);
+    CityMapPlanning.placeStructure(WALKWAY, baseC, true, 1, 5, 8, 1);
     
     fillAllVacancies(map, PYON);
     int initFunds = 100;
-    homeC.initFunds(initFunds);
+    baseC.initFunds(initFunds);
     
     
     final int RUN_TIME = YEAR_LENGTH;
@@ -90,19 +90,19 @@ public class TestTrading extends Test {
     boolean moneyOkay  = false;
     
     while (map.time() < RUN_TIME || graphics) {
-      map = test.runLoop(map, 1, graphics, "saves/test_trading.tlt");
+      test.runLoop(baseC, 1, graphics, "saves/test_trading.tlt");
       
       boolean allHome = true;
       for (Building b : map.buildings()) for (Actor a : b.workers()) {
         if (a.jobType() == Task.JOB.TRADING) allHome = false;
       }
       if (allHome) {
-        float funds = projectedEarnings(homeC, awayC, initFunds, false);
-        if (Nums.abs(funds - homeC.funds()) > 1) {
+        float funds = projectedEarnings(baseC, awayC, initFunds, false);
+        if (Nums.abs(funds - baseC.funds()) > 1) {
           I.say("\nTrade-earnings do not match projections!");
           I.say("  Expected: "+funds        );
-          I.say("  Actual:   "+homeC.funds());
-          projectedEarnings(homeC, awayC, initFunds, true);
+          I.say("  Actual:   "+baseC.funds());
+          projectedEarnings(baseC, awayC, initFunds, true);
           return false;
         }
         moneyOkay = true;
@@ -110,9 +110,9 @@ public class TestTrading extends Test {
       
       if (! tradeOkay) {
         boolean check = true;
-        check &= City.goodsSent(homeC, awayC, PARTS) > 1;
-        check &= City.goodsSent(homeC, awayC, MEDICINE ) > 1;
-        check &= homeC.funds() > 0;
+        check &= City.goodsSent(baseC, awayC, PARTS) > 1;
+        check &= City.goodsSent(baseC, awayC, MEDICINE ) > 1;
+        check &= baseC.funds() > 0;
         tradeOkay = check;
       }
       
@@ -125,7 +125,7 @@ public class TestTrading extends Test {
       
       if (tradeOkay && supplyOkay && moneyOkay) {
         I.say("\nTRADING TEST CONCLUDED SUCCESSFULLY!");
-        reportOnMap(homeC, awayC, true);
+        reportOnMap(baseC, awayC, true);
         if (! graphics) return true;
       }
     }
@@ -134,7 +134,7 @@ public class TestTrading extends Test {
     I.say("  Trade okay:  "+tradeOkay );
     I.say("  Supply okay: "+supplyOkay);
     I.say("  Money okay:  "+moneyOkay );
-    reportOnMap(homeC, awayC, false);
+    reportOnMap(baseC, awayC, false);
     return false;
   }
   

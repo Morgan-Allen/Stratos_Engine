@@ -48,7 +48,7 @@ public class TaskTrading extends Task {
     this.taken     = taken;
     this.tradeFrom = from ;
     this.tradeGoes = goes ;
-    this.homeCity  = from.map.city;
+    this.homeCity  = from.homeCity();
     
     configTravel(from, JOB.TRADING, from);
     return this;
@@ -84,7 +84,7 @@ public class TaskTrading extends Task {
         configTravel(goes, Task.JOB.TRADING, origin);
       }
       else {
-        Tile exits = findTransitPoint(visits.map, city);
+        Tile exits = findTransitPoint(visits.map, tradeFrom.homeCity(), city);
         configTask(origin, null, exits, Task.JOB.TRADING, 0);
       }
     }
