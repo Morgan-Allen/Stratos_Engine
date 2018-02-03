@@ -310,6 +310,16 @@ public class Formation implements
   
   
   public void disbandFormation() {
+    
+    if (isBounty && ! recruits.empty()) {
+      int split = this.cashReward / recruits.size();
+      int rem   = this.cashReward % recruits.size();
+      int index = 0;
+      for (Actor r : recruits) {
+        r.incCarried(CASH, split + (index++ < rem ? 1 : 0));
+      }
+    }
+    
     homeCity.formations.toggleMember(this, false);
     
     this.awayCity    = null  ;
@@ -393,9 +403,21 @@ public class Formation implements
       escorted.remove(a);
       casualties.add(a);
     }
-    if (active && recruits.empty() && escorted.empty()) {
-      disbandFormation();
-      return;
+    //
+    //  Bounties just stay open until their objective is completed.
+    if (isBounty) {
+      if (active && objectiveComplete()) {
+        disbandFormation();
+        return;
+      }
+    }
+    //
+    //  Other formations auto-disband if all applicants are dead or un-toggled.
+    else {
+      if (active && recruits.empty() && escorted.empty()) {
+        disbandFormation();
+        return;
+      }
     }
     //
     //  Check to see if an offer has expired-
@@ -438,6 +460,37 @@ public class Formation implements
         beginSecuring(homeCity);
       }
     }
+  }
+  
+  
+  boolean objectiveComplete() {
+    if (objective == OBJECTIVE_CONQUER) {
+      
+      if (secureFocus instanceof Element) {
+        Element e = (Element) secureFocus;
+        return e.destroyed();
+      }
+      
+      //  TODO:  Use this-
+      /*
+      if (! FormationUtils.tacticalFocusValid(this, secureFocus)) {
+        return true;
+      }
+      //*/
+    }
+    if (objective == OBJECTIVE_GARRISON) {
+      //  TODO:  In this case, you should arrange shifts and pay off at
+      //  regular intervals.
+      //int sinceStart = CityMap.timeSince(timeBegun, map.time);
+      //if (sinceStart > MONTH_LENGTH * 2) return true;
+    }
+    if (objective == OBJECTIVE_DIALOG) {
+      return termsAccepted || termsRefused;
+    }
+    
+    //  TODO:  You also need an objective for exploring the surrounds.
+    
+    return false;
   }
   
   

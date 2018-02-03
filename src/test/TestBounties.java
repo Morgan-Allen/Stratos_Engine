@@ -33,13 +33,8 @@ public class TestBounties extends Test {
     for (Actor a : fort.workers()) initActorFunds += a.carried(CASH);
     
     
-    //  TODO:  Home cities need to be supplied whenever an actor or building
-    //  enters the map.
-    
-    //  TODO:  You're also going to need multiple cities on a given map...
-    
     BuildingForNest nest = (BuildingForNest) RUINS_LAIR.generate();
-    nest.enterMap(map, 20, 20, 1, base);
+    nest.enterMap(map, 20, 20, 1, map.locals);
     
     Formation mission;
     mission = new Formation(Formation.OBJECTIVE_CONQUER, base, false);

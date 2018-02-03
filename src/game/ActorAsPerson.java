@@ -239,7 +239,8 @@ public class ActorAsPerson extends Actor {
         pick.compare(f, priority * (0.5f + Rand.num()));
       }
       
-      formation = pick.result();
+      Formation joins = pick.result();
+      if (joins != null) joins.toggleRecruit(this, true);
     }
     
     //  Once home & work have been established, try to derive a task to
