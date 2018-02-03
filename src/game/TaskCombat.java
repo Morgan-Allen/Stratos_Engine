@@ -165,19 +165,31 @@ public class TaskCombat extends Task {
     }
     else {
       final CityMap map    = actor.map;
-      final Tile    from   = actor.at();
       final Tile    at     = target.at();
       final Box2D   area   = target.area();
       final int     range  = MAX_RANGE;
       final Tile    temp[] = new Tile[9];
       
-      //  TODO:  You may want to key by range, not just by target/area.
+      //  TODO:  This is a temporary hack until I can get the pathing-cache to
+      //  store data for particular cities, and the like...
+      final Tile from;
+      if (actor.inside() instanceof Building) {
+        from = ((Building) actor.inside()).mainEntrance();
+      }
+      else {
+        from = actor.at();
+      }
       
       Object areaKey = map.pathCache.openGroupHandle(from);
-      String key = "RA_"+areaKey+"_"+at;
-      RangeAccess access = (RangeAccess) map.pathCache.getCache(key);
+      String key = null;
+      RangeAccess access = null;
       
-      if (access == null) {
+      if (areaKey != null) {
+        key = "RA_"+areaKey+"_"+at;
+        access = (RangeAccess) map.pathCache.getCache(key);
+      }
+      
+      if (access == null && key != null) {
         
         final Batch <Tile> accessT = new Batch();
         Flood <Tile> flood = new Flood <Tile> () {
@@ -204,7 +216,13 @@ public class TaskCombat extends Task {
         map.pathCache.putCache(key, access);
       }
       
-      inRange = access.tiles;
+      if (access != null) {
+        inRange = access.tiles;
+      }
+    }
+    
+    if (inRange == null) {
+      return null;
     }
     
     float rangeMelee   = 1.5f;

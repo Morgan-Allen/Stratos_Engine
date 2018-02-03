@@ -2,7 +2,6 @@
 
 package test;
 import game.*;
-import game.GameConstants.Target;
 import util.*;
 import static content.GameContent.*;
 import static game.GameConstants.*;
@@ -14,6 +13,7 @@ public class TestBounties extends Test {
   
   public static void main(String args[]) {
     testAttackBuildingMission(false);
+    testAttackActorMission   (false);
   }
   
   
@@ -47,17 +47,41 @@ public class TestBounties extends Test {
         return mission;
       }
       
-      boolean checkVictory(CityMap map, City base, Mission mission) {
-        Building nest = (Building) mission.focus();
+      boolean checkVictory(CityMap map, City base, Object focus) {
+        Building nest = (Building) focus;
         return nest.destroyed();
       }
     };
-    return test.bountyTest(graphics);
+    return test.bountyTest(graphics, "ATTACK BUILDING BOUNTY");
+  }
+
+  
+  static boolean testAttackActorMission(boolean graphics) {
+    TestBounties test = new TestBounties() {
+      
+      Mission setupMission(CityMap map, City base) {
+        Actor creature = (Actor) MICOVORE.generate();
+        creature.enterMap(map, 20, 20, 1, map.locals);
+        creature.takeDamage(creature.maxHealth() * 0.7f);
+        
+        Mission mission;
+        mission = new Mission(Mission.OBJECTIVE_CONQUER, base, false);
+        mission.setFocus(creature, 0, map);
+        return mission;
+      }
+      
+      boolean checkVictory(CityMap map, City base, Object focus) {
+        Actor creature = (Actor) focus;
+        return creature.destroyed();
+      }
+    };
+    return test.bountyTest(graphics, "ATTACK ACTOR BOUNTY");
   }
   
   
   
-  boolean bountyTest(boolean graphics) {
+  boolean bountyTest(boolean graphics, String title) {
+    
     City base = Test.setupTestCity(32, ALL_GOODS, false);
     CityMap map = base.activeMap();
     
@@ -73,6 +97,19 @@ public class TestBounties extends Test {
     
     Mission mission = setupMission(map, base);
     mission.setAsBounty(reward);
+    Object focus = mission.focus();
+    
+    
+    map.update();
+    Actor sample = fort.workers().first();
+    Task given = mission.selectActorBehaviour(sample);
+    
+    if (given == null) {
+      I.say("\n"+title+" TEST FAILED!");
+      I.say("  No task provided for actor: "+sample);
+      return false;
+    }
+    
     
     boolean fundsTaken     = false;
     boolean missionTaken   = false;
@@ -97,7 +134,7 @@ public class TestBounties extends Test {
       }
       
       if (missionTaken && ! targetFinished) {
-        targetFinished = checkVictory(map, base, mission);
+        targetFinished = checkVictory(map, base, focus);
       }
       
       if (targetFinished && ! rewardSplit) {
@@ -109,12 +146,12 @@ public class TestBounties extends Test {
       
       if (rewardSplit && ! testOkay) {
         testOkay = true;
-        I.say("\nBOUNTIES TEST CONCLUDED SUCCESSFULLY!");
+        I.say("\n"+title+" TEST CONCLUDED SUCCESSFULLY!");
         if (! graphics) return true;
       }
     }
     
-    I.say("\nBOUNTIES TEST FAILED!");
+    I.say("\n"+title+" TEST FAILED!");
     I.say("  Funds taken:     "+fundsTaken    );
     I.say("  Mission taken:   "+missionTaken  );
     I.say("  Target finished: "+targetFinished);
@@ -128,8 +165,8 @@ public class TestBounties extends Test {
     return null;
   }
   
-  
-  boolean checkVictory(CityMap map, City base, Mission mission) {
+
+  boolean checkVictory(CityMap map, City base, Object focus) {
     return false;
   }
   

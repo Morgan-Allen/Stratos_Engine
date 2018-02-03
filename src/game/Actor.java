@@ -575,6 +575,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   }
   
   
+  public float maxHealth() { return type().maxHealth; }
   public float injury () { return injury ; }
   public float fatigue() { return fatigue; }
   public boolean alive() { return state != STATE_DEAD; }
