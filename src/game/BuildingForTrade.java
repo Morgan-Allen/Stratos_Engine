@@ -14,8 +14,9 @@ public class BuildingForTrade extends Building implements Trader {
   /**  Data fields, setup and save/load methods-
     */
   Tally <Good> tradeLevel = new Tally();
-  City tradePartner = null;
   List <Good> tradeFixed = new List();
+  City tradePartner = null;
+  boolean tradeOff = false;
   Good needed[] = NO_GOODS, produced[] = NO_GOODS;
   
   
@@ -29,6 +30,7 @@ public class BuildingForTrade extends Building implements Trader {
     s.loadTally(tradeLevel);
     s.loadObjects(tradeFixed);
     tradePartner = (City) s.loadObject();
+    tradeOff = s.loadBool();
   }
   
   
@@ -37,6 +39,7 @@ public class BuildingForTrade extends Building implements Trader {
     s.saveTally(tradeLevel);
     s.saveObjects(tradeFixed);
     s.saveObject(tradePartner);
+    s.saveBool(tradeOff);
   }
 
   
@@ -48,6 +51,16 @@ public class BuildingForTrade extends Building implements Trader {
     if (matchStock) for (Good g : tradeLevel.keys()) {
       setInventory(g, Nums.abs(tradeLevel.valueFor(g)));
     }
+  }
+  
+  
+  public void setTradePartner(City partner) {
+    this.tradePartner = partner;
+  }
+  
+  
+  public void toggleTrading(boolean allowed) {
+    this.tradeOff = ! allowed;
   }
   
 
@@ -91,7 +104,7 @@ public class BuildingForTrade extends Building implements Trader {
     */
   public Task selectActorBehaviour(Actor actor) {
     
-    if (actor == workers.first()) {
+    if (actor == workers.first() && ! tradeOff) {
       return selectTraderBehaviour(actor);
     }
     else {
@@ -123,6 +136,10 @@ public class BuildingForTrade extends Building implements Trader {
     
     for (Building b : map.buildings) {
       if (b == this || ! (b instanceof Trader)) continue;
+      if (b.homeCity() != homeCity()) {
+        if      (tradePartner == null        ) continue;
+        else if (b.homeCity() != tradePartner) continue;
+      }
       targets.add((Trader) b);
     }
     
@@ -130,6 +147,7 @@ public class BuildingForTrade extends Building implements Trader {
       targets.add(tradePartner);
     }
     else for (City c : world.cities) {
+      if (c.activeMap() == map       ) continue;
       if (c == homeCity              ) continue;
       if (c.isEnemyOf(homeCity)      ) continue;
       if (c.distance (homeCity) == -1) continue;

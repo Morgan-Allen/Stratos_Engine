@@ -19,7 +19,7 @@ public class TestTrading extends Test {
   
   static boolean testTrading(boolean graphics) {
     Test test = new TestTrading();
-
+    
     World world = new World(ALL_GOODS);
     City  baseC = new City(world, world.addLocale(2, 2));
     City  awayC = new City(world, world.addLocale(3, 3));
@@ -87,31 +87,17 @@ public class TestTrading extends Test {
     final int RUN_TIME = YEAR_LENGTH;
     boolean tradeOkay  = false;
     boolean supplyOkay = false;
+    boolean tradeStop  = false;
     boolean moneyOkay  = false;
+    boolean testOkay   = false;
     
     while (map.time() < RUN_TIME || graphics) {
       test.runLoop(baseC, 1, graphics, "saves/test_trading.tlt");
       
-      boolean allHome = true;
-      for (Building b : map.buildings()) for (Actor a : b.workers()) {
-        if (a.jobType() == Task.JOB.TRADING) allHome = false;
-      }
-      if (allHome) {
-        float funds = projectedEarnings(baseC, awayC, initFunds, false);
-        if (Nums.abs(funds - baseC.funds()) > 1) {
-          I.say("\nTrade-earnings do not match projections!");
-          I.say("  Expected: "+funds        );
-          I.say("  Actual:   "+baseC.funds());
-          projectedEarnings(baseC, awayC, initFunds, true);
-          return false;
-        }
-        moneyOkay = true;
-      }
-      
       if (! tradeOkay) {
         boolean check = true;
-        check &= City.goodsSent(baseC, awayC, PARTS) > 1;
-        check &= City.goodsSent(baseC, awayC, MEDICINE ) > 1;
+        check &= City.goodsSent(baseC, awayC, PARTS   ) > 1;
+        check &= City.goodsSent(baseC, awayC, MEDICINE) > 1;
         check &= baseC.funds() > 0;
         tradeOkay = check;
       }
@@ -123,8 +109,31 @@ public class TestTrading extends Test {
         supplyOkay = check;
       }
       
-      if (tradeOkay && supplyOkay && moneyOkay) {
+      if (tradeOkay && supplyOkay && ! tradeStop) {
+        post1.toggleTrading(false);
+        post2.toggleTrading(false);
+        tradeStop = true;
+      }
+      
+      boolean allHome = true;
+      for (Building b : map.buildings()) for (Actor a : b.workers()) {
+        if (a.jobType() == Task.JOB.TRADING) allHome = false;
+      }
+      if (tradeStop && allHome && ! moneyOkay) {
+        float funds = projectedEarnings(baseC, awayC, initFunds, false);
+        if (Nums.abs(funds - baseC.funds()) > 1) {
+          I.say("\nTrade-earnings do not match projections!");
+          I.say("  Expected: "+funds        );
+          I.say("  Actual:   "+baseC.funds());
+          projectedEarnings(baseC, awayC, initFunds, true);
+          return false;
+        }
+        moneyOkay = true;
+      }
+      
+      if (tradeOkay && supplyOkay && moneyOkay && ! testOkay) {
         I.say("\nTRADING TEST CONCLUDED SUCCESSFULLY!");
+        testOkay = true;
         reportOnMap(baseC, awayC, true);
         if (! graphics) return true;
       }
