@@ -229,24 +229,24 @@ public class ActorAsPerson extends Actor {
     }
     
     //  See if there's a formation worth joining:
-    if (idle() && formation == null && homeCity() != null) {
-      Pick <Formation> pick = new Pick(Task.ROUTINE * Rand.num());
+    if (idle() && mission == null && homeCity() != null) {
+      Pick <Mission> pick = new Pick(Task.ROUTINE * Rand.num());
       
-      for (Formation f : homeCity().formations) {
+      for (Mission f : homeCity().missions) {
         if (! f.isBounty()) continue;
         Task t = f.selectActorBehaviour(this);
         float priority = t == null ? 0 : t.priority();
         pick.compare(f, priority * (0.5f + Rand.num()));
       }
       
-      Formation joins = pick.result();
+      Mission joins = pick.result();
       if (joins != null) joins.toggleRecruit(this, true);
     }
     
     //  Once home & work have been established, try to derive a task to
     //  perform-
-    if (idle() && formation != null && formation.active) {
-      assignTask(formation.selectActorBehaviour(this));
+    if (idle() && mission != null && mission.active) {
+      assignTask(mission.selectActorBehaviour(this));
     }
     if (idle() && work() != null && work().accessible()) {
       assignTask(work().selectActorBehaviour(this));

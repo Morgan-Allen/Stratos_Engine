@@ -38,8 +38,8 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   private Building home;
   private City     homeCity;
   private City     guestCity;
-  Building  recruiter;
-  Formation formation;
+  Building recruiter;
+  Mission  mission  ;
   
   private Task task;
   private Pathing inside;
@@ -77,7 +77,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     homeCity  = (City     ) s.loadObject();
     guestCity = (City     ) s.loadObject();
     recruiter = (Building ) s.loadObject();
-    formation = (Formation) s.loadObject();
+    mission   = (Mission  ) s.loadObject();
     
     task   = (Task   ) s.loadObject();
     inside = (Pathing) s.loadObject();
@@ -110,7 +110,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     s.saveObject(homeCity );
     s.saveObject(guestCity);
     s.saveObject(recruiter);
-    s.saveObject(formation);
+    s.saveObject(mission  );
     
     s.saveObject(task  );
     s.saveObject(inside);
@@ -166,14 +166,14 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   public void setDestroyed() {
     super.setDestroyed();
-    if (formation != null) formation.toggleRecruit(this, false);
+    if (mission != null) mission.toggleRecruit(this, false);
     if (home      != null) home.setResident(this, false);
     if (work      != null) work.setWorker  (this, false);
     if (task      != null) task.onCancel();
     home      = null;
     work      = null;
     recruiter = null;
-    formation = null;
+    mission = null;
     assignTask(null);
   }
   
@@ -234,7 +234,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     if (onMap()) {
       if (home      != null) home     .actorUpdates(this);
       if (work      != null) work     .actorUpdates(this);
-      if (formation != null) formation.actorUpdates(this);
+      if (mission != null) mission.actorUpdates(this);
       if (task == null || ! task.checkAndUpdateTask()) {
         beginNextBehaviour();
       }
@@ -335,8 +335,8 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   }
   
   
-  public Formation formation() {
-    return formation;
+  public Mission formation() {
+    return mission;
   }
   
   

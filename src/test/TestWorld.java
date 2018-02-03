@@ -424,8 +424,8 @@ public class TestWorld extends Test {
       //
       //  Ensure that any forces being sent are of reasonable size:
       for (World.Journey j : world.journeys()) {
-        for (Journeys g : j.going()) if (g instanceof Formation) {
-          Formation force = (Formation) g;
+        for (Journeys g : j.going()) if (g instanceof Mission) {
+          Mission force = (Mission) g;
           City home = force.homeCity();
           if (j.goes() == home) continue;
           
@@ -533,7 +533,7 @@ public class TestWorld extends Test {
     CityCouncil.MissionAssessment IA = from.council.invasionAssessment(
       from, goes, 0.5f, false
     );
-    Formation force = from.council.spawnFormation(IA);
+    Mission force = from.council.spawnFormation(IA);
     CityEvents.handleDeparture(force, from, goes);
     
     int time = 0;
@@ -550,7 +550,7 @@ public class TestWorld extends Test {
     CityCouncil.MissionAssessment DA = from.council.dialogAssessment(
       from, goes, false
     );
-    Formation force = from.council.spawnFormation(DA);
+    Mission force = from.council.spawnFormation(DA);
     CityEvents.handleDeparture(force, from, goes);
     
     int time = 0;

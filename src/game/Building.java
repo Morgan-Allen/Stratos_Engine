@@ -433,7 +433,7 @@ public class Building extends Element implements Pathing, Employer {
   }
   
   
-  public void deployInFormation(Formation f, boolean is) {
+  public void deployOnMission(Mission m, boolean is) {
     return;
   }
   

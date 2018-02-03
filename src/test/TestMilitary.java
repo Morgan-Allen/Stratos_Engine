@@ -52,8 +52,8 @@ public class TestMilitary extends Test {
     float initLoyalty  = awayC.loyalty(baseC);
     
     
-    Formation troops  = null;
-    Formation enemies = new Formation(Formation.OBJECTIVE_CONQUER, awayC, true);
+    Mission troops  = null;
+    Mission enemies = new Mission(Mission.OBJECTIVE_CONQUER, awayC, true);
     for (int n = 4; n-- > 0;) {
       Actor fights = (Actor) ((n == 0) ? TROOPER : PYON).generate();
       fights.assignHomeCity(awayC);
@@ -77,9 +77,9 @@ public class TestMilitary extends Test {
       test.runLoop(baseC, 10, graphics, "saves/test_military.tlt");
       
       if (fort.recruits().size() >= 8 && ! recruited) {
-        troops = new Formation(Formation.OBJECTIVE_GARRISON, baseC, false);
-        fort.deployInFormation(troops, true);
-        troops.beginSecuring(map.tileAt(25, 25), TileConstants.E, map);
+        troops = new Mission(Mission.OBJECTIVE_GARRISON, baseC, false);
+        fort.deployOnMission(troops, true);
+        troops.setFocus(map.tileAt(25, 25), TileConstants.E, map);
         
         Visit.appendTo(fromTroops, troops.recruits());
         initSkills = recordSkills(fromTroops, COMBAT_SKILLS);
@@ -87,10 +87,10 @@ public class TestMilitary extends Test {
       }
       
       if (troops != null && troops.formationReady() && ! invaded) {
-        enemies.beginSecuring(baseC);
+        enemies.setFocus(baseC);
         World.Journey j = world.journeyFor(enemies);
         world.completeJourney(j);
-        enemies.beginSecuring(troops, TileConstants.W, map);
+        enemies.setFocus(troops, TileConstants.W, map);
         invaded = true;
       }
       
@@ -107,9 +107,9 @@ public class TestMilitary extends Test {
       }
       
       if (homeWin && fort.recruits().size() >= 12 && ! invading) {
-        troops = new Formation(Formation.OBJECTIVE_CONQUER, baseC, false);
-        fort.deployInFormation(troops, true);
-        troops.beginSecuring(awayC);
+        troops = new Mission(Mission.OBJECTIVE_CONQUER, baseC, false);
+        fort.deployOnMission(troops, true);
+        troops.setFocus(awayC);
         troops.assignTerms(City.POSTURE.VASSAL, null, null, null);
         invading = true;
       }

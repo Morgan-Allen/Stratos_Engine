@@ -2,6 +2,7 @@
 
 package test;
 import game.*;
+import game.GameConstants.Target;
 import util.*;
 import static content.GameContent.*;
 import static game.GameConstants.*;
@@ -12,13 +13,51 @@ public class TestBounties extends Test {
   
   
   public static void main(String args[]) {
-    testBounties(false);
+    testAttackBuildingMission(false);
   }
   
   
-  static boolean testBounties(boolean graphics) {
-    TestBounties test = new TestBounties();
-    
+  //  What are the cases I need to cover here?
+  
+  //  Attack bounty on building.
+  //  Attack bounty on actor.
+  //  Defend bounty on building.
+  //  Defend bounty on actor.
+  //  Explore bounty on area.
+  //  Explore bounty on actor.
+  //  Contact bounty on actor.
+  //  Contact bounty on building.
+  
+  //  So, 8 scenarios in total.  You'll have to customise the target-entry,
+  //  and customise checking for success.
+  
+  //  But okay.  That is do-able.
+
+  
+  static boolean testAttackBuildingMission(boolean graphics) {
+    TestBounties test = new TestBounties() {
+      
+      Mission setupMission(CityMap map, City base) {
+        BuildingForNest nest = (BuildingForNest) RUINS_LAIR.generate();
+        nest.enterMap(map, 20, 20, 1, map.locals);
+        
+        Mission mission;
+        mission = new Mission(Mission.OBJECTIVE_CONQUER, base, false);
+        mission.setFocus(nest, 0, map);
+        return mission;
+      }
+      
+      boolean checkVictory(CityMap map, City base, Mission mission) {
+        Building nest = (Building) mission.focus();
+        return nest.destroyed();
+      }
+    };
+    return test.bountyTest(graphics);
+  }
+  
+  
+  
+  boolean bountyTest(boolean graphics) {
     City base = Test.setupTestCity(32, ALL_GOODS, false);
     CityMap map = base.activeMap();
     
@@ -32,15 +71,8 @@ public class TestBounties extends Test {
     float initActorFunds = 0;
     for (Actor a : fort.workers()) initActorFunds += a.carried(CASH);
     
-    
-    BuildingForNest nest = (BuildingForNest) RUINS_LAIR.generate();
-    nest.enterMap(map, 20, 20, 1, map.locals);
-    
-    Formation mission;
-    mission = new Formation(Formation.OBJECTIVE_CONQUER, base, false);
-    mission.beginSecuring(nest, 0, map);
+    Mission mission = setupMission(map, base);
     mission.setAsBounty(reward);
-    
     
     boolean fundsTaken     = false;
     boolean missionTaken   = false;
@@ -49,7 +81,7 @@ public class TestBounties extends Test {
     boolean testOkay       = false;
     
     while (map.time() < 1000 || graphics) {
-      test.runLoop(base, 10, graphics, "saves/test_military.tlt");
+      runLoop(base, 10, graphics, "saves/test_military.tlt");
       
       if (! fundsTaken) {
         fundsTaken = mission.cashReward() == initFunds - base.funds();
@@ -65,7 +97,7 @@ public class TestBounties extends Test {
       }
       
       if (missionTaken && ! targetFinished) {
-        targetFinished = nest.destroyed();
+        targetFinished = checkVictory(map, base, mission);
       }
       
       if (targetFinished && ! rewardSplit) {
@@ -88,6 +120,16 @@ public class TestBounties extends Test {
     I.say("  Target finished: "+targetFinished);
     I.say("  Reward split:    "+rewardSplit   );
     
+    return false;
+  }
+  
+  
+  Mission setupMission(CityMap map, City base) {
+    return null;
+  }
+  
+  
+  boolean checkVictory(CityMap map, City base, Mission mission) {
     return false;
   }
   

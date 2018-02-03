@@ -11,7 +11,7 @@ import static game.GameConstants.*;
 
 
 
-public class Formation implements
+public class Mission implements
   Session.Saveable, Journeys, TileConstants, Employer, Selection.Focus
 {
   
@@ -42,7 +42,7 @@ public class Formation implements
   int cashReward = -1;
   
   City.POSTURE postureDemand  = null;
-  Formation    actionDemand   = null;
+  Mission      actionDemand   = null;
   Actor        marriageDemand = null;
   Tally <Good> tributeDemand  = new Tally();
   
@@ -57,14 +57,14 @@ public class Formation implements
   CityMap map         ;
   Tile    transitPoint;
   Tile    standPoint  ;
-  Object  secureFocus ;
+  Object  focus       ;
   int     facing      ;
   
   List <Tile> guardPoints = new List();
   int lastUpdateTime = -1;
   
   
-  public Formation(int objective, City belongs, boolean activeAI) {
+  public Mission(int objective, City belongs, boolean activeAI) {
     this.objective  = objective;
     this.tacticalAI = activeAI;
     this.homeCity   = belongs;
@@ -72,7 +72,7 @@ public class Formation implements
   }
   
   
-  public Formation(Session s) throws Exception {
+  public Mission(Session s) throws Exception {
     s.cacheInstance(this);
     
     objective     = s.loadInt ();
@@ -88,7 +88,7 @@ public class Formation implements
     cashReward    = s.loadInt ();
     
     postureDemand  = (City.POSTURE) s.loadEnum(City.POSTURE.values());
-    actionDemand   = (Formation   ) s.loadObject();
+    actionDemand   = (Mission     ) s.loadObject();
     marriageDemand = (Actor       ) s.loadObject();
     s.loadTally(tributeDemand);
     
@@ -104,7 +104,7 @@ public class Formation implements
     active       = s.loadBool();
     transitPoint = loadTile(map, s);
     standPoint   = loadTile(map, s);
-    secureFocus  = s.loadObject();
+    focus        = s.loadObject();
     facing       = s.loadInt();
     
     for (int n = s.loadInt(); n-- > 0;) {
@@ -146,7 +146,7 @@ public class Formation implements
     s.saveBool(active);
     saveTile(transitPoint, map, s);
     saveTile(standPoint  , map, s);
-    s.saveObject(secureFocus);
+    s.saveObject(focus);
     s.saveInt(facing);
     
     s.saveInt(guardPoints.size());
@@ -190,7 +190,7 @@ public class Formation implements
   
   public void assignTerms(
     City.POSTURE posture,
-    Formation actionTaken,
+    Mission actionTaken,
     Actor toMarry,
     Tally <Good> tribute
   ) {
@@ -212,7 +212,7 @@ public class Formation implements
   
   
   public POSTURE      postureDemand () { return postureDemand ; }
-  public Formation    actionDemand  () { return actionDemand  ; }
+  public Mission      actionDemand  () { return actionDemand  ; }
   public Actor        marriageDemand() { return marriageDemand; }
   public Tally <Good> tributeDemand () { return tributeDemand ; }
   
@@ -248,15 +248,15 @@ public class Formation implements
   
   public void toggleRecruit(Actor a, boolean is) {
     this.recruits.toggleMember(a, is);
-    if (is) a.formation = this;
-    else    a.formation = null;
+    if (is) a.mission = this;
+    else    a.mission = null;
   }
   
   
   public void toggleEscorted(Actor a, boolean is) {
     this.escorted.toggleMember(a, is);
-    if (is) a.formation = this;
-    else    a.formation = null;
+    if (is) a.mission = this;
+    else    a.mission = null;
   }
   
   
@@ -270,9 +270,9 @@ public class Formation implements
   }
   
   
-  public void beginSecuring(City city) {
+  public void setFocus(City city) {
     
-    homeCity.formations.toggleMember(this, true);
+    homeCity.missions.toggleMember(this, true);
     this.active = true;
     
     City from, goes;
@@ -288,24 +288,24 @@ public class Formation implements
     
     if (onMap()) {
       this.transitPoint = findTransitPoint(map, from, goes);
-      beginSecuring(city, 0, map);
+      setFocus(city, 0, map);
     }
     else {
-      this.secureFocus = city;
+      this.focus = city;
       beginJourney(from, goes);
     }
   }
   
   
-  public void beginSecuring(Object focus, int facing, CityMap map) {
-    homeCity.formations.toggleMember(this, true);
+  public void setFocus(Object focus, int facing, CityMap map) {
+    homeCity.missions.toggleMember(this, true);
     
-    this.facing      = facing;
-    this.secureFocus = focus ;
-    this.active      = true  ;
-    this.map         = map   ;
+    this.facing = facing;
+    this.focus  = focus ;
+    this.active = true  ;
+    this.map    = map   ;
     
-    this.standPoint = standPointFrom(secureFocus);
+    this.standPoint = standPointFrom(focus);
   }
   
   
@@ -320,12 +320,12 @@ public class Formation implements
       }
     }
     
-    homeCity.formations.toggleMember(this, false);
+    homeCity.missions.toggleMember(this, false);
     
-    this.awayCity    = null  ;
-    this.secureFocus = null  ;
-    this.facing      = CENTRE;
-    this.active      = false ;
+    this.awayCity = null  ;
+    this.focus    = null  ;
+    this.facing   = CENTRE;
+    this.active   = false ;
     
     for (Actor r : recruits) toggleRecruit (r, false);
     for (Actor e : escorted) toggleEscorted(e, false);
@@ -342,8 +342,8 @@ public class Formation implements
     if (focus instanceof City) {
       return this.transitPoint;
     }
-    if (focus instanceof Formation) {
-      Pathing from = ((Formation) focus).pathFrom();
+    if (focus instanceof Mission) {
+      Pathing from = ((Mission) focus).pathFrom();
       return standPointFrom(from);
     }
     if (focus instanceof Element) {
@@ -366,16 +366,21 @@ public class Formation implements
   
   
   Target pathGoes() {
-    if (secureFocus instanceof City) {
+    if (focus instanceof City) {
       return transitPoint;
     }
-    if (secureFocus instanceof Formation) {
-      return ((Formation) secureFocus).pathFrom();
+    if (focus instanceof Mission) {
+      return ((Mission) focus).pathFrom();
     }
-    if (secureFocus instanceof Target) {
-      return (Target) secureFocus;
+    if (focus instanceof Target) {
+      return (Target) focus;
     }
     return null;
+  }
+  
+  
+  public Object focus() {
+    return focus;
   }
   
   
@@ -440,24 +445,24 @@ public class Formation implements
       if (tacticalAI) {
         FormationUtils.updateTacticalTarget(this);
       }
-      this.standPoint = standPointFrom(secureFocus);
+      this.standPoint = standPointFrom(focus);
       //
       //  This is a hacky way of saying "I want to go to a different city, is
       //  everyone ready yet?"
       boolean ready = formationReady();
-      if (secureFocus == distant && distant.activeMap() != map && ready) {
+      if (focus == distant && distant.activeMap() != map && ready) {
         beginJourney(local, distant);
       }
     }
     //
     //  And see if it's time to leave otherwise-
-    else if (secureFocus == awayCity) {
+    else if (focus == awayCity) {
       boolean shouldLeave = false;
       shouldLeave |= termsAccepted;
       shouldLeave |= termsRefused && objective == OBJECTIVE_DIALOG;
       shouldLeave |= complete;
       if (shouldLeave) {
-        beginSecuring(homeCity);
+        setFocus(homeCity);
       }
     }
   }
@@ -466,8 +471,8 @@ public class Formation implements
   boolean objectiveComplete() {
     if (objective == OBJECTIVE_CONQUER) {
       
-      if (secureFocus instanceof Element) {
-        Element e = (Element) secureFocus;
+      if (focus instanceof Element) {
+        Element e = (Element) focus;
         return e.destroyed();
       }
       
@@ -534,7 +539,7 @@ public class Formation implements
         e.enterMap(map, transits.x, transits.y, 1, e.homeCity());
         e.assignGuestCity(goes);
       }
-      beginSecuring(transitPoint, N, map);
+      setFocus(transitPoint, N, map);
       
       if (home) {
         this.away = false;
@@ -665,8 +670,8 @@ public class Formation implements
   
   public Tile standLocation(Actor actor) {
     boolean doPatrol =
-      (secureFocus instanceof Target) &&
-      ((Target) secureFocus).type().isWall
+      (focus instanceof Target) &&
+      ((Target) focus).type().isWall
     ;
     if (doPatrol) {
       return FormationUtils.standingPointPatrol(actor, this);
@@ -679,7 +684,7 @@ public class Formation implements
   
   public boolean formationReady() {
     if (map == null) return true;
-    if (secureFocus == null || ! active) return false;
+    if (focus == null || ! active) return false;
     
     for (Actor a : recruits) {
       if (standLocation(a) != a.at()) {
@@ -730,7 +735,7 @@ public class Formation implements
   
   
   public String fullName() {
-    return "Formation: "+OBJECTIVE_NAMES[objective]+": "+secureFocus;
+    return "Formation: "+OBJECTIVE_NAMES[objective]+": "+focus;
   }
   
   
@@ -754,8 +759,8 @@ public class Formation implements
   
   
   public Vec3D trackPosition() {
-    if (secureFocus instanceof Element) {
-      return ((Element) secureFocus).trackPosition();
+    if (focus instanceof Element) {
+      return ((Element) focus).trackPosition();
     }
     else {
       return new Vec3D();

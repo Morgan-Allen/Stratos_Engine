@@ -41,7 +41,7 @@ public class CityCouncil {
   private List <Actor> members = new List();
   private Table <Actor, Role> roles = new Table();
   
-  private List <Formation> petitions = new List();
+  private List <Mission> petitions = new List();
   
   
   CityCouncil(City city) {
@@ -137,23 +137,23 @@ public class CityCouncil {
   
   /**  Handling agreements or terms submitted by other cities-
     */
-  public void receiveTerms(Formation petition) {
+  public void receiveTerms(Mission petition) {
     petitions.include(petition);
   }
   
   
-  public Series <Formation> petitions() {
+  public Series <Mission> petitions() {
     return petitions;
   }
   
   
-  public void acceptTerms(Formation petition) {
+  public void acceptTerms(Mission petition) {
     petition.setTermsAccepted(true);
     petitions.remove(petition);
   }
   
   
-  public void rejectTerms(Formation petition) {
+  public void rejectTerms(Mission petition) {
     petition.setTermsAccepted(false);
     petitions.remove(petition);
   }
@@ -169,7 +169,7 @@ public class CityCouncil {
     
     int objective;
     POSTURE      postureDemand  = null;
-    Formation    actionDemand   = null;
+    Mission      actionDemand   = null;
     Actor        marriageDemand = null;
     Tally <Good> tributeDemand  = null;
     
@@ -239,7 +239,7 @@ public class CityCouncil {
   
   void updateCouncilAI() {
     
-    for (Formation petition : petitions) {
+    for (Mission petition : petitions) {
       float appeal = appealOfTerms(
         petition.homeCity, city,
         petition.postureDemand,
@@ -266,7 +266,7 @@ public class CityCouncil {
     //  And if any have positive appeal, launch the enterprise:
     MissionAssessment IA = pickI.result();
     if (IA != null) {
-      Formation force = spawnFormation(IA);
+      Mission force = spawnFormation(IA);
       CityEvents.handleDeparture(force, IA.fromC, IA.goesC);
     }
   }
@@ -396,7 +396,7 @@ public class CityCouncil {
   ) {
     MissionAssessment MA = new MissionAssessment();
     
-    MA.objective = Formation.OBJECTIVE_CONQUER;
+    MA.objective = Mission.OBJECTIVE_CONQUER;
     MA.fromC     = attack;
     MA.goesC     = defend;
     MA.fromPower = attack.armyPower() * commitLevel / POP_PER_CITIZEN;
@@ -429,7 +429,7 @@ public class CityCouncil {
   float appealOfTerms(
     City from, City goes,
     POSTURE      posture ,
-    Formation    action  ,
+    Mission      action  ,
     Actor        marriage,
     Tally <Good> tribute
   ) {
@@ -479,7 +479,7 @@ public class CityCouncil {
   ) {
     MissionAssessment MA = new MissionAssessment();
     
-    MA.objective = Formation.OBJECTIVE_DIALOG;
+    MA.objective = Mission.OBJECTIVE_DIALOG;
     MA.fromC = from;
     MA.goesC = goes;
     
@@ -604,8 +604,8 @@ public class CityCouncil {
   }
   
   
-  public Formation spawnFormation(MissionAssessment IA) {
-    Formation force = new Formation(IA.objective, city, true);
+  public Mission spawnFormation(MissionAssessment IA) {
+    Mission force = new Mission(IA.objective, city, true);
     
     Type citizen = (Type) Visit.first(city.world.citizenTypes);
     Type soldier = (Type) Visit.first(city.world.soldierTypes);
@@ -635,7 +635,7 @@ public class CityCouncil {
         marries.assignHomeCity(city);
         force.toggleEscorted(marries, true);
       }
-      if (IA.objective == Formation.OBJECTIVE_DIALOG) {
+      if (IA.objective == Mission.OBJECTIVE_DIALOG) {
         while (force.escorted.size() < 2) {
           Actor talks = (Actor) noble.generate();
           talks.assignHomeCity(city);

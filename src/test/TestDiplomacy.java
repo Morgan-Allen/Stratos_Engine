@@ -68,8 +68,8 @@ public class TestDiplomacy extends Test {
     Test.fillAllVacancies(map, PYON);
     
     
-    Formation escort;
-    escort = new Formation(Formation.OBJECTIVE_DIALOG, awayC, true);
+    Mission escort;
+    escort = new Mission(Mission.OBJECTIVE_DIALOG, awayC, true);
     for (int n = 4; n-- > 0;) {
       Actor s = (Actor) TROOPER.generate();
       s.assignHomeCity(awayC);
@@ -84,7 +84,7 @@ public class TestDiplomacy extends Test {
     for (Actor e : escort.escorted()) e.assignHomeCity(awayC);
     
     escort.assignTerms(City.POSTURE.ALLY, null, bride, null);
-    escort.beginSecuring(baseC);
+    escort.setFocus(baseC);
     
     boolean escortArrived  = false;
     boolean offerGiven     = false;
@@ -125,11 +125,11 @@ public class TestDiplomacy extends Test {
       }
       
       if (escortDeparted && ! escortSent) {
-        escort = new Formation(Formation.OBJECTIVE_DIALOG, baseC, true);
+        escort = new Mission(Mission.OBJECTIVE_DIALOG, baseC, true);
         escort.assignTerms(POSTURE.TRADING, null, null, null);
-        garrison.deployInFormation(escort, true);
+        garrison.deployOnMission(escort, true);
         escort.toggleEscorted(minister, true);
-        escort.beginSecuring(neutC);
+        escort.setFocus(neutC);
         escortSent = true;
       }
       

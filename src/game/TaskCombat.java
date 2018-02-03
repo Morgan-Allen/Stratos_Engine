@@ -75,9 +75,9 @@ public class TaskCombat extends Task {
   
   
   
-  static TaskCombat nextSieging(Actor actor, Formation formation) {
-    if (formation.secureFocus instanceof Element) {
-      Element e = (Element) formation.secureFocus;
+  static TaskCombat nextSieging(Actor actor, Mission formation) {
+    if (formation.focus instanceof Element) {
+      Element e = (Element) formation.focus;
       if (e.destroyed() || ! e.onMap()) return null;
       if (e.homeCity() == formation.homeCity) return null;
       return configCombat(actor, e, formation, null, JOB.COMBAT);
@@ -90,7 +90,7 @@ public class TaskCombat extends Task {
   //  your comrades are currently fighting.
   
   
-  static TaskCombat nextReaction(Actor actor, Formation formation) {
+  static TaskCombat nextReaction(Actor actor, Mission formation) {
     
     //  TODO:  Allow for a null formation to be passed in here.
     Tile from = actor.at();
@@ -154,7 +154,7 @@ public class TaskCombat extends Task {
   
   static TaskCombat configCombat(
     final Actor actor, final Element target,
-    Formation formation, TaskCombat currentTask,
+    Mission formation, TaskCombat currentTask,
     JOB jobType
   ) {
     if (actor == null || target == null || ! target.onMap()) return null;
@@ -273,7 +273,7 @@ public class TaskCombat extends Task {
   
 
   boolean checkAndUpdateTask() {
-    Task self = configCombat(actor, primary, actor.formation, this, type);
+    Task self = configCombat(actor, primary, actor.mission, this, type);
     if (self == null) return false;
     return super.checkAndUpdateTask();
   }

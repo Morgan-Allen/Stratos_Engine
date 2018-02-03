@@ -111,9 +111,9 @@ public class BuildingForArmy extends BuildingForCrafts {
   }
   
   
-  public void deployInFormation(Formation f, boolean is) {
+  public void deployOnMission(Mission m, boolean is) {
     for (Actor a : recruits) if (eligible(a, true)) {
-      f.toggleRecruit(a, is);
+      m.toggleRecruit(a, is);
     }
   }
   

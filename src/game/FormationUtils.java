@@ -13,7 +13,7 @@ import static game.GameConstants.*;
 public class FormationUtils {
   
   
-  static float rateCampingPoint(Tile t, Formation parent) {
+  static float rateCampingPoint(Tile t, Mission parent) {
     if (t == null || parent == null || parent.map == null) return -1;
     
     CityMap map = parent.map;
@@ -44,7 +44,7 @@ public class FormationUtils {
   }
   
   
-  static Tile findCampingPoint(final Formation parent) {
+  static Tile findCampingPoint(final Mission parent) {
     if (parent == null || parent.map == null) return null;
     
     final CityMap map = parent.map;
@@ -72,7 +72,7 @@ public class FormationUtils {
   
   //  TODO:  Move this to the Council class?
   
-  static Actor findOfferRecipient(Formation parent) {
+  static Actor findOfferRecipient(Mission parent) {
     CityCouncil council = parent.awayCity.council;
     
     Actor monarch = council.memberWithRole(Role.MONARCH);
@@ -124,8 +124,8 @@ public class FormationUtils {
     Object focus, CityMap map, Pathing pathFrom, boolean checkPathing
   ) {
     
-    if (focus instanceof Formation) {
-      Formation f = (Formation) focus;
+    if (focus instanceof Mission) {
+      Mission f = (Mission) focus;
       Target goes = f.pathGoes();
       if (f.away || goes == null) return null;
       if (f.powerSum() == 0 || ! f.active) return null;
@@ -175,13 +175,13 @@ public class FormationUtils {
   }
   
   
-  static boolean updateTacticalTarget(Formation parent) {
+  static boolean updateTacticalTarget(Mission parent) {
     
     CityMap map    = parent.map;
     City    home   = parent.homeCity;
     Pathing from   = parent.pathFrom();
     Tile    stands = parent.standPoint;
-    Object  focus  = parent.secureFocus;
+    Object  focus  = parent.focus;
     City    sieges = parent.awayCity;
     boolean envoy  = parent.escorted.size() > 0;
     
@@ -189,7 +189,7 @@ public class FormationUtils {
     //  If this is a diplomatic mission, stay in camp unless and until terms
     //  are refused-
     if (parent.hasTerms() && parent.termsAccepted) {
-      parent.beginSecuring(home);
+      parent.setFocus(home);
       return true;
     }
     
@@ -198,7 +198,7 @@ public class FormationUtils {
         return false;
       }
       Tile campPoint = findCampingPoint(parent);
-      parent.beginSecuring(campPoint, parent.facing, map);
+      parent.setFocus(campPoint, parent.facing, map);
       return true;
     }
     
@@ -207,7 +207,7 @@ public class FormationUtils {
     if (parent.casualtyLevel() > MAX_CASUALTIES / 100f) {
       CityEvents.enterHostility(sieges, home, false, 1);
       CityEvents.signalVictory(sieges, home, parent);
-      parent.beginSecuring(home);
+      parent.setFocus(home);
       return true;
     }
     if (parent.powerSum() == 0) {
@@ -226,7 +226,7 @@ public class FormationUtils {
     //  a building to tear down:
     Pick <Option> pick = new Pick();
     
-    for (City c : map.cities) for (Formation f : c.formations) {
+    for (City c : map.cities) for (Mission f : c.missions) {
       Option o = tacticalOptionFor(f, map, from, false);
       if (o != null && o.secures != null) pick.compare(o, o.rating);
     }
@@ -240,7 +240,7 @@ public class FormationUtils {
       Option o = pick.result();
       
       if (tacticalOptionFor(o.target, map, from, true) != null) {
-        parent.beginSecuring(o.target, parent.facing, map);
+        parent.setFocus(o.target, parent.facing, map);
         return true;
       }
       
@@ -254,7 +254,7 @@ public class FormationUtils {
           int pathT = t.pathType();
           
           if (above != null && (pathT == PATH_BLOCK || pathT == PATH_WALLS)) {
-            parent.beginSecuring(above, parent.facing, map);
+            parent.setFocus(above, parent.facing, map);
             return true;
           }
         }
@@ -268,17 +268,17 @@ public class FormationUtils {
       CityEvents.enterHostility(sieges, home, true, 1);
       CityEvents.imposeTerms(sieges, home, parent);
       CityEvents.signalVictory(home, sieges, parent);
-      parent.beginSecuring(home);
+      parent.setFocus(home);
       return true;
     }
   }
   
   
-  static void updateGuardPoints(final Formation parent) {
+  static void updateGuardPoints(final Mission parent) {
     
     //
     //  First, check to see if an update is due:
-    final Target focus = (Target) parent.secureFocus;
+    final Target focus = (Target) parent.focus;
     final CityMap map = parent.map;
     final int updateTime = parent.lastUpdateTime;
     int nextUpdate = updateTime >= 0 ? (updateTime + 10) : 0;
@@ -341,7 +341,7 @@ public class FormationUtils {
   }
   
   
-  static Tile standingPointPatrol(Actor member, Formation parent) {
+  static Tile standingPointPatrol(Actor member, Mission parent) {
     
     int span = MONTH_LENGTH, numRecruits = parent.recruits.size();
     int epoch = (parent.map.time / span) % numRecruits;
@@ -355,7 +355,7 @@ public class FormationUtils {
   }
   
   
-  static Tile standingPointRanks(Actor member, Formation parent) {
+  static Tile standingPointRanks(Actor member, Mission parent) {
     
     CityMap map = parent.map;
     Tile goes = parent.standPoint;

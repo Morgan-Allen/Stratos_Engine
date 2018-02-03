@@ -11,10 +11,10 @@ import util.*;
 public class MissionPane extends DetailPane {
   
   
-  final Formation mission;
+  final Mission mission;
   
   
-  public MissionPane(HUD UI, Formation subject) {
+  public MissionPane(HUD UI, Mission subject) {
     super(UI, subject);
     this.mission = subject;
   }

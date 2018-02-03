@@ -23,17 +23,17 @@ public class CityEvents {
   /**  Handling end-stage events:
     */
   public static void handleDeparture(
-    Formation formation, City from, City goes
+    Mission mission, City from, City goes
   ) {
-    City belongs = formation.homeCity();
-    belongs.incArmyPower(0 - formation.powerSum());
-    belongs.formations.include(formation);
-    formation.beginSecuring(goes);
+    City belongs = mission.homeCity();
+    belongs.incArmyPower(0 - mission.powerSum());
+    belongs.missions.include(mission);
+    mission.setFocus(goes);
   }
   
   
   public static void handleInvasion(
-    Formation formation, City goes, World.Journey journey
+    Mission mission, City goes, World.Journey journey
   ) {
     //
     //  Gather some details first:
@@ -49,7 +49,7 @@ public class CityEvents {
     CityCouncil.MissionAssessment IA = new CityCouncil.MissionAssessment();
     IA.fromC     = from;
     IA.goesC     = goes;
-    IA.fromPower = formation.powerSum() / POP_PER_CITIZEN;
+    IA.fromPower = mission.powerSum() / POP_PER_CITIZEN;
     IA.goesPower = goes.armyPower() / POP_PER_CITIZEN;
     from.council.calculateChances(IA, true);
     
@@ -68,7 +68,7 @@ public class CityEvents {
     }
     
     if (report) {
-      I.say("\n"+formation+" CONDUCTED ACTION AGAINST "+goes+", time "+time);
+      I.say("\n"+mission+" CONDUCTED ACTION AGAINST "+goes+", time "+time);
       I.say("  Victorious:    "+victory );
       I.say("  Attack power:  "+IA.fromPower);
       I.say("  Defend power:  "+IA.goesPower);
@@ -80,19 +80,19 @@ public class CityEvents {
     //  and relations.  (We assume/pretend that 'barbarian' factions won't set
     //  up political ties.
     //  TODO:  Handle recall of forces in a separate decision-pass?
-    fromLost = inflictCasualties(formation, fromLost);
-    goesLost = inflictCasualties(goes     , goesLost);
+    fromLost = inflictCasualties(mission, fromLost);
+    goesLost = inflictCasualties(goes   , goesLost);
     world.recordEvent("attacked", from, goes);
     enterHostility(goes, from, victory, 1);
     
     if (victory && from.government != GOVERNMENT.BARBARIAN) {
-      imposeTerms(goes, from, formation);
+      imposeTerms(goes, from, mission);
     }
     if (victory) {
-      signalVictory(from, goes, formation);
+      signalVictory(from, goes, mission);
     }
     else {
-      signalVictory(goes, from, formation);
+      signalVictory(goes, from, mission);
     }
     //
     //  Either way, report the final outcome:
@@ -103,14 +103,14 @@ public class CityEvents {
   }
   
   
-  static int inflictCasualties(Formation formation, float casualties) {
-    int numFought = formation.recruits.size(), numLost = 0;
+  static int inflictCasualties(Mission mission, float casualties) {
+    int numFought = mission.recruits.size(), numLost = 0;
     if (numFought == 0) return 0;
     
     for (float i = Nums.min(numFought, casualties); i-- > 0;) {
-      Actor lost = (Actor) Rand.pickFrom(formation.recruits);
+      Actor lost = (Actor) Rand.pickFrom(mission.recruits);
       lost.setAsKilled("casualty of war");
-      formation.toggleRecruit(lost, false);
+      mission.toggleRecruit(lost, false);
       numLost += 1;
     }
     return numLost;
@@ -126,7 +126,7 @@ public class CityEvents {
   
   
   static void handleGarrison(
-    Formation formation, City goes, World.Journey journey
+    Mission mission, City goes, World.Journey journey
   ) {
     //  TODO:  Implement this?
     return;
@@ -134,18 +134,18 @@ public class CityEvents {
   
   
   static void handleDialog(
-    Formation formation, City goes, World.Journey journey
+    Mission mission, City goes, World.Journey journey
   ) {
-    formation.dispatchTerms(goes);
+    mission.dispatchTerms(goes);
   }
   
   
   static void handleReturn(
-    Formation formation, City from, World.Journey journey
+    Mission mission, City from, World.Journey journey
   ) {
-    City belongs = formation.homeCity();
-    belongs.incArmyPower(formation.powerSum());
-    formation.disbandFormation();
+    City belongs = mission.homeCity();
+    belongs.incArmyPower(mission.powerSum());
+    mission.disbandFormation();
   }
   
   
@@ -154,12 +154,12 @@ public class CityEvents {
     *  don't delete...
     */
   static void imposeTerms(
-    City upon, City from, Formation formation
+    City upon, City from, Mission mission
   ) {
-    if (upon == null || from == null || formation == null) return;
-    setPosture(from, upon, formation.postureDemand, true);
-    setSuppliesDue (upon, from, formation.tributeDemand );
-    arrangeMarriage(upon, from, formation.marriageDemand);
+    if (upon == null || from == null || mission == null) return;
+    setPosture(from, upon, mission.postureDemand, true);
+    setSuppliesDue (upon, from, mission.tributeDemand );
+    arrangeMarriage(upon, from, mission.marriageDemand);
   }
   
   
@@ -171,7 +171,7 @@ public class CityEvents {
     marries.assignHomeCity(monarch.homeCity());
     if (monarch.home() != null) monarch.home().setResident(marries, true);
     
-    Formation party = marries.formation;
+    Mission party = marries.mission;
     if (party != null) {
       party.toggleRecruit (marries, false);
       party.toggleEscorted(marries, false);
@@ -180,13 +180,13 @@ public class CityEvents {
   
   
   static void signalVictory(
-    City victor, City losing, Formation formation
+    City victor, City losing, Mission mission
   ) {
-    if (victor == null || losing == null || formation == null) return;
+    if (victor == null || losing == null || mission == null) return;
     losing.toggleRebellion(victor, false);
     incPrestige(victor, PRES_VICTORY_GAIN);
     incPrestige(losing, PRES_DEFEAT_LOSS );
-    formation.setMissionComplete(formation.homeCity == victor);
+    mission.setMissionComplete(mission.homeCity() == victor);
   }
   
   

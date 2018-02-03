@@ -80,7 +80,7 @@ public class City implements Session.Saveable, Trader {
   Tally <Good> inventory  = new Tally();
   Tally <Type> buildLevel = new Tally();
   
-  List <Formation> formations = new List();
+  List <Mission> missions = new List();
   
   private boolean active;
   private CityMap map;
@@ -134,7 +134,7 @@ public class City implements Session.Saveable, Trader {
     s.loadTally(inventory );
     s.loadTally(buildLevel);
     
-    s.loadObjects(formations);
+    s.loadObjects(missions);
     
     active = s.loadBool();
     map    = (CityMap) s.loadObject();
@@ -173,7 +173,7 @@ public class City implements Session.Saveable, Trader {
     s.saveTally(inventory );
     s.saveTally(buildLevel);
     
-    s.saveObjects(formations);
+    s.saveObjects(missions);
     
     s.saveBool(active);
     s.saveObject(map);
@@ -564,7 +564,7 @@ public class City implements Session.Saveable, Trader {
       float armyPower = 0;
       for (Building b : map.buildings) {
         if (b.type().category == Type.IS_ARMY_BLD) {
-          armyPower += Formation.powerSum(b.recruits(), map);
+          armyPower += Mission.powerSum(b.recruits(), map);
         }
       }
       this.armyPower = armyPower;
@@ -598,7 +598,7 @@ public class City implements Session.Saveable, Trader {
       if (population < idealPop) {
         population = Nums.min(idealPop , population + popRegen);
       }
-      for (Formation f : formations) {
+      for (Mission f : missions) {
         idealArmy -= f.powerSum();
       }
       if (idealArmy < 0) idealArmy = 0;
@@ -696,11 +696,11 @@ public class City implements Session.Saveable, Trader {
     }
     //
     //  And update any formations and actors currently active-
-    for (Formation f : formations) {
+    for (Mission f : missions) {
       f.update();
     }
     for (Actor a : council.members()) {
-      if (a.formation != null || a.onMap()) continue;
+      if (a.mission != null || a.onMap()) continue;
       a.updateOffMap(this);
     }
   }

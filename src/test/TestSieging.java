@@ -75,10 +75,10 @@ public class TestSieging extends Test {
       fort.toggleRecruit(a, true);
     }
     
-    Formation guarding;
-    guarding = new Formation(Formation.OBJECTIVE_GARRISON, baseC, false);
-    fort.deployInFormation(guarding, true);
-    guarding.beginSecuring(tower, TileConstants.E, map);
+    Mission guarding;
+    guarding = new Mission(Mission.OBJECTIVE_GARRISON, baseC, false);
+    fort.deployOnMission(guarding, true);
+    guarding.setFocus(tower, TileConstants.E, map);
     
     Building store = (Building) SUPPLY_DEPOT.generate();
     store.enterMap(map, 10, 6, 1, baseC);
@@ -87,7 +87,7 @@ public class TestSieging extends Test {
     float initPrestige = awayC.prestige();
     float initLoyalty  = baseC.loyalty(awayC);
     Table <Actor, Tile> initPatrolPoints = new Table();
-    Formation enemy = null;
+    Mission enemy = null;
     Tally <Good> tribute = null;
     
     boolean patrolInit  = false;
@@ -144,8 +144,8 @@ public class TestSieging extends Test {
       
       if (patrolDone && ! siegeComing) {
         for (World.Journey j : map.world.journeys()) {
-          for (Journeys g : j.going()) if (g instanceof Formation) {
-            enemy = (Formation) g;
+          for (Journeys g : j.going()) if (g instanceof Mission) {
+            enemy = (Mission) g;
             tribute = enemy.tributeDemand();
             siegeComing = true;
             
@@ -157,7 +157,7 @@ public class TestSieging extends Test {
             //*/
           }
         }
-        if (siegeComing && enemy.objective != Formation.OBJECTIVE_CONQUER) {
+        if (siegeComing && enemy.objective != Mission.OBJECTIVE_CONQUER) {
           I.say("\nEnemies should be here to conquer!");
           break;
         }
