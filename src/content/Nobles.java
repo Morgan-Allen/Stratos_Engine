@@ -42,12 +42,10 @@ public class Nobles {
   final public static HumanType NOBLE = new HumanType(
     "actor_noble", CLASS_NOBLE
   ) {
-    public void prepareMedia(Sprite s, Element e) {
-      super.prepareMedia(s, e);
-      
-      ActorAsPerson p = (ActorAsPerson) e;
+    public void initAsMigrant(ActorAsPerson p) {
+      super.initAsMigrant(p);
       String forenames[] = p.man() ? HIGHBORN_MN : HIGHBORN_FN;
-      final String name = generateName(forenames, HIGHBORN_TN, null);
+      final String name = generateName(forenames, HIGHBORN_HN, HIGHBORN_TN);
       p.setCustomName(name);
     }
   };
@@ -61,10 +59,8 @@ public class Nobles {
   final public static HumanType CONSORT = new HumanType(
     "actor_consort", CLASS_NOBLE
   ) {
-    public void prepareMedia(Sprite s, Element e) {
-      super.prepareMedia(s, e);
-      
-      ActorAsPerson p = (ActorAsPerson) e;
+    public void initAsMigrant(ActorAsPerson p) {
+      super.initAsMigrant(p);
       String forenames[] = p.man() ? HIGHBORN_MN : HIGHBORN_FN;
       final String name = generateName(forenames, HIGHBORN_TN, null);
       p.setCustomName(name);

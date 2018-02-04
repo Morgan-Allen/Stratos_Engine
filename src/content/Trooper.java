@@ -28,10 +28,8 @@ public class Trooper {
   final public static HumanType TROOPER = new HumanType(
     "actor_trooper", CLASS_SOLDIER
   ) {
-    public void prepareMedia(Sprite s, Element e) {
-      super.prepareMedia(s, e);
-      
-      ActorAsPerson p = (ActorAsPerson) e;
+    public void initAsMigrant(ActorAsPerson p) {
+      super.initAsMigrant(p);
       final String name = generateName(TROOPER_FN, TROOPER_LN, TROOPER_MN);
       p.setCustomName(name);
     }

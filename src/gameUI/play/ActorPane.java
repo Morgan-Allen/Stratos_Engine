@@ -25,7 +25,7 @@ public class ActorPane extends DetailPane {
     this.text.setText("");
     final Description d = this.text;
     
-    d.append(""+actor.toString());
+    d.append(""+actor.fullName());
     d.append("\n");
     
     int maxHP = actor.type().maxHealth;

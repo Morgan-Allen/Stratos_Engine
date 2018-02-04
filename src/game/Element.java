@@ -474,6 +474,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   
   
   public boolean trackSelection() {
+    if (! onMap()) return false;
     return true;
   }
   

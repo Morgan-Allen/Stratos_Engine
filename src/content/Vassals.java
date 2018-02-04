@@ -54,10 +54,8 @@ public class Vassals {
   final public static HumanType AUDITOR = new HumanType(
     "actor_auditor", CLASS_TRADER
   ) {
-    public void prepareMedia(Sprite s, Element e) {
-      super.prepareMedia(s, e);
-      
-      ActorAsPerson p = (ActorAsPerson) e;
+    public void initAsMigrant(ActorAsPerson p) {
+      super.initAsMigrant(p);
       String forenames[] = p.man() ? CITIZEN_MN : CITIZEN_FN;
       final String name = generateName(forenames, CITIZEN_LN, null);
       p.setCustomName(name);
@@ -73,10 +71,8 @@ public class Vassals {
   final public static HumanType VENDOR = new HumanType(
     "actor_vendor", CLASS_TRADER
   ) {
-    public void prepareMedia(Sprite s, Element e) {
-      super.prepareMedia(s, e);
-      
-      ActorAsPerson p = (ActorAsPerson) e;
+    public void initAsMigrant(ActorAsPerson p) {
+      super.initAsMigrant(p);
       String forenames[] = p.man() ? CITIZEN_MN : CITIZEN_FN;
       final String name = generateName(forenames, CITIZEN_LN, null);
       p.setCustomName(name);
@@ -92,10 +88,8 @@ public class Vassals {
   final public static HumanType PYON = new HumanType(
     "actor_pyon", CLASS_COMMON
   ) {
-    public void prepareMedia(Sprite s, Element e) {
-      super.prepareMedia(s, e);
-      
-      ActorAsPerson p = (ActorAsPerson) e;
+    public void initAsMigrant(ActorAsPerson p) {
+      super.initAsMigrant(p);
       String forenames[] = p.man() ? PYON_MN : PYON_FN;
       final String name = generateName(forenames, PYON_LN, null);
       p.setCustomName(name);
