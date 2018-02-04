@@ -47,8 +47,7 @@ public class ScenarioBlankMap extends CityMapScenario {
     final int MAP_SIZE = 64;
     final Terrain GRADIENT[] = { JUNGLE, MEADOW, DESERT };
     
-    World.Locale locale = world.addLocale(5, 5);
-    
+    World.Locale locale = world.addLocale(5, 5, "Test Area");
     CityMap map = CityMapTerrain.generateTerrain(world, locale, MAP_SIZE, 0, GRADIENT);
     CityMapTerrain.populateFixtures(map);
     return map;

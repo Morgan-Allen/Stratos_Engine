@@ -488,12 +488,6 @@ public class CityMap implements Session.Saveable {
     if (time % SCAN_PERIOD == 0) {
       transitPoints.clear();
     }
-    if (time % MONTH_LENGTH == 0) {
-      //  TODO:  REVISE THIS!  ALLOW BUILDINGS TO SCHEDULE THEIR OWN ARRIVALS!
-      for (City city : cities) {
-        CityBorders.spawnMigrants(this, city, MONTH_LENGTH);
-      }
-    }
     
     time += 1;
     
@@ -557,6 +551,11 @@ public class CityMap implements Session.Saveable {
   
   /**  Rendering, debug and interface methods-
     */
+  public String toString() {
+    return "Map for "+locale;
+  }
+  
+  
   public void renderStage(Rendering rendering, City playing) {
     float renderTime = (numUpdates + Rendering.frameAlpha()) / ticksPS;
     

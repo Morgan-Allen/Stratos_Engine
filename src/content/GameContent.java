@@ -516,6 +516,7 @@ public class GameContent {
     SUPPLY_DEPOT.workerTypes.setWith(PYON, 2);
     SUPPLY_DEPOT.worksBeforeBuilt = true;
     SUPPLY_DEPOT.features = new Good[] { IS_TRADER };
+    SUPPLY_DEPOT.buildsWith = new Good[] { PLASTICS, PARTS };
     
     //
     //  Religious structures:
@@ -664,29 +665,29 @@ public class GameContent {
     */
   static World setupDefaultWorld() {
     World world = new World(ALL_GOODS);
-    City  cityA = new City(world, world.addLocale(1, 1));
-    City  cityB = new City(world, world.addLocale(3, 3));
+    City  cityA = new City(world, world.addLocale(1, 1, "Elysium Sector"));
+    City  cityB = new City(world, world.addLocale(3, 3, "Pavonis Sector"));
     world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES);
     
-    cityA.setName("Elysium Sector");
+    cityA.setName("Elysium Base");
     cityA.initTradeLevels(
-      PARTS, 5f ,
-      MEDICINE , 10f
+      PARTS   , 5f ,
+      MEDICINE, 10f
     );
     cityA.initBuildLevels(
       TROOPER_LODGE, 2f ,
-      HOLDING   , 10f
+      HOLDING      , 10f
     );
     world.addCities(cityA);
     
-    cityB.setName("Pavonis Sector");
+    cityB.setName("Pavonis Base");
     cityB.initTradeLevels(
       CARBS, 5f ,
       ORES , 10f
     );
     cityA.initBuildLevels(
       TROOPER_LODGE, 0.75f,
-      HOLDING   , 5f
+      HOLDING      , 5f
     );
     world.addCities(cityB);
     

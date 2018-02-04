@@ -82,48 +82,27 @@ public class CityBorders {
   }
   
   
-  static void spawnMigrants(CityMap map, City city, int period) {
-    if (map == null || ! map.world.settings.toggleMigrate) return;
-    Assessment a = new Assessment(map);
+  public static Actor generateMigrant(
+    Type jobType, Building employs, boolean payHireCost
+  ) {
+    if (! jobType.isPerson()) return null;
     
-    float crowding = Nums.max(a.jobsCrowding, a.homeCrowding);
-    float spaces = a.jobsTotal + a.homeTotal - (a.jobsFilled + a.homeFilled);
-    if (crowding >= 1) return;
+    //  TODO:  Consider a wider variety of cities to source from!
     
-    //
-    //  Tally up the number of migrants available to arrive this month-
-    //  TODO:  Do this with each neighbouring city, based on their own
-    //    population/crowding levels, current relations, and proximity.
-    City from = city;
-    Batch <Actor> migrants = new Batch();
-    float months   = period * 1f / MONTH_LENGTH;
-    float numSpawn = ((1 - crowding) * MIGRANTS_PER_1KM * months);
-    numSpawn = Nums.min(numSpawn, spaces);
+    CityMap map  = employs.map();
+    City    from = map.locals;
+    City    goes = employs.homeCity();
+    int     cost = employs.hireCost(jobType);
     
-    //
-    //  And put together a profile of which jobs are in greatest demand-
-    Type  jobTypes[] = a.jobsDemand.keysToArray(Type.class);
-    float jobNeeds[] = new float[jobTypes.length];
-    for (int i = jobTypes.length; i-- > 0;) {
-      Type j = jobTypes[i];
-      float need = a.jobsDemand.valueFor(j) - a.jobsSupply.valueFor(j);
-      jobNeeds[i] = Nums.max(0, need);
-    }
+    if (payHireCost) goes.incFunds(0 - cost);
     
-    //
-    //  Then spawn actors randomly generated to fit that profile-
+    ActorAsPerson migrant = (ActorAsPerson) jobType.generate();
+    jobType.initAsMigrant(migrant);
+    migrant.assignHomeCity(goes);
+    employs.setWorker(migrant, true);
+    map.world.beginJourney(from, goes, migrant);
     
-    //  TODO:  There should always be a chance of getting random, unskilled
-    //  workers, and higher-skill positions might not be trivially filled.
-    
-    while (numSpawn-- > 0) {
-      Type job = (Type) Rand.pickFrom(jobTypes, jobNeeds);
-      ActorAsPerson w = (ActorAsPerson) job.generate();
-      w.type().initAsMigrant(w);
-      w.assignHomeCity(city);
-      migrants.add(w);
-    }
-    map.world.beginJourney(from, city, (Batch) migrants);
+    return migrant;
   }
   
   

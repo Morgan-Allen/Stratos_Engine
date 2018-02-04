@@ -238,6 +238,7 @@ public class Building extends Element implements Pathing, Employer {
     if (--updateGap <= 0) {
       refreshEntrances(selectEntrances());
       updateOnPeriod(type().updateTime);
+      updateWorkers(type().updateTime);
       updateGap = type().updateTime;
     }
   }
@@ -377,6 +378,20 @@ public class Building extends Element implements Pathing, Employer {
   
   /**  Moderating and udpating recruitment and residency:
     */
+  void updateWorkers(int period) {
+    for (Type w : type().workerTypes.keys()) {
+      if (numWorkers(w) < maxWorkers(w) && w.socialClass == CLASS_COMMON) {
+        CityBorders.generateMigrant(w, this, false);
+      }
+    }
+  }
+  
+  
+  public int hireCost(Type workerType) {
+    return workerType.hireCost;
+  }
+  
+  
   public int numWorkers(Type type) {
     int sum = 0;
     for (Actor w : workers) if (w.type() == type) sum++;

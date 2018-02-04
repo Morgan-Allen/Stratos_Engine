@@ -386,7 +386,7 @@ public class MS3DModel extends SolidModel {
         final ModelNodeAnimation nd = new ModelNodeAnimation();
         nd.nodeId = node.nodeId;
         
-        I.say("  "+node.nodeId+" ("+name+")");
+        if (verbose) I.say("  "+node.nodeId+" ("+name+")");
         nd.rotation    = new Array();
         nd.translation = new Array();
         nd.scaling     = new Array();

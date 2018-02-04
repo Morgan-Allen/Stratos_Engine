@@ -20,19 +20,11 @@ public class TestBounties extends Test {
   
   //  What are the cases I need to cover here?
   
-  //  Attack bounty on building.
-  //  Attack bounty on actor.
   //  Defend bounty on building.
   //  Defend bounty on actor.
-  //  Explore bounty on area.
   //  Explore bounty on actor.
   //  Contact bounty on actor.
   //  Contact bounty on building.
-  
-  //  So, 8 scenarios in total.  You'll have to customise the target-entry,
-  //  and customise checking for success.
-  
-  //  But okay.  That is do-able.
 
   
   static boolean testAttackBuildingMission(boolean graphics) {

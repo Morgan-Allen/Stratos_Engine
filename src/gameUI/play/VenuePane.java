@@ -41,24 +41,29 @@ public class VenuePane extends DetailPane {
     //d.append("\nArmour: "+venue.structure.armour());
     //d.append("\nCredits: "+venue.stocks.credits());
     
-    for (Type w : type.workerTypes.keys()) {
-      int num = venue.numWorkers(w), max = (int) type.workerTypes.valueFor(w);
+    for (final Type w : type.workerTypes.keys()) {
+      int num = venue.numWorkers(w), max = venue.maxWorkers(w);
+      int cost = venue.hireCost(w);
+      boolean canHire = venue.homeCity().funds() >= cost;
+      
       d.append("\n\n"+w.name+": ("+num+"/"+max+")");
       for (Actor a : venue.workers()) if (a.type() == w) {
-        d.appendAll("\n  ", a, "  ", a.task());
+        if (a.onMap()) {
+          d.appendAll("\n  ", a, "  ", a.task());
+        }
+        else {
+          d.appendAll("\n  ", a, " (pending arrival)");
+        }
       }
       
-      /*
-      if (venue.canHire(w) && ! venue.isBusyHiring()) {
-        final int cost = w.hireCost;
+      if (num < max && w.socialClass != CLASS_COMMON && canHire) {
         d.append("\n  ");
         d.append(new Description.Link("Hire "+w.name+" ("+cost+" Cr)") {
           public void whenClicked(Object context) {
-            venue.startHiring((Actor) w.generate(), w);
+            CityBorders.generateMigrant(w, venue, true);
           }
         });
       }
-      ///*/
     }
     
     if (! venue.inventory().empty()) {
@@ -67,7 +72,6 @@ public class VenuePane extends DetailPane {
         d.appendAll("\n  ", g, ": ", venue.inventory(g));
       }
     }
-    
     
     /*
     Series <Upgrade> upgrades = venue.blueprint().upgradesAvailable();

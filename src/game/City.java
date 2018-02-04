@@ -91,12 +91,14 @@ public class City implements Session.Saveable, Trader {
   
   
   public City(World world, World.Locale locale) {
-    this.world  = world;
-    this.locale = locale;
+    this(world, locale, "City???");
   }
   
   
   public City(World world, World.Locale locale, String name) {
+    if (world  == null) I.complain("CANNOT PASS NULL WORLD:  "+name);
+    if (locale == null) I.complain("CANNOT PASS NULL LOCALE: "+name);
+    
     this.world  = world ;
     this.locale = locale;
     this.name   = name  ;
@@ -210,8 +212,13 @@ public class City implements Session.Saveable, Trader {
   
   
   public float distance(City other) {
+    if (other.locale == this.locale) return 0;
     Integer dist = locale.distances.get(other.locale);
-    return dist == null ? -1 : (float) dist;
+    if (dist != null) return (float) dist;
+    
+    float dx = locale.mapX - other.locale.mapX;
+    float dy = locale.mapY - other.locale.mapY;
+    return (int) Nums.sqrt((dx * dx) + (dy * dy));
   }
   
   

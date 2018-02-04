@@ -203,12 +203,12 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   }
   
   
-  public void setHome(Building home) {
+  void setHome(Building home) {
     this.home = home;
   }
   
   
-  public void setWork(Building work) {
+  void setWork(Building work) {
     this.work = work;
   }
   
@@ -443,6 +443,13 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     this.carried      = carried;
     this.carryAmount += amount ;
     if (this.carryAmount < 0) this.carryAmount = 0;
+  }
+  
+  
+  public void clearCarried() {
+    this.carried = null;
+    this.carryAmount = 0;
+    this.cargo = null;
   }
   
   

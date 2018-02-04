@@ -378,7 +378,11 @@ public class BuildingForHome extends Building {
   
   float totalFetchedFor(Building home, Good good) {
     float total = 0;
-    for (Actor a : home.residents) {
+    
+    List <Actor> all = home.residents.copy();
+    for (Actor a : home.workers) all.include(a);
+    
+    for (Actor a : all) {
       if (! (a.task() instanceof TaskDelivery)) continue;
       TaskDelivery fetch = (TaskDelivery) a.task();
       if (fetch.carried == good) total += fetch.amount;

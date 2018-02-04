@@ -168,6 +168,7 @@ public class GameConstants {
     CLASS_NOBLE    = 3,
     ALL_CLASSES[]  = { 0, 1, 2, 3 },
     TAX_VALUES []  = { 0, 25, 75, 250 },
+    AVG_HIRE_COST  = 400,
     AVG_TAX_VALUE  = 25,
     AVG_GOOD_VALUE = 25,
     TAX_INTERVAL   = YEAR_LENGTH,

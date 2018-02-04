@@ -26,6 +26,8 @@ public class TestCity extends Test {
     World world = map.world;
     world.settings.toggleFog = false;
     
+    base.initFunds(1000);
+    
     CityMapPlanning.placeStructure(WALKWAY, base, true, 3, 8, 25 , 1);
     CityMapPlanning.placeStructure(WALKWAY, base, true, 8, 2 , 1, 25);
     
@@ -38,6 +40,8 @@ public class TestCity extends Test {
     court .enterMap(map, 9 , 9 , 1, base);
     school.enterMap(map, 9 , 3 , 1, base);
     admin .enterMap(map, 18, 9 , 1, base);
+    
+    fillWorkVacancies(palace);
     
     for (int n = 4; n-- > 0;) {
       Building house = (Building) HOLDING.generate();
@@ -97,14 +101,26 @@ public class TestCity extends Test {
     while (map.time() < RUN_TIME || graphics) {
       test.runLoop(base, 1, graphics, "saves/test_city.tlt");
       
+      for (Building b : map.buildings()) if (b.homeCity() == base) {
+        for (Type job : b.type().workerTypes.keys()) {
+          int num = b.numWorkers(job), max = b.maxWorkers(job);
+          boolean canHire = b.hireCost(job) <= base.funds();
+          if (job.socialClass != CLASS_COMMON && num < max && canHire) {
+            CityBorders.generateMigrant(job, b, true);
+          }
+        }
+      }
+      
       if (goodsOkay) {
         for (Building b : map.buildings()) {
           if (b.type() == HOLDING) {
             BuildingForHome home = (BuildingForHome) b;
             for (Good g : home.usedBy(home.currentTier())) {
-              float need = home.maxStock(g) + 1;
+              float need = home.maxStock(g);
               float have = home.inventory(g);
-              if (have > need + 1) goodsOkay = false;
+              if (have > need + 2) {
+                goodsOkay = false;
+              }
             }
           }
         }

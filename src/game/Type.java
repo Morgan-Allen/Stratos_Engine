@@ -265,7 +265,8 @@ public class Type extends Index.Entry implements Session.Saveable {
     */
   public int  socialClass  = CLASS_COMMON;
   public int  genderRole   = SEX_EITHER;
-  public  Type patronGods[] = null;
+  public int  hireCost     = AVG_HIRE_COST;
+  public Type patronGods[] = null;
   public boolean isPorter  = false;
   
   public int maxHealth   = AVG_MAX_HEALTH;

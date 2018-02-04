@@ -14,6 +14,9 @@ public class World implements Session.Saveable {
   public static class Locale {
     float mapX, mapY;
     Table <Locale, Integer> distances = new Table();
+    
+    String label;
+    public String toString() { return label; }
   }
   
   public static class Journey {
@@ -179,11 +182,18 @@ public class World implements Session.Saveable {
   }
   
   
-  public Locale addLocale(float mapX, float mapY) {
+  public Locale addLocale(float mapX, float mapY, String label) {
     Locale l = new Locale();
-    l.mapX = mapX;
-    l.mapY = mapY;
+    l.mapX  = mapX;
+    l.mapY  = mapY;
+    l.label = label;
+    this.locales.add(l);
     return l;
+  }
+  
+  
+  public Locale addLocale(float mapX, float mapY) {
+    return addLocale(mapX, mapY, "Locale at "+mapX+"|"+mapY);
   }
   
   
@@ -220,18 +230,12 @@ public class World implements Session.Saveable {
   public Journey beginJourney(City from, City goes, Journeys... going) {
     if (from == null || goes == null) return null;
     
-    Integer distance = from.locale.distances.get(goes.locale);
-    if (distance == null) {
-      float dx = from.locale.mapX - goes.locale.mapX;
-      float dy = from.locale.mapY - goes.locale.mapY;
-      distance = (int) Nums.sqrt((dx * dx) + (dy * dy));
-    }
-    
+    float distance = Nums.max(1, from.distance(goes));
     Journey j = new Journey();
     j.from       = from;
     j.goes       = goes;
     j.startTime  = time;
-    j.arriveTime = j.startTime + (distance * TRADE_DIST_TIME);
+    j.arriveTime = (int) (j.startTime + (distance * TRADE_DIST_TIME));
     for (Journeys g : going) j.going.add(g);
     journeys.add(j);
     

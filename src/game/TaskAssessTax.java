@@ -83,7 +83,15 @@ public class TaskAssessTax extends Task {
     }
     
     if (actor.jobType() == JOB.RETURNING && visits == store) {
-      actor.offloadGood(CASH, store);
+      float cash = actor.carried(CASH);
+      actor.clearCarried();
+      store.homeCity().incFunds((int) cash);
     }
   }
 }
+
+
+
+
+
+
