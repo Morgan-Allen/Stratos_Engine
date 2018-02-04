@@ -101,7 +101,6 @@ public class Type extends Index.Entry implements Session.Saveable {
   
   public ModelAsset model = null;
   public ModelAsset modelVariants[] = {};
-  public String firstNames[], lastNames[];
   
   public Class baseClass;
   public int category;
@@ -263,6 +262,8 @@ public class Type extends Index.Entry implements Session.Saveable {
   
   /**  Walker-specific stats and setup methods-
     */
+  String nameValues[][] = new String[0][0];
+  
   public int  socialClass  = CLASS_COMMON;
   public int  genderRole   = SEX_EITHER;
   public int  hireCost     = AVG_HIRE_COST;
@@ -345,12 +346,15 @@ public class Type extends Index.Entry implements Session.Saveable {
   
   
   public void prepareMedia(Sprite s, Element e) {
-    return;
+    if (s == null || e == null) return;
+  }
+  
+  
+  String composeName() {
+    return name;
   }
   
 }
-
-
 
 
 

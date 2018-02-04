@@ -275,6 +275,90 @@ public class GameContent {
   }
   
   
+  //
+  //  TODO:  DERIVE NAMES FROM HOMEWORLD OF ORIGIN IF POSSIBLE
+  final static String
+    //
+    //  Natives only have first names, but might use son/daughter of X as a
+    //  title, or a conspicuous trait.
+    NATIVE_MN[] = {
+      "Duor", "Huno", "Umun", "Tunto", "Parab", "Sxumo", "Zhaka", "Hoka"
+    },
+    NATIVE_FN[] = {
+      "Khasi", "Mari", "Tesza", "Borab", "Hana", "Kaeli", "Hlara", "Ote"
+    },
+    //
+    //  Pyons have first and second names as standard.
+    PYON_MN[] = {
+      "Haber", "Danyl", "Jeme", "Marec", "Hoeb", "Ombar", "Tober", "Alav",
+      "Dann", "Gereg", "Sony", "Terev", "Olvar", "Man", "Halan", "Yohn"
+    },
+    PYON_FN[] = {
+      "Besa", "Linn", "Mina", "Abi", "Nana", "Dova", "Saba", "Kela", "Aryl",
+      "Vina", "Nena", "Lanu", "Mai", "Nevi", "Mona", "Ambi", "Kayt", "Tesa",
+    },
+    PYON_LN[] = {
+      "Foyle", "Orphy", "Samsun", "Ulga", "Yimon", "Timan", "Jo", "Yonson"
+    },
+    //
+    //  Citizens have first and second names as standard.
+    CITIZEN_MN[] = {
+      "Sarles", "Mortan", "Daneel", "Trevize", "Tedrick", "Arnalt", "Bictor"
+    },
+    CITIZEN_FN[] = {
+      "Becca", "Norema", "Catrin", "Xinia", "Max", "Sovia", "Unize", "Vonda"
+    },
+    CITIZEN_LN[] = {
+      "Vasov", "Olvaw", "Mallo", "Palev", "Unterhaussen", "Valiz", "Ryod",
+      "Obar", "Tiev", "Hanem", "Tsolo", "Matson", "Prestein", "Valter"
+    },
+    //
+    //  Highborn always have family/house names, depending on their planet of
+    //  origin, and may have additional titles.
+    HIGHBORN_MN[] = {
+      "Calib", "Vladmar", "Ledo", "Cado", "Alexander", "Xerxes", "Poul",
+      "Altan"
+    },
+    HIGHBORN_FN[] = {
+      "Meina", "Mnestra", "Aria", "Belise", "Ylande", "Vana", "Portia", "Vi",
+      "Lysandre"
+    },
+    HIGHBORN_TN[] = {
+      "Prime", "Secundus", "Tertius", "Minor",
+      "Alpha", "Beta", "Gamma", "Major"
+    },
+    //
+    //  TODO:  HOUSE NAMES ***MUST*** BE CUSTOMISED BY HOMEWORLD.
+    HIGHBORN_HN[] = {
+      "Rigel", "Ursa", "Alyph", "Rana", "Maia", "Fomalhaut", "Aldebaran",
+      "Regulus", "Suhail", "Antares", "Paleides", "Algol", "Orion",
+      "Deneb", "Ares",
+    }
+  ;
+  
+  
+  final static String
+    TROOPER_FN[] = {
+      "Sergeant", "Corporal", "Captain", "Private", "Private", "Private"
+    },
+    TROOPER_LN[] = {
+      "Santo", "Scully", "Huskins", "O'Mara", "Pitt", "Williams"
+    },
+    TROOPER_MN[] = {
+      "Lance", "Psycho", "Booya", "Ace", "Flash", "Lighter"
+    }
+  ;
+  
+  final static String
+    COLLECTIVE_FN[] = {
+      "Une", "Bena", "Blis", "Pax", "Sela", "Nami", "Oolen", "Nioba"
+    },
+    COLLECTIVE_LN[] = {
+      "of 9", "Primus", "003", "Iambis", "Orela", "the Zen", " of Melding"
+    }
+  ;
+  
+  
   final public static HumanType
     NOBLE     = new HumanType("actor_noble"    , CLASS_NOBLE ),
     CONSORT   = new HumanType("actor_consort"  , CLASS_NOBLE ),
