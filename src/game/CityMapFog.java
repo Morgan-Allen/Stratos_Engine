@@ -105,13 +105,13 @@ public class CityMapFog {
   
   /**  Exploration-related queries:
     */
-  Tile pickRandomFogPoint(Element near) {
+  Tile pickRandomFogPoint(Target near, int range) {
     if (! isToggled()) return null;
-    return maxMap.pickRandomPoint(near, -1);
+    return maxMap.pickRandomPoint(near, range);
   }
   
   
-  Tile findNearbyFogPoint(Element near, int range) {
+  Tile findNearbyFogPoint(Target near, int range) {
     if (! isToggled()) return null;
     return maxMap.findNearbyPoint(near, range);
   }

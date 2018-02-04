@@ -10,6 +10,8 @@ import static game.CityBorders.*;
 import static game.GameConstants.*;
 
 
+//  TODO:  Start splitting this off into separate classes...
+
 
 public class Mission implements
   Session.Saveable, Journeys, TileConstants, Employer, Selection.Focus
@@ -21,7 +23,8 @@ public class Mission implements
     OBJECTIVE_STANDBY  = 0,
     OBJECTIVE_CONQUER  = 1,
     OBJECTIVE_GARRISON = 2,
-    OBJECTIVE_DIALOG   = 3
+    OBJECTIVE_RECON    = 3,
+    OBJECTIVE_DIALOG   = 4
   ;
   final static String OBJECTIVE_NAMES[] = {
     "Standby", "Conquer", "Garrison", "Dialog"
@@ -59,6 +62,8 @@ public class Mission implements
   Tile    standPoint  ;
   Object  focus       ;
   int     facing      ;
+  
+  float exploreRange = -1;
   
   List <Tile> guardPoints = new List();
   int lastUpdateTime = -1;
@@ -107,6 +112,8 @@ public class Mission implements
     focus        = s.loadObject();
     facing       = s.loadInt();
     
+    exploreRange = s.loadFloat();
+    
     for (int n = s.loadInt(); n-- > 0;) {
       Tile point = CityMap.loadTile(map, s);
       guardPoints.add(point);
@@ -148,6 +155,8 @@ public class Mission implements
     saveTile(standPoint  , map, s);
     s.saveObject(focus);
     s.saveInt(facing);
+    
+    s.saveFloat(exploreRange);
     
     s.saveInt(guardPoints.size());
     for (Tile t : guardPoints) CityMap.saveTile(t, map, s);
@@ -231,6 +240,16 @@ public class Mission implements
   
   public boolean termsAnswered() {
     return termsAccepted || termsRefused;
+  }
+  
+  
+  public void setExploreRange(float range) {
+    this.exploreRange = range;
+  }
+  
+  
+  public float exploreRange() {
+    return exploreRange;
   }
   
   
@@ -470,12 +489,10 @@ public class Mission implements
   
   boolean objectiveComplete() {
     if (objective == OBJECTIVE_CONQUER) {
-      
       if (focus instanceof Element) {
         Element e = (Element) focus;
         return e.destroyed();
       }
-      
       //  TODO:  Use this-
       /*
       if (! FormationUtils.tacticalFocusValid(this, secureFocus)) {
@@ -488,6 +505,20 @@ public class Mission implements
       //  regular intervals.
       //int sinceStart = CityMap.timeSince(timeBegun, map.time);
       //if (sinceStart > MONTH_LENGTH * 2) return true;
+    }
+    if (objective == OBJECTIVE_RECON) {
+      if (focus instanceof Tile) {
+        Tile looks = (Tile) focus;
+        int r = (int) exploreRange;
+        boolean allSeen = true;
+        
+        for (Tile t : map.tilesUnder(looks.x - r, looks.y - r, r * 2, r * 2)) {
+          float dist = CityMap.distance(looks, t);
+          if (dist > r) continue;
+          if (map.fog.maxSightLevel(t) == 0) allSeen = false;
+        }
+        return allSeen;
+      }
     }
     if (objective == OBJECTIVE_DIALOG) {
       return termsAccepted || termsRefused;
@@ -589,6 +620,7 @@ public class Mission implements
     boolean haveTerms  = hasTerms();
     boolean isEnvoy    = escorted.includes(actor);
     boolean diplomatic = objective == OBJECTIVE_DIALOG;
+    boolean explores   = objective == OBJECTIVE_RECON;
     boolean onAwayMap  = awayCity != null && map == awayCity.activeMap();
     
     if (onAwayMap && haveTerms && isEnvoy && timeTermsSent == -1) {
@@ -617,6 +649,13 @@ public class Mission implements
     ;
     if (taskS != null) {
       return taskS;
+    }
+    
+    TaskExplore recon = (! explores) ? null :
+      TaskExplore.configExploration(actor, (Target) focus, (int) exploreRange)
+    ;
+    if (recon != null) {
+      return recon;
     }
     
     Tile stands = standLocation(actor);

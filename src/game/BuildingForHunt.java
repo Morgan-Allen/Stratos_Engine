@@ -45,8 +45,7 @@ public class BuildingForHunt extends Building {
     hunting = hunting.configHunting(this, produced());
     if (hunting != null) return hunting;
     
-    TaskExplore exploring = new TaskExplore(actor);
-    exploring = exploring.configExploration();
+    TaskExplore exploring = TaskExplore.configExploration(actor);
     if (exploring != null) return exploring;
     
     return null;

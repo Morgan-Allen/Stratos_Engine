@@ -14,6 +14,7 @@ public class TestBounties extends Test {
   public static void main(String args[]) {
     testAttackBuildingMission(false);
     testAttackActorMission   (false);
+    testExploreAreaMission   (false);
   }
   
   
@@ -52,7 +53,7 @@ public class TestBounties extends Test {
         return nest.destroyed();
       }
     };
-    return test.bountyTest(graphics, "ATTACK BUILDING BOUNTY");
+    return test.bountyTest(graphics, "ATTACK BUILDING MISSION");
   }
 
   
@@ -75,7 +76,39 @@ public class TestBounties extends Test {
         return creature.destroyed();
       }
     };
-    return test.bountyTest(graphics, "ATTACK ACTOR BOUNTY");
+    return test.bountyTest(graphics, "ATTACK ACTOR MISSION");
+  }
+  
+  
+  static boolean testExploreAreaMission(boolean graphics) {
+    TestBounties test = new TestBounties() {
+      
+      int RANGE = 8;
+      
+      Mission setupMission(CityMap map, City base) {
+        Tile looks = map.tileAt(20, 20);
+        
+        Mission mission;
+        mission = new Mission(Mission.OBJECTIVE_RECON, base, false);
+        mission.setFocus(looks, 0, map);
+        mission.setExploreRange(RANGE);
+        return mission;
+      }
+      
+      boolean checkVictory(CityMap map, City base, Object focus) {
+        Tile looks = (Tile) focus;
+        int r = RANGE;
+        boolean allSeen = true;
+        
+        for (Tile t : map.tilesUnder(looks.x - r, looks.y - r, r * 2, r * 2)) {
+          float dist = CityMap.distance(looks, t);
+          if (dist > r) continue;
+          if (map.fog.maxSightLevel(t) == 0) allSeen = false;
+        }
+        return allSeen;
+      }
+    };
+    return test.bountyTest(graphics, "EXPLORE AREA MISSION");
   }
   
   

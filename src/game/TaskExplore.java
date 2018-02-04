@@ -36,15 +36,21 @@ public class TaskExplore extends Task {
   
   /**  Configuration and behavioural updates-
     */
-  TaskExplore configExploration() {
+  static TaskExplore configExploration(Actor actor) {
+    return configExploration(actor, actor, -1);
+  }
+  
+  
+  static TaskExplore configExploration(Actor actor, Target from, int range) {
     CityMap map  = actor.map;
-    Tile    goes = map.fog.pickRandomFogPoint(actor);
+    Tile    goes = map.fog.pickRandomFogPoint(from, range);
     if (goes == null) return null;
     goes = Tile.nearestOpenTile(goes, map);
     if (goes == null) return null;
     
-    totalDist += CityMap.distance(actor.at(), goes);
-    return (TaskExplore) configTask(null, null, goes, JOB.EXPLORING, 0);
+    TaskExplore task = new TaskExplore(actor);
+    task.totalDist += CityMap.distance(actor.at(), goes);
+    return (TaskExplore) task.configTask(null, null, goes, JOB.EXPLORING, 0);
   }
   
   

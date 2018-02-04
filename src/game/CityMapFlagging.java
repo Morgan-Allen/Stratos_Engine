@@ -3,6 +3,7 @@
 package game;
 import util.*;
 import static game.CityMap.*;
+import static game.GameConstants.*;
 
 
 
@@ -107,9 +108,9 @@ public class CityMapFlagging {
   
   /**  More complex queries-
     */
-  public Tile pickDistantPoint(Element near, int maxRange, float randomness) {
+  public Tile pickDistantPoint(Target near, int maxRange, float randomness) {
     
-    boolean report = near.reports();
+    boolean report = I.talkAbout == near;
     if (report) I.say("\nGETTING TILE TO LOOK AT...");
     
     Tile from = near.at();
@@ -181,12 +182,12 @@ public class CityMapFlagging {
   }
   
   
-  public Tile pickRandomPoint(Element near, int range) {
+  public Tile pickRandomPoint(Target near, int range) {
     return pickDistantPoint(near, range, 1);
   }
   
   
-  public Tile findNearbyPoint(Element near, int range) {
+  public Tile findNearbyPoint(Target near, int range) {
     
     Tile from = near.at();
     int minX = from.x - range, minY = from.y - range;
