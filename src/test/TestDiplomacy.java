@@ -2,12 +2,13 @@
 
 package test;
 import game.*;
+import content.*;
 import util.*;
-import static content.GameContent.*;
 import static game.ActorAsPerson.*;
 import static game.City.*;
 import static game.CityCouncil.*;
 import static game.GameConstants.*;
+import static content.GameContent.*;
 
 
 
@@ -29,7 +30,7 @@ public class TestDiplomacy extends Test {
     CityMap map   = CityMapTerrain.generateTerrain(
       baseC, 32, 0, MEADOW, JUNGLE
     );
-    world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES);
+    world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES());
     world.addCities(baseC, awayC, neutC);
     baseC.setName("Home City");
     awayC.setName("Away City");
@@ -52,12 +53,12 @@ public class TestDiplomacy extends Test {
     palace.enterMap(map, 10, 10, 1, baseC);
     CityMapPlanning.placeStructure(WALKWAY, baseC, true, 12, 19, 1, 13);
     
-    ActorAsPerson monarch = (ActorAsPerson) NOBLE.generate();
+    ActorAsPerson monarch = (ActorAsPerson) Nobles.NOBLE.generate();
     council.toggleMember(monarch, Role.MONARCH, true);
     palace.setResident(monarch, true);
     monarch.enterMap(map, 12, 9, 1, baseC);
     
-    ActorAsPerson minister = (ActorAsPerson) NOBLE.generate();
+    ActorAsPerson minister = (ActorAsPerson) Nobles.NOBLE.generate();
     council.toggleMember(minister, Role.PRIME_MINISTER, true);
     palace.setResident(minister, true);
     minister.enterMap(map, 12, 9, 1, baseC);
@@ -65,20 +66,20 @@ public class TestDiplomacy extends Test {
     Building garrison = (Building) TROOPER_LODGE.generate();
     garrison.enterMap(map, 12, 1, 1, baseC);
     
-    Test.fillAllVacancies(map, PYON);
+    Test.fillAllVacancies(map, Vassals.PYON);
     
     
     Mission escort;
     escort = new Mission(Mission.OBJECTIVE_DIALOG, awayC, true);
     for (int n = 4; n-- > 0;) {
-      Actor s = (Actor) TROOPER.generate();
+      Actor s = (Actor) Trooper.TROOPER.generate();
       s.assignHomeCity(awayC);
       escort.toggleRecruit(s, true);
     }
     
-    Actor envoy = (Actor) NOBLE.generate();
+    Actor envoy = (Actor) Nobles.NOBLE.generate();
     escort.toggleEscorted(envoy, true);
-    Actor bride = (Actor) CONSORT.generate();
+    Actor bride = (Actor) Nobles.CONSORT.generate();
     escort.toggleEscorted(bride, true);
     
     for (Actor e : escort.escorted()) e.assignHomeCity(awayC);

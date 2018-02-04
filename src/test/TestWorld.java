@@ -3,6 +3,7 @@
 
 package test;
 import util.*;
+import content.*;
 import game.*;
 import static content.GameContent.*;
 import static game.Actor.*;
@@ -116,8 +117,8 @@ public class TestWorld extends Test {
     {
       City pair[] = configWeakStrongCityPair();
       City mainC = pair[1];
-      Actor monarch = (Actor) NOBLE  .generate();
-      Actor queen   = (Actor) CONSORT.generate();
+      Actor monarch = (Actor) Nobles.NOBLE  .generate();
+      Actor queen   = (Actor) Nobles.CONSORT.generate();
       monarch.setSexData(SEX_MALE  );
       queen  .setSexData(SEX_FEMALE);
       monarch.setAgeYears(AVG_RETIREMENT / 4);
@@ -277,9 +278,8 @@ public class TestWorld extends Test {
     //  for allies.
     
     {
-      //final Good goods[] = { CLAY, MAIZE, WOOD, RAW_COTTON, POTTERY, COTTON };
       World world = new World(ALL_GOODS);
-      world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES);
+      world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES());
       
       City from[] = new City[6];
       City goes[] = new City[4];
@@ -364,7 +364,7 @@ public class TestWorld extends Test {
     //  each of the compass-points on the map, and run the simulation for a
     //  while to ensure that invasions take place at reasonable frequency-
     World world = new World(ALL_GOODS);
-    world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES);
+    world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES());
     
     final int NUM_CITIES = 4;
     final String names[] = { "Tollan", "Texcoco", "Tlacopan", "Tlaxcala" };
@@ -512,7 +512,7 @@ public class TestWorld extends Test {
   
   static City[] configWeakStrongCityPair() {
     World world = new World(ALL_GOODS);
-    world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES);
+    world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES());
     City a = new City(world, world.addLocale(0, 0));
     City b = new City(world, world.addLocale(1, 0));
     a.setName("Victim City" );

@@ -37,7 +37,7 @@ public class ScenarioBlankMap extends CityMapScenario {
   
   protected World createWorld() {
     World world = new World(ALL_GOODS);
-    world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES);
+    world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES());
     return world;
   }
   

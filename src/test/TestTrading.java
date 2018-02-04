@@ -3,6 +3,7 @@
 
 package test;
 import game.*;
+import content.*;
 import util.*;
 import static content.GameContent.*;
 import static game.GameConstants.*;
@@ -79,7 +80,7 @@ public class TestTrading extends Test {
     
     CityMapPlanning.placeStructure(WALKWAY, baseC, true, 1, 5, 8, 1);
     
-    fillAllVacancies(map, PYON);
+    fillAllVacancies(map, Vassals.PYON);
     int initFunds = 100;
     baseC.initFunds(initFunds);
     

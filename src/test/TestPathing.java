@@ -2,6 +2,7 @@
 
 package test;
 import game.*;
+import content.*;
 import util.*;
 import static content.GameContent.*;
 import static game.GameConstants.*;
@@ -132,7 +133,7 @@ public class TestPathing extends Test {
     Tile initPoints[] = { cornerWall, innerGround, outerGround };
     
     for (int n = 3; n-- > 0;) {
-      Actor a = (Actor) PYON.generate();
+      Actor a = (Actor) Vassals.PYON.generate();
       Tile point = initPoints[n];
       a.enterMap(map, point.x, point.y, 1, base);
       actors.add(a);

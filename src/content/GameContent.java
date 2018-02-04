@@ -237,6 +237,7 @@ public class GameContent {
     
     public HumanType(String ID, int socialClass) {
       super(ActorAsPerson.class, ID, IS_PERSON_ACT, socialClass);
+      this.foodsAllowed = FOOD_TYPES;
     }
     
     void attachCostume(String fileName) {
@@ -275,131 +276,55 @@ public class GameContent {
   }
   
   
-  //
-  //  TODO:  DERIVE NAMES FROM HOMEWORLD OF ORIGIN IF POSSIBLE
-  final static String
-    //
-    //  Natives only have first names, but might use son/daughter of X as a
-    //  title, or a conspicuous trait.
-    NATIVE_MN[] = {
-      "Duor", "Huno", "Umun", "Tunto", "Parab", "Sxumo", "Zhaka", "Hoka"
-    },
-    NATIVE_FN[] = {
-      "Khasi", "Mari", "Tesza", "Borab", "Hana", "Kaeli", "Hlara", "Ote"
-    },
-    //
-    //  Pyons have first and second names as standard.
-    PYON_MN[] = {
-      "Haber", "Danyl", "Jeme", "Marec", "Hoeb", "Ombar", "Tober", "Alav",
-      "Dann", "Gereg", "Sony", "Terev", "Olvar", "Man", "Halan", "Yohn"
-    },
-    PYON_FN[] = {
-      "Besa", "Linn", "Mina", "Abi", "Nana", "Dova", "Saba", "Kela", "Aryl",
-      "Vina", "Nena", "Lanu", "Mai", "Nevi", "Mona", "Ambi", "Kayt", "Tesa",
-    },
-    PYON_LN[] = {
-      "Foyle", "Orphy", "Samsun", "Ulga", "Yimon", "Timan", "Jo", "Yonson"
-    },
-    //
-    //  Citizens have first and second names as standard.
-    CITIZEN_MN[] = {
-      "Sarles", "Mortan", "Daneel", "Trevize", "Tedrick", "Arnalt", "Bictor"
-    },
-    CITIZEN_FN[] = {
-      "Becca", "Norema", "Catrin", "Xinia", "Max", "Sovia", "Unize", "Vonda"
-    },
-    CITIZEN_LN[] = {
-      "Vasov", "Olvaw", "Mallo", "Palev", "Unterhaussen", "Valiz", "Ryod",
-      "Obar", "Tiev", "Hanem", "Tsolo", "Matson", "Prestein", "Valter"
-    },
-    //
-    //  Highborn always have family/house names, depending on their planet of
-    //  origin, and may have additional titles.
-    HIGHBORN_MN[] = {
-      "Calib", "Vladmar", "Ledo", "Cado", "Alexander", "Xerxes", "Poul",
-      "Altan"
-    },
-    HIGHBORN_FN[] = {
-      "Meina", "Mnestra", "Aria", "Belise", "Ylande", "Vana", "Portia", "Vi",
-      "Lysandre"
-    },
-    HIGHBORN_TN[] = {
-      "Prime", "Secundus", "Tertius", "Minor",
-      "Alpha", "Beta", "Gamma", "Major"
-    },
-    //
-    //  TODO:  HOUSE NAMES ***MUST*** BE CUSTOMISED BY HOMEWORLD.
-    HIGHBORN_HN[] = {
-      "Rigel", "Ursa", "Alyph", "Rana", "Maia", "Fomalhaut", "Aldebaran",
-      "Regulus", "Suhail", "Antares", "Paleides", "Algol", "Orion",
-      "Deneb", "Ares",
+  protected static String generateName(
+    String forenames[], String surnames[], String nicknames[]
+  ) {
+    final StringBuffer s = new StringBuffer();
+    
+    s.append(Rand.pickFrom(forenames));
+    if (nicknames != null) {
+      s.append(" '");
+      s.append(Rand.pickFrom(nicknames));
+      s.append("'");
     }
-  ;
-  
-  
-  final static String
-    TROOPER_FN[] = {
-      "Sergeant", "Corporal", "Captain", "Private", "Private", "Private"
-    },
-    TROOPER_LN[] = {
-      "Santo", "Scully", "Huskins", "O'Mara", "Pitt", "Williams"
-    },
-    TROOPER_MN[] = {
-      "Lance", "Psycho", "Booya", "Ace", "Flash", "Lighter"
+    if (surnames != null) {
+      s.append(" ");
+      s.append(Rand.pickFrom(surnames));
     }
-  ;
+    return s.toString();
+  }
   
-  final static String
-    COLLECTIVE_FN[] = {
-      "Une", "Bena", "Blis", "Pax", "Sela", "Nami", "Oolen", "Nioba"
-    },
-    COLLECTIVE_LN[] = {
-      "of 9", "Primus", "003", "Iambis", "Orela", "the Zen", " of Melding"
-    }
-  ;
   
   
   final public static HumanType
-    NOBLE     = new HumanType("actor_noble"    , CLASS_NOBLE ),
-    CONSORT   = new HumanType("actor_consort"  , CLASS_NOBLE ),
-    
-    TROOPER   = new HumanType("actor_trooper"  , CLASS_SOLDIER),
     ENFORCER  = new HumanType("actor_enforcer" , CLASS_SOLDIER),
     RUNNER    = new HumanType("actor_runner"   , CLASS_SOLDIER),
     
     ECOLOGIST = new HumanType("actor_ecologist", CLASS_SOLDIER),
     ENGINEER  = new HumanType("actor_engineer" , CLASS_SOLDIER),
-    PHYSICIAN = new HumanType("actor_physician", CLASS_SOLDIER),
+    PHYSICIAN = new HumanType("actor_physician", CLASS_SOLDIER)
     
-    AUDITOR   = new HumanType("actor_auditor"  , CLASS_TRADER),
-    VENDOR    = new HumanType("actor_vendor"   , CLASS_TRADER),
-    PYON      = new HumanType("actor_pyon"     , CLASS_COMMON),
-    
-    ALL_CITIZENS[] = { PYON, VENDOR, AUDITOR },
-    ALL_SOLDIERS[] = { TROOPER, RUNNER, NOBLE },
-    ALL_NOBLES  [] = { NOBLE },
+    /*
     ALL_HUMANS[] = (HumanType[]) Visit.compose(
       HumanType.class, ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES
     )
+    //*/
   ;
+  
+  public static Type[] ALL_CITIZENS() {
+    return new Type[]{ Vassals.PYON, Vassals.VENDOR, Vassals.AUDITOR };
+  }
+  
+  public static Type[] ALL_SOLDIERS() {
+    return new Type[]{ Trooper.TROOPER, RUNNER, Nobles.NOBLE };
+  }
+  
+  public static Type[] ALL_NOBLES() {
+    return new Type[]{ Nobles.NOBLE, Nobles.CONSORT };
+  }
+  
+  
   static {
-    
-    NOBLE.name = "Noble";
-    NOBLE.attachCostume("noble_skin.gif");
-    NOBLE.initTraits.setWith(SKILL_MELEE, 1, SKILL_SPEAK, 2, SKILL_WRITE, 2);
-    
-    CONSORT.name = "Consort";
-    CONSORT.attachCostume("consort_skin.gif");
-    CONSORT.initTraits.setWith(SKILL_SPEAK, 2, SKILL_WRITE, 1, SKILL_EVADE, 2);
-    
-    TROOPER.name = "Trooper";
-    TROOPER.attachCostume("trooper_skin.gif");
-    TROOPER.meleeDamage = 2;
-    TROOPER.rangeDamage = 5;
-    TROOPER.rangeDist   = 4;
-    TROOPER.armourClass = 4;
-    TROOPER.maxHealth   = 6;
-    TROOPER.initTraits.setWith(SKILL_MELEE, 3, SKILL_RANGE, 4, SKILL_EVADE, 1);
     
     ENFORCER.name = "Enforcer";
     ENFORCER.attachCostume("enforcer_skin.gif");
@@ -441,21 +366,6 @@ public class GameContent {
     PHYSICIAN.maxHealth   = 3;
     PHYSICIAN.initTraits.setWith(SKILL_CRAFT, 6, SKILL_WRITE, 4, SKILL_SPEAK, 3);
     
-    AUDITOR.name = "Auditor";
-    AUDITOR.attachCostume("auditor_skin.gif");
-    AUDITOR.initTraits.setWith(SKILL_SPEAK, 4, SKILL_WRITE, 4);
-    
-    VENDOR.name = "Vendor";
-    VENDOR.attachCostume("vendor_skin.gif");
-    VENDOR.initTraits.setWith(SKILL_SPEAK, 2, SKILL_WRITE, 2);
-    
-    PYON.name = "Pyon";
-    PYON.attachCostume("pyon_skin.gif");
-    PYON.initTraits.setWith(SKILL_FARM, 1, SKILL_BUILD, 1, SKILL_CRAFT, 1);
-    
-    for (Type t : ALL_HUMANS) {
-      t.foodsAllowed = FOOD_TYPES;
-    }
   }
   
   
@@ -524,7 +434,7 @@ public class GameContent {
     BASTION.setDimensions(5, 5, 2);
     BASTION.maxHealth = 300;
     BASTION.setBuildMaterials(PLASTICS, 10, PARTS, 25);
-    BASTION.workerTypes.setWith(NOBLE, 1, AUDITOR, 1, PYON, 2);
+    BASTION.workerTypes.setWith(Nobles.NOBLE, 1, Vassals.AUDITOR, 1, Vassals.PYON, 2);
     BASTION.homeSocialClass = CLASS_NOBLE;
     BASTION.maxResidents = 2;
     BASTION.buildsWith   = new Good[] { PLASTICS, PARTS };
@@ -539,7 +449,7 @@ public class GameContent {
     );
     TROOPER_LODGE.setDimensions(3, 3, 2);
     TROOPER_LODGE.setBuildMaterials(PLASTICS, 1, PARTS, 7);
-    TROOPER_LODGE.workerTypes.setWith(TROOPER, 2);
+    TROOPER_LODGE.workerTypes.setWith(Trooper.TROOPER, 2);
     TROOPER_LODGE.maxHealth = 250;
     
     ENFORCER_BLOC.name = "Enforcer Bloc";
@@ -589,7 +499,7 @@ public class GameContent {
     STOCK_EXCHANGE.tint = TINT_COMMERCIAL;
     STOCK_EXCHANGE.setDimensions(4, 4, 1);
     STOCK_EXCHANGE.setBuildMaterials(PLASTICS, 4, PARTS, 2);
-    STOCK_EXCHANGE.workerTypes.setWith(VENDOR, 2);
+    STOCK_EXCHANGE.workerTypes.setWith(Vassals.VENDOR, 2);
     STOCK_EXCHANGE.needed   = MARKET_GOODS;
     STOCK_EXCHANGE.features = new Good[] { IS_VENDOR };
     
@@ -597,7 +507,7 @@ public class GameContent {
     SUPPLY_DEPOT.tint = TINT_COMMERCIAL;
     SUPPLY_DEPOT.setDimensions(3, 3, 1);
     SUPPLY_DEPOT.setBuildMaterials(PLASTICS, 4, PARTS, 2);
-    SUPPLY_DEPOT.workerTypes.setWith(PYON, 2);
+    SUPPLY_DEPOT.workerTypes.setWith(Vassals.PYON, 2);
     SUPPLY_DEPOT.worksBeforeBuilt = true;
     SUPPLY_DEPOT.features = new Good[] { IS_TRADER };
     SUPPLY_DEPOT.buildsWith = new Good[] { PLASTICS, PARTS };
@@ -624,7 +534,6 @@ public class GameContent {
     }
     
     
-    //
     WALKWAY.name = "Walkway";
     WALKWAY.tint = PAVE_COLOR;
     WALKWAY.pathing = PATH_PAVE;
@@ -655,12 +564,11 @@ public class GameContent {
     TURRET.setFeatures(IS_TOWER);
     
     
-    
     HOLDING.name = "Holding";
     HOLDING.tint = TINT_LITE_RESIDENTIAL;
     HOLDING.setDimensions(2, 2, 1);
     HOLDING.setBuildMaterials(PLASTICS, 1);
-    HOLDING.workerTypes.setWith(PYON, 1);
+    HOLDING.workerTypes.setWith(Vassals.PYON, 1);
     HOLDING.homeFoods    = FOOD_TYPES;
     HOLDING.maxResidents = 4;
     HOLDING.maxStock     = 1;
@@ -692,7 +600,7 @@ public class GameContent {
     NURSERY.tint = TINT_LITE_INDUSTRIAL;
     NURSERY.setDimensions(2, 2, 1);
     NURSERY.setBuildMaterials(PLASTICS, 5, PARTS, 2);
-    NURSERY.workerTypes.setWith(PYON, 2);
+    NURSERY.workerTypes.setWith(Vassals.PYON, 2);
     NURSERY.worksBeforeBuilt = true;
     NURSERY.gatherFlag = IS_CROP;
     NURSERY.produced   = CROP_TYPES;
@@ -703,7 +611,7 @@ public class GameContent {
     FORMER_BAY.tint = TINT_LITE_INDUSTRIAL;
     FORMER_BAY.setDimensions(2, 2, 1);
     FORMER_BAY.setBuildMaterials(PLASTICS, 5, PARTS, 2);
-    FORMER_BAY.workerTypes.setWith(PYON, 2);
+    FORMER_BAY.workerTypes.setWith(Vassals.PYON, 2);
     FORMER_BAY.worksBeforeBuilt = true;
     FORMER_BAY.gatherFlag = IS_TREE;
     FORMER_BAY.maxStock   = 25;
@@ -714,7 +622,7 @@ public class GameContent {
     ORE_SMELTER.tint = TINT_LITE_INDUSTRIAL;
     ORE_SMELTER.setDimensions(2, 2, 1);
     ORE_SMELTER.setBuildMaterials(PLASTICS, 2, PARTS, 5);
-    ORE_SMELTER.workerTypes.setWith(PYON, 2);
+    ORE_SMELTER.workerTypes.setWith(Vassals.PYON, 2);
     ORE_SMELTER.worksBeforeBuilt = true;
     ORE_SMELTER.gatherFlag = IS_STONE;
     ORE_SMELTER.maxStock   = 25;
@@ -751,7 +659,7 @@ public class GameContent {
     World world = new World(ALL_GOODS);
     City  cityA = new City(world, world.addLocale(1, 1, "Elysium Sector"));
     City  cityB = new City(world, world.addLocale(3, 3, "Pavonis Sector"));
-    world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES);
+    world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES());
     
     cityA.setName("Elysium Base");
     cityA.initTradeLevels(

@@ -36,6 +36,8 @@ public class ActorAsPerson extends Actor {
   List <Level> levels = new List();
   List <Bond > bonds  = new List();
   
+  String customName = "";
+  
   
   public ActorAsPerson(Type type) {
     super(type);
@@ -58,6 +60,7 @@ public class ActorAsPerson extends Actor {
       b.properties = s.loadInt();
       bonds.add(b);
     }
+    customName = s.loadString();
   }
   
   
@@ -75,6 +78,7 @@ public class ActorAsPerson extends Actor {
       s.saveFloat(b.level);
       s.saveInt(b.properties);
     }
+    s.saveString(customName);
   }
   
   
@@ -438,7 +442,27 @@ public class ActorAsPerson extends Actor {
     return (sexData & SEX_FEMALE) != 0;
   }
   
+  
+  
+  /**  Rendering, debug and interface methods-
+    */
+  public String fullName() {
+    if (customName.length() > 0) return customName;
+    return super.fullName();
+  }
+  
+  
+  public void setCustomName(String name) {
+    this.customName = name;
+  }
 }
+
+
+
+
+
+
+
 
 
 

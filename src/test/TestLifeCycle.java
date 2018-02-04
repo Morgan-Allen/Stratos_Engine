@@ -2,6 +2,7 @@
 
 package test;
 import game.*;
+import content.*;
 import util.*;
 import static content.GameContent.*;
 import static game.ActorAsPerson.*;
@@ -24,7 +25,7 @@ public class TestLifeCycle extends Test {
     Test test = new TestLifeCycle();
     
     I.say("\nTesting XP gain...");
-    ActorAsPerson single = (ActorAsPerson) PYON.generate();
+    ActorAsPerson single = (ActorAsPerson) Vassals.PYON.generate();
     for (int n = MAX_TRAIN_TIME; n-- > 0;) {
       single.gainXP(SKILL_BUILD, 1);
       if (n % MONTH_LENGTH == 0) I.say("  "+single.levelOf(SKILL_BUILD));
@@ -54,8 +55,8 @@ public class TestLifeCycle extends Test {
     Building palace = (Building) BASTION.generate();
     CityCouncil council = base.council;
     
-    ActorAsPerson oldKing = (ActorAsPerson) NOBLE  .generate();
-    ActorAsPerson consort = (ActorAsPerson) CONSORT.generate();
+    ActorAsPerson oldKing = (ActorAsPerson) Nobles.NOBLE  .generate();
+    ActorAsPerson consort = (ActorAsPerson) Nobles.CONSORT.generate();
     oldKing.type().initAsMigrant(oldKing);
     consort.type().initAsMigrant(consort);
     oldKing.setAgeYears(AVG_RETIREMENT / 3);

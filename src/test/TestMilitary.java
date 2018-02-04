@@ -2,6 +2,7 @@
 
 package test;
 import game.*;
+import content.*;
 import util.*;
 import static content.GameContent.*;
 import static game.GameConstants.*;
@@ -25,7 +26,7 @@ public class TestMilitary extends Test {
     CityMap map   = CityMapTerrain.generateTerrain(
       baseC, 32, 0, MEADOW, JUNGLE
     );
-    world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES);
+    world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES());
     world.addCities(baseC, awayC);
     baseC.setName("Home City");
     awayC.setName("Away City");
@@ -44,7 +45,7 @@ public class TestMilitary extends Test {
     for (int n = 8; n-- > 0;) {
       Building house = (Building) HOLDING.generate();
       house.enterMap(map, 2 + (n * 3), 7, 1, baseC);
-      fillHomeVacancies(house, PYON);
+      fillHomeVacancies(house, Vassals.PYON);
       for (Actor a : house.residents()) a.setSexData(SEX_MALE);
     }
     
@@ -55,7 +56,7 @@ public class TestMilitary extends Test {
     Mission troops  = null;
     Mission enemies = new Mission(Mission.OBJECTIVE_CONQUER, awayC, true);
     for (int n = 4; n-- > 0;) {
-      Actor fights = (Actor) ((n == 0) ? TROOPER : PYON).generate();
+      Actor fights = (Actor) ((n == 0) ? Trooper.TROOPER : Vassals.PYON).generate();
       fights.assignHomeCity(awayC);
       enemies.toggleRecruit(fights, true);
     }
@@ -102,7 +103,7 @@ public class TestMilitary extends Test {
         homeWin = ! survivors;
         if (homeWin) {
           troops.disbandFormation();
-          fillAllVacancies(map, PYON);
+          fillAllVacancies(map, Vassals.PYON);
         }
       }
       
