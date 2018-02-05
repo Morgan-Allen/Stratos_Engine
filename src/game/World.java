@@ -37,6 +37,13 @@ public class World implements Session.Saveable {
     Object[] involved;
   }
   
+  final public static String
+    KEY_ATTACK_FLAG  = "attack_flag" ,
+    KEY_DEFEND_FLAG  = "defend_flag" ,
+    KEY_EXPLORE_FLAG = "explore_flag",
+    KEY_CONTACT_FLAG = "contact_flag"
+  ;
+  
   
   /**  Data fields, setup and save/load methods-
     */
@@ -56,6 +63,7 @@ public class World implements Session.Saveable {
   
   //  Only used for graphical reference...
   int mapWide = 10, mapHigh = 10;
+  Table <String, Type> mediaTypes = new Table();
   
   
   public World(Good goodTypes[]) {
@@ -70,6 +78,11 @@ public class World implements Session.Saveable {
     this.citizenTypes = citizens  ;
     this.soldierTypes = soldiers  ;
     this.nobleTypes   = nobles    ;
+  }
+  
+  
+  public void assignMedia(Object... args) {
+    mediaTypes = Table.make(args);
   }
   
   
@@ -117,6 +130,12 @@ public class World implements Session.Saveable {
     
     mapWide = s.loadInt();
     mapHigh = s.loadInt();
+    
+    for (int n = s.loadInt(); n-- > 0;) {
+      String key = s.loadString();
+      Type type = (Type) s.loadObject();
+      mediaTypes.put(key, type);
+    }
   }
   
   
@@ -164,6 +183,12 @@ public class World implements Session.Saveable {
     
     s.saveInt(mapWide);
     s.saveInt(mapHigh);
+    
+    s.saveInt(mediaTypes.size());
+    for (String key : mediaTypes.keySet()) {
+      s.saveString(key);
+      s.saveObject(mediaTypes.get(key));
+    }
   }
   
   
@@ -380,6 +405,11 @@ public class World implements Session.Saveable {
       if (x == mapX && y == mapY) return city;
     }
     return null;
+  }
+  
+  
+  public Type mediaTypeWithKey(String key) {
+    return mediaTypes.get(key);
   }
   
 }

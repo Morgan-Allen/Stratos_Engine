@@ -124,9 +124,11 @@ public class PlayUI extends HUD implements UIConstants {
     if (UI.detailPane != null && UI.detailPane.subject != null) {
       return UI.detailPane.subject;
     }
+    /*
     if (UI.optionList != null && UI.optionList.subject != null) {
       return UI.optionList.subject;
     }
+    //*/
     return null;
   }
   

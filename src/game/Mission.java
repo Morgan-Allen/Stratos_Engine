@@ -68,6 +68,10 @@ public class Mission implements
   List <Tile> guardPoints = new List();
   int lastUpdateTime = -1;
   
+  Sprite flag;
+  boolean noFlag = false;
+  
+  
   
   public Mission(int objective, City belongs, boolean activeAI) {
     this.objective  = objective;
@@ -487,6 +491,18 @@ public class Mission implements
   }
   
   
+  public boolean allowsFocus(Object newFocus) {
+    if (objective == OBJECTIVE_CONQUER) {
+      if (newFocus instanceof Building) return true;
+      if (newFocus instanceof Actor   ) return true;
+    }
+    if (objective == OBJECTIVE_RECON) {
+      if (newFocus instanceof Tile) return true;
+    }
+    return false;
+  }
+  
+  
   boolean objectiveComplete() {
     if (objective == OBJECTIVE_CONQUER) {
       if (focus instanceof Element) {
@@ -779,41 +795,94 @@ public class Mission implements
   
   
   public void whenClicked(Object context) {
+    PlayUI.pushSelection(this);
   }
   
   
-  public boolean testSelection(PlayUI UI, City base, Viewport port) {
-    return false;
+  public boolean canRender(City base, Viewport view) {
+    if (noFlag) {
+      return false;
+    }
+    if (focus instanceof Element) {
+      return ((Element) focus).canRender(base, view);
+    }
+    if (focus instanceof Tile) {
+      return true;
+    }
+    else return false;
+  }
+  
+  
+  public void renderFlag(Rendering rendering) {
+    if (flag == null) {
+      String key = "";
+      if (objective == OBJECTIVE_CONQUER ) key = World.KEY_ATTACK_FLAG ;
+      if (objective == OBJECTIVE_GARRISON) key = World.KEY_DEFEND_FLAG ;
+      if (objective == OBJECTIVE_RECON   ) key = World.KEY_EXPLORE_FLAG;
+      if (objective == OBJECTIVE_DIALOG  ) key = World.KEY_CONTACT_FLAG;
+      Type type = homeCity.world.mediaTypeWithKey(key);
+      if (type == null || type.model == null) {
+        flag   = null;
+        noFlag = true;
+        return;
+      }
+      else {
+        flag = type.model.makeSprite();
+      }
+    }
+    if (focus instanceof Element) {
+      Element e = (Element) focus;
+      flag.position.setTo(e.trackPosition());
+      flag.position.z += e.type().deep;
+    }
+    if (focus instanceof Tile) {
+      Tile t = (Tile) focus;
+      flag.position.setTo(t.trackPosition());
+      flag.position.z += 1;
+    }
+    flag.readyFor(rendering);
+  }
+  
+  
+  public boolean testSelection(PlayUI UI, City base, Viewport view) {
+    if (flag == null || ! canRender(base, view)) return false;
+    
+    final float selRad = 0.5f;
+    final Vec3D selPos = new Vec3D(flag.position);
+    selPos.z += 0.5f;
+    if (! view.mouseIntersects(selPos, selRad, UI)) return false;
+    
+    return true;
   }
   
   
   public boolean setSelected(PlayUI UI) {
-    return false;
+    UI.setDetailPane(new MissionPane(UI, this));
+    UI.setOptionList(null);
+    return true;
   }
   
   
   public boolean trackSelection() {
-    return false;
+    if (focus instanceof Selection.Focus) {
+      return ((Selection.Focus) focus).trackSelection();
+    }
+    else {
+      return false;
+    }
   }
   
   
   public Vec3D trackPosition() {
-    if (focus instanceof Element) {
-      return ((Element) focus).trackPosition();
+    if (focus instanceof Selection.Focus) {
+      return ((Selection.Focus) focus).trackPosition();
     }
     else {
       return new Vec3D();
     }
   }
   
-  
-  
 }
-
-
-
-
-
 
 
 

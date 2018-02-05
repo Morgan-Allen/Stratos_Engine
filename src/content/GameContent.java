@@ -48,6 +48,22 @@ public class GameContent {
   ;
   
   
+  final public static Type
+    FLAG_STRIKE = new Type(null, "flag_strike", IS_MEDIA),
+    FLAG_RECON  = new Type(null, "flag_recon" , IS_MEDIA)
+  ;
+  static {
+    FLAG_STRIKE.model = CutoutModel.fromImage(
+      GameContent.class, "flag_strike_model",
+      "media/GUI/Missions/flag_strike.gif", 1, 1
+    );
+    FLAG_RECON.model = CutoutModel.fromImage(
+      GameContent.class, "flag_recon_model",
+      "media/GUI/Missions/flag_recon.gif", 1, 1
+    );
+  }
+  
+  
   final public static Good
     CARBS      = new Good("Carbs"       , 10 ),
     GREENS     = new Good("Greens"      , 12 ),

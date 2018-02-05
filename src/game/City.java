@@ -223,6 +223,22 @@ public class City implements Session.Saveable, Trader {
   
   
   
+  /**  Accessing missions-
+   */
+  public Series <Mission> missions() {
+    return missions;
+  }
+  
+  
+  public Mission matchingMission(int objective, Object focus) {
+    for (Mission m : missions) {
+      if (m.objective == objective && m.focus() == focus) return m;
+    }
+    return null;
+  }
+  
+  
+  
   /**  Setting up basic relations-
     */
   public void setGovernment(GOVERNMENT g) {

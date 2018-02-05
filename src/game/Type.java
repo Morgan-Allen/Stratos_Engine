@@ -15,6 +15,7 @@ public class Type extends Index.Entry implements Session.Saveable {
   /**  Indexing, categorisation, spawning and save/load methods-
     */
   final public static int
+    IS_MEDIA       = -200,
     IS_TRAIT       = -100,
     IS_TERRAIN     = 0,
     IS_FIXTURE     = 1,

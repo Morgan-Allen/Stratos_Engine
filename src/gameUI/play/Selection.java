@@ -71,16 +71,12 @@ public class Selection {
       }
       hoverActor = pickA.result();
       
-      //  TODO:  Restore this shortly...
-      /*
-      final Pick <Mission> pickO = new Pick();
-      for (Base b : stage.allBases()) {
+      final Pick <Mission> pickM = new Pick();
+      for (City b : stage.cities()) {
         for (Mission m : b.missions()) {
-          trySelection(m, port, base, pickO);
+          trySelection(m, base, port, pickM);
         }
       }
-      hoverOther = pickO.result();
-      //*/
       
       if      (hoverOther != null) hovered = hoverOther;
       else if (hoverActor != null) hovered = hoverActor;
@@ -135,6 +131,7 @@ public class Selection {
   public Tile     hoverSpot () { return hoverSpot ; }
   public Actor    hoverActor() { return hoverActor; }
   public Building hoverVenue() { return hoverVenue; }
+  public Focus    hovered   () { return hovered   ; }
   
 }
 

@@ -37,7 +37,16 @@ public class ScenarioBlankMap extends CityMapScenario {
   
   protected World createWorld() {
     World world = new World(ALL_GOODS);
-    world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES());
+    world.assignTypes(
+      ALL_BUILDINGS,
+      ALL_CITIZENS(),
+      ALL_SOLDIERS(),
+      ALL_NOBLES()
+    );
+    world.assignMedia(
+      World.KEY_ATTACK_FLAG , FLAG_STRIKE,
+      World.KEY_EXPLORE_FLAG, FLAG_RECON
+    );
     return world;
   }
   

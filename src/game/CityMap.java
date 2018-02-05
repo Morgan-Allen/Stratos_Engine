@@ -200,12 +200,6 @@ public class CityMap implements Session.Saveable {
   }
   
   
-  public void addCity(City city) {
-    cities.include(city);
-    city.attachMap(this);
-  }
-  
-  
   
   /**  Basic public access methods-
     */
@@ -216,6 +210,17 @@ public class CityMap implements Session.Saveable {
   
   public Series <Actor> actors() {
     return actors;
+  }
+  
+  
+  public void addCity(City city) {
+    cities.include(city);
+    city.attachMap(this);
+  }
+  
+  
+  public Series <City> cities() {
+    return cities;
   }
   
   
@@ -621,14 +626,12 @@ public class CityMap implements Session.Saveable {
       actor.renderElement(rendering, playing);
     }
     
-    /*
-    for (Base base : allBases) {
+    for (City base : cities) {
       for (Mission mission : base.missions()) {
         if (! mission.canRender(playing, rendering.view)) continue;
         mission.renderFlag(rendering);
       }
     }
-    //*/
     
   }
   
@@ -637,8 +640,5 @@ public class CityMap implements Session.Saveable {
     //return ephemera;
   //}
 }
-
-
-
 
 
