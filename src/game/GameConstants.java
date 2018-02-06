@@ -194,12 +194,33 @@ public class GameConstants {
   public static class Good extends Type {
     
     final public int price;
+    public boolean isWeapon = false;
+    public boolean isArmour = false;
+    public boolean isUsable = false;
+    int maxQuality = -1;
+    int maxCarried = -1;
+    int priceLevels[] = {};
     
     public Good(String name, int price) {
       super(null, "good_"+name.toLowerCase().replace(' ', '_'), IS_GOOD);
       this.name    = name ;
       this.price   = price;
       this.pathing = PATH_HINDER;
+    }
+    
+    public void setAsWeapon(int damage, boolean ranged, int... prices) {
+      this.isWeapon    = true;
+      this.meleeDamage = ranged ? 0 : damage;
+      this.rangeDamage = ranged ? damage : 0;
+      this.priceLevels = prices;
+      this.maxQuality  = prices.length;
+    }
+    
+    public void setAsArmour(int armour, boolean shields, int... prices) {
+      this.isArmour    = true;
+      this.armourClass = armour;
+      this.priceLevels = prices;
+      this.maxQuality  = prices.length;
     }
   }
   

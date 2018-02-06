@@ -37,6 +37,8 @@ public class Trooper {
   static {
     TROOPER.name = "Trooper";
     TROOPER.attachCostume("trooper_skin.gif");
+    TROOPER.weaponType = BLASTER;
+    TROOPER.armourType = BODY_ARMOUR;
     TROOPER.meleeDamage = 2;
     TROOPER.rangeDamage = 5;
     TROOPER.rangeDist   = 4;

@@ -158,6 +158,7 @@ public class Type extends Index.Entry implements Session.Saveable {
   
   public Good needed  [] = NO_GOODS;
   public Good produced[] = NO_GOODS;
+  public Good canOrder[] = NO_GOODS;
   public Good features[] = NO_GOODS;
   public Type gatherFlag = null;
   public Trait craftSkill = null;
@@ -271,6 +272,9 @@ public class Type extends Index.Entry implements Session.Saveable {
   public Type patronGods[] = null;
   public boolean isPorter  = false;
   
+  public Good weaponType = null;
+  public Good armourType = null;
+  public Good useItemTypes[] = {};
   public int maxHealth   = AVG_MAX_HEALTH;
   public int meleeDamage = AVG_MELEE;
   public int rangeDamage = AVG_MISSILE;

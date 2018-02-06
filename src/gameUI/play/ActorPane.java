@@ -42,7 +42,7 @@ public class ActorPane extends DetailPane {
     d.appendAll("\n  Works at:  ", actor.work());
     d.appendAll("\n  Lives at:  ", actor.home());
     d.appendAll("\n  Currently: ", actor.task());
-    d.appendAll("\n  Carrying:  ", actor.carryAmount(), " ", actor.carried());
+    d.appendAll("\n  Carrying:  ", actor.carried());
     
     Series <Trait> traits = actor.allTraits();
     if (traits.size() > 0) {

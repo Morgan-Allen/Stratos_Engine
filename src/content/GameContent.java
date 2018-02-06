@@ -80,7 +80,7 @@ public class GameContent {
     
     CROP_TYPES  [] = { CARBS, GREENS, CARBONS },
     FOOD_TYPES  [] = { CARBS, GREENS, PROTEIN },
-    STONE_TYPES [] = { CARBONS, ORES },
+    STONE_TYPES [] = { CARBONS , ORES },
     BUILD_GOODS [] = { PLASTICS, PARTS },
     HOME_GOODS  [] = { PLASTICS, PARTS, MEDICINE },
     MARKET_GOODS[] = (Good[]) Visit.compose(Good.class, FOOD_TYPES, HOME_GOODS),
@@ -89,7 +89,15 @@ public class GameContent {
       CASH,
       CARBS, GREENS, PROTEIN, CARBONS, ORES, SPYCE,
       PLASTICS, PARTS, SOMA, MEDICINE
-    };
+    },
+    
+    BLASTER     = new Good("Blaster"    , -1),
+    BODY_ARMOUR = new Good("Body Armour", -1)
+  ;
+  static {
+    BLASTER.setAsWeapon(8, true, 100, 200, 300);
+    BODY_ARMOUR.setAsArmour(8, true, 150, 250, 350);
+  }
   
   
   final public static Terrain
@@ -319,12 +327,6 @@ public class GameContent {
     ECOLOGIST = new HumanType("actor_ecologist", CLASS_SOLDIER),
     ENGINEER  = new HumanType("actor_engineer" , CLASS_SOLDIER),
     PHYSICIAN = new HumanType("actor_physician", CLASS_SOLDIER)
-    
-    /*
-    ALL_HUMANS[] = (HumanType[]) Visit.compose(
-      HumanType.class, ALL_CITIZENS, ALL_SOLDIERS, ALL_NOBLES
-    )
-    //*/
   ;
   
   public static Type[] ALL_CITIZENS() {
@@ -341,7 +343,6 @@ public class GameContent {
   
   
   static {
-    
     ENFORCER.name = "Enforcer";
     ENFORCER.attachCostume("enforcer_skin.gif");
     ENFORCER.meleeDamage = 2;
@@ -381,7 +382,6 @@ public class GameContent {
     PHYSICIAN.armourClass = 1;
     PHYSICIAN.maxHealth   = 3;
     PHYSICIAN.initTraits.setWith(SKILL_CRAFT, 6, SKILL_WRITE, 4, SKILL_SPEAK, 3);
-    
   }
   
   
@@ -496,6 +496,9 @@ public class GameContent {
     ENGINEER_STATION.produced = new Good[] { PARTS };
     ENGINEER_STATION.maxStock = 3;
     ENGINEER_STATION.craftSkill = SKILL_CRAFT;
+    ENGINEER_STATION.canOrder = new Good[] {
+      BLASTER, BODY_ARMOUR
+    };
     
     PHYSICIAN_STATION.name = "Physician Station";
     PHYSICIAN_STATION.tint = TINT_INDUSTRIAL;

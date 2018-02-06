@@ -126,13 +126,14 @@ public class TaskGathering extends Task {
       if      (above.type().isCrop      ) above.setGrowLevel(-1);
       else if (above.type().growRate > 0) above.setGrowLevel( 0);
       
+      Good gathers = above.type().yields;
       float yield = above.type().yieldAmount;
       yield *= 1 + (skillBonus * 0.5f);
       
-      actor.incCarried(above.type().yields, yield);
+      actor.incCarried(gathers, yield);
       actor.gainXP(skill, 1 * multXP / 100);
       
-      if (actor.carryAmount() >= 2) {
+      if (actor.carried(gathers) >= 2) {
         returnToStore();
       }
       else {

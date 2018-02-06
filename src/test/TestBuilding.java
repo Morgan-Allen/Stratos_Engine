@@ -211,10 +211,12 @@ public class TestBuilding extends Test {
     }
     for (Actor a : map.actors()) {
       if (report) I.say("  "+a);
-      if (Visit.arrayIncludes(compared, a.carried())) {
-        float amount = a.carried((Good) a.carried());
-        if (report) I.say("    "+a.carried()+" (C): "+amount);
-        total.add(amount, (Good) a.carried());
+      
+      for (Good g : compared) {
+        float amount = a.carried(g);
+        if (amount == 0) continue;
+        if (report) I.say("    "+g+" (C): "+amount);
+        total.add(amount, g);
       }
     }
     

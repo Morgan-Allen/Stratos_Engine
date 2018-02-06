@@ -143,7 +143,7 @@ public class TestBounties extends Test {
     boolean testOkay       = false;
     
     while (map.time() < 1000 || graphics) {
-      runLoop(base, 10, graphics, "saves/test_military.tlt");
+      runLoop(base, 10, graphics, "saves/test_bounties.tlt");
       
       if (! fundsTaken) {
         fundsTaken = mission.cashReward() == initFunds - base.funds();

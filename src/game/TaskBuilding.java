@@ -109,7 +109,7 @@ public class TaskBuilding extends Task {
     //  Iterate over any structures demanding your attention and see if
     //  they're close enough to attend to:
     CityMapDemands demands = demandsFor(material, map);
-    boolean canPickup = actor.carried() == null || actor.carried() == material;
+    boolean canPickup = true;// = actor.carried() == null || actor.carried() == material;
     
     if (demands != null && canPickup) {
       int storeRange = store.type().maxDeliverRange;
@@ -131,7 +131,7 @@ public class TaskBuilding extends Task {
     //
     //  If there's no target to attend to, but you have surplus material left
     //  over, return it to your store:
-    if (actor.carried() == material) {
+    if (actor.carried(material) > 0) {
       TaskBuilding task = new TaskBuilding(actor, store, material, null);
       if (task.configTravel(store, JOB.RETURNING, store)) return task;
     }
@@ -321,7 +321,7 @@ public class TaskBuilding extends Task {
     //
     //  If we're depleting the material, take it from the actor first:
     if (actor.carried(m) > 0 && inc < 0 && ! siteOnly) {
-      float sub = Nums.min(actor.carryAmount(), 0 - inc);
+      float sub = Nums.min(actor.carried(m), 0 - inc);
       actor.incCarried(material, 0 - sub);
       inc += sub;
     }

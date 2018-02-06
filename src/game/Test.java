@@ -502,13 +502,10 @@ public class Test {
       );
       report.append("\n  Task: "+a.jobDesc());
       
-      if (a.carried() != null) {
-        report.append("\n  Carried: "+a.carried()+": "+a.carryAmount());
-      }
-      if (a.cargo() != null) {
-        report.append("\n  Cargo:");
-        for (Good g : a.cargo().keys()) {
-          report.append("\n    "+g+": "+a.cargo().valueFor(g));
+      if (! a.carried().empty()) {
+        report.append("\n  Carried:");
+        for (Good g : a.carried().keys()) {
+          report.append("\n    "+g+": "+a.carried(g));
         }
       }
     }

@@ -46,7 +46,6 @@ public class TaskCrafting extends Task {
     if (! venue.canAdvanceCrafting()) return;
     
     Trait skill     = venue.type().craftSkill;
-    float progress  = venue.craftProgress;
     float skillMult = actor.levelOf(skill) / MAX_SKILL_LEVEL;
     
     float progInc = 1f + (1f * skillMult);
@@ -60,18 +59,30 @@ public class TaskCrafting extends Task {
     for (Good need : venue.needed()) {
       venue.addInventory(0 - progInc, need);
     }
-    progress = Nums.min(progress + progInc, 1);
     
-    if (progress >= 1) {
-      for (Good made : venue.produced()) {
-        if (venue.inventory(made) >= venue.stockLimit(made)) continue;
-        venue.addInventory(1, made);
-        venue.homeCity().makeTotals.add(1, made);
-      }
-      progress = 0;
+    BuildingForCrafts.ItemOrder order = venue.nextUnfinishedOrder();
+    
+    if (order != null) {
+      float progress = order.progress;
+      progress = Nums.min(progress + progInc, 1);
+      order.progress = progress;
     }
     
-    venue.craftProgress = progress;
+    else {
+      float progress  = venue.craftProgress;
+      progress = Nums.min(progress + progInc, 1);
+      
+      if (progress >= 1) {
+        for (Good made : venue.produced()) {
+          if (venue.inventory(made) >= venue.stockLimit(made)) continue;
+          venue.addInventory(1, made);
+          venue.homeCity().makeTotals.add(1, made);
+        }
+        progress = 0;
+      }
+      
+      venue.craftProgress = progress;
+    }
   }
   
 }

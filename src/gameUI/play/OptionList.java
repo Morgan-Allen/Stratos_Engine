@@ -52,21 +52,27 @@ public class OptionList extends UIGroup implements UIConstants {
   }
   
   
-  private class MissionButton extends Button {
+  
+  //  TODO:  This mission has to be replenished whenever it's placed in the
+  //  world...
+  
+  private abstract class MissionButton extends Button {
     
     final City base;
-    final Mission mission;
+    private Mission mission = null;
     
     
-    MissionButton(PlayUI UI, String ID, ImageAsset button, String info, Mission m) {
+    MissionButton(PlayUI UI, String ID, ImageAsset button, String info) {
       super(UI, ID, button, Button.CIRCLE_LIT, info);
       this.base = UI.base;
-      this.mission = m;
     }
+    
+    abstract Mission initMission();
     
     protected void whenClicked() {
       final PlayTask task = new PlayTask() {
         public void doTask(PlayUI UI) {
+          if (mission == null) mission = initMission();
           
           Selection.Focus hovered = UI.selection.hovered();
           Mission match = base.matchingMission(mission.objective, hovered);
@@ -79,6 +85,7 @@ public class OptionList extends UIGroup implements UIConstants {
               mission.setFocus(hovered, 0, base.activeMap());
               mission.setAsBounty(0);
               PlayUI.pushSelection(mission);
+              mission = null;
             }
             else {
               //mission.renderFlag(rendering);
@@ -135,15 +142,21 @@ public class OptionList extends UIGroup implements UIConstants {
     
     options.add(new MissionButton(
       BUI, STRIKE_BUTTON_ID, STRIKE_BUTTON_IMG,
-      "Destroy or raze subject",
-      new Mission(Mission.OBJECTIVE_CONQUER, base, false)
-    ));
+      "Destroy or raze subject"
+    ) {
+      Mission initMission() {
+        return new Mission(Mission.OBJECTIVE_CONQUER, base, false);
+      }
+    });
     
     options.add(new MissionButton(
       BUI, RECON_BUTTON_ID, RECON_BUTTON_IMG,
-      "Explore area",
-      new Mission(Mission.OBJECTIVE_RECON, base, false)
-    ));
+      "Explore area"
+    ) {
+      Mission initMission() {
+        return new Mission(Mission.OBJECTIVE_RECON, base, false);
+      }
+    });
     
     /*
     for (Venue v : stage.allVenues()) if (v instanceof Technique.Source) {

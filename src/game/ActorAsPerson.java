@@ -35,6 +35,7 @@ public class ActorAsPerson extends Actor {
   
   List <Level> levels = new List();
   List <Bond > bonds  = new List();
+  List <Task > todo   = new List();
   
   String customName = "";
   
@@ -60,6 +61,8 @@ public class ActorAsPerson extends Actor {
       b.properties = s.loadInt();
       bonds.add(b);
     }
+    s.loadObjects(todo);
+    
     customName = s.loadString();
   }
   
@@ -78,6 +81,8 @@ public class ActorAsPerson extends Actor {
       s.saveFloat(b.level);
       s.saveInt(b.properties);
     }
+    s.saveObjects(todo);
+    
     s.saveString(customName);
   }
   
@@ -245,6 +250,37 @@ public class ActorAsPerson extends Actor {
       
       Mission joins = pick.result();
       if (joins != null) joins.toggleRecruit(this, true);
+    }
+    
+    //  TODO:  Base this on intelligence, etc.?  Or move into the task class?
+    //  Make any necessary purchases-
+    if (idle()) {
+      Pick <TaskPurchase> pick = new Pick(0);
+      boolean hasPurchase = false;
+      
+      for (Task t : todo) if (t instanceof TaskPurchase) {
+        TaskPurchase p = (TaskPurchase) t;
+        if (! p.shop.hasItemOrder(p.itemType, this)) {
+          todo.remove(t);
+        }
+        else {
+          hasPurchase = true;
+          p = TaskPurchase.resumePurchase(p);
+          if (p != null) pick.compare(p, p.priority() * Rand.num());
+        }
+      }
+      
+      if (! hasPurchase) for (Building b : map.buildings()) {
+        if (b.homeCity() != homeCity()        ) continue;
+        if (! (b instanceof BuildingForCrafts)) continue;
+        BuildingForCrafts shop = (BuildingForCrafts) b;
+        for (TaskPurchase p : TaskPurchase.configPurchases(this, shop)) {
+          if (p == null) continue;
+          pick.compare(p, p.priority() * Rand.num());
+        }
+      }
+      
+      assignTask(pick.result());
     }
     
     //  Once home & work have been established, try to derive a task to

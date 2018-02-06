@@ -72,7 +72,7 @@ public class TaskTrading extends Task {
     //
     //  If you're embarking on a fresh journey, take on your assigned cargo,
     //  then determine if you're visiting a city or another trading post:
-    if (visits == tradeFrom && actor.cargo() == null) {
+    if (visits == tradeFrom && actor.carried().empty()) {
       if (reports()) {
         I.say("\n"+actor+" SETTING OFF FROM "+visits);
       }
@@ -100,8 +100,8 @@ public class TaskTrading extends Task {
     //
     //  If you've returned from a journey, offload any goods you might have
     //  brought back, including any profits from exports.
-    else if (visits == tradeFrom && actor.cargo() != null) {
-      float profits = actor.cargo().valueFor(CASH);
+    else if (visits == tradeFrom && ! actor.carried().empty()) {
+      float profits = actor.carried(CASH);
       homeCity.incFunds((int) profits);
       if (reports()) {
         I.say("\n"+actor+" RETURNED TO "+visits);
@@ -179,7 +179,7 @@ public class TaskTrading extends Task {
     boolean tributeDue = city.isLoyalVassalOf(opposite);
     City.Relation r = city.relationWith(opposite);
     
-    Tally <Good> cargo = actor.cargo() == null ? new Tally() : actor.cargo();
+    Tally <Good> cargo = actor.carried();
     Tally <Good> stock = store.inventory();
     int totalCost = 0;
     
@@ -221,12 +221,12 @@ public class TaskTrading extends Task {
     boolean tributeDue = opposite.isLoyalVassalOf(city);
     City.Relation r = opposite.relationWith(city);
     
-    float cash = actor.cargo().valueFor(CASH);
+    float cash = actor.carried(CASH);
     int totalValue = 0;
     
-    for (Good g : actor.cargo().keys()) {
+    for (Good g : actor.carried().keys()) {
       if (g == CASH) continue;
-      float amount = actor.cargo().valueFor(g);
+      float amount = actor.carried(g);
       store.inventory().add(amount, g);
       
       if (tributeDue) {
@@ -241,13 +241,13 @@ public class TaskTrading extends Task {
     
     if (reports()) {
       I.say("\n"+actor+" depositing goods at "+store);
-      I.say("  Cargo: "+actor.cargo());
-      I.say("  Value: "+totalValue+" Profit: "+actor.cargo().valueFor(CASH));
+      I.say("  Cargo: "+actor.carried());
+      I.say("  Value: "+totalValue+" Profit: "+actor.carried(CASH));
     }
     
     boolean doPayment = city != homeCity;
-    actor.cargo().clear();
-    actor.cargo().add(cash + (doPayment ? totalValue : 0), CASH);
+    actor.clearCarried();
+    actor.incCarried(CASH, cash + (doPayment ? totalValue : 0));
   }
   
   

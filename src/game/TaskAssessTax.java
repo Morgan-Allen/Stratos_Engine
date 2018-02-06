@@ -38,9 +38,10 @@ public class TaskAssessTax extends Task {
   static TaskAssessTax nextAssessment(
     Actor actor, Building from, int maxCollect
   ) {
-    if (actor.carryAmount() > 0 && actor.carried() != CASH) return null;
+    //  TODO:  Maybe use a different Good for this, to distinguish from
+    //  personal savings?
     
-    float cashCarried = actor.carryAmount();
+    float cashCarried = actor.carried(CASH);
     Pick <Building> pick = new Pick();
     Tile entrance = from.mainEntrance();
     

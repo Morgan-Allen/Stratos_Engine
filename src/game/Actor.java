@@ -46,9 +46,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   private int moveMode = MOVE_NORMAL;
   private Vec3D position = new Vec3D();
   
-  private Object carried = null;
-  private float carryAmount = 0;
-  private Tally <Good> cargo = null;
+  Tally <Good> carried = new Tally();
   
   int sexData    = -1;
   int ageSeconds =  0;
@@ -84,9 +82,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     moveMode = s.loadInt();
     position.loadFrom(s.input());
     
-    carried     = s.loadObject();
-    carryAmount = s.loadFloat();
-    if (s.loadBool()) s.loadTally(cargo);
+    s.loadTally(carried);
     
     sexData    = s.loadInt();
     ageSeconds = s.loadInt();
@@ -117,10 +113,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     s.saveInt(moveMode);
     position.saveTo(s.output());
     
-    s.saveObject(carried);
-    s.saveFloat(carryAmount);
-    s.saveBool(cargo != null);
-    if (cargo != null) s.saveTally(cargo);
+    s.saveTally(carried);
     
     s.saveInt(sexData   );
     s.saveInt(ageSeconds);
@@ -418,67 +411,47 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   }
   
   
-  public void offloadGood(Good carried, Building store) {
-    if (store == null || carried != this.carried) return;
+  public void offloadGood(Good good, Building store) {
+    float amount = carried.valueFor(good);
+    if (store == null || amount == 0) return;
     
     if (reports()) I.say(this+" Depositing "+carried+" at "+store);
     
-    store.addInventory(carryAmount, carried);
-    this.carried = null;
-    this.carryAmount = 0;
+    store.addInventory(amount, good);
+    carried.set(good, 0);
   }
   
   
-  public void incCarried(Good carried, float amount) {
-    
-    //  TODO:  Add a proper warning system for this?
-    /*
-    if (this.carried != null && carried != this.carried) {
-      I.say("ERASING GOOD: "+carryAmount+" "+carried);
-      I.say("???");
-    }
-    //*/
-    
-    if (this.carried != carried) this.carryAmount = 0;
-    this.carried      = carried;
-    this.carryAmount += amount ;
-    if (this.carryAmount < 0) this.carryAmount = 0;
+  public void incCarried(Good good, float amount) {
+    float newAmount = carried.valueFor(good) + amount;
+    if (newAmount < 0) newAmount = 0;
+    carried.set(good, newAmount);
+  }
+  
+  
+  public void setCarried(Good good, float amount) {
+    carried.set(good, amount);
   }
   
   
   public void clearCarried() {
-    this.carried = null;
-    this.carryAmount = 0;
-    this.cargo = null;
+    carried.clear();
   }
   
   
   public void assignCargo(Tally <Good> cargo) {
-    this.cargo = cargo;
+    clearCarried();
+    carried.add(cargo);
   }
   
   
-  public Tally <Good> cargo() {
-    return cargo;
-  }
-  
-  
-  public Object carried() {
+  public Tally <Good> carried() {
     return carried;
   }
   
   
-  public float carryAmount() {
-    if (carried == null) return 0;
-    return carryAmount;
-  }
-  
-  
   public float carried(Good g) {
-    float sum = 0;
-    if (this.carried == g) sum += carryAmount;
-    if (this.cargo != null) sum += cargo.valueFor(g);
-    return sum;
+    return carried.valueFor(g);
   }
   
   

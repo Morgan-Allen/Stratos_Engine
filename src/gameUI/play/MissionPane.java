@@ -22,33 +22,31 @@ public class MissionPane extends DetailPane {
   
   protected void updateState() {
     
+    City base = mission.homeCity();
+    
     this.text.setText("");
     final Description d = this.text;
     
-    //  TODO:  RESTORE THIS!
-    /*
-    mission.describeMission(d);
-    d.append("\n");
+    d.append(mission.fullName());
     
-    final int credits = mission.baseReward();
+    int credits = mission.cashReward();
     d.append("\nReward: "+credits+" credits");
     
     d.append(" ");
-    if (mission.canIncreaseReward(100)) {
+    if (base.funds() >= 100) {
       d.append(new Description.Link("MORE") {
         public void whenClicked(Object context) {
-          mission.incBaseReward(100);
+          mission.incReward(100);
         }
       });
     }
     else Text.appendColour("MORE", Colour.LITE_GREY, d);
     
-    final Series <Actor> applied = mission.applicants();
+    final Series <Actor> applied = mission.recruits();
     d.append("\n\nApplied: ");
     for (Actor a : applied) {
       d.appendAll("\n  ", a);
     }
-    //*/
     
     super.updateState();
   }
