@@ -43,18 +43,24 @@ public class TaskCombat extends Task {
   }
   
   
-  static boolean hostile(Actor a, Actor b, CityMap map) {
+  static POSTURE postureFor(Element a, Element b) {
     City CA = a.homeCity (), CB = b.homeCity ();
     City GA = a.guestCity(), GB = b.guestCity();
-    if (GA == null) GA = CA;
-    if (GB == null) GB = CB;
-    if (CA == CB  ) return false;
-    if (GA == GB  ) return false;
-    if (CA == GB  ) return false;
-    if (GA == CB  ) return false;
-    POSTURE r = CA.posture(CB);
-    if (r == POSTURE.ENEMY) return true;
-    return false;
+    if (CA == CB) return POSTURE.ALLY;
+    if (GA == GB) return POSTURE.ALLY;
+    if (CA == GB) return POSTURE.ALLY;
+    if (GA == CB) return POSTURE.ALLY;
+    return CA.posture(CB);
+  }
+  
+  
+  static boolean allied(Element a, Element b) {
+    return postureFor(a, b) == POSTURE.ALLY;
+  }
+  
+  
+  static boolean hostile(Element a, Element b) {
+    return postureFor(a, b) == POSTURE.ENEMY;
   }
   
   
@@ -107,7 +113,7 @@ public class TaskCombat extends Task {
       protected float queuePriority(Option o) { return o.rating; }
     };
     
-    for (Actor other : others) if (hostile(other, actor, map)) {
+    for (Actor other : others) if (hostile(other, actor)) {
       Tile goes = other.at();
       float distF = distance(goes, from  );
       float distA = distance(goes, anchor);

@@ -311,7 +311,7 @@ public class GameConstants {
     IS_HOUSING = new Good("Is Housing"  , -1 ),
     IS_TOWER   = new Good("Is Tower"    , -1 ),
     IS_GATE    = new Good("Is Gate"     , -1 ),
-    IS_CISTERN = new Good("Is Cistern"  , -1 ),
+    IS_REFUGE  = new Good("Is Refuge"   , -1 ),
     
     DIVERSION  = new Good("Diversion"   , -1 ),
     EDUCATION  = new Good("Education"   , -1 ),

@@ -592,7 +592,7 @@ public class GameContent {
     HOLDING.maxResidents = 4;
     HOLDING.maxStock     = 1;
     HOLDING.buildsWith   = new Good[] { PLASTICS, PARTS };
-    HOLDING.features     = new Good[] { IS_HOUSING };
+    HOLDING.setFeatures(IS_HOUSING);
     HOLDING.setUpgradeTiers(HOLDING, HOUSE_T1, HOUSE_T2);
     
     HOUSE_T1.name = "Improved Holding";
@@ -610,7 +610,7 @@ public class GameContent {
     CANTINA.tint = TINT_AMENITY;
     CANTINA.setDimensions(3, 3, 1);
     CANTINA.setBuildMaterials(PARTS, 10);
-    CANTINA.setFeatures(DIVERSION);
+    CANTINA.setFeatures(DIVERSION, IS_REFUGE);
     CANTINA.featureAmount = 15;
     
     //

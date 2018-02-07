@@ -204,6 +204,11 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
+  public City guestCity() {
+    return homeCity();
+  }
+  
+  
   public CityMap map() {
     return map;
   }
