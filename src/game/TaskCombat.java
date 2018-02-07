@@ -328,6 +328,10 @@ public class TaskCombat extends Task {
   }
   
   
+  //  TODO:  You should also update the risk-assessment methods- win priority
+  //  and success-chance, plus the motive-bonus for any reward attached.
+  
+  
   protected void onTarget(Target other) {
     actor.performAttack(primary, attackMode == ATTACK_MELEE);
   }

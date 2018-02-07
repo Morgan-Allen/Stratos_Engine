@@ -87,7 +87,7 @@ public class Test {
   }
   
   
-  static Actor spawnWalker(Building b, Type type, boolean resident) {
+  public static Actor spawnWalker(Building b, Type type, boolean resident) {
     
     ActorAsPerson actor = (ActorAsPerson) type.generate();
     Tile at = b.at();
@@ -106,6 +106,17 @@ public class Test {
     }
     
     return actor;
+  }
+  
+  
+  public static Tile randomTileNear(
+    Tile at, float range, CityMap map, boolean open
+  ) {
+    int x = (int) (at.x + (range * Rand.range(-1, 1)));
+    int y = (int) (at.y + (range * Rand.range(-1, 1)));
+    Tile t = map.tileAt(Nums.clamp(x, map.size), Nums.clamp(y, map.size));
+    if (open) t = Tile.nearestOpenTile(t, map);
+    return t;
   }
   
   
