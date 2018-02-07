@@ -82,10 +82,9 @@ public class TaskRetreat extends Task {
     }
     
     for (Actor other : aware) {
-      
       boolean hostile      = TaskCombat.hostile(other, actor);
       boolean allied       = TaskCombat.allied (other, actor);
-      Element otherFocus   = Task.focusTarget(other.task());
+      Target  otherFocus   = Task.focusTarget(other.task());
       float   harmLevel    = other.task().harmLevel();
       boolean focusHostile = TaskCombat.hostile(actor, otherFocus);
       boolean focusAllied  = TaskCombat.allied (actor, otherFocus);

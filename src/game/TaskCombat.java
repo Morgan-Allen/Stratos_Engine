@@ -54,12 +54,18 @@ public class TaskCombat extends Task {
   }
   
   
-  static boolean allied(Element a, Element b) {
+  static POSTURE postureFor(Target a, Target b) {
+    if (a.isTile() || b.isTile()) return POSTURE.NEUTRAL;
+    return postureFor((Element) a, (Element) b);
+  }
+  
+  
+  static boolean allied(Target a, Target b) {
     return postureFor(a, b) == POSTURE.ALLY;
   }
   
   
-  static boolean hostile(Element a, Element b) {
+  static boolean hostile(Target a, Target b) {
     return postureFor(a, b) == POSTURE.ENEMY;
   }
   
@@ -314,6 +320,11 @@ public class TaskCombat extends Task {
     if (attackMode == ATTACK_RANGE) return actor.type().rangeDist + 1;
     if (attackMode == ATTACK_FIRE ) return actor.type().rangeDist + 1;
     return -1;
+  }
+  
+  
+  public float harmLevel() {
+    return FULL_HARM;
   }
   
   

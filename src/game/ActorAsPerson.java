@@ -361,11 +361,16 @@ public class ActorAsPerson extends Actor {
   void updateVision() {
     if (indoors()) return;
     
-    float range = type().sightRange * (map.fog.lightLevel() + 1f) / 2;
+    float range = sightRange();
     map.fog.liftFog(at(), range);
     
     //  TODO:  Allow buildings to update fog-of-war as well (possibly on a
     //  different map-overlay for convenience.)
+  }
+  
+  
+  public float sightRange() {
+    return super.sightRange() * (map.fog.lightLevel() + 1f) / 2;
   }
   
   

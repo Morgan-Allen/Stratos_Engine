@@ -45,6 +45,15 @@ public class Task implements Session.Saveable {
     URGENT      =  7.5f,
     PARAMOUNT   =  10.0f
   ;
+  final public static float
+    EXTRA_HARM  =  1.5f,
+    FULL_HARM   =  1.0f,
+    MILD_HARM   =  0.5f,
+    NO_HARM     =  0.0f,
+    MILD_HELP   = -0.5f,
+    FULL_HELP   = -1.0f,
+    EXTRA_HELP  = -1.5f
+  ;
   
   Actor actor;
   Employer origin;
@@ -194,6 +203,11 @@ public class Task implements Session.Saveable {
       priorityEval = (chance * success) + ((1 - chance) * failure);
     }
     return priorityEval;
+  }
+  
+  
+  public float harmLevel() {
+    return NO_HARM;
   }
   
   
