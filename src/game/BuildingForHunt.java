@@ -13,7 +13,7 @@ public class BuildingForHunt extends Building {
   
   /**  Data fields, construction and save/load methods-
     */
-  public BuildingForHunt(Type type) {
+  public BuildingForHunt(BuildType type) {
     super(type);
   }
   

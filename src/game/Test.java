@@ -489,7 +489,7 @@ public class Test {
     
     if (! c.buildLevel.empty()) {
       report.append("\n\nBuilt:");
-      for (Type t : c.buildLevel.keys()) {
+      for (BuildType t : c.buildLevel.keys()) {
         int level = (int) c.buildLevel.valueFor(t);
         report.append("\n  "+level+"x "+t);
       }

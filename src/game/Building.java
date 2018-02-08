@@ -32,8 +32,11 @@ public class Building extends Element implements Pathing, Employer {
   private Tally <Type> materials = new Tally();
   private Tally <Good> inventory = new Tally();
   
+  List <BuildType> upgrades = new List();
+  private BuildType currentUpgrade = null;
   
-  public Building(Type type) {
+  
+  public Building(BuildType type) {
     super(type);
     this.ID = "#"+nextID++;
   }
@@ -56,6 +59,9 @@ public class Building extends Element implements Pathing, Employer {
     
     s.loadTally(materials);
     s.loadTally(inventory);
+    
+    s.loadObjects(upgrades);
+    currentUpgrade = (BuildType) s.loadObject();
   }
   
   
@@ -75,6 +81,14 @@ public class Building extends Element implements Pathing, Employer {
     
     s.saveTally(materials);
     s.saveTally(inventory);
+    
+    s.saveObjects(upgrades);
+    s.saveObject(currentUpgrade);
+  }
+  
+  
+  public BuildType type() {
+    return (BuildType) super.type();
   }
   
   
@@ -330,13 +344,18 @@ public class Building extends Element implements Pathing, Employer {
   
   
   
-  /**  Utility methods for finding points of supply/demand:
+  /**  Utility methods for demand-levels, materials and construction/upgrades-
     */
   public float demandFor(Good g) {
     float need = razing() ? 0 : materialNeed(g);
     float hasB = materialLevel(g);
     float hasG = inventory.valueFor(g);
     return need - (hasB + hasG);
+  }
+  
+  
+  public float materialNeed(Good g) {
+    return materialNeed(g, null);
   }
   
   
@@ -372,6 +391,60 @@ public class Building extends Element implements Pathing, Employer {
   
   public float craftProgress() {
     return 0;
+  }
+  
+  
+  public boolean canBeginUpgrade(BuildType upgrade) {
+    for (Good g : upgrade.builtFrom) {
+      if (! Visit.arrayIncludes(type().builtFrom, g)) return false;
+    }
+    for (BuildType need : upgrade.needsAsUpgrade) {
+      if (need != type() && ! upgrades.includes(need)) return false;
+    }
+    if (currentUpgrade != null || ! complete()) {
+      return false;
+    }
+    return true;
+  }
+  
+  
+  public boolean beginUpgrade(BuildType upgrade) {
+    if (! canBeginUpgrade(upgrade)) return false;
+    upgrades.add(upgrade);
+    currentUpgrade = upgrade;
+    return true;
+  }
+  
+  
+  public BuildType currentUpgrade() {
+    return currentUpgrade;
+  }
+  
+  
+  private float materialNeed(Good g, BuildType exceptUpgrade) {
+    float need = super.materialNeed(g);
+    for (BuildType u : upgrades) {
+      if (u == exceptUpgrade) continue;
+      need += u.buildNeed(g);
+    }
+    return need;
+  }
+  
+  
+  public float upgradeProgress() {
+    if (currentUpgrade == null) return 0;
+    //
+    //  Get a tally of all materials required *minus* the currentUpgrade.
+    //  Then compare with actual materials received.
+    //  Sum up any excess, and compare with sum of materials required for the
+    //  upgrade.  Return the fraction as progress.
+    float sumNeed = 0, sumHave = 0;
+    for (Good g : materials()) {
+      float needMinusUpgrade = materialNeed(g, currentUpgrade);
+      sumHave += Nums.max(0, materialLevel(g) - needMinusUpgrade);
+      sumNeed += currentUpgrade.buildNeed(g);
+    }
+    return sumHave / sumNeed;
   }
   
   

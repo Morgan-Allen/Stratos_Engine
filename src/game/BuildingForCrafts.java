@@ -23,7 +23,7 @@ public class BuildingForCrafts extends Building {
   float craftProgress;
   
   
-  public BuildingForCrafts(Type type) {
+  public BuildingForCrafts(BuildType type) {
     super(type);
   }
   

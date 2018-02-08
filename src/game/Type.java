@@ -17,27 +17,27 @@ public class Type extends Index.Entry implements Session.Saveable {
   final public static int
     IS_MEDIA       = -200,
     IS_TRAIT       = -100,
-    IS_TERRAIN     = 0,
-    IS_FIXTURE     = 1,
-    IS_STRUCTURAL  = 2,
-    IS_GOOD        = 3,
-    IS_BUILDING    = 4,
-    IS_UPGRADE     = 5,
-    IS_CRAFTS_BLD  = 6,
-    IS_GATHER_BLD  = 7,
-    IS_WATER_BLD   = 8,
-    IS_TRADE_BLD   = 9,
-    IS_HOME_BLD    = 10,
-    IS_AMENITY_BLD = 11,
-    IS_GOVERN_BLD  = 12,
-    IS_HUNTS_BLD   = 13,
-    IS_ARMY_BLD    = 14,
-    IS_WALLS_BLD   = 15,
-    IS_FAITH_BLD   = 16,
-    IS_NEST_BLD    = 17,
-    IS_ACTOR       = 18,
-    IS_PERSON_ACT  = 19,
-    IS_ANIMAL_ACT  = 20
+    IS_TERRAIN     =  0,
+    IS_FIXTURE     =  1,
+    IS_STRUCTURAL  =  2,
+    IS_GOOD        =  3,
+    IS_BUILDING    =  4,
+    IS_UPGRADE     =  5,
+    IS_CRAFTS_BLD  =  6,
+    IS_GATHER_BLD  =  7,
+    IS_WATER_BLD   =  8,
+    IS_TRADE_BLD   =  9,
+    IS_HOME_BLD    =  10,
+    IS_AMENITY_BLD =  11,
+    IS_GOVERN_BLD  =  12,
+    IS_HUNTS_BLD   =  13,
+    IS_ARMY_BLD    =  14,
+    IS_WALLS_BLD   =  15,
+    IS_FAITH_BLD   =  16,
+    IS_NEST_BLD    =  17,
+    IS_ACTOR       =  18,
+    IS_PERSON_ACT  =  19,
+    IS_ANIMAL_ACT  =  20
   ;
   
   final static Index <Type> INDEX = new Index();
@@ -135,61 +135,26 @@ public class Type extends Index.Entry implements Session.Saveable {
     //  Note:  1 unit of 'nothing' is always included in the list of
     //  build-materials so that a foundation can be laid and allow
     //  other materials to arrive.
-    Object ground[] = { VOID, 1 };
-    args = Visit.compose(Object.class, ground, args);
+    if (! Visit.arrayIncludes(args, VOID)) {
+      Object ground[] = { VOID, 1 };
+      args = Visit.compose(Object.class, ground, args);
+    }
     Object split[][] = Visit.splitByModulus(args, 2);
     builtFrom   = (Good   []) castArray(split[0], Good   .class);
     builtAmount = (Integer[]) castArray(split[1], Integer.class);
   }
   
   
+  public float buildNeed(Good g) {
+    int index = Visit.indexOf(g, builtFrom);
+    if (index != -1) return builtAmount[index];
+    return 0;
+  }
+  
+  
   
   /**  Building-specific data fields and setup methods-
     */
-  public Type    upgradeTiers[] = NO_TIERS;
-  public Good    homeFoods   [] = {};
-  public Good    buildsWith  [] = NO_GOODS;
-  public boolean worksBeforeBuilt = false;
-  public Tally <Type> upgradeNeeds = new Tally();
-  public Tally <Good> homeUseGoods = new Tally();
-  
-  public int homeSocialClass  = CLASS_COMMON;
-  public int homeAmbienceNeed = AMBIENCE_MIN;
-  
-  public Good needed  [] = NO_GOODS;
-  public Good produced[] = NO_GOODS;
-  public Good canOrder[] = NO_GOODS;
-  public Good features[] = NO_GOODS;
-  public Type gatherFlag = null;
-  public Trait craftSkill = null;
-  
-  public int updateTime      = AVG_UPDATE_GAP  ;
-  public int craftTime       = AVG_CRAFT_TIME  ;
-  public int gatherRange     = AVG_GATHER_RANGE;
-  public int maxDeliverRange = MAX_TRADER_RANGE;
-  public int maxStock        = AVG_MAX_STOCK   ;
-  public int homeUseTime     = HOME_USE_TIME   ;
-  public int featureAmount   = AVG_SERVICE_GIVE;
-  
-  public Tally <Type> workerTypes = new Tally();
-  public int maxResidents = 0;
-  public int maxVisitors  = AVG_MAX_VISITORS;
-  public int maxRecruits  = AVG_ARMY_SIZE;
-  
-  
-  public void setUpgradeTiers(Type... tiers) {
-    this.upgradeTiers = tiers;
-  }
-  
-  
-  public void setFeatures(Good... features) {
-    this.features = features;
-  }
-  
-  
-  public boolean hasFeature(Good feature) {
-    return Visit.arrayIncludes(features, feature);
-  }
   
   
   public boolean isNatural() {

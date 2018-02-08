@@ -15,7 +15,7 @@ public class BuildingForArmy extends BuildingForCrafts {
   List <Actor> recruits = new List();
   
   
-  public BuildingForArmy(Type type) {
+  public BuildingForArmy(BuildType type) {
     super(type);
   }
   

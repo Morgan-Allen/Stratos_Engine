@@ -13,7 +13,7 @@ public class BuildingForGather extends Building {
   
   /**  Data fields, construction and save/load methods-
     */
-  public BuildingForGather(Type type) {
+  public BuildingForGather(BuildType type) {
     super(type);
   }
   

@@ -14,10 +14,10 @@ public class BuildingForHome extends Building {
   
   /**  Data fields, construction and save/load methods-
     */
-  Type currentTier;
+  BuildType currentTier;
   
   
-  public BuildingForHome(Type type) {
+  public BuildingForHome(BuildType type) {
     super(type);
     this.currentTier = type;
   }
@@ -25,7 +25,7 @@ public class BuildingForHome extends Building {
   
   public BuildingForHome(Session s) throws Exception {
     super(s);
-    currentTier = (Type) s.loadObject();
+    currentTier = (BuildType) s.loadObject();
   }
   
   
@@ -72,7 +72,7 @@ public class BuildingForHome extends Building {
   }
   
   
-  boolean performAmbienceCheck(Type tier, Tally <Type> access) {
+  boolean performAmbienceCheck(BuildType tier, Tally <Type> access) {
     //
     //  This method checks the surrounding tiles out to a distance of 6 tiles:
     final int MAX_AMBIENCE_DIST = 6;
@@ -129,7 +129,7 @@ public class BuildingForHome extends Building {
   }
   
   
-  boolean performServicesCheck(Type tier, Tally <Type> access) {
+  boolean performServicesCheck(BuildType tier, Tally <Type> access) {
     boolean allOK = true;
     for (Type need : tier.upgradeNeeds.keys()) {
       float amount = tier.upgradeNeeds.valueFor(need);
@@ -139,15 +139,15 @@ public class BuildingForHome extends Building {
   }
   
   
-  Type tierOffset(int off) {
-    Type tiers[] = type().upgradeTiers;
+  BuildType tierOffset(int off) {
+    BuildType tiers[] = type().upgradeTiers;
     int index = Visit.indexOf(currentTier, tiers);
     if (index == -1) return type();
     return tiers[Nums.clamp(index + off, tiers.length)];
   }
   
   
-  public Type currentTier() {
+  public BuildType currentTier() {
     return currentTier;
   }
   
@@ -155,7 +155,7 @@ public class BuildingForHome extends Building {
   
   /**  Stock and consumption-related checks:
     */
-  boolean performConsumerCheck(Type tier, Tally <Type> access) {
+  boolean performConsumerCheck(BuildType tier, Tally <Type> access) {
     for (Good g : tier.homeUseGoods.keys()) {
       float amount = inventory(g);
       if (amount < maxTierStock(g, tier)) return false;
@@ -180,13 +180,13 @@ public class BuildingForHome extends Building {
   }
   
   
-  float maxTierStock(Good g, Type tier) {
+  float maxTierStock(Good g, BuildType tier) {
     if (Visit.arrayIncludes(type().homeFoods, g)) return 5;
     return tier.homeUseGoods.valueFor(g);
   }
   
   
-  public Batch <Good> usedBy(Type tier) {
+  public Batch <Good> usedBy(BuildType tier) {
     Batch <Good> consumes = new Batch();
     for (Good g : type().homeFoods        ) consumes.add(g);
     for (Good g : tier.homeUseGoods.keys()) consumes.add(g);
@@ -195,7 +195,7 @@ public class BuildingForHome extends Building {
   
   
   public Tally <Good> homeUsed() {
-    Type tier = tierOffset(1);
+    BuildType tier = tierOffset(1);
     Batch <Good> consumed = usedBy(tier);
     Tally <Good> cons = new Tally();
     for (Good g : consumed) cons.set(g, maxTierStock(g, tier));
@@ -213,7 +213,7 @@ public class BuildingForHome extends Building {
       return;
     }
     
-    Type nextTier = tierOffset(1), lastTier = tierOffset(-1);
+    BuildType nextTier = tierOffset(1), lastTier = tierOffset(-1);
     Tally <Type> access = checkServiceAccess();
     
     boolean nextAmbOK = performAmbienceCheck(nextTier   , access);
@@ -235,7 +235,7 @@ public class BuildingForHome extends Building {
   }
   
   
-  public void setCurrentTier(Type tier) {
+  public void setCurrentTier(BuildType tier) {
     if (Visit.arrayIncludes(type().upgradeTiers, tier)) return;
     currentTier = tier;
     
@@ -244,7 +244,7 @@ public class BuildingForHome extends Building {
   }
   
   
-  void advanceHomeUse(Type tier) {
+  void advanceHomeUse(BuildType tier) {
     float conLevel = (1 + (residents.size() * 1f / type().maxResidents)) / 2;
     conLevel *= type().updateTime;
     conLevel /= tier.homeUseTime;
@@ -259,7 +259,7 @@ public class BuildingForHome extends Building {
   }
   
   
-  void generateOutputs(Type tier) {
+  void generateOutputs(BuildType tier) {
     float taxLevel = residents.size() * TAX_VALUES[type().homeSocialClass];
     taxLevel *= (1 + Visit.indexOf(tier, type().upgradeTiers));
     taxLevel *= type().updateTime;
@@ -273,10 +273,10 @@ public class BuildingForHome extends Building {
     if (actor.onMap()) {
       Building home = actor.home();
       if (home == null) return 0;
-      Type type = home.type();
+      BuildType type = home.type();
       if (type.category != Type.IS_HOME_BLD) return 0;
       
-      Type currentTier = ((BuildingForHome) home).currentTier;
+      BuildType currentTier = ((BuildingForHome) home).currentTier;
       float tier = Visit.indexOf(currentTier, type.upgradeTiers);
       tier /= Nums.max(1, type.upgradeTiers.length - 1);
       tier += type.homeSocialClass * 1f / CLASS_NOBLE;
@@ -308,7 +308,7 @@ public class BuildingForHome extends Building {
       }
       //
       //  Failing that, see if you can go shopping:
-      Type tier = tierOffset(1);
+      BuildType tier = tierOffset(1);
       class Order { Building b; Good g; float amount; }
       Pick <Order> pickS = new Pick();
       

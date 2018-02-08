@@ -20,7 +20,7 @@ public class BuildingForTrade extends Building implements Trader {
   Good needed[] = NO_GOODS, produced[] = NO_GOODS;
   
   
-  public BuildingForTrade(Type type) {
+  public BuildingForTrade(BuildType type) {
     super(type);
   }
   

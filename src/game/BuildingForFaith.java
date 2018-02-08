@@ -1,5 +1,8 @@
 
+
+
 package game;
+import static game.GameConstants.*;
 
 
 
@@ -8,7 +11,7 @@ package game;
 public class BuildingForFaith extends Building {
   
   
-  public BuildingForFaith(Type type) {
+  public BuildingForFaith(BuildType type) {
     super(type);
   }
   

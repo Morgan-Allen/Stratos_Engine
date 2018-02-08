@@ -26,7 +26,7 @@ public class VenuePane extends DetailPane {
     this.text.setText("");
     final Description d = this.text;
     
-    Type type = venue.type();
+    BuildType type = venue.type();
     
     d.append(""+venue.toString());//+" (Level "+venue.structure.venueLevel()+")");
     d.append("\n");

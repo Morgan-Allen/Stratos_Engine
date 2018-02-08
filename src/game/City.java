@@ -78,7 +78,7 @@ public class City implements Session.Saveable, Trader {
   private float armyPower    = 0;
   Tally <Good> tradeLevel = new Tally();
   Tally <Good> inventory  = new Tally();
-  Tally <Type> buildLevel = new Tally();
+  Tally <BuildType> buildLevel = new Tally();
   
   List <Mission> missions = new List();
   
@@ -206,7 +206,7 @@ public class City implements Session.Saveable, Trader {
   }
   
   
-  public Tally <Type> buildLevel() {
+  public Tally <BuildType> buildLevel() {
     return buildLevel;
   }
   
@@ -492,7 +492,7 @@ public class City implements Session.Saveable, Trader {
     */
   float idealPopulation() {
     float sum = 0;
-    for (Type t : buildLevel.keys()) {
+    for (BuildType t : buildLevel.keys()) {
       float l = buildLevel.valueFor(t);
       sum += l * t.maxResidents;
     }
@@ -505,7 +505,7 @@ public class City implements Session.Saveable, Trader {
     float powerC = citizen == null ? 0 : TaskCombat.attackPower(citizen);
     
     float sum = 0;
-    for (Type t : buildLevel.keys()) {
+    for (BuildType t : buildLevel.keys()) {
       if (t.isArmyOrWallsBuilding()) {
         float l = buildLevel.valueFor(t), sumW = 0;
         for (Type w : t.workerTypes.keys()) {
@@ -555,7 +555,7 @@ public class City implements Session.Saveable, Trader {
   
   float wallsLevel() {
     float sum = 0;
-    for (Type t : buildLevel.keys()) {
+    for (BuildType t : buildLevel.keys()) {
       if (t.category == Type.IS_WALLS_BLD) {
         float l = buildLevel.valueFor(t);
         sum += l * 1;

@@ -282,8 +282,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   
   
   public float materialNeed(Good g) {
-    int index = Visit.indexOf(g, type.builtFrom);
-    return index == -1 ? 0 : type.builtAmount[index];
+    return type.buildNeed(g);
   }
   
   

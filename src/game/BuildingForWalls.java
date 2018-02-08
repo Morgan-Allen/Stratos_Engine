@@ -12,7 +12,7 @@ public class BuildingForWalls extends Building {
   boolean tower, gate;
   
   
-  public BuildingForWalls(Type type) {
+  public BuildingForWalls(BuildType type) {
     super(type);
     tower = type.hasFeature(IS_TOWER);
     gate  = type.hasFeature(IS_GATE );

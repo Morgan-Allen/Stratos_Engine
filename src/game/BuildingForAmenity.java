@@ -1,6 +1,7 @@
 
 
 package game;
+import static game.GameConstants.*;
 
 
 
@@ -9,7 +10,7 @@ public class BuildingForAmenity extends Building {
   
   /**  Data fields, construction and save/load methods-
     */
-  public BuildingForAmenity(Type type) {
+  public BuildingForAmenity(BuildType type) {
     super(type);
   }
   

@@ -1,9 +1,6 @@
 
 
 package game;
-import util.*;
-import static game.Task.*;
-import static game.CityMap.*;
 import static game.GameConstants.*;
 
 
@@ -13,7 +10,7 @@ public class BuildingForGovern extends Building {
   
   /**  Data fields, construction and save/load methods-
     */
-  public BuildingForGovern(Type type) {
+  public BuildingForGovern(BuildType type) {
     super(type);
   }
   

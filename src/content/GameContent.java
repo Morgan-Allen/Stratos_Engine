@@ -540,7 +540,7 @@ public class GameContent {
     SCHOOL_TEK.name = "Tek Priest School";
     SCHOOL_SPA.name = "Spacer School";
     
-    for (Type t : PSI_SCHOOL_BUILDINGS) {
+    for (BuildType t : PSI_SCHOOL_BUILDINGS) {
       t.tint = TINT_RELIGIOUS;
       t.setDimensions(6, 6, 3);
       t.setBuildMaterials(PARTS, 15);
