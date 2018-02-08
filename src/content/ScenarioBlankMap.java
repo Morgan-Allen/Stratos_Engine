@@ -14,6 +14,9 @@ public class ScenarioBlankMap extends CityMapScenario {
   
   
   
+  List <BuildingForNest> nests = new List();
+  
+  
   public ScenarioBlankMap() {
     super();
   }
@@ -21,11 +24,13 @@ public class ScenarioBlankMap extends CityMapScenario {
   
   public ScenarioBlankMap(Session s) throws Exception {
     super(s);
+    s.loadObjects(nests);
   }
   
   
   public void saveState(Session s) throws Exception {
     super.saveState(s);
+    s.saveObjects(nests);
   }
   
   
@@ -112,9 +117,62 @@ public class ScenarioBlankMap extends CityMapScenario {
       playUI().assignHomePoint(bastion);
     }
     
+    //
+    //  TODO:  Insert lairs and add those to a list for subsequent spawning
+    //  updates!
+    
+  }
+  
+  
+  
+  public void updateScenario() {
+    super.updateScenario();
+    
+    //  TODO:  Update spawning routines.  And arrange for an assault of some
+    //  kind upon the player's settlement.
+    
+    //  TODO:  Move this out to the Nest class itself!
+    
+    int time = stage().time();
+    
+    for (BuildingForNest nest : nests) {
+      if ((time + (nest.varID() * 25)) % 100 == 0) {
+        if (nest.residents().size() < 4) {
+          Type spawned = Rand.yes() ? TRIPOD : DRONE;
+          Test.spawnWalker(nest, spawned, true);
+        }
+        else {
+          
+          Pick <Building> pick = new Pick();
+          for (Building b : nest.map().buildings()) {
+            if (! TaskCombat.hostile(b, nest)) continue;
+            if (! nest.map().pathCache.pathConnects(nest, b, true, false)) continue;
+            
+            float rating = 1f;
+            rating *= CityMap.distancePenalty(nest, b);
+            pick.compare(b, rating);
+          }
+          
+          if (! pick.empty()) {
+            Mission assault = new Mission(
+              Mission.OBJECTIVE_CONQUER, nest.homeCity(), false
+            );
+            assault.setFocus(pick.result(), 0, nest.map());
+          }
+        }
+      }
+    }
+    
+    
   }
   
 }
+
+
+
+
+
+
 
 
 
