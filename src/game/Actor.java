@@ -532,7 +532,13 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   public void takeDamage(float damage) {
     if (map == null || ! map.world.settings.toggleInjury) return;
     injury += damage;
+    injury = Nums.clamp(injury, 0, maxHealth());
     checkHealthState();
+  }
+  
+  
+  public void liftDamage(float damage) {
+    takeDamage(0 - damage);
   }
   
   

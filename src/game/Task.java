@@ -37,6 +37,7 @@ public class Task implements Session.Saveable {
     COMBAT    ,
     RETREAT   ,
     DIALOG    ,
+    CASTING   ,
   };
   final public static float
     NO_PRIORITY = -1.0f,
@@ -46,6 +47,7 @@ public class Task implements Session.Saveable {
     PARAMOUNT   =  10.0f
   ;
   final public static float
+    HARM_NULL   = -1.0f,
     EXTRA_HARM  =  1.5f,
     FULL_HARM   =  1.0f,
     MILD_HARM   =  0.5f,

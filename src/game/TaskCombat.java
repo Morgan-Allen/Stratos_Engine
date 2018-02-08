@@ -61,12 +61,28 @@ public class TaskCombat extends Task {
   
   
   static boolean allied(Target a, Target b) {
+    //  TODO:  Replace?
     return postureFor(a, b) == POSTURE.ALLY;
   }
   
   
   static boolean hostile(Target a, Target b) {
+    //  TODO:  Replace?
     return postureFor(a, b) == POSTURE.ENEMY;
+  }
+  
+  
+  static float hostility(Target a, Target b) {
+    POSTURE p = postureFor(a, b);
+    switch(p) {
+      case ENEMY  : return 1;
+      case ALLY   : return -1;
+      case VASSAL : return -0.5f;
+      case LORD   : return -1;
+      case NEUTRAL: return 0;
+      case TRADING: return -0.5f;
+    }
+    return 0;
   }
   
   
