@@ -729,6 +729,21 @@ public class City implements Session.Saveable, Trader {
   }
   
   
+
+  /**  Last-but-not-least, returning available Powers:
+    */
+  public Series <Technique> rulerPowers() {
+    Batch <Technique> all = new Batch();
+    if (activeMap() == null) {
+      return all;
+    }
+    for (Building b : map.buildings) if (b.homeCity() == this) {
+      for (Technique t : b.rulerPowers()) all.include(t);
+    }
+    return all;
+  }
+  
+  
   
   /**  Graphical, debug and interface methods-
     */

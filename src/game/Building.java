@@ -607,6 +607,23 @@ public class Building extends Element implements Pathing, Employer {
   
   
   
+  /**  Last-but-not-least, returning available Powers:
+    */
+  public Series <Technique> rulerPowers() {
+    Batch <Technique> all = new Batch();
+    if (complete()) for (Technique t : type().rulerPowers) {
+      all.include(t);
+    }
+    for (BuildType u : upgrades) if (u != currentUpgrade) {
+      for (Technique t : u.rulerPowers) {
+        all.include(t);
+      }
+    }
+    return all;
+  }
+  
+  
+  
   /**  Graphical, debug and interface methods-
     */
   protected boolean reports() {

@@ -552,6 +552,9 @@ public class GameContent {
       t.features        = new Good[] { RELIGION };
     }
     
+    SCHOOL_COL.workerTypes.setWith(Collective.COLLECTIVE, 2);
+    SCHOOL_COL.rulerPowers = new Technique[] { Collective.PSY_HEAL };
+    
     
     WALKWAY.name = "Walkway";
     WALKWAY.tint = PAVE_COLOR;
@@ -654,6 +657,8 @@ public class GameContent {
     SOLAR_TOWER.setBuildMaterials(PLASTICS, 2, PARTS, 2);
     SOLAR_TOWER.maxStock   = 25;
     SOLAR_TOWER.produced   = new Good[] {};
+    
+    
   }
   
   

@@ -9,6 +9,7 @@ import graphics.common.*;
 import graphics.widgets.*;
 import gameUI.misc.*;
 import util.*;
+import static game.GameConstants.*;
 
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.math.Vector2;
@@ -102,36 +103,47 @@ public class OptionList extends UIGroup implements UIConstants {
   }
   
   
-  //  TODO:  Restore this!
-  
-  /*
   private class PowerButton extends Button {
-    final Technique power;
-    final Base base;
-    final Element subject;
     
-    PowerButton(PlayUI UI, Technique power, Base base, Element subject) {
+    final Technique power;
+    final City base;
+    
+    
+    PowerButton(PlayUI UI, Technique power, City base) {
       super(
         UI, power.uniqueID()+"_button",
         power.icon, Button.CIRCLE_LIT, power.info
       );
-      this.power   = power  ;
-      this.base    = base   ;
-      this.subject = subject;
+      this.power = power;
+      this.base  = base ;
     }
     
     
     protected void updateState() {
-      this.enabled = base.credits() >= power.costCash;
+      this.enabled = base.funds() >= power.costCash;
       super.updateState();
     }
     
     
     protected void whenClicked() {
-      power.applyAsPower(base, subject);
+
+      final PlayTask task = new PlayTask() {
+        public void doTask(PlayUI UI) {
+          Target hovered = (Target) UI.selection.hovered();
+          
+          if (power.canUsePower(base, hovered)) {
+            if (UI.mouseClicked()) {
+              power.applyAsPower(base, hovered);
+            }
+          }
+          else {
+            //  TODO:  Render a disabled icon!
+          }
+        }
+      };
+      BUI.assignTask(task);
     }
   }
-  //*/
   
   
   private void setup() {
@@ -158,16 +170,9 @@ public class OptionList extends UIGroup implements UIConstants {
       }
     });
     
-    /*
-    for (Venue v : stage.allVenues()) if (v instanceof Technique.Source) {
-      Technique.Source source = (Technique.Source) v;
-      for (Technique t : source.techniquesAvailable()) {
-        if (! t.canUsePower(base, subject)) continue;
-        options.add(new PowerButton(BUI, t, base, subject));
-      }
+    for (Technique t : base.rulerPowers()) {
+      options.add(new PowerButton(BUI, t, base));
     }
-    
-    //*/
     
     final int sizeB = OPT_BUTTON_SIZE, spaceB = sizeB + OPT_MARGIN;
     int sumWide = options.size() * spaceB, across = 0;

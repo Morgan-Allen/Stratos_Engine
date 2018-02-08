@@ -321,6 +321,9 @@ public class GameConstants {
     public boolean isUpgrade = false;
     public BuildType needsAsUpgrade[] = {};
     
+    public Technique rulerPowers[] = {};
+    public Technique actorPowers[] = {};
+    
     
     public void setUpgradeTiers(BuildType... tiers) {
       this.upgradeTiers = tiers;
