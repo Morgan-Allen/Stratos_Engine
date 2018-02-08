@@ -121,10 +121,15 @@ public class GameContent {
     ALL_OILS [] = { CLAY_BANK1 }
   ;
   final public static ActorType
-    QUDU     = new ActorType(ActorAsAnimal.class, "animal_qudu"    , IS_ANIMAL_ACT),
-    VAREEN   = new ActorType(ActorAsAnimal.class, "animal_vareen"  , IS_ANIMAL_ACT),
-    MICOVORE = new ActorType(ActorAsAnimal.class, "animal_micovore", IS_ANIMAL_ACT),
-    ALL_ANIMALS[] = { QUDU, VAREEN, MICOVORE }
+    QUDU     = new ActorType(ActorAsAnimal.class, "animal_qudu"     , IS_ANIMAL_ACT),
+    VAREEN   = new ActorType(ActorAsAnimal.class, "animal_vareen"   , IS_ANIMAL_ACT),
+    MICOVORE = new ActorType(ActorAsAnimal.class, "animal_micovore" , IS_ANIMAL_ACT),
+    ALL_ANIMALS[] = { QUDU, VAREEN, MICOVORE },
+    
+    DRONE    = new ActorType(ActorAsAnimal.class, "artilect_drone"  , IS_ANIMAL_ACT),
+    TRIPOD   = new ActorType(ActorAsAnimal.class, "artilect_tripod" , IS_ANIMAL_ACT),
+    CRANIAL  = new ActorType(ActorAsAnimal.class, "artilect_cranial", IS_ANIMAL_ACT),
+    ALL_ARTILECTS[] = { DRONE, TRIPOD, CRANIAL }
   ;
   static {
     
@@ -172,19 +177,19 @@ public class GameContent {
     LAKE.isWater = true;
     
     //  TODO:  UNIFY WITH WALKER-TYPES BELOW!
-    QUDU .name        = "Qudu";
-    QUDU .habitats    = new Terrain[] { JUNGLE, MEADOW };
-    QUDU .predator    = false;
-    QUDU .meleeDamage = 1;
-    QUDU .armourClass = 2;
-    QUDU .maxHealth   = 8;
+    QUDU.name        = "Qudu";
+    QUDU.habitats    = new Terrain[] { JUNGLE, MEADOW };
+    QUDU.predator    = false;
+    QUDU.meleeDamage = 1;
+    QUDU.armourClass = 2;
+    QUDU.maxHealth   = 8;
     
-    VAREEN .name        = "Vareen";
-    VAREEN .habitats    = new Terrain[] { MEADOW, DESERT };
-    VAREEN .predator    = false;
-    VAREEN .meleeDamage = 0;
-    VAREEN .armourClass = 0;
-    VAREEN .maxHealth   = 2;
+    VAREEN.name        = "Vareen";
+    VAREEN.habitats    = new Terrain[] { MEADOW, DESERT };
+    VAREEN.predator    = false;
+    VAREEN.meleeDamage = 0;
+    VAREEN.armourClass = 0;
+    VAREEN.maxHealth   = 2;
     
     MICOVORE.name        = "Micovore";
     MICOVORE.habitats    = new Terrain[] { JUNGLE };
@@ -198,6 +203,45 @@ public class GameContent {
       s.lifespan = s.predator ? HUNTER_LIFESPAN : GRAZER_LIFESPAN;
       s.meatType = PROTEIN;
     }
+    
+    final String ARTILECTS_DIR = "media/Actors/artilects/";
+    final String ARTILECTS_XML = "ArtilectModels.xml";
+    
+    DRONE.name        = "Drone";
+    DRONE.predator    = false;
+    DRONE.meleeDamage = 0;
+    DRONE.rangeDamage = 2;
+    DRONE.armourClass = 4;
+    DRONE.maxHealth   = 8;
+    
+    DRONE.model = MS3DModel.loadFrom(
+      ARTILECTS_DIR, "DefenceDrone.ms3d",
+      GameContent.class, ARTILECTS_XML, "Defence Drone"
+    );
+    
+    TRIPOD.name        = "Tripod";
+    TRIPOD.predator    = false;
+    TRIPOD.meleeDamage = 4;
+    TRIPOD.rangeDamage = 6;
+    TRIPOD.armourClass = 6;
+    TRIPOD.maxHealth   = 15;
+    
+    TRIPOD.model = MS3DModel.loadFrom(
+      ARTILECTS_DIR, "Tripod.ms3d",
+      GameContent.class, ARTILECTS_XML, "Tripod"
+    );
+    
+    CRANIAL.name        = "Cranial";
+    CRANIAL.predator    = false;
+    CRANIAL.meleeDamage = 6;
+    CRANIAL.armourClass = 8;
+    CRANIAL.maxHealth   = 12;
+    
+    CRANIAL.model = MS3DModel.loadFrom(
+      ARTILECTS_DIR, "Cranial.ms3d",
+      GameContent.class, ARTILECTS_XML, "Cranial"
+    );
+    
     
     int i = 0;
     for (Good c : CROP_TYPES) {

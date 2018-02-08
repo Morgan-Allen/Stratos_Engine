@@ -121,6 +121,38 @@ public class ScenarioBlankMap extends CityMapScenario {
     //  TODO:  Insert lairs and add those to a list for subsequent spawning
     //  updates!
     
+    //  Ideally, you want to place the lairs in sectors where you don't find
+    //  the main settlement.
+    
+    class SiteOption { Tile at; float rating; }
+    List <SiteOption> options = new List <SiteOption> () {
+      protected float queuePriority(SiteOption r) {
+        return r.rating;
+      }
+    };
+    for (Coord c : Visit.grid(0, 0, stage.size(), stage.size(), 8)) {
+      Tile at = stage.tileAt(c);
+      float dist = CityMap.distance(bastion, at);
+      if (dist <= 16) continue;
+      
+      float rating = 16f * Rand.num() * dist;
+      SiteOption option = new SiteOption();
+      option.at = at;
+      option.rating = rating;
+      options.add(option);
+    }
+    
+    options.queueSort();
+    
+    int NUM_LAIRS = 3;
+    for (int n = NUM_LAIRS; n-- > 0;) {
+      SiteOption o = options.removeFirst();
+      BuildingForNest nest = (BuildingForNest) RUINS_LAIR.generate();
+      nest.enterMap(stage, o.at.x, o.at.y, 1, stage.locals);
+      nests.add(nest);
+    }
+    
+    City.setPosture(base, stage.locals, City.POSTURE.ENEMY, true);
   }
   
   

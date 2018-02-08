@@ -12,6 +12,9 @@ import static game.CityMapPathCache.*;
 public class TaskCombat extends Task {
   
   
+  
+  /**  Data fields, construction and save/load methods-
+    */
   final static int
     ATTACK_NONE  = 0,
     ATTACK_MELEE = 1,
@@ -43,7 +46,10 @@ public class TaskCombat extends Task {
   }
   
   
-  static POSTURE postureFor(Element a, Element b) {
+  
+  /**  Utility methods for determining hostility, power, et cetera:
+    */
+  public static POSTURE postureFor(Element a, Element b) {
     City CA = a.homeCity (), CB = b.homeCity ();
     City GA = a.guestCity(), GB = b.guestCity();
     if (CA == CB) return POSTURE.ALLY;
@@ -54,25 +60,25 @@ public class TaskCombat extends Task {
   }
   
   
-  static POSTURE postureFor(Target a, Target b) {
+  public static POSTURE postureFor(Target a, Target b) {
     if (a.isTile() || b.isTile()) return POSTURE.NEUTRAL;
     return postureFor((Element) a, (Element) b);
   }
   
   
-  static boolean allied(Target a, Target b) {
+  public static boolean allied(Target a, Target b) {
     //  TODO:  Replace?
     return postureFor(a, b) == POSTURE.ALLY;
   }
   
   
-  static boolean hostile(Target a, Target b) {
+  public static boolean hostile(Target a, Target b) {
     //  TODO:  Replace?
     return postureFor(a, b) == POSTURE.ENEMY;
   }
   
   
-  static float hostility(Target a, Target b) {
+  public static float hostility(Target a, Target b) {
     POSTURE p = postureFor(a, b);
     switch(p) {
       case ENEMY  : return 1;
@@ -86,7 +92,7 @@ public class TaskCombat extends Task {
   }
   
   
-  static float attackPower(Type t) {
+  public static float attackPower(Type t) {
     float power = Nums.max(t.meleeDamage, t.rangeDamage) + t.armourClass;
     power /= Nums.max(AVG_MELEE, AVG_MISSILE) + AVG_DEFEND;
     power *= t.maxHealth * 1f / AVG_MAX_HEALTH;
@@ -94,7 +100,7 @@ public class TaskCombat extends Task {
   }
   
   
-  static float attackPower(Actor a) {
+  public static float attackPower(Actor a) {
     if (a.state >= Actor.STATE_DEAD) return 0;
     float power = attackPower(a.type());
     power *= 1 - ((a.injury + a.hunger) / a.type().maxHealth);
@@ -102,6 +108,10 @@ public class TaskCombat extends Task {
   }
   
   
+  
+  
+  /**  Factory methods for actual combat behaviours-
+    */
   
   static TaskCombat nextSieging(Actor actor, Mission formation) {
     if (formation.focus instanceof Element) {
@@ -317,7 +327,9 @@ public class TaskCombat extends Task {
   }
   
   
-
+  
+  /**  Behaviour-execution-
+    */
   boolean checkAndUpdateTask() {
     Task self = configCombat(actor, primary, actor.mission, this, type);
     if (self == null) return false;
@@ -343,10 +355,8 @@ public class TaskCombat extends Task {
     return FULL_HARM;
   }
   
-  
   //  TODO:  You should also update the risk-assessment methods- win priority
   //  and success-chance, plus the motive-bonus for any reward attached.
-  
   
   protected void onTarget(Target other) {
     actor.performAttack(primary, attackMode == ATTACK_MELEE);

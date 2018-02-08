@@ -92,6 +92,11 @@ public abstract class CityMapScenario implements Session.Saveable {
   }
   
   
+  public City    base () { return base ; }
+  public CityMap stage() { return stage; }
+  public World   verse() { return verse; }
+  
+  
   public void renderVisuals(Rendering rendering) {
     stage.renderStage(rendering, base);
   }

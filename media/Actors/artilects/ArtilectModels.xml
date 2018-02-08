@@ -1,0 +1,175 @@
+
+
+
+<model
+  name="Defence Drone"
+  format="MS3D"
+  type="JOINT"
+  path="media/Actors/artilects/"
+  file="DefenceDrone.ms3d"
+  scale="0.015"
+  bound="2.5"
+  stride="1.5"
+  height="2.5"
+>
+  <animations rotate="90">
+    <animation name="stand"       start="1"  end="1"  duration="1"   />
+    <animation name="move"        start="1"  end="3"  duration="1"   />
+    <animation name="move_fast"   start="1"  end="3"  duration="1"   />
+    <animation name="fall"        start="3"  end="5"  duration="3"   />
+    <animation name="strike"      start="1"  end="3"  duration="1"   />
+    <animation name="fire"        start="1"  end="3"  duration="1"   />
+  </animations>
+  
+  <attachPoints>
+    <attachPoint function="fire" joint="core"/>
+    <attachPoint function="target" joint="core"/>
+  </attachPoints>
+</model>
+
+
+<model
+  name="Recon Drone"
+  format="MS3D"
+  type="JOINT"
+  path="media/Actors/artilects/"
+  file="ReconDrone.ms3d"
+  scale="0.015"
+  bound="2.5"
+  stride="1.5"
+  height="2.5"
+>
+  <animations rotate="90">
+    <animation name="stand"       start="1"  end="1"  duration="1"   />
+    <animation name="move"        start="1"  end="3"  duration="1"   />
+    <animation name="move_fast"   start="1"  end="3"  duration="1"   />
+    <animation name="fall"        start="3"  end="5"  duration="3"   />
+    <animation name="strike"      start="1"  end="3"  duration="1"   />
+    <animation name="fire"        start="1"  end="3"  duration="1"   />
+  </animations>
+  
+  <attachPoints>
+    <attachPoint function="fire" joint="core"/>
+    <attachPoint function="target" joint="core"/>
+  </attachPoints>
+</model>
+
+
+<model
+  name="Blast Drone"
+  format="MS3D"
+  type="JOINT"
+  path="media/Actors/artilects/"
+  file="BlastDrone.ms3d"
+  scale="0.015"
+  bound="2.5"
+  stride="1.5"
+  height="2.5"
+>
+  <animations rotate="90">
+    <animation name="stand"       start="1"  end="1"  duration="1"   />
+    <animation name="move"        start="1"  end="3"  duration="1"   />
+    <animation name="move_fast"   start="1"  end="3"  duration="1"   />
+    <animation name="fall"        start="3"  end="5"  duration="3"   />
+    <animation name="strike"      start="1"  end="3"  duration="1"   />
+    <animation name="fire"        start="1"  end="3"  duration="1"   />
+  </animations>
+  
+  <attachPoints>
+    <attachPoint function="fire" joint="core"/>
+    <attachPoint function="target" joint="core"/>
+  </attachPoints>
+</model>
+
+
+<model
+  name="Tripod"
+  format="MS3D"
+  type="JOINT"
+  path="media/Actors/artilects/"
+  file="Tripod.ms3d"
+  scale="0.055"
+  bound="2.5"
+  stride="1.5"
+  height="2.5"
+>
+  <animations rotate="90" fps="1">
+    <animation name="strike"     start="0"   end="40"  duration="1.5" />
+    <animation name="build"      start="41" end="261" duration="4" />
+    <animation name="reach_down" start="303" end="600" duration="4" />
+    <animation name="fire"       start="600" end="650" duration="1" />
+    <animation name="idle"       start="651" end="681" duration="1" />
+    <animation name="look"       start="682" end="849" duration="4" />
+    <animation name="move"       start="850" end="910" duration="1" />
+    <animation name="move_fast"  start="850" end="910" duration="0.7" />
+    <animation name="fall"       start="911" end="986" duration="2" />
+  </animations>
+  
+  <attachPoints>
+    <attachPoint function="fire"   joint="head"/>
+    <attachPoint function="target" joint="head"/>
+  </attachPoints>
+</model>
+
+
+
+<model
+  name="Cranial"
+  format="MS3D"
+  type="JOINT"
+  path="media/Actors/artilects/"
+  file="Cranial.ms3d"
+  scale="0.25"
+  bound="2.5"
+  stride="1.5"
+  height="2.5"
+>
+  <animations rotate="180">
+	<animation name="move"        start="1"    end="40"   duration="1.5" />
+	<animation name="move_fast"   start="42"   end="81"   duration="1"   />
+	
+	<animation name="carry"       start="83"   end="143"  duration="3"   />
+	<animation name="look"        start="144"  end="204"  duration="4"   />
+	<animation name="build"       start="205"  end="305"  duration="3"   />
+	
+	<animation name="BigPsy"      start="307"  end="367"  duration="2"   />
+	<animation name="QuickPsy1"   start="379"  end="413"  duration="1.2" />
+	
+	<animation name="strike"      start="414"  end="453"  duration="1.2" />
+	<animation name="fire"        start="454"  end="537"  duration="1.2" />
+	<animation name="strike_big"  start="538"  end="584"  duration="1.2" />
+	
+	<animation name="fall"        start="585"  end="652"  duration="2"   />
+  </animations>
+  
+  <attachPoints>
+    <attachPoint function="fire"   joint="head"/>
+    <attachPoint function="target" joint="core"/>
+  </attachPoints>
+  
+</model>
+
+
+
+<model
+  name="Tesseract"
+  format="MS3D"
+  type="JOINT"
+  path="media/Actors/artilects/"
+  file="Tesseract.ms3d"
+  scale="0.05"
+  bound="2.5"
+  stride="1.5"
+  height="2.5"
+>
+  <animations rotate="90">
+    <animation name="stand"       start="1"  end="1"  duration="1"   />
+  </animations>
+  
+  <attachPoints>
+    <attachPoint function="fire" joint="core"/>
+    <attachPoint function="target" joint="core"/>
+  </attachPoints>
+</model>
+
+
