@@ -102,7 +102,7 @@ public class TestCity extends Test {
       test.runLoop(base, 1, graphics, "saves/test_city.tlt");
       
       for (Building b : map.buildings()) if (b.homeCity() == base) {
-        for (Type job : b.type().workerTypes.keys()) {
+        for (ActorType job : b.type().workerTypes.keys()) {
           int num = b.numWorkers(job), max = b.maxWorkers(job);
           boolean canHire = b.hireCost(job) <= base.funds();
           if (job.socialClass != CLASS_COMMON && num < max && canHire) {

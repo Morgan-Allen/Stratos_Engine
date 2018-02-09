@@ -126,14 +126,12 @@ public class OptionList extends UIGroup implements UIConstants {
     
     
     protected void whenClicked() {
-
       final PlayTask task = new PlayTask() {
         public void doTask(PlayUI UI) {
           Target hovered = (Target) UI.selection.hovered();
-          
           if (power.canUsePower(base, hovered)) {
             if (UI.mouseClicked()) {
-              power.applyAsPower(base, hovered);
+              power.applyFromRuler(base, hovered);
             }
           }
           else {

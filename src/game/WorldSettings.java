@@ -19,6 +19,7 @@ public class WorldSettings {
     toggleHunger  = true,
     toggleFatigue = true,
     toggleInjury  = true,
+    toggleReacts  = true,
     
     toggleAging       = true,
     toggleChildMort   = true,

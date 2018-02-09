@@ -13,6 +13,8 @@ import static game.GameConstants.*;
 public abstract class Technique extends Trait {
   
   
+  /**  Data fields, construction and setup methods-
+    */
   final public static int
     NO_PROPS       = 0,
     TARGET_SELF    = 1 << 0,
@@ -39,21 +41,31 @@ public abstract class Technique extends Trait {
     NO_TIRING      = 0,
     MINOR_TIRING   = 1,
     MEDIUM_TIRING  = 3,
-    HEAVY_TIRING   = 6
+    HEAVY_TIRING   = 6,
+    
+    NO_RANGE       = 0,
+    MELEE_RANGE    = 1,
+    SHORT_RANGE    = 3,
+    LONG_RANGE     = 6
   ;
   
   
-  public String name, info;
+  public String name;
+  public String info;
   public ImageAsset icon;
   public String animName;
   
-  public int costCash;
-  public int costAP;
-  public int costTire;
+  public int minLevel = 0;
+  public Tally <Trait> skillNeeds = new Tally();
   
-  public int properties;
-  public float harmLevel;
-  public float powerLevel;
+  public int costCash =  0;
+  public int costAP   =  0;
+  public int costTire =  0;
+  public int maxRange = -1;
+  
+  public int   properties = 0;
+  public float harmLevel  = 0;
+  public float powerLevel = 0;
   
   
   public Technique(String ID) {
@@ -70,10 +82,17 @@ public abstract class Technique extends Trait {
   }
   
   
-  public void setCosting(int costCash, int costAP, int costTire) {
+  public void setMinLevel(int minLevel, Object... skillNeeds) {
+    this.minLevel = minLevel;
+    this.skillNeeds.setWith(skillNeeds);
+  }
+  
+  
+  public void setCosting(int costCash, int costAP, int costTire, int maxRange) {
     this.costCash = costCash;
     this.costAP   = costAP  ;
     this.costTire = costTire;
+    this.maxRange = maxRange;
   }
   
   
@@ -88,6 +107,9 @@ public abstract class Technique extends Trait {
   }
   
   
+  
+  /**  Property queries-
+    */
   public boolean hasProperty(int mask) {
     return (properties & mask) == mask;
   }
@@ -103,73 +125,46 @@ public abstract class Technique extends Trait {
   }
   
   
-  
-  public float rateUse(Actor using, Target subject) {
-    
-    //  TODO:  Include effects of cooldown/AP limits.
-    float rating = Task.PARAMOUNT;
-    
-    if (harmLevel != Task.HARM_NULL) {
-      float hostility = TaskCombat.hostility(subject, using);
-      if (harmLevel >  0 && hostility <= 0) return -5;
-      if (harmLevel <= 0 && hostility >  0) return -5;
-      rating /= 1 + Nums.abs(harmLevel - hostility);
-    }
-    
-    rating = powerLevel * rating / 10f;
-    return rating;
-    /*
-    //
-    //  Techniques become less attractive based on the fraction of fatigue or
-    //  concentration they would consume.
-    final boolean report = I.talkAbout == actor && ActorSkills.techsVerbose;
-    final float
-      conCost = concentrationCost / actor.health.concentration(),
-      fatCost = fatigueCost       / actor.health.fatigueLimit ();
-    if (report) I.say("  Con/Fat costs: "+conCost+"/"+fatCost);
-    if (conCost > 1 || fatCost > 1) return 0;
-    //
-    //  Don't use a harmful technique against a subject you want to help, and
-    //  try to avoid extreme harm against subjects you only want to subdue, et
-    //  cetera.
-    float rating = 10;
-    
-    rating *= ((1 - conCost) + (1 - fatCost)) / 2f;
-    rating = powerLevel * rating / 10f;
-    if (report) I.say("  Overall rating: "+rating);
-    return rating;
-    //*/
-  }
-  
-  
-  public boolean canUseActive(Actor using, Target subject) {
-    return false;
-  }
-  
-  
   public boolean canUsePassive(Actor using, Target subject) {
     return false;
   }
   
   
-  public boolean canUsePower(City using, Target subject) {
-    return false;
+  public boolean canUseActive(Actor using, Target subject) {
+    if (using.cooldown() > 0) return false;
+    if (using.maxHealth() - using.fatigue() < costTire) return false;
+    if (CityMap.distance(using, subject) > maxRange) return false;
+    return canTarget(subject);
   }
   
   
-  public Task useAsActive(Actor using, Target subject) {
-    Use use = new Use(this, using, subject, NO_PROPS);
-    return use.configTask(null, null, subject, Task.JOB.CASTING, 0);
+  public boolean canUsePower(City ruler, Target subject) {
+    if (ruler.funds() < costCash) return false;
+    return canTarget(subject);
   }
   
   
-  public void applyAsPower(City using, Target subject) {
-    final Use use = new Use(this, null, subject, NO_PROPS);
-    applyEffects(subject, use);
+  public boolean canTarget(Target subject) {
+    return true;
   }
   
-
   
+  public boolean canLearn(Actor actor) {
+    if (actor.classLevel() < minLevel) {
+      return false;
+    }
+    for (Trait t : skillNeeds.keys()) {
+      if (actor.levelOf(t) < skillNeeds.valueFor(t)) {
+        return false;
+      }
+    }
+    return true;
+  }
+  
+  
+  
+  /**  Evaluation and execution-
+    */
   public static class Use extends Task {
     
     final Technique used;
@@ -211,24 +206,59 @@ public abstract class Technique extends Trait {
     
     
     protected void onTarget(Target target) {
-      used.applyEffects(target, this);
+      used.applyFromActor(actor, target);
     }
     
     
     public String animName() {
       return used.animName;
     }
-
-
+    
+    
     public void describePlan(Description d) {
       d.appendAll("Using ", used, " on ", target);
     }
   }
   
   
-  //
-  //  TODO:  Have separate methods for passive, active, power or buff effects?
-  protected abstract void applyEffects(Target subject, Use use);
+  public float rateUse(Actor using, Target subject) {
+    float rating = Task.PARAMOUNT;
+    //
+    //  Don't use a harmful technique against a subject you want to help, and
+    //  try to avoid extreme harm against subjects you only want to subdue, et
+    //  cetera.
+    if (harmLevel != Task.HARM_NULL) {
+      float hostility = TaskCombat.hostility(subject, using);
+      if (harmLevel >  0 && hostility <= 0) return -5;
+      if (harmLevel <= 0 && hostility >  0) return -5;
+      rating /= 1 + Nums.abs(harmLevel - hostility);
+    }
+    
+    float fatCost = costTire / (using.maxHealth() - using.fatigue());
+    if (fatCost > 1) return 0;
+    
+    rating *= 1 - fatCost;
+    rating = powerLevel * rating / 10f;
+    return rating;
+  }
+  
+  
+  public void applyFromRuler(City ruler, Target subject) {
+    ruler.incFunds(0 - costCash);
+    applyCommonEffects(subject, ruler, null);
+  }
+  
+  
+  public void applyFromActor(Actor actor, Target subject) {
+    actor.setCooldown(costAP  );
+    actor.takeFatigue(costTire);
+    applyCommonEffects(subject, null, actor);
+  }
+  
+  
+  public void applyCommonEffects(Target subject, City ruler, Actor actor) {
+    return;
+  }
   
   
   
@@ -243,6 +273,28 @@ public abstract class Technique extends Trait {
 
 
 
+//  TODO:  Include effects of cooldown/AP limits.
+/*
+//
+//  Techniques become less attractive based on the fraction of fatigue or
+//  concentration they would consume.
+final boolean report = I.talkAbout == actor && ActorSkills.techsVerbose;
+final float
+  conCost = concentrationCost / actor.health.concentration(),
+  fatCost = fatigueCost       / actor.health.fatigueLimit ();
+if (report) I.say("  Con/Fat costs: "+conCost+"/"+fatCost);
+if (conCost > 1 || fatCost > 1) return 0;
+//
+//  Don't use a harmful technique against a subject you want to help, and
+//  try to avoid extreme harm against subjects you only want to subdue, et
+//  cetera.
+float rating = 10;
+
+rating *= ((1 - conCost) + (1 - fatCost)) / 2f;
+rating = powerLevel * rating / 10f;
+if (report) I.say("  Overall rating: "+rating);
+return rating;
+//*/
 
 
 

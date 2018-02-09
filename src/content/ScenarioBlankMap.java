@@ -170,7 +170,7 @@ public class ScenarioBlankMap extends CityMapScenario {
     for (BuildingForNest nest : nests) {
       if ((time + (nest.varID() * 25)) % 100 == 0) {
         if (nest.residents().size() < 4) {
-          Type spawned = Rand.yes() ? TRIPOD : DRONE;
+          ActorType spawned = Rand.yes() ? TRIPOD : DRONE;
           Test.spawnWalker(nest, spawned, true);
         }
         else {

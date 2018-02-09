@@ -6,6 +6,8 @@ import util.*;
 import static game.GameConstants.*;
 import java.lang.reflect.*;
 
+import game.GameConstants.Good;
+
 
 
 
@@ -117,9 +119,19 @@ public class Type extends Index.Entry implements Session.Saveable {
   public boolean mobile   = false;
   public float   growRate = 0;
   public int     ambience = 0;
-  public boolean isCrop   = false;
   public boolean isWater  = false;
+  public boolean isCrop   = false;
   public boolean isWall   = false;
+  
+  public Good weaponType = null;
+  public Good armourType = null;
+  public Good useItemTypes[] = {};
+  public int maxHealth   = AVG_MAX_HEALTH;
+  public int meleeDamage = AVG_MELEE;
+  public int rangeDamage = AVG_MISSILE;
+  public int rangeDist   = AVG_RANGE;
+  public int armourClass = AVG_DEFEND;
+  public int sightRange  = AVG_SIGHT;
   
   
   public void setDimensions(int w, int h, int d) {
@@ -224,74 +236,6 @@ public class Type extends Index.Entry implements Session.Saveable {
   public boolean isArmyOrWallsBuilding() {
     return category == IS_ARMY_BLD || category == IS_WALLS_BLD;
   }
-  
-  
-  
-  /**  Walker-specific stats and setup methods-
-    */
-  String nameValues[][] = new String[0][0];
-  
-  public int  socialClass  = CLASS_COMMON;
-  public int  genderRole   = SEX_EITHER;
-  public int  hireCost     = AVG_HIRE_COST;
-  public Type patronGods[] = null;
-  public boolean isPorter  = false;
-  
-  public Good weaponType = null;
-  public Good armourType = null;
-  public Good useItemTypes[] = {};
-  public int maxHealth   = AVG_MAX_HEALTH;
-  public int meleeDamage = AVG_MELEE;
-  public int rangeDamage = AVG_MISSILE;
-  public int rangeDist   = AVG_RANGE;
-  public int armourClass = AVG_DEFEND;
-  public int sightRange  = AVG_SIGHT;
-  
-  public Tally <Trait> initTraits = new Tally();
-  
-  public Terrain habitats[]   = NO_HABITAT;
-  public boolean predator     = false;
-  public int     lifespan     = LIFESPAN_LENGTH;
-  public Good[]  foodsAllowed = null;
-  public Good    meatType     = null;
-  
-  
-  public void initAsMigrant(ActorAsPerson a) {
-    
-    float age = Rand.range(AVG_MARRIED, AVG_MENOPAUSE);
-    age += Rand.num() - 0.5f;
-    
-    int sex = genderRole;
-    if (sex == SEX_EITHER) {
-      sex = Rand.yes() ? SEX_FEMALE : SEX_MALE;
-    }
-    
-    a.ageSeconds = (int) (age * YEAR_LENGTH);
-    a.sexData    = sex;
-    a.hunger     = Rand.num() - 0.5f;
-    
-    for (Trait t : initTraits.keys()) {
-      a.setLevel(t, initTraits.valueFor(t));
-    }
-    
-    for (Trait t : ALL_PERSONALITY) {
-      a.setLevel(t, Rand.range(-1, 1));
-    }
-  }
-  
-  
-  public void initAsAnimal(ActorAsAnimal a) {
-    float age = Rand.num() * a.type().lifespan;
-    a.ageSeconds = (int) age;
-    a.hunger     = Rand.num() - 0.5f;
-    return;
-  }
-  
-  
-  public boolean isCommoner() { return socialClass == CLASS_COMMON ; }
-  public boolean isTrader  () { return socialClass == CLASS_TRADER ; }
-  public boolean isSoldier () { return socialClass == CLASS_SOLDIER; }
-  public boolean isNoble   () { return socialClass == CLASS_NOBLE  ; }
   
   
   

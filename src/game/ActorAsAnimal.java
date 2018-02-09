@@ -19,7 +19,7 @@ public class ActorAsAnimal extends Actor {
   boolean rides;
   
   
-  public ActorAsAnimal(Type type) {
+  public ActorAsAnimal(ActorType type) {
     super(type);
   }
   

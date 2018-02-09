@@ -67,7 +67,7 @@ public class CityBorders {
           homeFilled += NR = b.numResidents(socialClass);
           if (report) I.say("  Class "+socialClass+": "+NR+"/"+MR);
         }
-        for (Type t : b.type().workerTypes.keys()) {
+        for (ActorType t : b.type().workerTypes.keys()) {
           jobsTotal  += MW = b.maxWorkers(t);
           jobsFilled += NW = b.numWorkers(t);
           jobsDemand.add(MW, t);
@@ -83,7 +83,7 @@ public class CityBorders {
   
   
   public static Actor generateMigrant(
-    Type jobType, Building employs, boolean payHireCost
+    ActorType jobType, Building employs, boolean payHireCost
   ) {
     if (! jobType.isPerson()) return null;
     
@@ -108,7 +108,7 @@ public class CityBorders {
   
   static void findWork(CityMap map, Actor migrant) {
     
-    class Opening { Building b; Type position; }
+    class Opening { Building b; ActorType position; }
     Tile from = migrant.at();
     City homeC = migrant.homeCity();
     final Pick <Opening> pick = new Pick();
@@ -116,7 +116,7 @@ public class CityBorders {
     for (Building b : map.buildings) if (b.accessible()) {
       if (homeC != null && b.homeCity() != homeC) continue;
       
-      for (Type t : b.type().workerTypes.keys()) {
+      for (ActorType t : b.type().workerTypes.keys()) {
         int space = b.maxWorkers(t) - b.numWorkers(t);
         if (space <= 0) continue;
         

@@ -37,10 +37,12 @@ public class ActorAsPerson extends Actor {
   List <Bond > bonds  = new List();
   List <Task > todo   = new List();
   
+  List <Technique> known = new List();
+  
   String customName = "";
   
   
-  public ActorAsPerson(Type type) {
+  public ActorAsPerson(ActorType type) {
     super(type);
   }
   
@@ -63,6 +65,8 @@ public class ActorAsPerson extends Actor {
     }
     s.loadObjects(todo);
     
+    s.loadObjects(known);
+    
     customName = s.loadString();
   }
   
@@ -82,6 +86,8 @@ public class ActorAsPerson extends Actor {
       s.saveInt(b.properties);
     }
     s.saveObjects(todo);
+    
+    s.saveObjects(known);
     
     s.saveString(customName);
   }
@@ -138,6 +144,15 @@ public class ActorAsPerson extends Actor {
   public float levelOf(Trait trait) {
     Level l = levelFor(trait, false);
     return l == null ? 0 : l.level;
+  }
+  
+  
+  
+  /**  Supplemental combat methods-
+    */
+  public boolean armed() {
+    Good weapon = type().weaponType;
+    return weapon != null && carried(weapon) > 0;
   }
   
   
@@ -230,11 +245,18 @@ public class ActorAsPerson extends Actor {
     //  TODO:  You will need to ensure that work/home/formation venues are
     //  present on the same map to derive related bahaviours!
     
+    //  TODO:  Merge this with retreat behaviours...?
     //  If you're seriously hungry/beat/tired, try going home:
     Batch <Good> menu = menuAt(home());
     float hurtRating = fatigue + injury + (menu.size() > 0 ? hunger : 0);
     if (hurtRating > (type().maxHealth * (Rand.num() + 0.5f))) {
       assignTask(restingTask(home()));
+    }
+    
+    TaskRetreat retreat = TaskRetreat.configRetreat(this);
+    if (retreat != null) {
+      assignTask(retreat);
+      if (mission != null) mission.toggleRecruit(this, false);
     }
     
     //  See if there's a formation worth joining:
@@ -303,13 +325,54 @@ public class ActorAsPerson extends Actor {
   }
   
   
+  void updateReactions() {
+    
+    //
+    //  TODO:  You might consider using actual task/reactions for this.
+    //
+    //  TODO:  This might be a little intensive, computationally, as well?
+    
+    if (cooldown() == 0 && map.world.settings.toggleReacts) {
+
+      class Reaction { Technique used; Target subject; float rating; }
+      Pick <Reaction> pick = new Pick(0);
+      
+      for (Actor other : map.actorsInRange(at(), sightRange())) {
+        for (Technique used : known) {
+          if (used.canUseActive(this, other)) {
+            Reaction r = new Reaction();
+            r.rating  = used.rateUse(this, other);
+            r.subject = other;
+            r.used    = used;
+            pick.compare(r, r.rating);
+          }
+        }
+        for (Good g : carried.keys()) for (Technique used : g.allows) {
+          if (used.canUseActive(this, other)) {
+            Reaction r = new Reaction();
+            r.rating  = used.rateUse(this, other);
+            r.subject = other;
+            r.used    = used;
+            pick.compare(r, r.rating);
+          }
+        }
+      }
+
+      if (! pick.empty()) {
+        Reaction r = pick.result();
+        r.used.applyFromActor(this, r.subject);
+      }
+    }
+  }
+  
+  
   
   /**  Handling hunger, injury, healing and eating, etc:
     */
   void update() {
     WorldSettings settings = map.world.settings;
     
-    hunger += settings.toggleHunger ? (1f / STARVE_INTERVAL ) : 0;
+    hunger += settings.toggleHunger ? (1f / STARVE_INTERVAL) : 0;
     if (jobType() == JOB.RESTING) {
       float rests = 1f / FATIGUE_REGEN;
       float heals = 1f / HEALTH_REGEN ;
@@ -320,6 +383,11 @@ public class ActorAsPerson extends Actor {
       fatigue += settings.toggleFatigue ? (1f / FATIGUE_INTERVAL) : 0;
       float heals = 0.5f / HEALTH_REGEN;
       injury = Nums.max(0, injury - heals);
+    }
+    
+    for (Technique t : type().classTechniques) {
+      if (known.includes(t)) continue;
+      if (t.canLearn(this)) known.add(t);
     }
     
     super.update();

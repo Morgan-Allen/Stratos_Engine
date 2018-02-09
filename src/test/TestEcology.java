@@ -25,7 +25,7 @@ public class TestEcology extends Test {
     World world = map.world;
     ActorAsAnimal.reportCycle = graphics;
     
-    Type species[] = { VAREEN, MICOVORE };
+    ActorType species[] = { VAREEN, MICOVORE };
     Tally <Type> realPops  = new Tally();
     Tally <Type> popLevels = new Tally();
     
@@ -43,7 +43,7 @@ public class TestEcology extends Test {
       //  range compared to their 'ideal' levels.
       
       boolean popsOkay = true;
-      for (Type s : species) {
+      for (ActorType s : species) {
         float
           idealPop = CityMapTerrain.idealPopulation(s, map),
           minPop   = (idealPop / 2.0f) - 2,

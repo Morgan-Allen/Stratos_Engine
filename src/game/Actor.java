@@ -42,6 +42,8 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   Mission  mission  ;
   
   private Task task;
+  private Task reaction;
+  
   private Pathing inside;
   private int moveMode = MOVE_NORMAL;
   private Vec3D position = new Vec3D();
@@ -51,15 +53,16 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   int sexData    = -1;
   int ageSeconds =  0;
   int pregnancy  =  0;
-  float injury ;
-  float hunger ;
-  float fatigue;
-  float stress ;
+  float injury  ;
+  float hunger  ;
+  float fatigue ;
+  float stress  ;
+  float cooldown;
   int   state = STATE_OKAY;
   
   
   
-  public Actor(Type type) {
+  public Actor(ActorType type) {
     super(type);
     this.ID = "#"+nextID++;
   }
@@ -70,14 +73,16 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     
     ID = s.loadString();
     
-    work      = (Building ) s.loadObject();
-    home      = (Building ) s.loadObject();
-    homeCity  = (City     ) s.loadObject();
-    guestCity = (City     ) s.loadObject();
-    recruiter = (Building ) s.loadObject();
-    mission   = (Mission  ) s.loadObject();
+    work      = (Building) s.loadObject();
+    home      = (Building) s.loadObject();
+    homeCity  = (City    ) s.loadObject();
+    guestCity = (City    ) s.loadObject();
+    recruiter = (Building) s.loadObject();
+    mission   = (Mission ) s.loadObject();
     
-    task   = (Task   ) s.loadObject();
+    task     = (Task) s.loadObject();
+    reaction = (Task) s.loadObject();
+    
     inside = (Pathing) s.loadObject();
     moveMode = s.loadInt();
     position.loadFrom(s.input());
@@ -88,11 +93,12 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     ageSeconds = s.loadInt();
     pregnancy  = s.loadInt();
     
-    injury  = s.loadFloat();
-    hunger  = s.loadFloat();
-    fatigue = s.loadFloat();
-    stress  = s.loadFloat();
-    state   = s.loadInt();
+    injury   = s.loadFloat();
+    hunger   = s.loadFloat();
+    fatigue  = s.loadFloat();
+    stress   = s.loadFloat();
+    cooldown = s.loadFloat();
+    state    = s.loadInt();
   }
   
   
@@ -108,7 +114,9 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     s.saveObject(recruiter);
     s.saveObject(mission  );
     
-    s.saveObject(task  );
+    s.saveObject(task    );
+    s.saveObject(reaction);
+    
     s.saveObject(inside);
     s.saveInt(moveMode);
     position.saveTo(s.output());
@@ -119,11 +127,17 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     s.saveInt(ageSeconds);
     s.saveInt(pregnancy );
     
-    s.saveFloat(injury );
-    s.saveFloat(hunger );
-    s.saveFloat(fatigue);
-    s.saveFloat(stress );
-    s.saveInt  (state  );
+    s.saveFloat(injury  );
+    s.saveFloat(hunger  );
+    s.saveFloat(fatigue );
+    s.saveFloat(stress  );
+    s.saveFloat(cooldown);
+    s.saveInt  (state   );
+  }
+  
+  
+  public ActorType type() {
+    return (ActorType) super.type();
   }
   
   
@@ -225,15 +239,20 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     //
     //  Task updates-
     if (onMap()) {
-      if (home      != null) home     .actorUpdates(this);
-      if (work      != null) work     .actorUpdates(this);
+      if (home    != null) home   .actorUpdates(this);
+      if (work    != null) work   .actorUpdates(this);
       if (mission != null) mission.actorUpdates(this);
-      if (task == null || ! task.checkAndUpdateTask()) {
+      if (reaction != null && reaction.checkAndUpdateTask()) {
+        assignReaction(null);
+      }
+      else if (task == null || ! task.checkAndUpdateTask()) {
         beginNextBehaviour();
       }
+      updateReactions();
     }
     //
     //  And update your current vision and health-
+    if (onMap()) updateCooldown();
     if (onMap()) updateVision();
     if (onMap()) checkHealthState();
     if (onMap()) updateLifeCycle(homeCity(), true);
@@ -248,6 +267,11 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   void beginNextBehaviour() {
     assignTask(null);
     assignTask(wanderTask());
+  }
+  
+  
+  void updateReactions() {
+    return;
   }
   
   
@@ -319,12 +343,24 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   public void assignTask(Task task) {
     if (this.task != null) this.task.toggleFocus(false);
     this.task = task;
-    if (this.task != null) this.task.toggleFocus(true );
+    if (this.task != null) this.task.toggleFocus(true);
+  }
+  
+  
+  public void assignReaction(Task reaction) {
+    if (this.reaction != null) this.reaction.toggleFocus(false);
+    this.reaction = reaction;
+    if (this.reaction != null) this.reaction.toggleFocus(true);
   }
   
   
   public Task task() {
     return task;
+  }
+  
+  
+  public Task reaction() {
+    return reaction;
   }
   
   
@@ -529,6 +565,11 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   }
   
   
+  public boolean armed() {
+    return Nums.max(type().meleeDamage, type().rangeDamage) > 0;
+  }
+  
+  
   public void takeDamage(float damage) {
     if (map == null || ! map.world.settings.toggleInjury) return;
     injury += damage;
@@ -542,10 +583,33 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   }
   
   
+  public void takeFatigue(float tire) {
+    if (map == null || ! map.world.settings.toggleFatigue) return;
+    fatigue += tire;
+    fatigue = Nums.clamp(tire, 0, maxHealth());
+    checkHealthState();
+  }
+  
+  
+  public void liftFatigue(float tire) {
+    takeFatigue(0 - tire);
+  }
+  
+  
   public void setAsKilled(String cause) {
     state = STATE_DEAD;
     if (map != null) exitMap(map);
     setDestroyed();
+  }
+  
+  
+  public void setCooldown(float cool) {
+    this.cooldown = cool;
+  }
+  
+  
+  void updateCooldown() {
+    this.cooldown = Nums.max(0, cooldown - 1);
   }
   
   
@@ -563,8 +627,9 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   public float maxHealth () { return type().maxHealth ; }
   public float sightRange() { return type().sightRange; }
-  public float injury () { return injury ; }
-  public float fatigue() { return fatigue; }
+  public float injury  () { return injury  ; }
+  public float fatigue () { return fatigue ; }
+  public float cooldown() { return cooldown; }
   public boolean alive() { return state != STATE_DEAD; }
   public boolean dead () { return state == STATE_DEAD; }
   
@@ -572,6 +637,11 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   /**  Stub methods related to skills, XP and bonding:
     */
+  public int classLevel() {
+    return 1;
+  }
+  
+  
   public void gainXP(Trait trait, float XP) {
     return;
   }

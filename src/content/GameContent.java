@@ -198,7 +198,7 @@ public class GameContent {
     MICOVORE.armourClass = 1;
     MICOVORE.maxHealth   = 6;
     
-    for (Type s : ALL_ANIMALS) {
+    for (ActorType s : ALL_ANIMALS) {
       s.rangeDamage = -1;
       s.lifespan = s.predator ? HUNTER_LIFESPAN : GRAZER_LIFESPAN;
       s.meatType = PROTEIN;
@@ -565,6 +565,9 @@ public class GameContent {
     STOCK_EXCHANGE.workerTypes.setWith(Vassals.VENDOR, 2);
     STOCK_EXCHANGE.needed   = MARKET_GOODS;
     STOCK_EXCHANGE.features = new Good[] { IS_VENDOR };
+    STOCK_EXCHANGE.canOrder = new Good[] {
+      StockExGoods.MEDIKIT//, StockExGoods.SHIELD_BAND, StockExGoods.COMM_RELAY
+    };
     
     SUPPLY_DEPOT.name = "Supply Depot";
     SUPPLY_DEPOT.tint = TINT_COMMERCIAL;

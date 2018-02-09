@@ -41,7 +41,7 @@ public class VenuePane extends DetailPane {
     //d.append("\nArmour: "+venue.structure.armour());
     //d.append("\nCredits: "+venue.stocks.credits());
     
-    for (final Type w : type.workerTypes.keys()) {
+    for (final ActorType w : type.workerTypes.keys()) {
       int num = venue.numWorkers(w), max = venue.maxWorkers(w);
       int cost = venue.hireCost(w);
       boolean canHire = venue.homeCity().funds() >= cost;

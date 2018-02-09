@@ -274,14 +274,14 @@ public class CityMapTerrain implements TileConstants {
   
   /**  Adding predators and prey:
     */
-  public static void populateAnimals(CityMap map, Type... species) {
+  public static void populateAnimals(CityMap map, ActorType... species) {
     
     for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
       map.terrain.scanHabitat(map.grid[c.x][c.y]);
     }
     map.terrain.endScan();
     
-    for (Type s : species) {
+    for (ActorType s : species) {
       float idealPop = idealPopulation(s, map);
       while (idealPop-- > 0) {
         Tile point = findGrazePoint(s, map);
@@ -303,7 +303,7 @@ public class CityMapTerrain implements TileConstants {
   }
   
   
-  public static float idealPopulation(Type species, CityMap map) {
+  public static float idealPopulation(ActorType species, CityMap map) {
     float numTiles = 0;
     for (Terrain h : species.habitats) {
       HabitatScan scan = map.terrain.scanFor(h);
@@ -318,7 +318,7 @@ public class CityMapTerrain implements TileConstants {
   }
   
   
-  public static Tile findGrazePoint(Type species, CityMap map) {
+  public static Tile findGrazePoint(ActorType species, CityMap map) {
     int x = SCAN_RES / 2, y = SCAN_RES / 2, QR = SCAN_RES / 4;
     
     Batch <Tile > points  = new Batch();

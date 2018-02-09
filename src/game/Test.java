@@ -58,7 +58,7 @@ public class Test {
   
   //  TODO:  Move these into the Scenario class!
   
-  public static void fillAllVacancies(CityMap map, Type defaultCitizen) {
+  public static void fillAllVacancies(CityMap map, ActorType defaultCitizen) {
     for (Building b : map.buildings) if (b.accessible()) {
       fillWorkVacancies(b);
       for (Actor w : b.workers) CityBorders.findHome(map, w);
@@ -70,7 +70,7 @@ public class Test {
   
   
   public static void fillWorkVacancies(Building b) {
-    for (Type t : b.type().workerTypes.keys()) {
+    for (ActorType t : b.type().workerTypes.keys()) {
       while (b.numWorkers(t) < b.maxWorkers(t)) {
         spawnWalker(b, t, false);
       }
@@ -78,8 +78,8 @@ public class Test {
   }
   
   
-  public static void fillHomeVacancies(Building b, Type... types) {
-    for (Type t : types) {
+  public static void fillHomeVacancies(Building b, ActorType... types) {
+    for (ActorType t : types) {
       while (b.numResidents(t.socialClass) < b.maxResidents(t.socialClass)) {
         spawnWalker(b, t, true);
       }
@@ -87,7 +87,7 @@ public class Test {
   }
   
   
-  public static Actor spawnWalker(Building b, Type type, boolean resident) {
+  public static Actor spawnWalker(Building b, ActorType type, boolean resident) {
     
     ActorAsPerson actor = (ActorAsPerson) type.generate();
     Tile at = b.at();
