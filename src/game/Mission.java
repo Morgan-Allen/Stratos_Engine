@@ -653,8 +653,10 @@ public class Mission implements
       }
     }
     
+    Tile stands = standLocation(actor);
+    
     TaskCombat taskC = (actor.inCombat() || isEnvoy) ? null :
-      TaskCombat.nextReaction(actor, this)
+      TaskCombat.nextReaction(actor, stands, this, AVG_FILE)
     ;
     if (taskC != null) {
       return taskC;
@@ -674,7 +676,6 @@ public class Mission implements
       return recon;
     }
     
-    Tile stands = standLocation(actor);
     Task standT = actor.targetTask(stands, 10, Task.JOB.MILITARY, this);
     if (standT != null) {
       return standT;

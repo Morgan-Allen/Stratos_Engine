@@ -109,6 +109,14 @@ public class TaskCombat extends Task {
   }
   
   
+  public static boolean wallBonus(Element from, Element goes) {
+    boolean wallBonus = false;
+    wallBonus |= from.at().pathType() == PATH_WALLS;
+    wallBonus &= goes.at().pathType() != PATH_WALLS;
+    return wallBonus;
+  }
+  
+  
   
   
   /**  Factory methods for actual combat behaviours-
@@ -125,19 +133,21 @@ public class TaskCombat extends Task {
   }
   
   
-  //  TODO:  Allow for iteration over members of a target formation, or whatever
-  //  your comrades are currently fighting.
+  
+  static TaskCombat nextReaction(Actor actor) {
+    return nextReaction(actor, null, null, 0);
+  }
   
   
-  static TaskCombat nextReaction(Actor actor, Mission formation) {
+  static TaskCombat nextReaction(
+    Actor actor, Tile anchor, Employer employer, float noticeBonus
+  ) {
+    //  TODO:  Allow for iteration over members of a target formation, or
+    //  whatever your comrades are currently fighting...
+    //  TODO:  Grant a vision bonus for higher ground?
     
-    //  TODO:  Allow for a null formation to be passed in here.
     Tile from = actor.at();
     CityMap map = actor.map;
-    Tile anchor = formation.standLocation(actor);
-    
-    //  TODO:  Grant a vision bonus for higher ground?
-    float noticeBonus = AVG_FILE;
     float noticeRange = actor.type().sightRange + noticeBonus;
     Series <Actor> others = map.actorsInRange(from, noticeRange);
     
@@ -149,7 +159,7 @@ public class TaskCombat extends Task {
     for (Actor other : others) if (hostile(other, actor)) {
       Tile goes = other.at();
       float distF = distance(goes, from  );
-      float distA = distance(goes, anchor);
+      float distA = anchor == null ? 0 : distance(goes, anchor);
       if (distA > noticeRange) continue;
       
       float rating = 1f * distancePenalty(distF + distA);
@@ -163,7 +173,7 @@ public class TaskCombat extends Task {
     
     options.queueSort();
     for (Option o : options) {
-      TaskCombat c = configCombat(actor, o.other, formation, null, JOB.COMBAT);
+      TaskCombat c = configCombat(actor, o.other, employer, null, JOB.COMBAT);
       if (c != null) return c;
     }
     
@@ -192,9 +202,8 @@ public class TaskCombat extends Task {
   
   
   static TaskCombat configCombat(
-    final Actor actor, final Element target,
-    Mission formation, TaskCombat currentTask,
-    JOB jobType
+    final Actor actor, final Element target, Employer employer,
+    TaskCombat currentTask, JOB jobType
   ) {
     if (actor == null || target == null || ! target.onMap()) return null;
     Tile inRange[] = null;
@@ -320,7 +329,7 @@ public class TaskCombat extends Task {
     }
     
     if (needsConfig) return (TaskCombat) (
-      currentTask.configTask(formation, null, t, jobType, 0)
+      currentTask.configTask(employer, null, t, jobType, 0)
     );
     else {
       return currentTask;

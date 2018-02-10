@@ -532,8 +532,8 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     //  TODO:  Move this out into the TaskCombat class.
     Trait   attackSkill = melee ? SKILL_MELEE : SKILL_RANGE;
     Trait   defendSkill = melee ? SKILL_MELEE : SKILL_EVADE;
-    boolean wallBonus   = wallBonus(this, other);
-    boolean wallPenalty = wallBonus(other, this);
+    boolean wallBonus   = TaskCombat.wallBonus(this, other);
+    boolean wallPenalty = TaskCombat.wallBonus(other, this);
     boolean hits = true;
     float XP = 1;
     
@@ -560,14 +560,6 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     }
     
     gainXP(attackSkill, XP);
-  }
-  
-  
-  boolean wallBonus(Element from, Element goes) {
-    boolean wallBonus = false;
-    wallBonus |= from.at().pathType() == PATH_WALLS;
-    wallBonus &= goes.at().pathType() != PATH_WALLS;
-    return wallBonus;
   }
   
   

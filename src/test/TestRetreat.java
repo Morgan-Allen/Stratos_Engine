@@ -53,11 +53,11 @@ public class TestRetreat extends Test {
     }
     
     //  Generate some allies.  See if s/he stands their ground.
-    Batch <Actor> friends = new Batch();
+    Batch <Actor> allies = new Batch();
     for (int n = 5; n-- > 0;) {
-      Actor friend = (Actor) Trooper.TROOPER.generate();
-      friend.assignHomeCity(base);
-      friends.add(friend);
+      Actor ally = (Actor) Trooper.TROOPER.generate();
+      ally.assignHomeCity(base);
+      allies.add(ally);
     }
     
     for (int n = 3; n-- > 0;) map.update();
@@ -89,7 +89,7 @@ public class TestRetreat extends Test {
       }
       
       if (scareOkay && ! alliesDone) {
-        for (Actor friend : friends) {
+        for (Actor friend : allies) {
           Tile goes = randomTileNear(subject.at(), nearRange, map, true);
           friend.enterMap(map, goes.x, goes.y, 1, friend.homeCity());
         }

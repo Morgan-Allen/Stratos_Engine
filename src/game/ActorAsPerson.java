@@ -320,6 +320,11 @@ public class ActorAsPerson extends Actor {
   void updateReactions() {
     
     if (jobType() != Task.JOB.RETREAT) {
+      if (! inCombat()) {
+        TaskCombat combat = TaskCombat.nextReaction(this);
+        if (combat != null) assignTask(combat);
+      }
+      
       float oldPriority = jobPriority();
       TaskRetreat retreat = TaskRetreat.configRetreat(this);
       if (retreat != null && retreat.priority() > oldPriority) {
