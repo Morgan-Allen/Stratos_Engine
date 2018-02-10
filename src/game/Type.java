@@ -68,10 +68,17 @@ public class Type extends Index.Entry implements Session.Saveable {
     }
     try {
       if (! Element.class.isAssignableFrom(baseClass)) return null;
-      final Constructor c = baseClass.getConstructor(Type.class);
+      Constructor c = null;
+      for (Constructor n : baseClass.getConstructors()) {
+        Class params[] = n.getParameterTypes();
+        if (params.length == 1 && Type.class.isAssignableFrom(params[0])) {
+          c = n;
+          break;
+        }
+      }
       return c.newInstance(this);
     }
-    catch (NoSuchMethodException e) {
+    catch (NullPointerException e) {
       I.say(
         "\n  WARNING: NO TYPE CONSTRUCTOR FOR: "+baseClass.getName()+
         "\n  All Elements should implement a public constructor taking a Type "+
@@ -98,7 +105,7 @@ public class Type extends Index.Entry implements Session.Saveable {
   
   /**  Common data fields and setup functions-
     */
-  public String name;
+  public String name = "";
   public String traitRangeNames[];
   public int tint = BLACK_COLOR;
   

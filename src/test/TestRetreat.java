@@ -16,7 +16,7 @@ public class TestRetreat extends Test {
   
   
   public static void main(String args[]) {
-    testRetreat(true);
+    testRetreat(false);
   }
   
   
@@ -40,6 +40,7 @@ public class TestRetreat extends Test {
     Building home = (Building) ECOLOGIST_STATION.generate();
     home.enterMap(map, 2, 2, 1, base);
     Actor subject = spawnWalker(home, ECOLOGIST, false);
+    subject.setInside(subject.inside(), false);
     subject.setLocation(map.tileAt(20, 20), map);
     float nearRange = subject.sightRange() - 1;
     
@@ -92,6 +93,7 @@ public class TestRetreat extends Test {
           Tile goes = randomTileNear(subject.at(), nearRange, map, true);
           friend.enterMap(map, goes.x, goes.y, 1, friend.homeCity());
         }
+        alliesDone = true;
       }
       
       if (alliesDone && ! braveAgain) {

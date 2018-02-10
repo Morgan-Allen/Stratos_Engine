@@ -37,6 +37,7 @@ public class TaskRetreat extends Task {
   static TaskRetreat configRetreat(Actor actor) {
     
     Building home = actor.home();
+    if (home == null) home = actor.work();
     CityMap map = actor.map;
     Pick <Building> pickHide = new Pick();
     
@@ -85,7 +86,7 @@ public class TaskRetreat extends Task {
       boolean hostile      = TaskCombat.hostile(other, actor);
       boolean allied       = TaskCombat.allied (other, actor);
       Target  otherFocus   = Task.focusTarget(other.task());
-      float   harmLevel    = other.task().harmLevel();
+      float   harmLevel    = otherFocus == null ? 0 : other.task().harmLevel();
       boolean focusHostile = TaskCombat.hostile(actor, otherFocus);
       boolean focusAllied  = TaskCombat.allied (actor, otherFocus);
       
@@ -97,7 +98,8 @@ public class TaskRetreat extends Task {
       if (alliance  > 0) allySum   += power * alliance ;
     }
     
-    float lossChance = dangerSum / (dangerSum + allySum);
+    float lossChance = 0, sumFactors = dangerSum + allySum;
+    if (sumFactors > 0) lossChance = dangerSum / sumFactors;
     lossChance += actor.injury () * 1.0f / actor.maxHealth();
     lossChance += actor.fatigue() * 0.5f / actor.maxHealth();
     

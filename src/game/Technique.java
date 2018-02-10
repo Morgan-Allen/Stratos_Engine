@@ -50,10 +50,9 @@ public abstract class Technique extends Trait {
   ;
   
   
-  public String name;
-  public String info;
-  public ImageAsset icon;
-  public String animName;
+  public String info = "";
+  public ImageAsset icon = null;
+  public String animName = AnimNames.STAND;
   
   public int minLevel = 0;
   public Tally <Trait> skillNeeds = new Tally();
@@ -68,14 +67,12 @@ public abstract class Technique extends Trait {
   public float powerLevel = 0;
   
   
-  public Technique(String ID) {
-    super(ID);
+  public Technique(String ID, String name) {
+    super(ID, name);
   }
   
   
-  public void setProperties(
-    int properties, float harmLevel, float powerLevel
-  ) {
+  public void setProperties(int properties, float harmLevel, float powerLevel) {
     this.properties = properties;
     this.harmLevel  = harmLevel ;
     this.powerLevel = powerLevel;
@@ -97,13 +94,14 @@ public abstract class Technique extends Trait {
   
   
   public void attachMedia(
-    String name, String iconPath, String info, String animName
+    Class baseClass, String iconPath, String info, String animName
   ) {
-    final String key = entryKey()+"_icon";
-    this.icon     = ImageAsset.fromImage(baseClass, key, iconPath);
-    this.animName = AnimNames.LOOK;
-    this.name     = name;
+    if (baseClass != null && iconPath != null) {
+      final String key = entryKey()+"_icon";
+      this.icon = ImageAsset.fromImage(baseClass, key, iconPath);
+    }
     this.info     = info;
+    this.animName = AnimNames.LOOK;
   }
   
   
@@ -268,34 +266,6 @@ public abstract class Technique extends Trait {
     return name;
   }
 }
-
-
-
-
-
-//  TODO:  Include effects of cooldown/AP limits.
-/*
-//
-//  Techniques become less attractive based on the fraction of fatigue or
-//  concentration they would consume.
-final boolean report = I.talkAbout == actor && ActorSkills.techsVerbose;
-final float
-  conCost = concentrationCost / actor.health.concentration(),
-  fatCost = fatigueCost       / actor.health.fatigueLimit ();
-if (report) I.say("  Con/Fat costs: "+conCost+"/"+fatCost);
-if (conCost > 1 || fatCost > 1) return 0;
-//
-//  Don't use a harmful technique against a subject you want to help, and
-//  try to avoid extreme harm against subjects you only want to subdue, et
-//  cetera.
-float rating = 10;
-
-rating *= ((1 - conCost) + (1 - fatCost)) / 2f;
-rating = powerLevel * rating / 10f;
-if (report) I.say("  Overall rating: "+rating);
-return rating;
-//*/
-
 
 
 

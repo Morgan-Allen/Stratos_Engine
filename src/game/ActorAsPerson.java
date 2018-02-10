@@ -234,13 +234,11 @@ public class ActorAsPerson extends Actor {
     assignTask(null);
     
     //  Adults will search for work and a place to live:
+    //  Children and retirees don't work:
     if (adult && work() == null) CityBorders.findWork(map, this);
     if (adult && home() == null) CityBorders.findHome(map, this);
+    if (work() != null && ! adult) work().setWorker(this, false);
     
-    //  Children and retirees don't work:
-    if (work() != null && ! adult) {
-      work().setWorker(this, false);
-    }
     
     //  TODO:  You will need to ensure that work/home/formation venues are
     //  present on the same map to derive related bahaviours!
@@ -251,12 +249,6 @@ public class ActorAsPerson extends Actor {
     float hurtRating = fatigue + injury + (menu.size() > 0 ? hunger : 0);
     if (hurtRating > (type().maxHealth * (Rand.num() + 0.5f))) {
       assignTask(restingTask(home()));
-    }
-    
-    TaskRetreat retreat = TaskRetreat.configRetreat(this);
-    if (retreat != null) {
-      assignTask(retreat);
-      if (mission != null) mission.toggleRecruit(this, false);
     }
     
     //  See if there's a formation worth joining:
@@ -327,13 +319,22 @@ public class ActorAsPerson extends Actor {
   
   void updateReactions() {
     
+    if (jobType() != Task.JOB.RETREAT) {
+      float oldPriority = jobPriority();
+      TaskRetreat retreat = TaskRetreat.configRetreat(this);
+      if (retreat != null && retreat.priority() > oldPriority) {
+        assignTask(retreat);
+        if (mission != null) mission.toggleRecruit(this, false);
+      }
+    }
+    
     //
     //  TODO:  You might consider using actual task/reactions for this.
     //
     //  TODO:  This might be a little intensive, computationally, as well?
     
     if (cooldown() == 0 && map.world.settings.toggleReacts) {
-
+      
       class Reaction { Technique used; Target subject; float rating; }
       Pick <Reaction> pick = new Pick(0);
       

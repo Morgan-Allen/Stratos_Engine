@@ -18,7 +18,7 @@ public class Test {
   ) {
     World   world  = new World(goods);
     Locale  locale = world.addLocale(5, 5);
-    City    city   = new City(world, locale);
+    City    city   = new City(world, locale, "Test City");
     CityMap map    = null;
     
     if (! genTerrain) {

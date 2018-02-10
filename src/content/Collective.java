@@ -29,7 +29,9 @@ public class Collective {
   ;
   
   
-  final public static Technique PSY_HEAL = new Technique("power_psy_heal") {
+  final public static Technique PSY_HEAL = new Technique(
+    "power_psy_heal", "Psy Heal"
+  ) {
     
     public boolean canTarget(Target subject) {
       return subject.type().isActor();
@@ -42,7 +44,7 @@ public class Collective {
   };
   static {
     PSY_HEAL.attachMedia(
-      "PSY HEAL", "media/GUI/Powers/power_psy_heal.png",
+      Collective.class, "media/GUI/Powers/power_psy_heal.png",
       "Heals the subject for up to "+PSY_HEAL_AMOUNT+" damage.",
       AnimNames.LOOK
     );

@@ -52,15 +52,16 @@ public class TaskCombat extends Task {
   public static POSTURE postureFor(Element a, Element b) {
     City CA = a.homeCity (), CB = b.homeCity ();
     City GA = a.guestCity(), GB = b.guestCity();
-    if (CA == CB) return POSTURE.ALLY;
-    if (GA == GB) return POSTURE.ALLY;
-    if (CA == GB) return POSTURE.ALLY;
-    if (GA == CB) return POSTURE.ALLY;
+    if (CA == CB              ) return POSTURE.ALLY;
+    if (GA != null && GA == GB) return POSTURE.ALLY;
+    if (GB != null && CA == GB) return POSTURE.ALLY;
+    if (GA != null && GA == CB) return POSTURE.ALLY;
     return CA.posture(CB);
   }
   
   
   public static POSTURE postureFor(Target a, Target b) {
+    if (a == null  || b == null ) return POSTURE.NEUTRAL;
     if (a.isTile() || b.isTile()) return POSTURE.NEUTRAL;
     return postureFor((Element) a, (Element) b);
   }

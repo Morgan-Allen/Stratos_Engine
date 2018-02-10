@@ -278,7 +278,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   /**  Pathing and visitation utilities:
     */
-  void setInside(Pathing b, boolean yes) {
+  public void setInside(Pathing b, boolean yes) {
     if (b == null || ! b.onMap()) {
       if (b == inside) inside = null;
       return;
@@ -417,6 +417,12 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   public JOB jobType() {
     if (task == null) return JOB.NONE;
     return task.type;
+  }
+  
+  
+  public float jobPriority() {
+    if (task == null) return Task.NO_PRIORITY;
+    return task.priority();
   }
   
   
