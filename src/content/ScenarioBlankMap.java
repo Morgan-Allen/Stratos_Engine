@@ -13,7 +13,6 @@ import static content.GameContent.*;
 public class ScenarioBlankMap extends CityMapScenario {
   
   
-  
   List <BuildingForNest> nests = new List();
   
   
@@ -117,10 +116,8 @@ public class ScenarioBlankMap extends CityMapScenario {
       playUI().assignHomePoint(bastion);
     }
     
-    //
-    //  TODO:  Insert lairs and add those to a list for subsequent spawning
-    //  updates!
     
+    //  TODO:
     //  Ideally, you want to place the lairs in sectors where you don't find
     //  the main settlement.
     
@@ -145,10 +142,13 @@ public class ScenarioBlankMap extends CityMapScenario {
     options.queueSort();
     
     int NUM_LAIRS = 3;
+    Object spawnArgs[] = { TRIPOD, 0.33f, DRONE, 0.66f };
+    
     for (int n = NUM_LAIRS; n-- > 0;) {
       SiteOption o = options.removeFirst();
       BuildingForNest nest = (BuildingForNest) RUINS_LAIR.generate();
       nest.enterMap(stage, o.at.x, o.at.y, 1, stage.locals);
+      nest.assignSpawnParameters(MONTH_LENGTH, 4, spawnArgs);
       nests.add(nest);
     }
     
@@ -159,57 +159,9 @@ public class ScenarioBlankMap extends CityMapScenario {
   
   public void updateScenario() {
     super.updateScenario();
-    
-    //  TODO:  Update spawning routines.  And arrange for an assault of some
-    //  kind upon the player's settlement.
-    
-    //  TODO:  Move this out to the Nest class itself!
-    
-    int time = stage().time();
-    
-    for (BuildingForNest nest : nests) {
-      if ((time + (nest.varID() * 25)) % 100 == 0) {
-        if (nest.residents().size() < 4) {
-          ActorType spawned = Rand.yes() ? TRIPOD : DRONE;
-          Test.spawnWalker(nest, spawned, true);
-        }
-        else {
-          
-          Pick <Building> pick = new Pick();
-          for (Building b : nest.map().buildings()) {
-            if (! TaskCombat.hostile(b, nest)) continue;
-            if (! nest.map().pathCache.pathConnects(nest, b, true, false)) continue;
-            
-            float rating = 1f;
-            rating *= CityMap.distancePenalty(nest, b);
-            pick.compare(b, rating);
-          }
-          
-          if (! pick.empty()) {
-            Mission assault = new Mission(
-              Mission.OBJECTIVE_CONQUER, nest.homeCity(), false
-            );
-            assault.setFocus(pick.result(), 0, nest.map());
-          }
-        }
-      }
-    }
-    
-    
   }
   
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -274,7 +274,7 @@ public class TestSieging extends Test {
       }
     }
     
-    I.say("\nSIEGE TEST FAILED!");
+    I.say("\nSIEGING TEST FAILED!");
     I.say("  Patrol init:  "+patrolInit );
     I.say("  Patrol done:  "+patrolDone );
     I.say("  Siege coming: "+siegeComing);
