@@ -241,7 +241,7 @@ public class CityCouncil {
     
     for (Mission petition : petitions) {
       float appeal = appealOfTerms(
-        petition.homeCity, city,
+        petition.homeCity(), city,
         petition.postureDemand,
         petition.actionDemand,
         petition.marriageDemand,

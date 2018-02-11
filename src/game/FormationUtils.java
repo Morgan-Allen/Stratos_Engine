@@ -14,9 +14,9 @@ public class FormationUtils {
   
   
   static float rateCampingPoint(Tile t, Mission parent) {
-    if (t == null || parent == null || parent.map == null) return -1;
+    if (t == null || parent == null || parent.map() == null) return -1;
     
-    CityMap map = parent.map;
+    CityMap map = parent.map();
     Pathing from = parent.pathFrom();
     float rating = 0;
     boolean blocked = false;
@@ -45,10 +45,10 @@ public class FormationUtils {
   
   
   static Tile findCampingPoint(final Mission parent) {
-    if (parent == null || parent.map == null) return null;
+    if (parent == null || parent.map() == null) return null;
     
-    final CityMap map = parent.map;
-    final Tile init = Tile.nearestOpenTile(parent.standPoint, map);
+    final CityMap map = parent.map();
+    final Tile init = Tile.nearestOpenTile(parent.standPoint(), map);
     if (init == null) return null;
     
     final Tile temp[] = new Tile[9];
@@ -73,7 +73,7 @@ public class FormationUtils {
   //  TODO:  Move this to the Council class?
   
   static Actor findOfferRecipient(Mission parent) {
-    CityCouncil council = parent.awayCity.council;
+    CityCouncil council = parent.awayCity().council;
     
     Actor monarch = council.memberWithRole(Role.MONARCH);
     if (monarch != null && monarch.onMap()) return monarch;
@@ -127,11 +127,11 @@ public class FormationUtils {
     if (focus instanceof Mission) {
       Mission f = (Mission) focus;
       Target goes = f.pathGoes();
-      if (f.away || goes == null) return null;
-      if (f.powerSum() == 0 || ! f.active) return null;
+      if (f.away() || goes == null) return null;
+      if (f.powerSum() == 0 || ! f.active()) return null;
       
       int power = f.powerSum();
-      Tile secures = f.standPoint;
+      Tile secures = f.standPoint();
       if (power <= 0) return null;
 
       if (checkPathing) {
@@ -177,12 +177,12 @@ public class FormationUtils {
   
   static boolean updateTacticalTarget(Mission parent) {
     
-    CityMap map    = parent.map;
-    City    home   = parent.homeCity;
+    CityMap map    = parent.map();
+    City    home   = parent.homeCity();
     Pathing from   = parent.pathFrom();
-    Tile    stands = parent.standPoint;
-    Object  focus  = parent.focus;
-    City    sieges = parent.awayCity;
+    Tile    stands = parent.standPoint();
+    Object  focus  = parent.focus();
+    City    sieges = parent.awayCity();
     boolean envoy  = parent.escorted.size() > 0;
     
     //
@@ -198,7 +198,7 @@ public class FormationUtils {
         return false;
       }
       Tile campPoint = findCampingPoint(parent);
-      parent.setFocus(campPoint, parent.facing, map);
+      parent.setFocus(campPoint, parent.facing(), map);
       return true;
     }
     
@@ -240,7 +240,7 @@ public class FormationUtils {
       Option o = pick.result();
       
       if (tacticalOptionFor(o.target, map, from, true) != null) {
-        parent.setFocus(o.target, parent.facing, map);
+        parent.setFocus(o.target, parent.facing(), map);
         return true;
       }
       
@@ -254,7 +254,7 @@ public class FormationUtils {
           int pathT = t.pathType();
           
           if (above != null && (pathT == PATH_BLOCK || pathT == PATH_WALLS)) {
-            parent.setFocus(above, parent.facing, map);
+            parent.setFocus(above, parent.facing(), map);
             return true;
           }
         }
@@ -278,8 +278,8 @@ public class FormationUtils {
     
     //
     //  First, check to see if an update is due:
-    final Target focus = (Target) parent.focus;
-    final CityMap map = parent.map;
+    final Target focus = (Target) parent.focus();
+    final CityMap map = parent.map();
     final int updateTime = parent.lastUpdateTime;
     int nextUpdate = updateTime >= 0 ? (updateTime + 10) : 0;
     
@@ -344,7 +344,7 @@ public class FormationUtils {
   static Tile standingPointPatrol(Actor member, Mission parent) {
     
     int span = MONTH_LENGTH, numRecruits = parent.recruits.size();
-    int epoch = (parent.map.time / span) % numRecruits;
+    int epoch = (parent.map().time / span) % numRecruits;
     
     int index = parent.recruits.indexOf(member);
     if (index == -1) return null;
@@ -357,8 +357,8 @@ public class FormationUtils {
   
   static Tile standingPointRanks(Actor member, Mission parent) {
     
-    CityMap map = parent.map;
-    Tile goes = parent.standPoint;
+    CityMap map = parent.map();
+    Tile goes = parent.standPoint();
     if (goes == null || map == null) return null;
     
     int index = parent.recruits.indexOf(member);

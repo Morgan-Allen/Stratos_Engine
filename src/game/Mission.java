@@ -53,15 +53,15 @@ public class Mission implements
   List <Actor> recruits   = new List();
   List <Actor> casualties = new List();
   
-  boolean away   = false;
-  boolean active = false;
-  City    homeCity    ;
-  City    awayCity    ;
-  CityMap map         ;
-  Tile    transitPoint;
-  Tile    standPoint  ;
-  Object  focus       ;
-  int     facing      ;
+  private boolean away   = false;
+  private boolean active = false;
+  private City    homeCity    ;
+  private City    awayCity    ;
+  private CityMap map         ;
+  private Tile    transitPoint;
+  private Tile    standPoint  ;
+  private Object  focus       ;
+  private int     facing      ;
   
   float exploreRange = -1;
   
@@ -355,6 +355,11 @@ public class Mission implements
   }
   
   
+  public boolean active() {
+    return active;
+  }
+  
+  
   
   /**  Pathing and stand-point related methods-
     */
@@ -376,6 +381,21 @@ public class Mission implements
       return ((Target) focus).at();
     }
     return null;
+  }
+  
+  
+  CityMap map() {
+    return map;
+  }
+  
+  
+  int facing() {
+    return facing;
+  }
+  
+  
+  Tile standPoint() {
+    return standPoint;
   }
   
   
@@ -417,6 +437,16 @@ public class Mission implements
   }
   
   
+  public boolean away() {
+    return away;
+  }
+  
+  
+  public City awayCity() {
+    return awayCity;
+  }
+  
+  
   
   /**  Regular updates and journey-related methods:
     */
@@ -432,9 +462,11 @@ public class Mission implements
       casualties.add(a);
     }
     //
-    //  Bounties just stay open until their objective is completed.
-    if (isBounty) {
+    //  Bounties just stay open until their objective is completed, as do non-
+    //  autopilot missions.
+    if (isBounty || ! tacticalAI) {
       if (active && objectiveComplete()) {
+        setMissionComplete(true);
         disbandFormation();
         return;
       }

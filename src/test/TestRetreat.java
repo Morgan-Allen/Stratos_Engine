@@ -39,7 +39,7 @@ public class TestRetreat extends Test {
     //  Generate an actor.
     Building home = (Building) ECOLOGIST_STATION.generate();
     home.enterMap(map, 2, 2, 1, base);
-    Actor subject = spawnWalker(home, ECOLOGIST, false);
+    Actor subject = spawnPerson(home, ECOLOGIST, false);
     subject.setInside(subject.inside(), false);
     subject.setLocation(map.tileAt(20, 20), map);
     float nearRange = subject.sightRange() - 1;

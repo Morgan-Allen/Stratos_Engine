@@ -123,10 +123,10 @@ public class TaskCombat extends Task {
     */
   
   static TaskCombat nextSieging(Actor actor, Mission formation) {
-    if (formation.focus instanceof Element) {
-      Element e = (Element) formation.focus;
+    if (formation.focus() instanceof Element) {
+      Element e = (Element) formation.focus();
       if (e.destroyed() || ! e.onMap()) return null;
-      if (e.homeCity() == formation.homeCity) return null;
+      if (e.homeCity() == formation.homeCity()) return null;
       return configCombat(actor, e, formation, null, JOB.COMBAT);
     }
     else return null;

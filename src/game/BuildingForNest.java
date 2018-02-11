@@ -90,22 +90,26 @@ public class BuildingForNest extends Building {
       ActorType types  [] = new ActorType[numTypes];
       
       for (ActorType type : spawnChances.keys()) {
+        float current = numResidents(type) * 1f / maxResidents;
         float chance = spawnChances.valueFor(type);
-        chances[i] = chance;
+        chances[i] = Nums.max(0, chance - current);
         types  [i] = type;
         i++;
       }
+      ActorType spawnType = (ActorType) Rand.pickFrom(types, chances);
       
-      ActorType spawned = (ActorType) Rand.pickFrom(types, chances);
-      if (spawned != null) {
-        Test.spawnWalker(this, spawned, true);
+      if (spawnType != null) {
+        Actor spawn = (Actor) spawnType.generate();
+        spawn.enterMap(map, at().x, at().y, 1, homeCity());
+        spawn.setInside(this, true);
+        setResident(spawn, true);
       }
     }
     //
     //  And have them raid hostile targets if and when present...
     //  TODO:  Ideally, you'd like this to piggyback off the tactical AI for
-    //  Missions in general.
-    else if (activeMission == null) {
+    //  Missions in general...
+    else if (activeMission == null || activeMission.complete()) {
       
       Pick <Building> pick = new Pick();
       for (Building b : map().buildings()) {

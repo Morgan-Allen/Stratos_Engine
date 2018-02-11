@@ -299,7 +299,7 @@ public class ActorAsPerson extends Actor {
     
     //  Once home & work have been established, try to derive a task to
     //  perform-
-    if (idle() && mission != null && mission.active) {
+    if (idle() && mission != null && mission.active()) {
       assignTask(mission.selectActorBehaviour(this));
     }
     if (idle() && work() != null && work().accessible()) {

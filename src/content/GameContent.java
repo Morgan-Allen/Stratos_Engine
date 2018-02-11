@@ -242,6 +242,10 @@ public class GameContent {
       GameContent.class, ARTILECTS_XML, "Cranial"
     );
     
+    for (ActorType t : ALL_ARTILECTS) {
+      t.organic = false;
+    }
+    
     
     int i = 0;
     for (Good c : CROP_TYPES) {

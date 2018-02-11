@@ -45,30 +45,39 @@ public class ActorAsAnimal extends Actor {
     //
     //  Establish a few details first...
     float hurtRating = fatigue + injury;
-    Tile rests = findGrazePoint();
+    Tile rests = type().organic ? findGrazePoint() : null;
     assignTask(null);
-    //
-    //  If you're seriously tired or hurt, but not hungry, find a place to rest:
-    if (hurtRating > type().maxHealth / 2 && hunger < 1 && rests != null) {
-      assignTask(targetTask(rests, 10, JOB.RESTING, null));
-    }
-    //
-    //  If you're hungry, look for food, either by grazing within your habitat
-    //  or seeking prey:
-    if (idle() && hunger >= 1) {
-      if (type().predator) {
-        Actor prey = findPrey();
-        TaskCombat hunt = TaskCombat.configHunting(this, prey);
-        if (hunt != null) assignTask(hunt);
+    
+    if (type().organic) {
+      //
+      //  If you're seriously tired or hurt, but not hungry, find a place to rest:
+      if (hurtRating > type().maxHealth / 2 && hunger < 1 && rests != null) {
+        assignTask(targetTask(rests, 10, JOB.RESTING, null));
       }
-      else if (rests != null) {
-        assignTask(targetTask(rests, 1, JOB.FORAGING, null));
+      //
+      //  If you're hungry, look for food, either by grazing within your habitat
+      //  or seeking prey:
+      if (idle() && hunger >= 1) {
+        if (type().predator) {
+          Actor prey = findPrey();
+          TaskCombat hunt = TaskCombat.configHunting(this, prey);
+          if (hunt != null) assignTask(hunt);
+        }
+        else if (rests != null) {
+          assignTask(targetTask(rests, 1, JOB.FORAGING, null));
+        }
+      }
+      //
+      //  If you're still in pain, rest up-
+      if (idle() && hurtRating >= 0.5 && rests != null) {
+        assignTask(targetTask(at(), 10, JOB.RESTING, null));
       }
     }
+    
     //
-    //  If you're still in pain, rest up-
-    if (idle() && hurtRating >= 0.5 && rests != null) {
-      assignTask(targetTask(at(), 10, JOB.RESTING, null));
+    //  If you're assigned a mission, take it on:
+    if (idle() && mission != null && mission.active()) {
+      assignTask(mission.selectActorBehaviour(this));
     }
     //
     //  If that all fails, wander about a little-
@@ -78,6 +87,15 @@ public class ActorAsAnimal extends Actor {
   }
   
   
+  void updateReactions() {
+    //  TODO:  You need to handle retreat and combat actions here...
+    
+  }
+  
+  
+
+  /**  Custom behaviour-scripting...
+    */
   Tile findGrazePoint() {
     
     Pick <Tile> pick = new Pick();

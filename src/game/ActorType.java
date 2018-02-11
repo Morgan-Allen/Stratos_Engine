@@ -20,6 +20,7 @@ public class ActorType extends Type {
   
   public Terrain habitats[]   = NO_HABITAT;
   public boolean predator     = false;
+  public boolean organic      = true;
   public int     lifespan     = LIFESPAN_LENGTH;
   public Good[]  foodsAllowed = null;
   public Good    meatType     = null;

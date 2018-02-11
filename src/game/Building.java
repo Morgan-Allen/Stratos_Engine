@@ -539,6 +539,13 @@ public class Building extends Element implements Pathing, Employer {
   }
   
   
+  public int numResidents(ActorType type) {
+    int sum = 0;
+    for (Actor w : residents) if (w.type() == type) sum++;
+    return sum;
+  }
+  
+  
   public int numResidents(int socialClass) {
     return residents.size();
     //  TODO:  Restore this later once you have multiple housing types...

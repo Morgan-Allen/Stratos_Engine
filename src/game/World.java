@@ -341,6 +341,10 @@ public class World implements Session.Saveable {
   public void updateWithTime(int time) {
     this.time = time;
     
+    CityMap active = activeCityMap();
+    if (active != null) {
+      active.locals.updateCity();
+    }
     for (City city : cities) {
       city.updateCity();
     }
