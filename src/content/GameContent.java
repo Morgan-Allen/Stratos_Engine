@@ -434,6 +434,9 @@ public class GameContent {
     //  TODO:  Add Runner Market and Pseer/Kommando School.
     
     BASTION           = new BuildType(BuildingForGovern.class , "venue_bastion"  , IS_GOVERN_BLD ),
+    BASTION_L2        = new BuildType(BuildingForGovern.class , "venue_bastion_2", IS_UPGRADE    ),
+    BASTION_L3        = new BuildType(BuildingForGovern.class , "venue_bastion_3", IS_UPGRADE    ),
+    
     TROOPER_LODGE     = new BuildType(BuildingForArmy.class   , "venue_trooper"  , IS_ARMY_BLD   ),
     ENFORCER_BLOC     = new BuildType(BuildingForGovern.class , "venue_enforcer" , IS_GOVERN_BLD ),
     
@@ -491,6 +494,7 @@ public class GameContent {
       GameContent.class, "bastion_model",
       "media/Buildings/bastion.png", 5, 2
     );
+    
     BASTION.setDimensions(5, 5, 2);
     BASTION.maxHealth = 300;
     BASTION.setBuildMaterials(PLASTICS, 10, PARTS, 25);
@@ -500,6 +504,15 @@ public class GameContent {
     BASTION.buildsWith   = new Good[] { PLASTICS, PARTS };
     BASTION.setFeatures(IS_HOUSING);
     BASTION.worksBeforeBuilt = true;
+    
+    BASTION_L2.name = "Bastion Level 2";
+    BASTION_L2.setBuildMaterials(PLASTICS, 5, PARTS, 15);
+    
+    BASTION_L3.name = "Bastion Level 3";
+    BASTION_L3.setBuildMaterials(PLASTICS, 5, PARTS, 15);
+    
+    BASTION.setUpgradeTiers(BASTION, BASTION_L2, BASTION_L3);
+    
     
     TROOPER_LODGE.name = "Trooper Lodge";
     TROOPER_LODGE.tint = TINT_MILITARY;

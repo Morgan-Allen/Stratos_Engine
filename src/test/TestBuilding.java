@@ -13,7 +13,7 @@ public class TestBuilding extends Test {
   
   
   public static void main(String args[]) {
-    testBuilding(true);
+    testBuilding(false);
   }
   
   
@@ -59,6 +59,7 @@ public class TestBuilding extends Test {
       WALKWAY, base, false, 2, 2, 10, 1
     );
     
+    
     Tally <Good> startingMaterials = totalMaterials(map, false, BUILD_GOODS);
     Tally <Good> endMaterials = startingMaterials;
     
@@ -71,6 +72,9 @@ public class TestBuilding extends Test {
     boolean materialOkay = false;
     boolean didDamage    = false;
     boolean repairsOkay  = false;
+    boolean upgradeBegun = false;
+    boolean upgradeOkay  = false;
+    boolean downgraded   = false;
     boolean testOkay     = false;
     
     final int RUN_TIME = YEAR_LENGTH;
@@ -138,7 +142,23 @@ public class TestBuilding extends Test {
         repairsOkay = allFixed;
       }
       
-      if ((repairsOkay && materialOkay) && ! testOkay) {
+      if (repairsOkay && ! upgradeBegun) {
+        palace.beginUpgrade(BASTION_L2);
+        upgradeBegun = true;
+        //I.say("Has upgrade: "+palace.hasUpgrade(BASTION_L2));
+        //I.say("Build level: "+palace.buildLevel());
+      }
+      
+      if (upgradeBegun && ! upgradeOkay) {
+        upgradeOkay = palace.hasUpgrade(BASTION_L2);
+        if (upgradeOkay) palace.takeDownUpgrade(BASTION_L2);
+      }
+      
+      if (upgradeOkay && ! downgraded) {
+        downgraded = palace.buildLevel() == 1;
+      }
+      
+      if ((repairsOkay && downgraded && materialOkay) && ! testOkay) {
         I.say("\nBUILDING TEST CONCLUDED SUCCESSFULLY!");
         testOkay = true;
         if (! graphics) return true;
@@ -155,6 +175,11 @@ public class TestBuilding extends Test {
     I.say("  Material okay: "+materialOkay);
     I.say("  Did damage:    "+didDamage   );
     I.say("  Repairs okay:  "+repairsOkay );
+    I.say("  Upgrade begun: "+upgradeBegun);
+    I.say("  Upgrade okay:  "+upgradeOkay );
+    I.say("  Downgraded:    "+downgraded  );
+    
+    I.say("Palace build level: "+palace.buildLevel());
     
     I.say("\nStructure conditions:");
     for (Building b : toBuild) {

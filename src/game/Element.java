@@ -346,7 +346,9 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
     if (type.growRate == 0) {
       setFlagging(buildLevel >= 1, type.flagKey);
     }
-    
+    for (Good g : materials()) {
+      TaskBuilding.checkNeedForBuilding(this, g, map, true);
+    }
     if (buildLevel >= 1) {
       stateBits |= FLAG_BUILT;
       if (! wasBuilt) onCompletion();

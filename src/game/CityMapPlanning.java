@@ -122,8 +122,8 @@ public class CityMapPlanning {
   private void updateBuildDemands(Element e) {
     //  TODO:  Migrate the 'check build need' function in here?
     
-    for (Good m : e.type().builtFrom) {
-      TaskBuilding.checkNeedForBuilding(e, m, map);
+    for (Good m : e.materials()) {
+      TaskBuilding.checkNeedForBuilding(e, m, map, true);
     }
   }
   

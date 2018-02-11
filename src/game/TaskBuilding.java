@@ -59,7 +59,9 @@ public class TaskBuilding extends Task {
   }
   
   
-  static float checkNeedForBuilding(Element b, Good w, CityMap map) {
+  static float checkNeedForBuilding(
+    Element b, Good w, CityMap map, boolean doUpdate
+  ) {
     Tile at = b.at();
     if (at == null) return 0;
     
@@ -76,8 +78,10 @@ public class TaskBuilding extends Task {
     if (natural && ! raze           ) amountGap = 0;
     if (need == 0 && amountDone <= 0) amountGap = 0;
     
-    CityMapDemands demands = demandsFor(w, map);
-    demands.setAmount(amountGap, b, at.x, at.y);
+    if (doUpdate) {
+      CityMapDemands demands = demandsFor(w, map);
+      demands.setAmount(amountGap, b, at.x, at.y);
+    }
     
     return amountGap;
   }
@@ -109,9 +113,7 @@ public class TaskBuilding extends Task {
     //  Iterate over any structures demanding your attention and see if
     //  they're close enough to attend to:
     CityMapDemands demands = demandsFor(material, map);
-    boolean canPickup = true;// = actor.carried() == null || actor.carried() == material;
-    
-    if (demands != null && canPickup) {
+    if (demands != null) {
       int storeRange = store.type().maxDeliverRange;
       int maxRange = near ? actor.type().sightRange : storeRange;
       
@@ -152,7 +154,7 @@ public class TaskBuilding extends Task {
     }
     
     float atStore   = store.inventory(material);
-    float needBuild = checkNeedForBuilding(b, material, map);
+    float needBuild = checkNeedForBuilding(b, material, map, false);
     float carried   = getCarryAmount(material, b, false);
     
     if (needBuild > 0) {
@@ -265,7 +267,7 @@ public class TaskBuilding extends Task {
     //  First, we ascertain how much raw material we have, and how much
     //  building needs to be done-
     Tile at = b.at();
-    float amountGap = checkNeedForBuilding(b, material, map);
+    float amountGap = checkNeedForBuilding(b, material, map, false);
     float amountGot = getCarryAmount(material, b, false);
     //
     //  We do some basic sanity checks to ensure our effort isn't

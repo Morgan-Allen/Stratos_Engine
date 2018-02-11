@@ -33,7 +33,8 @@ public class Building extends Element implements Pathing, Employer {
   private Tally <Good> inventory = new Tally();
   
   List <BuildType> upgrades = new List();
-  private BuildType currentUpgrade = null;
+  private BuildType upgradeAdds = null;
+  private BuildType upgradeTake = null;
   
   
   public Building(BuildType type) {
@@ -61,7 +62,8 @@ public class Building extends Element implements Pathing, Employer {
     s.loadTally(inventory);
     
     s.loadObjects(upgrades);
-    currentUpgrade = (BuildType) s.loadObject();
+    upgradeAdds = (BuildType) s.loadObject();
+    upgradeTake = (BuildType) s.loadObject();
   }
   
   
@@ -83,7 +85,8 @@ public class Building extends Element implements Pathing, Employer {
     s.saveTally(inventory);
     
     s.saveObjects(upgrades);
-    s.saveObject(currentUpgrade);
+    s.saveObject(upgradeAdds);
+    s.saveObject(upgradeTake);
   }
   
   
@@ -371,6 +374,17 @@ public class Building extends Element implements Pathing, Employer {
   }
   
   
+  void updateBuildState() {
+    super.updateBuildState();
+    if (upgradeAdds != null && buildLevel() >= 1) {
+      upgradeAdds = null;
+    }
+    if (upgradeTake != null && buildLevel() <= 1) {
+      upgradeTake = null;
+    }
+  }
+  
+  
   public float maxStock(Good g) {
     return type().maxStock;
   }
@@ -394,14 +408,17 @@ public class Building extends Element implements Pathing, Employer {
   }
   
   
-  public boolean canBeginUpgrade(BuildType upgrade) {
+  public boolean canBeginUpgrade(BuildType upgrade, boolean takeDown) {
     for (Good g : upgrade.builtFrom) {
-      if (! Visit.arrayIncludes(type().builtFrom, g)) return false;
+      if (! Visit.arrayIncludes(materials(), g)) return false;
     }
-    for (BuildType need : upgrade.needsAsUpgrade) {
-      if (need != type() && ! upgrades.includes(need)) return false;
+    if (takeDown) for (BuildType t : upgrades) {
+      if (Visit.arrayIncludes(t.needsAsUpgrade, upgrade)) return false;
     }
-    if (currentUpgrade != null || ! complete()) {
+    else for (BuildType need : upgrade.needsAsUpgrade) {
+      if (! hasUpgrade(need)) return false;
+    }
+    if (upgradeAdds != null || upgradeTake != null || ! complete()) {
       return false;
     }
     return true;
@@ -409,15 +426,41 @@ public class Building extends Element implements Pathing, Employer {
   
   
   public boolean beginUpgrade(BuildType upgrade) {
-    if (! canBeginUpgrade(upgrade)) return false;
+    if (! canBeginUpgrade(upgrade, false)) return false;
     upgrades.add(upgrade);
-    currentUpgrade = upgrade;
+    upgradeAdds = upgrade;
+    updateBuildState();
+    return true;
+  }
+  
+  
+  public boolean takeDownUpgrade(BuildType upgrade) {
+    if (! canBeginUpgrade(upgrade, true)) return false;
+    if (! upgrades.includes(upgrade)    ) return false;
+    upgrades.remove(upgrade);
+    upgradeTake = upgrade;
+    updateBuildState();
     return true;
   }
   
   
   public BuildType currentUpgrade() {
-    return currentUpgrade;
+    if (upgradeAdds != null) return upgradeAdds;
+    if (upgradeTake != null) return upgradeTake;
+    return null;
+  }
+  
+  
+  public Series <BuildType> upgrades() {
+    return upgrades;
+  }
+  
+  
+  public boolean hasUpgrade(BuildType upgrade) {
+    if (upgrade == null            ) return false;
+    if (upgrade == type()          ) return true ;
+    if (upgrade == currentUpgrade()) return false;
+    return upgrades.includes(upgrade);
   }
   
   
@@ -432,7 +475,8 @@ public class Building extends Element implements Pathing, Employer {
   
   
   public float upgradeProgress() {
-    if (currentUpgrade == null) return 0;
+    BuildType current = currentUpgrade();
+    if (current == null) return 0;
     //
     //  Get a tally of all materials required *minus* the currentUpgrade.
     //  Then compare with actual materials received.
@@ -440,9 +484,9 @@ public class Building extends Element implements Pathing, Employer {
     //  upgrade.  Return the fraction as progress.
     float sumNeed = 0, sumHave = 0;
     for (Good g : materials()) {
-      float needMinusUpgrade = materialNeed(g, currentUpgrade);
+      float needMinusUpgrade = materialNeed(g, current);
       sumHave += Nums.max(0, materialLevel(g) - needMinusUpgrade);
-      sumNeed += currentUpgrade.buildNeed(g);
+      sumNeed += current.buildNeed(g);
     }
     return sumHave / sumNeed;
   }
@@ -614,7 +658,7 @@ public class Building extends Element implements Pathing, Employer {
     if (complete()) for (Technique t : type().rulerPowers) {
       all.include(t);
     }
-    for (BuildType u : upgrades) if (u != currentUpgrade) {
+    for (BuildType u : upgrades) if (u != currentUpgrade()) {
       for (Technique t : u.rulerPowers) {
         all.include(t);
       }
