@@ -649,7 +649,7 @@ public class GameContent {
     HOLDING.name = "Holding";
     HOLDING.tint = TINT_LITE_RESIDENTIAL;
     HOLDING.setDimensions(2, 2, 1);
-    HOLDING.setBuildMaterials(PLASTICS, 1);
+    HOLDING.setBuildMaterials(PLASTICS, 1, PARTS, 0);
     HOLDING.workerTypes.setWith(Vassals.PYON, 1);
     HOLDING.homeFoods    = FOOD_TYPES;
     HOLDING.maxResidents = 4;
@@ -659,12 +659,12 @@ public class GameContent {
     HOLDING.setUpgradeTiers(HOLDING, HOUSE_T1, HOUSE_T2);
     
     HOUSE_T1.name = "Improved Holding";
-    HOUSE_T1.setBuildMaterials(PLASTICS, 2, PARTS, 1);
+    HOUSE_T1.setBuildMaterials(PLASTICS, 1, PARTS, 1);
     HOUSE_T1.maxStock = 2;
     HOUSE_T1.upgradeNeeds.setWith(DIVERSION, 10);
     
     HOUSE_T2.name = "Fancy Holding";
-    HOUSE_T2.setBuildMaterials(PLASTICS, 3, PARTS, 2);
+    HOUSE_T2.setBuildMaterials(PLASTICS, 1, PARTS, 1);
     HOUSE_T2.homeUseGoods.setWith(MEDICINE, 1);
     HOUSE_T2.maxStock = 2;
     HOUSE_T2.upgradeNeeds.setWith(DIVERSION, 15, PHYSICIAN_STATION, 1);

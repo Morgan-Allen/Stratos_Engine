@@ -115,7 +115,7 @@ public class TestCity extends Test {
         for (Building b : map.buildings()) {
           if (b.type() == HOLDING) {
             BuildingForHome home = (BuildingForHome) b;
-            for (Good g : home.usedBy(home.currentTier())) {
+            for (Good g : home.usedBy(home.currentBuildingTier())) {
               float need = home.maxStock(g);
               float have = home.inventory(g);
               if (have > need + 2) {
@@ -142,8 +142,8 @@ public class TestCity extends Test {
           }
           if (b.type() == HOLDING) {
             BuildingForHome home = (BuildingForHome) b;
-            if (home.currentTier() != HOUSE_T2) allNeeds = false;
-            if (home.inventory(CASH) > 5.0f   ) allNeeds = false;
+            if (home.currentBuildingTier() != HOUSE_T2) allNeeds = false;
+            if (home.inventory(CASH) > 5.0f           ) allNeeds = false;
           }
           if (b.type() == ENGINEER_STATION) {
             boolean isCrafting = false;
@@ -193,7 +193,7 @@ public class TestCity extends Test {
       if (b.type().isHomeBuilding()) {
         BuildingForHome house = (BuildingForHome) b;
         I.say("  "+house);
-        I.say("    Tier:      "+house.currentTier());
+        I.say("    Tier:      "+house.currentBuildingTier());
         I.say("    Inventory: "+house.inventory());
       }
     }

@@ -13,7 +13,7 @@ public class TestBuilding extends Test {
   
   
   public static void main(String args[]) {
-    testBuilding(false);
+    testBuilding(true);
   }
   
   
@@ -145,17 +145,18 @@ public class TestBuilding extends Test {
       if (repairsOkay && ! upgradeBegun) {
         palace.beginUpgrade(BASTION_L2);
         upgradeBegun = true;
-        //I.say("Has upgrade: "+palace.hasUpgrade(BASTION_L2));
-        //I.say("Build level: "+palace.buildLevel());
       }
       
       if (upgradeBegun && ! upgradeOkay) {
         upgradeOkay = palace.hasUpgrade(BASTION_L2);
-        if (upgradeOkay) palace.takeDownUpgrade(BASTION_L2);
+        if (upgradeOkay) palace.beginRemovingUpgrade(BASTION_L2);
       }
       
       if (upgradeOkay && ! downgraded) {
-        downgraded = palace.buildLevel() == 1;
+        downgraded = (
+          palace.buildLevel() == 1 &&
+          palace.currentUpgrade() == null
+        );
       }
       
       if ((repairsOkay && downgraded && materialOkay) && ! testOkay) {

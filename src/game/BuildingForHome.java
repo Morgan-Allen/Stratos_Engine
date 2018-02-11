@@ -14,24 +14,18 @@ public class BuildingForHome extends Building {
   
   /**  Data fields, construction and save/load methods-
     */
-  BuildType currentTier;
-  
-  
   public BuildingForHome(BuildType type) {
     super(type);
-    this.currentTier = type;
   }
   
   
   public BuildingForHome(Session s) throws Exception {
     super(s);
-    currentTier = (BuildType) s.loadObject();
   }
   
   
   public void saveState(Session s) throws Exception {
     super.saveState(s);
-    s.saveObject(currentTier);
   }
   
   
@@ -141,14 +135,9 @@ public class BuildingForHome extends Building {
   
   BuildType tierOffset(int off) {
     BuildType tiers[] = type().upgradeTiers;
-    int index = Visit.indexOf(currentTier, tiers);
+    int index = Visit.indexOf(currentBuildingTier(), tiers);
     if (index == -1) return type();
     return tiers[Nums.clamp(index + off, tiers.length)];
-  }
-  
-  
-  public BuildType currentTier() {
-    return currentTier;
   }
   
   
@@ -163,20 +152,9 @@ public class BuildingForHome extends Building {
     return true;
   }
   
-
-  public Good[] materials() {
-    return currentTier.builtFrom;
-  }
-  
-  
-  public float materialNeed(Good g) {
-    int index = Visit.indexOf(g, currentTier.builtFrom);
-    return index == -1 ? 0 : currentTier.builtAmount[index];
-  }
-  
   
   public float maxStock(Good g) {
-    return maxTierStock(g, currentTier);
+    return maxTierStock(g, currentBuildingTier());
   }
   
   
@@ -213,6 +191,7 @@ public class BuildingForHome extends Building {
       return;
     }
     
+    BuildType currentTier = currentBuildingTier();
     BuildType nextTier = tierOffset(1), lastTier = tierOffset(-1);
     Tally <Type> access = checkServiceAccess();
     
@@ -223,11 +202,17 @@ public class BuildingForHome extends Building {
     boolean currSerOK = performServicesCheck(currentTier, access);
     boolean currConOK = performConsumerCheck(currentTier, access);
     
-    if (! (currAmbOK && currSerOK && currConOK)) {
-      currentTier = lastTier;
+    if (
+      canBeginUpgrade(lastTier, true) &&
+      ! (currAmbOK && currSerOK && currConOK)
+    ) {
+      beginRemovingUpgrade(currentTier);
     }
-    else if (nextAmbOK && nextSerOK && nextConOK) {
-      currentTier = nextTier;
+    else if (
+      nextAmbOK && nextSerOK && nextConOK &&
+      canBeginUpgrade(nextTier, false)
+    ) {
+      beginUpgrade(nextTier);
     }
     
     advanceHomeUse (nextTier);
@@ -236,11 +221,13 @@ public class BuildingForHome extends Building {
   
   
   public void setCurrentTier(BuildType tier) {
-    if (Visit.arrayIncludes(type().upgradeTiers, tier)) return;
-    currentTier = tier;
+    BuildType tiers[] = type().upgradeTiers;
+    if (Visit.arrayIncludes(tiers, tier)) return;
     
-    //  TODO:  Create a distinction between the current and target
-    //  tiers...
+    for (BuildType t : tiers) {
+      applyUpgrade(t);
+      if (t == tier) break;
+    }
   }
   
   
@@ -276,7 +263,7 @@ public class BuildingForHome extends Building {
       BuildType type = home.type();
       if (type.category != Type.IS_HOME_BLD) return 0;
       
-      BuildType currentTier = ((BuildingForHome) home).currentTier;
+      BuildType currentTier = home.currentBuildingTier();
       float tier = Visit.indexOf(currentTier, type.upgradeTiers);
       tier /= Nums.max(1, type.upgradeTiers.length - 1);
       tier += type.homeSocialClass * 1f / CLASS_NOBLE;
@@ -407,8 +394,9 @@ public class BuildingForHome extends Building {
   /**  Rendering, debug and interface methods-
     */
   public String toString() {
-    if (currentTier == null) return super.toString();
-    return currentTier.name+" "+ID;
+    BuildType tier = currentBuildingTier();
+    if (tier == null) return super.toString();
+    return tier.name+" "+ID;
   }
 }
 

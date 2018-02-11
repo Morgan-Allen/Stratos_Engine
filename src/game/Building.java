@@ -434,11 +434,20 @@ public class Building extends Element implements Pathing, Employer {
   }
   
   
-  public boolean takeDownUpgrade(BuildType upgrade) {
+  public boolean beginRemovingUpgrade(BuildType upgrade) {
     if (! canBeginUpgrade(upgrade, true)) return false;
     if (! upgrades.includes(upgrade)    ) return false;
     upgrades.remove(upgrade);
     upgradeTake = upgrade;
+    updateBuildState();
+    return true;
+  }
+  
+  
+  public boolean applyUpgrade(BuildType upgrade) {
+    if (! canBeginUpgrade(upgrade, true)) return false;
+    upgrades.add(upgrade);
+    for (Good g : materials()) setMaterialLevel(g, materialNeed(g));
     updateBuildState();
     return true;
   }
@@ -489,6 +498,15 @@ public class Building extends Element implements Pathing, Employer {
       sumNeed += current.buildNeed(g);
     }
     return sumHave / sumNeed;
+  }
+  
+  
+  public BuildType currentBuildingTier() {
+    BuildType tiers[] = type().upgradeTiers;
+    for (int n = tiers.length; n-- > 0;) {
+      if (hasUpgrade(tiers[n])) return tiers[n];
+    }
+    return null;
   }
   
   
