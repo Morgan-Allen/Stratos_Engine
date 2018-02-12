@@ -676,7 +676,7 @@ public class Building extends Element implements Pathing, Employer {
   
   
   
-  /**  Last-but-not-least, returning available Powers:
+  /**  Last-but-not-least, returning available Powers and compiled services:
     */
   public Series <Technique> rulerPowers() {
     Batch <Technique> all = new Batch();
@@ -689,6 +689,16 @@ public class Building extends Element implements Pathing, Employer {
       }
     }
     return all;
+  }
+  
+  
+  public Series <Good> shopItems() {
+    Batch <Good> items = new Batch();
+    Visit.appendTo(items, type().shopItems);
+    for (BuildType u : upgrades) if (u != currentUpgrade()) {
+      Visit.appendTo(items, u.shopItems);
+    }
+    return items;
   }
   
   

@@ -557,7 +557,7 @@ public class GameContent {
     ENGINEER_STATION.produced = new Good[] { PARTS };
     ENGINEER_STATION.maxStock = 3;
     ENGINEER_STATION.craftSkill = SKILL_CRAFT;
-    ENGINEER_STATION.canOrder = new Good[] {
+    ENGINEER_STATION.shopItems = new Good[] {
       BLASTER, BODY_ARMOUR
     };
     
@@ -582,7 +582,7 @@ public class GameContent {
     STOCK_EXCHANGE.workerTypes.setWith(Vassals.VENDOR, 2);
     STOCK_EXCHANGE.needed   = MARKET_GOODS;
     STOCK_EXCHANGE.features = new Good[] { IS_VENDOR };
-    STOCK_EXCHANGE.canOrder = new Good[] {
+    STOCK_EXCHANGE.shopItems = new Good[] {
       StockExGoods.MEDIKIT//, StockExGoods.SHIELD_BAND, StockExGoods.COMM_RELAY
     };
     

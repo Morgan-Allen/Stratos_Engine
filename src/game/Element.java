@@ -286,30 +286,6 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
-  public void takeDamage(float damage) {
-    
-    float totalNeed = 0, totalHave = 0;
-    for (Good g : materials()) {
-      totalNeed += materialNeed(g);
-      totalHave += materialLevel(g);
-    }
-    float totalHealth = type.maxHealth * totalHave / totalNeed;
-    
-    for (Good g : materials()) {
-      float level = materialLevel(g);
-      float sub = level;
-      sub *= damage / totalHealth;
-      sub *= level / totalHave;
-      setMaterialLevel(g, level - sub);
-    }
-    
-    if (buildLevel() <= 0) {
-      exitMap(map);
-      setDestroyed();
-    }
-  }
-  
-  
   public float buildLevel() {
     float totalNeed = 0, totalHave = 0;
     for (Good g : materials()) {
@@ -412,6 +388,48 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   
   float ambience() {
     return type.ambience;
+  }
+  
+  
+  
+  /**  Support methods for combat-
+    */
+  public int meleeDamage() {
+    return type.meleeDamage;
+  }
+  
+  
+  public int rangeDamage() {
+    return type.rangeDamage;
+  }
+  
+  
+  public int armourClass() {
+    return type.armourClass;
+  }
+  
+  
+  public void takeDamage(float damage) {
+    
+    float totalNeed = 0, totalHave = 0;
+    for (Good g : materials()) {
+      totalNeed += materialNeed(g);
+      totalHave += materialLevel(g);
+    }
+    float totalHealth = type.maxHealth * totalHave / totalNeed;
+    
+    for (Good g : materials()) {
+      float level = materialLevel(g);
+      float sub = level;
+      sub *= damage / totalHealth;
+      sub *= level / totalHave;
+      setMaterialLevel(g, level - sub);
+    }
+    
+    if (buildLevel() <= 0) {
+      exitMap(map);
+      setDestroyed();
+    }
   }
   
 

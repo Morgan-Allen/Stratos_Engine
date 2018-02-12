@@ -524,8 +524,8 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   /**  Combat and survival-related code:
     */
   void performAttack(Element other, boolean melee) {
-    int damage = melee ? type().meleeDamage : type().rangeDamage;
-    int armour = other.type().armourClass;
+    int damage = melee ? meleeDamage() : rangeDamage();
+    int armour = other.armourClass();
     if (other == null || damage <= 0) return;
     
     //

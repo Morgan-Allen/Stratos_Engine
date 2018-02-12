@@ -52,7 +52,7 @@ public class TaskPurchase extends Task {
   ) {
     //  TODO:  Consider just ordering the cheapest of these?
     Batch <TaskPurchase> purchases = new Batch();
-    for (Good g : shop.type().canOrder) {
+    for (Good g : shop.shopItems()) {
       if (shop.hasItemOrder(g, actor)) continue;
       
       if (g == actor.type().weaponType) {

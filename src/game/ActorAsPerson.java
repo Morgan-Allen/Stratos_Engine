@@ -430,7 +430,7 @@ public class ActorAsPerson extends Actor {
   
   
   
-  /**  Handling sight-range:
+  /**  Handling sight-range and combat-stats:
     */
   void updateVision() {
     if (indoors()) return;
@@ -445,6 +445,39 @@ public class ActorAsPerson extends Actor {
   
   public float sightRange() {
     return super.sightRange() * (map.fog.lightLevel() + 1f) / 2;
+  }
+  
+  
+  public int meleeDamage() {
+    Good weapon = type().weaponType;
+    if (weapon != null) {
+      int damage = weapon.meleeDamage;
+      damage += carried(weapon);
+      return damage;
+    }
+    else return super.meleeDamage();
+  }
+  
+  
+  public int rangeDamage() {
+    Good weapon = type().weaponType;
+    if (weapon != null) {
+      int damage = weapon.rangeDamage;
+      damage += carried(weapon);
+      return damage;
+    }
+    else return super.rangeDamage();
+  }
+  
+  
+  public int armourClass() {
+    Good armour = type().weaponType;
+    if (armour != null) {
+      int amount = armour.armourClass;
+      amount += carried(armour);
+      return amount;
+    }
+    else return super.armourClass();
   }
   
   

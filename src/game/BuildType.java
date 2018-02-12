@@ -15,10 +15,10 @@ public class BuildType extends Type {
   public int homeSocialClass  = CLASS_COMMON;
   public int homeAmbienceNeed = AMBIENCE_MIN;
   
-  public Good needed  [] = NO_GOODS;
-  public Good produced[] = NO_GOODS;
-  public Good canOrder[] = NO_GOODS;
-  public Good features[] = NO_GOODS;
+  public Good needed   [] = NO_GOODS;
+  public Good produced [] = NO_GOODS;
+  public Good shopItems[] = NO_GOODS;
+  public Good features [] = NO_GOODS;
   public Type gatherFlag = null;
   public Trait craftSkill = null;
   
@@ -71,7 +71,6 @@ public class BuildType extends Type {
   //  TODO:
   
   //  Bonuses to venue HP, upgrade-slots, recruit-slots, armour, etc.
-  //  Items to make or sell
   //  Boost to skill use or manufacture-speed
   //  Techniques available to learn or as sovereign spells
   //  Max weapon/armour manufacturing level boost
