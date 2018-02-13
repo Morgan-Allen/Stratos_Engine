@@ -35,15 +35,14 @@ public class BuildType extends Type {
   public int maxVisitors  = AVG_MAX_VISITORS;
   public int maxRecruits  = AVG_ARMY_SIZE;
   
-  
-  
-  //  TODO:  MERGE THESE IF YOU CAN
-  public BuildType    upgradeTiers[] = NO_TIERS;
-  public Tally <Type> upgradeNeeds = new Tally();
-  public Tally <Good> homeUseGoods = new Tally();
+  public int maxUpgrades = 0;
+  public BuildType upgradeTiers[] = NO_TIERS;
+  public BuildType allUpgrades [] = NO_UPGRADES;
   
   public boolean isUpgrade = false;
+  public Tally <Type> serviceNeeds = new Tally();
   public BuildType needsAsUpgrade[] = {};
+  public Tally <Good> homeUseGoods = new Tally();
   
   public Technique rulerPowers[] = {};
   public Technique actorPowers[] = {};
@@ -51,6 +50,11 @@ public class BuildType extends Type {
   
   public void setUpgradeTiers(BuildType... tiers) {
     this.upgradeTiers = tiers;
+  }
+  
+  
+  public void setAllUpgrades(BuildType... upgrades) {
+    this.allUpgrades = upgrades;
   }
   
   

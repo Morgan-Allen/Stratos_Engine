@@ -125,8 +125,8 @@ public class BuildingForHome extends Building {
   
   boolean performServicesCheck(BuildType tier, Tally <Type> access) {
     boolean allOK = true;
-    for (Type need : tier.upgradeNeeds.keys()) {
-      float amount = tier.upgradeNeeds.valueFor(need);
+    for (Type need : tier.serviceNeeds.keys()) {
+      float amount = tier.serviceNeeds.valueFor(need);
       if (access.valueFor(need) < amount) allOK = false;
     }
     return allOK;

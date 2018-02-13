@@ -2,9 +2,10 @@
 
 package gameUI.play;
 import game.*;
+import static game.GameConstants.*;
+import graphics.common.*;
 import graphics.widgets.*;
 import util.*;
-import static game.GameConstants.*;
 
 
 
@@ -73,58 +74,51 @@ public class VenuePane extends DetailPane {
       }
     }
     
-    /*
-    Series <Upgrade> upgrades = venue.blueprint().upgradesAvailable();
-    if (! upgrades.empty()) {
-      int num = venue.structure.numUpgrades(), max = venue.structure.maxUpgrades();
+    
+    BuildType upgrades[] = venue.type().allUpgrades;
+    
+    if (! Visit.empty(upgrades)) {
+      int num = venue.numSideUpgrades(), max = venue.maxUpgrades();
       d.append("\n\nUpgrades: ("+num+"/"+max+")");
       
-      for (final Upgrade u : upgrades) {
-        if (venue.structure.canUpgrade(u) && ! venue.structure.busyUpgrading()) {
+      for (final BuildType upgrade : upgrades) {
+        
+        boolean done    = venue.hasUpgrade(upgrade);
+        boolean current = venue.currentUpgrade() == upgrade;
+        boolean canDo   = venue.canBeginUpgrade(upgrade, false);
+        String  name    = upgrade.name;
+        
+        if (done) {
+          d.append("\n  "+name+" (complete)");
+        }
+        else if (current) {
+          float progress = venue.upgradeProgress();
+          d.append("\n  "+name+" ("+I.percent(progress)+"%)");
+        }
+        else if (canDo) {
+          
+          //  TODO:  List building materials as well...
+          
           d.append("\n  ");
-          d.append(new Description.Link(u.name+" ("+u.upgradeCost+")") {
+          d.append(new Description.Link(name) {
             public void whenClicked(Object context) {
-              venue.structure.startUpgrade(u);
+              venue.beginUpgrade(upgrade);
             }
           });
         }
         else {
-          continue;
-          //d.append("\n  ");
-          //d.append(u.name);
+          Text.appendColour("\n  "+name, Colour.GREY, d);
         }
-      }
-      for (Upgrade u : venue.structure.upgradesQueued()) {
-        d.append("\n  Upgrading: "+u.name);
-        int prog = (int) (venue.structure.upgradeProgress(u) * 100);
-        d.append(" ("+prog+"%)");
-      }
-      for (Upgrade u : venue.structure.allUpgrades()) {
-        d.append("\n  "+u.name+" (installed)");
+        
       }
     }
     
-    final Blueprint nextLevel = venue.structure.nextVenueLevel();
-    if (nextLevel != null && venue.structure.canUpgradeVenue(nextLevel)) {
-      d.append("\n  Upgrade to ");
-      d.append(new Description.Link(nextLevel.name) {
-        public void whenClicked(Object context) {
-          venue.structure.startVenueUpgrade(nextLevel);
-        }
-      });
-    }
-    
-    for (Actor a : venue.staff.hiring()) {
-      d.append("\n  Hiring: "+a);
-      int prog = (int) (venue.staff.hiringProgress(a) * 100);
-      d.append(" ("+prog+"%)");
-    }
     
     d.append("\n\nVisitors:");
     for (Element i : venue.inside()) {
       d.appendAll("\n  ", i);
     }
-    //*/
+    
     
     super.updateState();
   }

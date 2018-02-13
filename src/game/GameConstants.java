@@ -360,9 +360,10 @@ public class GameConstants {
     AMBIENCE_PAD =  2 ,
     AMBIENCE_MAX =  20
   ;
-  final static BuildType  
-    NO_TIERS[] = new BuildType[0],
-    NO_NEEDS[] = new BuildType[0]
+  final static BuildType
+    NO_UPGRADES[] = new BuildType[0],
+    NO_TIERS   [] = new BuildType[0],
+    NO_NEEDS   [] = new BuildType[0]
   ;
   
   

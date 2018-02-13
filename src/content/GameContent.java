@@ -433,6 +433,7 @@ public class GameContent {
     BASTION_L3.setBuildMaterials(PLASTICS, 5, PARTS, 15);
     
     BASTION.setUpgradeTiers(BASTION, BASTION_L2, BASTION_L3);
+    BASTION.setAllUpgrades(BASTION.upgradeTiers);
     
     
     TROOPER_LODGE.name = "Trooper Lodge";
@@ -583,13 +584,13 @@ public class GameContent {
     HOUSE_T1.name = "Improved Holding";
     HOUSE_T1.setBuildMaterials(PLASTICS, 1, PARTS, 1);
     HOUSE_T1.maxStock = 2;
-    HOUSE_T1.upgradeNeeds.setWith(DIVERSION, 10);
+    HOUSE_T1.serviceNeeds.setWith(DIVERSION, 10);
     
     HOUSE_T2.name = "Fancy Holding";
     HOUSE_T2.setBuildMaterials(PLASTICS, 1, PARTS, 1);
     HOUSE_T2.homeUseGoods.setWith(MEDICINE, 1);
     HOUSE_T2.maxStock = 2;
-    HOUSE_T2.upgradeNeeds.setWith(DIVERSION, 15, PHYSICIAN_STATION, 1);
+    HOUSE_T2.serviceNeeds.setWith(DIVERSION, 15, PHYSICIAN_STATION, 1);
     
     CANTINA.name = "Cantina";
     CANTINA.tint = TINT_AMENITY;

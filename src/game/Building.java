@@ -414,6 +414,9 @@ public class Building extends Element implements Pathing, Employer {
     if (upgrade == type() || (upgrades.includes(upgrade) && ! takeDown)) {
       return false;
     }
+    if (! Visit.arrayIncludes(type().upgradeTiers, upgrade)) {
+      if (numSideUpgrades() >= maxUpgrades()) return false;
+    }
     for (Good g : upgrade.builtFrom) {
       if (! Visit.arrayIncludes(materials(), g)) return false;
     }
@@ -467,6 +470,21 @@ public class Building extends Element implements Pathing, Employer {
   
   public Series <BuildType> upgrades() {
     return upgrades;
+  }
+  
+  
+  public int maxUpgrades() {
+    int max = type().maxUpgrades;
+    for (BuildType b : upgrades) max += b.maxUpgrades;
+    return max;
+  }
+  
+  
+  public int numSideUpgrades() {
+    BuildType tiers[] = type().upgradeTiers;
+    int num = 0;
+    for (BuildType b : upgrades) if (! Visit.arrayIncludes(tiers, b)) num += 1;
+    return num;
   }
   
   
