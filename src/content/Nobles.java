@@ -3,10 +3,7 @@
 
 package content;
 import game.*;
-import graphics.common.*;
-import util.*;
 import static game.GameConstants.*;
-import static content.GameContent.*;
 
 
 
@@ -51,7 +48,7 @@ public class Nobles {
   };
   static {
     NOBLE.name = "Noble";
-    NOBLE.attachCostume("noble_skin.gif");
+    NOBLE.attachCostume(Nobles.class, "noble_skin.gif");
     NOBLE.initTraits.setWith(SKILL_MELEE, 1, SKILL_SPEAK, 2, SKILL_WRITE, 2);
   }
   
@@ -68,7 +65,7 @@ public class Nobles {
   };
   static {
     CONSORT.name = "Consort";
-    CONSORT.attachCostume("consort_skin.gif");
+    CONSORT.attachCostume(Nobles.class, "consort_skin.gif");
     CONSORT.initTraits.setWith(SKILL_SPEAK, 2, SKILL_WRITE, 1, SKILL_EVADE, 2);
   }
   

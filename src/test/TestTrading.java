@@ -50,9 +50,11 @@ public class TestTrading extends Test {
     
     CityMap map = new CityMap(world, baseC.locale, baseC);
     map.performSetup(10, new Terrain[0]);
-    world.settings.toggleFog     = false;
-    world.settings.toggleHunger  = false;
-    world.settings.toggleFatigue = false;
+    world.settings.toggleFog      = false;
+    world.settings.toggleHunger   = false;
+    world.settings.toggleFatigue  = false;
+    world.settings.toggleBuilding = false;
+    
     
     BuildingForTrade post1 = (BuildingForTrade) SUPPLY_DEPOT.generate();
     post1.enterMap(map, 1, 6, 1, baseC);

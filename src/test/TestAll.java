@@ -27,7 +27,9 @@ public class TestAll {
     record(TestMilitary .testMilitary (false));
     record(TestSieging  .testSieging  (false));
     record(TestDiplomacy.testDiplomacy(false));
+    record(TestSpawning .testSpawning (false));
     record(TestCity     .testCity     (false));
+    record(TestPurchases.testPurchases(false));
     record(TestFarming  .testFarming  (false));
     record(TestForests  .testForests  (false));
     record(TestTrading  .testTrading  (false));

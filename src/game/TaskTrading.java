@@ -108,7 +108,7 @@ public class TaskTrading extends Task {
         I.say("  ADDING TRADE PROFITS: "+profits);
       }
       offloadGoods(tradeFrom);
-      actor.assignCargo(null);
+      actor.clearCarried();
     }
   }
   
@@ -179,8 +179,9 @@ public class TaskTrading extends Task {
     boolean tributeDue = city.isLoyalVassalOf(opposite);
     City.Relation r = city.relationWith(opposite);
     
-    Tally <Good> cargo = actor.carried();
+    Tally <Good> cargo = new Tally();
     Tally <Good> stock = store.inventory();
+    cargo.add(actor.carried);
     int totalCost = 0;
     
     for (Good g : taken.keys()) {

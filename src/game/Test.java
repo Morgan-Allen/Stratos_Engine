@@ -331,6 +331,22 @@ public class Test {
   }
   
   
+  
+  
+
+  
+  private static Test currentTest = null;
+  private static City currentCity = null;
+  
+  public static Test currentTest() {
+    return currentTest;
+  }
+  
+  public static City currentCity() {
+    return currentCity;
+  }
+  
+  
   public City runLoop(
     City city, int numUpdates, boolean graphics, String filename
   ) {
@@ -340,6 +356,9 @@ public class Test {
     this.filename = filename;
     
     while (! doQuit) {
+      
+      Test.currentTest = this;
+      Test.currentCity = city;
       
       if (graphics) {
         World world = map.world;
@@ -509,7 +528,9 @@ public class Test {
         "\n  Melee/Range dmg:  "+t.meleeDamage+"/"+t.rangeDamage+
         "\n  Armour class:     "+t.armourClass+
         "\n  Sight/attack rng: "+t.sightRange+"/"+t.rangeDist+
-        "\n  Injury:           "+I.shorten(a.injury, 1)+"/"+t.maxHealth
+        "\n  Injury:           "+I.shorten(a.injury , 1)+"/"+t.maxHealth+
+        "\n  Fatigue:          "+I.shorten(a.fatigue, 1)+"/"+t.maxHealth+
+        "\n  Hunger:           "+I.shorten(a.hunger , 1)+"/"+t.maxHealth
       );
       report.append("\n  Task: "+a.jobDesc());
       
@@ -591,6 +612,13 @@ public class Test {
     if (! goodRep.empty()) {
       report.append("\nGoods:");
       for (String s : goodRep) report.append(s);
+    }
+    
+    report.append("\nMaterials: ");
+    for (Good g : b.materials()) {
+      float amount = b.materialLevel(g);
+      float demand = b.materialNeed(g);
+      report.append("\n  "+g+": "+I.shorten(amount, 1)+"/"+I.shorten(demand, 1));
     }
     
     return report.toString();

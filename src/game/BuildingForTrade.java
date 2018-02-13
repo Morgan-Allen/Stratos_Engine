@@ -92,12 +92,6 @@ public class BuildingForTrade extends Building implements Trader {
     return Nums.abs(tradeLevel.valueFor(made));
   }
   
-  public float demandFor(Good g) {
-    boolean consumes = accessible() && Visit.arrayIncludes(needed(), g);
-    float need = consumes ? stockNeeded(g) : 0;
-    return super.demandFor(g) + need;
-  }
-  
   
   
   /**  Selecting behaviour for walkers-

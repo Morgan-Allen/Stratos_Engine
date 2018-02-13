@@ -2,9 +2,7 @@
 
 package content;
 import game.*;
-import game.GameConstants.Target;
 import graphics.common.*;
-import static content.GameContent.*;
 import static game.GameConstants.*;
 import static game.Technique.*;
 
@@ -66,7 +64,7 @@ public class Collective {
   };
   static {
     COLLECTIVE.name = "Collective";
-    COLLECTIVE.attachCostume("collective_skin.gif");
+    COLLECTIVE.attachCostume(Collective.class, "collective_skin.gif");
     COLLECTIVE.meleeDamage = 0;
     COLLECTIVE.rangeDamage = 0;
     COLLECTIVE.rangeDist   = 0;

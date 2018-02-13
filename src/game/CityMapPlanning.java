@@ -89,13 +89,14 @@ public class CityMapPlanning {
   
   public void placeObject(Element e) {
     toBuild.add(e);
+    togglePlacement(e, true);
   }
   
   
   public void placeObject(Element e, int x, int y, City owns) {
     e.setLocation(map.tileAt(x, y), map);
     if (e.type().isBuilding()) ((Building) e).assignHomeCity(owns);
-    toBuild.add(e);
+    placeObject(e);
   }
   
   
@@ -195,7 +196,7 @@ public class CityMapPlanning {
   ) {
     for (Tile t : map.tilesUnder(x, y, w, h)) if (t != null) {
       Element plans = map.planning.objectAt(t);
-      if (plans != null) {
+      if (plans != null && plans != t.above) {
         map.planning.unplaceObject(plans);
       }
       if (t.above != null && now) {

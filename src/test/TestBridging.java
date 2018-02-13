@@ -141,6 +141,8 @@ public class TestBridging extends Test {
     else {
       Batch <Element> freshBuilt = new Batch();
       for (Element e : map.planning.toBuildCopy()) {
+        if (e == palace) continue;
+        
         Tile at = e.at();
         map.planning.unplaceObject(e);
         e.exitMap(map);

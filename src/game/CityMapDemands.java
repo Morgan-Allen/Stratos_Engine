@@ -28,6 +28,7 @@ public class CityMapDemands {
     
     public Object source() { return source; }
     public Coord coord() { return new Coord(x, y); }
+    public float amount() { return amount; }
   }
   
   static class Node extends Entry {

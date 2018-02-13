@@ -20,10 +20,13 @@ public class WorldSettings {
     toggleFatigue = true,
     toggleInjury  = true,
     toggleReacts  = true,
+    toggleCombat  = true,
     
     toggleAging       = true,
     toggleChildMort   = true,
     
+    toggleBuilding    = true,
+    toggleSalvage     = true,
     toggleMigrate     = true,
     toggleBuildEvolve = true,
     

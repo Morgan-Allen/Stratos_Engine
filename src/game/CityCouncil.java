@@ -194,9 +194,11 @@ public class CityCouncil {
     Actor monarch = memberWithRole(Role.MONARCH);
     if (monarch != null) {
       for (Actor consort : monarch.allBondedWith(BOND_MARRIED)) {
+        if (! consort.alive()) continue;
         toggleMember(consort, Role.CONSORT, true);
       }
       for (Actor heir : monarch.allBondedWith(BOND_CHILD)) {
+        if (! heir.alive()) continue;
         toggleMember(heir, Role.HEIR, true);
       }
     }
@@ -211,20 +213,24 @@ public class CityCouncil {
         Role r = roles.get(a);
         float rating = 1 + membersBondAvg(a);
         if (r == Role.HEIR) rating *= 3;
-        if (a.woman()) rating /= 2;
+        if (a.woman()     ) rating /= 2;
         rating *= 1 + (a.ageYears() / AVG_RETIREMENT);
         pick.compare(a, rating);
       }
       //
       //  The king is dead, long live the king-
       Actor newMonarch = pick.result();
-      if (newMonarch != null) toggleMember(newMonarch, Role.MONARCH, true);
+      if (newMonarch != null) {
+        toggleMember(newMonarch, Role.MONARCH, true);
+      }
     }
     //
     //  And remove any other dead council-members:
     for (Actor a : members) {
       Role r = roles.get(a);
-      if (a.dead()) toggleMember(a, r, false);
+      if (a.dead()) {
+        toggleMember(a, r, false);
+      }
     }
     //
     //  We annul any independent decision-making if AI is toggled off-

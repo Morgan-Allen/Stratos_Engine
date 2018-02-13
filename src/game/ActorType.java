@@ -71,6 +71,11 @@ public class ActorType extends Type {
   }
   
   
+  public Type childType() {
+    return this;
+  }
+  
+  
   public boolean isCommoner() { return socialClass == CLASS_COMMON ; }
   public boolean isTrader  () { return socialClass == CLASS_TRADER ; }
   public boolean isSoldier () { return socialClass == CLASS_SOLDIER; }

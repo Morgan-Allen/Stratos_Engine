@@ -26,7 +26,7 @@ public class TestCity extends Test {
     World world = map.world;
     world.settings.toggleFog = false;
     
-    base.initFunds(1000);
+    base.initFunds(5000);
     
     CityMapPlanning.placeStructure(WALKWAY, base, true, 3, 8, 25 , 1);
     CityMapPlanning.placeStructure(WALKWAY, base, true, 8, 2 , 1, 25);
@@ -59,7 +59,7 @@ public class TestCity extends Test {
     market.enterMap(map, 4 , 9 , 1, base);
     
     for (int n = 4; n-- > 0;) {
-      Element rock = new Element(CLAY_BANK1);
+      Element rock = new Element(DESERT_ROCK1);
       rock.enterMap(map, 1 + (n * 3), 28, 1, base);
     }
     
@@ -101,6 +101,8 @@ public class TestCity extends Test {
     while (map.time() < RUN_TIME || graphics) {
       test.runLoop(base, 1, graphics, "saves/test_city.tlt");
       
+      //
+      //  Hire workers as and when necessary:
       for (Building b : map.buildings()) if (b.homeCity() == base) {
         for (ActorType job : b.type().workerTypes.keys()) {
           int num = b.numWorkers(job), max = b.maxWorkers(job);
@@ -111,6 +113,8 @@ public class TestCity extends Test {
         }
       }
       
+      //
+      //  Check to ensure stocks are under control:
       if (goodsOkay) {
         for (Building b : map.buildings()) {
           if (b.type() == HOLDING) {

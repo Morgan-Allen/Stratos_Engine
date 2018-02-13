@@ -151,17 +151,18 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
     stateBits |= FLAG_ON_MAP;
     setLocation(map.tileAt(x, y), map);
     
-    ///I.say("\nEntered map at "+at+": "+this);
     if (! type.mobile) {
+      
+      for (Tile t : footprint(map)) {
+        if (t.above != null) t.above.exitMap(map);
+        map.setAbove(t, this);
+      }
+      
+      map.planning.placeObject(this);
+      
       for (Good g : materials()) {
         float need = materialNeed(g);
         setMaterialLevel(g, need * buildLevel);
-      }
-      
-      for (Tile t : footprint(map)) {
-        ///I.say("  Footprint: "+t);
-        if (t.above != null) t.above.exitMap(map);
-        map.setAbove(t, this);
       }
     }
   }
@@ -169,19 +170,22 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   
   public void exitMap(CityMap map) {
     
+    //setLocation(null, map);
+    //this.map = null;
+    stateBits |=  FLAG_EXIT;
+    stateBits &= ~FLAG_ON_MAP;
+    
     if (! type.mobile) {
       if (true       ) setFlagging(false, type.flagKey);
       if (type.isCrop) setFlagging(false, NEED_PLANT  );
+      
       for (Tile t : footprint(map)) {
         if (t.above == this) map.setAbove(t, null);
       }
+      
+      map.planning.unplaceObject(this);
       setDestroyed();
     }
-    
-    setLocation(null, map);
-    this.map = null;
-    stateBits |=  FLAG_EXIT;
-    stateBits &= ~FLAG_ON_MAP;
   }
   
   

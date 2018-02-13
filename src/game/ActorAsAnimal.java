@@ -88,6 +88,7 @@ public class ActorAsAnimal extends Actor {
   
   
   void updateReactions() {
+    if (! map.world.settings.toggleReacts) return;
     //  TODO:  You need to handle retreat and combat actions here...
     
   }

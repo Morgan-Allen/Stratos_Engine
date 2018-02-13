@@ -15,7 +15,7 @@ public class TestSieging extends Test {
   
   
   public static void main(String args[]) {
-    testSieging(false);
+    testSieging(true);
   }
   
   
@@ -43,8 +43,11 @@ public class TestSieging extends Test {
     World.setupRoute(baseC.locale, awayC.locale, 1);
     City.setPosture(baseC, awayC, City.POSTURE.ENEMY, true);
     
+    
     CityMapPlanning.placeStructure(SHIELD_WALL, baseC, true, 4, 4, 20, 20);
     CityMapPlanning.markDemolish(map, true, 6, 6, 16, 16);
+    
+    map.planning.updatePlanning();
     
     Building gate = (Building) BLAST_DOOR.generate();
     gate.setFacing(TileConstants.E);
@@ -104,6 +107,7 @@ public class TestSieging extends Test {
     final int RUN_TIME = 1000;
     final int MIN_DEFENDERS = 4;
     final int MIN_INVADERS  = 8;
+    
     
     while (map.time() < RUN_TIME || graphics) {
       test.runLoop(baseC, 1, graphics, "saves/test_sieging.tlt");

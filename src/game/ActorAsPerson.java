@@ -239,7 +239,6 @@ public class ActorAsPerson extends Actor {
     if (adult && home() == null) CityBorders.findHome(map, this);
     if (work() != null && ! adult) work().setWorker(this, false);
     
-    
     //  TODO:  You will need to ensure that work/home/formation venues are
     //  present on the same map to derive related bahaviours!
     
@@ -318,6 +317,7 @@ public class ActorAsPerson extends Actor {
   
   
   void updateReactions() {
+    if (! map.world.settings.toggleReacts) return;
     
     if (jobType() != Task.JOB.RETREAT) {
       if (! inCombat()) {
@@ -496,15 +496,19 @@ public class ActorAsPerson extends Actor {
         float dieChance = AVG_CHILD_MORT / 100f;
         if (! settings.toggleChildMort) dieChance = 0;
         
+        //I.say(this+" FINISHED TERM...");
+        
         if (Rand.num() >= dieChance) {
           completePregnancy(home(), onMap);
         }
         else {
           pregnancy = 0;
+          //I.say(this+" LOST THEIR CHILD.");
         }
       }
       if (pregnancy > PREGNANCY_LENGTH + MONTH_LENGTH) {
         pregnancy = 0;
+        //I.say(this+" CANCELLED PREGNANCY!");
       }
     }
     
@@ -528,6 +532,7 @@ public class ActorAsPerson extends Actor {
         ;
         if (Rand.num() < pregChance) {
           beginPregnancy();
+          //I.say(this+" BECAME PREGNANT!  TIME TO TERM: "+(PREGNANCY_LENGTH+map.time()));
         }
       }
     }
@@ -546,7 +551,7 @@ public class ActorAsPerson extends Actor {
   
   public void completePregnancy(Building venue, boolean onMap) {
     
-    ActorAsPerson child  = (ActorAsPerson) CHILD.generate();
+    ActorAsPerson child  = (ActorAsPerson) type().childType().generate();
     ActorAsPerson father = (ActorAsPerson) bondedWith(BOND_MARRIED);
     setBond(this  , child, BOND_CHILD, BOND_PARENT, 0.5f);
     setBond(father, child, BOND_CHILD, BOND_PARENT, 0.5f);
@@ -558,6 +563,8 @@ public class ActorAsPerson extends Actor {
       child.setInside(venue, true);
       venue.setResident(child, true);
     }
+    
+    //I.say(this+" GAVE BIRTH TO "+child);
   }
   
   

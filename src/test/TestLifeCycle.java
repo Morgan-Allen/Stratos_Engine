@@ -24,6 +24,14 @@ public class TestLifeCycle extends Test {
   static boolean testLifeCycle(boolean graphics) {
     Test test = new TestLifeCycle();
     
+    City base = setupTestCity(16, ALL_GOODS, false);
+    CityMap map = base.activeMap();
+    World world = map.world;
+    
+    world.settings.toggleFog    = false;
+    world.settings.toggleReacts = false;
+    
+    
     I.say("\nTesting XP gain...");
     ActorAsPerson single = (ActorAsPerson) Vassals.PYON.generate();
     for (int n = MAX_TRAIN_TIME; n-- > 0;) {
@@ -36,14 +44,9 @@ public class TestLifeCycle extends Test {
       return false;
     }
     
-    City base = setupTestCity(16, ALL_GOODS, false);
-    CityMap map = base.activeMap();
-    World world = map.world;
-    world.settings.toggleFog = false;
-    
-    for (int x = 7; x > 0; x -= 3) {
-      for (int y = 7; y > 0; y -= 3) {
-        Type type = y == 7 ? HOLDING : ENGINEER_STATION;
+    for (int x = 10; x > 0; x -= 3) {
+      for (int y = 10; y > 0; y -= 3) {
+        Type type = (y == 10 || y == 7) ? HOLDING : ENGINEER_STATION;
         Building built = (Building) type.generate();
         built.enterMap(map, x, y, 1, base);
       }
@@ -88,6 +91,10 @@ public class TestLifeCycle extends Test {
     boolean succession = false;
     boolean testOkay   = false;
     
+    Test.fillAllVacancies(map, Vassals.PYON);
+    for (Actor a : map.actors()) a.setHungerLevel(0.75f);
+    
+    
     I.say("\nTOTAL LIFE CYCLE RUN TIME: "+RUN_TIME);
     
     while (map.time() < RUN_TIME || graphics) {
@@ -124,10 +131,10 @@ public class TestLifeCycle extends Test {
             b.setInventory(PARTS, 5);
           }
           if (b.type() == HOLDING || b.type() == BASTION) {
-            b.setInventory(CARBS  , 5);
+            b.setInventory(CARBS   , 5);
             b.setInventory(GREENS  , 5);
-            b.setInventory(PARTS, 5);
-            b.setInventory(MEDICINE , 5);
+            b.setInventory(PARTS   , 5);
+            b.setInventory(MEDICINE, 5);
           }
         }
         //  TODO:  Restore this later- it may take time to update employment

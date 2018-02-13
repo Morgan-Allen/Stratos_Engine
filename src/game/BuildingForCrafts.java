@@ -61,13 +61,6 @@ public class BuildingForCrafts extends Building {
   
   /**  Life-cycle, update and economic functions-
     */
-  public float demandFor(Good g) {
-    boolean consumes = accessible() && Visit.arrayIncludes(needed(), g);
-    float need = consumes ? stockNeeded(g) : 0;
-    return super.demandFor(g) + need;
-  }
-  
-  
   void updateOnPeriod(int period) {
     super.updateOnPeriod(period);
     for (ItemOrder order : orders) {
@@ -164,8 +157,8 @@ public class BuildingForCrafts extends Building {
     }
     //
     //  Go here if you aren't already:
-    Task coming = returnActorHere(actor);
-    if (coming != null) return coming;
+    //Task coming = returnActorHere(actor);
+    //if (coming != null) return coming;
     //
     //  If you're already home, see if any deliveries are required:
     Task delivery = TaskDelivery.pickNextDelivery(actor, this, produced());

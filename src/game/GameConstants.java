@@ -317,13 +317,7 @@ public class GameConstants {
     EMPTY = new Terrain("Empty", "terr_empty", -1);
   
   final public static ActorType
-    NO_WALKERS[] = new ActorType[0],
-    CHILD = new ActorType(ActorAsPerson.class, "type_child", IS_PERSON_ACT, CLASS_COMMON);
-  
-  static {
-    CHILD.name = "Child";
-    CHILD.initTraits.setWith();
-  }
+    NO_WALKERS[] = new ActorType[0];
   
   
   

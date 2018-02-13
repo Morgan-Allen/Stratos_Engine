@@ -350,10 +350,12 @@ public class Building extends Element implements Pathing, Employer {
   /**  Utility methods for demand-levels, materials and construction/upgrades-
     */
   public float demandFor(Good g) {
-    float need = razing() ? 0 : materialNeed(g);
-    float hasB = materialLevel(g);
-    float hasG = inventory.valueFor(g);
-    return need - (hasB + hasG);
+    boolean consumes = accessible() && Visit.arrayIncludes(needed(), g);
+    float needG = consumes ? stockNeeded(g) : 0;
+    float needM = razing() ? 0 : materialNeed(g);
+    float hasM  = materialLevel(g);
+    float hasG  = inventory.valueFor(g);
+    return needM + needG - (hasM + hasG);
   }
   
   
@@ -409,6 +411,9 @@ public class Building extends Element implements Pathing, Employer {
   
   
   public boolean canBeginUpgrade(BuildType upgrade, boolean takeDown) {
+    if (upgrade == type() || (upgrades.includes(upgrade) && ! takeDown)) {
+      return false;
+    }
     for (Good g : upgrade.builtFrom) {
       if (! Visit.arrayIncludes(materials(), g)) return false;
     }
@@ -475,6 +480,7 @@ public class Building extends Element implements Pathing, Employer {
   
   private float materialNeed(Good g, BuildType exceptUpgrade) {
     float need = super.materialNeed(g);
+    
     for (BuildType u : upgrades) {
       if (u == exceptUpgrade) continue;
       need += u.buildNeed(g);

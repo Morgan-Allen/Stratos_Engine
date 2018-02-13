@@ -2,10 +2,10 @@
 
 package content;
 import game.*;
+import game.GameConstants.Good;
 import graphics.common.*;
 import util.*;
 import static game.GameConstants.*;
-import static content.GameContent.*;
 
 
 
@@ -25,6 +25,16 @@ public class Trooper {
   ;
   
   
+  final public static Good
+    BLASTER     = new Good("Blaster"    , -1),
+    BODY_ARMOUR = new Good("Body Armour", -1)
+  ;
+  static {
+    BLASTER.setAsWeapon(8, true, 100, 200, 300);
+    BODY_ARMOUR.setAsArmour(8, true, 150, 250, 350);
+  }
+  
+  
   final public static HumanType TROOPER = new HumanType(
     "actor_trooper", CLASS_SOLDIER
   ) {
@@ -36,7 +46,7 @@ public class Trooper {
   };
   static {
     TROOPER.name = "Trooper";
-    TROOPER.attachCostume("trooper_skin.gif");
+    TROOPER.attachCostume(Trooper.class, "trooper_skin.gif");
     TROOPER.weaponType = BLASTER;
     TROOPER.armourType = BODY_ARMOUR;
     TROOPER.meleeDamage = 2;

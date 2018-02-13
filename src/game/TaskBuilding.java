@@ -45,7 +45,7 @@ public class TaskBuilding extends Task {
   /**  These methods are also used by the planning-map to flag any
     *  structures that need attention:
     */
-  static CityMapDemands demandsFor(Good m, CityMap map) {
+  public static CityMapDemands demandsFor(Good m, CityMap map) {
     
     //  TODO:  Improve the lookup speed here?
     
@@ -72,7 +72,7 @@ public class TaskBuilding extends Task {
     b.flagTeardown(raze);
     
     float need       = raze ? 0 : b.materialNeed(w);
-    float amountDone = b.materialLevel(w);
+    float amountDone = b.onMap() ? b.materialLevel(w) : 0;
     float amountGap  = need - amountDone;
     
     if (natural && ! raze           ) amountGap = 0;
@@ -91,7 +91,8 @@ public class TaskBuilding extends Task {
   /**  Setup and config methods exclusive to the task itself:
     */
   static Task nextBuildingTask(Building store, Actor a) {
-    if (Visit.empty(store.type().buildsWith)) return null;
+    if (! a.map().world.settings.toggleBuilding) return null;
+    if (Visit.empty(store.type().buildsWith)   ) return null;
     {
       Task clearing = nextBuildingTask(store, a, VOID, false);
       if (clearing != null) return clearing;
@@ -107,6 +108,7 @@ public class TaskBuilding extends Task {
   static Task nextBuildingTask(
     Building store, Actor actor, Good material, boolean near
   ) {
+    if (! actor.map().world.settings.toggleBuilding) return null;
     CityMap map = actor.map;
     Tile at = actor.at();
     //
@@ -263,11 +265,12 @@ public class TaskBuilding extends Task {
   
   
   void advanceBuilding(Element b, CityMap map) {
+    
     //
     //  First, we ascertain how much raw material we have, and how much
     //  building needs to be done-
     Tile at = b.at();
-    float amountGap = checkNeedForBuilding(b, material, map, false);
+    float amountGap = checkNeedForBuilding(b, material, map, true);
     float amountGot = getCarryAmount(material, b, false);
     //
     //  We do some basic sanity checks to ensure our effort isn't
@@ -353,6 +356,11 @@ public class TaskBuilding extends Task {
   
   /**  Rendering, debug and interface methods:
     */
+  public String toString() {
+    return type.name()+" "+site+" from "+target;
+  }
+  
+  
   private float[] totalMaterial() {
     float total[] = new float[5];
     total[0] += total[1] = site == null ? 0 : site.materialLevel(material);

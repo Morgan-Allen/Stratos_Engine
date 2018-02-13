@@ -5,7 +5,7 @@ import game.*;
 import graphics.common.*;
 import util.*;
 import static game.GameConstants.*;
-import static content.GameContent.*;
+//import static content.GameContent.*;
 
 
 
@@ -63,7 +63,7 @@ public class Vassals {
   };
   static {
     AUDITOR.name = "Auditor";
-    AUDITOR.attachCostume("auditor_skin.gif");
+    AUDITOR.attachCostume(Vassals.class, "auditor_skin.gif");
     AUDITOR.initTraits.setWith(SKILL_SPEAK, 4, SKILL_WRITE, 4);
   }
   
@@ -80,7 +80,7 @@ public class Vassals {
   };
   static {
     VENDOR.name = "Vendor";
-    VENDOR.attachCostume("vendor_skin.gif");
+    VENDOR.attachCostume(Vassals.class, "vendor_skin.gif");
     VENDOR.initTraits.setWith(SKILL_SPEAK, 2, SKILL_WRITE, 2);
   }
   
@@ -97,7 +97,7 @@ public class Vassals {
   };
   static {
     PYON.name = "Pyon";
-    PYON.attachCostume("pyon_skin.gif");
+    PYON.attachCostume(Vassals.class, "pyon_skin.gif");
     PYON.initTraits.setWith(SKILL_FARM, 1, SKILL_BUILD, 1, SKILL_CRAFT, 1);
   }
   

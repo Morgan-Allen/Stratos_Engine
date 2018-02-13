@@ -238,18 +238,16 @@ public class Actor extends Element implements Session.Saveable, Journeys {
     }
     //
     //  Task updates-
-    if (onMap()) {
-      if (home    != null) home   .actorUpdates(this);
-      if (work    != null) work   .actorUpdates(this);
-      if (mission != null) mission.actorUpdates(this);
-      if (reaction != null && reaction.checkAndUpdateTask()) {
-        assignReaction(null);
-      }
-      else if (task == null || ! task.checkAndUpdateTask()) {
-        beginNextBehaviour();
-      }
-      updateReactions();
+    if (home    != null && onMap()) home   .actorUpdates(this);
+    if (work    != null && onMap()) work   .actorUpdates(this);
+    if (mission != null && onMap()) mission.actorUpdates(this);
+    if (onMap() && reaction != null && reaction.checkAndUpdateTask()) {
+      assignReaction(null);
     }
+    else if (onMap() && (task == null || ! task.checkAndUpdateTask())) {
+      beginNextBehaviour();
+    }
+    if (onMap()) updateReactions();
     //
     //  And update your current vision and health-
     if (onMap()) updateCooldown();
@@ -482,6 +480,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   
   public void assignCargo(Tally <Good> cargo) {
+    if (cargo == null || cargo == this.carried) return;
     clearCarried();
     carried.add(cargo);
   }
@@ -571,7 +570,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   public void takeDamage(float damage) {
     if (map == null || ! map.world.settings.toggleInjury) return;
     injury += damage;
-    injury = Nums.clamp(injury, 0, maxHealth());
+    injury = Nums.clamp(injury, 0, maxHealth() + 1);
     checkHealthState();
   }
   
@@ -584,7 +583,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   public void takeFatigue(float tire) {
     if (map == null || ! map.world.settings.toggleFatigue) return;
     fatigue += tire;
-    fatigue = Nums.clamp(tire, 0, maxHealth());
+    fatigue = Nums.clamp(tire, 0, maxHealth() + 1);
     checkHealthState();
   }
   
@@ -595,6 +594,10 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   
   public void setAsKilled(String cause) {
+    
+    //I.say("  "+this+" killed, cause: "+cause);
+    //I.say("    Home: "+home+", work: "+work);
+    
     state = STATE_DEAD;
     if (map != null) exitMap(map);
     setDestroyed();
@@ -603,6 +606,11 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   public void setCooldown(float cool) {
     this.cooldown = cool;
+  }
+  
+  
+  public void setHungerLevel(float level) {
+    this.hunger = maxHealth() * level;
   }
   
   
@@ -628,6 +636,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   public float injury  () { return injury  ; }
   public float fatigue () { return fatigue ; }
   public float cooldown() { return cooldown; }
+  public float hunger  () { return hunger  ; }
   public boolean alive() { return state != STATE_DEAD; }
   public boolean dead () { return state == STATE_DEAD; }
   
@@ -739,7 +748,10 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   
   public String toString() {
+    
     City player = PlayUI.playerBase();
+    if (player == null) player = Test.currentCity();
+    
     String from = "";
     if (map != null && player != null && homeCity != null) {
       City.POSTURE p = player.posture(homeCity);

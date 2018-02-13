@@ -60,7 +60,11 @@ public class CityMap implements Session.Saveable {
     this.world = world;
     this.locale = locale;
     this.locals = new City(world, locale, "Locals: "+locale);
+    
+    locals.setGovernment(City.GOVERNMENT.BARBARIAN);
+    locals.council.setTypeAI(CityCouncil.AI_OFF);
     addCity(locals);
+    
     for (City c : cities) addCity(c);
   }
   

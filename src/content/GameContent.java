@@ -65,6 +65,7 @@ public class GameContent {
   
   
   final public static Good
+    
     CARBS      = new Good("Carbs"       , 10 ),
     GREENS     = new Good("Greens"      , 12 ),
     PROTEIN    = new Good("Protein"     , 35 ),
@@ -80,7 +81,7 @@ public class GameContent {
     
     CROP_TYPES  [] = { CARBS, GREENS, CARBONS },
     FOOD_TYPES  [] = { CARBS, GREENS, PROTEIN },
-    STONE_TYPES [] = { CARBONS , ORES },
+    STONE_TYPES [] = { CARBONS , ORES  },
     BUILD_GOODS [] = { PLASTICS, PARTS },
     HOME_GOODS  [] = { PLASTICS, PARTS, MEDICINE },
     MARKET_GOODS[] = (Good[]) Visit.compose(Good.class, FOOD_TYPES, HOME_GOODS),
@@ -89,15 +90,7 @@ public class GameContent {
       CASH,
       CARBS, GREENS, PROTEIN, CARBONS, ORES, SPYCE,
       PLASTICS, PARTS, SOMA, MEDICINE
-    },
-    
-    BLASTER     = new Good("Blaster"    , -1),
-    BODY_ARMOUR = new Good("Body Armour", -1)
-  ;
-  static {
-    BLASTER.setAsWeapon(8, true, 100, 200, 300);
-    BODY_ARMOUR.setAsArmour(8, true, 150, 250, 350);
-  }
+    };
   
   
   final public static Terrain
@@ -111,14 +104,14 @@ public class GameContent {
     }
   ;
   final public static Type
-    JUNGLE_TREE1 = new Type(Element.class, "fixture_j_tree1", IS_FIXTURE),
-    DESERT_ROCK1 = new Type(Element.class, "fixture_d_rock1", IS_FIXTURE),
-    DESERT_ROCK2 = new Type(Element.class, "fixture_d_rock2", IS_FIXTURE),
-    CLAY_BANK1   = new Type(Element.class, "fixture_b_clay1", IS_FIXTURE),
+    JUNGLE_TREE1   = new Type(Element.class, "fixture_j_tree1", IS_FIXTURE),
+    DESERT_ROCK1   = new Type(Element.class, "fixture_d_rock1", IS_FIXTURE),
+    DESERT_ROCK2   = new Type(Element.class, "fixture_d_rock2", IS_FIXTURE),
+    CARBON_DEPOSIT = new Type(Element.class, "fixture_b_clay1", IS_FIXTURE),
     
     ALL_TREES[] = { JUNGLE_TREE1 },
     ALL_ROCKS[] = { DESERT_ROCK1, DESERT_ROCK2 },
-    ALL_OILS [] = { CLAY_BANK1 }
+    ALL_OILS [] = { CARBON_DEPOSIT }
   ;
   final public static ActorType
     QUDU     = new ActorType(ActorAsAnimal.class, "animal_qudu"     , IS_ANIMAL_ACT),
@@ -154,7 +147,7 @@ public class GameContent {
     JUNGLE_TREE1.tint = colour(0, 3, 0);
     DESERT_ROCK1.tint = colour(6, 4, 4);
     DESERT_ROCK2.tint = colour(6, 4, 4);
-    CLAY_BANK1  .tint = colour(5, 3, 3);
+    CARBON_DEPOSIT  .tint = colour(5, 3, 3);
     JUNGLE      .tint = colour(1, 4, 1);
     DESERT      .tint = colour(5, 4, 3);
     MEADOW      .tint = colour(2, 5, 2);
@@ -172,7 +165,7 @@ public class GameContent {
     //  TODO:  UNIFY WITH CROPS BELOW!
     JUNGLE_TREE1.growRate = 0.5f;
     DESERT_ROCK1.setDimensions(2, 2, 1);
-    CLAY_BANK1  .setDimensions(2, 2, 0);
+    CARBON_DEPOSIT  .setDimensions(2, 2, 0);
     LAKE.pathing = PATH_BLOCK;
     LAKE.isWater = true;
     
@@ -279,96 +272,9 @@ public class GameContent {
   
   
   
-  final static String
-    HUMAN_FILE_DIR = "media/Actors/human/",
-    HUMAN_XML_FILE = "HumanModels.xml"
-  ;
-  final static ModelAsset
-    HUMAN_MODEL_MALE = MS3DModel.loadFrom(
-      HUMAN_FILE_DIR, "male_final.ms3d",
-      GameContent.class, HUMAN_XML_FILE, "MalePrime"
-    ),
-    HUMAN_MODEL_FEMALE = MS3DModel.loadFrom(
-      HUMAN_FILE_DIR, "female_final.ms3d",
-      GameContent.class, HUMAN_XML_FILE, "FemalePrime"
-    ),
-    ALL_HUMAN_MODELS[] = { HUMAN_MODEL_MALE, HUMAN_MODEL_FEMALE },
-    HUMAN_MODEL_DEFAULT = (ModelAsset) Visit.last(ALL_HUMAN_MODELS)
-  ;
-  final static ImageAsset HUMAN_BLOOD_SKINS[] = ImageAsset.fromImages(
-    GameContent.class, "human_blood_skins", HUMAN_FILE_DIR,
-    "skin_blood_desert.gif",
-    "skin_blood_wastes.gif",
-    "skin_blood_tundra.gif",
-    "skin_blood_forest.gif"
-  );
-  
-  public static class HumanType extends ActorType {
-    
-    public ImageAsset costume;
-    
-    public HumanType(String ID, int socialClass) {
-      super(ActorAsPerson.class, ID, IS_PERSON_ACT, socialClass);
-      this.foodsAllowed = FOOD_TYPES;
-    }
-    
-    void attachCostume(String fileName) {
-      costume = ImageAsset.fromImage(
-        GameContent.class, "costume_"+entryKey(), HUMAN_FILE_DIR+fileName
-      );
-    }
-    
-    public Sprite makeSpriteFor(Element e) {
-      final ActorAsPerson a = (ActorAsPerson) e;
-      ModelAsset model = a.man() ? HUMAN_MODEL_MALE : HUMAN_MODEL_FEMALE;
-      ImageAsset skin = HUMAN_BLOOD_SKINS[a.varID() % 4];
-      
-      SolidSprite s = (SolidSprite) model.makeSprite();
-      s.setOverlaySkins(
-        AnimNames.MAIN_BODY,
-        skin   .asTexture(),
-        costume.asTexture()
-      );
-      String partsAllowed[] = {
-        AnimNames.MAIN_BODY,
-        //a.gear.device().modelPartID,
-        //a.gear.outfit().modelPartID
-      };
-      for (String groupName : ((SolidModel) model).partNames()) {
-        boolean valid = false;
-        for (String p : partsAllowed) if (groupName.equals(p)) valid = true;
-        if (! valid) s.togglePart(groupName, false);
-      }
-      return s;
-    }
-    
-    public void prepareMedia(Sprite s, Element e) {
-      super.prepareMedia(s, e);
-    }
-  }
-  
-  
-  protected static String generateName(
-    String forenames[], String surnames[], String nicknames[]
-  ) {
-    final StringBuffer s = new StringBuffer();
-    
-    s.append(Rand.pickFrom(forenames));
-    if (nicknames != null) {
-      s.append(" '");
-      s.append(Rand.pickFrom(nicknames));
-      s.append("'");
-    }
-    if (surnames != null) {
-      s.append(" ");
-      s.append(Rand.pickFrom(surnames));
-    }
-    return s.toString();
-  }
-  
-  
-  
   final public static HumanType
+    CHILD     = new HumanType("actor_child"    , CLASS_COMMON ),
+    
     ENFORCER  = new HumanType("actor_enforcer" , CLASS_SOLDIER),
     RUNNER    = new HumanType("actor_runner"   , CLASS_SOLDIER),
     
@@ -391,8 +297,17 @@ public class GameContent {
   
   
   static {
+    CHILD.name = "Child";
+    CHILD.attachCostume(GameContent.class, "child_skin.gif");
+    CHILD.meleeDamage = 0;
+    CHILD.rangeDamage = 0;
+    CHILD.rangeDist   = 0;
+    CHILD.armourClass = 0;
+    CHILD.maxHealth   = 2;
+    CHILD.initTraits.setWith();
+    
     ENFORCER.name = "Enforcer";
-    ENFORCER.attachCostume("enforcer_skin.gif");
+    ENFORCER.attachCostume(GameContent.class, "enforcer_skin.gif");
     ENFORCER.meleeDamage = 2;
     ENFORCER.rangeDamage = 4;
     ENFORCER.rangeDist   = 6;
@@ -401,7 +316,7 @@ public class GameContent {
     ENFORCER.initTraits.setWith(SKILL_MELEE, 2, SKILL_RANGE, 5, SKILL_EVADE, 3);
     
     RUNNER.name = "Runner";
-    RUNNER.attachCostume("runner_skin.gif");
+    RUNNER.attachCostume(GameContent.class, "runner_skin.gif");
     RUNNER.rangeDamage = 6;
     RUNNER.rangeDist   = 8;
     RUNNER.armourClass = 3;
@@ -409,7 +324,7 @@ public class GameContent {
     RUNNER.initTraits.setWith(SKILL_RANGE, 5, SKILL_EVADE, 4);
     
     ECOLOGIST.name = "Ecologist";
-    ECOLOGIST.attachCostume("ecologist_skin.gif");
+    ECOLOGIST.attachCostume(GameContent.class, "ecologist_skin.gif");
     ECOLOGIST.rangeDamage = 4;
     ECOLOGIST.armourClass = 3;
     ECOLOGIST.rangeDist   = 6;
@@ -417,14 +332,14 @@ public class GameContent {
     ECOLOGIST.initTraits.setWith(SKILL_RANGE, 5, SKILL_EVADE, 3, SKILL_FARM, 4);
     
     ENGINEER.name = "Engineer";
-    ENGINEER.attachCostume("engineer_skin.gif");
+    ENGINEER.attachCostume(GameContent.class, "engineer_skin.gif");
     ENGINEER.meleeDamage = 5;
     ENGINEER.armourClass = 5;
     ENGINEER.maxHealth   = 4;
     ENGINEER.initTraits.setWith(SKILL_MELEE, 3, SKILL_CRAFT, 5, SKILL_BUILD, 5);
     
     PHYSICIAN.name = "Physician";
-    PHYSICIAN.attachCostume("physician_skin.gif");
+    PHYSICIAN.attachCostume(GameContent.class, "physician_skin.gif");
     PHYSICIAN.meleeDamage = 0;
     PHYSICIAN.rangeDamage = 0;
     PHYSICIAN.armourClass = 1;
@@ -506,6 +421,8 @@ public class GameContent {
     BASTION.homeSocialClass = CLASS_NOBLE;
     BASTION.maxResidents = 2;
     BASTION.buildsWith   = new Good[] { PLASTICS, PARTS };
+    BASTION.needed       = BASTION.buildsWith;
+    BASTION.maxStock     = 5;
     BASTION.setFeatures(IS_HOUSING);
     BASTION.worksBeforeBuilt = true;
     
@@ -558,8 +475,9 @@ public class GameContent {
     ENGINEER_STATION.maxStock = 3;
     ENGINEER_STATION.craftSkill = SKILL_CRAFT;
     ENGINEER_STATION.shopItems = new Good[] {
-      BLASTER, BODY_ARMOUR
+      Trooper.BLASTER, Trooper.BODY_ARMOUR
     };
+    ENGINEER_STATION.buildsWith = new Good[] { PLASTICS, PARTS };
     
     PHYSICIAN_STATION.name = "Physician Station";
     PHYSICIAN_STATION.tint = TINT_INDUSTRIAL;
