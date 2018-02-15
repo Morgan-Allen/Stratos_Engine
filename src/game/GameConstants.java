@@ -395,6 +395,7 @@ public class GameConstants {
     Tile at();
     boolean isTile();
     boolean onMap();
+    boolean indoors();
     
     void targetedBy(Active a);
     void setFocused(Active a, boolean is);

@@ -105,6 +105,11 @@ public class Tile implements Pathing, Selection.Focus {
   }
   
   
+  public boolean indoors() {
+    return false;
+  }
+  
+  
   public int pathType() {
     if (above != null) {
       int pathing = above.pathType();

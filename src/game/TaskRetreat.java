@@ -86,6 +86,8 @@ public class TaskRetreat extends Task {
     }
     
     for (Active other : aware) {
+      if (other.indoors()) continue;
+      
       boolean hostile      = TaskCombat.hostile(other, actor);
       boolean allied       = TaskCombat.allied (other, actor);
       Target  otherFocus   = Task.focusTarget(other.task());

@@ -166,6 +166,8 @@ public class TaskCombat extends Task {
     };
     
     for (Active other : others) if (hostile(other, actor)) {
+      if (other.indoors()) continue;
+      
       Tile goes = other.at();
       float distF = distance(goes, from  );
       float distA = anchor == null ? 0 : distance(goes, anchor);

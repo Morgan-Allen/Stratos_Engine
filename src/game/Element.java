@@ -233,6 +233,11 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
+  public boolean indoors() {
+    return false;
+  }
+  
+  
   public int pathType() {
     return complete() ? type.pathing : PATH_NONE;
   }

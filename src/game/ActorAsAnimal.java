@@ -89,8 +89,20 @@ public class ActorAsAnimal extends Actor {
   
   void updateReactions() {
     if (! map.world.settings.toggleReacts) return;
-    //  TODO:  You need to handle retreat and combat actions here...
     
+    if (jobType() != Task.JOB.RETREAT) {
+      if (! Task.inCombat(this)) {
+        TaskCombat combat = TaskCombat.nextReaction(this);
+        if (combat != null) assignTask(combat);
+      }
+      
+      float oldPriority = jobPriority();
+      TaskRetreat retreat = TaskRetreat.configRetreat(this);
+      if (retreat != null && retreat.priority() > oldPriority) {
+        assignTask(retreat);
+        if (mission != null) mission.toggleRecruit(this, false);
+      }
+    }
   }
   
   
