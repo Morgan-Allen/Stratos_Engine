@@ -56,7 +56,7 @@ public class TestFarming extends Test {
       for (Tile t : map.allTiles()) {
         
         int numF = 0;
-        for (Actor a : t.focused()) {
+        for (Active a : t.focused()) {
           if (a.jobType() == Task.JOB.PLANTING) numF++;
           if (a.jobType() == Task.JOB.HARVEST ) numF++;
         }
@@ -68,7 +68,7 @@ public class TestFarming extends Test {
           break;
         }
         
-        Actor a = t.focused().first();
+        Active a = t.focused().first();
         if (a == null) continue;
         
         Target mainFocus = Task.focusTarget(a.task());

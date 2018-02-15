@@ -95,12 +95,14 @@ public class TaskPurchase extends Task {
   
   
   static TaskPurchase resumePurchase(TaskPurchase p) {
-    if (! p.shop.orderComplete(p.itemType, p.actor)) return null;
+    if (! p.shop.orderComplete(p.itemType, (Actor) p.active)) return null;
     return (TaskPurchase) p.configTask(null, p.shop, null, JOB.COLLECTING, 0);
   }
   
   
   protected void onVisit(Building visits) {
+    Actor actor = (Actor) this.active;
+    
     if (actor.jobType() == JOB.SHOPPING && visits == shop) {
       shop.addItemOrder(itemType, quality, actor);
       ((ActorAsPerson) actor).todo.add(this);

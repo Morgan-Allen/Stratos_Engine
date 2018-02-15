@@ -175,10 +175,9 @@ public class TaskDelivery extends Task {
   
   
   protected void onVisit(Building visits) {
-    //float oldTotal[] = totalMaterial(), newTotal[] = oldTotal;
+    Actor actor = (Actor) this.active;
     
     if (visits == from) {
-      ///I.say("Collecting "+amount+" "+carried+" from "+from);
       amount = Nums.min(amount, visits.inventory(carried));
       amount = Nums.max(amount, 0);
       if (amount > 0) {
@@ -187,12 +186,8 @@ public class TaskDelivery extends Task {
       }
     }
     if (visits == goes) {
-      ///I.say("Delivering "+amount+" "+carried+" to "+goes);
       actor.offloadGood(carried, goes);
     }
-    
-    //newTotal = totalMaterial();
-    //checkTotalsDiff(oldTotal, newTotal);
   }
   
   
@@ -211,6 +206,7 @@ public class TaskDelivery extends Task {
   
   
   private float[] totalMaterial() {
+    Actor actor = (Actor) this.active;
     float total[] = new float[4];
     total[0] += total[1] = from.inventory(carried);
     total[0] += total[2] = actor.carried(carried);

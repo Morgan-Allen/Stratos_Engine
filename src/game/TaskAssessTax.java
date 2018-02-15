@@ -74,6 +74,7 @@ public class TaskAssessTax extends Task {
   
   
   protected void onVisit(Building visits) {
+    Actor actor = (Actor) this.active;
     
     if (actor.jobType() == JOB.COLLECTING) {
       float cash = visits.inventory(CASH);

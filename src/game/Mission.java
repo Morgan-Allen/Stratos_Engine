@@ -687,14 +687,14 @@ public class Mission implements
     
     Tile stands = standLocation(actor);
     
-    TaskCombat taskC = (actor.inCombat() || isEnvoy) ? null :
+    TaskCombat taskC = (Task.inCombat(actor) || isEnvoy) ? null :
       TaskCombat.nextReaction(actor, stands, this, AVG_FILE)
     ;
     if (taskC != null) {
       return taskC;
     }
     
-    TaskCombat taskS = (actor.inCombat() || isEnvoy) ? null :
+    TaskCombat taskS = (Task.inCombat(actor) || isEnvoy) ? null :
       TaskCombat.nextSieging(actor, this)
     ;
     if (taskS != null) {

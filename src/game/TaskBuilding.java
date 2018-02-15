@@ -200,7 +200,7 @@ public class TaskBuilding extends Task {
       CityMap map = goes.map;
       Tile c = goes.at();
       Type t = goes.type();
-      Pathing from = Task.pathOrigin(actor);
+      Pathing from = Task.pathOrigin(active);
       Pick <Tile> pick = new Pick();
       
       for (Tile a : map.tilesAround(c.x, c.y, t.wide, t.high)) {
@@ -208,7 +208,7 @@ public class TaskBuilding extends Task {
         
         float rating = 1;
         rating *= CityMap.distancePenalty(from, a);
-        if (Task.hasTaskFocus(a, jobType, actor)) rating /= 3;
+        if (Task.hasTaskFocus(a, jobType, active)) rating /= 3;
         
         pick.compare(a, rating);
       }
@@ -223,9 +223,9 @@ public class TaskBuilding extends Task {
   }
   
   
-  void toggleFocus(boolean active) {
-    super.toggleFocus(active);
-    if (site != null) site.setFocused(actor, active);
+  void toggleFocus(boolean activeNow) {
+    super.toggleFocus(activeNow);
+    if (site != null) site.setFocused(active, activeNow);
   }
   
   
@@ -235,7 +235,7 @@ public class TaskBuilding extends Task {
   
   
   protected void onTarget(Target target) {
-    //float oldTotal[] = totalMaterial(), newTotal[] = oldTotal;
+    Actor actor = (Actor) this.active;
     //
     //  Pick up some of the material initially-
     if (type == JOB.COLLECTING && adjacent(target, store)) {
@@ -258,14 +258,11 @@ public class TaskBuilding extends Task {
       Task next = nextBuildingTask(store, actor, material, true);
       actor.assignTask(next);
     }
-    
-    //newTotal = totalMaterial();
-    //checkTotalsDiff(oldTotal, newTotal);
   }
   
   
   void advanceBuilding(Element b, CityMap map) {
-    
+    Actor actor = (Actor) this.active;
     //
     //  First, we ascertain how much raw material we have, and how much
     //  building needs to be done-
@@ -313,6 +310,7 @@ public class TaskBuilding extends Task {
   
   
   float incCarryAmount(float inc, Good m, Element b, boolean siteOnly) {
+    Actor actor = (Actor) this.active;
     //
     //  The default 'nothing' material gets special treatment:
     if (m == VOID) return 100;
@@ -362,6 +360,7 @@ public class TaskBuilding extends Task {
   
   
   private float[] totalMaterial() {
+    Actor actor = (Actor) this.active;
     float total[] = new float[5];
     total[0] += total[1] = site == null ? 0 : site.materialLevel(material);
     total[0] += total[2] = actor.carried(material);

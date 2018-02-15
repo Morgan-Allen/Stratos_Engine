@@ -11,7 +11,9 @@ import static game.GameConstants.*;
 
 
 
-public class Actor extends Element implements Session.Saveable, Journeys {
+public class Actor extends Element implements
+  Session.Saveable, Journeys, Active
+{
   
   
   /**  Data fields and setup/initialisation-
@@ -138,6 +140,11 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   public ActorType type() {
     return (ActorType) super.type();
+  }
+  
+  
+  public boolean isActor() {
+    return true;
   }
   
   
@@ -310,8 +317,8 @@ public class Actor extends Element implements Session.Saveable, Journeys {
       position.set(at.x, at.y, height);
     }
     
-    map.flagActor(this, old, false);
-    map.flagActor(this, at , true );
+    map.flagActive(this, old, false);
+    map.flagActive(this, at , true );
   }
   
   
@@ -362,7 +369,7 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   }
   
   
-  public Mission formation() {
+  public Mission mission() {
     return mission;
   }
   
@@ -431,12 +438,6 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   public boolean idle() {
     return task == null;
-  }
-  
-  
-  public boolean inCombat() {
-    JOB type = jobType();
-    return type == JOB.COMBAT || type == JOB.HUNTING;
   }
   
   
@@ -522,43 +523,8 @@ public class Actor extends Element implements Session.Saveable, Journeys {
   
   /**  Combat and survival-related code:
     */
-  void performAttack(Element other, boolean melee) {
-    int damage = melee ? meleeDamage() : rangeDamage();
-    int armour = other.armourClass();
-    if (other == null || damage <= 0) return;
-    
-    //
-    //  TODO:  Move this out into the TaskCombat class.
-    Trait   attackSkill = melee ? SKILL_MELEE : SKILL_RANGE;
-    Trait   defendSkill = melee ? SKILL_MELEE : SKILL_EVADE;
-    boolean wallBonus   = TaskCombat.wallBonus(this, other);
-    boolean wallPenalty = TaskCombat.wallBonus(other, this);
-    boolean hits = true;
-    float XP = 1;
-    
-    if (other.type().isActor()) {
-      float attackBonus = levelOf(attackSkill) * 2f / MAX_SKILL_LEVEL;
-      float defendBonus = levelOf(defendSkill) * 2f / MAX_SKILL_LEVEL;
-      if (wallBonus  ) attackBonus += WALL_HIT_BONUS / 100f;
-      if (wallPenalty) defendBonus += WALL_DEF_BONUS / 100f;
-      
-      float hitChance = Nums.clamp(attackBonus + 0.5f - defendBonus, 0, 1);
-      hits = Rand.num() < hitChance;
-      XP   = (1.5f - hitChance) * FIGHT_XP_PERCENT / 100f;
-      
-      float otherXP = (0.5f + hitChance) * FIGHT_XP_PERCENT / 100f;
-      ((Actor) other).gainXP(defendSkill, otherXP);
-    }
-    
-    if (hits) {
-      if (wallBonus  ) damage += WALL_DMG_BONUS;
-      if (wallPenalty) armour += WALL_ARM_BONUS;
-      damage = Rand.index(damage + armour) + 1;
-      damage = Nums.max(0, damage - armour);
-      if (damage > 0) other.takeDamage(damage);
-    }
-    
-    gainXP(attackSkill, XP);
+  public void performAttack(Element other, boolean melee) {
+    TaskCombat.performAttack(this, other, melee);
   }
   
   

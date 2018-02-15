@@ -39,9 +39,10 @@ public class TaskHunting extends Task {
   /**  Scripting and events-
     */
   TaskHunting configHunting(Building store, Good... meatTypes) {
+    Actor actor = (Actor) this.active;
     
     Pick <Actor> forHunt = new Pick();
-    for (Actor a : actor.map.actors) {
+    for (Actor a : actor.map().actors) {
       if (a.maxSightLevel() == 0                 ) continue;
       if (a.type().category != Type.IS_ANIMAL_ACT) continue;
       if (a.type().predator || a.growLevel() < 1 ) continue;
@@ -67,6 +68,7 @@ public class TaskHunting extends Task {
   
   
   protected void onTarget(Target target) {
+    Actor actor = (Actor) this.active;
     if (target == prey) {
       Tile site = prey.at();
       
@@ -89,6 +91,7 @@ public class TaskHunting extends Task {
   
   
   protected void onVisit(Building visits) {
+    Actor actor = (Actor) this.active;
     if (visits != store) return;
     actor.offloadGood(prey.type().meatType, visits);
   }

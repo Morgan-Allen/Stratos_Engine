@@ -69,6 +69,7 @@ public class TaskTrading extends Task {
   
   
   protected void onVisit(Building visits) {
+    Actor actor = (Actor) this.active;
     //
     //  If you're embarking on a fresh journey, take on your assigned cargo,
     //  then determine if you're visiting a city or another trading post:
@@ -114,6 +115,7 @@ public class TaskTrading extends Task {
   
   
   protected void onTarget(Target target) {
+    Actor actor = (Actor) this.active;
     //
     //  We might be visiting an incomplete structure:
     if (target.at().above == tradeFrom) {
@@ -134,6 +136,7 @@ public class TaskTrading extends Task {
   
   
   protected void onArrival(City goes, World.Journey journey) {
+    Actor actor = (Actor) this.active;
     //
     //  If you've arrived at your destination city, offload your cargo, take on
     //  fresh goods, and record any profits in the process:
@@ -171,6 +174,7 @@ public class TaskTrading extends Task {
   
   
   void takeOnGoods(Trader store, Tally <Good> taken) {
+    Actor actor = (Actor) this.active;
     if (store == null) return;
     
     //  You don't have to pay for goods if the city you're taking them from
@@ -214,6 +218,7 @@ public class TaskTrading extends Task {
   
   
   void offloadGoods(Trader store) {
+    Actor actor = (Actor) this.active;
     if (store == null) return;
     
     //  You don't receive money for goods if the city you deliver to is owed

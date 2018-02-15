@@ -566,7 +566,11 @@ public class GameContent {
     TURRET.isWall  = true;
     TURRET.setDimensions(2, 2, 4);
     TURRET.setBuildMaterials(PARTS, 10);
-    TURRET.setFeatures(IS_TOWER);
+    TURRET.setFeatures(IS_TOWER, IS_TURRET);
+    TURRET.rangeDamage = 4;
+    TURRET.rangeDist   = 6;
+    TURRET.armourClass = 0;
+    TURRET.sightRange  = 8;
     
     
     HOLDING.name = "Holding";

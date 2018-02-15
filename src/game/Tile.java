@@ -18,8 +18,8 @@ public class Tile implements Pathing, Selection.Focus {
   Terrain terrain = EMPTY;
   Element above = null;
   
-  List <Actor> inside  = null;
-  List <Actor> focused = null;
+  List <Actor > inside  = null;
+  List <Active> focused = null;
   private Object pathFlag;  //  Only used during temporary path-searches...
   
   
@@ -80,18 +80,18 @@ public class Tile implements Pathing, Selection.Focus {
   }
   
   
-  public void targetedBy(Actor w) {
+  public void targetedBy(Active w) {
     return;
   }
   
   
-  public void setFocused(Actor a, boolean is) {
+  public void setFocused(Active a, boolean is) {
     focused = Element.setMember(a, is, focused);
   }
   
   
-  public Series <Actor> focused() {
-    return focused == null ? NO_ACTORS : focused;
+  public Series <Active> focused() {
+    return focused == null ? NONE_ACTIVE : focused;
   }
   
   

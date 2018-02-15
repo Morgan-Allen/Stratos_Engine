@@ -37,6 +37,8 @@ public class TestSieging extends Test {
     world.settings.toggleFatigue = false;
     world.settings.toggleHunger  = false;
     
+    
+    
     awayC.initBuildLevels(TROOPER_LODGE, 5, HOLDING, 1);
     awayC.council.setTypeAI(CityCouncil.AI_OFF);
     
@@ -49,13 +51,25 @@ public class TestSieging extends Test {
     
     map.planning.updatePlanning();
     
-    Building gate = (Building) BLAST_DOOR.generate();
+    BuildingForWalls gate = (BuildingForWalls) BLAST_DOOR.generate();
     gate.setFacing(TileConstants.E);
     gate.enterMap(map, 22, 9, 1, baseC);
     
-    Building tower = (Building) TURRET.generate();
+    BuildingForWalls tower = (BuildingForWalls) TURRET.generate();
     tower.setFacing(TileConstants.E);
     tower.enterMap(map, 22, 12, 1, baseC);
+    
+    Actor foe = (Actor) Trooper.TROOPER.generate();
+    foe.enterMap(map, 25, 12, 1, awayC);
+    
+    map.update();
+    
+    if (! Task.inCombat(tower)) {
+      I.say("\nTOWER DID NOT REACT TO ENEMIES!");
+      return false;
+    }
+    
+    foe.exitMap(map);
     
     
     BuildingForArmy fort = (BuildingForArmy) TROOPER_LODGE.generate();
@@ -99,6 +113,7 @@ public class TestSieging extends Test {
     boolean siegeComing = false;
     boolean siegeBegun  = false;
     boolean invadeFight = false;
+    boolean towerFight  = false;
     boolean defendFight = false;
     boolean victorious  = false;
     boolean tributePaid = false;
@@ -237,6 +252,10 @@ public class TestSieging extends Test {
         defendFight = numFighting >= MIN_DEFENDERS / 2;
       }
       
+      if (siegeComing && ! towerFight) {
+        towerFight = Task.inCombat(tower);
+      }
+      
       if (siegeBegun && ! victorious) {
         if (baseC.isVassalOf(awayC)) {
           victorious = true;
@@ -271,7 +290,10 @@ public class TestSieging extends Test {
         }
       }
       
-      if (invadeFight && defendFight && tributePaid && ! siegedOkay) {
+      if (
+        invadeFight && defendFight && towerFight &&
+        tributePaid && ! siegedOkay
+      ) {
         siegedOkay = true;
         I.say("\nSIEGING TEST CONCLUDED SUCCESSFULLY!");
         if (! graphics) return true;
@@ -285,6 +307,7 @@ public class TestSieging extends Test {
     I.say("  Siege begun:  "+siegeBegun );
     I.say("  Invade fight: "+invadeFight);
     I.say("  Defend fight: "+defendFight);
+    I.say("  Tower fight:  "+towerFight );
     I.say("  Victorious:   "+victorious );
     I.say("  Tribute paid: "+tributePaid);
     I.say("  Sieged okay:  "+siegedOkay );

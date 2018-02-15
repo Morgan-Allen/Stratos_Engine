@@ -70,19 +70,22 @@ public class TaskRetreat extends Task {
   
   
   protected float successPriority() {
+    Actor actor = (Actor) this.active;
     
     float dangerSum = 0, allySum = 0;
     float range = actor.sightRange();
-    Batch <Actor> aware = new Batch();
+    Batch <Active> aware = new Batch();
     
-    for (Actor other : actor.map.actorsInRange(actor.at(), range)) {
+    for (Active other : actor.map.activeInRange(actor.at(), range)) {
       aware.add(other);
     }
-    for (Actor other : actor.focused()) {
-      if (other.task().inContact() && other.inCombat()) aware.include(other);
+    for (Active other : actor.focused()) {
+      if (Task.inCombat(other) && other.task().inContact()) {
+        aware.include(other);
+      }
     }
     
-    for (Actor other : aware) {
+    for (Active other : aware) {
       boolean hostile      = TaskCombat.hostile(other, actor);
       boolean allied       = TaskCombat.allied (other, actor);
       Target  otherFocus   = Task.focusTarget(other.task());

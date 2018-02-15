@@ -152,7 +152,7 @@ public class TestBounties extends Test {
       if (fundsTaken && ! missionTaken) {
         boolean allOn = true, someOn = false;
         for (Actor a : fort.workers()) {
-          if (a.formation() == mission) someOn = true;
+          if (a.mission() == mission) someOn = true;
           else allOn = false;
         }
         missionTaken = allOn && someOn;

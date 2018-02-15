@@ -281,6 +281,8 @@ public class GameConstants {
     */
   final public static Good
     
+    //  TODO:  Use Traits for this instead.
+    
     //  Note- 'void' is used to mark foundations for clearing during
     //  construction, and as a default build-material.
     VOID       = new Good("Void"        ,  0 ),
@@ -297,6 +299,7 @@ public class GameConstants {
     IS_TRADER  = new Good("Is Trader"   , -1 ),
     IS_HOUSING = new Good("Is Housing"  , -1 ),
     IS_TOWER   = new Good("Is Tower"    , -1 ),
+    IS_TURRET  = new Good("Is Turret"   , -1 ),
     IS_GATE    = new Good("Is Gate"     , -1 ),
     IS_REFUGE  = new Good("Is Refuge"   , -1 ),
     
@@ -370,7 +373,21 @@ public class GameConstants {
   
   /**  Commonly used interfaces-
     */
-  final static Series <Actor> NO_ACTORS = new Batch();
+  public static interface Active extends Target {
+    
+    CityMap map();
+    boolean isActor();
+    
+    Task.JOB jobType();
+    Task task();
+    Mission mission();
+    
+    void assignTask(Task task);
+    void performAttack(Element other, boolean melee);
+  }
+  final static Series <Active> NONE_ACTIVE = new Batch();
+  final static Series <Actor > NO_ACTORS   = new Batch();
+  
   
   public static interface Target extends Flood.Fill {
     
@@ -379,9 +396,9 @@ public class GameConstants {
     boolean isTile();
     boolean onMap();
     
-    void targetedBy(Actor a);
-    void setFocused(Actor a, boolean is);
-    Series <Actor> focused();
+    void targetedBy(Active a);
+    void setFocused(Active a, boolean is);
+    Series <Active> focused();
     boolean hasFocus();
   }
   

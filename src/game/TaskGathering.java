@@ -92,6 +92,7 @@ public class TaskGathering extends Task {
   
   protected void onTarget(Target other) {
     if (other == null) return;
+    Actor actor = (Actor) this.active;
     
     if (actor.jobType() == JOB.RETURNING && store.actorIsHere(actor)) {
       onVisit(store);
@@ -160,6 +161,7 @@ public class TaskGathering extends Task {
   
   
   protected void onVisit(Building visits) {
+    Actor actor = (Actor) this.active;
     if (visits == store) {
       for (Good made : store.type().produced) {
         actor.offloadGood(made, store);

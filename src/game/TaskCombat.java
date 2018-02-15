@@ -5,7 +5,6 @@ import util.*;
 import static game.City.*;
 import static game.CityMap.*;
 import static game.GameConstants.*;
-import static game.CityMapPathCache.*;
 
 
 
@@ -26,7 +25,7 @@ public class TaskCombat extends Task {
   int attackMode;
   
   
-  public TaskCombat(Actor actor, Element primary) {
+  public TaskCombat(Active actor, Element primary) {
     super(actor);
     this.primary = primary;
   }
@@ -101,11 +100,21 @@ public class TaskCombat extends Task {
   }
   
   
-  public static float attackPower(Actor a) {
-    if (a.state >= Actor.STATE_DEAD) return 0;
-    float power = attackPower(a.type());
-    power *= 1 - ((a.injury + a.hunger) / a.type().maxHealth);
-    return power;
+  public static float attackPower(Active f) {
+    if (f.isActor()) {
+      Actor a = (Actor) f;
+      if (a.state >= Actor.STATE_DEAD) return 0;
+      float power = attackPower(a.type());
+      power *= 1 - ((a.injury + a.hunger) / a.type().maxHealth);
+      return power;
+    }
+    else {
+      Element e = (Element) f;
+      if (e.destroyed()) return 0;
+      float power = attackPower(e.type());
+      power *= e.buildLevel();
+      return power;
+    }
   }
   
   
@@ -134,29 +143,29 @@ public class TaskCombat extends Task {
   
   
   
-  static TaskCombat nextReaction(Actor actor) {
+  static TaskCombat nextReaction(Active actor) {
     return nextReaction(actor, null, null, 0);
   }
   
   
   static TaskCombat nextReaction(
-    Actor actor, Tile anchor, Employer employer, float noticeBonus
+    Active actor, Tile anchor, Employer employer, float noticeBonus
   ) {
     //  TODO:  Allow for iteration over members of a target formation, or
     //  whatever your comrades are currently fighting...
     //  TODO:  Grant a vision bonus for higher ground?
     
     Tile from = actor.at();
-    CityMap map = actor.map;
-    float noticeRange = actor.type().sightRange + noticeBonus;
-    Series <Actor> others = map.actorsInRange(from, noticeRange);
+    CityMap map = actor.map();
+    float noticeRange = ((Element) actor).sightRange() + noticeBonus;
+    Series <Active> others = map.activeInRange(from, noticeRange);
     
-    class Option { Actor other; float rating; };
+    class Option { Element other; float rating; };
     List <Option> options = new List <Option> () {
       protected float queuePriority(Option o) { return o.rating; }
     };
     
-    for (Actor other : others) if (hostile(other, actor)) {
+    for (Active other : others) if (hostile(other, actor)) {
       Tile goes = other.at();
       float distF = distance(goes, from  );
       float distA = anchor == null ? 0 : distance(goes, anchor);
@@ -166,7 +175,7 @@ public class TaskCombat extends Task {
       rating /= 1 + other.focused().size();
       
       Option o = new Option();
-      o.other  = other ;
+      o.other  = (Element) other;
       o.rating = rating;
       options.add(o);
     }
@@ -202,30 +211,59 @@ public class TaskCombat extends Task {
   
   
   static TaskCombat configCombat(
-    final Actor actor, final Element target, Employer employer,
+    final Active active, final Element target, Employer employer,
     TaskCombat currentTask, JOB jobType
   ) {
-    if (actor == null || target == null || ! target.onMap()) return null;
-    Tile inRange[] = null;
+    if (active == null || target == null || ! target.onMap()) return null;
     
+    
+    //  In the case of immobile actives, such as turrets, you don't bother with
+    //  the fancy pathing-connection tests.  You just check if the target is in
+    //  range.
+    if (! active.isActor()) {
+      float distance     = CityMap.distance(active.at(), target);
+      float rangeMelee   = 1.5f;
+      float rangeMissile = active.type().rangeDist;
+      float rateMelee    = active.type().meleeDamage;
+      float rateRange    = active.type().rangeDamage;
+      
+      if (distance > rangeMelee  ) rateMelee = 0;
+      if (distance > rangeMissile) rateRange = 0;
+      
+      if (rateMelee <= 0 && rateRange <= 0) return null;
+      
+      if (currentTask == null) currentTask = new TaskCombat(active, target);
+      currentTask.configTask(employer, null, target.at(), jobType, 0);
+      
+      if (rateMelee > rateRange) currentTask.attackMode = ATTACK_MELEE;
+      else currentTask.attackMode = ATTACK_RANGE;
+      
+      return currentTask;
+    }
+    
+    
+    //  Otherwise, try and ensure that it's possible to path toward some tile
+    //  within range of the target-
+    Tile inRange[] = null;
     if (currentTask != null) {
-      inRange = new Tile[] { actor.at(), (Tile) currentTask.target };
+      inRange = new Tile[] { active.at(), (Tile) currentTask.target };
     }
     else {
-      final CityMap map    = actor.map;
+      final CityMap map    = active.map();
       final Tile    at     = target.at();
       final Box2D   area   = target.area();
       final int     range  = MAX_RANGE;
       final Tile    temp[] = new Tile[9];
       
       //  TODO:  This is a temporary hack until I can get the pathing-cache to
-      //  store data for particular cities, and the like...
+      //  store data for particular cities...
       final Tile from;
-      if (actor.inside() instanceof Building) {
-        from = ((Building) actor.inside()).mainEntrance();
+      Pathing inside = active.isActor() ? ((Actor) active).inside() : null;
+      if (inside instanceof Building) {
+        from = ((Building) inside).mainEntrance();
       }
       else {
-        from = actor.at();
+        from = active.at();
       }
       
       Object areaKey = map.pathCache.openGroupHandle(from);
@@ -274,7 +312,7 @@ public class TaskCombat extends Task {
     }
     
     float rangeMelee   = 1.5f;
-    float rangeMissile = actor.type().rangeDist;
+    float rangeMissile = active.type().rangeDist;
     float maxRange     = Nums.max(rangeMelee, rangeMissile);
     
     Pick <Tile> pick = new Pick();
@@ -293,7 +331,7 @@ public class TaskCombat extends Task {
     }
     
     for (Tile t : inRange) {
-      if (Task.hasTaskFocus(t, jobType, actor)) continue;
+      if (Task.hasTaskFocus(t, jobType, active)) continue;
       
       float dist = area.distance(t.x, t.y);
       if (report) I.say("  "+t+" dist: "+dist);
@@ -301,8 +339,8 @@ public class TaskCombat extends Task {
       if (dist > maxRange) continue;
       
       float rating = 0;
-      if      (dist < rangeMelee  ) rating += actor.type().meleeDamage;
-      else if (dist < rangeMissile) rating += actor.type().rangeDamage;
+      if      (dist < rangeMelee  ) rating += active.type().meleeDamage;
+      else if (dist < rangeMissile) rating += active.type().rangeDamage;
       pick.compare(t, rating);
     }
     
@@ -315,7 +353,7 @@ public class TaskCombat extends Task {
     boolean canTouch  = standWall == targWall;
     
     if (currentTask == null) {
-      currentTask = new TaskCombat(actor, target);
+      currentTask = new TaskCombat(active, target);
     }
     else if (currentTask.target == t) {
       needsConfig = false;
@@ -341,22 +379,22 @@ public class TaskCombat extends Task {
   /**  Behaviour-execution-
     */
   boolean checkAndUpdateTask() {
-    Task self = configCombat(actor, primary, actor.mission, this, type);
+    Task self = configCombat(active, primary, active.mission(), this, type);
     if (self == null) return false;
     return super.checkAndUpdateTask();
   }
   
   
-  void toggleFocus(boolean active) {
-    super.toggleFocus(active);
-    primary.setFocused(actor, active);
+  void toggleFocus(boolean activeNow) {
+    super.toggleFocus(activeNow);
+    primary.setFocused(active, activeNow);
   }
   
   
   float actionRange() {
     if (attackMode == ATTACK_MELEE) return 0;
-    if (attackMode == ATTACK_RANGE) return actor.type().rangeDist + 1;
-    if (attackMode == ATTACK_FIRE ) return actor.type().rangeDist + 1;
+    if (attackMode == ATTACK_RANGE) return active.type().rangeDist + 1;
+    if (attackMode == ATTACK_FIRE ) return active.type().rangeDist + 1;
     return -1;
   }
   
@@ -369,7 +407,56 @@ public class TaskCombat extends Task {
   //  and success-chance, plus the motive-bonus for any reward attached.
   
   protected void onTarget(Target other) {
-    actor.performAttack(primary, attackMode == ATTACK_MELEE);
+    active.performAttack(primary, attackMode == ATTACK_MELEE);
+  }
+  
+  
+  static void performAttack(Element attacks, Element other, boolean melee) {
+    
+    int damage = melee ? attacks.meleeDamage() : attacks.rangeDamage();
+    int armour = other.armourClass();
+    if (other == null || damage <= 0) return;
+    
+    Trait   attackSkill = melee ? SKILL_MELEE : SKILL_RANGE;
+    Trait   defendSkill = melee ? SKILL_MELEE : SKILL_EVADE;
+    boolean wallBonus   = TaskCombat.wallBonus(attacks, other);
+    boolean wallPenalty = TaskCombat.wallBonus(other, attacks);
+    boolean hits = true;
+    float XP = 1, otherXP = 0, hitChance = 0, attackBonus = 0, defendBonus = 0;
+    
+    if (attacks.type().isActor()) {
+      Actor attackA = (Actor) attacks;
+      attackBonus = attackA.levelOf(attackSkill) * 2f / MAX_SKILL_LEVEL;
+    }
+    if (other.type().isActor()) {
+      Actor otherA = (Actor) other;
+      defendBonus = otherA.levelOf(defendSkill) * 2f / MAX_SKILL_LEVEL;
+    }
+    
+    if (wallBonus  ) attackBonus += WALL_HIT_BONUS / 100f;
+    if (wallPenalty) defendBonus += WALL_DEF_BONUS / 100f;
+    
+    hitChance = Nums.clamp(attackBonus + 0.5f - defendBonus, 0, 1);
+    hits      = Rand.num() < hitChance;
+    XP        = (1.5f - hitChance) * FIGHT_XP_PERCENT / 100f;
+    otherXP   = (0.5f + hitChance) * FIGHT_XP_PERCENT / 100f;
+    
+    if (hits) {
+      if (wallBonus  ) damage += WALL_DMG_BONUS;
+      if (wallPenalty) armour += WALL_ARM_BONUS;
+      damage = Rand.index(damage + armour) + 1;
+      damage = Nums.max(0, damage - armour);
+      if (damage > 0) other.takeDamage(damage);
+    }
+    
+    if (attacks.type().isActor()) {
+      Actor attackA = (Actor) attacks;
+      attackA.gainXP(attackSkill, XP);
+    }
+    if (other.type().isActor()) {
+      Actor otherA = (Actor) other;
+      otherA.gainXP(defendSkill, otherXP);
+    }
   }
   
   

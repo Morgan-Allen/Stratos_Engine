@@ -380,7 +380,7 @@ public class BuildingForHome extends Building {
   
   float totalFetchedFrom(Building store, Good good) {
     float total = 0;
-    for (Actor a : store.focused()) {
+    for (Active a : store.focused()) {
       if (! (a.task() instanceof TaskDelivery)) continue;
       TaskDelivery fetch = (TaskDelivery) a.task();
       if (fetch.from    != store) continue;

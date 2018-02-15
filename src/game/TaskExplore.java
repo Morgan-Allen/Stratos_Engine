@@ -55,7 +55,9 @@ public class TaskExplore extends Task {
   
   
   protected void onTarget(Target target) {
-    CityMap map = actor.map;
+    Actor actor = (Actor) this.active;
+    CityMap map = actor.map();
+    
     Tile goes = map.fog.findNearbyFogPoint(actor, actor.type().sightRange + 2);
     if (goes == null) return;
     goes = Tile.nearestOpenTile(goes, map);

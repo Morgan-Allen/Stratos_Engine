@@ -34,7 +34,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   private int   buildBits = 0;
   private int   stateBits = 0;
   
-  private List <Actor> focused = null;
+  private List <Active> focused = null;
   private Object pathFlag;  //  Note- used during temporary search.
   
   private Sprite sprite = null;
@@ -395,6 +395,11 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
+  public float sightRange() {
+    return type.sightRange;
+  }
+  
+  
   
   /**  Support methods for combat-
     */
@@ -440,7 +445,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   
   /**  Handling focus for actor activities-
     */
-  static List <Actor> setMember(Actor a, boolean is, List <Actor> l) {
+  static List setMember(Active a, boolean is, List l) {
     if (is) {
       if (l == null) l = new List();
       l.include(a);
@@ -453,13 +458,13 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
-  public void setFocused(Actor a, boolean is) {
+  public void setFocused(Active a, boolean is) {
     focused = setMember(a, is, focused);
   }
 
   
-  public Series <Actor> focused() {
-    return focused == null ? NO_ACTORS : focused;
+  public Series <Active> focused() {
+    return focused == null ? NONE_ACTIVE : focused;
   }
   
   
@@ -468,7 +473,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
-  public void targetedBy(Actor w) {
+  public void targetedBy(Active w) {
     return;
   }
   

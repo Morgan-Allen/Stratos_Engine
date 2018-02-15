@@ -41,6 +41,7 @@ public class TaskCrafting extends Task {
   
   
   protected void onVisit(Building visits) {
+    Actor actor = (Actor) this.active;
     
     BuildingForCrafts venue = (BuildingForCrafts) visits;
     if (! venue.canAdvanceCrafting()) return;

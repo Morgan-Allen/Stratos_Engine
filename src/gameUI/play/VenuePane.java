@@ -19,7 +19,6 @@ public class VenuePane extends DetailPane {
     super(UI, venue);
     this.venue = venue;
   }
-
   
   
   protected void updateState() {
@@ -29,7 +28,7 @@ public class VenuePane extends DetailPane {
     
     BuildType type = venue.type();
     
-    d.append(""+venue.toString());//+" (Level "+venue.structure.venueLevel()+")");
+    d.append(""+venue.toString());
     d.append("\n");
     
     d.append("\nHP: ");
@@ -41,6 +40,7 @@ public class VenuePane extends DetailPane {
     //d.append("\nDamage: "+venue.structure.damage());
     //d.append("\nArmour: "+venue.structure.armour());
     //d.append("\nCredits: "+venue.stocks.credits());
+    
     
     for (final ActorType w : type.workerTypes.keys()) {
       int num = venue.numWorkers(w), max = venue.maxWorkers(w);
@@ -109,7 +109,6 @@ public class VenuePane extends DetailPane {
         else {
           Text.appendColour("\n  "+name, Colour.GREY, d);
         }
-        
       }
     }
     

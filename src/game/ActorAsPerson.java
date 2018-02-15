@@ -320,7 +320,7 @@ public class ActorAsPerson extends Actor {
     if (! map.world.settings.toggleReacts) return;
     
     if (jobType() != Task.JOB.RETREAT) {
-      if (! inCombat()) {
+      if (! Task.inCombat(this)) {
         TaskCombat combat = TaskCombat.nextReaction(this);
         if (combat != null) assignTask(combat);
       }
@@ -343,7 +343,7 @@ public class ActorAsPerson extends Actor {
       class Reaction { Technique used; Target subject; float rating; }
       Pick <Reaction> pick = new Pick(0);
       
-      for (Actor other : map.actorsInRange(at(), sightRange())) {
+      for (Active other : map.activeInRange(at(), sightRange())) {
         for (Technique used : known) {
           if (used.canUseActive(this, other)) {
             Reaction r = new Reaction();

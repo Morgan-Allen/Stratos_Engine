@@ -36,7 +36,7 @@ public class CityMap implements Session.Saveable {
   
   int size, scanSize, flagSize;
   Tile grid[][];
-  List <Actor> actorGrid[][];
+  List <Active> actorGrid[][];
   
   int time = 0;
   int numUpdates = 0, ticksPS = PlayLoop.UPDATES_PER_SECOND;
@@ -529,24 +529,24 @@ public class CityMap implements Session.Saveable {
   }
   
   
-  void flagActor(Actor a, Tile at, boolean is) {
+  void flagActive(Active a, Tile at, boolean is) {
     if (at == null || a == null) return;
-    List <Actor> inBigGrid = actorGrid[at.x / FLAG_RES][at.y / FLAG_RES];
+    List <Active> inBigGrid = actorGrid[at.x / FLAG_RES][at.y / FLAG_RES];
     inBigGrid.toggleMember(a, is);
-    at.setInside(a, is);
+    if (a.isActor()) at.setInside((Actor) a, is);
   }
   
   
-  Series <Actor> actorsInRange(Tile point, float range) {
+  Series <Active> activeInRange(Tile point, float range) {
     
     Box2D area = new Box2D(point.x / FLAG_RES, point.y / FLAG_RES, 0, 0);
     area.expandBy(Nums.round(range / FLAG_RES, 1, true));
     
-    Batch <Actor> all = new Batch();
+    Batch <Active> all = new Batch();
     for (Coord c : Visit.grid(area)) try {
-      List <Actor> inBigGrid = actorGrid[c.x][c.y];
+      List <Active> inBigGrid = actorGrid[c.x][c.y];
       
-      for (Actor a : inBigGrid) {
+      for (Active a : inBigGrid) {
         if (distance(a.at(), point) > range) continue;
         all.add(a);
       }

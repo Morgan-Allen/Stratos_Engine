@@ -204,6 +204,7 @@ public abstract class Technique extends Trait {
     
     
     protected void onTarget(Target target) {
+      Actor actor = (Actor) this.active;
       used.applyFromActor(actor, target);
     }
     

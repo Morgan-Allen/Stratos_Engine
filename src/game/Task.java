@@ -57,7 +57,7 @@ public class Task implements Session.Saveable {
     EXTRA_HELP  = -1.5f
   ;
   
-  Actor actor;
+  final Active active;
   Employer origin;
   
   JOB type      = JOB.NONE;
@@ -75,15 +75,15 @@ public class Task implements Session.Saveable {
   
   
   
-  Task(Actor actor) {
-    this.actor = actor;
+  Task(Active actor) {
+    this.active = actor;
   }
   
   
   public Task(Session s) throws Exception {
     s.cacheInstance(this);
     
-    actor     = (Actor   ) s.loadObject();
+    active     = (Actor   ) s.loadObject();
     origin    = (Employer) s.loadObject();
     type      = JOB.values()[s.loadInt()];
     timeSpent = s.loadInt();
@@ -96,13 +96,13 @@ public class Task implements Session.Saveable {
     else {
       path = new Pathing[PL];
       for (int i = 0; i < PL; i++) {
-        if (s.loadBool()) path[i] = loadTile(actor.map, s);
+        if (s.loadBool()) path[i] = loadTile(active.map(), s);
         else              path[i] = (Pathing) s.loadObject();
       }
     }
     pathIndex = s.loadInt();
     offMap    = s.loadBool();
-    target    = loadTarget(actor.map, s);
+    target    = loadTarget(active.map(), s);
     visits    = (Building) s.loadObject();
     
     priorityEval = s.loadFloat();
@@ -112,7 +112,7 @@ public class Task implements Session.Saveable {
   
   public void saveState(Session s) throws Exception {
     
-    s.saveObject(actor );
+    s.saveObject(active );
     s.saveObject(origin);
     s.saveInt(type.ordinal());
     s.saveInt(timeSpent);
@@ -124,7 +124,7 @@ public class Task implements Session.Saveable {
       for (Pathing t : path) {
         if (t.isTile()) {
           s.saveBool(true);
-          saveTile((Tile) t, actor.map, s);
+          saveTile((Tile) t, active.map(), s);
         }
         else {
           s.saveBool(false);
@@ -134,7 +134,7 @@ public class Task implements Session.Saveable {
     }
     s.saveInt(pathIndex);
     s.saveBool(offMap);
-    saveTarget(target, actor.map, s);
+    saveTarget(target, active.map(), s);
     s.saveObject(visits);
     
     s.saveFloat(priorityEval);
@@ -150,8 +150,11 @@ public class Task implements Session.Saveable {
   ) {
     //  Note- the un/assign task calls are needed to ensure that current focus
     //  for the actor is updated correctly.
-    boolean active = actor.task() == this;
-    if (active) actor.assignTask(null);
+    boolean activeNow = active.task() == this;
+    
+    //  TODO:  This should probably *not* be done this way, now that multiple
+    //  tasks can be configured for assessment at the same time.
+    if (activeNow) active.assignTask(null);
     
     this.origin    = origin ;
     this.type      = jobType;
@@ -165,15 +168,15 @@ public class Task implements Session.Saveable {
     path = updatePathing();
     
     if (Visit.empty(path)) return null;
-    if (active) actor.assignTask(this);
+    if (activeNow) active.assignTask(this);
     return this;
   }
   
   
-  void toggleFocus(boolean active) {
+  void toggleFocus(boolean activeNow) {
     Target t = Task.focusTarget(this);
     if (t == null) return;
-    t.setFocused(actor, active);
+    t.setFocused(active, activeNow);
   }
   
   
@@ -227,7 +230,7 @@ public class Task implements Session.Saveable {
       return false;
     }
     
-    if (! checkPathing(pathTarget())) {
+    if (active.isActor() && ! checkPathing(pathTarget())) {
       this.path = updatePathing();
       this.pathIndex = -1;
       
@@ -236,11 +239,13 @@ public class Task implements Session.Saveable {
       }
     }
     
-    CityMap  map      = actor.map;
-    Pathing  inside   = actor.inside();
+    CityMap  map      = active.map();
+    boolean  canVisit = active.isActor();
+    Actor    visitor  = canVisit ? (Actor) active : null;
+    Pathing  inside   = canVisit ? visitor.inside() : null;
     Pathing  path[]   = this.path;
     Pathing  pathEnd  = (Pathing) Visit.last(path);
-    float    distance = CityMap.distance(actor.at(), pathEnd);
+    float    distance = CityMap.distance(active.at(), pathEnd);
     float    minRange = actionRange();
     Building visits   = this.visits;
     Target   target   = this.target;
@@ -251,10 +256,12 @@ public class Task implements Session.Saveable {
     if (visits != null && inside == visits) {
       if (timeSpent++ <= maxTime) {
         inContact = true;
-        onVisit(visits);
-        actor.onVisit(visits);
-        visits.visitedBy(actor);
-        if (origin != null) origin.actorVisits(actor, visits);
+        if (canVisit) {
+          onVisit(visits);
+          visitor.onVisit(visits);
+          visits.visitedBy(visitor);
+          if (origin != null) origin.actorVisits(visitor, visits);
+        }
         return true;
       }
       else {
@@ -265,22 +272,29 @@ public class Task implements Session.Saveable {
       if (target != null && timeSpent++ <= maxTime) {
         inContact = true;
         onTarget(target);
-        actor.onTarget(target);
-        target.targetedBy(actor);
-        if (origin != null) origin.actorTargets(actor, target);
+        target.targetedBy(active);
+        if (canVisit) {
+          //  TODO:  Revisit the interface here.  Ideally, anything that can
+          //  be assigned a task will have delegate methods for this.
+          visitor.onTarget(target);
+          if (origin != null) origin.actorTargets(visitor, target);
+        }
         return true;
       }
       else {
         return false;
       }
     }
-    else {
+    else if (canVisit) {
       int index = Nums.clamp(pathIndex + 1, path.length);
       Pathing ahead = path[pathIndex = index];
-      if (ahead.isTile()) actor.setInside(inside, false);
-      else actor.setInside(ahead, true);
-      actor.setLocation(ahead.at(), map);
+      if (ahead.isTile()) visitor.setInside(inside, false);
+      else visitor.setInside(ahead, true);
+      visitor.setLocation(ahead.at(), map);
       return true;
+    }
+    else {
+      return false;
     }
   }
   
@@ -319,10 +333,10 @@ public class Task implements Session.Saveable {
     return null;
   }
   
-
-  public static boolean hasTaskFocus(Target t, JOB type, Actor except) {
+  
+  public static boolean hasTaskFocus(Target t, JOB type, Active except) {
     if (t.focused().empty()) return false;
-    for (Actor a : t.focused()) {
+    for (Active a : t.focused()) {
       if (a != except && a.jobType() == type) return true;
     }
     return false;
@@ -331,6 +345,13 @@ public class Task implements Session.Saveable {
   
   public static boolean hasTaskFocus(Target t, JOB type) {
     return hasTaskFocus(t, type, null);
+  }
+  
+  
+  public static boolean inCombat(Active f) {
+    if (f == null) return false;
+    JOB type = f.jobType();
+    return type == JOB.COMBAT || type == JOB.HUNTING;
   }
   
   
@@ -396,6 +417,8 @@ public class Task implements Session.Saveable {
     if (path == null || target == null) return false;
     
     Pathing last = (Pathing) Visit.last(path);
+    Actor actor = (Actor) this.active;
+    CityMap map = actor.map();
     if (CityMap.distance(last, target) > 1.5f) return false;
     
     int index = Nums.clamp(pathIndex, path.length);
@@ -405,8 +428,8 @@ public class Task implements Session.Saveable {
     for (int i = 0; i < actor.type().sightRange; i++, index++) {
       if (index >= path.length) break;
       Pathing t = path[index];
-      if (t.isTile() && actor.map.blocked((Tile) t)) return false;
-      if (! (t.onMap() && t.allowsEntry(actor))    ) return false;
+      if (t.isTile() && map.blocked((Tile) t)) return false;
+      if (! (t.onMap() && t.allowsEntry(actor))) return false;
     }
     
     return true;
@@ -414,12 +437,12 @@ public class Task implements Session.Saveable {
   
   
   Pathing[] updatePathing() {
-    boolean report  = actor.reports();
+    boolean report  = reports();
     boolean verbose = false;
     
-    CityMap map      = actor.map;
+    CityMap map      = active.map();
     boolean visiting = visits != null;
-    Pathing from     = pathOrigin(actor);
+    Pathing from     = pathOrigin(active);
     Pathing heads    = pathTarget();
     
     if (report && verbose) {
@@ -491,7 +514,7 @@ public class Task implements Session.Saveable {
   
   
   boolean reports() {
-    return actor.reports();
+    return ((Element) active).reports();
   }
   
   
