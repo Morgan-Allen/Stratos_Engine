@@ -112,7 +112,7 @@ public class ActorAsAnimal extends Actor {
   Tile findGrazePoint() {
     
     Pick <Tile> pick = new Pick();
-    for (Tile t : CityMap.adjacent(at(), null, map)) {
+    for (Tile t : AreaMap.adjacent(at(), null, map)) {
       if (t == null || map.blocked(t)) continue;
       if (! Visit.arrayIncludes(type().habitats, t.terrain)) continue;
       pick.compare(t, Rand.num());
@@ -142,8 +142,8 @@ public class ActorAsAnimal extends Actor {
       if (a.type().predator) continue;
       if (a.pregnancy != 0) continue;
       
-      float dist   = CityMap.distance(a.at(), at());
-      float rating = CityMap.distancePenalty(dist);
+      float dist   = AreaMap.distance(a.at(), at());
+      float rating = AreaMap.distancePenalty(dist);
       if (category != Type.IS_ANIMAL_ACT) rating /= 2;
       
       pick.compare(a, rating);
@@ -222,7 +222,7 @@ public class ActorAsAnimal extends Actor {
   }
   
   
-  void updateLifeCycle(City city, boolean onMap) {
+  void updateLifeCycle(Base city, boolean onMap) {
     super.updateLifeCycle(city, onMap);
     //
     //  Once per month, check to see if breeding conditions are correct.  (In
@@ -262,7 +262,7 @@ public class ActorAsAnimal extends Actor {
         
         Actor child = (ActorAsAnimal) type().generate();
         Tile at = this.at();
-        child.enterMap(map, at.x, at.y, 1, homeCity());
+        child.enterMap(map, at.x, at.y, 1, base());
         if (reportCycle) I.say(this+" GAVE BIRTH");
       }
     }

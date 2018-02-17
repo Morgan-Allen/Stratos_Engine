@@ -33,7 +33,7 @@ public class CityOfferings {
     List <Offering> offerings = new List();
   }
   
-  City city;
+  Base city;
   List <Festival> schedule = new List();
   
   

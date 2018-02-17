@@ -77,7 +77,7 @@ public class TaskCrafting extends Task {
         for (Good made : venue.produced()) {
           if (venue.inventory(made) >= venue.stockLimit(made)) continue;
           venue.addInventory(1, made);
-          venue.homeCity().makeTotals.add(1, made);
+          venue.base().makeTotals.add(1, made);
         }
         progress = 0;
       }

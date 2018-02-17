@@ -4,7 +4,7 @@
 
 package game;
 import util.*;
-import static game.CityMap.*;
+import static game.AreaMap.*;
 import static game.CityCouncil.*;
 import static game.GameConstants.*;
 
@@ -16,7 +16,7 @@ public class FormationUtils {
   static float rateCampingPoint(Tile t, Mission parent) {
     if (t == null || parent == null || parent.map() == null) return -1;
     
-    CityMap map = parent.map();
+    AreaMap map = parent.map();
     Pathing from = parent.pathFrom();
     float rating = 0;
     boolean blocked = false;
@@ -47,7 +47,7 @@ public class FormationUtils {
   static Tile findCampingPoint(final Mission parent) {
     if (parent == null || parent.map() == null) return null;
     
-    final CityMap map = parent.map();
+    final AreaMap map = parent.map();
     final Tile init = Tile.nearestOpenTile(parent.standPoint(), map);
     if (init == null) return null;
     
@@ -56,7 +56,7 @@ public class FormationUtils {
     
     Flood <Tile> flood = new Flood <Tile> () {
       protected void addSuccessors(Tile front) {
-        for (Tile n : CityMap.adjacent(front, temp, map)) {
+        for (Tile n : AreaMap.adjacent(front, temp, map)) {
           if (map.blocked(n) || n.flaggedWith() != null) continue;
           tryAdding(n);
           
@@ -93,12 +93,12 @@ public class FormationUtils {
     
     Tile tempT[] = new Tile[9];
     
-    public SiegeSearch(CityMap map, Tile init, Tile dest) {
+    public SiegeSearch(AreaMap map, Tile init, Tile dest) {
       super(map, init, dest, -1);
     }
     
     protected Pathing[] adjacent(Pathing spot) {
-      CityMap.adjacent((Tile) spot, tempT, map);
+      AreaMap.adjacent((Tile) spot, tempT, map);
       return tempT;
     }
     
@@ -121,7 +121,7 @@ public class FormationUtils {
   static class Option { Object target; Tile secures; float rating; }
   
   static Option tacticalOptionFor(
-    Object focus, CityMap map, Pathing pathFrom, boolean checkPathing
+    Object focus, AreaMap map, Pathing pathFrom, boolean checkPathing
   ) {
     
     if (focus instanceof Mission) {
@@ -139,8 +139,8 @@ public class FormationUtils {
         if (! hasPath) return null;
       }
       
-      float dist = CityMap.distance(goes, pathFrom);
-      float rating = CityMap.distancePenalty(dist);
+      float dist = AreaMap.distance(goes, pathFrom);
+      float rating = AreaMap.distancePenalty(dist);
       
       Option o = new Option();
       o.target  = focus;
@@ -161,8 +161,8 @@ public class FormationUtils {
       }
       
       Tile secures = e.centre();
-      float dist = CityMap.distance(secures, pathFrom);
-      float rating = CityMap.distancePenalty(dist);
+      float dist = AreaMap.distance(secures, pathFrom);
+      float rating = AreaMap.distancePenalty(dist);
       
       Option o = new Option();
       o.target  = focus;
@@ -177,12 +177,12 @@ public class FormationUtils {
   
   static boolean updateTacticalTarget(Mission parent) {
     
-    CityMap map    = parent.map();
-    City    home   = parent.homeCity();
+    AreaMap map    = parent.map();
+    Base    home   = parent.base();
     Pathing from   = parent.pathFrom();
     Tile    stands = parent.standPoint();
     Object  focus  = parent.focus();
-    City    sieges = parent.awayCity();
+    Base    sieges = parent.awayCity();
     boolean envoy  = parent.escorted.size() > 0;
     
     //
@@ -226,7 +226,7 @@ public class FormationUtils {
     //  a building to tear down:
     Pick <Option> pick = new Pick();
     
-    for (City c : map.cities) for (Mission f : c.missions) {
+    for (Base c : map.cities) for (Mission f : c.missions) {
       Option o = tacticalOptionFor(f, map, from, false);
       if (o != null && o.secures != null) pick.compare(o, o.rating);
     }
@@ -279,7 +279,7 @@ public class FormationUtils {
     //
     //  First, check to see if an update is due:
     final Target focus = (Target) parent.focus();
-    final CityMap map = parent.map();
+    final AreaMap map = parent.map();
     final int updateTime = parent.lastUpdateTime;
     int nextUpdate = updateTime >= 0 ? (updateTime + 10) : 0;
     
@@ -304,7 +304,7 @@ public class FormationUtils {
       Flood <Pathing> flood = new Flood <Pathing> () {
         
         protected void addSuccessors(Pathing front) {
-          if (CityMap.distance(front, focus) > MAX_DIST) return;
+          if (AreaMap.distance(front, focus) > MAX_DIST) return;
           
           for (Pathing p : front.adjacent(temp, map)) {
             if (p == null || p.pathType() != PATH_WALLS) continue;
@@ -357,7 +357,7 @@ public class FormationUtils {
   
   static Tile standingPointRanks(Actor member, Mission parent) {
     
-    CityMap map = parent.map();
+    AreaMap map = parent.map();
     Tile goes = parent.standPoint();
     if (goes == null || map == null) return null;
     

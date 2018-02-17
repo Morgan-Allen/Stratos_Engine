@@ -2,7 +2,7 @@
 
 package game;
 import util.*;
-import static game.CityMap.*;
+import static game.AreaMap.*;
 import static game.GameConstants.*;
 
 
@@ -32,10 +32,10 @@ public class BuildingForGather extends Building {
   /**  Utility methods for filling up crop areas:
     */
   public static Tile[] applyPlanting(
-    City city, int x, int y, int w, int h, Good... crops
+    Base city, int x, int y, int w, int h, Good... crops
   ) {
     Batch <Tile> planted = new Batch();
-    CityMap map = city.activeMap();
+    AreaMap map = city.activeMap();
     for (Coord c : Visit.grid(x, y, w, h, 1)) {
       
       Tile t = map.tileAt(c);

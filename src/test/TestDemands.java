@@ -18,8 +18,8 @@ public class TestDemands extends Test {
   
   static boolean testDemands(boolean graphics) {
     
-    City base = setupTestCity(32, ALL_GOODS, false);
-    CityMap map = base.activeMap();
+    Base base = setupTestCity(32, ALL_GOODS, false);
+    AreaMap map = base.activeMap();
     World world = map.world;
     CityMapDemands demands = new CityMapDemands(map, "AAA");
     
@@ -100,7 +100,7 @@ public class TestDemands extends Test {
     
     for (CityMapDemands.Entry e : demands.nearbyEntries(fromX, fromY)) {
       Coord c = e.coord();
-      float dist = CityMap.distance(fromX, fromY, c.x, c.y);
+      float dist = AreaMap.distance(fromX, fromY, c.x, c.y);
       
       if (dist < lastDist) {
         I.say("\nDID NOT SORT ENTRIES BY DISTANCE:");

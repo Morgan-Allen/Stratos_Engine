@@ -2,7 +2,7 @@
 
 package game;
 import util.*;
-import static game.CityMap.*;
+import static game.AreaMap.*;
 import java.util.Iterator;
 
 
@@ -40,13 +40,13 @@ public class CityMapDemands {
   }
   
   
-  final CityMap map;
+  final AreaMap map;
   final Object key;
   
   Node root;
   
   
-  public CityMapDemands(CityMap map, Object key) {
+  public CityMapDemands(AreaMap map, Object key) {
     this.map  = map;
     this.key  = key;
     root      = new Node();
@@ -264,11 +264,11 @@ public class CityMapDemands {
           //Tile goes = map.tileAt(e.x, e.y);
           //if (! map.pathCache.pathConnects(from, goes)) return;
           
-          float dist = CityMap.distance(x, y, e.x, e.y);
+          float dist = AreaMap.distance(x, y, e.x, e.y);
           e.tempDist = dist - 0.5f;
         }
         else {
-          float dist = CityMap.distance(x, y, e.x, e.y);
+          float dist = AreaMap.distance(x, y, e.x, e.y);
           e.tempDist = dist - (((Node) e).size / 2f);
         }
         sorting.add(e);

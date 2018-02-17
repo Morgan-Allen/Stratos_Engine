@@ -5,7 +5,7 @@ import gameUI.play.*;
 import graphics.common.*;
 import graphics.sfx.*;
 import util.*;
-import static game.CityMap.*;
+import static game.AreaMap.*;
 import static game.GameConstants.*;
 import static util.TileConstants.*;
 
@@ -24,7 +24,7 @@ public class Building extends Element implements Pathing, Employer {
   private Tile entrances[] = new Tile[0];
   
   private int updateGap = 0;
-  private City homeCity = null;
+  private Base homeCity = null;
   List <Actor> workers   = new List();
   List <Actor> residents = new List();
   List <Actor> visitors  = new List();
@@ -53,7 +53,7 @@ public class Building extends Element implements Pathing, Employer {
     for (int i = 0; i < numE; i++) entrances[i] = loadTile(map, s);
     
     updateGap = s.loadInt();
-    homeCity = (City) s.loadObject();
+    homeCity = (Base) s.loadObject();
     s.loadObjects(workers  );
     s.loadObjects(residents);
     s.loadObjects(visitors );
@@ -108,17 +108,17 @@ public class Building extends Element implements Pathing, Employer {
   }
   
   
-  public void assignHomeCity(City belongs) {
+  public void assignHomeCity(Base belongs) {
     this.homeCity = belongs;
   }
   
   
-  public City homeCity() {
+  public Base base() {
     return homeCity;
   }
   
   
-  public void enterMap(CityMap map, int x, int y, float buildLevel, City owns) {
+  public void enterMap(AreaMap map, int x, int y, float buildLevel, Base owns) {
     if (onMap()) {
       I.complain("\nALREADY ON MAP: "+this);
       return;
@@ -134,7 +134,7 @@ public class Building extends Element implements Pathing, Employer {
   }
   
   
-  public void exitMap(CityMap map) {
+  public void exitMap(AreaMap map) {
     
     //I.say("EXITING MAP: "+this);
     
@@ -161,7 +161,7 @@ public class Building extends Element implements Pathing, Employer {
   
   /**  Auxiliary pathing-assist methods:
     */
-  public Pathing[] adjacent(Pathing[] temp, CityMap map) {
+  public Pathing[] adjacent(Pathing[] temp, AreaMap map) {
     if (temp == null) temp = new Pathing[1];
     for (int i = temp.length; i-- > 0;) temp[i] = null;
     if (entrances == null) return temp;
@@ -655,7 +655,7 @@ public class Building extends Element implements Pathing, Employer {
       return actor.inside() == this;
     }
     else {
-      return CityMap.adjacent(this, actor);
+      return AreaMap.adjacent(this, actor);
     }
   }
   
@@ -771,7 +771,7 @@ public class Building extends Element implements Pathing, Employer {
   }
   
   
-  public void renderElement(Rendering rendering, City base) {
+  public void renderElement(Rendering rendering, Base base) {
     super.renderElement(rendering, base);
     
     Sprite s = sprite();

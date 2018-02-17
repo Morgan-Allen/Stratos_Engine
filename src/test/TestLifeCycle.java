@@ -24,8 +24,8 @@ public class TestLifeCycle extends Test {
   static boolean testLifeCycle(boolean graphics) {
     Test test = new TestLifeCycle();
     
-    City base = setupTestCity(16, ALL_GOODS, false);
-    CityMap map = base.activeMap();
+    Base base = setupTestCity(16, ALL_GOODS, false);
+    AreaMap map = base.activeMap();
     World world = map.world;
     
     world.settings.toggleFog    = false;

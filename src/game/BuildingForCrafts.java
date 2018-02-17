@@ -64,7 +64,7 @@ public class BuildingForCrafts extends Building {
   void updateOnPeriod(int period) {
     super.updateOnPeriod(period);
     for (ItemOrder order : orders) {
-      int spent = CityMap.timeSince(order.timePlaced, map.time());
+      int spent = AreaMap.timeSince(order.timePlaced, map.time());
       if (spent > MONTH_LENGTH * 2) orders.remove(order);
     }
   }

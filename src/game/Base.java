@@ -6,7 +6,7 @@ import static game.GameConstants.*;
 
 
 
-public class City implements Session.Saveable, Trader {
+public class Base implements Session.Saveable, Trader {
   
   
   /**  Data fields, construction and save/load methods-
@@ -51,7 +51,7 @@ public class City implements Session.Saveable, Trader {
   ;
   
   public static class Relation {
-    City    with;
+    Base    with;
     POSTURE posture;
     float   loyalty;
     
@@ -71,7 +71,7 @@ public class City implements Session.Saveable, Trader {
   GOVERNMENT government = GOVERNMENT.FEUDAL;
   float prestige = PRESTIGE_AVG;
   final public CityCouncil council = new CityCouncil(this);
-  Table <City, Relation> relations = new Table();
+  Table <Base, Relation> relations = new Table();
   
   private int   currentFunds = 0;
   private float population   = 0;
@@ -83,19 +83,19 @@ public class City implements Session.Saveable, Trader {
   List <Mission> missions = new List();
   
   private boolean active;
-  private CityMap map;
+  private AreaMap map;
   
   Tally <Type> makeTotals = new Tally();
   Tally <Type> usedTotals = new Tally();
   
   
   
-  public City(World world, World.Locale locale) {
+  public Base(World world, World.Locale locale) {
     this(world, locale, "City???");
   }
   
   
-  public City(World world, World.Locale locale, String name) {
+  public Base(World world, World.Locale locale, String name) {
     if (world  == null) I.complain("CANNOT PASS NULL WORLD:  "+name);
     if (locale == null) I.complain("CANNOT PASS NULL LOCALE: "+name);
     
@@ -105,7 +105,7 @@ public class City implements Session.Saveable, Trader {
   }
   
   
-  public City(Session s) throws Exception {
+  public Base(Session s) throws Exception {
     s.cacheInstance(this);
     
     name = s.loadString();
@@ -119,7 +119,7 @@ public class City implements Session.Saveable, Trader {
     
     for (int n = s.loadInt(); n-- > 0;) {
       Relation r = new Relation();
-      r.with    = (City) s.loadObject();
+      r.with    = (Base) s.loadObject();
       r.posture = POSTURE.values()[s.loadInt()];
       r.loyalty = s.loadFloat();
       r.madeVassalDate = s.loadInt();
@@ -139,7 +139,7 @@ public class City implements Session.Saveable, Trader {
     s.loadObjects(missions);
     
     active = s.loadBool();
-    map    = (CityMap) s.loadObject();
+    map    = (AreaMap) s.loadObject();
     
     s.loadTally(makeTotals);
     s.loadTally(usedTotals);
@@ -188,13 +188,13 @@ public class City implements Session.Saveable, Trader {
   
   /**  Supplemental setup/query methods for economy, trade and geography-
     */
-  public void attachMap(CityMap map) {
+  public void attachMap(AreaMap map) {
     this.map    = map ;
     this.active = map == null ? false : true;
   }
   
   
-  public CityMap activeMap() {
+  public AreaMap activeMap() {
     return map;
   }
   
@@ -211,7 +211,7 @@ public class City implements Session.Saveable, Trader {
   }
   
   
-  public float distance(City other) {
+  public float distance(Base other) {
     if (other.locale == this.locale) return 0;
     Integer dist = locale.distances.get(other.locale);
     if (dist != null) return (float) dist;
@@ -251,7 +251,7 @@ public class City implements Session.Saveable, Trader {
   }
   
   
-  Relation relationWith(City other) {
+  Relation relationWith(Base other) {
     if (other == null) return null;
     Relation r = relations.get(other);
     if (r == null) {
@@ -264,25 +264,25 @@ public class City implements Session.Saveable, Trader {
   }
   
   
-  public POSTURE posture(City other) {
+  public POSTURE posture(Base other) {
     if (other == null) return null;
     return relationWith(other).posture;
   }
   
   
-  public float loyalty(City other) {
+  public float loyalty(Base other) {
     if (other == null) return 0;
     return relationWith(other).loyalty;
   }
   
   
-  public static void setPosture(City a, City b, POSTURE p, boolean symmetric) {
+  public static void setPosture(Base a, Base b, POSTURE p, boolean symmetric) {
     if (p == null) p = POSTURE.NEUTRAL;
     //
     //  You cannot have more than one Lord at a time, so break relations with
     //  any former master-
     if (p == POSTURE.LORD) {
-      City formerLord = a.currentLord();
+      Base formerLord = a.currentLord();
       if (formerLord == b) return;
       if (formerLord != null) setPosture(a, formerLord, POSTURE.NEUTRAL, true);
       a.relationWith(b).madeVassalDate = a.world.time;
@@ -304,7 +304,7 @@ public class City implements Session.Saveable, Trader {
   }
   
   
-  public void toggleRebellion(City lord, boolean is) {
+  public void toggleRebellion(Base lord, boolean is) {
     Relation r = relationWith(lord);
     if (r.posture != POSTURE.LORD) return;
     
@@ -319,13 +319,13 @@ public class City implements Session.Saveable, Trader {
   }
   
   
-  public boolean isVassalOf(City o) { return posture(o) == POSTURE.LORD  ; }
-  public boolean isLordOf  (City o) { return posture(o) == POSTURE.VASSAL; }
-  public boolean isEnemyOf (City o) { return posture(o) == POSTURE.ENEMY ; }
-  public boolean isAllyOf  (City o) { return posture(o) == POSTURE.ALLY  ; }
+  public boolean isVassalOf(Base o) { return posture(o) == POSTURE.LORD  ; }
+  public boolean isLordOf  (Base o) { return posture(o) == POSTURE.VASSAL; }
+  public boolean isEnemyOf (Base o) { return posture(o) == POSTURE.ENEMY ; }
+  public boolean isAllyOf  (Base o) { return posture(o) == POSTURE.ALLY  ; }
   
   
-  public static void incLoyalty(City a, City b, float inc) {
+  public static void incLoyalty(Base a, Base b, float inc) {
     Relation r = a.relationWith(b);
     float loyalty = Nums.clamp(r.loyalty + inc, -1, 1);
     r.loyalty = loyalty;
@@ -342,12 +342,12 @@ public class City implements Session.Saveable, Trader {
   }
   
   
-  public static void incPrestige(City c, float inc) {
+  public static void incPrestige(Base c, float inc) {
     c.prestige = Nums.clamp(c.prestige + inc, PRESTIGE_MIN, PRESTIGE_MAX);
   }
   
   
-  public City currentLord() {
+  public Base currentLord() {
     for (Relation r : relations.values()) {
       if (r.posture == POSTURE.LORD) return r.with;
     }
@@ -355,38 +355,38 @@ public class City implements Session.Saveable, Trader {
   }
   
   
-  public City capitalLord() {
-    City c = this;
+  public Base capitalLord() {
+    Base c = this;
     while (true) {
-      City l = c.currentLord();
+      Base l = c.currentLord();
       if (l == null) return c;
       else c = l;
     }
   }
   
   
-  public boolean isVassalOfSameLord(City o) {
-    City lord = capitalLord();
+  public boolean isVassalOfSameLord(Base o) {
+    Base lord = capitalLord();
     return lord != null && o.capitalLord() == lord;
   }
   
   
-  public boolean isLoyalVassalOf(City o) {
+  public boolean isLoyalVassalOf(Base o) {
     Relation r = relationWith(o);
     if (r == null || r.posture != POSTURE.LORD) return false;
     return r.lastRebelDate == -1;
   }
   
   
-  public Series <City> relationsWith() {
-    Batch <City> all = new Batch();
-    for (City c : relations.keySet()) all.add(c);
+  public Series <Base> relationsWith() {
+    Batch <Base> all = new Batch();
+    for (Base c : relations.keySet()) all.add(c);
     return all;
   }
   
   
-  public Series <City> vassalsInRevolt() {
-    Batch <City> all = new Batch();
+  public Series <Base> vassalsInRevolt() {
+    Batch <Base> all = new Batch();
     for (Relation r : relations.values()) {
       if (r.with.yearsSinceRevolt(this) > 0) all.add(r.with);
     }
@@ -394,7 +394,7 @@ public class City implements Session.Saveable, Trader {
   }
   
   
-  public float yearsSinceRevolt(City lord) {
+  public float yearsSinceRevolt(Base lord) {
     Relation r = relationWith(lord);
     if (r.posture != POSTURE.LORD         ) return -1;
     if (r == null || r.lastRebelDate == -1) return -1;
@@ -451,27 +451,27 @@ public class City implements Session.Saveable, Trader {
   }
   
   
-  public static void setSuppliesDue(City a, City b, Tally <Good> suppliesDue) {
+  public static void setSuppliesDue(Base a, Base b, Tally <Good> suppliesDue) {
     if (suppliesDue == null) suppliesDue = new Tally();
     Relation r = a.relationWith(b);
     r.suppliesDue = suppliesDue;
   }
   
   
-  public static Tally <Good> suppliesDue(City a, City b) {
+  public static Tally <Good> suppliesDue(Base a, Base b) {
     Relation r = a.relationWith(b);
     if (r == null) return new Tally();
     return r.suppliesDue;
   }
   
   
-  public static float goodsSent(City a, City b, Good g) {
+  public static float goodsSent(Base a, Base b, Good g) {
     Relation r = a.relationWith(b);
     return r == null ? 0 : r.suppliesSent.valueFor(g);
   }
   
   
-  public static float suppliesDue(City a, City b, Good g) {
+  public static float suppliesDue(Base a, Base b, Good g) {
     Relation r = a.relationWith(b);
     return r == null ? 0 : r.suppliesDue.valueFor(g);
   }
@@ -484,14 +484,14 @@ public class City implements Session.Saveable, Trader {
   
   public Tally <Good> tradeLevel() { return tradeLevel; }
   public Tally <Good> inventory () { return inventory ; }
-  public City homeCity() { return this; }
+  public Base base() { return this; }
   
   
-  public float importPrice(Good g, City sells) {
+  public float importPrice(Good g, Base sells) {
     return g.price * 1 + (TRAVEL_MARGIN / 100f);
   }
   
-  public float exportPrice(Good g, City buys) {
+  public float exportPrice(Good g, Base buys) {
     return g.price;
   }
   
@@ -580,7 +580,7 @@ public class City implements Session.Saveable, Trader {
   void updateCity() {
     boolean  updateStats = world.time % MONTH_LENGTH == 0;
     boolean  activeMap   = map != null;
-    City     lord        = currentLord();
+    Base     lord        = currentLord();
     //
     //  Local player-owned cities (i.e, with their own map), must derive their
     //  vitual statistics from that small-scale city map:
@@ -588,7 +588,7 @@ public class City implements Session.Saveable, Trader {
       council.updateCouncil(true);
       
       int citizens = 0;
-      for (Actor a : map.actors) if (a.homeCity() == this) {
+      for (Actor a : map.actors) if (a.base() == this) {
         citizens += 1;
       }
       population = citizens * POP_PER_CITIZEN;
@@ -713,7 +713,7 @@ public class City implements Session.Saveable, Trader {
       //
       //  And, finally, lose prestige based on any vassals in recent revolt-
       //  and if the time gone exceeds a certain threshold, end vassal status.
-      for (City revolts : vassalsInRevolt()) {
+      for (Base revolts : vassalsInRevolt()) {
         float years = revolts.yearsSinceRevolt(this);
         float maxT = AVG_TRIBUTE_YEARS, timeMult = (maxT - years) / maxT;
         
@@ -746,7 +746,7 @@ public class City implements Session.Saveable, Trader {
     if (activeMap() == null) {
       return all;
     }
-    for (Building b : map.buildings) if (b.homeCity() == this) {
+    for (Building b : map.buildings) if (b.base() == this) {
       for (Technique t : b.rulerPowers()) all.include(t);
     }
     return all;

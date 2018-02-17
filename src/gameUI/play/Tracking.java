@@ -36,7 +36,7 @@ public class Tracking {
 
   /**  Updates general camera behaviour.
     */
-  protected void updateTracking(CityMap stage, Selection.Focus tracked) {
+  protected void updateTracking(AreaMap stage, Selection.Focus tracked) {
   
     if (tracked == null || ! tracked.trackSelection()) tracked = null;
     else trackSelection(tracked);
@@ -76,7 +76,7 @@ public class Tracking {
   }
   
   
-  private void pushCamera(int x, int y, CityMap stage) {
+  private void pushCamera(int x, int y, AreaMap stage) {
     //
     //  First, we calculate a positional offset within the world and without
     //  exiting it's bounds:

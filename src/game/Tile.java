@@ -4,7 +4,7 @@ package game;
 import gameUI.play.*;
 import graphics.common.Viewport;
 import util.*;
-import static game.CityMap.*;
+import static game.AreaMap.*;
 import static game.GameConstants.*;
 import static util.TileConstants.*;
 
@@ -29,7 +29,7 @@ public class Tile implements Pathing, Selection.Focus {
   }
   
   
-  void loadState(Session s, CityMap map) throws Exception {
+  void loadState(Session s, AreaMap map) throws Exception {
     elevation = s.loadInt();
     int terrID = s.loadInt();
     terrain = terrID == -1 ? EMPTY : map.terrainTypes[terrID];
@@ -40,7 +40,7 @@ public class Tile implements Pathing, Selection.Focus {
   }
   
   
-  void saveState(Session s, CityMap map) throws Exception {
+  void saveState(Session s, AreaMap map) throws Exception {
     s.saveInt(elevation);
     s.saveInt(Visit.indexOf(terrain, map.terrainTypes));
     s.saveObject(above);
@@ -122,7 +122,7 @@ public class Tile implements Pathing, Selection.Focus {
   }
   
   
-  public Pathing[] adjacent(Pathing[] temp, CityMap map) {
+  public Pathing[] adjacent(Pathing[] temp, AreaMap map) {
     if (temp == null) temp = new Pathing[9];
     
     int pathT = pathType();
@@ -194,17 +194,17 @@ public class Tile implements Pathing, Selection.Focus {
   
   /**  Various utility and convenience methods-
     */
-  public static Tile nearestOpenTile(Tile from, CityMap map) {
+  public static Tile nearestOpenTile(Tile from, AreaMap map) {
     return nearestOpenTile(from, map, 1);
   }
   
 
-  public static Tile nearestOpenTile(Tile from, CityMap map, int maxRange) {
+  public static Tile nearestOpenTile(Tile from, AreaMap map, int maxRange) {
     
     if (from == null || ! map.blocked(from)) return from;
     if (maxRange <= 0) return null;
 
-    for (Tile t : CityMap.adjacent(from, null, map)) {
+    for (Tile t : AreaMap.adjacent(from, null, map)) {
       if (t == null || map.blocked(t)) continue;
       return t;
     }
@@ -244,7 +244,7 @@ public class Tile implements Pathing, Selection.Focus {
   }
   
   
-  public boolean testSelection(PlayUI UI, City base, Viewport port) {
+  public boolean testSelection(PlayUI UI, Base base, Viewport port) {
     return false;
   }
 

@@ -2,7 +2,7 @@
 
 package game;
 import util.*;
-import static game.CityMap.*;
+import static game.AreaMap.*;
 import static game.GameConstants.*;
 
 
@@ -51,7 +51,7 @@ public class BuildingForArmy extends BuildingForCrafts {
     //  here-
     if (recruits.size() < type().maxRecruits) {
       for (Building b : map.buildings) {
-        float rating = CityMap.distancePenalty(this, b);
+        float rating = AreaMap.distancePenalty(this, b);
         if (b == this) rating *= 10;
         float sumE = 0;
         for (Actor a : b.workers) if (eligible(a, false)) {

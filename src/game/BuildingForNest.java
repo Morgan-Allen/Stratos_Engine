@@ -100,7 +100,7 @@ public class BuildingForNest extends Building {
       
       if (spawnType != null) {
         Actor spawn = (Actor) spawnType.generate();
-        spawn.enterMap(map, at().x, at().y, 1, homeCity());
+        spawn.enterMap(map, at().x, at().y, 1, base());
         spawn.setInside(this, true);
         setResident(spawn, true);
       }
@@ -117,13 +117,13 @@ public class BuildingForNest extends Building {
         if (! map().pathCache.pathConnects(this, b, true, false)) continue;
         
         float rating = 1f;
-        rating *= CityMap.distancePenalty(this, b);
+        rating *= AreaMap.distancePenalty(this, b);
         pick.compare(b, rating);
       }
       
       if (! pick.empty()) {
         activeMission = new Mission(
-          Mission.OBJECTIVE_CONQUER, homeCity(), false
+          Mission.OBJECTIVE_CONQUER, base(), false
         );
         activeMission.setFocus(pick.result(), 0, map());
         for (Actor a : residents()) activeMission.toggleRecruit(a, true);

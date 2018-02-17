@@ -22,8 +22,8 @@ public class TestBridging extends Test {
     Test test = new TestBridging();
     
     Terrain terrTypes[] = { LAKE, MEADOW, JUNGLE };
-    City base = setupTestCity(16, ALL_GOODS, false, terrTypes);
-    CityMap map = base.activeMap();
+    Base base = setupTestCity(16, ALL_GOODS, false, terrTypes);
+    AreaMap map = base.activeMap();
     World world = base.world;
     world.settings.toggleFog     = false;
     world.settings.toggleFatigue = false;
@@ -151,7 +151,7 @@ public class TestBridging extends Test {
         if (e.type().isBuilding()) {
           Building b = (Building) e, c = (Building) copy;
           c.setFacing(b.facing());
-          c.assignHomeCity(b.homeCity());
+          c.assignHomeCity(b.base());
         }
         copy.setLocation(at, map);
         freshBuilt.add(copy);
@@ -212,7 +212,7 @@ public class TestBridging extends Test {
   
   
   private static boolean testPathing(
-    Tile t, Building base, CityMap map
+    Tile t, Building base, AreaMap map
   ) {
     ActorPathSearch s = new ActorPathSearch(map, t, base, -1);
     s.doSearch();

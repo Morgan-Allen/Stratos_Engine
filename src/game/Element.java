@@ -4,7 +4,7 @@ package game;
 import gameUI.play.*;
 import graphics.common.*;
 import util.*;
-import static game.CityMap.*;
+import static game.AreaMap.*;
 import static game.GameConstants.*;
 
 
@@ -28,7 +28,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   private Type type;
   private int varID;
   
-  CityMap map;
+  AreaMap map;
   private Tile at;
   private float growLevel = 0;
   private int   buildBits = 0;
@@ -51,7 +51,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
     
     type   = (Type) s.loadObject();
     varID  = s.loadInt();
-    map    = (CityMap) s.loadObject();
+    map    = (AreaMap) s.loadObject();
     at     = loadTile(map, s);
     
     growLevel = s.loadFloat();
@@ -97,13 +97,13 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   
   /**  Entering and exiting the map-
     */
-  public Visit <Tile> footprint(CityMap map) {
+  public Visit <Tile> footprint(AreaMap map) {
     if (at == null) return map.tilesAround(0, 0, 0, 0);
     return map.tilesUnder(at.x, at.y, type.wide, type.high);
   }
   
   
-  public Visit <Tile> perimeter(CityMap map) {
+  public Visit <Tile> perimeter(AreaMap map) {
     if (at == null) return map.tilesAround(0, 0, 0, 0);
     return map.tilesAround(at.x, at.y, type.wide, type.high);
   }
@@ -124,7 +124,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
-  public boolean canPlace(CityMap map, int x, int y, int margin) {
+  public boolean canPlace(AreaMap map, int x, int y, int margin) {
     int w = type.wide, h = type.high, m = margin;
     for (Tile t : map.tilesUnder(x - m, y - m, w + (m * 2), h + (m * 2))) {
       if (t == null) return false;
@@ -135,7 +135,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
-  public void setLocation(Tile at, CityMap map) {
+  public void setLocation(Tile at, AreaMap map) {
     this.at  = at;
     this.map = map;
     stateBits |= FLAG_SITED;
@@ -147,7 +147,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
-  public void enterMap(CityMap map, int x, int y, float buildLevel, City owns) {
+  public void enterMap(AreaMap map, int x, int y, float buildLevel, Base owns) {
     stateBits |= FLAG_ON_MAP;
     setLocation(map.tileAt(x, y), map);
     
@@ -168,7 +168,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
-  public void exitMap(CityMap map) {
+  public void exitMap(AreaMap map) {
     
     //setLocation(null, map);
     //this.map = null;
@@ -202,18 +202,18 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
-  public City homeCity() {
+  public Base base() {
     if (! onMap()) return null;
     return map.locals;
   }
   
   
-  public City guestCity() {
-    return homeCity();
+  public Base guestBase() {
+    return base();
   }
   
   
-  public CityMap map() {
+  public AreaMap map() {
     return map;
   }
   
@@ -523,7 +523,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
-  public boolean testSelection(PlayUI UI, City base, Viewport port) {
+  public boolean testSelection(PlayUI UI, Base base, Viewport port) {
     float height = type.deep;
     float radius = 1.5f * Nums.max(type.wide, type.high) / 2;
     float selRad = (height + radius) / 2;
@@ -547,7 +547,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
-  public boolean canRender(City base, Viewport view) {
+  public boolean canRender(Base base, Viewport view) {
     final Sprite s = sprite();
     if (s == null) return false;
     
@@ -558,7 +558,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
-  public void renderElement(Rendering rendering, City base) {
+  public void renderElement(Rendering rendering, Base base) {
     final Sprite s = sprite();
     if (onMap()) {
       final float fog = renderedFog(base);
@@ -569,7 +569,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
-  protected float renderedFog(City base) {
+  protected float renderedFog(Base base) {
     //return 1;//sightLevel();
     return sightLevel();
     //final Vec3D p = trackPosition();

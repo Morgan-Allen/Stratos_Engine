@@ -15,7 +15,7 @@ public class BuildingForTrade extends Building implements Trader {
     */
   Tally <Good> tradeLevel = new Tally();
   List <Good> tradeFixed = new List();
-  City tradePartner = null;
+  Base tradePartner = null;
   boolean tradeOff = false;
   Good needed[] = NO_GOODS, produced[] = NO_GOODS;
   
@@ -29,7 +29,7 @@ public class BuildingForTrade extends Building implements Trader {
     super(s);
     s.loadTally(tradeLevel);
     s.loadObjects(tradeFixed);
-    tradePartner = (City) s.loadObject();
+    tradePartner = (Base) s.loadObject();
     tradeOff = s.loadBool();
   }
   
@@ -54,7 +54,7 @@ public class BuildingForTrade extends Building implements Trader {
   }
   
   
-  public void setTradePartner(City partner) {
+  public void setTradePartner(Base partner) {
     this.tradePartner = partner;
   }
   
@@ -92,12 +92,12 @@ public class BuildingForTrade extends Building implements Trader {
     return Nums.abs(tradeLevel.valueFor(made));
   }
   
-  public float importPrice(Good g, City sells) {
-    return homeCity().importPrice(g, sells);
+  public float importPrice(Good g, Base sells) {
+    return base().importPrice(g, sells);
   }
   
-  public float exportPrice(Good g, City buys) {
-    return homeCity().exportPrice(g, buys);
+  public float exportPrice(Good g, Base buys) {
+    return base().exportPrice(g, buys);
   }
   
   public float shopPrice(Good g, TaskDelivery s) {
@@ -137,14 +137,14 @@ public class BuildingForTrade extends Building implements Trader {
     class Order { Tally <Good> cargo; Trader goes; float rating; }
     List <Trader> targets = new List();
     List <Order> orders = new List();
-    City homeCity = homeCity();
+    Base homeCity = base();
     World world = homeCity.world;
     
     for (Building b : map.buildings) {
       if (b == this || ! (b instanceof Trader)) continue;
-      if (b.homeCity() != homeCity()) {
+      if (b.base() != base()) {
         if      (tradePartner == null        ) continue;
-        else if (b.homeCity() != tradePartner) continue;
+        else if (b.base() != tradePartner) continue;
       }
       targets.add((Trader) b);
     }
@@ -152,7 +152,7 @@ public class BuildingForTrade extends Building implements Trader {
     if (tradePartner != null) {
       targets.add(tradePartner);
     }
-    else for (City c : world.cities) {
+    else for (Base c : world.cities) {
       if (c.activeMap() == map       ) continue;
       if (c == homeCity              ) continue;
       if (c.isEnemyOf(homeCity)      ) continue;
@@ -162,7 +162,7 @@ public class BuildingForTrade extends Building implements Trader {
     
     for (Trader t : targets) {
       World w = map.world;
-      City c = (t == t.homeCity()) ? ((City) t) : null;
+      Base c = (t == t.base()) ? ((Base) t) : null;
       Tally <Good> cargoAway = configureCargo(this, t, false, w);
       Tally <Good> cargoBack = configureCargo(t, this, true , w);
       

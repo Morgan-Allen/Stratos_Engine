@@ -2,7 +2,7 @@
 
 package game;
 import util.*;
-import static game.CityMap.*;
+import static game.AreaMap.*;
 import static game.GameConstants.*;
 
 
@@ -10,13 +10,13 @@ import static game.GameConstants.*;
 public class CityMapPlanning {
   
   
-  final CityMap map;
+  final AreaMap map;
   List <Element> toBuild = new List();
   Element grid[][];
   
   
   
-  CityMapPlanning(CityMap map) {
+  CityMapPlanning(AreaMap map) {
     this.map  = map;
   }
   
@@ -93,7 +93,7 @@ public class CityMapPlanning {
   }
   
   
-  public void placeObject(Element e, int x, int y, City owns) {
+  public void placeObject(Element e, int x, int y, Base owns) {
     e.setLocation(map.tileAt(x, y), map);
     if (e.type().isBuilding()) ((Building) e).assignHomeCity(owns);
     placeObject(e);
@@ -149,7 +149,7 @@ public class CityMapPlanning {
   /**  Some helper methods for dealing with infrastructure:
     */
   public static Series <Element> placeStructure(
-    Type s, City city, Box2D area, boolean built
+    Type s, Base city, Box2D area, boolean built
   ) {
     return placeStructure(
       s, city, built,
@@ -160,10 +160,10 @@ public class CityMapPlanning {
   
   
   public static Series <Element> placeStructure(
-    Type s, City city, boolean built, int x, int y, int w, int h
+    Type s, Base city, boolean built, int x, int y, int w, int h
   ) {
     Batch <Element> placed = new Batch();
-    CityMap map = city.activeMap();
+    AreaMap map = city.activeMap();
     for (Coord c : Visit.grid(x, y, w, h, 1)) {
       Tile t = map.tileAt(c.x, c.y);
       if (t == null) continue;
@@ -181,7 +181,7 @@ public class CityMapPlanning {
   
   
   public static void markDemolish(
-    CityMap map, boolean now, Box2D area
+    AreaMap map, boolean now, Box2D area
   ) {
     markDemolish(
       map, now,
@@ -192,7 +192,7 @@ public class CityMapPlanning {
   
   
   public static void markDemolish(
-    CityMap map, boolean now, int x, int y, int w, int h
+    AreaMap map, boolean now, int x, int y, int w, int h
   ) {
     for (Tile t : map.tilesUnder(x, y, w, h)) if (t != null) {
       Element plans = map.planning.objectAt(t);

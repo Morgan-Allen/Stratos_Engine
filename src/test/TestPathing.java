@@ -23,8 +23,8 @@ public class TestPathing extends Test {
     
     boolean testOkay = true;
     
-    City base = setupTestCity(32, ALL_GOODS, false);
-    CityMap map = base.activeMap();
+    Base base = setupTestCity(32, ALL_GOODS, false);
+    AreaMap map = base.activeMap();
     World world = map.world;
     world.settings.toggleFog     = false;
     world.settings.toggleHunger  = false;
@@ -226,7 +226,7 @@ public class TestPathing extends Test {
   
   
   private static Pathing[] checkPathingOkay(
-    Pathing from, Pathing goes, CityMap map
+    Pathing from, Pathing goes, AreaMap map
   ) {
     ActorPathSearch search = new ActorPathSearch(map, from, goes, -1);
     search.doSearch();

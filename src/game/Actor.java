@@ -6,7 +6,7 @@ import graphics.common.*;
 import graphics.sfx.*;
 import util.*;
 import static game.Task.*;
-import static game.CityMap.*;
+import static game.AreaMap.*;
 import static game.GameConstants.*;
 
 
@@ -38,8 +38,8 @@ public class Actor extends Element implements
   
   private Building work;
   private Building home;
-  private City     homeCity;
-  private City     guestCity;
+  private Base     homeCity;
+  private Base     guestCity;
   Building recruiter;
   Mission  mission  ;
   
@@ -77,8 +77,8 @@ public class Actor extends Element implements
     
     work      = (Building) s.loadObject();
     home      = (Building) s.loadObject();
-    homeCity  = (City    ) s.loadObject();
-    guestCity = (City    ) s.loadObject();
+    homeCity  = (Base    ) s.loadObject();
+    guestCity = (Base    ) s.loadObject();
     recruiter = (Building) s.loadObject();
     mission   = (Mission ) s.loadObject();
     
@@ -151,7 +151,7 @@ public class Actor extends Element implements
   
   /**  World entry and exit-
     */
-  public void enterMap(CityMap map, int x, int y, float buildLevel, City owns) {
+  public void enterMap(AreaMap map, int x, int y, float buildLevel, Base owns) {
     if (onMap()) {
       I.complain("\nALREADY ON MAP: "+this);
       return;
@@ -167,7 +167,7 @@ public class Actor extends Element implements
   }
   
   
-  public void exitMap(CityMap map) {
+  public void exitMap(AreaMap map) {
     if (inside != null) setInside(inside, false);
     map.actors.remove(this);
     
@@ -192,17 +192,17 @@ public class Actor extends Element implements
   }
   
   
-  public void assignHomeCity(City city) {
+  public void assignHomeCity(Base city) {
     this.homeCity = city;
   }
   
   
-  public void assignGuestCity(City city) {
+  public void assignGuestCity(Base city) {
     this.guestCity = city;
   }
   
   
-  public boolean onMap(CityMap map) {
+  public boolean onMap(AreaMap map) {
     return map != null && map == this.map;
   }
   
@@ -260,11 +260,11 @@ public class Actor extends Element implements
     if (onMap()) updateCooldown();
     if (onMap()) updateVision();
     if (onMap()) checkHealthState();
-    if (onMap()) updateLifeCycle(homeCity(), true);
+    if (onMap()) updateLifeCycle(base(), true);
   }
   
   
-  void updateOffMap(City city) {
+  void updateOffMap(Base city) {
     updateLifeCycle(city, false);
   }
   
@@ -303,7 +303,7 @@ public class Actor extends Element implements
   }
   
   
-  public void setLocation(Tile at, CityMap map) {
+  public void setLocation(Tile at, AreaMap map) {
     if (! onMap()) {
       super.setLocation(at, map);
       return;
@@ -497,7 +497,7 @@ public class Actor extends Element implements
   }
   
   
-  public void onArrival(City goes, World.Journey journey) {
+  public void onArrival(Base goes, World.Journey journey) {
     if (goes.activeMap() != null) {
       Tile entry = CityBorders.findTransitPoint(
         goes.activeMap(), goes, journey.from
@@ -510,12 +510,12 @@ public class Actor extends Element implements
   }
   
   
-  public City homeCity() {
+  public Base base() {
     return homeCity;
   }
   
   
-  public City guestCity() {
+  public Base guestBase() {
     return guestCity;
   }
   
@@ -684,7 +684,7 @@ public class Actor extends Element implements
   }
   
   
-  void updateLifeCycle(City city, boolean onMap) {
+  void updateLifeCycle(Base city, boolean onMap) {
     ageSeconds += 1;
   }
   
@@ -715,16 +715,16 @@ public class Actor extends Element implements
   
   public String toString() {
     
-    City player = PlayUI.playerBase();
+    Base player = PlayUI.playerBase();
     if (player == null) player = Test.currentCity();
     
     String from = "";
     if (map != null && player != null && homeCity != null) {
-      City.POSTURE p = player.posture(homeCity);
-      if (p == City.POSTURE.ENEMY ) from = " (E)";
-      if (p == City.POSTURE.ALLY  ) from = " (A)";
-      if (p == City.POSTURE.VASSAL) from = " (V)";
-      if (p == City.POSTURE.LORD  ) from = " (L)";
+      Base.POSTURE p = player.posture(homeCity);
+      if (p == Base.POSTURE.ENEMY ) from = " (E)";
+      if (p == Base.POSTURE.ALLY  ) from = " (A)";
+      if (p == Base.POSTURE.VASSAL) from = " (V)";
+      if (p == Base.POSTURE.LORD  ) from = " (L)";
     }
     return type().name+" "+ID+from;
   }
@@ -736,7 +736,7 @@ public class Actor extends Element implements
   }
   
 
-  public boolean testSelection(PlayUI UI, City base, Viewport port) {
+  public boolean testSelection(PlayUI UI, Base base, Viewport port) {
     if (indoors()) return false;
     return super.testSelection(UI, base, port);
   }
@@ -749,13 +749,13 @@ public class Actor extends Element implements
   }
   
 
-  public boolean canRender(City base, Viewport view) {
+  public boolean canRender(Base base, Viewport view) {
     if (indoors()) return false;
     return super.canRender(base, view);
   }
   
   
-  public void renderElement(Rendering rendering, City base) {
+  public void renderElement(Rendering rendering, Base base) {
     Sprite s = sprite();
     if (s == null) return;
     

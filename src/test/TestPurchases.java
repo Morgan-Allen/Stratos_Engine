@@ -20,8 +20,8 @@ public class TestPurchases extends Test {
   static boolean testPurchases(boolean graphics) {
     TestPurchases test = new TestPurchases();
     
-    City base = Test.setupTestCity(16, ALL_GOODS, false);
-    CityMap map = base.activeMap();
+    Base base = Test.setupTestCity(16, ALL_GOODS, false);
+    AreaMap map = base.activeMap();
     World world = map.world;
     
     world.settings.toggleFog     = false;

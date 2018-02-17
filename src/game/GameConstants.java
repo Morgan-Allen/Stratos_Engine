@@ -4,7 +4,7 @@ package game;
 import util.*;
 import graphics.common.*;
 import static game.Type.*;
-import static game.CityMap.*;
+import static game.AreaMap.*;
 import java.awt.Color;
 
 
@@ -383,7 +383,7 @@ public class GameConstants {
     */
   public static interface Active extends Target {
     
-    CityMap map();
+    AreaMap map();
     boolean isActor();
     
     Task.JOB jobType();
@@ -415,7 +415,7 @@ public class GameConstants {
   public static interface Pathing extends Target {
     
     int pathType();
-    Pathing[] adjacent(Pathing temp[], CityMap map);
+    Pathing[] adjacent(Pathing temp[], AreaMap map);
     boolean allowsEntryFrom(Pathing p);
 
     boolean allowsEntry(Actor a);
@@ -427,15 +427,15 @@ public class GameConstants {
   public static interface Trader {
     Tally <Good> tradeLevel();
     Tally <Good> inventory ();
-    City homeCity();
-    float importPrice(Good g, City sells);
-    float exportPrice(Good g, City buys );
+    Base base();
+    float importPrice(Good g, Base sells);
+    float exportPrice(Good g, Base buys );
   }
   
   
   public static interface Journeys {
-    void onArrival(City goes, World.Journey journey);
-    City homeCity();
+    void onArrival(Base goes, World.Journey journey);
+    Base base();
   }
   
   

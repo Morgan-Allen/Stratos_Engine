@@ -5,7 +5,7 @@ import game.*;
 import content.*;
 import util.*;
 import static game.ActorAsPerson.*;
-import static game.City.*;
+import static game.Base.*;
 import static game.CityCouncil.*;
 import static game.GameConstants.*;
 import static content.GameContent.*;
@@ -24,10 +24,10 @@ public class TestDiplomacy extends Test {
     Test test = new TestDiplomacy();
     
     World   world = new World(ALL_GOODS);
-    City    baseC = new City(world, world.addLocale(2, 2));
-    City    awayC = new City(world, world.addLocale(2, 3));
-    City    neutC = new City(world, world.addLocale(3, 2));
-    CityMap map   = CityMapTerrain.generateTerrain(
+    Base    baseC = new Base(world, world.addLocale(2, 2));
+    Base    awayC = new Base(world, world.addLocale(2, 3));
+    Base    neutC = new Base(world, world.addLocale(3, 2));
+    AreaMap map   = CityMapTerrain.generateTerrain(
       baseC, 32, 0, MEADOW, JUNGLE
     );
     world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES());
@@ -84,7 +84,7 @@ public class TestDiplomacy extends Test {
     
     for (Actor e : escort.escorted()) e.assignHomeCity(awayC);
     
-    escort.assignTerms(City.POSTURE.ALLY, null, bride, null);
+    escort.assignTerms(Base.POSTURE.ALLY, null, bride, null);
     escort.setFocus(baseC);
     
     boolean escortArrived  = false;

@@ -3,7 +3,7 @@
 package game;
 import util.*;
 import static game.ActorAsPerson.*;
-import static game.City.*;
+import static game.Base.*;
 import static game.CityCouncil.*;
 import static game.GameConstants.*;
 
@@ -14,7 +14,7 @@ public class CityEvents {
   
   /**  Rendering, debug and interface methods-
     */
-  static boolean reportEvents(CityMap map) {
+  static boolean reportEvents(AreaMap map) {
     if (map == null) return false;
     return map.world.settings.reportBattle;
   }
@@ -23,9 +23,9 @@ public class CityEvents {
   /**  Handling end-stage events:
     */
   public static void handleDeparture(
-    Mission mission, City from, City goes
+    Mission mission, Base from, Base goes
   ) {
-    City belongs = mission.homeCity();
+    Base belongs = mission.base();
     belongs.incArmyPower(0 - mission.powerSum());
     belongs.missions.include(mission);
     mission.setFocus(goes);
@@ -33,14 +33,14 @@ public class CityEvents {
   
   
   public static void handleInvasion(
-    Mission mission, City goes, World.Journey journey
+    Mission mission, Base goes, World.Journey journey
   ) {
     //
     //  Gather some details first:
-    City    from   = journey.from;
+    Base    from   = journey.from;
     World   world  = from.world;
     int     time   = world.time;
-    CityMap map    = world.activeCityMap();
+    AreaMap map    = world.activeCityMap();
     boolean report = reportEvents(map);
     //
     //  We use the same math that estimates the appeal of invasion to play out
@@ -117,7 +117,7 @@ public class CityEvents {
   }
   
   
-  static int inflictCasualties(City defends, float casualties) {
+  static int inflictCasualties(Base defends, float casualties) {
     casualties = Nums.min(casualties, defends.armyPower());
     defends.incArmyPower (0 - casualties * POP_PER_CITIZEN);
     defends.incPopulation(0 - casualties * POP_PER_CITIZEN);
@@ -126,7 +126,7 @@ public class CityEvents {
   
   
   static void handleGarrison(
-    Mission mission, City goes, World.Journey journey
+    Mission mission, Base goes, World.Journey journey
   ) {
     //  TODO:  Implement this?
     return;
@@ -134,16 +134,16 @@ public class CityEvents {
   
   
   static void handleDialog(
-    Mission mission, City goes, World.Journey journey
+    Mission mission, Base goes, World.Journey journey
   ) {
     mission.dispatchTerms(goes);
   }
   
   
   static void handleReturn(
-    Mission mission, City from, World.Journey journey
+    Mission mission, Base from, World.Journey journey
   ) {
-    City belongs = mission.homeCity();
+    Base belongs = mission.base();
     belongs.incArmyPower(mission.powerSum());
     mission.disbandFormation();
   }
@@ -154,7 +154,7 @@ public class CityEvents {
     *  don't delete...
     */
   static void imposeTerms(
-    City upon, City from, Mission mission
+    Base upon, Base from, Mission mission
   ) {
     if (upon == null || from == null || mission == null) return;
     setPosture(from, upon, mission.postureDemand, true);
@@ -163,12 +163,12 @@ public class CityEvents {
   }
   
   
-  static void arrangeMarriage(City city, City other, Actor marries) {
+  static void arrangeMarriage(Base city, Base other, Actor marries) {
     Actor monarch = city.council.memberWithRole(Role.MONARCH);
     if (monarch == null || monarch.dead()) return;
     
     setBond(monarch, marries, BOND_MARRIED, BOND_MARRIED, 0);
-    marries.assignHomeCity(monarch.homeCity());
+    marries.assignHomeCity(monarch.base());
     if (monarch.home() != null) monarch.home().setResident(marries, true);
     
     Mission party = marries.mission;
@@ -180,18 +180,18 @@ public class CityEvents {
   
   
   static void signalVictory(
-    City victor, City losing, Mission mission
+    Base victor, Base losing, Mission mission
   ) {
     if (victor == null || losing == null || mission == null) return;
     losing.toggleRebellion(victor, false);
     incPrestige(victor, PRES_VICTORY_GAIN);
     incPrestige(losing, PRES_DEFEAT_LOSS );
-    mission.setMissionComplete(mission.homeCity() == victor);
+    mission.setMissionComplete(mission.base() == victor);
   }
   
   
   static void enterHostility(
-    City defends, City attacks, boolean victory, float weight
+    Base defends, Base attacks, boolean victory, float weight
   ) {
     if (defends == null) return;
     

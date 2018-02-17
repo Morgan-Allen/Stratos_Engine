@@ -3,7 +3,7 @@
 package game;
 import util.*;
 import static game.Task.*;
-import static game.CityMap.*;
+import static game.AreaMap.*;
 import static game.GameConstants.*;
 
 
@@ -251,10 +251,10 @@ public class ActorAsPerson extends Actor {
     }
     
     //  See if there's a formation worth joining:
-    if (idle() && mission == null && homeCity() != null) {
+    if (idle() && mission == null && base() != null) {
       Pick <Mission> pick = new Pick(Task.ROUTINE * Rand.num());
       
-      for (Mission f : homeCity().missions) {
+      for (Mission f : base().missions) {
         if (! f.isBounty()) continue;
         Task t = f.selectActorBehaviour(this);
         float priority = t == null ? 0 : t.priority();
@@ -284,7 +284,7 @@ public class ActorAsPerson extends Actor {
       }
       
       if (! hasPurchase) for (Building b : map.buildings()) {
-        if (b.homeCity() != homeCity()        ) continue;
+        if (b.base() != base()        ) continue;
         if (! (b instanceof BuildingForCrafts)) continue;
         BuildingForCrafts shop = (BuildingForCrafts) b;
         for (TaskPurchase p : TaskPurchase.configPurchases(this, shop)) {
@@ -484,7 +484,7 @@ public class ActorAsPerson extends Actor {
   
   /**  Aging, reproduction and life-cycle methods-
     */
-  void updateLifeCycle(City city, boolean onMap) {
+  void updateLifeCycle(Base city, boolean onMap) {
     super.updateLifeCycle(city, onMap);
     
     WorldSettings settings = city.world.settings;
@@ -559,7 +559,7 @@ public class ActorAsPerson extends Actor {
     
     if (onMap) {
       Tile at = venue.at();
-      child.enterMap(map, at.x, at.y, 1, homeCity());
+      child.enterMap(map, at.x, at.y, 1, base());
       child.setInside(venue, true);
       venue.setResident(child, true);
     }

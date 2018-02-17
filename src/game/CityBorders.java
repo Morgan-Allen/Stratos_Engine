@@ -2,7 +2,7 @@
 
 package game;
 import util.*;
-import static game.CityMap.*;
+import static game.AreaMap.*;
 import static game.GameConstants.*;
 
 
@@ -12,7 +12,7 @@ public class CityBorders {
   
   /**  General migration utilities-
     */
-  static Tile findTransitPoint(CityMap map, City base, City with) {
+  static Tile findTransitPoint(AreaMap map, Base base, Base with) {
     
     //  TODO:  Make sure there's a pathing connection to the main settlement
     //  here!
@@ -54,7 +54,7 @@ public class CityBorders {
     Tally <Type> jobsDemand = new Tally();
     Tally <Type> jobsSupply = new Tally();
     
-    Assessment(CityMap map) {
+    Assessment(AreaMap map) {
       int MR, NR, MW, NW;
       
       for (Building b : map.buildings) {
@@ -89,9 +89,9 @@ public class CityBorders {
     
     //  TODO:  Consider a wider variety of cities to source from!
     
-    CityMap map  = employs.map();
-    City    from = map.locals;
-    City    goes = employs.homeCity();
+    AreaMap map  = employs.map();
+    Base    from = map.locals;
+    Base    goes = employs.base();
     int     cost = employs.hireCost(jobType);
     
     if (payHireCost) goes.incFunds(0 - cost);
@@ -106,15 +106,15 @@ public class CityBorders {
   }
   
   
-  static void findWork(CityMap map, Actor migrant) {
+  static void findWork(AreaMap map, Actor migrant) {
     
     class Opening { Building b; ActorType position; }
     Tile from = migrant.at();
-    City homeC = migrant.homeCity();
+    Base homeC = migrant.base();
     final Pick <Opening> pick = new Pick();
     
     for (Building b : map.buildings) if (b.accessible()) {
-      if (homeC != null && b.homeCity() != homeC) continue;
+      if (homeC != null && b.base() != homeC) continue;
       
       for (ActorType t : b.type().workerTypes.keys()) {
         int space = b.maxWorkers(t) - b.numWorkers(t);
@@ -125,7 +125,7 @@ public class CityBorders {
           fitness += migrant.levelOf(skill) * t.initTraits.valueFor(skill);
         }
         
-        float near = CityMap.distancePenalty(from, b);
+        float near = AreaMap.distancePenalty(from, b);
         Opening o = new Opening();
         o.b = b;
         o.position = t;
@@ -145,7 +145,7 @@ public class CityBorders {
   }
   
   
-  static void findHome(CityMap map, Actor migrant) {
+  static void findHome(AreaMap map, Actor migrant) {
     int socialClass = migrant.type().socialClass;
     Tile from = migrant.at();
     final Pick <Building> pick = new Pick();
@@ -155,7 +155,7 @@ public class CityBorders {
       int space = max - b.numResidents(socialClass);
       if (space <= 0) continue;
       
-      float near = 10 / (10f + CityMap.distance(from, b));
+      float near = 10 / (10f + AreaMap.distance(from, b));
       pick.compare(b, space * near);
     }
     
@@ -174,13 +174,13 @@ public class CityBorders {
     Trader from, Trader goes, boolean cityOnly, World world
   ) {
     Tally <Good> cargo = new Tally();
-    boolean fromCity = from.homeCity() == from;
-    boolean goesCity = goes.homeCity() == goes;
+    boolean fromCity = from.base() == from;
+    boolean goesCity = goes.base() == goes;
     
     if (from == null || goes == null        ) return cargo;
     if (cityOnly && ! (fromCity || goesCity)) return cargo;
-    City.Relation fromR = goes.homeCity().relationWith(from.homeCity());
-    City.Relation goesR = from.homeCity().relationWith(goes.homeCity());
+    Base.Relation fromR = goes.base().relationWith(from.base());
+    Base.Relation goesR = from.base().relationWith(goes.base());
     
     for (Good good : world.goodTypes) {
       float amountO = from.inventory ().valueFor(good);
@@ -210,7 +210,7 @@ public class CityBorders {
   
   static float distanceRating(Trader from, Trader goes) {
     
-    City fromC = from.homeCity(), goesC = goes.homeCity();
+    Base fromC = from.base(), goesC = goes.base();
     Integer distance = fromC.locale.distances.get(goesC.locale);
     float distRating = distance == null ? MAX_TRADER_RANGE : distance;
     
@@ -219,7 +219,7 @@ public class CityBorders {
       goes instanceof Building &&
       fromC == goesC
     ) {
-      float mapDist = CityMap.distance(
+      float mapDist = AreaMap.distance(
         ((Building) from).mainEntrance(),
         ((Building) goes).mainEntrance()
       );

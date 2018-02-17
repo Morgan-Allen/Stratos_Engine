@@ -21,9 +21,9 @@ public class TestMilitary extends Test {
     Test test = new TestMilitary();
 
     World   world = new World(ALL_GOODS);
-    City    baseC = new City(world, world.addLocale(2, 2));
-    City    awayC = new City(world, world.addLocale(3, 3));
-    CityMap map   = CityMapTerrain.generateTerrain(
+    Base    baseC = new Base(world, world.addLocale(2, 2));
+    Base    awayC = new Base(world, world.addLocale(3, 3));
+    AreaMap map   = CityMapTerrain.generateTerrain(
       baseC, 32, 0, MEADOW, JUNGLE
     );
     world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES());
@@ -34,7 +34,7 @@ public class TestMilitary extends Test {
     world.settings.toggleFog = false;
     
     World.setupRoute(baseC.locale, awayC.locale, 1);
-    City.setPosture(baseC, awayC, City.POSTURE.ENEMY, true);
+    Base.setPosture(baseC, awayC, Base.POSTURE.ENEMY, true);
     
     
     BuildingForArmy fort = (BuildingForArmy) TROOPER_LODGE.generate();
@@ -111,7 +111,7 @@ public class TestMilitary extends Test {
         troops = new Mission(Mission.OBJECTIVE_CONQUER, baseC, false);
         fort.deployOnMission(troops, true);
         troops.setFocus(awayC);
-        troops.assignTerms(City.POSTURE.VASSAL, null, null, null);
+        troops.assignTerms(Base.POSTURE.VASSAL, null, null, null);
         invading = true;
       }
       

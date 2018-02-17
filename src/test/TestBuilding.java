@@ -20,8 +20,8 @@ public class TestBuilding extends Test {
   static boolean testBuilding(boolean graphics) {
     Test test = new TestBuilding();
     
-    City base = setupTestCity(16, ALL_GOODS, false);
-    CityMap map = base.activeMap();
+    Base base = setupTestCity(16, ALL_GOODS, false);
+    AreaMap map = base.activeMap();
     World world = map.world;
     world.settings.toggleFog         = false;
     world.settings.toggleFatigue     = false;
@@ -209,7 +209,7 @@ public class TestBuilding extends Test {
   
   
   static Tally <Good> totalMaterials(
-    CityMap map, boolean report, Good[] compared
+    AreaMap map, boolean report, Good[] compared
   ) {
     if (report) I.say("\nReporting material presences...");
     

@@ -50,8 +50,8 @@ public class TestPathCache extends Test {
       { 1, 1, 1, 1, 1, 1, 1, 1 },
     };
     int miniSize = 8;
-    City miniBase = setupTestCity(miniSize, ALL_GOODS, false, ALL_TERRAINS);
-    CityMap miniMap = miniBase.activeMap();
+    Base miniBase = setupTestCity(miniSize, ALL_GOODS, false, ALL_TERRAINS);
+    AreaMap miniMap = miniBase.activeMap();
     
     for (Coord c : Visit.grid(0, 0, miniSize, miniSize, 1)) {
       byte l = layout[c.x][c.y];
@@ -128,8 +128,8 @@ public class TestPathCache extends Test {
     //
     //  Now, set up a larger map for testing of connections between
     //  more distant areas:
-    City base = setupTestCity(128, ALL_GOODS, false, ALL_TERRAINS);
-    CityMap map = base.activeMap();
+    Base base = setupTestCity(128, ALL_GOODS, false, ALL_TERRAINS);
+    AreaMap map = base.activeMap();
     World world = map.world;
     world.settings.toggleFog   = false;
     world.settings.viewPathMap = true ;
@@ -277,7 +277,7 @@ public class TestPathCache extends Test {
   }
   
   
-  static boolean verifyConnectionQueries(CityMap map) {
+  static boolean verifyConnectionQueries(AreaMap map) {
     for (Coord c : Visit.grid(0, 0, map.size(), map.size(), 1)) {
       if (map.blocked(c)) continue;
       
@@ -297,7 +297,7 @@ public class TestPathCache extends Test {
   }
   
   
-  static boolean verifyConnection(Tile from, Tile goes, CityMap map) {
+  static boolean verifyConnection(Tile from, Tile goes, AreaMap map) {
     
     boolean connects = map.pathCache.pathConnects(from, goes);
     ActorPathSearch search;

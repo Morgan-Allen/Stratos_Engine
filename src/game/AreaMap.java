@@ -9,7 +9,7 @@ import static util.TileConstants.*;
 
 
 
-public class CityMap implements Session.Saveable {
+public class AreaMap implements Session.Saveable {
   
   
   /**  Data fields and initialisation-
@@ -31,8 +31,8 @@ public class CityMap implements Session.Saveable {
   
   final public World world;
   final public World.Locale locale;
-  final public City locals;
-  List <City> cities = new List();
+  final public Base locals;
+  List <Base> cities = new List();
   
   int size, scanSize, flagSize;
   Tile grid[][];
@@ -45,7 +45,7 @@ public class CityMap implements Session.Saveable {
   final public CityMapFog      fog      = new CityMapFog     (this);
   final public CityMapTerrain  terrain  = new CityMapTerrain (this);
   
-  Table <City, Tile> transitPoints = new Table();
+  Table <Base, Tile> transitPoints = new Table();
   Table <Type, CityMapFlagging> flagging = new Table();
   Table <String, CityMapDemands> demands = new Table();
   
@@ -56,27 +56,27 @@ public class CityMap implements Session.Saveable {
   String saveName;
   
   
-  public CityMap(World world, World.Locale locale, City... cities) {
+  public AreaMap(World world, World.Locale locale, Base... cities) {
     this.world = world;
     this.locale = locale;
-    this.locals = new City(world, locale, "Locals: "+locale);
+    this.locals = new Base(world, locale, "Locals: "+locale);
     
-    locals.setGovernment(City.GOVERNMENT.BARBARIAN);
+    locals.setGovernment(Base.GOVERNMENT.BARBARIAN);
     locals.council.setTypeAI(CityCouncil.AI_OFF);
     addCity(locals);
     
-    for (City c : cities) addCity(c);
+    for (Base c : cities) addCity(c);
   }
   
   
-  public CityMap(Session s) throws Exception {
+  public AreaMap(Session s) throws Exception {
     s.cacheInstance(this);
     
     terrainTypes = (Terrain[]) s.loadObjectArray(Terrain.class);
     
     world = (World) s.loadObject();
     locale = world.locales.atIndex(s.loadInt());
-    locals = (City) s.loadObject();
+    locals = (Base) s.loadObject();
     s.loadObjects(cities);
     
     performSetup(s.loadInt(), terrainTypes);
@@ -96,7 +96,7 @@ public class CityMap implements Session.Saveable {
     terrain .loadState(s);
     
     for (int n = s.loadInt(); n-- > 0;) {
-      City with = (City) s.loadObject();
+      Base with = (Base) s.loadObject();
       Tile point = loadTile(this, s);
       transitPoints.put(with, point);
     }
@@ -150,7 +150,7 @@ public class CityMap implements Session.Saveable {
     terrain .saveState(s);
     
     s.saveInt(transitPoints.size());
-    for (City c : transitPoints.keySet()) {
+    for (Base c : transitPoints.keySet()) {
       s.saveObject(c);
       saveTile(transitPoints.get(c), this, s);
     }
@@ -217,13 +217,13 @@ public class CityMap implements Session.Saveable {
   }
   
   
-  public void addCity(City city) {
+  public void addCity(Base city) {
     cities.include(city);
     city.attachMap(this);
   }
   
   
-  public Series <City> cities() {
+  public Series <Base> cities() {
     return cities;
   }
   
@@ -231,7 +231,7 @@ public class CityMap implements Session.Saveable {
   
   /**  Tiles and related setup/query methods-
     */
-  static Tile loadTile(CityMap map, Session s) throws Exception {
+  static Tile loadTile(AreaMap map, Session s) throws Exception {
     int x = s.loadInt();
     if (x == -1) return null;
     int y = s.loadInt();
@@ -239,7 +239,7 @@ public class CityMap implements Session.Saveable {
   }
   
   
-  static void saveTile(Tile t, CityMap map, Session s) throws Exception {
+  static void saveTile(Tile t, AreaMap map, Session s) throws Exception {
     if (t != null && map == null) {
       I.complain("CANNOT SAVE TILE WITHOUT MAP");
       return;
@@ -253,20 +253,20 @@ public class CityMap implements Session.Saveable {
   }
   
   
-  static Target loadTarget(CityMap map, Session s) throws Exception {
+  static Target loadTarget(AreaMap map, Session s) throws Exception {
     if (s.loadBool()) return loadTile(map, s);
     else return (Target) s.loadObject();
   }
   
   
-  static void saveTarget(Target t, CityMap map, Session s) throws Exception {
+  static void saveTarget(Target t, AreaMap map, Session s) throws Exception {
     if (t == null ) { s.saveBool(false); s.saveObject(null); return; }
     if (t.isTile()) { s.saveBool(true ); saveTile((Tile) t, map, s); }
     else            { s.saveBool(false); s.saveObject(t)           ; }
   }
   
   
-  public static Tile[] adjacent(Tile spot, Tile temp[], CityMap map) {
+  public static Tile[] adjacent(Tile spot, Tile temp[], AreaMap map) {
     if (temp == null) temp = new Tile[9];
     if (map == null || spot == null) return temp;
     for (int dir : T_INDEX) {
@@ -565,7 +565,7 @@ public class CityMap implements Session.Saveable {
   }
   
   
-  public void renderStage(Rendering rendering, City playing) {
+  public void renderStage(Rendering rendering, Base playing) {
     float renderTime = (numUpdates + Rendering.frameAlpha()) / ticksPS;
     
     Box2D area = new Box2D(0, 0, size, size);
@@ -630,7 +630,7 @@ public class CityMap implements Session.Saveable {
       actor.renderElement(rendering, playing);
     }
     
-    for (City base : cities) {
+    for (Base base : cities) {
       for (Mission mission : base.missions()) {
         if (! mission.canRender(playing, rendering.view)) continue;
         mission.renderFlag(rendering);

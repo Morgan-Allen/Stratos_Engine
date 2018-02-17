@@ -2,14 +2,14 @@
 
 package game;
 import util.*;
-import static game.CityMap.*;
+import static game.AreaMap.*;
 import static game.GameConstants.*;
 
 
 
 public class ActorPathSearch extends Search <Pathing> {
   
-  CityMap map;
+  AreaMap map;
   Pathing dest;
   Pathing temp[] = new Pathing[9];
   Actor   client   = null;
@@ -24,7 +24,7 @@ public class ActorPathSearch extends Search <Pathing> {
   
   
   public ActorPathSearch(
-    CityMap map, Pathing init, Pathing dest, int maxDist
+    AreaMap map, Pathing init, Pathing dest, int maxDist
   ) {
     super(init, -1);
     this.map     = map;

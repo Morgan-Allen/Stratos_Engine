@@ -2,7 +2,7 @@
 
 package game;
 import util.*;
-import static game.CityMap.*;
+import static game.AreaMap.*;
 import static game.GameConstants.*;
 
 
@@ -42,21 +42,21 @@ public class TaskExplore extends Task {
   
   
   static TaskExplore configExploration(Actor actor, Target from, int range) {
-    CityMap map  = actor.map;
+    AreaMap map  = actor.map;
     Tile    goes = map.fog.pickRandomFogPoint(from, range);
     if (goes == null) return null;
     goes = Tile.nearestOpenTile(goes, map);
     if (goes == null) return null;
     
     TaskExplore task = new TaskExplore(actor);
-    task.totalDist += CityMap.distance(actor.at(), goes);
+    task.totalDist += AreaMap.distance(actor.at(), goes);
     return (TaskExplore) task.configTask(null, null, goes, JOB.EXPLORING, 0);
   }
   
   
   protected void onTarget(Target target) {
     Actor actor = (Actor) this.active;
-    CityMap map = actor.map();
+    AreaMap map = actor.map();
     
     Tile goes = map.fog.findNearbyFogPoint(actor, actor.type().sightRange + 2);
     if (goes == null) return;
@@ -64,7 +64,7 @@ public class TaskExplore extends Task {
     if (goes == null) return;
     
     if (goes != null && totalDist < MAX_EXPLORE_DIST) {
-      totalDist += CityMap.distance(actor.at(), goes);
+      totalDist += AreaMap.distance(actor.at(), goes);
       configTask(null, null, goes, JOB.EXPLORING, 0);
     }
   }

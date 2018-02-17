@@ -47,14 +47,14 @@ public class TaskAssessTax extends Task {
     
     for (Building b : from.map.buildings) {
       if (! b.type().hasFeature(IS_HOUSING)) continue;
-      float distW = CityMap.distance(actor.at(), b.mainEntrance());
-      float distB = CityMap.distance(entrance  , b.mainEntrance());
+      float distW = AreaMap.distance(actor.at(), b.mainEntrance());
+      float distB = AreaMap.distance(entrance  , b.mainEntrance());
       if (distB > from.type().maxDeliverRange) continue;
       
       int amount = (int) b.inventory(CASH);
       if (amount <= 0) continue;
       
-      pick.compare(b, amount * CityMap.distancePenalty(distW));
+      pick.compare(b, amount * AreaMap.distancePenalty(distW));
     }
     
     if (cashCarried > maxCollect || (pick.empty() && cashCarried > 0)) {
@@ -87,7 +87,7 @@ public class TaskAssessTax extends Task {
     if (actor.jobType() == JOB.RETURNING && visits == store) {
       float cash = actor.carried(CASH);
       actor.clearCarried();
-      store.homeCity().incFunds((int) cash);
+      store.base().incFunds((int) cash);
     }
   }
 }

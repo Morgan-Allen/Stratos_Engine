@@ -19,8 +19,8 @@ public class TestExploring extends Test {
   static boolean testExploring(boolean graphics) {
     Test test = new TestExploring();
 
-    City base = setupTestCity(16, ALL_GOODS, true, JUNGLE, MEADOW);
-    CityMap map = base.activeMap();
+    Base base = setupTestCity(16, ALL_GOODS, true, JUNGLE, MEADOW);
+    AreaMap map = base.activeMap();
     World world = map.world;
     
     CityMapPlanning.markDemolish(map, true, 3, 3, 6, 6);

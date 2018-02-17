@@ -17,8 +17,8 @@ public abstract class CityMapScenario implements Session.Saveable {
   boolean setupDone = false;
   
   World   verse = null;
-  CityMap stage = null;
-  City    base  = null;
+  AreaMap stage = null;
+  Base    base  = null;
   
   PlayUI UI;
   
@@ -30,8 +30,8 @@ public abstract class CityMapScenario implements Session.Saveable {
   public CityMapScenario(Session s) throws Exception {
     s.cacheInstance(this);
     verse = (World  ) s.loadObject();
-    stage = (CityMap) s.loadObject();
-    base  = (City   ) s.loadObject();
+    stage = (AreaMap) s.loadObject();
+    base  = (Base   ) s.loadObject();
     UI = new PlayUI(PlayLoop.rendering());
     UI.loadState(s);
   }
@@ -76,9 +76,9 @@ public abstract class CityMapScenario implements Session.Saveable {
   
   protected abstract String savePath();
   protected abstract World createWorld();
-  protected abstract CityMap createStage(World verse);
-  protected abstract City createBase(CityMap stage, World verse);
-  protected abstract void configScenario(World verse, CityMap stage, City base);
+  protected abstract AreaMap createStage(World verse);
+  protected abstract Base createBase(AreaMap stage, World verse);
+  protected abstract void configScenario(World verse, AreaMap stage, Base base);
   
   
   public float loadProgress() {
@@ -92,8 +92,8 @@ public abstract class CityMapScenario implements Session.Saveable {
   }
   
   
-  public City    base () { return base ; }
-  public CityMap stage() { return stage; }
+  public Base    base () { return base ; }
+  public AreaMap stage() { return stage; }
   public World   verse() { return verse; }
   
   

@@ -55,27 +55,27 @@ public class ScenarioBlankMap extends CityMapScenario {
   }
   
   
-  protected CityMap createStage(World world) {
+  protected AreaMap createStage(World world) {
     
     final int MAP_SIZE = 64;
     final Terrain GRADIENT[] = { JUNGLE, MEADOW, DESERT };
     
     World.Locale locale = world.addLocale(5, 5, "Test Area");
-    CityMap map = CityMapTerrain.generateTerrain(world, locale, MAP_SIZE, 0, GRADIENT);
+    AreaMap map = CityMapTerrain.generateTerrain(world, locale, MAP_SIZE, 0, GRADIENT);
     CityMapTerrain.populateFixtures(map);
     return map;
   }
   
   
-  protected City createBase(CityMap stage, World world) {
-    City city = new City(world, stage.locale);
+  protected Base createBase(AreaMap stage, World world) {
+    Base city = new Base(world, stage.locale);
     city.setName("Player Base");
     stage.addCity(city);
     return city;
   }
   
   
-  protected void configScenario(World world, CityMap stage, City base) {
+  protected void configScenario(World world, AreaMap stage, Base base) {
     
     Building bastion = (Building) BASTION.generate();
     int w = bastion.type().wide, h = bastion.type().high;
@@ -89,7 +89,7 @@ public class ScenarioBlankMap extends CityMapScenario {
       boolean canPlace = true;
       
       for (Tile f : stage.tilesUnder(t.x - 1, t.y - 1, w + 2, h + 2)) {
-        if (f == null || f.terrain().pathing != CityMap.PATH_FREE) {
+        if (f == null || f.terrain().pathing != AreaMap.PATH_FREE) {
           canPlace = false;
           break;
         }
@@ -97,7 +97,7 @@ public class ScenarioBlankMap extends CityMapScenario {
       if (! canPlace) continue;
       
       Tile sited = stage.tileAt(t.x + (w / 2), t.y + (h / 2));
-      float dist = CityMap.distance(sited, centre);
+      float dist = AreaMap.distance(sited, centre);
       pickLanding.compare(t, 0 - dist);
     }
     
@@ -129,7 +129,7 @@ public class ScenarioBlankMap extends CityMapScenario {
     };
     for (Coord c : Visit.grid(0, 0, stage.size(), stage.size(), 8)) {
       Tile at = stage.tileAt(c);
-      float dist = CityMap.distance(bastion, at);
+      float dist = AreaMap.distance(bastion, at);
       if (dist <= 16) continue;
       
       float rating = 16f * Rand.num() * dist;
@@ -152,7 +152,7 @@ public class ScenarioBlankMap extends CityMapScenario {
       nests.add(nest);
     }
     
-    City.setPosture(base, stage.locals, City.POSTURE.ENEMY, true);
+    Base.setPosture(base, stage.locals, Base.POSTURE.ENEMY, true);
   }
   
   

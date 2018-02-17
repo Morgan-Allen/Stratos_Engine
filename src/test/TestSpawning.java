@@ -19,8 +19,8 @@ public class TestSpawning extends Test {
   static boolean testSpawning(boolean graphics) {
     Test test = new TestSpawning();
     
-    City base = setupTestCity(32, ALL_GOODS, true, JUNGLE, MEADOW);
-    CityMap map = base.activeMap();
+    Base base = setupTestCity(32, ALL_GOODS, true, JUNGLE, MEADOW);
+    AreaMap map = base.activeMap();
     World world = map.world;
     
     
@@ -36,7 +36,7 @@ public class TestSpawning extends Test {
     Building toRaze = (Building) ENFORCER_BLOC.generate();
     toRaze.enterMap(map, 6, 6, 1, base);
     
-    City.setPosture(base, map.locals, City.POSTURE.ENEMY, true);
+    Base.setPosture(base, map.locals, Base.POSTURE.ENEMY, true);
     world.settings.toggleFog = false;
     
     boolean spawnDone   = false;
@@ -52,7 +52,7 @@ public class TestSpawning extends Test {
       test.runLoop(base, 10, graphics, "saves/test_animals.tlt");
       
       popCounts.clear();
-      for (Actor a : map.actors()) if (a.homeCity() == nest.homeCity()) {
+      for (Actor a : map.actors()) if (a.base() == nest.base()) {
         popCounts.add(1, a.type());
       }
       

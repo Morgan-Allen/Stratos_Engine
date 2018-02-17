@@ -30,7 +30,7 @@ public class TestBounties extends Test {
   static boolean testAttackBuildingMission(boolean graphics) {
     TestBounties test = new TestBounties() {
       
-      Mission setupMission(CityMap map, City base) {
+      Mission setupMission(AreaMap map, Base base) {
         BuildingForNest nest = (BuildingForNest) RUINS_LAIR.generate();
         nest.enterMap(map, 20, 20, 1, map.locals);
         
@@ -40,7 +40,7 @@ public class TestBounties extends Test {
         return mission;
       }
       
-      boolean checkVictory(CityMap map, City base, Object focus) {
+      boolean checkVictory(AreaMap map, Base base, Object focus) {
         Building nest = (Building) focus;
         return nest.destroyed();
       }
@@ -52,7 +52,7 @@ public class TestBounties extends Test {
   static boolean testAttackActorMission(boolean graphics) {
     TestBounties test = new TestBounties() {
       
-      Mission setupMission(CityMap map, City base) {
+      Mission setupMission(AreaMap map, Base base) {
         Actor creature = (Actor) MICOVORE.generate();
         creature.enterMap(map, 20, 20, 1, map.locals);
         creature.takeDamage(creature.maxHealth() * 0.7f);
@@ -63,7 +63,7 @@ public class TestBounties extends Test {
         return mission;
       }
       
-      boolean checkVictory(CityMap map, City base, Object focus) {
+      boolean checkVictory(AreaMap map, Base base, Object focus) {
         Actor creature = (Actor) focus;
         return creature.destroyed();
       }
@@ -77,7 +77,7 @@ public class TestBounties extends Test {
       
       int RANGE = 8;
       
-      Mission setupMission(CityMap map, City base) {
+      Mission setupMission(AreaMap map, Base base) {
         Tile looks = map.tileAt(20, 20);
         
         Mission mission;
@@ -87,13 +87,13 @@ public class TestBounties extends Test {
         return mission;
       }
       
-      boolean checkVictory(CityMap map, City base, Object focus) {
+      boolean checkVictory(AreaMap map, Base base, Object focus) {
         Tile looks = (Tile) focus;
         int r = RANGE;
         boolean allSeen = true;
         
         for (Tile t : map.tilesUnder(looks.x - r, looks.y - r, r * 2, r * 2)) {
-          float dist = CityMap.distance(looks, t);
+          float dist = AreaMap.distance(looks, t);
           if (dist > r) continue;
           if (map.fog.maxSightLevel(t) == 0) allSeen = false;
         }
@@ -107,8 +107,8 @@ public class TestBounties extends Test {
   
   boolean bountyTest(boolean graphics, String title) {
     
-    City base = Test.setupTestCity(32, ALL_GOODS, false);
-    CityMap map = base.activeMap();
+    Base base = Test.setupTestCity(32, ALL_GOODS, false);
+    AreaMap map = base.activeMap();
     
     int initFunds = 1000, reward = 500;
     base.initFunds(initFunds);
@@ -186,12 +186,12 @@ public class TestBounties extends Test {
   }
   
   
-  Mission setupMission(CityMap map, City base) {
+  Mission setupMission(AreaMap map, Base base) {
     return null;
   }
   
 
-  boolean checkVictory(CityMap map, City base, Object focus) {
+  boolean checkVictory(AreaMap map, Base base, Object focus) {
     return false;
   }
   

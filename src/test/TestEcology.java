@@ -20,8 +20,8 @@ public class TestEcology extends Test {
   static void testAnimals(boolean graphics) {
     Test test = new TestEcology();
     
-    City base = setupTestCity(64, ALL_GOODS, true, JUNGLE, MEADOW);
-    CityMap map = base.activeMap();
+    Base base = setupTestCity(64, ALL_GOODS, true, JUNGLE, MEADOW);
+    AreaMap map = base.activeMap();
     World world = map.world;
     ActorAsAnimal.reportCycle = graphics;
     

@@ -5,7 +5,7 @@ package test;
 import game.*;
 import content.*;
 import util.*;
-import static game.City.*;
+import static game.Base.*;
 import static game.Task.*;
 import static game.GameConstants.*;
 import static content.GameContent.*;
@@ -23,14 +23,14 @@ public class TestRetreat extends Test {
   static boolean testRetreat(boolean graphics) {
     TestRetreat test = new TestRetreat();
     
-    City base = Test.setupTestCity(32, ALL_GOODS, false);
-    CityMap map = base.activeMap();
+    Base base = Test.setupTestCity(32, ALL_GOODS, false);
+    AreaMap map = base.activeMap();
     World world = base.world;
     
-    City enemyBase = new City(world, map.locale, "Enemy Base");
+    Base enemyBase = new Base(world, map.locale, "Enemy Base");
     enemyBase.attachMap(map);
     map.addCity(enemyBase);
-    City.setPosture(base, enemyBase, POSTURE.ENEMY, true);
+    Base.setPosture(base, enemyBase, POSTURE.ENEMY, true);
     
     world.settings.toggleFatigue = false;
     world.settings.toggleInjury  = false;
@@ -79,7 +79,7 @@ public class TestRetreat extends Test {
       if (braveOkay && ! enemiesDone) {
         for (Actor enemy : enemies) {
           Tile goes = randomTileNear(subject.at(), nearRange, map, true);
-          enemy.enterMap(map, goes.x, goes.y, 1, enemy.homeCity());
+          enemy.enterMap(map, goes.x, goes.y, 1, enemy.base());
         }
         enemiesDone = true;
       }
@@ -91,7 +91,7 @@ public class TestRetreat extends Test {
       if (scareOkay && ! alliesDone) {
         for (Actor friend : allies) {
           Tile goes = randomTileNear(subject.at(), nearRange, map, true);
-          friend.enterMap(map, goes.x, goes.y, 1, friend.homeCity());
+          friend.enterMap(map, goes.x, goes.y, 1, friend.base());
         }
         alliesDone = true;
       }

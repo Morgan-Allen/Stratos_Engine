@@ -2,8 +2,8 @@
 
 package game;
 import util.*;
-import static game.City.*;
-import static game.CityMap.*;
+import static game.Base.*;
+import static game.AreaMap.*;
 import static game.GameConstants.*;
 
 
@@ -49,8 +49,8 @@ public class TaskCombat extends Task {
   /**  Utility methods for determining hostility, power, et cetera:
     */
   public static POSTURE postureFor(Element a, Element b) {
-    City CA = a.homeCity (), CB = b.homeCity ();
-    City GA = a.guestCity(), GB = b.guestCity();
+    Base CA = a.base (), CB = b.base ();
+    Base GA = a.guestBase(), GB = b.guestBase();
     if (CA == CB              ) return POSTURE.ALLY;
     if (GA != null && GA == GB) return POSTURE.ALLY;
     if (GB != null && CA == GB) return POSTURE.ALLY;
@@ -135,7 +135,7 @@ public class TaskCombat extends Task {
     if (formation.focus() instanceof Element) {
       Element e = (Element) formation.focus();
       if (e.destroyed() || ! e.onMap()) return null;
-      if (e.homeCity() == formation.homeCity()) return null;
+      if (e.base() == formation.base()) return null;
       return configCombat(actor, e, formation, null, JOB.COMBAT);
     }
     else return null;
@@ -156,7 +156,7 @@ public class TaskCombat extends Task {
     //  TODO:  Grant a vision bonus for higher ground?
     
     Tile from = actor.at();
-    CityMap map = actor.map();
+    AreaMap map = actor.map();
     float noticeRange = ((Element) actor).sightRange() + noticeBonus;
     Series <Active> others = map.activeInRange(from, noticeRange);
     
@@ -223,7 +223,7 @@ public class TaskCombat extends Task {
     //  the fancy pathing-connection tests.  You just check if the target is in
     //  range.
     if (! active.isActor()) {
-      float distance     = CityMap.distance(active.at(), target);
+      float distance     = AreaMap.distance(active.at(), target);
       float rangeMelee   = 1.5f;
       float rangeMissile = active.type().rangeDist;
       float rateMelee    = active.type().meleeDamage;
@@ -251,7 +251,7 @@ public class TaskCombat extends Task {
       inRange = new Tile[] { active.at(), (Tile) currentTask.target };
     }
     else {
-      final CityMap map    = active.map();
+      final AreaMap map    = active.map();
       final Tile    at     = target.at();
       final Box2D   area   = target.area();
       final int     range  = MAX_RANGE;
@@ -282,7 +282,7 @@ public class TaskCombat extends Task {
         final Batch <Tile> accessT = new Batch();
         Flood <Tile> flood = new Flood <Tile> () {
           protected void addSuccessors(Tile front) {
-            for (Tile n : CityMap.adjacent(front, temp, map)) {
+            for (Tile n : AreaMap.adjacent(front, temp, map)) {
               if (n == null || n.flaggedWith() != null) continue;
               if (area.distance(n.x, n.y) > range     ) continue;
               

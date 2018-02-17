@@ -4,7 +4,7 @@ package game;
 import graphics.common.*;
 import graphics.terrain.*;
 import util.*;
-import static game.CityMap.*;
+import static game.AreaMap.*;
 import static game.WorldCalendar.*;
 import static game.GameConstants.*;
 
@@ -17,7 +17,7 @@ public class CityMapFog {
     */
   final static int MAX_FOG = 100;
   
-  CityMap map;
+  AreaMap map;
   
   int  dayState = -1;
   byte fogVals[][];
@@ -30,7 +30,7 @@ public class CityMapFog {
   
   
   
-  CityMapFog(CityMap map) {
+  CityMapFog(AreaMap map) {
     this.map = map;
   }
   

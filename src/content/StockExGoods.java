@@ -27,7 +27,7 @@ public class StockExGoods {
       return using == subject && using.injury() > (using.maxHealth() / 2);
     }
     
-    public void applyCommonEffects(Target subject, City ruler, Actor actor) {
+    public void applyCommonEffects(Target subject, Base ruler, Actor actor) {
       final Actor healed = (Actor) subject;
       healed.liftDamage(MEDIKIT_HEAL_AMOUNT);
       healed.incCarried(MEDIKIT, -1);

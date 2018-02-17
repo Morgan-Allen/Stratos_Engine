@@ -22,7 +22,7 @@ public class MissionPane extends DetailPane {
   
   protected void updateState() {
     
-    City base = mission.homeCity();
+    Base base = mission.base();
     
     this.text.setText("");
     final Description d = this.text;

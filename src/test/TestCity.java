@@ -21,8 +21,8 @@ public class TestCity extends Test {
   static boolean testCity(boolean graphics) {
     Test test = new TestCity();
     
-    City base = setupTestCity(32, ALL_GOODS, false);
-    CityMap map = base.activeMap();
+    Base base = setupTestCity(32, ALL_GOODS, false);
+    AreaMap map = base.activeMap();
     World world = map.world;
     world.settings.toggleFog = false;
     
@@ -83,7 +83,7 @@ public class TestCity extends Test {
     try {
       Session.saveSession("saves/test_save.tlt", map);
       Session session = Session.loadSession("saves/test_save.tlt", true);
-      CityMap loaded = (CityMap) session.loaded()[0];
+      AreaMap loaded = (AreaMap) session.loaded()[0];
       I.say("\nSuccessfully loaded map: "+loaded);
     }
     catch(Exception e) {
@@ -103,7 +103,7 @@ public class TestCity extends Test {
       
       //
       //  Hire workers as and when necessary:
-      for (Building b : map.buildings()) if (b.homeCity() == base) {
+      for (Building b : map.buildings()) if (b.base() == base) {
         for (ActorType job : b.type().workerTypes.keys()) {
           int num = b.numWorkers(job), max = b.maxWorkers(job);
           boolean canHire = b.hireCost(job) <= base.funds();
@@ -191,7 +191,7 @@ public class TestCity extends Test {
   }
   
   
-  static void reportOnMap(CityMap map, City base, boolean okay, Good... goods) {
+  static void reportOnMap(AreaMap map, Base base, boolean okay, Good... goods) {
     I.say("  Current time: "+map.time());
     if (! okay) for (Building b : map.buildings()) {
       if (b.type().isHomeBuilding()) {

@@ -31,7 +31,7 @@ public class TestBlankMap extends Test {
     Test test = new TestBlankMap();
     test.attachBuildMenu(BUILD_MENUS, BUILD_MENU_NAMES);
     
-    City base = loadCity(null, filename);
+    Base base = loadCity(null, filename);
     if (base == null) base = setupTestCity(32, ALL_GOODS, true, MEADOW, JUNGLE);
     
     while (true) {

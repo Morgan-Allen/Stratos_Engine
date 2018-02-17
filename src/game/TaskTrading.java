@@ -2,7 +2,7 @@
 
 package game;
 import util.*;
-import static game.CityMap.*;
+import static game.AreaMap.*;
 import static game.CityBorders.*;
 import static game.GameConstants.*;
 
@@ -14,7 +14,7 @@ public class TaskTrading extends Task {
   /**  Data fields, construction/setup and save/load methods-
     */
   Tally <Good> taken;
-  City   homeCity ;
+  Base   homeCity ;
   Trader tradeFrom;
   Trader tradeGoes;
   
@@ -27,7 +27,7 @@ public class TaskTrading extends Task {
   public TaskTrading(Session s) throws Exception {
     super(s);
     s.loadTally(taken);
-    homeCity  = (City  ) s.loadObject();
+    homeCity  = (Base  ) s.loadObject();
     tradeFrom = (Trader) s.loadObject();
     tradeGoes = (Trader) s.loadObject();
   }
@@ -48,7 +48,7 @@ public class TaskTrading extends Task {
     this.taken     = taken;
     this.tradeFrom = from ;
     this.tradeGoes = goes ;
-    this.homeCity  = from.homeCity();
+    this.homeCity  = from.base();
     
     configTravel(from, JOB.TRADING, from);
     return this;
@@ -77,7 +77,7 @@ public class TaskTrading extends Task {
       if (reports()) {
         I.say("\n"+actor+" SETTING OFF FROM "+visits);
       }
-      City city = tradeGoes.homeCity();
+      Base city = tradeGoes.base();
       takeOnGoods(tradeFrom, taken);
       
       if (tradeGoes != city) {
@@ -85,7 +85,7 @@ public class TaskTrading extends Task {
         configTravel(goes, Task.JOB.TRADING, origin);
       }
       else {
-        Tile exits = findTransitPoint(visits.map, tradeFrom.homeCity(), city);
+        Tile exits = findTransitPoint(visits.map, tradeFrom.base(), city);
         configTask(origin, null, exits, Task.JOB.TRADING, 0);
       }
     }
@@ -129,13 +129,13 @@ public class TaskTrading extends Task {
     //
     //  If you've arrived at the edge of the map, begin your journey to a
     //  foreign city-
-    City city = tradeGoes.homeCity();
-    city.world.beginJourney(city, (City) tradeGoes, actor);
+    Base city = tradeGoes.base();
+    city.world.beginJourney(city, (Base) tradeGoes, actor);
     actor.exitMap(actor.map);
   }
   
   
-  protected void onArrival(City goes, World.Journey journey) {
+  protected void onArrival(Base goes, World.Journey journey) {
     Actor actor = (Actor) this.active;
     //
     //  If you've arrived at your destination city, offload your cargo, take on
@@ -158,14 +158,14 @@ public class TaskTrading extends Task {
 
   /**  Other utility methods:
     */
-  City oppositeCity(Trader point) {
-    if (point == tradeFrom) return tradeGoes.homeCity();
-    if (point == tradeGoes) return tradeFrom.homeCity();
+  Base oppositeCity(Trader point) {
+    if (point == tradeFrom) return tradeGoes.base();
+    if (point == tradeGoes) return tradeFrom.base();
     return null;
   }
   
   
-  float tributeQuantityRemaining(City.Relation r, Good good) {
+  float tributeQuantityRemaining(Base.Relation r, Good good) {
     if (r == null) return 0;
     float demand = r.suppliesDue .valueFor(good);
     float paid   = r.suppliesSent.valueFor(good);
@@ -179,9 +179,9 @@ public class TaskTrading extends Task {
     
     //  You don't have to pay for goods if the city you're taking them from
     //  owes them as tribute!
-    City city = store.homeCity(), opposite = oppositeCity(store);
+    Base city = store.base(), opposite = oppositeCity(store);
     boolean tributeDue = city.isLoyalVassalOf(opposite);
-    City.Relation r = city.relationWith(opposite);
+    Base.Relation r = city.relationWith(opposite);
     
     Tally <Good> cargo = new Tally();
     Tally <Good> stock = store.inventory();
@@ -224,9 +224,9 @@ public class TaskTrading extends Task {
     
     //  You don't receive money for goods if the city you deliver to is owed
     //  them as tribute.
-    City city = store.homeCity(), opposite = oppositeCity(store);
+    Base city = store.base(), opposite = oppositeCity(store);
     boolean tributeDue = opposite.isLoyalVassalOf(city);
-    City.Relation r = opposite.relationWith(city);
+    Base.Relation r = opposite.relationWith(city);
     
     float cash = actor.carried(CASH);
     int totalValue = 0;

@@ -1,7 +1,7 @@
 
 
 package game;
-import static game.CityMap.*;
+import static game.AreaMap.*;
 import static game.GameConstants.*;
 import util.*;
 
@@ -45,13 +45,13 @@ public class BuildingForWalls extends Building implements Active {
   
   /**  Entering and exiting the world-
     */
-  public void enterMap(CityMap map, int x, int y, float buildLevel, City owns) {
+  public void enterMap(AreaMap map, int x, int y, float buildLevel, Base owns) {
     super.enterMap(map, x, y, buildLevel, owns);
     map.flagActive(this, centre(), true);
   }
   
   
-  public void exitMap(CityMap map) {
+  public void exitMap(AreaMap map) {
     map.flagActive(this, centre(), false);
     super.exitMap(map);
   }
@@ -88,8 +88,8 @@ public class BuildingForWalls extends Building implements Active {
   
   
   public boolean allowsEntry(Actor a) {
-    City owner = homeCity();
-    if (a.homeCity() != owner && a.guestCity() != owner) {
+    Base owner = base();
+    if (a.base() != owner && a.guestBase() != owner) {
       return false;
     }
     return super.allowsEntry(a);

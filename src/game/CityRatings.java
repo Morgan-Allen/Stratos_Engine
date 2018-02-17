@@ -8,7 +8,7 @@ import util.*;
 public class CityRatings {
   
   
-  City city;
+  Base city;
   
   //  So... What am I measuring here?
   
@@ -29,11 +29,11 @@ public class CityRatings {
   
   
   
-  void updateRatings(CityMap map) {
+  void updateRatings(AreaMap map) {
     int totalPop = 0;
     
     for (Actor a : map.actors) {
-      if (a.homeCity() != city) continue;
+      if (a.base() != city) continue;
       totalPop += 1;
     }
   }

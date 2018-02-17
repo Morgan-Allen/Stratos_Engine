@@ -35,7 +35,7 @@ public class Collective {
       return subject.type().isActor();
     }
     
-    public void applyCommonEffects(Target subject, City ruler, Actor actor) {
+    public void applyCommonEffects(Target subject, Base ruler, Actor actor) {
       final Actor healed = (Actor) subject;
       healed.liftDamage(PSY_HEAL_AMOUNT);
     }

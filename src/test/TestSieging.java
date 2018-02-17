@@ -5,7 +5,7 @@ import game.*;
 import content.*;
 import util.*;
 import static content.GameContent.*;
-import static game.CityMap.*;
+import static game.AreaMap.*;
 import static game.GameConstants.*;
 import static game.Task.*;
 
@@ -23,9 +23,9 @@ public class TestSieging extends Test {
     Test test = new TestSieging();
     
     World   world = new World(ALL_GOODS);
-    City    baseC = new City(world, world.addLocale(2, 2));
-    City    awayC = new City(world, world.addLocale(3, 3));
-    CityMap map   = CityMapTerrain.generateTerrain(
+    Base    baseC = new Base(world, world.addLocale(2, 2));
+    Base    awayC = new Base(world, world.addLocale(3, 3));
+    AreaMap map   = CityMapTerrain.generateTerrain(
       baseC, 32, 0, MEADOW, JUNGLE
     );
     baseC.setName("Home City");
@@ -43,7 +43,7 @@ public class TestSieging extends Test {
     awayC.council.setTypeAI(CityCouncil.AI_OFF);
     
     World.setupRoute(baseC.locale, awayC.locale, 1);
-    City.setPosture(baseC, awayC, City.POSTURE.ENEMY, true);
+    Base.setPosture(baseC, awayC, Base.POSTURE.ENEMY, true);
     
     
     CityMapPlanning.placeStructure(SHIELD_WALL, baseC, true, 4, 4, 20, 20);
@@ -269,7 +269,7 @@ public class TestSieging extends Test {
         boolean allSent = true;
         for (Good g : tribute.keys()) {
           float need = tribute.valueFor(g);
-          float sent = City.goodsSent(baseC, awayC, g);
+          float sent = Base.goodsSent(baseC, awayC, g);
           if (sent < need) allSent = false;
         }
         tributePaid = allSent;

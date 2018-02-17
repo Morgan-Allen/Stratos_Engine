@@ -2,7 +2,7 @@
 
 package game;
 import util.*;
-import static game.CityMap.*;
+import static game.AreaMap.*;
 import static game.GameConstants.*;
 
 
@@ -52,10 +52,10 @@ public class TaskHunting extends Task {
       if (! Visit.arrayIncludes(meatTypes, meat)) continue;
       if (store.inventory(meat) >= store.type().maxStock) continue;
       
-      float dist = CityMap.distance(actor.at(), a.at());
+      float dist = AreaMap.distance(actor.at(), a.at());
       if (dist > MAX_EXPLORE_DIST) continue;
       
-      forHunt.compare(a, CityMap.distancePenalty(dist));
+      forHunt.compare(a, AreaMap.distancePenalty(dist));
     }
     if (forHunt.empty()) return null;
     

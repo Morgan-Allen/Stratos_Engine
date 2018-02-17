@@ -3,7 +3,7 @@
 package game;
 import graphics.common.*;
 import util.*;
-import static game.CityMap.*;
+import static game.AreaMap.*;
 import static game.GameConstants.*;
 
 
@@ -239,13 +239,13 @@ public class Task implements Session.Saveable {
       }
     }
     
-    CityMap  map      = active.map();
+    AreaMap  map      = active.map();
     boolean  canVisit = active.isActor();
     Actor    visitor  = canVisit ? (Actor) active : null;
     Pathing  inside   = canVisit ? visitor.inside() : null;
     Pathing  path[]   = this.path;
     Pathing  pathEnd  = (Pathing) Visit.last(path);
-    float    distance = CityMap.distance(active.at(), pathEnd);
+    float    distance = AreaMap.distance(active.at(), pathEnd);
     float    minRange = actionRange();
     Building visits   = this.visits;
     Target   target   = this.target;
@@ -312,7 +312,7 @@ public class Task implements Session.Saveable {
   }
   
   
-  protected void onArrival(City goes, World.Journey journey) {
+  protected void onArrival(Base goes, World.Journey journey) {
     return;
   }
   
@@ -418,8 +418,8 @@ public class Task implements Session.Saveable {
     
     Pathing last = (Pathing) Visit.last(path);
     Actor actor = (Actor) this.active;
-    CityMap map = actor.map();
-    if (CityMap.distance(last, target) > 1.5f) return false;
+    AreaMap map = actor.map();
+    if (AreaMap.distance(last, target) > 1.5f) return false;
     
     int index = Nums.clamp(pathIndex, path.length);
     Pathing current = pathOrigin(actor), step = path[index];
@@ -440,7 +440,7 @@ public class Task implements Session.Saveable {
     boolean report  = reports();
     boolean verbose = false;
     
-    CityMap map      = active.map();
+    AreaMap map      = active.map();
     boolean visiting = visits != null;
     Pathing from     = pathOrigin(active);
     Pathing heads    = pathTarget();
@@ -469,7 +469,7 @@ public class Task implements Session.Saveable {
       if (report) I.say("  Could not find path for "+this);
       return null;
     }
-    else if (path.length < (CityMap.distance(from, heads) / 2) - 1) {
+    else if (path.length < (AreaMap.distance(from, heads) / 2) - 1) {
       if (report) I.say("  Path is impossible!");
       return null;
     }
@@ -481,13 +481,13 @@ public class Task implements Session.Saveable {
   
   
   public static boolean verifyPath(
-    Pathing path[], Pathing start, Pathing end, CityMap map
+    Pathing path[], Pathing start, Pathing end, AreaMap map
   ) {
     if (Visit.empty(path) || path[0] != start) return false;
 
     Pathing temp[] = new Pathing[9];
     Pathing last = (Pathing) Visit.last(path);
-    if (last != end && CityMap.distance(last, end) > 1.5f) {
+    if (last != end && AreaMap.distance(last, end) > 1.5f) {
       return false;
     }
     

@@ -2,7 +2,7 @@
 
 package game;
 import util.*;
-import static game.CityMap.*;
+import static game.AreaMap.*;
 import static game.GameConstants.Pathing;
 import static game.GameConstants.Target;
 
@@ -68,7 +68,7 @@ public class CityMapPathCache {
   }
   
   
-  final CityMap map;
+  final AreaMap map;
   Area areaLookup[][];
   boolean flagDirty[][];
   
@@ -89,7 +89,7 @@ public class CityMapPathCache {
   Table <String, Object> tempCache;
   
   
-  CityMapPathCache(CityMap map) {
+  CityMapPathCache(AreaMap map) {
     this.map = map;
   }
   
@@ -205,7 +205,7 @@ public class CityMapPathCache {
         return temp;
       }
       else {
-        CityMap.adjacent(at, temp, map);
+        AreaMap.adjacent(at, temp, map);
         temp[8] = at;
         return temp;
       }
@@ -220,7 +220,7 @@ public class CityMapPathCache {
   
   public Tile mostOpenNeighbour(Tile at) {
     Pick <Tile> pick = new Pick();
-    for (Tile t : CityMap.adjacent(at, null, map)) {
+    for (Tile t : AreaMap.adjacent(at, null, map)) {
       AreaGroup group = groupFor(areaFor(t), false);
       if (group != null) pick.compare(t, group.totalTiles);
     }

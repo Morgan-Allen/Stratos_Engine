@@ -4,8 +4,8 @@ package game;
 import gameUI.play.*;
 import graphics.common.*;
 import util.*;
-import static game.CityMap.*;
-import static game.City.*;
+import static game.AreaMap.*;
+import static game.Base.*;
 import static game.CityBorders.*;
 import static game.GameConstants.*;
 
@@ -44,7 +44,7 @@ public class Mission implements
   boolean isBounty = false;
   int cashReward = -1;
   
-  City.POSTURE postureDemand  = null;
+  Base.POSTURE postureDemand  = null;
   Mission      actionDemand   = null;
   Actor        marriageDemand = null;
   Tally <Good> tributeDemand  = new Tally();
@@ -55,9 +55,9 @@ public class Mission implements
   
   private boolean away   = false;
   private boolean active = false;
-  private City    homeCity    ;
-  private City    awayCity    ;
-  private CityMap map         ;
+  private Base    homeCity    ;
+  private Base    awayCity    ;
+  private AreaMap map         ;
   private Tile    transitPoint;
   private Tile    standPoint  ;
   private Object  focus       ;
@@ -73,7 +73,7 @@ public class Mission implements
   
   
   
-  public Mission(int objective, City belongs, boolean activeAI) {
+  public Mission(int objective, Base belongs, boolean activeAI) {
     this.objective  = objective;
     this.tacticalAI = activeAI;
     this.homeCity   = belongs;
@@ -96,7 +96,7 @@ public class Mission implements
     isBounty      = s.loadBool();
     cashReward    = s.loadInt ();
     
-    postureDemand  = (City.POSTURE) s.loadEnum(City.POSTURE.values());
+    postureDemand  = (Base.POSTURE) s.loadEnum(Base.POSTURE.values());
     actionDemand   = (Mission     ) s.loadObject();
     marriageDemand = (Actor       ) s.loadObject();
     s.loadTally(tributeDemand);
@@ -106,9 +106,9 @@ public class Mission implements
     s.loadObjects(casualties);
     
     away         = s.loadBool();
-    homeCity     = (City   ) s.loadObject();
-    awayCity     = (City   ) s.loadObject();
-    map          = (CityMap) s.loadObject();
+    homeCity     = (Base   ) s.loadObject();
+    awayCity     = (Base   ) s.loadObject();
+    map          = (AreaMap) s.loadObject();
     
     active       = s.loadBool();
     transitPoint = loadTile(map, s);
@@ -119,7 +119,7 @@ public class Mission implements
     exploreRange = s.loadFloat();
     
     for (int n = s.loadInt(); n-- > 0;) {
-      Tile point = CityMap.loadTile(map, s);
+      Tile point = AreaMap.loadTile(map, s);
       guardPoints.add(point);
     }
     lastUpdateTime = s.loadInt();
@@ -163,7 +163,7 @@ public class Mission implements
     s.saveFloat(exploreRange);
     
     s.saveInt(guardPoints.size());
-    for (Tile t : guardPoints) CityMap.saveTile(t, map, s);
+    for (Tile t : guardPoints) AreaMap.saveTile(t, map, s);
     s.saveInt(lastUpdateTime);
   }
   
@@ -202,7 +202,7 @@ public class Mission implements
   
   
   public void assignTerms(
-    City.POSTURE posture,
+    Base.POSTURE posture,
     Mission actionTaken,
     Actor toMarry,
     Tally <Good> tribute
@@ -293,12 +293,12 @@ public class Mission implements
   }
   
   
-  public void setFocus(City city) {
+  public void setFocus(Base city) {
     
     homeCity.missions.toggleMember(this, true);
     this.active = true;
     
-    City from, goes;
+    Base from, goes;
     if (city != homeCity) {
       this.awayCity = city;
       from = homeCity;
@@ -320,7 +320,7 @@ public class Mission implements
   }
   
   
-  public void setFocus(Object focus, int facing, CityMap map) {
+  public void setFocus(Object focus, int facing, AreaMap map) {
     homeCity.missions.toggleMember(this, true);
     
     this.facing = facing;
@@ -367,7 +367,7 @@ public class Mission implements
     
     //  TODO:  Get the nearest open tile, just for good measure?
     
-    if (focus instanceof City) {
+    if (focus instanceof Base) {
       return this.transitPoint;
     }
     if (focus instanceof Mission) {
@@ -384,7 +384,7 @@ public class Mission implements
   }
   
   
-  CityMap map() {
+  AreaMap map() {
     return map;
   }
   
@@ -409,7 +409,7 @@ public class Mission implements
   
   
   Target pathGoes() {
-    if (focus instanceof City) {
+    if (focus instanceof Base) {
       return transitPoint;
     }
     if (focus instanceof Mission) {
@@ -432,7 +432,7 @@ public class Mission implements
   }
   
   
-  public boolean onMap(CityMap map) {
+  public boolean onMap(AreaMap map) {
     return this.map != null && this.map == map;
   }
   
@@ -442,7 +442,7 @@ public class Mission implements
   }
   
   
-  public City awayCity() {
+  public Base awayCity() {
     return awayCity;
   }
   
@@ -481,10 +481,10 @@ public class Mission implements
     }
     //
     //  Check to see if an offer has expired-
-    City local   = away ? awayCity : homeCity;
-    City distant = away ? homeCity : awayCity;
-    int sinceArrive = CityMap.timeSince(timeArrived  , homeCity.world.time);
-    int sinceTerms  = CityMap.timeSince(timeTermsSent, homeCity.world.time);
+    Base local   = away ? awayCity : homeCity;
+    Base distant = away ? homeCity : awayCity;
+    int sinceArrive = AreaMap.timeSince(timeArrived  , homeCity.world.time);
+    int sinceTerms  = AreaMap.timeSince(timeTermsSent, homeCity.world.time);
     boolean hasEnvoy = escorted.size() > 0;
     
     if (hasEnvoy && (
@@ -561,7 +561,7 @@ public class Mission implements
         boolean allSeen = true;
         
         for (Tile t : map.tilesUnder(looks.x - r, looks.y - r, r * 2, r * 2)) {
-          float dist = CityMap.distance(looks, t);
+          float dist = AreaMap.distance(looks, t);
           if (dist > r) continue;
           if (map.fog.maxSightLevel(t) == 0) allSeen = false;
         }
@@ -578,7 +578,7 @@ public class Mission implements
   }
   
   
-  private World.Journey beginJourney(City from, City goes) {
+  private World.Journey beginJourney(Base from, Base goes) {
     if (reports()) I.say("\nREADY TO BEGIN FOREIGN MISSION!");
     for (Actor r : recruits) if (r.onMap(map)) {
       r.exitMap(map);
@@ -594,7 +594,7 @@ public class Mission implements
   }
   
   
-  public void onArrival(City goes, World.Journey journey) {
+  public void onArrival(Base goes, World.Journey journey) {
     //
     //  There are 4 cases here: arriving home or away, and arriving on a map or
     //  not.
@@ -612,10 +612,10 @@ public class Mission implements
       this.transitPoint = transits;
       
       for (Actor r : recruits) {
-        r.enterMap(map, transits.x, transits.y, 1, r.homeCity());
+        r.enterMap(map, transits.x, transits.y, 1, r.base());
       }
       for (Actor e : escorted) {
-        e.enterMap(map, transits.x, transits.y, 1, e.homeCity());
+        e.enterMap(map, transits.x, transits.y, 1, e.base());
         e.assignGuestCity(goes);
       }
       setFocus(transitPoint, N, map);
@@ -745,12 +745,12 @@ public class Mission implements
   }
   
   
-  public City homeCity() {
+  public Base base() {
     return homeCity;
   }
   
   
-  void dispatchTerms(City goes) {
+  void dispatchTerms(Base goes) {
     goes.council.receiveTerms(this);
     timeTermsSent = goes.world.time;
   }
@@ -799,7 +799,7 @@ public class Mission implements
   }
   
   
-  static int powerSum(Series <Actor> recruits, CityMap mapOnly) {
+  static int powerSum(Series <Actor> recruits, AreaMap mapOnly) {
     float sumStats = 0;
     for (Actor a : recruits) {
       if (mapOnly != null && a.map != mapOnly) continue;
@@ -832,7 +832,7 @@ public class Mission implements
   }
   
   
-  public boolean canRender(City base, Viewport view) {
+  public boolean canRender(Base base, Viewport view) {
     if (noFlag) {
       return false;
     }
@@ -877,7 +877,7 @@ public class Mission implements
   }
   
   
-  public boolean testSelection(PlayUI UI, City base, Viewport view) {
+  public boolean testSelection(PlayUI UI, Base base, Viewport view) {
     if (flag == null || ! canRender(base, view)) return false;
     
     final float selRad = 0.5f;

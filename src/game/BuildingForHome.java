@@ -2,7 +2,7 @@
 
 package game;
 import util.*;
-import static game.CityMap.*;
+import static game.AreaMap.*;
 import static game.Task.*;
 import static game.GameConstants.*;
 import static util.TileConstants.*;
@@ -51,7 +51,7 @@ public class BuildingForHome extends Building {
       for (Building b : map.buildings) {
         if (! Visit.arrayIncludes(b.type().features, service)) continue;
         
-        float dist = CityMap.distance(b.mainEntrance(), entrance);
+        float dist = AreaMap.distance(b.mainEntrance(), entrance);
         if (dist > maxRange) continue;
         
         if (! map.pathCache.pathConnects(entrance, b.mainEntrance())) {
@@ -241,7 +241,7 @@ public class BuildingForHome extends Building {
       float used      = maxTierStock(cons, tier) * conLevel;
       float amount    = Nums.max(0, oldAmount - used);
       setInventory(cons, amount);
-      homeCity().usedTotals.add(oldAmount - amount, cons);
+      base().usedTotals.add(oldAmount - amount, cons);
     }
   }
   
@@ -252,7 +252,7 @@ public class BuildingForHome extends Building {
     taxLevel *= type().updateTime;
     taxLevel /= TAX_INTERVAL;
     addInventory(taxLevel, CASH);
-    homeCity().makeTotals.add(taxLevel, CASH);
+    base().makeTotals.add(taxLevel, CASH);
   }
   
   

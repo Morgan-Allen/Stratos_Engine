@@ -15,12 +15,12 @@ public class WorldSettings {
   final World world;
   
   public boolean
-    toggleFog     = true,
-    toggleHunger  = true,
-    toggleFatigue = true,
-    toggleInjury  = true,
-    toggleReacts  = true,
-    toggleCombat  = true,
+    toggleFog         = true,
+    toggleHunger      = true,
+    toggleFatigue     = true,
+    toggleInjury      = true,
+    toggleReacts      = true,
+    toggleCombat      = true,
     
     toggleAging       = true,
     toggleChildMort   = true,
@@ -30,14 +30,18 @@ public class WorldSettings {
     toggleMigrate     = true,
     toggleBuildEvolve = true,
     
-    slowed    = false,
-    speedUp   = false,
-    paused    = false,
-    worldView = false,
+    toggleEasyHunger  = true,
+    toggleEasyCraft   = true,
+    toggleEasyBuild   = true,
     
-    viewPathMap     = false,
-    reportBattle    = false,
-    reportPathCache = false;
+    slowed            = false,
+    speedUp           = false,
+    paused            = false,
+    worldView         = false,
+    
+    viewPathMap       = false,
+    reportBattle      = false,
+    reportPathCache   = false;
   
   
   WorldSettings(World world) {

@@ -59,7 +59,7 @@ public class OptionList extends UIGroup implements UIConstants {
   
   private abstract class MissionButton extends Button {
     
-    final City base;
+    final Base base;
     private Mission mission = null;
     
     
@@ -106,10 +106,10 @@ public class OptionList extends UIGroup implements UIConstants {
   private class PowerButton extends Button {
     
     final Technique power;
-    final City base;
+    final Base base;
     
     
-    PowerButton(PlayUI UI, Technique power, City base) {
+    PowerButton(PlayUI UI, Technique power, Base base) {
       super(
         UI, power.uniqueID()+"_button",
         power.icon, Button.CIRCLE_LIT, power.info
@@ -146,8 +146,8 @@ public class OptionList extends UIGroup implements UIConstants {
   
   private void setup() {
     
-    final CityMap stage = BUI.stage;
-    final City    base  = BUI.base ;
+    final AreaMap stage = BUI.stage;
+    final Base    base  = BUI.base ;
     final List <UINode> options = new List();
     
     options.add(new MissionButton(

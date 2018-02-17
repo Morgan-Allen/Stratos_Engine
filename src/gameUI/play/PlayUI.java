@@ -20,8 +20,8 @@ public class PlayUI extends HUD implements UIConstants {
       "media/GUI/panels/installations_tab.png"
     );
   
-  CityMap stage;
-  City    base;
+  AreaMap stage;
+  Base    base;
   Element home;
   
   Button     installTab ;
@@ -71,7 +71,7 @@ public class PlayUI extends HUD implements UIConstants {
   }
   
   
-  public void assignParameters(CityMap stage, City base) {
+  public void assignParameters(AreaMap stage, Base base) {
     if (stage == null || base == null) {
       I.complain("\nCANNOT ASSIGN NULL STAGE/BASE TO UI!");
       return;
@@ -92,8 +92,8 @@ public class PlayUI extends HUD implements UIConstants {
   
   
   public void loadState(Session s) throws Exception {
-    stage = (CityMap) s.loadObject();
-    base  = (City   ) s.loadObject();
+    stage = (AreaMap) s.loadObject();
+    base  = (Base   ) s.loadObject();
     home  = (Element) s.loadObject();
     selection.loadState(s);
     tracking .loadState(s);
@@ -133,7 +133,7 @@ public class PlayUI extends HUD implements UIConstants {
   }
   
   
-  public static City playerBase() {
+  public static Base playerBase() {
     final PlayUI UI = MainGame.playUI();
     if (UI == null) return null;
     return UI.base;

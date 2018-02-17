@@ -13,16 +13,16 @@ public class Test {
   
   /**  Initial setup utilities:
     */
-  protected static City setupTestCity(
+  protected static Base setupTestCity(
     int size, Good goods[], boolean genTerrain, Terrain... gradient
   ) {
     World   world  = new World(goods);
     Locale  locale = world.addLocale(5, 5);
-    City    city   = new City(world, locale, "Test City");
-    CityMap map    = null;
+    Base    city   = new Base(world, locale, "Test City");
+    AreaMap map    = null;
     
     if (! genTerrain) {
-      map = new CityMap(world, locale, city);
+      map = new AreaMap(world, locale, city);
       map.performSetup(size, gradient);
     }
     else {
@@ -38,12 +38,12 @@ public class Test {
   }
   
   
-  protected static City setupTestCity(
+  protected static Base setupTestCity(
     byte layout[][], byte elevation[][], Good goods[], Terrain... gradient
   ) {
     int wide = layout.length, high = layout[0].length;
-    City city = setupTestCity(Nums.max(wide, high), goods, false, gradient);
-    CityMap map = city.activeMap();
+    Base city = setupTestCity(Nums.max(wide, high), goods, false, gradient);
+    AreaMap map = city.activeMap();
     
     for (Tile t : map.allTiles()) {
       Terrain terr = gradient[layout[t.x][t.y]];
@@ -58,7 +58,7 @@ public class Test {
   
   //  TODO:  Move these into the Scenario class!
   
-  public static void fillAllVacancies(CityMap map, ActorType defaultCitizen) {
+  public static void fillAllVacancies(AreaMap map, ActorType defaultCitizen) {
     for (Building b : map.buildings) if (b.accessible()) {
       fillWorkVacancies(b);
       for (Actor w : b.workers) CityBorders.findHome(map, w);
@@ -97,12 +97,12 @@ public class Test {
     else          b.setWorker  (actor, true);
     
     if (b.complete()) {
-      actor.enterMap(b.map, at.x, at.y, 1, b.homeCity());
+      actor.enterMap(b.map, at.x, at.y, 1, b.base());
       actor.setInside(b, true);
     }
     else {
       Tile t = b.centre();
-      actor.enterMap(b.map, t.x, t.y, 1, b.homeCity());
+      actor.enterMap(b.map, t.x, t.y, 1, b.base());
     }
     
     return actor;
@@ -110,7 +110,7 @@ public class Test {
   
   
   public static Tile randomTileNear(
-    Tile at, float range, CityMap map, boolean open
+    Tile at, float range, AreaMap map, boolean open
   ) {
     int x = (int) (at.x + (range * Rand.range(-1, 1)));
     int y = (int) (at.y + (range * Rand.range(-1, 1)));
@@ -172,7 +172,7 @@ public class Test {
   }
   
   
-  Box2D drawnBox(CityMap map) {
+  Box2D drawnBox(AreaMap map) {
     Box2D b = new Box2D(hover.x, hover.y, 0, 0);
     if (drawnTile != null) b.include(drawnTile.x, drawnTile.y, 0);
     b.incHigh(1);
@@ -183,7 +183,7 @@ public class Test {
   }
   
   
-  void updateCityMapView(CityMap map) {
+  void updateCityMapView(AreaMap map) {
     configGraphic(map.size, map.size);
     
     for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
@@ -244,7 +244,7 @@ public class Test {
   }
   
   
-  void updateCityPathingView(CityMap map) {
+  void updateCityPathingView(AreaMap map) {
     configGraphic(map.size, map.size);
     
     Tile hovered = map.tileAt(hover.x, hover.y);
@@ -288,7 +288,7 @@ public class Test {
   
   
   
-  private void updateCityFogLayer(CityMap map) {
+  private void updateCityFogLayer(AreaMap map) {
     for (Tile t : map.allTiles()) {
       float sight = 0;
       sight += map.fog.sightLevel(t);
@@ -301,7 +301,7 @@ public class Test {
   }
   
   
-  private void updateWorldMapView(CityMap map) {
+  private void updateWorldMapView(AreaMap map) {
     World world = map.world;
     int wide = world.mapWide * 2, high = world.mapHigh * 2;
     configGraphic(wide, high);
@@ -316,11 +316,11 @@ public class Test {
     for (World.Journey j : world.journeys) {
       Vec2D c = world.journeyPos(j);
       int x = 1 + (int) (c.x * 2), y = 1 + (int) (c.y * 2);
-      graphic[x][y] = j.going.first().homeCity().tint;
+      graphic[x][y] = j.going.first().base().tint;
     }
     
-    for (City city : world.cities) {
-      City lord = city.currentLord();
+    for (Base city : world.cities) {
+      Base lord = city.currentLord();
       int x = (int) city.locale.mapX * 2, y = (int) city.locale.mapY * 2;
       for (Coord c : Visit.grid(x, y, 2, 2, 1)) graphic[c.x][c.y] = city.tint;
       if (lord != null) graphic[x + 1][y] = lord.tint;
@@ -336,21 +336,21 @@ public class Test {
 
   
   private static Test currentTest = null;
-  private static City currentCity = null;
+  private static Base currentCity = null;
   
   public static Test currentTest() {
     return currentTest;
   }
   
-  public static City currentCity() {
+  public static Base currentCity() {
     return currentCity;
   }
   
   
-  public City runLoop(
-    City city, int numUpdates, boolean graphics, String filename
+  public Base runLoop(
+    Base city, int numUpdates, boolean graphics, String filename
   ) {
-    CityMap map = city.activeMap();
+    AreaMap map = city.activeMap();
     int skipUpdate = 0;
     boolean doQuit = false;
     this.filename = filename;
@@ -397,8 +397,8 @@ public class Test {
         if (doBuild) {
           I.presentInfo(reportForBuildMenu(map, city), VIEW_NAME);
         }
-        else if (above instanceof City) {
-          I.presentInfo(reportFor((City) above), VIEW_NAME);
+        else if (above instanceof Base) {
+          I.presentInfo(reportFor((Base) above), VIEW_NAME);
         }
         else if (above instanceof Building) {
           I.presentInfo(reportFor((Building) above), VIEW_NAME);
@@ -442,7 +442,7 @@ public class Test {
   
   /**  Saving and loading-
     */
-  protected static void saveCity(City city, String filename) {
+  protected static void saveCity(Base city, String filename) {
     try {
       I.say("\nWILL SAVE CURRENT CITY...");
       Session.saveSession(filename, city);
@@ -451,14 +451,14 @@ public class Test {
   }
   
   
-  protected static City loadCity(City oldCity, String filename) {
+  protected static Base loadCity(Base oldCity, String filename) {
     if (! Session.fileExists(filename)) {
       return oldCity;
     }
     try {
       I.say("\nWILL LOAD SAVED CITY...");
       Session s = Session.loadSession(filename, true);
-      City city = (City) s.loaded()[0];
+      Base city = (Base) s.loaded()[0];
       if (city == null) throw new Exception("No map loaded!");
       return city;
     }
@@ -470,7 +470,7 @@ public class Test {
   
   /**  UI outputs-
     */
-  private String reportFor(City c) {
+  private String reportFor(Base c) {
     StringBuffer report = new StringBuffer(""+c);
     
     report.append("\n  Population: "+c.population());
@@ -478,10 +478,10 @@ public class Test {
     report.append("\n  Prestige: "+c.prestige());
     
     List <String> borderRep = new List();
-    for (City other : c.world.cities) if (other != c) {
-      City.POSTURE r = c.posture(other);
+    for (Base other : c.world.cities) if (other != c) {
+      Base.POSTURE r = c.posture(other);
       float loyalty = c.loyalty(other);
-      borderRep.add("\n  "+other+": "+r+", "+City.descLoyalty(loyalty));
+      borderRep.add("\n  "+other+": "+r+", "+Base.descLoyalty(loyalty));
     }
     if (! borderRep.empty()) {
       report.append("\n\nRelations:");
@@ -625,7 +625,7 @@ public class Test {
   }
   
   
-  private String reportForBuildMenu(CityMap map, City city) {
+  private String reportForBuildMenu(AreaMap map, Base city) {
     StringBuffer report = new StringBuffer("");
     
     /*
@@ -744,7 +744,7 @@ public class Test {
   }
   
   
-  private String baseReport(CityMap map, City city) {
+  private String baseReport(AreaMap map, Base city) {
     StringBuffer report = new StringBuffer("Home City: "+city);
     WorldSettings settings = map.world.settings;
     

@@ -47,7 +47,7 @@ public class Readout extends UIGroup {
   protected void updateState() {
     super.updateState();
     
-    final City played = UI.base;
+    final Base played = UI.base;
     read.setText("");
     //
     //  Credits first-

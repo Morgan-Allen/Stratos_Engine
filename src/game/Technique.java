@@ -131,12 +131,12 @@ public abstract class Technique extends Trait {
   public boolean canUseActive(Actor using, Target subject) {
     if (using.cooldown() > 0) return false;
     if (using.maxHealth() - using.fatigue() < costTire) return false;
-    if (CityMap.distance(using, subject) > maxRange) return false;
+    if (AreaMap.distance(using, subject) > maxRange) return false;
     return canTarget(subject);
   }
   
   
-  public boolean canUsePower(City ruler, Target subject) {
+  public boolean canUsePower(Base ruler, Target subject) {
     if (ruler.funds() < costCash) return false;
     return canTarget(subject);
   }
@@ -242,7 +242,7 @@ public abstract class Technique extends Trait {
   }
   
   
-  public void applyFromRuler(City ruler, Target subject) {
+  public void applyFromRuler(Base ruler, Target subject) {
     ruler.incFunds(0 - costCash);
     applyCommonEffects(subject, ruler, null);
   }
@@ -255,7 +255,7 @@ public abstract class Technique extends Trait {
   }
   
   
-  public void applyCommonEffects(Target subject, City ruler, Actor actor) {
+  public void applyCommonEffects(Target subject, Base ruler, Actor actor) {
     return;
   }
   

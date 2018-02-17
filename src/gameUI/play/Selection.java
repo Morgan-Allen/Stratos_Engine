@@ -11,7 +11,7 @@ import util.*;
 public class Selection {
   
   public static interface Focus extends Description.Clickable {
-    boolean testSelection(PlayUI UI, City base, Viewport port);
+    boolean testSelection(PlayUI UI, Base base, Viewport port);
     boolean setSelected(PlayUI UI);
     boolean trackSelection();
     Vec3D trackPosition();
@@ -42,7 +42,7 @@ public class Selection {
   }
   
   
-  void updateSelection(CityMap stage, City base) {
+  void updateSelection(AreaMap stage, Base base) {
     if (UI.selected() != null) {
       hovered    = null;
       hoverSpot  = null;
@@ -72,7 +72,7 @@ public class Selection {
       hoverActor = pickA.result();
       
       final Pick <Mission> pickM = new Pick();
-      for (City b : stage.cities()) {
+      for (Base b : stage.cities()) {
         for (Mission m : b.missions()) {
           trySelection(m, base, port, pickM);
         }
@@ -95,7 +95,7 @@ public class Selection {
   
   
   private void trySelection(
-    Selection.Focus e, City base, Viewport port, Pick pick
+    Selection.Focus e, Base base, Viewport port, Pick pick
   ) {
     if (! e.testSelection(UI, base, port)) return;
     final float dist = port.translateToScreen(e.trackPosition()).z;

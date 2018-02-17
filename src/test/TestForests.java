@@ -20,8 +20,8 @@ public class TestForests extends Test {
     Test test = new TestForests();
     
 
-    City base = setupTestCity(32, ALL_GOODS, true, JUNGLE, MEADOW);
-    CityMap map = base.activeMap();
+    Base base = setupTestCity(32, ALL_GOODS, true, JUNGLE, MEADOW);
+    AreaMap map = base.activeMap();
     World world = map.world;
     world.settings.toggleFog = false;
     

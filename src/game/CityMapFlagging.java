@@ -2,7 +2,7 @@
 
 package game;
 import util.*;
-import static game.CityMap.*;
+import static game.AreaMap.*;
 import static game.GameConstants.*;
 
 
@@ -13,14 +13,14 @@ public class CityMapFlagging {
   
   /**  Data fields, construction and save/load methods-
     */
-  CityMap map;
+  AreaMap map;
   Object  key;
   int range;
   
   Object flagLevels[];
   
   
-  CityMapFlagging(CityMap map, Object key, int range) {
+  CityMapFlagging(AreaMap map, Object key, int range) {
     this.map = map;
     this.key = key;
     this.range = range;
@@ -198,7 +198,7 @@ public class CityMapFlagging {
       Tile t = map.tileAt(c.x, c.y);
       if (t == null || t.hasFocus()) continue;
       
-      float dist = CityMap.distance(from, t);
+      float dist = AreaMap.distance(from, t);
       if (dist > range || vals[t.x][t.y] == 0) continue;
       
       pick.compare(t, 0 - dist);

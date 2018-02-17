@@ -45,7 +45,7 @@ public class VenuePane extends DetailPane {
     for (final ActorType w : type.workerTypes.keys()) {
       int num = venue.numWorkers(w), max = venue.maxWorkers(w);
       int cost = venue.hireCost(w);
-      boolean canHire = venue.homeCity().funds() >= cost;
+      boolean canHire = venue.base().funds() >= cost;
       
       d.append("\n\n"+w.name+": ("+num+"/"+max+")");
       for (Actor a : venue.workers()) if (a.type() == w) {

@@ -44,8 +44,8 @@ public class InstallPane extends DetailPane {
   
   private void beginInstallTask(Type type) {
     final Building placed = (Building) type.generate();
-    final CityMap  stage  = UI.stage;
-    final City     base   = UI.base;
+    final AreaMap  stage  = UI.stage;
+    final Base     base   = UI.base;
     
     final PlayTask task = new PlayTask() {
       public void doTask(PlayUI UI) {

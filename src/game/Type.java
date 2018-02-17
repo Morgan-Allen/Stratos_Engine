@@ -122,7 +122,7 @@ public class Type extends Index.Entry implements Session.Saveable {
   public Good    builtFrom  [] = EMPTY_MATERIAL;
   public Integer builtAmount[] = { 1 };
   
-  public int     pathing  = CityMap.PATH_BLOCK;
+  public int     pathing  = AreaMap.PATH_BLOCK;
   public boolean mobile   = false;
   public float   growRate = 0;
   public int     ambience = 0;

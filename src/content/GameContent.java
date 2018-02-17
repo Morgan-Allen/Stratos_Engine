@@ -6,7 +6,7 @@ import graphics.common.*;
 import graphics.cutout.*;
 import graphics.solids.*;
 import util.*;
-import static game.CityMap.*;
+import static game.AreaMap.*;
 import static game.GameConstants.*;
 import static game.Type.*;
 
@@ -668,8 +668,8 @@ public class GameContent {
     */
   static World setupDefaultWorld() {
     World world = new World(ALL_GOODS);
-    City  cityA = new City(world, world.addLocale(1, 1, "Elysium Sector"));
-    City  cityB = new City(world, world.addLocale(3, 3, "Pavonis Sector"));
+    Base  cityA = new Base(world, world.addLocale(1, 1, "Elysium Sector"));
+    Base  cityB = new Base(world, world.addLocale(3, 3, "Pavonis Sector"));
     world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES());
     
     cityA.setName("Elysium Base");

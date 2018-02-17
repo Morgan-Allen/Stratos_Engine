@@ -38,15 +38,15 @@ public class TaskRetreat extends Task {
     
     Building home = actor.home();
     if (home == null) home = actor.work();
-    CityMap map = actor.map;
+    AreaMap map = actor.map;
     Pick <Building> pickHide = new Pick();
     
     for (Building b : map.buildings) {
-      if (b != home && b.homeCity() != actor.homeCity()) continue;
+      if (b != home && b.base() != actor.base()) continue;
       if (b != home && ! b.type().hasFeature(IS_REFUGE)) continue;
       
       float rating = 1.0f;
-      rating *= CityMap.distancePenalty(actor, b);
+      rating *= AreaMap.distancePenalty(actor, b);
       if (b == home) rating *= 2;
       
       pickHide.compare(b, rating);

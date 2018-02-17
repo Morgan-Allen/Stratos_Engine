@@ -14,7 +14,7 @@ public class TestTrading extends Test {
   
   
   public static void main(String args[]) {
-    testTrading(true);
+    testTrading(false);
   }
   
   
@@ -22,18 +22,18 @@ public class TestTrading extends Test {
     Test test = new TestTrading();
     
     World world = new World(ALL_GOODS);
-    City  baseC = new City(world, world.addLocale(2, 2));
-    City  awayC = new City(world, world.addLocale(3, 3));
+    Base  baseC = new Base(world, world.addLocale(2, 2));
+    Base  awayC = new Base(world, world.addLocale(3, 3));
     world.addCities(baseC, awayC);
     awayC.council.setTypeAI(CityCouncil.AI_OFF);
     baseC.setName("(Home City)");
     awayC.setName("(Away City)");
     
     World.setupRoute(baseC.locale, awayC.locale, 1);
-    City.setPosture(baseC, awayC, City.POSTURE.VASSAL, true);
+    Base.setPosture(baseC, awayC, Base.POSTURE.VASSAL, true);
     
     Tally <Good> supplies = new Tally().setWith(GREENS, 10, SPYCE, 5);
-    City.setSuppliesDue(awayC, baseC, supplies);
+    Base.setSuppliesDue(awayC, baseC, supplies);
     
     awayC.initTradeLevels(
       MEDICINE  ,  50,
@@ -48,7 +48,7 @@ public class TestTrading extends Test {
     );
     
     
-    CityMap map = new CityMap(world, baseC.locale, baseC);
+    AreaMap map = new AreaMap(world, baseC.locale, baseC);
     map.performSetup(10, new Terrain[0]);
     world.settings.toggleFog      = false;
     world.settings.toggleHunger   = false;
@@ -99,8 +99,8 @@ public class TestTrading extends Test {
       
       if (! tradeOkay) {
         boolean check = true;
-        check &= City.goodsSent(baseC, awayC, PARTS   ) > 1;
-        check &= City.goodsSent(baseC, awayC, MEDICINE) > 1;
+        check &= Base.goodsSent(baseC, awayC, PARTS   ) > 1;
+        check &= Base.goodsSent(baseC, awayC, MEDICINE) > 1;
         check &= baseC.funds() > 0;
         tradeOkay = check;
       }
@@ -152,15 +152,17 @@ public class TestTrading extends Test {
   
   
   static float projectedEarnings(
-    City cityA, City cityB, int initFunds, boolean report
+    Base cityA, Base cityB, int initFunds, boolean report
   ) {
     if (report) I.say("\nProjected earnings:");
     
+    //  TODO:  This should be broken.  And it isn't.  Find out why.
+    
     float projectedFunds = initFunds;
     for (Good g : ALL_GOODS) {
-      float sent = City.goodsSent  (cityA, cityB, g);
-      float got  = City.goodsSent  (cityB, cityA, g);
-      float free = City.suppliesDue(cityB, cityA, g);
+      float sent = Base.goodsSent  (cityA, cityB, g);
+      float got  = Base.goodsSent  (cityB, cityA, g);
+      float free = Base.suppliesDue(cityB, cityA, g);
       if (sent == 0 && got == 0 && free == 0) continue;
       
       float pays = sent * g.price;
@@ -177,14 +179,14 @@ public class TestTrading extends Test {
   }
   
   
-  static void reportOnMap(City a, City b, boolean okay) {
+  static void reportOnMap(Base a, Base b, boolean okay) {
     final Good GOODS[] = { ORES, PARTS, MEDICINE, GREENS, SPYCE };
     
     I.say("\nGoods report:");
     for (Good g : GOODS) {
       I.say("  Made "+g+": "+a.totalMade(g));
-      I.add("  Sent "+City.goodsSent(a, b, g));
-      I.add("  Got " +City.goodsSent(b, a, g));
+      I.add("  Sent "+Base.goodsSent(a, b, g));
+      I.add("  Got " +Base.goodsSent(b, a, g));
     }
     I.say("  Current funds: "+a.funds());
     I.say("  Current time:  "+a.world.time());

@@ -20,14 +20,14 @@ public class World implements Session.Saveable {
   }
   
   public static class Journey {
-    City from;
-    City goes;
+    Base from;
+    Base goes;
     int startTime;
     int arriveTime;
     Batch <Journeys> going = new Batch();
     
-    public City from() { return from; }
-    public City goes() { return goes; }
+    public Base from() { return from; }
+    public Base goes() { return goes; }
     public Series <Journeys> going() { return going; }
   }
   
@@ -57,7 +57,7 @@ public class World implements Session.Saveable {
   
   int time = 0;
   List <Locale > locales  = new List();
-  List <City   > cities   = new List();
+  List <Base   > cities   = new List();
   List <Journey> journeys = new List();
   List <Event  > history  = new List();
   
@@ -112,8 +112,8 @@ public class World implements Session.Saveable {
     
     for (int n = s.loadInt(); n-- > 0;) {
       Journey j = new Journey();
-      j.from       = (City) s.loadObject();
-      j.goes       = (City) s.loadObject();
+      j.from       = (Base) s.loadObject();
+      j.goes       = (Base) s.loadObject();
       j.startTime  = s.loadInt();
       j.arriveTime = s.loadInt();
       s.loadObjects(j.going);
@@ -222,29 +222,29 @@ public class World implements Session.Saveable {
   }
   
   
-  public static Vec2D mapCoords(City c) {
+  public static Vec2D mapCoords(Base c) {
     return new Vec2D(c.locale.mapX, c.locale.mapY);
   }
   
   
-  public void addCities(City... cities) {
+  public void addCities(Base... cities) {
     Visit.appendTo(this.cities, cities);
   }
   
   
-  public City cityNamed(String n) {
-    for (City c : cities) if (c.name.equals(n)) return c;
+  public Base cityNamed(String n) {
+    for (Base c : cities) if (c.name.equals(n)) return c;
     return null;
   }
   
   
-  public CityMap activeCityMap() {
-    for (City c : cities) if (c.activeMap() != null) return c.activeMap();
+  public AreaMap activeCityMap() {
+    for (Base c : cities) if (c.activeMap() != null) return c.activeMap();
     return null;
   }
   
   
-  public Series <City> cities() {
+  public Series <Base> cities() {
     return cities;
   }
   
@@ -252,7 +252,7 @@ public class World implements Session.Saveable {
   
   /**  Registering and updating journeys:
     */
-  public Journey beginJourney(City from, City goes, Journeys... going) {
+  public Journey beginJourney(Base from, Base goes, Journeys... going) {
     if (from == null || goes == null) return null;
     
     float distance = Nums.max(1, from.distance(goes));
@@ -274,7 +274,7 @@ public class World implements Session.Saveable {
   }
 
   
-  public Journey beginJourney(City from, City goes, Series <Journeys> going) {
+  public Journey beginJourney(Base from, Base goes, Series <Journeys> going) {
     return beginJourney(from, goes, going.toArray(Journeys.class));
   }
   
@@ -341,11 +341,11 @@ public class World implements Session.Saveable {
   public void updateWithTime(int time) {
     this.time = time;
     
-    CityMap active = activeCityMap();
+    AreaMap active = activeCityMap();
     if (active != null) {
       active.locals.updateCity();
     }
-    for (City city : cities) {
+    for (Base city : cities) {
       city.updateCity();
     }
     
@@ -403,8 +403,8 @@ public class World implements Session.Saveable {
   }
   
   
-  City onMap(int mapX, int mapY) {
-    for (City city : cities) {
+  Base onMap(int mapX, int mapY) {
+    for (Base city : cities) {
       int x = (int) city.locale.mapX, y = (int) city.locale.mapY;
       if (x == mapX && y == mapY) return city;
     }

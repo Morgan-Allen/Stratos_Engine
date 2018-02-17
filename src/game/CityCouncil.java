@@ -3,7 +3,7 @@
 package game;
 import util.*;
 import static game.ActorAsPerson.*;
-import static game.City.*;
+import static game.Base.*;
 import static game.GameConstants.*;
 
 
@@ -35,7 +35,7 @@ public class CityCouncil {
   };
   
   
-  final City city;
+  final Base city;
   private int typeAI = AI_NORMAL;
   
   private List <Actor> members = new List();
@@ -44,7 +44,7 @@ public class CityCouncil {
   private List <Mission> petitions = new List();
   
   
-  CityCouncil(City city) {
+  CityCouncil(Base city) {
     this.city = city;
   }
   
@@ -164,7 +164,7 @@ public class CityCouncil {
     */
   public static class MissionAssessment {
     
-    City fromC, goesC;
+    Base fromC, goesC;
     float fromPower, goesPower;
     
     int objective;
@@ -182,8 +182,8 @@ public class CityCouncil {
     float costs, benefits;
     float evaluatedAppeal;
     
-    public City from() { return fromC; }
-    public City goes() { return goesC; }
+    public Base from() { return fromC; }
+    public Base goes() { return goesC; }
     public float appeal() { return evaluatedAppeal; }
   }
   
@@ -247,7 +247,7 @@ public class CityCouncil {
     
     for (Mission petition : petitions) {
       float appeal = appealOfTerms(
-        petition.homeCity(), city,
+        petition.base(), city,
         petition.postureDemand,
         petition.actionDemand,
         petition.marriageDemand,
@@ -281,7 +281,7 @@ public class CityCouncil {
   
   /**  Evaluating the appeal and probability of invading other cities:
     */
-  float casualtyValue(City city) {
+  float casualtyValue(Base city) {
     //
     //  For now, we'll assume that the value of lives is calculated on an
     //  entirely cynical economic basis:
@@ -292,7 +292,7 @@ public class CityCouncil {
   }
   
   
-  float tributeValue(Good good, float perYear, City city) {
+  float tributeValue(Good good, float perYear, Base city) {
     //
     //  The value of tribute is calculated based on relative supply/demand
     //  levels for a particular good:
@@ -397,7 +397,7 @@ public class CityCouncil {
   
   
   public MissionAssessment invasionAssessment(
-    City attack, City defend,
+    Base attack, Base defend,
     float commitLevel, boolean random
   ) {
     MissionAssessment MA = new MissionAssessment();
@@ -433,7 +433,7 @@ public class CityCouncil {
   //  would be attractive.
   
   float appealOfTerms(
-    City from, City goes,
+    Base from, Base goes,
     POSTURE      posture ,
     Mission      action  ,
     Actor        marriage,
@@ -445,7 +445,7 @@ public class CityCouncil {
     //  TODO:  Merge this with the assessment code below.
     
     float synergyVal = 0, dot = 0, count = 0;
-    for (City c : goes.relationsWith()) {
+    for (Base c : goes.relationsWith()) {
       float valueF = from.loyalty(c);
       float valueG = goes.loyalty(c);
       synergyVal += dot = valueF * valueG;
@@ -481,7 +481,7 @@ public class CityCouncil {
   
   
   public MissionAssessment dialogAssessment(
-    City from, City goes, boolean random
+    Base from, Base goes, boolean random
   ) {
     MissionAssessment MA = new MissionAssessment();
     
@@ -518,7 +518,7 @@ public class CityCouncil {
     
     //I.say("\nGetting synergy between "+from+" and "+goes);
     float synergyVal = 0, dot = 0, count = 0;
-    for (City c : goes.relationsWith()) {
+    for (Base c : goes.relationsWith()) {
       float valueF = from.loyalty(c);
       float valueG = goes.loyalty(c);
       //I.say("  "+c+": "+valueF+" * "+valueG);
@@ -585,7 +585,7 @@ public class CityCouncil {
     //  TODO:  Allow for multiple levels of force-commitment, since you don't
     //  want your own city to be vulnerable?  And multiple options for terms
     //  during diplomacy?
-    for (City other : city.world.cities) if (other != city) {
+    for (Base other : city.world.cities) if (other != city) {
       Integer distance = city.locale.distances.get(other.locale);
       if (distance == null) continue;
       
@@ -654,7 +654,7 @@ public class CityCouncil {
   }
   
   
-  boolean considerRevolt(City lord, int period) {
+  boolean considerRevolt(Base lord, int period) {
     if (typeAI == AI_DEFIANT  ) return true ;
     if (typeAI == AI_COMPLIANT) return false;
     if (typeAI == AI_OFF      ) return false;

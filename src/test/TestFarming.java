@@ -20,8 +20,8 @@ public class TestFarming extends Test {
   static boolean testFarming(boolean graphics) {
     Test test = new TestFarming();
 
-    City base = setupTestCity(20, ALL_GOODS, true, DESERT, MEADOW, JUNGLE);
-    CityMap map = base.activeMap();
+    Base base = setupTestCity(20, ALL_GOODS, true, DESERT, MEADOW, JUNGLE);
+    AreaMap map = base.activeMap();
     World world = map.world;
     world.settings.toggleFog    = false;
     world.settings.toggleHunger = false;
