@@ -13,7 +13,8 @@ public class BuildingForTrade extends Building implements Trader {
   
   /**  Data fields, setup and save/load methods-
     */
-  Tally <Good> tradeLevel = new Tally();
+  Tally <Good> prodLevel = new Tally();
+  Tally <Good> needLevel = new Tally();
   List <Good> tradeFixed = new List();
   Base tradePartner = null;
   boolean tradeOff = false;
@@ -27,7 +28,8 @@ public class BuildingForTrade extends Building implements Trader {
   
   public BuildingForTrade(Session s) throws Exception {
     super(s);
-    s.loadTally(tradeLevel);
+    s.loadTally(prodLevel);
+    s.loadTally(needLevel);
     s.loadObjects(tradeFixed);
     tradePartner = (Base) s.loadObject();
     tradeOff = s.loadBool();
@@ -36,7 +38,8 @@ public class BuildingForTrade extends Building implements Trader {
   
   public void saveState(Session s) throws Exception {
     super.saveState(s);
-    s.saveTally(tradeLevel);
+    s.saveTally(prodLevel);
+    s.saveTally(needLevel);
     s.saveObjects(tradeFixed);
     s.saveObject(tradePartner);
     s.saveBool(tradeOff);
@@ -46,10 +49,18 @@ public class BuildingForTrade extends Building implements Trader {
   
   /**  Updating demands-
     */
-  public void setTradeLevels(boolean matchStock, Object... args) {
-    tradeLevel.setWith(args);
-    if (matchStock) for (Good g : tradeLevel.keys()) {
-      setInventory(g, Nums.abs(tradeLevel.valueFor(g)));
+  public void setAcceptLevels(boolean matchStock, Object... args) {
+    prodLevel.setWith(args);
+    if (matchStock) for (Good g : prodLevel.keys()) {
+      setInventory(g, Nums.abs(prodLevel.valueFor(g)));
+    }
+  }
+  
+  
+  public void setNeedLevels(boolean matchStock, Object... args) {
+    needLevel.setWith(args);
+    if (matchStock) for (Good g : needLevel.keys()) {
+      setInventory(g, Nums.abs(needLevel.valueFor(g)));
     }
   }
   
@@ -68,28 +79,31 @@ public class BuildingForTrade extends Building implements Trader {
     super.updateOnPeriod(period);
     
     Batch <Good> impB = new Batch(), expB = new Batch();
-    for (Good g : tradeLevel.keys()) {
-      float level = tradeLevel.valueFor(g);
-      if (level != 0) impB.add(g);
-      if (level != 0) expB.add(g);
+    for (Good g : map.world.goodTypes) {
+      float need   = needLevel  .valueFor(g);
+      float accept = prodLevel.valueFor(g);
+      if (need   > 0) impB.add(g);
+      if (accept > 0) expB.add(g);
     }
     produced = impB.toArray(Good.class);
     needed   = expB.toArray(Good.class);
   }
   
   
-  public Tally <Good> tradeLevel() { return tradeLevel; }
+  public Tally <Good> needLevels() { return needLevel; }
+  public Tally <Good> prodLevels() { return prodLevel; }
   public Tally <Good> inventory () { return super.inventory(); }
   
   public Good[] needed  () { return needed  ; }
   public Good[] produced() { return produced; }
   
+  
   public float stockNeeded(Good need) {
-    return Nums.abs(tradeLevel.valueFor(need));
+    return needLevel.valueFor(need) + prodLevel.valueFor(need);
   }
   
-  public float stockLimit (Good made) {
-    return Nums.abs(tradeLevel.valueFor(made));
+  public float stockLimit(Good made) {
+    return needLevel.valueFor(made) + prodLevel.valueFor(made);
   }
   
   public float importPrice(Good g, Base sells) {

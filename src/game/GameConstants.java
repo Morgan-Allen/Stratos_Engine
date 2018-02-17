@@ -425,8 +425,9 @@ public class GameConstants {
   
   
   public static interface Trader {
-    Tally <Good> tradeLevel();
-    Tally <Good> inventory ();
+    Tally <Good> needLevels();
+    Tally <Good> prodLevels();
+    Tally <Good> inventory();
     Base base();
     float importPrice(Good g, Base sells);
     float exportPrice(Good g, Base buys );

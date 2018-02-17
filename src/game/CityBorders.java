@@ -183,20 +183,20 @@ public class CityBorders {
     Base.Relation goesR = from.base().relationWith(goes.base());
     
     for (Good good : world.goodTypes) {
-      float amountO = from.inventory ().valueFor(good);
-      float demandO = from.tradeLevel().valueFor(good);
-      float amountD = goes.inventory ().valueFor(good);
-      float demandD = goes.tradeLevel().valueFor(good);
+      float amountFrom = from.inventory ().valueFor(good);
+      float amountGoes = goes.inventory ().valueFor(good);
+      float needFrom   = from.needLevels().valueFor(good);
+      float needGoes   = goes.needLevels().valueFor(good);
       
       if (fromCity) {
-        demandO = Nums.max(demandO, fromR.suppliesDue.valueFor(good));
+        needFrom = Nums.max(needFrom, fromR.suppliesDue.valueFor(good));
       }
       if (goesCity) {
-        demandD = Nums.max(demandD, goesR.suppliesDue.valueFor(good));
+        needGoes = Nums.max(needGoes, goesR.suppliesDue.valueFor(good));
       }
       
-      float surplus  = amountO - Nums.max(0, demandO);
-      float shortage = Nums.max(0, demandD) - amountD;
+      float surplus  = amountFrom - needFrom;
+      float shortage = needGoes - amountGoes;
       
       if (surplus > 0 && shortage > 0) {
         float size = Nums.min(surplus, shortage);

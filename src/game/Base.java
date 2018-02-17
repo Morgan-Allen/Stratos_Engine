@@ -4,6 +4,8 @@ package game;
 import util.*;
 import static game.GameConstants.*;
 
+import game.GameConstants.Good;
+
 
 
 public class Base implements Session.Saveable, Trader {
@@ -12,7 +14,7 @@ public class Base implements Session.Saveable, Trader {
   /**  Data fields, construction and save/load methods-
     */
   public static enum GOVERNMENT {  //  TODO:  Move into the Council class.
-    IMPERIAL, FEUDAL, BARBARIAN
+    IMPERIAL, FEUDAL, BARBARIAN, REPUBLIC
   }
   public static enum POSTURE {
     ENEMY  ,
@@ -70,14 +72,16 @@ public class Base implements Session.Saveable, Trader {
   
   GOVERNMENT government = GOVERNMENT.FEUDAL;
   float prestige = PRESTIGE_AVG;
+  Base homeland = null;
   final public CityCouncil council = new CityCouncil(this);
-  Table <Base, Relation> relations = new Table();
+  final Table <Base, Relation> relations = new Table();
   
   private int   currentFunds = 0;
   private float population   = 0;
   private float armyPower    = 0;
-  Tally <Good> tradeLevel = new Tally();
-  Tally <Good> inventory  = new Tally();
+  Tally <Good> needLevel   = new Tally();
+  Tally <Good> prodLevel = new Tally();
+  Tally <Good> inventory   = new Tally();
   Tally <BuildType> buildLevel = new Tally();
   
   List <Mission> missions = new List();
@@ -115,6 +119,7 @@ public class Base implements Session.Saveable, Trader {
     
     government = GOVERNMENT.values()[s.loadInt()];
     prestige = s.loadFloat();
+    homeland = (Base) s.loadObject();
     council.loadState(s);
     
     for (int n = s.loadInt(); n-- > 0;) {
@@ -132,9 +137,10 @@ public class Base implements Session.Saveable, Trader {
     currentFunds = s.loadInt();
     population   = s.loadFloat();
     armyPower    = s.loadFloat();
-    s.loadTally(tradeLevel);
-    s.loadTally(inventory );
-    s.loadTally(buildLevel);
+    s.loadTally(needLevel  );
+    s.loadTally(prodLevel);
+    s.loadTally(inventory  );
+    s.loadTally(buildLevel );
     
     s.loadObjects(missions);
     
@@ -155,6 +161,7 @@ public class Base implements Session.Saveable, Trader {
     
     s.saveInt(government.ordinal());
     s.saveFloat(prestige);
+    s.saveObject(homeland);
     council.saveState(s);
     
     s.saveInt(relations.size());
@@ -171,9 +178,10 @@ public class Base implements Session.Saveable, Trader {
     s.saveInt(currentFunds);
     s.saveFloat(population);
     s.saveFloat(armyPower );
-    s.saveTally(tradeLevel);
-    s.saveTally(inventory );
-    s.saveTally(buildLevel);
+    s.saveTally(needLevel  );
+    s.saveTally(prodLevel);
+    s.saveTally(inventory  );
+    s.saveTally(buildLevel );
     
     s.saveObjects(missions);
     
@@ -248,6 +256,16 @@ public class Base implements Session.Saveable, Trader {
   
   public GOVERNMENT government() {
     return government;
+  }
+  
+  
+  public void setHomeland(Base homeland) {
+    this.homeland = homeland;
+  }
+  
+  
+  public Base homeland() {
+    return homeland;
   }
   
   
@@ -421,18 +439,19 @@ public class Base implements Session.Saveable, Trader {
   }
   
   
-  public void initTradeLevels(Object... args) {
-    tradeLevel.setWith(args);
+  public void setTradeLevel(Good g, float need, float accept) {
+    needLevel  .set(g, need  );
+    prodLevel.set(g, accept);
   }
   
   
-  public float tradeLevel(Good g) {
-    return tradeLevel.valueFor(g);
+  public float needLevel(Good g) {
+    return needLevel.valueFor(g);
   }
   
   
-  public float setTradeLevel(Good g, float amount) {
-    return tradeLevel.set(g, amount);
+  public float prodLevel(Good g) {
+    return prodLevel.valueFor(g);
   }
   
   
@@ -481,9 +500,10 @@ public class Base implements Session.Saveable, Trader {
     return makeTotals.valueFor(g);
   }
   
-  
-  public Tally <Good> tradeLevel() { return tradeLevel; }
-  public Tally <Good> inventory () { return inventory ; }
+
+  public Tally <Good> needLevels  () { return needLevel; }
+  public Tally <Good> prodLevels() { return prodLevel; }
+  public Tally <Good> inventory   () { return inventory ; }
   public Base base() { return this; }
   
   
@@ -639,15 +659,13 @@ public class Base implements Session.Saveable, Trader {
         armyPower = Nums.min(idealArmy, armyPower + popRegen);
       }
       
-      //I.say("POWER OF "+this+" IS "+armyPower);
-      
-      for (Good g : tradeLevel.keys()) {
-        float demand = tradeLevel.valueFor(g);
-        float supply = 0 - demand;
-        float amount = inventory .valueFor(g);
+      for (Good g : world.goodTypes) {
+        float demand = needLevel  .valueFor(g);
+        float supply = prodLevel.valueFor(g);
+        float amount = inventory  .valueFor(g);
         if (demand > 0) amount -= usageInc * demand;
         if (supply > 0) amount += usageInc * supply;
-        inventory.set(g, Nums.clamp(amount, 0, Nums.abs(demand)));
+        inventory.set(g, Nums.clamp(amount, 0, Nums.abs(demand + supply)));
       }
       
       if (isLoyalVassalOf(lord)) {

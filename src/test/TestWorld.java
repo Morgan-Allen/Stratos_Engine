@@ -5,13 +5,13 @@ package test;
 import util.*;
 import content.*;
 import game.*;
-import static content.GameContent.*;
 import static game.Actor.*;
 import static game.ActorAsPerson.*;
 import static game.Base.*;
 import static game.CityCouncil.*;
 import static game.GameConstants.*;
 import static game.World.*;
+import static content.GameContent.*;
 
 
 
@@ -33,10 +33,12 @@ public class TestWorld extends Test {
       Base vassal = pair[0], lord = pair[1];
       World world = vassal.world;
       
-      vassal.initTradeLevels(CARBS, 10f, MEDICINE, -5f);
-      for (Good g : vassal.tradeLevel().keys()) {
-        float demand = vassal.tradeLevel(g);
-        if (demand > 0) vassal.setInventory(g, demand);
+      vassal.setTradeLevel(CARBS   , 0, 10);
+      vassal.setTradeLevel(MEDICINE, 5, 0 );
+      //vassal.initTradeLevels(CARBS, 10f, MEDICINE, -5f);
+      for (Good g : vassal.needLevels().keys()) {
+        float demand = vassal.needLevel(g);
+        vassal.setInventory(g, demand);
       }
       
       float AVG_P = Base.PRESTIGE_AVG, AVG_L = Base.LOY_CIVIL;
@@ -50,6 +52,21 @@ public class TestWorld extends Test {
         world.updateWithTime(time++);
       }
       
+      for (Good g : vassal.needLevels().keys()) {
+        if (vassal.inventory(g) > 1) {
+          I.say("\nCity did not consume goods over time!");
+          return false;
+        }
+      }
+      for (Good g : vassal.prodLevels().keys()) {
+        float supply = vassal.prodLevel(g);
+        if (vassal.inventory(g) < supply - 1) {
+          I.say("\nCity did not generate goods over time!");
+          return false;
+        }
+      }
+      
+      /*
       for (Good g : vassal.tradeLevel().keys()) {
         float demand = vassal.tradeLevel(g);
         if (demand > 0) {
@@ -66,6 +83,7 @@ public class TestWorld extends Test {
           }
         }
       }
+      //*/
       
       float endP = lord.prestige(), endL = vassal.loyalty(lord);
       if (Nums.abs(endP - AVG_P) >= Nums.abs(initPrestige - AVG_P)) {
@@ -320,8 +338,12 @@ public class TestWorld extends Test {
       Base main = from[0];
       
       //  Establish trade-options with city 3...
-      main   .initTradeLevels(GREENS,  5, PARTS,  5);
-      from[2].initTradeLevels(GREENS, -5, PARTS, -5);
+      main   .setTradeLevel(GREENS, 0, 5);
+      main   .setTradeLevel(PARTS , 0, 5);
+      from[2].setTradeLevel(GREENS, 5, 0);
+      from[2].setTradeLevel(PARTS , 5, 0);
+      //main   .initTradeLevels(GREENS,  5, PARTS,  5);
+      //from[2].initTradeLevels(GREENS, -5, PARTS, -5);
       
       //  Establish enmity with city 5...
       incLoyalty(main, from[4], -0.5f);
@@ -388,7 +410,8 @@ public class TestWorld extends Test {
       for (Good g : goods) {
         float amount = (Rand.num() - 0.5f) * 10;
         amount = Nums.round(amount, 2, amount >= 0);
-        city.setTradeLevel(g, amount);
+        if (amount > 0) city.setTradeLevel(g, amount, 0);
+        else city.setTradeLevel(g, 0, 0 - amount);
       }
       city.initBuildLevels(
         TROOPER_LODGE, 2f + Rand.index(3),
@@ -588,12 +611,13 @@ public class TestWorld extends Test {
     I.say("\nReporting world state:");
     for (Base c : world.cities()) {
       I.say("  "+c+":");
-      I.say("    Pop: "+c.population());
-      I.say("    Arm: "+c.armyPower ());
-      I.say("    Prs: "+c.prestige  ());
-      I.say("    Trd: "+c.tradeLevel());
-      I.say("    Bld: "+c.buildLevel());
-      I.say("    Inv: "+c.inventory ());
+      I.say("    Pop:    "+c.population  ());
+      I.say("    Arm:    "+c.armyPower   ());
+      I.say("    Prs:    "+c.prestige    ());
+      I.say("    Need:   "+c.needLevels  ());
+      I.say("    Accept: "+c.prodLevels());
+      I.say("    Bld:    "+c.buildLevel  ());
+      I.say("    Inv:    "+c.inventory   ());
       I.say("    Relations-");
       for (Base o : world.cities()) if (o != c) {
         I.add(" "+o+": "+c.posture(o)+" "+c.loyalty(o));

@@ -490,15 +490,17 @@ public class Test {
     
     List <String> goodRep = new List();
     for (Good g : c.world.goodTypes) {
-      float amount = c.inventory.valueFor(g);
-      float demand = c.tradeLevel.valueFor(g);
-      if (amount == 0 && demand == 0) continue;
+      float amount = c.inventory(g);
+      float need   = c.needLevel(g);
+      float accept = c.prodLevel(g);
+      //float demand = c.tradeLevel.valueFor(g);
+      if (amount == 0 && need == 0 && accept == 0) continue;
       
-      if (demand > 0) goodRep.add(
-        "\n  Needs: "+g+": "+I.shorten(amount, 1)+"/"+I.shorten( demand, 1)
+      if (need > 0) goodRep.add(
+        "\n  Needs: "+g+": "+I.shorten(amount, 1)+"/"+I.shorten(need, 1)
       );
-      else goodRep.add(
-        "\n  Sells: "+g+": "+I.shorten(amount, 1)+"/"+I.shorten(-demand, 1)
+      if (accept > 0) goodRep.add(
+        "\n  Sells: "+g+": "+I.shorten(amount, 1)+"/"+I.shorten(accept, 1)
       );
     }
     if (! goodRep.empty()) {

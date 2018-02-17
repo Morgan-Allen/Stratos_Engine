@@ -35,12 +35,10 @@ public class TestTrading extends Test {
     Tally <Good> supplies = new Tally().setWith(GREENS, 10, SPYCE, 5);
     Base.setSuppliesDue(awayC, baseC, supplies);
     
-    awayC.initTradeLevels(
-      MEDICINE  ,  50,
-      PARTS     ,  50,
-      GREENS    , -50,
-      ORES      , -50
-    );
+    awayC.setTradeLevel(MEDICINE, 0 , 50);
+    awayC.setTradeLevel(PARTS   , 0 , 50);
+    awayC.setTradeLevel(GREENS  , 50, 0 );
+    awayC.setTradeLevel(ORES    , 50, 0 );
     awayC.initInventory(
       GREENS    ,  35,
       ORES      ,  20,
@@ -59,19 +57,21 @@ public class TestTrading extends Test {
     BuildingForTrade post1 = (BuildingForTrade) SUPPLY_DEPOT.generate();
     post1.enterMap(map, 1, 6, 1, baseC);
     post1.setID("(Does Trading)");
-    post1.setTradeLevels(false,
-      GREENS    ,  2 ,
-      ORES      ,  2 ,
-      MEDICINE  , -5 ,
-      PARTS     , -5 
+    post1.setAcceptLevels(false,
+      GREENS    , 2,
+      ORES      , 2
+    );
+    post1.setNeedLevels(false,
+      MEDICINE  , 5,
+      PARTS     , 5
     );
     
     BuildingForTrade post2 = (BuildingForTrade) SUPPLY_DEPOT.generate();
     post2.enterMap(map, 5, 6, 1, baseC);
     post2.setID("(Gets Supplies)");
-    post2.setTradeLevels(false,
+    post2.setAcceptLevels(false,
       GREENS    , 15,
-      SPYCE     , 5 
+      SPYCE     , 5
     );
     
     Building kiln = (Building) ENGINEER_STATION.generate();

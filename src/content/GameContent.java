@@ -673,10 +673,12 @@ public class GameContent {
     world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES());
     
     cityA.setName("Elysium Base");
-    cityA.initTradeLevels(
-      PARTS   , 5f ,
-      MEDICINE, 10f
-    );
+    cityA.setTradeLevel(PARTS   , 0, 5 );
+    cityA.setTradeLevel(MEDICINE, 0, 10);
+    //cityA.initTradeLevels(
+    //  PARTS   , 5f ,
+    //  MEDICINE, 10f
+    //);
     cityA.initBuildLevels(
       TROOPER_LODGE, 2f ,
       HOLDING      , 10f
@@ -684,10 +686,12 @@ public class GameContent {
     world.addCities(cityA);
     
     cityB.setName("Pavonis Base");
-    cityB.initTradeLevels(
-      CARBS, 5f ,
-      ORES , 10f
-    );
+    cityB.setTradeLevel(CARBS, 0, 5 );
+    cityB.setTradeLevel(ORES , 0, 10);
+    //cityB.initTradeLevels(
+    //  CARBS, 5f ,
+    //  ORES , 10f
+    //);
     cityA.initBuildLevels(
       TROOPER_LODGE, 0.75f,
       HOLDING      , 5f
