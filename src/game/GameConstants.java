@@ -162,6 +162,8 @@ public class GameConstants {
     MIGRANTS_PER_1KM = 10     //  per month per 1000 foreign citizens
   ;
   final public static int
+    //
+    //  Social-class constants-
     CLASS_COMMON   = 0,
     CLASS_TRADER   = 1,
     CLASS_SOLDIER  = 2,
@@ -172,6 +174,12 @@ public class GameConstants {
     AVG_TAX_VALUE  = 25,
     AVG_GOOD_VALUE = 25,
     TAX_INTERVAL   = YEAR_LENGTH,
+    //
+    //  Economic constants-
+    MARKET_MARGIN   =  100,
+    SCARCE_MARGIN   =  50,
+    PLENTY_MARGIN   = -35,
+    TRAVEL_MARGIN   =  35,
     //
     //  City constants-
     AVG_CITY_DIST   = 5,
@@ -420,6 +428,8 @@ public class GameConstants {
     Tally <Good> tradeLevel();
     Tally <Good> inventory ();
     City homeCity();
+    float importPrice(Good g, City sells);
+    float exportPrice(Good g, City buys );
   }
   
   

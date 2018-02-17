@@ -189,6 +189,7 @@ public class TaskTrading extends Task {
     int totalCost = 0;
     
     for (Good g : taken.keys()) {
+      float price  = store.exportPrice(g, opposite);
       float amount = Nums.min(taken.valueFor(g), stock.valueFor(g));
       cargo.add(    amount, g);
       stock.add(0 - amount, g);
@@ -196,10 +197,10 @@ public class TaskTrading extends Task {
       if (tributeDue) {
         float tribLeft = tributeQuantityRemaining(r, g);
         float payFor   = Nums.max(0, amount - tribLeft);
-        totalCost += payFor * g.price;
+        totalCost += payFor * price;
       }
       else {
-        totalCost += amount * g.price;
+        totalCost += amount * price;
       }
       
       r.suppliesSent.add(amount, g);
@@ -232,16 +233,18 @@ public class TaskTrading extends Task {
     
     for (Good g : actor.carried().keys()) {
       if (g == CASH) continue;
+      
+      float price  = store.importPrice(g, opposite);
       float amount = actor.carried(g);
       store.inventory().add(amount, g);
       
       if (tributeDue) {
         float tribLeft = tributeQuantityRemaining(r, g);
         float payFor   = Nums.max(0, amount - tribLeft);
-        totalValue += payFor * g.price;
+        totalValue += payFor * price;
       }
       else {
-        totalValue += amount * g.price;
+        totalValue += amount * price;
       }
     }
     

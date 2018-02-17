@@ -92,6 +92,18 @@ public class BuildingForTrade extends Building implements Trader {
     return Nums.abs(tradeLevel.valueFor(made));
   }
   
+  public float importPrice(Good g, City sells) {
+    return homeCity().importPrice(g, sells);
+  }
+  
+  public float exportPrice(Good g, City buys) {
+    return homeCity().exportPrice(g, buys);
+  }
+  
+  public float shopPrice(Good g, TaskDelivery s) {
+    return super.shopPrice(g, s);
+  }
+  
   
   
   /**  Selecting behaviour for walkers-

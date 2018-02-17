@@ -236,6 +236,16 @@ public class Building extends Element implements Pathing, Employer {
   }
   
   
+  public float shopPrice(Good g, TaskDelivery s) {
+    if (type().hasFeature(IS_VENDOR)) {
+      return g.price * (1 + (MARKET_MARGIN / 100f));
+    }
+    else {
+      return g.price;
+    }
+  }
+  
+  
   
   /**  Regular updates:
     */

@@ -180,6 +180,12 @@ public class TaskDelivery extends Task {
     if (visits == from) {
       amount = Nums.min(amount, visits.inventory(carried));
       amount = Nums.max(amount, 0);
+      
+      if (amount > 0 && type == JOB.SHOPPING && goes.type().isHomeBuilding()) {
+        float cashPaid = amount * from.shopPrice(carried, this);
+        from.addInventory(cashPaid, CASH);
+      }
+      
       if (amount > 0) {
         actor.pickupGood(carried, amount, from);
         configTravel(goes, type, origin);

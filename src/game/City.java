@@ -477,13 +477,22 @@ public class City implements Session.Saveable, Trader {
   }
   
   
+  public float totalMade(Good g) {
+    return makeTotals.valueFor(g);
+  }
+  
+  
   public Tally <Good> tradeLevel() { return tradeLevel; }
   public Tally <Good> inventory () { return inventory ; }
   public City homeCity() { return this; }
   
   
-  public float totalMade(Good g) {
-    return makeTotals.valueFor(g);
+  public float importPrice(Good g, City sells) {
+    return g.price * 1 + (TRAVEL_MARGIN / 100f);
+  }
+  
+  public float exportPrice(Good g, City buys) {
+    return g.price;
   }
   
   
