@@ -95,7 +95,7 @@ public class Base implements Session.Saveable, Trader {
   
   
   public Base(World world, World.Locale locale) {
-    this(world, locale, "City???");
+    this(world, locale, "Base???");
   }
   
   
@@ -508,7 +508,7 @@ public class Base implements Session.Saveable, Trader {
   
   
   public float importPrice(Good g, Base sells) {
-    return g.price * 1 + (TRAVEL_MARGIN / 100f);
+    return (int) (g.price * (1 + (TRAVEL_MARGIN / 100f)));
   }
   
   public float exportPrice(Good g, Base buys) {
@@ -660,12 +660,13 @@ public class Base implements Session.Saveable, Trader {
       }
       
       for (Good g : world.goodTypes) {
-        float demand = needLevel  .valueFor(g);
+        float demand = needLevel.valueFor(g);
         float supply = prodLevel.valueFor(g);
-        float amount = inventory  .valueFor(g);
-        if (demand > 0) amount -= usageInc * demand;
-        if (supply > 0) amount += usageInc * supply;
-        inventory.set(g, Nums.clamp(amount, 0, Nums.abs(demand + supply)));
+        float amount = inventory.valueFor(g);
+        amount -= usageInc * demand;
+        amount += usageInc * supply;
+        if (amount > demand + supply) amount -= usageInc * 5;
+        inventory.set(g, Nums.max(0, amount));
       }
       
       if (isLoyalVassalOf(lord)) {

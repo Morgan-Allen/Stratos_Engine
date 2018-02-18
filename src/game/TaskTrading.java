@@ -2,7 +2,6 @@
 
 package game;
 import util.*;
-import static game.AreaMap.*;
 import static game.CityBorders.*;
 import static game.GameConstants.*;
 
@@ -179,17 +178,18 @@ public class TaskTrading extends Task {
     
     //  You don't have to pay for goods if the city you're taking them from
     //  owes them as tribute!
-    Base city = store.base(), opposite = oppositeCity(store);
-    boolean tributeDue = city.isLoyalVassalOf(opposite);
-    Base.Relation r = city.relationWith(opposite);
+    Base base = store.base(), opposite = oppositeCity(store);
+    boolean tributeDue = base.isLoyalVassalOf(opposite);
+    Base.Relation r = base.relationWith(opposite);
     
     Tally <Good> cargo = new Tally();
     Tally <Good> stock = store.inventory();
     cargo.add(actor.carried);
-    int totalCost = 0;
+    int totalPaid = 0, totalGets = 0;
     
     for (Good g : taken.keys()) {
-      float price  = store.exportPrice(g, opposite);
+      float priceP = opposite.importPrice(g, base);
+      float priceG = base.exportPrice(g, opposite);
       float amount = Nums.min(taken.valueFor(g), stock.valueFor(g));
       cargo.add(    amount, g);
       stock.add(0 - amount, g);
@@ -197,23 +197,28 @@ public class TaskTrading extends Task {
       if (tributeDue) {
         float tribLeft = tributeQuantityRemaining(r, g);
         float payFor   = Nums.max(0, amount - tribLeft);
-        totalCost += payFor * price;
+        totalPaid += payFor * priceP;
+        totalGets += payFor * priceG;
       }
       else {
-        totalCost += amount * price;
+        totalPaid += amount * priceP;
+        totalGets += amount * priceG;
       }
-      
       r.suppliesSent.add(amount, g);
     }
     
-    boolean doPayment = city != homeCity;
-    cargo.add(doPayment ? (0 - totalCost) : 0, CASH);
+    boolean doPayment = base != homeCity;
+    if (doPayment) {
+      cargo.add(0 - totalPaid, CASH);
+      store.inventory().add(totalGets, CASH);
+    }
     actor.assignCargo(cargo);
     
     if (reports()) {
       I.say("\n"+actor+" taking on goods from "+store);
       I.say("  New cargo: "+cargo);
-      I.say("  Cost: "+totalCost+" Profit: "+cargo.valueFor(CASH));
+      I.say("  Profit: "+cargo.valueFor(CASH));
+      I.say("  Cost paid: "+totalPaid+" Cost gets: "+totalGets);
     }
   }
   
@@ -224,42 +229,125 @@ public class TaskTrading extends Task {
     
     //  You don't receive money for goods if the city you deliver to is owed
     //  them as tribute.
-    Base city = store.base(), opposite = oppositeCity(store);
-    boolean tributeDue = opposite.isLoyalVassalOf(city);
-    Base.Relation r = opposite.relationWith(city);
+    Base base = store.base(), opposite = oppositeCity(store);
+    boolean tributeDue = opposite.isLoyalVassalOf(base);
+    Base.Relation r = opposite.relationWith(base);
     
-    float cash = actor.carried(CASH);
-    int totalValue = 0;
+    //float cash = actor.carried(CASH);
+    //int totalValue = 0;
+    int totalPaid = 0, totalGets = 0;
     
     for (Good g : actor.carried().keys()) {
       if (g == CASH) continue;
       
-      float price  = store.importPrice(g, opposite);
+      float priceP = opposite.importPrice(g, base);
+      float priceG = base.exportPrice(g, opposite);
       float amount = actor.carried(g);
       store.inventory().add(amount, g);
       
       if (tributeDue) {
         float tribLeft = tributeQuantityRemaining(r, g);
         float payFor   = Nums.max(0, amount - tribLeft);
-        totalValue += payFor * price;
+        totalPaid += payFor * priceP;
+        totalGets += payFor * priceG;
       }
       else {
-        totalValue += amount * price;
+        totalPaid += amount * priceP;
+        totalGets += amount * priceG;
       }
     }
     
     if (reports()) {
       I.say("\n"+actor+" depositing goods at "+store);
       I.say("  Cargo: "+actor.carried());
-      I.say("  Value: "+totalValue+" Profit: "+actor.carried(CASH));
+      I.say("  Profit: "+actor.carried(CASH));
+      I.say("  Cost paid: "+totalPaid+" Cost gets: "+totalGets);
     }
     
-    boolean doPayment = city != homeCity;
+    boolean doPayment = base != homeCity;
     actor.clearCarried();
-    actor.incCarried(CASH, cash + (doPayment ? totalValue : 0));
+    //actor.incCarried(CASH, cash + (doPayment ? totalValue : 0));
+    
+    if (doPayment) {
+      actor.incCarried(CASH, totalGets);
+      store.inventory().add(0 - totalPaid, CASH);
+    }
   }
   
   
+  static Tally <Good> configureCargo(
+    Trader from, Trader goes, boolean cityOnly, World world
+  ) {
+    Tally <Good> cargo = new Tally();
+    boolean fromCity = from.base() == from;
+    boolean goesCity = goes.base() == goes;
+    
+    boolean report = false;
+    if (report) I.say("\nDoing cargo config for "+from+" -> "+goes);
+    
+    if (from == null || goes == null        ) return cargo;
+    if (cityOnly && ! (fromCity || goesCity)) return cargo;
+    Base.Relation fromR = goes.base().relationWith(from.base());
+    Base.Relation goesR = from.base().relationWith(goes.base());
+    
+    for (Good good : world.goodTypes) {
+      float amountFrom = from.inventory ().valueFor(good);
+      float amountGoes = goes.inventory ().valueFor(good);
+      float needFrom   = from.needLevels().valueFor(good);
+      float needGoes   = goes.needLevels().valueFor(good);
+      
+      if (report) {
+        I.say("  "+I.padToLength(good.name, 12)+": ");
+        I.add(amountFrom+"/"+needFrom+" -> "+amountGoes+"/"+needGoes);
+      }
+      
+      if (fromCity) {
+        needFrom = Nums.max(needFrom, fromR.suppliesDue.valueFor(good));
+      }
+      if (goesCity) {
+        needGoes = Nums.max(needGoes, goesR.suppliesDue.valueFor(good));
+      }
+      
+      float surplus  = amountFrom - needFrom;
+      float shortage = needGoes - amountGoes;
+      
+      if (surplus > 0 && shortage > 0) {
+        float size = Nums.min(surplus, shortage);
+        cargo.set(good, size);
+      }
+    }
+    
+    if (report) {
+      I.say("  Cargo: "+cargo);
+      I.say("");
+    }
+    
+    return cargo;
+  }
+  
+  
+  static float distanceRating(Trader from, Trader goes) {
+    final Base fromB = from.base(), goesB = goes.base();
+    if (
+      from instanceof Building &&
+      goes instanceof Building &&
+      fromB == goesB
+    ) {
+      float mapDist = AreaMap.distance(
+        ((Building) from).mainEntrance(),
+        ((Building) goes).mainEntrance()
+      );
+      return 1f / (1 + (mapDist / MAX_TRADER_RANGE));
+    }
+    else {
+      return CityBorders.distanceRating(fromB, goesB);
+    }
+  }
+  
+  
+  
+  /**  Graphical, debug and interface methods-
+    */
   boolean reports() {
     //return tradeFrom instanceof City || tradeGoes instanceof City;
     return super.reports();

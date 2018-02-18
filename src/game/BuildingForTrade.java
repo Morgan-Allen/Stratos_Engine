@@ -49,7 +49,7 @@ public class BuildingForTrade extends Building implements Trader {
   
   /**  Updating demands-
     */
-  public void setAcceptLevels(boolean matchStock, Object... args) {
+  public void setProdLevels(boolean matchStock, Object... args) {
     prodLevel.setWith(args);
     if (matchStock) for (Good g : prodLevel.keys()) {
       setInventory(g, Nums.abs(prodLevel.valueFor(g)));
@@ -177,10 +177,10 @@ public class BuildingForTrade extends Building implements Trader {
     for (Trader t : targets) {
       World w = map.world;
       Base c = (t == t.base()) ? ((Base) t) : null;
-      Tally <Good> cargoAway = configureCargo(this, t, false, w);
-      Tally <Good> cargoBack = configureCargo(t, this, true , w);
+      Tally <Good> cargoAway = TaskTrading.configureCargo(this, t, false, w);
+      Tally <Good> cargoBack = TaskTrading.configureCargo(t, this, true , w);
       
-      float distRating = distanceRating(this, t);
+      float distRating = TaskTrading.distanceRating(this, t);
       float rating = 0;
       
       if (cargoAway.size() > 0) {

@@ -35,16 +35,18 @@ public class TestTrading extends Test {
     Tally <Good> supplies = new Tally().setWith(GREENS, 10, SPYCE, 5);
     Base.setSuppliesDue(awayC, baseC, supplies);
     
-    awayC.setTradeLevel(MEDICINE, 0 , 50);
-    awayC.setTradeLevel(PARTS   , 0 , 50);
-    awayC.setTradeLevel(GREENS  , 50, 0 );
-    awayC.setTradeLevel(ORES    , 50, 0 );
+    awayC.setTradeLevel(MEDICINE, 50, 0 );
+    awayC.setTradeLevel(PARTS   , 50, 0 );
+    awayC.setTradeLevel(GREENS  , 0 , 50);
+    awayC.setTradeLevel(ORES    , 0 , 50);
     awayC.initInventory(
       GREENS    ,  35,
       ORES      ,  20,
-      SPYCE     ,  5 
+      SPYCE     ,  10
     );
     
+    //  Send parts and medicine.
+    //  Get spyce and greens.
     
     AreaMap map = new AreaMap(world, baseC.locale, baseC);
     map.performSetup(10, new Terrain[0]);
@@ -53,15 +55,14 @@ public class TestTrading extends Test {
     world.settings.toggleFatigue  = false;
     world.settings.toggleBuilding = false;
     
-    
     BuildingForTrade post1 = (BuildingForTrade) SUPPLY_DEPOT.generate();
     post1.enterMap(map, 1, 6, 1, baseC);
     post1.setID("(Does Trading)");
-    post1.setAcceptLevels(false,
+    post1.setNeedLevels(false,
       GREENS    , 2,
       ORES      , 2
     );
-    post1.setNeedLevels(false,
+    post1.setProdLevels(false,
       MEDICINE  , 5,
       PARTS     , 5
     );
@@ -69,7 +70,7 @@ public class TestTrading extends Test {
     BuildingForTrade post2 = (BuildingForTrade) SUPPLY_DEPOT.generate();
     post2.enterMap(map, 5, 6, 1, baseC);
     post2.setID("(Gets Supplies)");
-    post2.setAcceptLevels(false,
+    post2.setNeedLevels(false,
       GREENS    , 15,
       SPYCE     , 5
     );
@@ -156,8 +157,6 @@ public class TestTrading extends Test {
   ) {
     if (report) I.say("\nProjected earnings:");
     
-    //  TODO:  This should be broken.  And it isn't.  Find out why.
-    
     float projectedFunds = initFunds;
     for (Good g : ALL_GOODS) {
       float sent = Base.goodsSent  (cityA, cityB, g);
@@ -165,14 +164,18 @@ public class TestTrading extends Test {
       float free = Base.suppliesDue(cityB, cityA, g);
       if (sent == 0 && got == 0 && free == 0) continue;
       
-      float pays = sent * g.price;
-      pays -= Nums.max(0, got - free) * g.price;
+      float priceSent = cityA.exportPrice(g, cityB);
+      float priceGot  = cityA.importPrice(g, cityB);
+      
+      float pays = sent * priceSent;
+      pays -= Nums.max(0, got - free) * priceGot;
       projectedFunds += pays;
       
       if (report) {
-        I.say("  "+g+": +"+sent+" -"+got);
+        I.say("  "+g+": +"+got+" -"+sent);
         if (free > 0) I.add(" ("+free+" free)");
-        I.add(", price: "+g.price+", total: "+pays);
+        I.say("    Export price: "+priceSent+", Import price: "+priceGot);
+        I.say("    Total: "+pays);
       }
     }
     return projectedFunds;

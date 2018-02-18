@@ -41,7 +41,7 @@ public class TestBuilding extends Test {
     BuildingForTrade post = (BuildingForTrade) SUPPLY_DEPOT.generate();
     post.enterMap(map, 2, 10, 0, base);
     post.setID("(Stock of Goods)");
-    post.setAcceptLevels(true,
+    post.setProdLevels(true,
       PARTS   , 80,
       PLASTICS, 60,
       MEDICINE, 20

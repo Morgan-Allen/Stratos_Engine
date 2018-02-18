@@ -43,6 +43,11 @@ public class CityBorders {
   }
   
   
+  static float distanceRating(Base from, Base goes) {
+    return AVG_CITY_DIST / (AVG_CITY_DIST + from.distance(goes));
+  }
+  
+  
   
   /**  Finding migrants in and out-
     */
@@ -163,71 +168,6 @@ public class CityBorders {
     if (home != null) home.setResident(migrant, true);
   }
   
-  
-  
-  /**  Trading utilities-
-    */
-  //  TODO:  MOVE THIS TO THE TASK-TRADING CLASS!
-  
-  
-  static Tally <Good> configureCargo(
-    Trader from, Trader goes, boolean cityOnly, World world
-  ) {
-    Tally <Good> cargo = new Tally();
-    boolean fromCity = from.base() == from;
-    boolean goesCity = goes.base() == goes;
-    
-    if (from == null || goes == null        ) return cargo;
-    if (cityOnly && ! (fromCity || goesCity)) return cargo;
-    Base.Relation fromR = goes.base().relationWith(from.base());
-    Base.Relation goesR = from.base().relationWith(goes.base());
-    
-    for (Good good : world.goodTypes) {
-      float amountFrom = from.inventory ().valueFor(good);
-      float amountGoes = goes.inventory ().valueFor(good);
-      float needFrom   = from.needLevels().valueFor(good);
-      float needGoes   = goes.needLevels().valueFor(good);
-      
-      if (fromCity) {
-        needFrom = Nums.max(needFrom, fromR.suppliesDue.valueFor(good));
-      }
-      if (goesCity) {
-        needGoes = Nums.max(needGoes, goesR.suppliesDue.valueFor(good));
-      }
-      
-      float surplus  = amountFrom - needFrom;
-      float shortage = needGoes - amountGoes;
-      
-      if (surplus > 0 && shortage > 0) {
-        float size = Nums.min(surplus, shortage);
-        cargo.set(good, size);
-      }
-    }
-    
-    return cargo;
-  }
-  
-  
-  static float distanceRating(Trader from, Trader goes) {
-    
-    Base fromC = from.base(), goesC = goes.base();
-    Integer distance = fromC.locale.distances.get(goesC.locale);
-    float distRating = distance == null ? MAX_TRADER_RANGE : distance;
-    
-    if (
-      from instanceof Building &&
-      goes instanceof Building &&
-      fromC == goesC
-    ) {
-      float mapDist = AreaMap.distance(
-        ((Building) from).mainEntrance(),
-        ((Building) goes).mainEntrance()
-      );
-      distRating += mapDist / MAX_WANDER_RANGE;
-    }
-    
-    return AVG_CITY_DIST / (AVG_CITY_DIST + distRating);
-  }
   
   
 }

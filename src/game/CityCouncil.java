@@ -422,6 +422,7 @@ public class CityCouncil {
     appeal += (random ? Rand.avgNums(2) : 0.5f) * MA.benefits;
     appeal -= (random ? Rand.avgNums(2) : 0.5f) * MA.costs;
     //appeal /= (MA.benefits + MA.costs) / 2;
+    
     appeal *= CityBorders.distanceRating(MA.fromC, MA.goesC);
     MA.evaluatedAppeal = appeal;
     
