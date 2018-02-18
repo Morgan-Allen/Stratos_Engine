@@ -278,9 +278,16 @@ public class TaskTrading extends Task {
   static Tally <Good> configureCargo(
     Trader from, Trader goes, boolean cityOnly, World world
   ) {
+    
+    //  TODO:  You need to cap the total sum of goods transported based on
+    //  cargo limits.
+    
     Tally <Good> cargo = new Tally();
     boolean fromCity = from.base() == from;
     boolean goesCity = goes.base() == goes;
+    boolean fromFlex = from.base() == goes.base().homeland();
+    boolean goesFlex = goes.base() == from.base().homeland();
+    
     
     boolean report = false;
     if (report) I.say("\nDoing cargo config for "+from+" -> "+goes);
@@ -310,6 +317,9 @@ public class TaskTrading extends Task {
       
       float surplus  = amountFrom - needFrom;
       float shortage = needGoes - amountGoes;
+      
+      if (fromFlex) surplus  = Nums.max(surplus , shortage);
+      if (goesFlex) shortage = Nums.max(shortage, surplus );
       
       if (surplus > 0 && shortage > 0) {
         float size = Nums.min(surplus, shortage);

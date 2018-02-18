@@ -10,7 +10,7 @@ import util.*;
 //  sectors of the same world...
 
 
-public class ActorAsVessel extends Actor {
+public class ActorAsVessel extends Actor implements Trader, Employer {
   
   
   
@@ -38,4 +38,71 @@ public class ActorAsVessel extends Actor {
   void beginNextBehaviour() {
   }
   
+  
+  
+  /**  Implementing Employer interface-
+    */
+  public Task selectActorBehaviour(Actor actor) {
+    return null;
+  }
+  
+  
+  public void actorUpdates(Actor actor) {
+    return;
+  }
+  
+  
+  public void actorPasses(Actor actor, Building other) {
+    return;
+  }
+  
+  
+  public void actorTargets(Actor actor, Target other) {
+    return;
+  }
+  
+  
+  public void actorVisits(Actor actor, Building visits) {
+    return;
+  }
+  
+  
+  
+  /**  Implementing Trader interface-
+    */
+  //  TODO:  Sew these up properly.
+  
+  public Tally <Good> needLevels() {
+    return null;
+  }
+  
+  
+  public Tally <Good> prodLevels() {
+    return null;
+  }
+  
+  
+  public Tally<Good> inventory() {
+    return null;
+  }
+  
+  
+  public float importPrice(Good g, Base sells) {
+    return 0;
+  }
+  
+  
+  public float exportPrice(Good g, Base buys) {
+    return 0;
+  }
+  
+  
+  
 }
+
+
+
+
+
+
+

@@ -501,18 +501,40 @@ public class Base implements Session.Saveable, Trader {
   }
   
 
-  public Tally <Good> needLevels  () { return needLevel; }
+  public Tally <Good> needLevels() { return needLevel; }
   public Tally <Good> prodLevels() { return prodLevel; }
-  public Tally <Good> inventory   () { return inventory ; }
+  public Tally <Good> inventory () { return inventory; }
   public Base base() { return this; }
   
   
-  public float importPrice(Good g, Base sells) {
-    return (int) (g.price * (1 + (TRAVEL_MARGIN / 100f)));
+  
+  //  Selling to where goods are abundant gets you a lower price.
+  //  Buying from where goods are scarce imposes a higher price.
+  //  Selling to where goods are scarce gets you a higher price.
+  //  Buying from where goods are abundant imposes a lower price.
+  
+  static float priceMultiple(Good g, Base buys, Base sells) {
+    float mult = 1.0f;
+    float needS = sells.needLevel(g);
+    float prodS = sells.prodLevel(g);
+    if (needS > 0) mult += SCARCE_MARGIN / 100f;
+    if (prodS > 0) mult += PLENTY_MARGIN / 100f;
+    //float needB = buys.needLevel(g);
+    //float prodB = buys.prodLevel(g);
+    return mult;
   }
   
+  
+  public float importPrice(Good g, Base sells) {
+    float mult = priceMultiple(g, this, sells);
+    mult += TRAVEL_MARGIN / 100f;
+    return (int) (g.price * mult);
+  }
+  
+  
   public float exportPrice(Good g, Base buys) {
-    return g.price;
+    float mult = priceMultiple(g, buys, this);
+    return (int) (g.price * mult);
   }
   
   
