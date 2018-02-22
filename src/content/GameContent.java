@@ -162,14 +162,14 @@ public class GameContent {
       ModelAsset.class, (Object[][]) JUNGLE_TREE_MODELS
     );
     
-    //  TODO:  UNIFY WITH CROPS BELOW!
+    //  TODO:  UNIFY WITH CROPS BELOW?
     JUNGLE_TREE1.growRate = 0.5f;
     DESERT_ROCK1.setDimensions(2, 2, 1);
     CARBON_DEPOSIT  .setDimensions(2, 2, 0);
     LAKE.pathing = PATH_BLOCK;
     LAKE.isWater = true;
     
-    //  TODO:  UNIFY WITH ACTOR-TYPES BELOW!
+    
     QUDU.name        = "Qudu";
     QUDU.habitats    = new Terrain[] { JUNGLE, MEADOW };
     QUDU.predator    = false;
@@ -544,32 +544,55 @@ public class GameContent {
     
     //
     //  Religious structures:
+    
     SCHOOL_LOG.name = "Logician School";
+    SCHOOL_LOG.model = CutoutModel.fromImage(
+      GameContent.class, "logician_school_model",
+      "media/Buildings/logician_school.png", 5, 2
+    );
+    
     SCHOOL_COL.name = "Collective School";
-    SCHOOL_LEN.name = "LENSR School";
-    SCHOOL_SHA.name = "Shaper School";
-    SCHOOL_TEK.name = "Tek Priest School";
-    SCHOOL_SPA.name = "Spacer School";
-    
-    //  TODO:  ADD ARTWORK FOR THESE!
-    
-    for (BuildType t : PSI_SCHOOL_BUILDINGS) {
-      t.tint = TINT_RELIGIOUS;
-      t.setDimensions(6, 6, 3);
-      t.setBuildMaterials(PARTS, 15);
-      //t.setWorkerTypes(PRIEST);
-      //t.maxWorkers      = 1;
-      t.maxHealth       = 100;
-      t.maxResidents    = 1;
-      t.homeSocialClass = CLASS_NOBLE;
-      t.features        = new Good[] { RELIGION };
-    }
+    SCHOOL_COL.model = CutoutModel.fromImage(
+      GameContent.class, "collective_school_model",
+      "media/Buildings/collective_school.png", 5, 2
+    );
     
     SCHOOL_COL.workerTypes.setWith(Collective.COLLECTIVE, 2);
     SCHOOL_COL.rulerPowers = new Technique[] { Collective.PSY_HEAL };
     
+    SCHOOL_LEN.name = "LENSR School";
+    SCHOOL_LEN.model = CutoutModel.fromImage(
+      GameContent.class, "lensr_school_model",
+      "media/Buildings/LENSR_school.png", 5, 2
+    );
     
-    //  TODO:  The model-system for these could be complicated, figure it out...
+    SCHOOL_SHA.name = "Shaper School";
+    SCHOOL_SHA.model = CutoutModel.fromImage(
+      GameContent.class, "shaper_school_model",
+      "media/Buildings/shaper_school.png", 5, 2
+    );
+    
+    SCHOOL_TEK.name = "Tek Priest School";
+    SCHOOL_TEK.model = CutoutModel.fromImage(
+      GameContent.class, "tek_priest_school_model",
+      "media/Buildings/tek_priest_school.png", 5, 2
+    );
+    
+    SCHOOL_SPA.name = "Spacer School";
+    SCHOOL_SPA.model = CutoutModel.fromImage(
+      GameContent.class, "spacer_school_model",
+      "media/Buildings/spacer_school.png", 5, 2
+    );
+    
+    for (BuildType t : PSI_SCHOOL_BUILDINGS) {
+      t.tint = TINT_RELIGIOUS;
+      t.setDimensions(5, 5, 2);
+      t.setBuildMaterials(PARTS, 15);
+      t.maxHealth       = 150;
+      t.homeSocialClass = CLASS_NOBLE;
+      t.features        = new Good[] { RELIGION };
+    }
+    
     
     WALKWAY.name = "Walkway";
     WALKWAY.tint = PAVE_COLOR;
@@ -577,7 +600,15 @@ public class GameContent {
     WALKWAY.setDimensions(1, 1, 0);
     WALKWAY.setBuildMaterials(PARTS, 1);
     
+    CutoutModel WALL_MODELS[][] = CutoutModel.fromImageGrid(
+      GameContent.class, "shield_wall_models",
+      "media/Buildings/shield_wall.png",
+      4, 3, 2, 2, false
+    );
+    
     SHIELD_WALL.name = "Shield Wall";
+    SHIELD_WALL.modelVariants = WALL_MODELS[0];
+    
     SHIELD_WALL.tint = TINT_LITE_MILITARY;
     SHIELD_WALL.pathing = PATH_WALLS;
     SHIELD_WALL.isWall  = true;
@@ -585,6 +616,8 @@ public class GameContent {
     SHIELD_WALL.setBuildMaterials(PARTS, 2);
     
     BLAST_DOOR.name = "Blast Door";
+    BLAST_DOOR.modelVariants = WALL_MODELS[1];
+    
     BLAST_DOOR.tint = TINT_MILITARY;
     BLAST_DOOR.pathing = PATH_WALLS;
     BLAST_DOOR.isWall  = true;
@@ -593,6 +626,8 @@ public class GameContent {
     BLAST_DOOR.setFeatures(IS_GATE);
     
     TURRET.name = "Turret";
+    TURRET.modelVariants = WALL_MODELS[2];
+    
     TURRET.tint = TINT_MILITARY;
     TURRET.pathing = PATH_BLOCK;
     TURRET.isWall  = true;
@@ -605,19 +640,16 @@ public class GameContent {
     TURRET.sightRange  = 8;
     
     
-    
-    //  TODO:  ASSIGN THESE!
-    /*
-    CutoutModel HOUSE_MODELS = CutoutModel.fromImageGrid(sourceClass, ID, fileName, gridX, gridY, size, height, splat);
-    
-    SUPPLY_DEPOT.model = CutoutModel.fromImage(
-      GameContent.class, "supply_depot_model",
-      "media/Buildings/supply_depot.png", 4, 2
+    CutoutModel HOUSE_MODELS[][] = CutoutModel.fromImageGrid(
+      GameContent.class, "housing_models",
+      "media/Buildings/holdings.png",
+      3, 3, 2, 2, false
     );
-    //*/
     
     HOLDING.name = "Holding";
     HOLDING.tint = TINT_LITE_RESIDENTIAL;
+    HOLDING.modelVariants = HOUSE_MODELS[0];
+    
     HOLDING.setDimensions(2, 2, 1);
     HOLDING.setBuildMaterials(PLASTICS, 1, PARTS, 0);
     HOLDING.workerTypes.setWith(Vassals.PYON, 1);
@@ -629,11 +661,15 @@ public class GameContent {
     HOLDING.setUpgradeTiers(HOLDING, HOUSE_T1, HOUSE_T2);
     
     HOUSE_T1.name = "Improved Holding";
+    HOUSE_T1.modelVariants = HOUSE_MODELS[1];
+    
     HOUSE_T1.setBuildMaterials(PLASTICS, 1, PARTS, 1);
     HOUSE_T1.maxStock = 2;
     HOUSE_T1.serviceNeeds.setWith(DIVERSION, 10);
     
     HOUSE_T2.name = "Fancy Holding";
+    HOUSE_T2.modelVariants = HOUSE_MODELS[2];
+    
     HOUSE_T2.setBuildMaterials(PLASTICS, 1, PARTS, 1);
     HOUSE_T2.homeUseGoods.setWith(MEDICINE, 1);
     HOUSE_T2.maxStock = 2;
@@ -683,7 +719,6 @@ public class GameContent {
     FORMER_BAY.produced   = new Good[] { CARBONS };
     FORMER_BAY.craftSkill = SKILL_CRAFT;
     
-    
     EXCAVATOR.name = "Excavator";
     EXCAVATOR.tint = TINT_LITE_INDUSTRIAL;
     EXCAVATOR.model = CutoutModel.fromImage(
@@ -700,7 +735,7 @@ public class GameContent {
     EXCAVATOR.craftSkill = SKILL_CRAFT;
     
     
-    //  TODO:  This isn't actually needed for now, and won't be until you get
+    //  This isn't actually needed for now, and won't be until you get
     //  power-supplies working.
     /*
     SOLAR_TOWER.name = "Solar Tower";
