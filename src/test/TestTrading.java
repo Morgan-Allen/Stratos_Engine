@@ -14,7 +14,7 @@ public class TestTrading extends Test {
   
   
   public static void main(String args[]) {
-    testTrading(false);
+    testTrading(true);
   }
   
   
@@ -68,7 +68,7 @@ public class TestTrading extends Test {
     );
     
     BuildingForTrade post2 = (BuildingForTrade) SUPPLY_DEPOT.generate();
-    post2.enterMap(map, 5, 6, 1, baseC);
+    post2.enterMap(map, 6, 6, 1, baseC);
     post2.setID("(Gets Supplies)");
     post2.setNeedLevels(false,
       GREENS    , 15,
@@ -76,10 +76,10 @@ public class TestTrading extends Test {
     );
     
     Building kiln = (Building) ENGINEER_STATION.generate();
-    kiln.enterMap(map, 2, 3, 1, baseC);
+    kiln.enterMap(map, 2, 2, 1, baseC);
     
     Building weaver = (Building) PHYSICIAN_STATION.generate();
-    weaver.enterMap(map, 5, 3, 1, baseC);
+    weaver.enterMap(map, 6, 2, 1, baseC);
     
     CityMapPlanning.placeStructure(WALKWAY, baseC, true, 1, 5, 8, 1);
     

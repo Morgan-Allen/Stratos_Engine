@@ -99,7 +99,7 @@ public class TestSieging extends Test {
     guarding.setFocus(tower, TileConstants.E, map);
     
     Building store = (Building) SUPPLY_DEPOT.generate();
-    store.enterMap(map, 10, 6, 1, baseC);
+    store.enterMap(map, 12, 14, 1, baseC);
     store.setInventory(MEDICINE, 10);
     
     float initPrestige = awayC.prestige();

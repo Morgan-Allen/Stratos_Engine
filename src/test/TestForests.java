@@ -27,6 +27,7 @@ public class TestForests extends Test {
     
     Building logs = (Building) FORMER_BAY.generate();
     logs.enterMap(map, 5, 5, 1, base);
+    clearMargins(logs, 2);
     fillWorkVacancies(logs);
     
     boolean loggingDone = false;

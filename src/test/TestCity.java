@@ -38,7 +38,7 @@ public class TestCity extends Test {
     
     palace.enterMap(map, 3 , 3 , 1, base);
     court .enterMap(map, 9 , 9 , 1, base);
-    school.enterMap(map, 9 , 3 , 1, base);
+    school.enterMap(map, 9 , 2 , 1, base);
     admin .enterMap(map, 18, 9 , 1, base);
     
     fillWorkVacancies(palace);
@@ -48,13 +48,13 @@ public class TestCity extends Test {
       house.enterMap(map, 9 + (n * 3), 6, 1f, base);
     }
     
-    Building quarry = (Building) ORE_SMELTER     .generate();
+    Building quarry = (Building) EXCAVATOR       .generate();
     Building kiln1  = (Building) ENGINEER_STATION.generate();
     Building kiln2  = (Building) ENGINEER_STATION.generate();
     Building market = (Building) STOCK_EXCHANGE  .generate();
     
     quarry.enterMap(map, 4 , 15, 1, base);
-    kiln1 .enterMap(map, 9 , 17, 1, base);
+    kiln1 .enterMap(map, 9 , 18, 1, base);
     kiln2 .enterMap(map, 9 , 14, 1, base);
     market.enterMap(map, 4 , 9 , 1, base);
     

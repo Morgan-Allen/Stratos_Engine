@@ -67,7 +67,7 @@ public class TestBridging extends Test {
     map.planning.placeObject(tower2, 14, 2, base);
     
     Building kiln = (Building) ENGINEER_STATION.generate();
-    map.planning.placeObject(kiln, 10, 2, base);
+    map.planning.placeObject(kiln, 9, 1, base);
     
     //
     //  First, we simulate the entire construction process by picking

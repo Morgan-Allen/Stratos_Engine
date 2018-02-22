@@ -44,13 +44,13 @@ public class TestLifeCycle extends Test {
       return false;
     }
     
-    for (int x = 10; x > 0; x -= 3) {
-      for (int y = 10; y > 0; y -= 3) {
-        Type type = (y == 10 || y == 7) ? HOLDING : ENGINEER_STATION;
+    for (int x = 9; x > 0; x -= 4) {
+      for (int y = 13; y > 0; y -= 3) {
+        Type type = (y >= 7) ? HOLDING : ENGINEER_STATION;
         Building built = (Building) type.generate();
         built.enterMap(map, x, y, 1, base);
       }
-      placeStructure(WALKWAY, base, true, x - 1, 0, 1, 10);
+      placeStructure(WALKWAY, base, true, x - 1, 0, 1, 15);
     }
     placeStructure(WALKWAY, base, true, 0, 0, 10, 1);
     placeStructure(WALKWAY, base, true, 0, 9, 16, 1);
@@ -71,7 +71,7 @@ public class TestLifeCycle extends Test {
     
     palace.setResident(oldKing, true);
     palace.setResident(consort, true);
-    palace .enterMap(map, 10, 10, 1, base);
+    palace .enterMap(map, 9 , 10, 1, base);
     oldKing.enterMap(map, 12, 9 , 1, base);
     consort.enterMap(map, 12, 9 , 1, base);
     

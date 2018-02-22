@@ -4,8 +4,6 @@ package game;
 import util.*;
 import static game.GameConstants.*;
 
-import game.GameConstants.Good;
-
 
 
 public class Base implements Session.Saveable, Trader {

@@ -120,6 +120,23 @@ public class Test {
   }
   
   
+  public static void clearMargins(Building b, int marginWide) {
+    Type type = b.type();
+    Tile at = b.at();
+    AreaMap map = b.map();
+    int
+      x = at.x - marginWide,
+      y = at.y - marginWide,
+      w = type.wide + (marginWide * 2),
+      h = type.high + (marginWide * 2)
+    ;
+    for (Tile t : map.tilesUnder(x, y, w, h)) {
+      Element e = map.above(t);
+      if (e != null && e != b) e.exitMap(map);
+    }
+  }
+  
+  
   
   /**  Graphical display and loop-execution:
     */
