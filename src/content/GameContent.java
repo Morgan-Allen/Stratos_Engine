@@ -92,6 +92,19 @@ public class GameContent {
       PLASTICS, PARTS, SOMA, MEDICINE
     };
   
+  static {
+    //  TODO:  You need to assign images here.
+    int i = 0;
+    for (Good c : CROP_TYPES) {
+      c.tint = TINT_CROPS[i++ % 3];
+      c.growRate    = 1f;
+      c.isCrop      = true;
+      c.flagKey     = IS_CROP;
+      c.yields      = c;
+      c.yieldAmount = CROP_YIELD / 100f;
+    }
+  }
+  
   
   final public static Terrain
     MEADOW = new Terrain("Meadow", "terr_meadow", 5),
@@ -144,14 +157,17 @@ public class GameContent {
     );
     DESERT.attachFixtures(DESERT_ROCK1, 0.15f, DESERT_ROCK2, 0.20f);
     
-    JUNGLE_TREE1.tint = colour(0, 3, 0);
-    DESERT_ROCK1.tint = colour(6, 4, 4);
-    DESERT_ROCK2.tint = colour(6, 4, 4);
-    CARBON_DEPOSIT  .tint = colour(5, 3, 3);
-    JUNGLE      .tint = colour(1, 4, 1);
-    DESERT      .tint = colour(5, 4, 3);
-    MEADOW      .tint = colour(2, 5, 2);
-    LAKE        .tint = colour(0, 0, 3);
+    
+    //  TODO:  Add the various images here.
+    
+    JUNGLE_TREE1  .tint = colour(0, 3, 0);
+    DESERT_ROCK1  .tint = colour(6, 4, 4);
+    DESERT_ROCK2  .tint = colour(6, 4, 4);
+    CARBON_DEPOSIT.tint = colour(5, 3, 3);
+    JUNGLE        .tint = colour(1, 4, 1);
+    DESERT        .tint = colour(5, 4, 3);
+    MEADOW        .tint = colour(2, 5, 2);
+    LAKE          .tint = colour(0, 0, 3);
     
     ModelAsset JUNGLE_TREE_MODELS[][] = CutoutModel.fromImageGrid(
       GameContent.class, "model_jungle_tree",
@@ -162,93 +178,13 @@ public class GameContent {
       ModelAsset.class, (Object[][]) JUNGLE_TREE_MODELS
     );
     
-    //  TODO:  UNIFY WITH CROPS BELOW?
     JUNGLE_TREE1.growRate = 0.5f;
-    DESERT_ROCK1.setDimensions(2, 2, 1);
-    CARBON_DEPOSIT  .setDimensions(2, 2, 0);
+    DESERT_ROCK1  .setDimensions(2, 2, 1);
+    CARBON_DEPOSIT.setDimensions(2, 2, 0);
     LAKE.pathing = PATH_BLOCK;
     LAKE.isWater = true;
     
     
-    QUDU.name        = "Qudu";
-    QUDU.habitats    = new Terrain[] { JUNGLE, MEADOW };
-    QUDU.predator    = false;
-    QUDU.meleeDamage = 1;
-    QUDU.armourClass = 2;
-    QUDU.maxHealth   = 8;
-    
-    VAREEN.name        = "Vareen";
-    VAREEN.habitats    = new Terrain[] { MEADOW, DESERT };
-    VAREEN.predator    = false;
-    VAREEN.meleeDamage = 0;
-    VAREEN.armourClass = 0;
-    VAREEN.maxHealth   = 2;
-    
-    MICOVORE.name        = "Micovore";
-    MICOVORE.habitats    = new Terrain[] { JUNGLE };
-    MICOVORE.predator    = true;
-    MICOVORE.meleeDamage = 5;
-    MICOVORE.armourClass = 1;
-    MICOVORE.maxHealth   = 6;
-    
-    for (ActorType s : ALL_ANIMALS) {
-      s.rangeDamage = -1;
-      s.lifespan = s.predator ? HUNTER_LIFESPAN : GRAZER_LIFESPAN;
-      s.meatType = PROTEIN;
-    }
-    
-    final String ARTILECTS_DIR = "media/Actors/artilects/";
-    final String ARTILECTS_XML = "ArtilectModels.xml";
-    
-    DRONE.name        = "Drone";
-    DRONE.predator    = false;
-    DRONE.meleeDamage = 0;
-    DRONE.rangeDamage = 2;
-    DRONE.armourClass = 4;
-    DRONE.maxHealth   = 8;
-    
-    DRONE.model = MS3DModel.loadFrom(
-      ARTILECTS_DIR, "DefenceDrone.ms3d",
-      GameContent.class, ARTILECTS_XML, "Defence Drone"
-    );
-    
-    TRIPOD.name        = "Tripod";
-    TRIPOD.predator    = false;
-    TRIPOD.meleeDamage = 4;
-    TRIPOD.rangeDamage = 6;
-    TRIPOD.armourClass = 6;
-    TRIPOD.maxHealth   = 15;
-    
-    TRIPOD.model = MS3DModel.loadFrom(
-      ARTILECTS_DIR, "Tripod.ms3d",
-      GameContent.class, ARTILECTS_XML, "Tripod"
-    );
-    
-    CRANIAL.name        = "Cranial";
-    CRANIAL.predator    = false;
-    CRANIAL.meleeDamage = 6;
-    CRANIAL.armourClass = 8;
-    CRANIAL.maxHealth   = 12;
-    
-    CRANIAL.model = MS3DModel.loadFrom(
-      ARTILECTS_DIR, "Cranial.ms3d",
-      GameContent.class, ARTILECTS_XML, "Cranial"
-    );
-    
-    for (ActorType t : ALL_ARTILECTS) {
-      t.organic = false;
-    }
-    
-    
-    int i = 0;
-    for (Good c : CROP_TYPES) {
-      c.tint = TINT_CROPS[i++ % 3];
-      c.growRate    = 1f;
-      c.isCrop      = true;
-      c.flagKey     = IS_CROP;
-      c.yields      = c;
-      c.yieldAmount = CROP_YIELD / 100f;
-    }
     for (Type t : ALL_TREES) {
       t.name = "Forest";
       t.growRate    = CROP_YIELD * 0.5f / 100f;
@@ -267,6 +203,101 @@ public class GameContent {
       c.flagKey     = IS_STONE;
       c.yields      = CARBONS;
       c.yieldAmount = 1f;
+    }
+    
+    
+    final String ANIMALS_DIR = "media/Actors/fauna/";
+    final String ANIMALS_XML = "FaunaModels.xml";
+    
+    QUDU.name  = "Qudu";
+    QUDU.model = MS3DModel.loadFrom(
+      ANIMALS_DIR, "Qudu.ms3d",
+      GameContent.class, ANIMALS_XML, "Qudu"
+    );
+    
+    QUDU.habitats    = new Terrain[] { JUNGLE, MEADOW };
+    QUDU.predator    = false;
+    QUDU.meleeDamage = 1;
+    QUDU.armourClass = 2;
+    QUDU.maxHealth   = 8;
+    
+    
+    VAREEN.name  = "Vareen";
+    VAREEN.model = MS3DModel.loadFrom(
+      ANIMALS_DIR, "Vareen.ms3d",
+      GameContent.class, ANIMALS_XML, "Vareen"
+    );
+    
+    VAREEN.habitats    = new Terrain[] { MEADOW, DESERT };
+    VAREEN.predator    = false;
+    VAREEN.meleeDamage = 0;
+    VAREEN.armourClass = 0;
+    VAREEN.maxHealth   = 2;
+    
+    
+    MICOVORE.name  = "Micovore";
+    MICOVORE.model = MS3DModel.loadFrom(
+      ANIMALS_DIR, "Micovore.ms3d",
+      GameContent.class, ANIMALS_XML, "Micovore"
+    );
+    
+    MICOVORE.habitats    = new Terrain[] { JUNGLE };
+    MICOVORE.predator    = true;
+    MICOVORE.meleeDamage = 5;
+    MICOVORE.armourClass = 1;
+    MICOVORE.maxHealth   = 6;
+    
+    
+    for (ActorType s : ALL_ANIMALS) {
+      s.rangeDamage = -1;
+      s.lifespan = s.predator ? HUNTER_LIFESPAN : GRAZER_LIFESPAN;
+      s.meatType = PROTEIN;
+    }
+    
+    
+    final String ARTILECTS_DIR = "media/Actors/artilects/";
+    final String ARTILECTS_XML = "ArtilectModels.xml";
+    
+    DRONE.name  = "Drone";
+    DRONE.model = MS3DModel.loadFrom(
+      ARTILECTS_DIR, "DefenceDrone.ms3d",
+      GameContent.class, ARTILECTS_XML, "Defence Drone"
+    );
+    
+    DRONE.predator    = false;
+    DRONE.meleeDamage = 0;
+    DRONE.rangeDamage = 2;
+    DRONE.armourClass = 4;
+    DRONE.maxHealth   = 8;
+    
+    
+    TRIPOD.name  = "Tripod";
+    TRIPOD.model = MS3DModel.loadFrom(
+      ARTILECTS_DIR, "Tripod.ms3d",
+      GameContent.class, ARTILECTS_XML, "Tripod"
+    );
+    
+    TRIPOD.predator    = false;
+    TRIPOD.meleeDamage = 4;
+    TRIPOD.rangeDamage = 6;
+    TRIPOD.armourClass = 6;
+    TRIPOD.maxHealth   = 15;
+    
+    
+    CRANIAL.name  = "Cranial";
+    CRANIAL.model = MS3DModel.loadFrom(
+      ARTILECTS_DIR, "Cranial.ms3d",
+      GameContent.class, ARTILECTS_XML, "Cranial"
+    );
+    
+    CRANIAL.predator    = false;
+    CRANIAL.meleeDamage = 6;
+    CRANIAL.armourClass = 8;
+    CRANIAL.maxHealth   = 12;
+    
+    
+    for (ActorType t : ALL_ARTILECTS) {
+      t.organic = false;
     }
   }
   
@@ -415,7 +446,7 @@ public class GameContent {
     BASTION.tint = TINT_MILITARY;
     BASTION.model = CutoutModel.fromImage(
       GameContent.class, "bastion_model",
-      "media/Buildings/bastion.png", 5, 2
+      "media/Buildings/mil_bastion.png", 5, 2
     );
     
     BASTION.setDimensions(5, 5, 2);
@@ -444,7 +475,7 @@ public class GameContent {
     TROOPER_LODGE.tint = TINT_MILITARY;
     TROOPER_LODGE.model = CutoutModel.fromImage(
       GameContent.class, "trooper_lodge_model",
-      "media/Buildings/trooper_lodge.png", 3, 2
+      "media/Buildings/mil_trooper_lodge.png", 3, 2
     );
     TROOPER_LODGE.setDimensions(3, 3, 2);
     TROOPER_LODGE.setBuildMaterials(PLASTICS, 1, PARTS, 7);
@@ -455,7 +486,7 @@ public class GameContent {
     ENFORCER_BLOC.tint = TINT_MILITARY;
     ENFORCER_BLOC.model = CutoutModel.fromImage(
       GameContent.class, "enforcer_bloc_model",
-      "media/Buildings/enforcer_bloc.png", 3, 2
+      "media/Buildings/mil_enforcer_bloc.png", 3, 2
     );
     ENFORCER_BLOC.setDimensions(2, 2, 1);
     ENFORCER_BLOC.setBuildMaterials(PARTS, 4);
@@ -469,7 +500,7 @@ public class GameContent {
     ECOLOGIST_STATION.tint = TINT_INDUSTRIAL;
     ECOLOGIST_STATION.model = CutoutModel.fromImage(
       GameContent.class, "ecologist_station_model",
-      "media/Buildings/ecologist_station.png", 4, 2
+      "media/Buildings/station_ecologist.png", 4, 2
     );
     ECOLOGIST_STATION.setDimensions(4, 4, 1);
     ECOLOGIST_STATION.setBuildMaterials(PLASTICS, 7, PARTS, 1);
@@ -482,7 +513,7 @@ public class GameContent {
     ENGINEER_STATION.tint = TINT_INDUSTRIAL;
     ENGINEER_STATION.model = CutoutModel.fromImage(
       GameContent.class, "engineer_station_model",
-      "media/Buildings/engineer_station.png", 3, 2
+      "media/Buildings/station_engineer.png", 3, 2
     );
     ENGINEER_STATION.setDimensions(3, 3, 2);
     ENGINEER_STATION.setBuildMaterials(PARTS, 8);
@@ -500,7 +531,7 @@ public class GameContent {
     PHYSICIAN_STATION.tint = TINT_INDUSTRIAL;
     ENFORCER_BLOC.model = CutoutModel.fromImage(
       GameContent.class, "physician_station_model",
-      "media/Buildings/physician_station.png", 3, 2
+      "media/Buildings/station_physician.png", 3, 2
     );
     PHYSICIAN_STATION.setDimensions(3, 3, 2);
     PHYSICIAN_STATION.setBuildMaterials(PLASTICS, 4, PARTS, 2);
@@ -518,7 +549,7 @@ public class GameContent {
     STOCK_EXCHANGE.tint = TINT_COMMERCIAL;
     STOCK_EXCHANGE.model = CutoutModel.fromImage(
       GameContent.class, "stock_exchange_model",
-      "media/Buildings/stock_exchange.png", 4, 2
+      "media/Buildings/civ_stock_exchange.png", 4, 2
     );
     STOCK_EXCHANGE.setDimensions(4, 4, 1);
     STOCK_EXCHANGE.setBuildMaterials(PLASTICS, 4, PARTS, 2);
@@ -532,7 +563,7 @@ public class GameContent {
     SUPPLY_DEPOT.name = "Supply Depot";
     SUPPLY_DEPOT.tint = TINT_COMMERCIAL;
     SUPPLY_DEPOT.model = CutoutModel.fromImage(
-      GameContent.class, "supply_depot_model",
+      GameContent.class, "civ_supply_depot_model",
       "media/Buildings/supply_depot.png", 4, 1
     );
     SUPPLY_DEPOT.setDimensions(4, 4, 1);
@@ -548,13 +579,13 @@ public class GameContent {
     SCHOOL_LOG.name = "Logician School";
     SCHOOL_LOG.model = CutoutModel.fromImage(
       GameContent.class, "logician_school_model",
-      "media/Buildings/logician_school.png", 5, 2
+      "media/Buildings/school_logician.png", 5, 2
     );
     
     SCHOOL_COL.name = "Collective School";
     SCHOOL_COL.model = CutoutModel.fromImage(
       GameContent.class, "collective_school_model",
-      "media/Buildings/collective_school.png", 5, 2
+      "media/Buildings/school_collective.png", 5, 2
     );
     
     SCHOOL_COL.workerTypes.setWith(Collective.COLLECTIVE, 2);
@@ -563,25 +594,25 @@ public class GameContent {
     SCHOOL_LEN.name = "LENSR School";
     SCHOOL_LEN.model = CutoutModel.fromImage(
       GameContent.class, "lensr_school_model",
-      "media/Buildings/LENSR_school.png", 5, 2
+      "media/Buildings/school_LENSR.png", 5, 2
     );
     
     SCHOOL_SHA.name = "Shaper School";
     SCHOOL_SHA.model = CutoutModel.fromImage(
       GameContent.class, "shaper_school_model",
-      "media/Buildings/shaper_school.png", 5, 2
+      "media/Buildings/school_shaper.png", 5, 2
     );
     
     SCHOOL_TEK.name = "Tek Priest School";
     SCHOOL_TEK.model = CutoutModel.fromImage(
       GameContent.class, "tek_priest_school_model",
-      "media/Buildings/tek_priest_school.png", 5, 2
+      "media/Buildings/school_tek_priest.png", 5, 2
     );
     
     SCHOOL_SPA.name = "Spacer School";
     SCHOOL_SPA.model = CutoutModel.fromImage(
       GameContent.class, "spacer_school_model",
-      "media/Buildings/spacer_school.png", 5, 2
+      "media/Buildings/school_spacer.png", 5, 2
     );
     
     for (BuildType t : PSI_SCHOOL_BUILDINGS) {
@@ -602,7 +633,7 @@ public class GameContent {
     
     CutoutModel WALL_MODELS[][] = CutoutModel.fromImageGrid(
       GameContent.class, "shield_wall_models",
-      "media/Buildings/shield_wall.png",
+      "media/Buildings/mil_shield_walls.png",
       4, 3, 2, 2, false
     );
     
@@ -642,8 +673,8 @@ public class GameContent {
     
     CutoutModel HOUSE_MODELS[][] = CutoutModel.fromImageGrid(
       GameContent.class, "housing_models",
-      "media/Buildings/holdings.png",
-      3, 3, 2, 2, false
+      "media/Buildings/civ_holdings.png",
+      3, 4, 2, 2, false
     );
     
     HOLDING.name = "Holding";
@@ -680,7 +711,7 @@ public class GameContent {
     CANTINA.tint = TINT_AMENITY;
     CANTINA.model = CutoutModel.fromImage(
       GameContent.class, "cantina_model",
-      "media/Buildings/cantina.png", 3, 1
+      "media/Buildings/civ_cantina.png", 3, 1
     );
     CANTINA.setDimensions(3, 3, 1);
     CANTINA.setBuildMaterials(PARTS, 10);
@@ -693,7 +724,7 @@ public class GameContent {
     NURSERY.tint = TINT_LITE_INDUSTRIAL;
     NURSERY.model = CutoutModel.fromImage(
       GameContent.class, "nursery_model",
-      "media/Buildings/nursery.png", 2, 1
+      "media/Buildings/res_nursery.png", 2, 1
     );
     NURSERY.setDimensions(2, 2, 1);
     NURSERY.setBuildMaterials(PLASTICS, 5, PARTS, 2);
@@ -708,7 +739,7 @@ public class GameContent {
     FORMER_BAY.tint = TINT_LITE_INDUSTRIAL;
     FORMER_BAY.model = CutoutModel.fromImage(
       GameContent.class, "former_bay_model",
-      "media/Buildings/former_bay.png", 4, 2
+      "media/Buildings/res_former_bay.png", 4, 2
     );
     FORMER_BAY.setDimensions(4, 4, 2);
     FORMER_BAY.setBuildMaterials(PLASTICS, 5, PARTS, 2);
@@ -723,7 +754,7 @@ public class GameContent {
     EXCAVATOR.tint = TINT_LITE_INDUSTRIAL;
     EXCAVATOR.model = CutoutModel.fromImage(
       GameContent.class, "excavator_model",
-      "media/Buildings/excavator.png", 4, 2
+      "media/Buildings/res_excavator.png", 4, 2
     );
     EXCAVATOR.setDimensions(4, 4, 1);
     EXCAVATOR.setBuildMaterials(PLASTICS, 2, PARTS, 5);
@@ -749,7 +780,6 @@ public class GameContent {
     SOLAR_TOWER.maxStock   = 25;
     SOLAR_TOWER.produced   = new Good[] {};
     //*/
-    
   }
   
   
