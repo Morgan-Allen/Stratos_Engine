@@ -49,6 +49,7 @@ public class AreaMap implements Session.Saveable {
   Table <Type, CityMapFlagging> flagging = new Table();
   Table <String, CityMapDemands> demands = new Table();
   
+  List <Building> claimants = new List();
   List <Building> buildings = new List();
   List <Actor   > actors    = new List();
   final public CityMapPathCache pathCache = new CityMapPathCache(this);
@@ -116,6 +117,7 @@ public class AreaMap implements Session.Saveable {
       demands.put(key, forKey);
     }
     
+    s.loadObjects(claimants);
     s.loadObjects(buildings);
     s.loadObjects(actors   );
     pathCache.loadState(s);
@@ -167,6 +169,7 @@ public class AreaMap implements Session.Saveable {
       demands.get(key).saveState(s);
     }
     
+    s.saveObjects(claimants);
     s.saveObjects(buildings);
     s.saveObjects(actors   );
     pathCache.saveState(s);
@@ -207,6 +210,11 @@ public class AreaMap implements Session.Saveable {
   
   /**  Basic public access methods-
     */
+  public Series <Building> claimants() {
+    return claimants;
+  }
+  
+  
   public Series <Building> buildings() {
     return buildings;
   }

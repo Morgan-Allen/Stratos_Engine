@@ -118,6 +118,31 @@ public class Building extends Element implements Pathing, Employer {
   }
   
   
+  public boolean isClaimant() {
+    return type().claimMargin > 0;
+  }
+  
+
+  public boolean canPlace(AreaMap map, int x, int y, int margin) {
+    if (! super.canPlace(map, x, y, margin)) return false;
+    
+    //  TODO:  The efficiency of this might be improved on larger maps.
+    Box2D claims = claimArea();
+    for (Building b : map.claimants()) {
+      if (b.claimArea().intersects(claims)) return false;
+    }
+    return true;
+  }
+  
+  
+  public Box2D claimArea() {
+    int margin = type().claimMargin;
+    Box2D area = area();
+    if (area == null || margin <= 0) return area;
+    return area.expandBy(margin);
+  }
+  
+  
   public void enterMap(AreaMap map, int x, int y, float buildLevel, Base owns) {
     if (onMap()) {
       I.complain("\nALREADY ON MAP: "+this);
@@ -129,6 +154,8 @@ public class Building extends Element implements Pathing, Employer {
     }
     
     super.enterMap(map, x, y, buildLevel, owns);
+    
+    if (isClaimant()) map.claimants.add(this);
     map.buildings.add(this);
     assignHomeCity(owns);
   }
@@ -140,7 +167,10 @@ public class Building extends Element implements Pathing, Employer {
     
     refreshEntrances(new Tile[0]);
     super.exitMap(map);
+    
+    if (isClaimant()) map.claimants.remove(this);
     map.buildings.remove(this);
+    
     for (Actor w : workers) if (w.work() == this) {
       w.setWork(null);
     }

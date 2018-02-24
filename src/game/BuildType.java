@@ -19,8 +19,10 @@ public class BuildType extends Type {
   public Good produced [] = NO_GOODS;
   public Good shopItems[] = NO_GOODS;
   public Good features [] = NO_GOODS;
-  public Type gatherFlag = null;
   public Trait craftSkill = null;
+  
+  public Type gatherFlag = null;
+  public int claimMargin = -1;
   
   public int updateTime      = AVG_UPDATE_GAP  ;
   public int craftTime       = AVG_CRAFT_TIME  ;

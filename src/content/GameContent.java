@@ -381,22 +381,44 @@ public class GameContent {
   
   final public static BuildType
     
-    //  TODO:  Add Runner Market and Pseer/Kommando School?
     BASTION           = new BuildType(BuildingForGovern.class , "venue_bastion"  , IS_GOVERN_BLD ),
     BASTION_L2        = new BuildType(BuildingForGovern.class , "venue_bastion_2", IS_UPGRADE    ),
     BASTION_L3        = new BuildType(BuildingForGovern.class , "venue_bastion_3", IS_UPGRADE    ),
-    
-    TROOPER_LODGE     = new BuildType(BuildingForArmy.class   , "venue_trooper"  , IS_ARMY_BLD   ),
     ENFORCER_BLOC     = new BuildType(BuildingForGovern.class , "venue_enforcer" , IS_GOVERN_BLD ),
     
-    //  TODO:  Make the ecologist station a farm building, and make hunting a separate building?
-    ECOLOGIST_STATION = new BuildType(BuildingForHunt.class   , "venue_ecologist", IS_HUNTS_BLD  ),
+    //  TODO:  Make the enforcer bloc a turret-building?
+    //  TODO:  Attach placement-mechanics for walls.
+    SHIELD_WALL       = new BuildType(Element.class           , "type_shield_wl" , IS_STRUCTURAL ),
+    BLAST_DOOR        = new BuildType(BuildingForWalls.class  , "type_blast_door", IS_WALLS_BLD  ),
+    TURRET            = new BuildType(BuildingForWalls.class  , "type_turret"    , IS_WALLS_BLD  ),
+    
+    TROOPER_LODGE     = new BuildType(BuildingForArmy.class   , "venue_trooper"  , IS_ARMY_BLD   ),
+    //  TODO:  Add the Runner Market for assassinations and contraband.
+    //  TODO:  Add the Kommando Redoubt for hunting and scouting.
+    //RUNNER_MARKET
+    //KOMMANDO_REDOUBT
+    
+    ECOLOGIST_STATION = new BuildType(BuildingForCrafts.class , "venue_ecologist", IS_CRAFTS_BLD ),
     ENGINEER_STATION  = new BuildType(BuildingForCrafts.class , "venue_engineer" , IS_CRAFTS_BLD ),
     PHYSICIAN_STATION = new BuildType(BuildingForCrafts.class , "venue_physician", IS_CRAFTS_BLD ),
+    
+    NURSERY           = new BuildType(BuildingForGather.class , "type_nursery"   , IS_GATHER_BLD ),
+    FORMER_BAY        = new BuildType(BuildingForGather.class , "type_former_bay", IS_GATHER_BLD ),
+    EXCAVATOR         = new BuildType(BuildingForGather.class , "type_excavator" , IS_GATHER_BLD ),
+    //  TODO:  These aren't needed for now.  Add later.
+    //SOLAR_TOWER   = new BuildType(BuildingForGather.class , "type_solar_tower"  , IS_GATHER_BLD ),
+    //REACTOR
+    //CULTURE_VATS
     
     CANTINA           = new BuildType(BuildingForAmenity.class, "venue_cantina"  , IS_AMENITY_BLD),
     STOCK_EXCHANGE    = new BuildType(BuildingForCrafts.class , "venue_stock_ex" , IS_CRAFTS_BLD ),
     SUPPLY_DEPOT      = new BuildType(BuildingForTrade.class  , "venue_supply_d" , IS_TRADE_BLD  ),
+    
+    WALKWAY           = new BuildType(Element.class           , "type_walkway"   , IS_STRUCTURAL ),
+    //SERVICE_HATCH
+    HOLDING           = new BuildType(BuildingForHome.class   , "type_holding"   , IS_HOME_BLD   ),
+    HOUSE_T1          = new BuildType(BuildingForHome.class   , "type_house_t1"  , IS_UPGRADE    ),
+    HOUSE_T2          = new BuildType(BuildingForHome.class   , "type_house_t2"  , IS_UPGRADE    ),
     
     SCHOOL_LOG        = new BuildType(BuildingForFaith.class , "venue_logician"  , IS_FAITH_BLD  ),
     SCHOOL_COL        = new BuildType(BuildingForFaith.class , "venue_collective", IS_FAITH_BLD  ),
@@ -405,22 +427,6 @@ public class GameContent {
     SCHOOL_TEK        = new BuildType(BuildingForFaith.class , "venue_tek_priest", IS_FAITH_BLD  ),
     SCHOOL_SPA        = new BuildType(BuildingForFaith.class , "venue_spacer"    , IS_FAITH_BLD  ),
     
-    
-    WALKWAY       = new BuildType(Element.class           , "type_walkway"      , IS_STRUCTURAL ),
-    SHIELD_WALL   = new BuildType(Element.class           , "type_shield_wall"  , IS_STRUCTURAL ),
-    BLAST_DOOR    = new BuildType(BuildingForWalls.class  , "type_blast_door"   , IS_WALLS_BLD  ),
-    TURRET        = new BuildType(BuildingForWalls.class  , "type_turret"       , IS_WALLS_BLD  ),
-    
-    HOLDING       = new BuildType(BuildingForHome.class   , "type_holding"      , IS_HOME_BLD   ),
-    HOUSE_T1      = new BuildType(BuildingForHome.class   , "type_house_tier1"  , IS_UPGRADE    ),
-    HOUSE_T2      = new BuildType(BuildingForHome.class   , "type_house_tier2"  , IS_UPGRADE    ),
-    
-    NURSERY       = new BuildType(BuildingForGather.class , "type_nursery"      , IS_GATHER_BLD ),
-    FORMER_BAY    = new BuildType(BuildingForGather.class , "type_former_bay"   , IS_GATHER_BLD ),
-    EXCAVATOR     = new BuildType(BuildingForGather.class , "type_excavator"    , IS_GATHER_BLD ),
-    
-    //  TODO:  This isn't needed for now.  Add later.
-    //SOLAR_TOWER   = new BuildType(BuildingForGather.class , "type_solar_tower"  , IS_GATHER_BLD ),
     
     INFRASTRUCTURE_BUILDINGS[] = { WALKWAY, SHIELD_WALL, BLAST_DOOR, TURRET },
     RESIDENTIAL_BUILDINGS   [] = { BASTION, HOLDING, CANTINA },
@@ -785,6 +791,11 @@ public class GameContent {
   
   final public static BuildType
     RUINS_LAIR = new BuildType(BuildingForNest.class, "nest_ruins_lair", IS_NEST_BLD),
+    
+    //  TODO:  Add Animal Nests.
+    
+    //  TODO:  Add Native Huts.
+    
     ALL_NESTS[] = { RUINS_LAIR };
   
   static {

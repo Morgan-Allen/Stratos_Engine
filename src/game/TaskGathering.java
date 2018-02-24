@@ -11,10 +11,10 @@ public class TaskGathering extends Task {
   
   
   
-  Building store;
+  BuildingForGather store;
   
   
-  public TaskGathering(Actor actor, Building store) {
+  public TaskGathering(Actor actor, BuildingForGather store) {
     super(actor);
     this.store = store;
   }
@@ -22,7 +22,7 @@ public class TaskGathering extends Task {
   
   public TaskGathering(Session s) throws Exception {
     super(s);
-    store = (Building) s.loadObject();
+    store = (BuildingForGather) s.loadObject();
   }
   
   
@@ -34,9 +34,11 @@ public class TaskGathering extends Task {
   
   
   static Task pickPlantPoint(
-    Building store, Actor actor, boolean close, boolean start
+    BuildingForGather store, Actor actor, boolean close, boolean start
   ) {
     if (start && actor.inside() != store) return null;
+    
+    //  TODO:  Have this work off a different principle.
     
     boolean canPlant = false;
     for (Good g : store.type().produced) if (g.isCrop) canPlant = true;
@@ -60,7 +62,7 @@ public class TaskGathering extends Task {
   
   
   static Task pickNextCrop(
-    Building store, Actor actor, boolean close, Object... cropTypes
+    BuildingForGather store, Actor actor, boolean close, Object... cropTypes
   ) {
     if (Visit.empty(cropTypes)) return null;
     
