@@ -6,6 +6,7 @@ import game.*;
 import util.*;
 import static content.GameContent.*;
 import static game.GameConstants.*;
+import static game.BuildingForGather.*;
 
 
 
@@ -27,26 +28,22 @@ public class TestFarming extends Test {
     Base base = setupTestCity(20, ALL_GOODS, true, DESERT, MEADOW, JUNGLE);
     AreaMap map = base.activeMap();
     World world = map.world;
-    world.settings.toggleFog    = false;
-    world.settings.toggleHunger = false;
-    world.settings.toggleHunger = false;
+    world.settings.toggleFog     = false;
+    world.settings.toggleHunger  = false;
+    world.settings.toggleFatigue = false;
     
     BuildingForGather farm = (BuildingForGather) NURSERY.generate();
     farm.enterMap(map, 9, 9, 1, base);
     fillWorkVacancies(farm);
     CityMapPlanning.placeStructure(WALKWAY, base, true, 9, 8, 10, 1);
     
-    Good needed[] = { CARBS, GREENS };
-    Tile plantTiles[] = BuildingForGather.applyPlanting(
-      base, 6, 6, 10, 10, needed
-    );
     
-    CityMapFlagging forCrops = map.flagMap(NEED_PLANT, true);
-    if (plantTiles.length != forCrops.totalSum()) {
-      I.say("\nFARMING TEST FAILED- NOT ALL PLANTED TILES WERE FLAGGED");
-      I.say("  Flagged: "+forCrops.totalSum()+"/"+plantTiles.length);
-      return false;
+    Batch <Tile> plantTiles = new Batch();
+    for (Plot p : farm.plots()) for (Tile t : map.tilesUnder(p)) {
+      if (t != null) plantTiles.add(t);
     }
+    Good needed[] = farm.type().produced;
+    
     
     boolean planted  = false;
     boolean harvest  = false;

@@ -165,6 +165,13 @@ public class CityMapPathCache {
   
   
   public boolean pathConnects(
+   Actor from, Target goes, boolean checkAdjacent, boolean open
+  ) {
+    return pathConnects(Task.pathOrigin(from), goes, checkAdjacent, open);
+  }
+  
+  
+  public boolean pathConnects(
     Pathing from, Target goes, boolean checkAdjacent, boolean open
   ) {
     if (from == null || goes == null) return false;

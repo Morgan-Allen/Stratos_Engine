@@ -389,6 +389,22 @@ public class AreaMap implements Session.Saveable {
   }
   
   
+  public Visit <Tile> tilesUnder(Box2D area) {
+    return tilesUnder(
+      (int) area.xpos(), (int) area.ypos(),
+      (int) area.xdim(), (int) area.ydim()
+    );
+  }
+  
+  
+  public Visit <Tile> tilesAround(Box2D area) {
+    return tilesAround(
+      (int) area.xpos(), (int) area.ypos(),
+      (int) area.xdim(), (int) area.ydim()
+    );
+  }
+  
+  
   
   /**  Blockage and paving methods-
     */

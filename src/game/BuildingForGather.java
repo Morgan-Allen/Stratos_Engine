@@ -13,11 +13,12 @@ public class BuildingForGather extends Building {
   
   /**  Data fields, construction and save/load methods-
     */
-  static class Plot extends Box2D {
-    Type planted;
+  public static class Plot extends Box2D {
+    Type plantOnly = null;
   };
   
-  List <Box2D> plantAreas = new List();
+  List <Plot> plots = new List();
+  private Tile temp[] = new Tile[9];
   
   
   public BuildingForGather(BuildType type) {
@@ -28,15 +29,20 @@ public class BuildingForGather extends Building {
   public BuildingForGather(Session s) throws Exception {
     super(s);
     for (int i = s.loadInt(); i-- > 0;) {
-      plantAreas.add(new Box2D().loadFrom(s.input()));
+      Plot p = new Plot();
+      p.loadFrom(s.input());
+      p.plantOnly = (Type) s.loadObject();
     }
   }
   
   
   public void saveState(Session s) throws Exception {
     super.saveState(s);
-    s.saveInt(plantAreas.size());
-    for (Box2D a : plantAreas) a.saveTo(s.output());
+    s.saveInt(plots.size());
+    for (Plot p : plots) {
+      p.saveTo(s.output());
+      s.saveObject(p.plantOnly);
+    }
   }
   
   
@@ -46,36 +52,59 @@ public class BuildingForGather extends Building {
   public void enterMap(AreaMap map, int x, int y, float buildLevel, Base owns) {
     super.enterMap(map, x, y, buildLevel, owns);
     
+    //  I'm... not sure I like this.  Figure it out.
+    
     if (isClaimant() && TaskGathering.canPlant(this)) {
-      Box2D limit = area().expandBy(type().claimMargin);
+      Plot limit = (Plot) new Plot().setTo(claimArea());
       
       //  TODO:  Ensure planted areas don't overlap with your own footprint.
       
-      //  TODO:  Also, you need to ensure that the right mixture of goods is
-      //  harvested.  The simplest way is to just pick at random to ensure the
-      //  correct balance.  Either that, or stipple the rows.
-      
-      //  You can set the correct balance at the venue via upgrades.
-      
-      
-      
-      
-      this.plantAreas = divideIntoPlots(limit, 3, 4);
+      this.plots = divideIntoPlots(limit, 3, 4);
     }
   }
-
-
-  private List <Box2D> divideIntoPlots(
-    Box2D area, int prefSpacing, int maxSideRatio
+  
+  
+  public Series <Plot> plots() {
+    return plots;
+  }
+  
+  
+  boolean canPlant(Tile at) {
+    if (at == null) return false;
+    if (at.terrain.pathing != PATH_FREE) return false;
+    if (at.above != null && ! at.above.type().isClearable()) return false;
+    
+    for (Tile t : AreaMap.adjacent(at, temp, map())) {
+      if (t == null || t.above == null) continue;
+      if (t.above.type().isClearable()) continue;
+      if (t.above.type().pathing <= PATH_FREE) continue;
+      return false;
+    }
+    
+    return true;
+  }
+  
+  
+  Good seedType(Tile t) {
+    Good crops[] = this.type().produced;
+    float index = t.x % 5;
+    index += (t.y % 5) / 5f;
+    index *= crops.length / 5f;
+    return crops[(int) index];
+  }
+  
+  
+  private List <Plot> divideIntoPlots(
+    Plot area, int prefSpacing, int maxSideRatio
   ) {
     final int idealSplit = 1 + (prefSpacing * 2);
     prefSpacing  = Nums.max(prefSpacing , 1);
     maxSideRatio = Nums.max(maxSideRatio, 1);
-    final List <Box2D> bigPlots = new List(), finePlots = new List();
+    final List <Plot> bigPlots = new List(), finePlots = new List();
     bigPlots.add(area);
     
     while (bigPlots.size() > 0) {
-      for (Box2D plot : bigPlots) {
+      for (Plot plot : bigPlots) {
         final float minSide = plot.minSide();
         
         if (minSide > prefSpacing) {
@@ -98,16 +127,17 @@ public class BuildingForGather extends Building {
   
   
   private void dividePlot(
-    Box2D plot, boolean across, float split, List <Box2D> plots
+    Plot plot, boolean across, float split, List <Plot> plots
   ) {
     final int
       side  = (int) (across ? plot.xdim() : plot.ydim()),
       sideA = (int) (side * split),
-      sideB = side - (1 + sideA);
-    final Box2D
-      plotA = new Box2D(plot),
-      plotB = new Box2D(plot);
-    
+      sideB = side - (1 + sideA)
+    ;
+    final Plot
+      plotA = (Plot) new Plot().setTo(plot),
+      plotB = (Plot) new Plot().setTo(plot)
+    ;
     if (across) {
       plotA.xdim(sideA);
       plotB.xdim(sideB);

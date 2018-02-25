@@ -4,6 +4,7 @@ package game;
 import util.*;
 import static game.AreaMap.*;
 import static game.GameConstants.*;
+import static game.BuildingForGather.*;
 
 
 
@@ -12,6 +13,7 @@ public class TaskGathering extends Task {
   
   
   BuildingForGather store;
+  Good plants = null;
   
   
   public TaskGathering(Actor actor, BuildingForGather store) {
@@ -23,37 +25,59 @@ public class TaskGathering extends Task {
   public TaskGathering(Session s) throws Exception {
     super(s);
     store = (BuildingForGather) s.loadObject();
+    plants = (Good) s.loadObject();
   }
   
   
   public void saveState(Session s) throws Exception {
     super.saveState(s);
     s.saveObject(store);
+    s.saveObject(plants);
   }
   
+  
+  
+  static boolean canPlant(BuildingForGather store) {
+    boolean canPlant = false;
+    for (Good g : store.type().produced) if (g.isCrop) canPlant = true;
+    return canPlant;
+  }
   
   
   static Task pickPlantPoint(
     BuildingForGather store, Actor actor, boolean close, boolean start
   ) {
     if (start && actor.inside() != store) return null;
+    if (! canPlant(store)) return null;
     
-    //  TODO:  Have this work off a different principle.
     
-    boolean canPlant = false;
-    for (Good g : store.type().produced) if (g.isCrop) canPlant = true;
-    if (! canPlant) return null;
+    Pick <Tile> pick = new Pick();
+    AreaMap map = store.map();
+    Pathing from = Task.pathOrigin(actor);
     
-    CityMapFlagging flagging = store.map.flagging.get(NEED_PLANT);
-    if (flagging == null) return null;
+    for (Plot p : store.plots()) {
+      for (Tile t : map.tilesUnder(p)) {
+        if (t == null || t.hasFocus()) continue;
+        if (! map.pathCache.pathConnects(from, t, true, false)) continue;
+        
+        if (! store.canPlant(t)) continue;
+        
+        Good g = store.seedType(t);
+        Element e = map.above(t);
+        if (e != null && e.type() == g && e.growLevel() >= 0) continue;
+        
+        float rating = AreaMap.distancePenalty(actor, t);
+        pick.compare(t, rating);
+      }
+    }
     
-    Tile goes = null;
-    if (close) goes = flagging.findNearbyPoint(actor, AVG_GATHER_RANGE);
-    else goes = flagging.pickRandomPoint(store, store.type().maxDeliverRange);
-    if (goes == null) return null;
+    if (pick.empty()) return null;
     
+    Tile goes = pick.result();
     TaskGathering task = new TaskGathering(actor, store);
+    
     if (task.configTask(store, null, goes, JOB.PLANTING, 2) != null) {
+      task.plants = store.seedType(goes);
       return task;
     }
     
@@ -94,24 +118,26 @@ public class TaskGathering extends Task {
   
   protected void onTarget(Target other) {
     if (other == null) return;
-    Actor actor = (Actor) this.active;
+    Actor   actor = (Actor) this.active;
+    Tile    at    = other.at();
+    AreaMap map   = actor.map();
     
     if (actor.jobType() == JOB.RETURNING && store.actorIsHere(actor)) {
       onVisit(store);
       return;
     }
     
-    Element above = other.at().above;
-    if (above == null || above.type().yields == null) return;
     
     Trait skill      = store.type().craftSkill;
     float skillBonus = actor.levelOf(skill) / MAX_SKILL_LEVEL;
-    float multXP     = above.type().isCrop ? FARM_XP_PERCENT : GATHR_XP_PERCENT;
     
     if (actor.jobType() == JOB.PLANTING) {
+      float multXP = plants.isCrop ? FARM_XP_PERCENT : GATHR_XP_PERCENT;
       //
       //  First, initialise the crop:
-      above.setGrowLevel(0);
+      Element crop = new Element(plants);
+      crop.enterMap(map, at.x, at.y, 1, store.base());
+      crop.setGrowLevel(0);
       actor.gainXP(skill, 1 * multXP / 100);
       //
       //  Then pick another point to sow:
@@ -125,9 +151,13 @@ public class TaskGathering extends Task {
     }
     
     if (actor.jobType() == JOB.HARVEST) {
+      Element above = map.above(at);
+      if (above == null || above.type().yields == null) return;
       
       if      (above.type().isCrop      ) above.setGrowLevel(-1);
       else if (above.type().growRate > 0) above.setGrowLevel( 0);
+      
+      float multXP = above.type().isCrop ? FARM_XP_PERCENT : GATHR_XP_PERCENT;
       
       Good gathers = above.type().yields;
       float yield = above.type().yieldAmount;

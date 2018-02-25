@@ -736,10 +736,11 @@ public class GameContent {
     NURSERY.setBuildMaterials(PLASTICS, 5, PARTS, 2);
     NURSERY.workerTypes.setWith(Vassals.PYON, 2);
     NURSERY.worksBeforeBuilt = true;
-    NURSERY.gatherFlag = IS_CROP;
-    NURSERY.produced   = CROP_TYPES;
-    NURSERY.maxStock   = 25;
-    NURSERY.craftSkill = SKILL_FARM;
+    NURSERY.gatherFlag  = IS_CROP;
+    NURSERY.claimMargin = 4;
+    NURSERY.produced    = new Good[] { CARBS, GREENS };
+    NURSERY.maxStock    = 25;
+    NURSERY.craftSkill  = SKILL_FARM;
     
     FORMER_BAY.name = "Former Bay";
     FORMER_BAY.tint = TINT_LITE_INDUSTRIAL;

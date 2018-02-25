@@ -184,7 +184,7 @@ public class Type extends Index.Entry implements Session.Saveable {
   
   
   public boolean isClearable() {
-    return category == IS_FIXTURE;
+    return category == IS_FIXTURE || category == IS_GOOD;
   }
   
   
