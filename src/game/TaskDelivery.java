@@ -43,6 +43,9 @@ public class TaskDelivery extends Task {
   
   /**  Other config utilities:
     */
+  //  TODO:  Move the shopping code over here from BuildingForHome
+  
+  
   static TaskDelivery pickNextDelivery(
     Actor actor, Building from, Good... produced
   ) {
@@ -181,7 +184,12 @@ public class TaskDelivery extends Task {
       amount = Nums.min(amount, visits.inventory(carried));
       amount = Nums.max(amount, 0);
       
-      if (amount > 0 && type == JOB.SHOPPING && goes.type().isHomeBuilding()) {
+      boolean privateSale = amount > 0 && goes.type().hasFeature(IS_HOUSING);
+      if (type == JOB.DELIVER && privateSale) {
+        float cashPaid = amount * from.shopPrice(carried, this);
+        from.addInventory(cashPaid, CASH);
+      }
+      if (type == JOB.SHOPPING && privateSale) {
         float cashPaid = amount * from.shopPrice(carried, this);
         from.addInventory(cashPaid, CASH);
       }

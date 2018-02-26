@@ -419,6 +419,7 @@ public class GameContent {
     HOLDING           = new BuildType(BuildingForHome.class   , "type_holding"   , IS_HOME_BLD   ),
     HOUSE_T1          = new BuildType(BuildingForHome.class   , "type_house_t1"  , IS_UPGRADE    ),
     HOUSE_T2          = new BuildType(BuildingForHome.class   , "type_house_t2"  , IS_UPGRADE    ),
+    //HOUSE_T3
     
     SCHOOL_LOG        = new BuildType(BuildingForFaith.class , "venue_logician"  , IS_FAITH_BLD  ),
     SCHOOL_COL        = new BuildType(BuildingForFaith.class , "venue_collective", IS_FAITH_BLD  ),
@@ -464,7 +465,7 @@ public class GameContent {
     BASTION.buildsWith   = new Good[] { PLASTICS, PARTS };
     BASTION.needed       = BASTION.buildsWith;
     BASTION.maxStock     = 5;
-    BASTION.setFeatures(IS_HOUSING);
+    BASTION.setFeatures(IS_HOUSING, IS_REFUGE);
     BASTION.worksBeforeBuilt = true;
     
     BASTION_L2.name = "Bastion Level 2";
@@ -560,8 +561,8 @@ public class GameContent {
     STOCK_EXCHANGE.setDimensions(4, 4, 1);
     STOCK_EXCHANGE.setBuildMaterials(PLASTICS, 4, PARTS, 2);
     STOCK_EXCHANGE.workerTypes.setWith(Vassals.VENDOR, 2);
-    STOCK_EXCHANGE.needed   = MARKET_GOODS;
-    STOCK_EXCHANGE.features = new Good[] { IS_VENDOR };
+    STOCK_EXCHANGE.needed    = MARKET_GOODS;
+    STOCK_EXCHANGE.features  = new Good[] { IS_VENDOR };
     STOCK_EXCHANGE.shopItems = new Good[] {
       StockExGoods.MEDIKIT//, StockExGoods.SHIELD_BAND, StockExGoods.COMM_RELAY
     };

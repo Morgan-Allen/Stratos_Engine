@@ -303,7 +303,7 @@ public class GameConstants {
     IS_STONE   = new Good("Is Stone"    , -1 ),
     
     IS_ADMIN   = new Good("Is Admin"    , -1 ),
-    IS_VENDOR  = new Good("Is Market"   , -1 ),
+    IS_VENDOR  = new Good("Is Vendor"   , -1 ),
     IS_TRADER  = new Good("Is Trader"   , -1 ),
     IS_HOUSING = new Good("Is Housing"  , -1 ),
     IS_TOWER   = new Good("Is Tower"    , -1 ),
