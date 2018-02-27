@@ -151,7 +151,7 @@ public class TestBridging extends Test {
         if (e.type().isBuilding()) {
           Building b = (Building) e, c = (Building) copy;
           c.setFacing(b.facing());
-          c.assignHomeCity(b.base());
+          c.assignBase(b.base());
         }
         copy.setLocation(at, map);
         freshBuilt.add(copy);

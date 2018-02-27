@@ -6,7 +6,7 @@ import graphics.common.*;
 import util.*;
 import static game.AreaMap.*;
 import static game.Base.*;
-import static game.CityBorders.*;
+import static game.ActorUtils.*;
 import static game.GameConstants.*;
 
 

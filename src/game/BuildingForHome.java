@@ -5,6 +5,7 @@ import util.*;
 import static game.AreaMap.*;
 import static game.Task.*;
 import static game.GameConstants.*;
+import static game.TaskDelivery.*;
 import static util.TileConstants.*;
 
 
@@ -391,6 +392,7 @@ public class BuildingForHome extends Building {
   
   
   
+  
   /**  Rendering, debug and interface methods-
     */
   public String toString() {
@@ -399,6 +401,8 @@ public class BuildingForHome extends Building {
     return tier.name+" "+ID;
   }
 }
+
+
 
 
 

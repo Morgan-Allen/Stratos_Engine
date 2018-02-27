@@ -4,7 +4,7 @@
 package game;
 import util.*;
 import static game.GameConstants.*;
-import static game.CityBorders.*;
+import static game.ActorUtils.*;
 
 
 

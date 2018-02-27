@@ -95,7 +95,7 @@ public class CityMapPlanning {
   
   public void placeObject(Element e, int x, int y, Base owns) {
     e.setLocation(map.tileAt(x, y), map);
-    if (e.type().isBuilding()) ((Building) e).assignHomeCity(owns);
+    if (e.type().isBuilding()) ((Building) e).assignBase(owns);
     placeObject(e);
   }
   

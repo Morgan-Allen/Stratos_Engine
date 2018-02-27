@@ -52,13 +52,8 @@ public class BuildingForGather extends Building {
   public void enterMap(AreaMap map, int x, int y, float buildLevel, Base owns) {
     super.enterMap(map, x, y, buildLevel, owns);
     
-    //  I'm... not sure I like this.  Figure it out.
-    
     if (isClaimant() && TaskGathering.canPlant(this)) {
       Plot limit = (Plot) new Plot().setTo(claimArea());
-      
-      //  TODO:  Ensure planted areas don't overlap with your own footprint.
-      
       this.plots = divideIntoPlots(limit, 3, 4);
     }
   }
@@ -154,6 +149,8 @@ public class BuildingForGather extends Building {
   }
   
   
+  
+  //  TODO:  Consider whether this is still needed
   /*
   public static Tile[] applyPlanting(
     Base city, int x, int y, int w, int h, Good... crops
@@ -183,10 +180,6 @@ public class BuildingForGather extends Building {
     return crops[(int) index];
   }
   //*/
-  
-  
-  
-  
   
   
   

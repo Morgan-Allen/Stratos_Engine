@@ -61,7 +61,7 @@ public class VenuePane extends DetailPane {
         d.append("\n  ");
         d.append(new Description.Link("Hire "+w.name+" ("+cost+" Cr)") {
           public void whenClicked(Object context) {
-            CityBorders.generateMigrant(w, venue, true);
+            ActorUtils.generateMigrant(w, venue, true);
           }
         });
       }

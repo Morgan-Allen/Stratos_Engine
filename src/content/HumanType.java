@@ -51,6 +51,11 @@ public class HumanType extends ActorType {
   }
   
   
+  public Type nestType() {
+    return GameContent.HOLDING;
+  }
+  
+  
   void attachCostume(Class baseClass, String fileName) {
     costume = ImageAsset.fromImage(
       baseClass, "costume_"+entryKey(), HUMAN_FILE_DIR+fileName

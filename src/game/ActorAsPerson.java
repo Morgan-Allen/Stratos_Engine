@@ -235,8 +235,8 @@ public class ActorAsPerson extends Actor {
     
     //  Adults will search for work and a place to live:
     //  Children and retirees don't work:
-    if (adult && work() == null) CityBorders.findWork(map, this);
-    if (adult && home() == null) CityBorders.findHome(map, this);
+    if (adult && work() == null) ActorUtils.findWork(map, this);
+    if (adult && home() == null) ActorUtils.findHome(map, this);
     if (work() != null && ! adult) work().setWorker(this, false);
     
     //  TODO:  You will need to ensure that work/home/formation venues are

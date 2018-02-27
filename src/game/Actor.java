@@ -499,7 +499,7 @@ public class Actor extends Element implements
   
   public void onArrival(Base goes, World.Journey journey) {
     if (goes.activeMap() != null) {
-      Tile entry = CityBorders.findTransitPoint(
+      Tile entry = ActorUtils.findTransitPoint(
         goes.activeMap(), goes, journey.from
       );
       enterMap(goes.activeMap(), entry.x, entry.y, 1, homeCity);

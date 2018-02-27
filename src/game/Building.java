@@ -108,7 +108,7 @@ public class Building extends Element implements Pathing, Employer {
   }
   
   
-  public void assignHomeCity(Base belongs) {
+  public void assignBase(Base belongs) {
     this.homeCity = belongs;
   }
   
@@ -157,7 +157,7 @@ public class Building extends Element implements Pathing, Employer {
     
     if (isClaimant()) map.claimants.add(this);
     map.buildings.add(this);
-    assignHomeCity(owns);
+    assignBase(owns);
   }
   
   
@@ -580,7 +580,7 @@ public class Building extends Element implements Pathing, Employer {
   void updateWorkers(int period) {
     for (ActorType w : type().workerTypes.keys()) {
       if (numWorkers(w) < maxWorkers(w) && w.socialClass == CLASS_COMMON) {
-        CityBorders.generateMigrant(w, this, false);
+        ActorUtils.generateMigrant(w, this, false);
       }
     }
   }

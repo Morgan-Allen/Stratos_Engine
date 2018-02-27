@@ -2,7 +2,7 @@
 
 package game;
 import util.*;
-import static game.CityBorders.*;
+import static game.ActorUtils.*;
 import static game.GameConstants.*;
 
 
@@ -350,7 +350,7 @@ public class TaskTrading extends Task {
       return 1f / (1 + (mapDist / MAX_TRADER_RANGE));
     }
     else {
-      return CityBorders.distanceRating(fromB, goesB);
+      return ActorUtils.distanceRating(fromB, goesB);
     }
   }
   

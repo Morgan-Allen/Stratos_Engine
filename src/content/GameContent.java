@@ -93,7 +93,7 @@ public class GameContent {
     };
   
   static {
-    //  TODO:  You need to assign images here.
+    
     int i = 0;
     for (Good c : CROP_TYPES) {
       c.tint = TINT_CROPS[i++ % 3];
@@ -103,6 +103,14 @@ public class GameContent {
       c.yields      = c;
       c.yieldAmount = CROP_YIELD / 100f;
     }
+
+    CutoutModel CROP_MODELS[][] = CutoutModel.fromImageGrid(
+      GameContent.class, "crop_models",
+      "media/Buildings/res_all_crops.png",
+      4, 4, 1, 1, false
+    );
+    CARBS .modelVariants = CROP_MODELS[0];
+    GREENS.modelVariants = CROP_MODELS[1];
   }
   
   

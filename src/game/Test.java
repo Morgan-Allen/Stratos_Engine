@@ -61,7 +61,7 @@ public class Test {
   public static void fillAllVacancies(AreaMap map, ActorType defaultCitizen) {
     for (Building b : map.buildings) if (b.accessible()) {
       fillWorkVacancies(b);
-      for (Actor w : b.workers) CityBorders.findHome(map, w);
+      for (Actor w : b.workers) ActorUtils.findHome(map, w);
     }
     for (Building b : map.buildings) if (b.accessible()) {
       fillHomeVacancies(b, defaultCitizen);

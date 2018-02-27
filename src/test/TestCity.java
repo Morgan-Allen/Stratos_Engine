@@ -108,7 +108,7 @@ public class TestCity extends Test {
           int num = b.numWorkers(job), max = b.maxWorkers(job);
           boolean canHire = b.hireCost(job) <= base.funds();
           if (job.socialClass != CLASS_COMMON && num < max && canHire) {
-            CityBorders.generateMigrant(job, b, true);
+            ActorUtils.generateMigrant(job, b, true);
           }
         }
       }
