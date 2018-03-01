@@ -70,7 +70,8 @@ public class BuildingForCrafts extends Building {
   }
   
   
-  boolean canAdvanceCrafting() {
+  /*
+  boolean canAdvanceCrafting(Recipe recipe) {
     boolean anyRoom = false, allMaterials = true;
     
     for (Good made : produced()) {
@@ -85,6 +86,7 @@ public class BuildingForCrafts extends Building {
     
     return anyRoom && allMaterials;
   }
+  //*/
   
   
   public ItemOrder nextUnfinishedOrder() {
@@ -167,9 +169,9 @@ public class BuildingForCrafts extends Building {
     }
     //
     //  And failing all that, start crafting:
-    if (canAdvanceCrafting()) {
-      TaskCrafting task = TaskCrafting.configCrafting(actor, this);
-      if (task != null) return task;
+    TaskCrafting crafting = TaskCrafting.nextCraftingTask(actor, this);
+    if (crafting != null) {
+      return crafting;
     }
     return null;
   }

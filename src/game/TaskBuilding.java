@@ -312,8 +312,13 @@ public class TaskBuilding extends Task {
   float incCarryAmount(float inc, Good m, Element b, boolean siteOnly) {
     Actor actor = (Actor) this.active;
     //
-    //  The default 'nothing' material gets special treatment:
-    if (m == VOID) return 100;
+    //  The default 'nothing' material gets special treatment, as does cash:
+    if (m == VOID) {
+      return 100;
+    }
+    if (m == CASH) {
+      return 100;
+    }
     //
     //  If we're recovering material, the actor keeps it:
     float total = 0;

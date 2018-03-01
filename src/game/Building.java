@@ -758,10 +758,15 @@ public class Building extends Element implements Pathing, Employer {
   
   public Series <Good> shopItems() {
     Batch <Good> items = new Batch();
-    Visit.appendTo(items, type().shopItems);
+    
+    for (Good g : type().shopItems) items.include(g);
+    for (Recipe r : type().recipes) items.include(r.made);
+    
     for (BuildType u : upgrades) if (u != currentUpgrade()) {
-      Visit.appendTo(items, u.shopItems);
+      for (Good g : u.shopItems) items.include(g);
+      for (Recipe r : u.recipes) items.include(r.made);
     }
+    
     return items;
   }
   

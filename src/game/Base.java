@@ -77,9 +77,9 @@ public class Base implements Session.Saveable, Trader {
   private int   currentFunds = 0;
   private float population   = 0;
   private float armyPower    = 0;
-  Tally <Good> needLevel   = new Tally();
+  Tally <Good> needLevel = new Tally();
   Tally <Good> prodLevel = new Tally();
-  Tally <Good> inventory   = new Tally();
+  Tally <Good> inventory = new Tally();
   Tally <BuildType> buildLevel = new Tally();
   
   List <Mission> missions = new List();
@@ -618,9 +618,9 @@ public class Base implements Session.Saveable, Trader {
   /**  Regular updates-
     */
   void updateCity() {
-    boolean  updateStats = world.time % MONTH_LENGTH == 0;
-    boolean  activeMap   = map != null;
-    Base     lord        = currentLord();
+    boolean updateStats = world.time % MONTH_LENGTH == 0;
+    boolean activeMap   = map != null;
+    Base    lord        = currentLord();
     //
     //  Local player-owned cities (i.e, with their own map), must derive their
     //  vitual statistics from that small-scale city map:
@@ -643,14 +643,24 @@ public class Base implements Session.Saveable, Trader {
       
       //I.say("POWER OF "+this+" IS "+armyPower);
       
-      inventory.clear();
+      inventory .clear();
       buildLevel.clear();
+      needLevel .clear();
+      prodLevel .clear();
+      
+      //  TODO:  You might want to update this more frequently.
+      //  TODO:  And put in a basic test-routine for this...
       
       for (Building b : map.buildings) {
-        if (b.type().category == Type.IS_TRADE_BLD) {
-          BuildingForTrade post = (BuildingForTrade) b;
-          for (Good g : post.inventory().keys()) {
-            inventory.add(post.inventory(g), g);
+        for (Good g : world.goodTypes) {
+          inventory.add(b.inventory(g), g);
+        }
+        if (b.type().category != Type.IS_TRADE_BLD) {
+          for (Good g : b.needed()) {
+            needLevel.add(b.stockLimit(g), g);
+          }
+          for (Good g : b.produced()) {
+            prodLevel.add(b.stockLimit(g), g);
           }
         }
         buildLevel.add(1, b.type());

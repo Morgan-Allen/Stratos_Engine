@@ -116,6 +116,14 @@ public class TaskGathering extends Task {
   }
   
   
+  Recipe recipeFor(Type cropType) {
+    for (Recipe r : store.type().recipes) {
+      if (r.made == cropType.yields) return r;
+    }
+    return null;
+  }
+  
+  
   protected void onTarget(Target other) {
     if (other == null) return;
     Actor   actor = (Actor) this.active;
@@ -127,17 +135,16 @@ public class TaskGathering extends Task {
       return;
     }
     
-    
-    Trait skill      = store.type().craftSkill;
-    float skillBonus = actor.levelOf(skill) / MAX_SKILL_LEVEL;
-    
     if (actor.jobType() == JOB.PLANTING) {
-      float multXP = plants.isCrop ? FARM_XP_PERCENT : GATHR_XP_PERCENT;
+      Recipe recipe     = recipeFor(plants);
+      Trait  skill      = recipe.craftSkill;
+      float  skillBonus = actor.levelOf(skill) / MAX_SKILL_LEVEL;
+      float  multXP     = plants.isCrop ? FARM_XP_PERCENT : GATHR_XP_PERCENT;
       //
       //  First, initialise the crop:
       Element crop = new Element(plants);
       crop.enterMap(map, at.x, at.y, 1, store.base());
-      crop.setGrowLevel(0);
+      crop.setGrowLevel(0 + skillBonus / 4);
       actor.gainXP(skill, 1 * multXP / 100);
       //
       //  Then pick another point to sow:
@@ -154,13 +161,17 @@ public class TaskGathering extends Task {
       Element above = map.above(at);
       if (above == null || above.type().yields == null) return;
       
-      if      (above.type().isCrop      ) above.setGrowLevel(-1);
-      else if (above.type().growRate > 0) above.setGrowLevel( 0);
+      Type plants = above.type();
+      if      (plants.isCrop      ) above.setGrowLevel(-1);
+      else if (plants.growRate > 0) above.setGrowLevel( 0);
       
-      float multXP = above.type().isCrop ? FARM_XP_PERCENT : GATHR_XP_PERCENT;
+      Recipe recipe     = recipeFor(plants);
+      Trait  skill      = recipe.craftSkill;
+      float  skillBonus = actor.levelOf(skill) / MAX_SKILL_LEVEL;
+      float  multXP     = plants.isCrop ? FARM_XP_PERCENT : GATHR_XP_PERCENT;
       
-      Good gathers = above.type().yields;
-      float yield = above.type().yieldAmount;
+      Good gathers = plants.yields;
+      float yield  = plants.yieldAmount;
       yield *= 1 + (skillBonus * 0.5f);
       
       actor.incCarried(gathers, yield);

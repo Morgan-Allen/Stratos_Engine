@@ -68,10 +68,19 @@ public class ScenarioBlankMap extends CityMapScenario {
   
   
   protected Base createBase(AreaMap stage, World world) {
-    Base city = new Base(world, stage.locale);
-    city.setName("Player Base");
-    stage.addCity(city);
-    return city;
+    World.Locale homeworld = world.addLocale(1, 1, "Homeworld");
+    
+    Base patron = new Base(world, homeworld);
+    patron.setName("Homeworld Base");
+    
+    Base landing = new Base(world, stage.locale);
+    landing.setName("Player Landing");
+    landing.setHomeland(patron);
+    stage.addCity(landing);
+    
+    world.addCities(patron, landing);
+    
+    return landing;
   }
   
   

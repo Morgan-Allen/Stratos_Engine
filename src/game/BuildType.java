@@ -17,15 +17,15 @@ public class BuildType extends Type {
   
   public Good needed   [] = NO_GOODS;
   public Good produced [] = NO_GOODS;
-  public Good shopItems[] = NO_GOODS;
   public Good features [] = NO_GOODS;
-  public Trait craftSkill = null;
+  
+  public Recipe recipes[] = {};
+  public Good shopItems[] = NO_GOODS;
   
   public Type gatherFlag = null;
   public int claimMargin = -1;
   
   public int updateTime      = AVG_UPDATE_GAP  ;
-  public int craftTime       = AVG_CRAFT_TIME  ;
   public int gatherRange     = AVG_GATHER_RANGE;
   public int maxDeliverRange = MAX_TRADER_RANGE;
   public int maxStock        = AVG_MAX_STOCK   ;

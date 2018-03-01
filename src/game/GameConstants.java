@@ -283,6 +283,21 @@ public class GameConstants {
     }
   }
   
+  public static class Recipe {
+    
+    Good inputs[];
+    Good made;
+    float craftTime;
+    Trait craftSkill;
+    
+    public Recipe(Good made, Trait skill, float time, Good... inputs) {
+      this.inputs     = inputs;
+      this.made       = made;
+      this.craftTime  = time;
+      this.craftSkill = skill;
+    }
+  }
+  
   
   
   /**  Economic constants-

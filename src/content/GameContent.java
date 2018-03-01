@@ -414,7 +414,7 @@ public class GameContent {
     FORMER_BAY        = new BuildType(BuildingForGather.class , "type_former_bay", IS_GATHER_BLD ),
     EXCAVATOR         = new BuildType(BuildingForGather.class , "type_excavator" , IS_GATHER_BLD ),
     //  TODO:  These aren't needed for now.  Add later.
-    //SOLAR_TOWER   = new BuildType(BuildingForGather.class , "type_solar_tower"  , IS_GATHER_BLD ),
+    //SOLAR_MAST   = new BuildType(BuildingForGather.class , "type_solar_tower"  , IS_GATHER_BLD ),
     //REACTOR
     //CULTURE_VATS
     
@@ -533,12 +533,14 @@ public class GameContent {
     ENGINEER_STATION.setDimensions(3, 3, 2);
     ENGINEER_STATION.setBuildMaterials(PARTS, 8);
     ENGINEER_STATION.workerTypes.setWith(ENGINEER, 2);
-    ENGINEER_STATION.needed   = new Good[] { ORES };
-    ENGINEER_STATION.produced = new Good[] { PARTS };
+    ENGINEER_STATION.needed   = new Good[] { CARBONS, ORES };
+    ENGINEER_STATION.produced = new Good[] { PLASTICS, PARTS };
     ENGINEER_STATION.maxStock = 3;
-    ENGINEER_STATION.craftSkill = SKILL_CRAFT;
-    ENGINEER_STATION.shopItems = new Good[] {
-      Trooper.BLASTER, Trooper.BODY_ARMOUR
+    ENGINEER_STATION.recipes = new Recipe[] {
+      new Recipe(PLASTICS           , SKILL_CRAFT, AVG_CRAFT_TIME, CARBONS),
+      new Recipe(PARTS              , SKILL_CRAFT, AVG_CRAFT_TIME, ORES   ),
+      new Recipe(Trooper.BLASTER    , SKILL_CRAFT, AVG_CRAFT_TIME, ORES   ),
+      new Recipe(Trooper.BODY_ARMOUR, SKILL_CRAFT, AVG_CRAFT_TIME, ORES   ),
     };
     ENGINEER_STATION.buildsWith = new Good[] { PLASTICS, PARTS };
     
@@ -554,7 +556,9 @@ public class GameContent {
     PHYSICIAN_STATION.needed   = new Good[] { GREENS };
     PHYSICIAN_STATION.produced = new Good[] { MEDICINE };
     PHYSICIAN_STATION.maxStock = 3;
-    PHYSICIAN_STATION.craftSkill = SKILL_CRAFT;
+    PHYSICIAN_STATION.recipes = new Recipe[] {
+      new Recipe(MEDICINE, SKILL_CRAFT, AVG_CRAFT_TIME, GREENS)
+    };
     PHYSICIAN_STATION.setFeatures(HEALTHCARE);
     PHYSICIAN_STATION.featureAmount = 20;
     
@@ -749,7 +753,10 @@ public class GameContent {
     NURSERY.claimMargin = 4;
     NURSERY.produced    = new Good[] { CARBS, GREENS };
     NURSERY.maxStock    = 25;
-    NURSERY.craftSkill  = SKILL_FARM;
+    NURSERY.recipes = new Recipe[] {
+      new Recipe(CARBS , SKILL_FARM, -1),
+      new Recipe(GREENS, SKILL_FARM, -1)
+    };
     
     FORMER_BAY.name = "Former Bay";
     FORMER_BAY.tint = TINT_LITE_INDUSTRIAL;
@@ -764,7 +771,9 @@ public class GameContent {
     FORMER_BAY.gatherFlag = IS_TREE;
     FORMER_BAY.maxStock   = 25;
     FORMER_BAY.produced   = new Good[] { CARBONS };
-    FORMER_BAY.craftSkill = SKILL_CRAFT;
+    FORMER_BAY.recipes = new Recipe[] {
+      new Recipe(CARBONS, SKILL_CRAFT, -1)
+    };
     
     EXCAVATOR.name = "Excavator";
     EXCAVATOR.tint = TINT_LITE_INDUSTRIAL;
@@ -779,11 +788,14 @@ public class GameContent {
     EXCAVATOR.gatherFlag = IS_STONE;
     EXCAVATOR.maxStock   = 25;
     EXCAVATOR.produced   = new Good[] { CARBONS, ORES };
-    EXCAVATOR.craftSkill = SKILL_CRAFT;
-    
+    EXCAVATOR.recipes = new Recipe[] {
+      new Recipe(CARBONS, SKILL_CRAFT, -1),
+      new Recipe(ORES   , SKILL_CRAFT, -1),
+    };
     
     //  This isn't actually needed for now, and won't be until you get
     //  power-supplies working.
+    //  Rename to 'Solar Mast'.
     /*
     SOLAR_TOWER.name = "Solar Tower";
     SOLAR_TOWER.tint = TINT_LITE_INDUSTRIAL;
