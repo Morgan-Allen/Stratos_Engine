@@ -57,7 +57,7 @@ public class World implements Session.Saveable {
   
   int time = 0;
   List <Locale > locales  = new List();
-  List <Base   > cities   = new List();
+  List <Base   > bases    = new List();
   List <Journey> journeys = new List();
   List <Event  > history  = new List();
   
@@ -108,7 +108,7 @@ public class World implements Session.Saveable {
       l.distances.put(locales.atIndex(s.loadInt()), s.loadInt());
     }
     
-    s.loadObjects(cities);
+    s.loadObjects(bases);
     
     for (int n = s.loadInt(); n-- > 0;) {
       Journey j = new Journey();
@@ -163,7 +163,7 @@ public class World implements Session.Saveable {
       }
     }
     
-    s.saveObjects(cities);
+    s.saveObjects(bases);
     
     s.saveInt(journeys.size());
     for (Journey j : journeys) {
@@ -228,24 +228,24 @@ public class World implements Session.Saveable {
   
   
   public void addCities(Base... cities) {
-    Visit.appendTo(this.cities, cities);
+    Visit.appendTo(this.bases, cities);
   }
   
   
   public Base cityNamed(String n) {
-    for (Base c : cities) if (c.name.equals(n)) return c;
+    for (Base c : bases) if (c.name.equals(n)) return c;
     return null;
   }
   
   
   public AreaMap activeCityMap() {
-    for (Base c : cities) if (c.activeMap() != null) return c.activeMap();
+    for (Base c : bases) if (c.activeMap() != null) return c.activeMap();
     return null;
   }
   
   
   public Series <Base> cities() {
-    return cities;
+    return bases;
   }
   
   
@@ -345,7 +345,7 @@ public class World implements Session.Saveable {
     if (active != null) {
       active.locals.updateCity();
     }
-    for (Base city : cities) {
+    for (Base city : bases) {
       city.updateCity();
     }
     
@@ -404,7 +404,7 @@ public class World implements Session.Saveable {
   
   
   Base onMap(int mapX, int mapY) {
-    for (Base city : cities) {
+    for (Base city : bases) {
       int x = (int) city.locale.mapX, y = (int) city.locale.mapY;
       if (x == mapX && y == mapY) return city;
     }

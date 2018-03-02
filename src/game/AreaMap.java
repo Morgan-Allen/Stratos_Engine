@@ -32,7 +32,7 @@ public class AreaMap implements Session.Saveable {
   final public World world;
   final public World.Locale locale;
   final public Base locals;
-  List <Base> cities = new List();
+  List <Base> bases = new List();
   
   int size, scanSize, flagSize;
   Tile grid[][];
@@ -78,7 +78,7 @@ public class AreaMap implements Session.Saveable {
     world = (World) s.loadObject();
     locale = world.locales.atIndex(s.loadInt());
     locals = (Base) s.loadObject();
-    s.loadObjects(cities);
+    s.loadObjects(bases);
     
     performSetup(s.loadInt(), terrainTypes);
     for (Coord c : Visit.grid(0, 0, size, size, 1)) {
@@ -133,7 +133,7 @@ public class AreaMap implements Session.Saveable {
     s.saveObject(world);
     s.saveInt(world.locales.indexOf(locale));
     s.saveObject(locals);
-    s.saveObjects(cities);
+    s.saveObjects(bases);
     
     s.saveInt(size);
     for (Coord c : Visit.grid(0, 0, size, size, 1)) {
@@ -226,13 +226,13 @@ public class AreaMap implements Session.Saveable {
   
   
   public void addCity(Base city) {
-    cities.include(city);
+    bases.include(city);
     city.attachMap(this);
   }
   
   
   public Series <Base> cities() {
-    return cities;
+    return bases;
   }
   
   
@@ -654,7 +654,7 @@ public class AreaMap implements Session.Saveable {
       actor.renderElement(rendering, playing);
     }
     
-    for (Base base : cities) {
+    for (Base base : bases) {
       for (Mission mission : base.missions()) {
         if (! mission.canRender(playing, rendering.view)) continue;
         mission.renderFlag(rendering);

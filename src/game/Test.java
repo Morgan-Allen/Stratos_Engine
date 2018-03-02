@@ -336,7 +336,7 @@ public class Test {
       graphic[x][y] = j.going.first().base().tint;
     }
     
-    for (Base city : world.cities) {
+    for (Base city : world.bases) {
       Base lord = city.currentLord();
       int x = (int) city.locale.mapX * 2, y = (int) city.locale.mapY * 2;
       for (Coord c : Visit.grid(x, y, 2, 2, 1)) graphic[c.x][c.y] = city.tint;
@@ -495,7 +495,7 @@ public class Test {
     report.append("\n  Prestige: "+c.prestige());
     
     List <String> borderRep = new List();
-    for (Base other : c.world.cities) if (other != c) {
+    for (Base other : c.world.bases) if (other != c) {
       Base.POSTURE r = c.posture(other);
       float loyalty = c.loyalty(other);
       borderRep.add("\n  "+other+": "+r+", "+Base.descLoyalty(loyalty));
@@ -609,10 +609,6 @@ public class Test {
       report.append("\nBuild level:\n  "+I.percent(b.buildLevel()));
     }
     
-    if (b.craftProgress() > 0) {
-      report.append("\nCraft progress:\n  "+I.percent(b.craftProgress()));
-    }
-    
     //
     //  Finally, present a tally of goods in demand:
     Tally <Good> homeCons = b.homeUsed();
@@ -626,6 +622,15 @@ public class Test {
       
       demand += consumes;
       goodRep.add("\n  "+g+": "+I.shorten(amount, 1)+"/"+I.shorten(demand, 1));
+    }
+    
+    if (b instanceof BuildingForCrafts) {
+      BuildingForCrafts BC = (BuildingForCrafts) b;
+      for (BuildingForCrafts.ItemOrder order : BC.orders()) {
+        Good g = order.itemType;
+        float amount = order.progress;
+        goodRep.add("\n  "+g+": "+I.shorten(amount, 1));
+      }
     }
     
     if (! goodRep.empty()) {

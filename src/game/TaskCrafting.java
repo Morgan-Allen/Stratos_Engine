@@ -45,15 +45,16 @@ public class TaskCrafting extends Task {
       
       boolean anyRoom = false, allMaterials = true;
       ItemOrder fills = null;
-      float supply = venue.base().inventory(recipe.made) + 0;
-      float demand = venue.base().needLevel(recipe.made) + 1;
+      Good made = recipe.made;
+      float supply = venue.base().inventory(made) + 0;
+      float demand = venue.base().needLevel(made) + 1;
       float rating = 2.0f - Nums.clamp(supply / demand, 0, 1);
       
-      if (venue.inventory(recipe.made) < venue.stockLimit(recipe.made)) {
+      if (venue.inventory(made) < venue.stockLimit(made)) {
         anyRoom = true;
       }
       else for (ItemOrder order : venue.orders()) {
-        if (order.progress < 1 && order.itemType == recipe.made) {
+        if (order.progress < 1 && order.itemType == made) {
           anyRoom = true;
           fills = order;
           rating += 10f;
@@ -62,6 +63,9 @@ public class TaskCrafting extends Task {
       }
       for (Good need : recipe.inputs) {
         if (venue.inventory(need) <= 0) allMaterials = false;
+      }
+      if (fills == null && ! Visit.arrayIncludes(venue.produced(), made)) {
+        continue;
       }
       
       if (anyRoom && allMaterials) {
@@ -75,11 +79,11 @@ public class TaskCrafting extends Task {
   
   
   static TaskCrafting configCrafting(
-    Actor actor, BuildingForCrafts venue, Recipe recipe, ItemOrder order
+    Actor actor, BuildingForCrafts venue, Recipe recipe, ItemOrder fills
   ) {
     TaskCrafting task = new TaskCrafting(actor, venue, recipe);
     if (task.configTask(venue, venue, null, JOB.CRAFTING, 10) == null) {
-      task.order = order;
+      task.order = fills;
       return null;
     }
     return task;
@@ -92,54 +96,6 @@ public class TaskCrafting extends Task {
   public static double totalProgInc = 0;
   
   
-  /*
-  protected void onVisit(Building visits) {
-    Actor actor = (Actor) this.active;
-    
-    BuildingForCrafts venue = (BuildingForCrafts) visits;
-    if (! venue.canAdvanceCrafting()) return;
-    
-    Trait skill     = venue.type().craftSkill;
-    float skillMult = actor.levelOf(skill) / MAX_SKILL_LEVEL;
-    
-    float progInc = 1f + (1f * skillMult);
-    progInc *= 1f / venue.type().craftTime;
-    
-    totalCraftTime += 1;
-    totalProgInc += progInc;
-    
-    actor.gainXP(skill, 1 * CRAFT_XP_PERCENT / 100f);
-    
-    for (Good need : venue.needed()) {
-      venue.addInventory(0 - progInc, need);
-    }
-    
-    BuildingForCrafts.ItemOrder order = venue.nextUnfinishedOrder();
-    
-    if (order != null) {
-      float progress = order.progress;
-      progress = Nums.min(progress + progInc, 1);
-      order.progress = progress;
-    }
-    
-    else {
-      float progress  = venue.craftProgress;
-      progress = Nums.min(progress + progInc, 1);
-      
-      if (progress >= 1) {
-        for (Good made : venue.produced()) {
-          if (venue.inventory(made) >= venue.stockLimit(made)) continue;
-          venue.addInventory(1, made);
-          venue.base().makeTotals.add(1, made);
-        }
-        progress = 0;
-      }
-      
-      venue.craftProgress = progress;
-    }
-  }
-  //*/
-  
 
   protected void onVisit(Building visits) {
     
@@ -148,6 +104,8 @@ public class TaskCrafting extends Task {
     float progress  = order == null ? venue.inventory(recipe.made) : order.progress;
     Trait skill     = recipe.craftSkill;
     float skillMult = actor.levelOf(skill) / MAX_SKILL_LEVEL;
+    
+    //I.say("Progress on "+recipe.made+": "+progress);
     
     float progInc = 1f + (1f * skillMult);
     progInc *= 1f / recipe.craftTime;

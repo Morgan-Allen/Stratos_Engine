@@ -14,7 +14,7 @@ public class TestTrading extends Test {
   
   
   public static void main(String args[]) {
-    testTrading(true);
+    testTrading(false);
   }
   
   
@@ -50,10 +50,11 @@ public class TestTrading extends Test {
     
     AreaMap map = new AreaMap(world, baseC.locale, baseC);
     map.performSetup(10, new Terrain[0]);
-    world.settings.toggleFog      = false;
-    world.settings.toggleHunger   = false;
-    world.settings.toggleFatigue  = false;
-    world.settings.toggleBuilding = false;
+    world.settings.toggleFog       = false;
+    world.settings.toggleHunger    = false;
+    world.settings.toggleFatigue   = false;
+    world.settings.toggleBuilding  = false;
+    world.settings.togglePurchases = false;
     
     BuildingForTrade post1 = (BuildingForTrade) SUPPLY_DEPOT.generate();
     post1.enterMap(map, 1, 6, 1, baseC);
@@ -124,10 +125,14 @@ public class TestTrading extends Test {
         if (a.jobType() == Task.JOB.TRADING) allHome = false;
       }
       if (tradeStop && allHome && ! moneyOkay) {
-        float funds = projectedEarnings(baseC, awayC, initFunds, false);
-        if (Nums.abs(funds - baseC.funds()) > 1) {
+        float estimate = projectedEarnings(baseC, awayC, initFunds, false);
+        
+        float funds = baseC.funds();
+        for (Building b : map.buildings()) funds += b.inventory(CASH);
+        
+        if (Nums.abs(estimate - funds) > 1) {
           I.say("\nTrade-earnings do not match projections!");
-          I.say("  Expected: "+funds        );
+          I.say("  Expected: "+estimate        );
           I.say("  Actual:   "+baseC.funds());
           projectedEarnings(baseC, awayC, initFunds, true);
           return false;
@@ -156,8 +161,8 @@ public class TestTrading extends Test {
     Base cityA, Base cityB, int initFunds, boolean report
   ) {
     if (report) I.say("\nProjected earnings:");
-    
     float projectedFunds = initFunds;
+    
     for (Good g : ALL_GOODS) {
       float sent = Base.goodsSent  (cityA, cityB, g);
       float got  = Base.goodsSent  (cityB, cityA, g);

@@ -52,6 +52,8 @@ public class TaskPurchase extends Task {
   ) {
     //  TODO:  Consider just ordering the cheapest of these?
     Batch <TaskPurchase> purchases = new Batch();
+    if (! actor.map().world.settings.togglePurchases) return purchases;
+    
     for (Good g : shop.shopItems()) {
       if (shop.hasItemOrder(g, actor)) continue;
       
@@ -72,6 +74,9 @@ public class TaskPurchase extends Task {
   static TaskPurchase configNextPurchase(
     Actor actor, Good good, BuildingForCrafts shop
   ) {
+    if (! actor.map().world.settings.togglePurchases) {
+      return null;
+    }
     if (shop.hasItemOrder(good, actor)) {
       return null;
     }

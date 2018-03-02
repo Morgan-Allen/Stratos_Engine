@@ -166,7 +166,7 @@ public class BuildingForTrade extends Building implements Trader {
     if (tradePartner != null) {
       targets.add(tradePartner);
     }
-    else for (Base c : world.cities) {
+    else for (Base c : world.bases) {
       if (c.activeMap() == map       ) continue;
       if (c == homeCity              ) continue;
       if (c.isEnemyOf(homeCity)      ) continue;

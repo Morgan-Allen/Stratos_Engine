@@ -439,11 +439,15 @@ public class GameConstants {
   }
   
   
-  public static interface Trader {
-    Tally <Good> needLevels();
-    Tally <Good> prodLevels();
+  public static interface Carrier {
     Tally <Good> inventory();
     Base base();
+  }
+  
+  
+  public static interface Trader extends Carrier {
+    Tally <Good> needLevels();
+    Tally <Good> prodLevels();
     float importPrice(Good g, Base sells);
     float exportPrice(Good g, Base buys );
   }

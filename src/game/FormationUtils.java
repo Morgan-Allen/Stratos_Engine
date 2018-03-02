@@ -226,7 +226,7 @@ public class FormationUtils {
     //  a building to tear down:
     Pick <Option> pick = new Pick();
     
-    for (Base c : map.cities) for (Mission f : c.missions) {
+    for (Base c : map.bases) for (Mission f : c.missions) {
       Option o = tacticalOptionFor(f, map, from, false);
       if (o != null && o.secures != null) pick.compare(o, o.rating);
     }

@@ -587,7 +587,7 @@ public class CityCouncil {
     //  TODO:  Allow for multiple levels of force-commitment, since you don't
     //  want your own city to be vulnerable?  And multiple options for terms
     //  during diplomacy?
-    for (Base other : city.world.cities) if (other != city) {
+    for (Base other : city.world.bases) if (other != city) {
       Integer distance = city.locale.distances.get(other.locale);
       if (distance == null) continue;
       

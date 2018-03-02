@@ -13,9 +13,11 @@ public class TaskTrading extends Task {
   /**  Data fields, construction/setup and save/load methods-
     */
   Tally <Good> taken;
-  Base   homeCity ;
-  Trader tradeFrom;
-  Trader tradeGoes;
+  Base    homeCity ;
+  Trader  tradeFrom;
+  Trader  tradeGoes;
+  boolean didExport;
+  boolean didImport;
   
   
   public TaskTrading(Actor actor) {
@@ -29,6 +31,8 @@ public class TaskTrading extends Task {
     homeCity  = (Base  ) s.loadObject();
     tradeFrom = (Trader) s.loadObject();
     tradeGoes = (Trader) s.loadObject();
+    didExport = s.loadBool();
+    didImport = s.loadBool();
   }
   
   
@@ -38,6 +42,8 @@ public class TaskTrading extends Task {
     s.saveObject(homeCity );
     s.saveObject(tradeFrom);
     s.saveObject(tradeFrom);
+    s.saveBool(didExport);
+    s.saveBool(didImport);
   }
   
   
@@ -49,7 +55,7 @@ public class TaskTrading extends Task {
     this.tradeGoes = goes ;
     this.homeCity  = from.base();
     
-    configTravel(from, JOB.TRADING, from);
+    configTravel(from, from, JOB.TRADING, from);
     return this;
   }
   
@@ -57,58 +63,33 @@ public class TaskTrading extends Task {
   
   /**  Handling actor events-
     */
-  void configTravel(Building site, Task.JOB jobType, Employer e) {
-    if (site.complete()) {
-      configTask(e, site, null, jobType, 0);
-    }
-    else {
-      configTask(e, null, site.at(), jobType, 0);
-    }
-  }
-  
-  
-  protected void onVisit(Building visits) {
-    Actor actor = (Actor) this.active;
+  void configTravel(Trader from, Trader trader, Task.JOB jobType, Employer e) {
+    Actor actor = (Actor) active;
+    AreaMap fromA = from.base().activeMap(), goesA = trader.base().activeMap();
     //
-    //  If you're embarking on a fresh journey, take on your assigned cargo,
-    //  then determine if you're visiting a city or another trading post:
-    if (visits == tradeFrom && actor.carried().empty()) {
-      if (reports()) {
-        I.say("\n"+actor+" SETTING OFF FROM "+visits);
-      }
-      Base city = tradeGoes.base();
-      takeOnGoods(tradeFrom, taken);
-      
-      if (tradeGoes != city) {
-        Building goes = (Building) tradeGoes;
-        configTravel(goes, Task.JOB.TRADING, origin);
+    //  If your're headed to a building on the same map, either proceed to the
+    //  entrance or head to the corner tile.
+    if (fromA != null && fromA == goesA) {
+      Building goes = (Building) trader;
+      if (goes.complete()) {
+        configTask(e, goes, null, jobType, 0);
       }
       else {
-        Tile exits = findTransitPoint(visits.map, tradeFrom.base(), city);
+        configTask(e, null, goes.at(), jobType, 0);
+      }
+    }
+    //
+    //  If you're headed to a foreign base, either head to the nearest exit
+    //  point or begin your journey directly.
+    else {
+      if (actor.onMap()) {
+        Tile exits = findTransitPoint(actor.map(), from.base(), trader.base());
         configTask(origin, null, exits, Task.JOB.TRADING, 0);
       }
-    }
-    //
-    //  If you've reached another trading post, simply offload your goods.
-    //  (The case of reaching a city off-map is handled below.)
-    else if (visits == tradeGoes) {
-      if (reports()) {
-        I.say("\n"+actor+" REACHED "+tradeGoes);
+      else {
+        World world = homeCity.world;
+        world.beginJourney(from.base(), trader.base(), actor);
       }
-      offloadGoods(tradeGoes);
-    }
-    //
-    //  If you've returned from a journey, offload any goods you might have
-    //  brought back, including any profits from exports.
-    else if (visits == tradeFrom && ! actor.carried().empty()) {
-      float profits = actor.carried(CASH);
-      homeCity.incFunds((int) profits);
-      if (reports()) {
-        I.say("\n"+actor+" RETURNED TO "+visits);
-        I.say("  ADDING TRADE PROFITS: "+profits);
-      }
-      offloadGoods(tradeFrom);
-      actor.clearCarried();
     }
   }
   
@@ -118,11 +99,11 @@ public class TaskTrading extends Task {
     //
     //  We might be visiting an incomplete structure:
     if (target.at().above == tradeFrom) {
-      onVisit((Building) tradeFrom);
+      onVisit(tradeFrom);
       return;
     }
     if (target.at().above == tradeGoes) {
-      onVisit((Building) tradeGoes);
+      onVisit(tradeGoes);
       return;
     }
     //
@@ -134,33 +115,131 @@ public class TaskTrading extends Task {
   }
   
   
+  protected void onVisit(Building visits) {
+    //
+    //  Any visited building is assumed to be one of the depots-
+    onVisit((Trader) visits);
+  }
+  
+  
   protected void onArrival(Base goes, World.Journey journey) {
-    Actor actor = (Actor) this.active;
     //
     //  If you've arrived at your destination city, offload your cargo, take on
     //  fresh goods, and record any profits in the process:
-    if (goes != homeCity) {
-      Tally <Good> taken = configureCargo(goes, tradeFrom, false, goes.world);
-      offloadGoods(goes       );
-      takeOnGoods (goes, taken);
-      homeCity.world.beginJourney(journey.goes, homeCity, actor);
+    if (goes != homeCity && ! didImport) {
+      onVisit(goes);
     }
     //
-    //  If you're arrived back on your home map, return to your post-
-    else {
-      Building store = (Building) tradeFrom;
-      configTravel(store, Task.JOB.TRADING, origin);
+    //  If you've arrived back on your home map, return to your post-
+    else if (goes == homeCity) {
+      configTravel(tradeFrom, tradeFrom, Task.JOB.TRADING, origin);
+    }
+    //
+    //  ...Fwaaah?
+    else I.complain("THIS SHOULDN'T HAPPEN");
+  }
+  
+    
+  protected void onVisit(Trader visits) {
+    Actor actor = (Actor) active;
+    World world = homeCity.world;
+    //
+    //  If you haven't done your export, and this is your 'from' point, take on
+    //  goods, then head to your 'goes' point.
+    //
+    if (visits == tradeFrom && ! didExport) {
+      if (taken == null) {
+        taken = configureCargo(tradeFrom, tradeGoes, false, world);
+      }
+      transferGoods(tradeFrom, actor, taken);
+      configTravel(tradeFrom, tradeGoes, Task.JOB.TRADING, origin);
+      didExport = true;
+    }
+    //
+    //  If this is your 'goes' point, and you haven't done your import, take on
+    //  goods, and return to your 'from' point.
+    //
+    else if (visits == tradeGoes && ! didImport) {
+      transferGoods(actor, tradeGoes, taken);
+      taken = configureCargo(tradeGoes, tradeFrom, false, world);
+      transferGoods(tradeGoes, actor, taken);
+      configTravel(tradeGoes, tradeFrom, Task.JOB.TRADING, origin);
+      didImport = true;
+    }
+    //
+    //  If you *have* done your export, and this is your 'from' point, offload
+    //  goods, and end the task.
+    //
+    else if (visits == tradeFrom) {
+      transferGoods(actor, tradeFrom, taken);
+      int profit = (int) actor.carried(CASH);
+      actor.setCarried(CASH, 0);
+      incFunds(tradeFrom, profit);
+      if (reports() && profit != 0) {
+        I.say("\n"+actor+" returned profit: "+profit);
+      }
     }
   }
   
+  
+  void transferGoods(Carrier from, Carrier goes, Tally <Good> cargo) {
+    
+    boolean report = reports() && ! cargo.empty();
+    if (report) {
+      I.say("\nTransferring goods from "+from+" to "+goes);
+      I.say("  Cargo: "+cargo);
+    }
+    
+    Base fromB = from.base(), goesB = goes.base();
+    boolean paymentDue = fromB != goesB;
+    boolean tributeDue = fromB.isLoyalVassalOf(goesB);
+    Base.Relation relation = fromB.relationWith(goesB);
+    
+    Tally <Good> stock = from.inventory();
+    float totalGets = 0, totalPays = 0;
+    
+    for (Good g : cargo.keys()) {
+      if (g == CASH) continue;
 
-
+      float priceP = goesB.importPrice(g, fromB);
+      float priceG = fromB.exportPrice(g, goesB);
+      float amount = Nums.min(cargo.valueFor(g), stock.valueFor(g));
+      from.inventory().add(0 - amount, g);
+      goes.inventory().add(amount + 0, g);
+      
+      float paysFor = amount;
+      if (tributeDue) {
+        paysFor -= tributeQuantityRemaining(relation, g);
+        paysFor = Nums.max(0, paysFor);
+      }
+      
+      totalPays += paysFor * priceP;
+      totalGets += paysFor * priceG;
+      relation.suppliesSent.add(amount, g);
+    }
+    
+    if (report && paymentDue) {
+      I.say("  Price pays: "+totalPays);
+      I.say("  Price gets: "+totalGets);
+    }
+    
+    if (paymentDue) {
+      incFunds(from, totalGets + 0);
+      incFunds(goes, 0 - totalPays);
+    }
+  }
+  
+  
+  
   /**  Other utility methods:
     */
-  Base oppositeCity(Trader point) {
-    if (point == tradeFrom) return tradeGoes.base();
-    if (point == tradeGoes) return tradeFrom.base();
-    return null;
+  void incFunds(Carrier gets, float payment) {
+    if (gets.base() == gets) {
+      gets.base().incFunds((int) payment);
+    }
+    else {
+      gets.inventory().add(payment, CASH);
+    }
   }
   
   
@@ -169,109 +248,6 @@ public class TaskTrading extends Task {
     float demand = r.suppliesDue .valueFor(good);
     float paid   = r.suppliesSent.valueFor(good);
     return Nums.max(0, demand - paid);
-  }
-  
-  
-  void takeOnGoods(Trader store, Tally <Good> taken) {
-    Actor actor = (Actor) this.active;
-    if (store == null) return;
-    
-    //  You don't have to pay for goods if the city you're taking them from
-    //  owes them as tribute!
-    Base base = store.base(), opposite = oppositeCity(store);
-    boolean tributeDue = base.isLoyalVassalOf(opposite);
-    Base.Relation r = base.relationWith(opposite);
-    
-    Tally <Good> cargo = new Tally();
-    Tally <Good> stock = store.inventory();
-    cargo.add(actor.carried);
-    int totalPaid = 0, totalGets = 0;
-    
-    for (Good g : taken.keys()) {
-      float priceP = opposite.importPrice(g, base);
-      float priceG = base.exportPrice(g, opposite);
-      float amount = Nums.min(taken.valueFor(g), stock.valueFor(g));
-      cargo.add(    amount, g);
-      stock.add(0 - amount, g);
-      
-      if (tributeDue) {
-        float tribLeft = tributeQuantityRemaining(r, g);
-        float payFor   = Nums.max(0, amount - tribLeft);
-        totalPaid += payFor * priceP;
-        totalGets += payFor * priceG;
-      }
-      else {
-        totalPaid += amount * priceP;
-        totalGets += amount * priceG;
-      }
-      r.suppliesSent.add(amount, g);
-    }
-    
-    boolean doPayment = base != homeCity;
-    if (doPayment) {
-      cargo.add(0 - totalPaid, CASH);
-      store.inventory().add(totalGets, CASH);
-    }
-    actor.assignCargo(cargo);
-    
-    if (reports()) {
-      I.say("\n"+actor+" taking on goods from "+store);
-      I.say("  New cargo: "+cargo);
-      I.say("  Profit: "+cargo.valueFor(CASH));
-      I.say("  Cost paid: "+totalPaid+" Cost gets: "+totalGets);
-    }
-  }
-  
-  
-  void offloadGoods(Trader store) {
-    Actor actor = (Actor) this.active;
-    if (store == null) return;
-    
-    //  You don't receive money for goods if the city you deliver to is owed
-    //  them as tribute.
-    Base base = store.base(), opposite = oppositeCity(store);
-    boolean tributeDue = opposite.isLoyalVassalOf(base);
-    Base.Relation r = opposite.relationWith(base);
-    
-    //float cash = actor.carried(CASH);
-    //int totalValue = 0;
-    int totalPaid = 0, totalGets = 0;
-    
-    for (Good g : actor.carried().keys()) {
-      if (g == CASH) continue;
-      
-      float priceP = opposite.importPrice(g, base);
-      float priceG = base.exportPrice(g, opposite);
-      float amount = actor.carried(g);
-      store.inventory().add(amount, g);
-      
-      if (tributeDue) {
-        float tribLeft = tributeQuantityRemaining(r, g);
-        float payFor   = Nums.max(0, amount - tribLeft);
-        totalPaid += payFor * priceP;
-        totalGets += payFor * priceG;
-      }
-      else {
-        totalPaid += amount * priceP;
-        totalGets += amount * priceG;
-      }
-    }
-    
-    if (reports()) {
-      I.say("\n"+actor+" depositing goods at "+store);
-      I.say("  Cargo: "+actor.carried());
-      I.say("  Profit: "+actor.carried(CASH));
-      I.say("  Cost paid: "+totalPaid+" Cost gets: "+totalGets);
-    }
-    
-    boolean doPayment = base != homeCity;
-    actor.clearCarried();
-    //actor.incCarried(CASH, cash + (doPayment ? totalValue : 0));
-    
-    if (doPayment) {
-      actor.incCarried(CASH, totalGets);
-      store.inventory().add(0 - totalPaid, CASH);
-    }
   }
   
   
@@ -298,6 +274,8 @@ public class TaskTrading extends Task {
     Base.Relation goesR = from.base().relationWith(goes.base());
     
     for (Good good : world.goodTypes) {
+      if (good == CASH) continue;
+      
       float amountFrom = from.inventory ().valueFor(good);
       float amountGoes = goes.inventory ().valueFor(good);
       float needFrom   = from.needLevels().valueFor(good);
@@ -359,6 +337,7 @@ public class TaskTrading extends Task {
   /**  Graphical, debug and interface methods-
     */
   boolean reports() {
+    //if (true) return true;
     //return tradeFrom instanceof City || tradeGoes instanceof City;
     return super.reports();
   }

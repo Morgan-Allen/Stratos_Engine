@@ -11,7 +11,7 @@ import static util.TileConstants.*;
 
 
 
-public class Building extends Element implements Pathing, Employer {
+public class Building extends Element implements Pathing, Employer, Carrier {
   
   
   /**  Data fields and setup/initialisation-
@@ -442,11 +442,6 @@ public class Building extends Element implements Pathing, Employer {
   
   public Tally <Good> homeUsed() {
     return new Tally();
-  }
-  
-  
-  public float craftProgress() {
-    return 0;
   }
   
   

@@ -12,7 +12,7 @@ import static game.GameConstants.*;
 
 
 public class Actor extends Element implements
-  Session.Saveable, Journeys, Active
+  Session.Saveable, Journeys, Active, Carrier
 {
   
   
@@ -494,6 +494,11 @@ public class Actor extends Element implements
   
   public float carried(Good g) {
     return carried.valueFor(g);
+  }
+  
+  
+  public Tally <Good> inventory() {
+    return carried;
   }
   
   

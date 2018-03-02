@@ -20,7 +20,6 @@ public class BuildingForCrafts extends Building {
   }
   
   List <ItemOrder> orders = new List();
-  float craftProgress;
   
   
   public BuildingForCrafts(BuildType type) {
@@ -40,7 +39,6 @@ public class BuildingForCrafts extends Building {
       o.timePlaced = s.loadInt();
       orders.add(o);
     }
-    craftProgress = s.loadFloat();
   }
   
   
@@ -54,7 +52,6 @@ public class BuildingForCrafts extends Building {
       s.saveFloat(o.progress);
       s.saveInt(o.timePlaced);
     }
-    s.saveFloat(craftProgress);
   }
   
   
@@ -92,11 +89,6 @@ public class BuildingForCrafts extends Building {
   public ItemOrder nextUnfinishedOrder() {
     for (ItemOrder order : orders) if (order.progress < 1) return order;
     return null;
-  }
-  
-  
-  public float craftProgress() {
-    return craftProgress;
   }
   
   
