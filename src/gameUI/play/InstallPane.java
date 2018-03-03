@@ -22,20 +22,21 @@ public class InstallPane extends DetailPane {
   
   
   protected void updateState() {
+    final AreaMap stage = UI.stage;
+    final Base    base  = UI.base;
     
     this.text.setText("");
     final Description d = this.text;
-    
     d.append("\nFacilities: ");
-    for (final Type type : UI.base.world.buildTypes()) {
-      //if (! type.canBuildManually(UI.base)) continue;
+    
+    for (final Type type : UI.base.buildTypes()) {
+      if (! type.rulerCanBuild(base, stage)) continue;
       d.append("\n  ");
       d.append(type.name, new Description.Link() {
         public void whenClicked(Object context) {
           beginInstallTask(type);
         }
       });
-      //d.append(" ("+type.buildCost+" Cr)");
     }
     
     super.updateState();

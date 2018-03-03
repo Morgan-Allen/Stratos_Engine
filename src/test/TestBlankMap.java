@@ -12,16 +12,13 @@ public class TestBlankMap extends Test {
   
   
   final static BuildType BUILD_MENUS[][] = {
-    MILITARY_BUILDINGS   ,
-    SCIENCE_BUILDINGS    ,
-    ECONOMIC_BUILDINGS   ,
-    RESIDENTIAL_BUILDINGS,
-    PSI_SCHOOL_BUILDINGS ,
-    RESOURCE_BUILDINGS   ,
+    MILITARY_BUILDINGS  ,
+    GUILD_BUILDINGS     ,
+    COMMERCE_BUILDINGS  ,
+    PSI_SCHOOL_BUILDINGS,
   };
   final static String BUILD_MENU_NAMES[] = {
-    "Military"   , "Science"   , "Economic" ,
-    "Residential", "Psi School", "Resource" 
+    "Military", "Guilds", "Commerce", "Psi School"
   };
   
   

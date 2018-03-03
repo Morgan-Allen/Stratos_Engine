@@ -97,6 +97,8 @@ public class CutoutModel extends ModelAsset {
   
   protected State loadAsset() {
     texture = ImageAsset.getTexture(fileName);
+    if (texture == null) return state = State.ERROR;
+    
     region = new TextureRegion(
       texture,
       window.xpos(), window.ypos(),
@@ -105,7 +107,8 @@ public class CutoutModel extends ModelAsset {
     final Texture t = texture;
     final float relHeight =
       (t.getHeight() * window.ydim()) /
-      (t.getWidth () * window.xdim());
+      (t.getWidth () * window.xdim())
+    ;
     setupDimensions(size, relHeight);
     setupVertices();
     
@@ -117,7 +120,7 @@ public class CutoutModel extends ModelAsset {
   
   
   protected State disposeAsset() {
-    texture.dispose();
+    if (texture   != null) texture  .dispose();
     if (lightSkin != null) lightSkin.dispose();
     return state = State.DISPOSED;
   }

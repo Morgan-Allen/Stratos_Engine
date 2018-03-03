@@ -56,6 +56,7 @@ public class Assets {
     protected abstract State disposeAsset();
     
     public boolean stateLoaded  () { return state == State.LOADED  ; }
+    public boolean stateError   () { return state == State.ERROR   ; }
     public boolean stateDisposed() { return state == State.DISPOSED; }
     
     protected void setKeyFile(String filePath) {
@@ -208,12 +209,12 @@ public class Assets {
       asset.loadAsset();
       assetsLoaded.add(asset);
     }
-    if (asset.stateLoaded()) {
+    if (asset.stateLoaded() || asset.stateError()) {
       assetsToLoad.remove(asset);
       assetCache.put(asset.assetID, asset);
       if (extraVerbose) I.say(" ...loading complete.");
     }
-    else if (extraVerbose) I.say("  ...loading not done.");
+    else if (extraVerbose) I.say(" ...loading not done.");
   }
   
   

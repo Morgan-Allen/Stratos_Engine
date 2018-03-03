@@ -149,12 +149,29 @@ public class ImageAsset extends Assets.Loadable {
   
   
   public static Texture getTexture(String fileName) {
-    Texture cached = (Texture) Assets.getResource(TEX_PREFIX+fileName);
-    if (cached != null) return cached;
-    cached = new Texture(Gdx.files.internal(fileName));
-    cached.setFilter(TextureFilter.Linear, TextureFilter.Linear);
+    Object cached = Assets.getResource(TEX_PREFIX+fileName);
+    
+    if (cached == NO_FILE) return null;
+    if (cached != null) return (Texture) cached;
+    
+    if (! Assets.exists(fileName)) {
+      cached = NO_FILE;
+    }
+    else try {
+      Texture loaded = new Texture(Gdx.files.internal(fileName));
+      loaded.setFilter(TextureFilter.Linear, TextureFilter.Linear);
+      cached = loaded;
+    }
+    catch (Exception e) {
+      cached = NO_FILE;
+    }
+    
+    if (cached == NO_FILE) {
+      System.out.print("\nWARNING: NO TEXTURE: "+fileName);
+      return null;
+    }
     Assets.cacheResource(cached, TEX_PREFIX+fileName);
-    return cached;
+    return (Texture) cached;
   }
   
   

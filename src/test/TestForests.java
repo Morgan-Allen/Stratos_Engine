@@ -25,7 +25,7 @@ public class TestForests extends Test {
     World world = map.world;
     world.settings.toggleFog = false;
     
-    Building logs = (Building) FORMER_BAY.generate();
+    Building logs = (Building) HARVESTER.generate();
     logs.enterMap(map, 5, 5, 1, base);
     clearMargins(logs, 2);
     fillWorkVacancies(logs);

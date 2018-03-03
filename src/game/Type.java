@@ -115,6 +115,9 @@ public class Type extends Index.Entry implements Session.Saveable {
   public Type flagKey = null;
   public int wide = 1, high = 1, deep = 1;
   
+  public boolean rulerBuilt = true;
+  public boolean uniqueBuilding = false;
+  
   public Good    yields      = null;
   public float   yieldAmount = 0;
   public Good    builtFrom  [] = EMPTY_MATERIAL;
@@ -172,6 +175,13 @@ public class Type extends Index.Entry implements Session.Saveable {
   
   /**  Building-specific data fields and setup methods-
     */
+  public boolean rulerCanBuild(Base ruler, AreaMap map) {
+    if (! rulerBuilt) return false;
+    if (uniqueBuilding) {
+      for (Building b : map.buildings()) if (b.type() == this) return false;
+    }
+    return true;
+  }
   
   
   public boolean isNatural() {
@@ -252,13 +262,13 @@ public class Type extends Index.Entry implements Session.Saveable {
   
   
   public Sprite makeSpriteFor(Element e) {
-    if (model != null) {
+    if (model != null && model.stateLoaded()) {
       return model.makeSprite();
     }
     if (! Visit.empty(modelVariants)) {
       int index = e.varID() % modelVariants.length;
       ModelAsset pick = modelVariants[index];
-      return pick.makeSprite();
+      if (pick != null && pick.stateLoaded()) return pick.makeSprite();
     }
     return null;
   }

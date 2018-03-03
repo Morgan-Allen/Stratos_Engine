@@ -82,6 +82,8 @@ public class Base implements Session.Saveable, Trader {
   Tally <Good> inventory = new Tally();
   Tally <BuildType> buildLevel = new Tally();
   
+  List <BuildType> buildTypes = new List();
+  
   List <Mission> missions = new List();
   
   private boolean active;
@@ -135,10 +137,12 @@ public class Base implements Session.Saveable, Trader {
     currentFunds = s.loadInt();
     population   = s.loadFloat();
     armyPower    = s.loadFloat();
-    s.loadTally(needLevel  );
-    s.loadTally(prodLevel);
-    s.loadTally(inventory  );
-    s.loadTally(buildLevel );
+    s.loadTally(needLevel );
+    s.loadTally(prodLevel );
+    s.loadTally(inventory );
+    s.loadTally(buildLevel);
+    
+    s.loadObjects(buildTypes);
     
     s.loadObjects(missions);
     
@@ -176,10 +180,12 @@ public class Base implements Session.Saveable, Trader {
     s.saveInt(currentFunds);
     s.saveFloat(population);
     s.saveFloat(armyPower );
-    s.saveTally(needLevel  );
-    s.saveTally(prodLevel);
-    s.saveTally(inventory  );
-    s.saveTally(buildLevel );
+    s.saveTally(needLevel );
+    s.saveTally(prodLevel );
+    s.saveTally(inventory );
+    s.saveTally(buildLevel);
+    
+    s.saveObjects(buildTypes);
     
     s.saveObjects(missions);
     
@@ -202,6 +208,17 @@ public class Base implements Session.Saveable, Trader {
   
   public AreaMap activeMap() {
     return map;
+  }
+  
+  
+  public void assignBuildTypes(BuildType... types) {
+    buildTypes.clear();
+    Visit.appendTo(buildTypes, types);
+  }
+  
+  
+  public Series <BuildType> buildTypes() {
+    return buildTypes;
   }
   
   

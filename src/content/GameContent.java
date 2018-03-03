@@ -403,24 +403,33 @@ public class GameContent {
     TROOPER_LODGE     = new BuildType(BuildingForArmy.class   , "venue_trooper"  , IS_ARMY_BLD   ),
     //  TODO:  Add the Runner Market for assassinations and contraband.
     //  TODO:  Add the Kommando Redoubt for hunting and scouting.
-    //RUNNER_MARKET
     //KOMMANDO_REDOUBT
+    MILITARY_BUILDINGS[] =
+    {
+      BASTION, ENFORCER_BLOC, TROOPER_LODGE,  SHIELD_WALL, BLAST_DOOR, TURRET
+    },
     
     ECOLOGIST_STATION = new BuildType(BuildingForCrafts.class , "venue_ecologist", IS_CRAFTS_BLD ),
     ENGINEER_STATION  = new BuildType(BuildingForCrafts.class , "venue_engineer" , IS_CRAFTS_BLD ),
     PHYSICIAN_STATION = new BuildType(BuildingForCrafts.class , "venue_physician", IS_CRAFTS_BLD ),
     
     NURSERY           = new BuildType(BuildingForGather.class , "type_nursery"   , IS_GATHER_BLD ),
-    FORMER_BAY        = new BuildType(BuildingForGather.class , "type_former_bay", IS_GATHER_BLD ),
+    HARVESTER         = new BuildType(BuildingForGather.class , "type_harvester" , IS_GATHER_BLD ),
     EXCAVATOR         = new BuildType(BuildingForGather.class , "type_excavator" , IS_GATHER_BLD ),
     //  TODO:  These aren't needed for now.  Add later.
     //SOLAR_MAST   = new BuildType(BuildingForGather.class , "type_solar_tower"  , IS_GATHER_BLD ),
     //REACTOR
     //CULTURE_VATS
+    GUILD_BUILDINGS[] =
+    {
+      ECOLOGIST_STATION, ENGINEER_STATION, PHYSICIAN_STATION,
+      NURSERY, HARVESTER, EXCAVATOR
+    },
     
     CANTINA           = new BuildType(BuildingForAmenity.class, "venue_cantina"  , IS_AMENITY_BLD),
     STOCK_EXCHANGE    = new BuildType(BuildingForCrafts.class , "venue_stock_ex" , IS_CRAFTS_BLD ),
     SUPPLY_DEPOT      = new BuildType(BuildingForTrade.class  , "venue_supply_d" , IS_TRADE_BLD  ),
+    //RUNNER_MARKET
     
     WALKWAY           = new BuildType(Element.class           , "type_walkway"   , IS_STRUCTURAL ),
     //SERVICE_HATCH
@@ -428,6 +437,11 @@ public class GameContent {
     HOUSE_T1          = new BuildType(BuildingForHome.class   , "type_house_t1"  , IS_UPGRADE    ),
     HOUSE_T2          = new BuildType(BuildingForHome.class   , "type_house_t2"  , IS_UPGRADE    ),
     //HOUSE_T3
+    COMMERCE_BUILDINGS[] =
+    {
+      CANTINA, STOCK_EXCHANGE, SUPPLY_DEPOT,  // RUNNER_MARKET,
+      WALKWAY, HOLDING,  //SERVICE_HATCH
+    },
     
     SCHOOL_LOG        = new BuildType(BuildingForFaith.class , "venue_logician"  , IS_FAITH_BLD  ),
     SCHOOL_COL        = new BuildType(BuildingForFaith.class , "venue_collective", IS_FAITH_BLD  ),
@@ -435,23 +449,21 @@ public class GameContent {
     SCHOOL_SHA        = new BuildType(BuildingForFaith.class , "venue_shaper"    , IS_FAITH_BLD  ),
     SCHOOL_TEK        = new BuildType(BuildingForFaith.class , "venue_tek_priest", IS_FAITH_BLD  ),
     SCHOOL_SPA        = new BuildType(BuildingForFaith.class , "venue_spacer"    , IS_FAITH_BLD  ),
-    
-    
-    INFRASTRUCTURE_BUILDINGS[] = { WALKWAY, SHIELD_WALL, BLAST_DOOR, TURRET },
-    RESIDENTIAL_BUILDINGS   [] = { BASTION, HOLDING, CANTINA },
-    RESOURCE_BUILDINGS      [] = { NURSERY, FORMER_BAY, EXCAVATOR },
-    ECONOMIC_BUILDINGS      [] = { STOCK_EXCHANGE, SUPPLY_DEPOT, ENFORCER_BLOC },
-    MILITARY_BUILDINGS      [] = { ECOLOGIST_STATION, TROOPER_LODGE },
-    SCIENCE_BUILDINGS       [] = { ENGINEER_STATION, PHYSICIAN_STATION },
-    PSI_SCHOOL_BUILDINGS[] = {
+    PSI_SCHOOL_BUILDINGS[] =
+    {
       SCHOOL_LOG, SCHOOL_COL, SCHOOL_LEN, SCHOOL_SHA, SCHOOL_TEK, SCHOOL_SPA
     },
+    
     ALL_BUILDINGS[] = (BuildType[]) Visit.compose(BuildType.class,
-      MILITARY_BUILDINGS, SCIENCE_BUILDINGS, ECONOMIC_BUILDINGS,
-      //RESIDENTIAL_BUILDINGS,
-      //RESOURCE_BUILDINGS,
-      INFRASTRUCTURE_BUILDINGS
-    )
+      MILITARY_BUILDINGS, GUILD_BUILDINGS, COMMERCE_BUILDINGS,
+      PSI_SCHOOL_BUILDINGS
+    ),
+    RULER_BUILT[] = {
+      BASTION, TROOPER_LODGE, SCHOOL_COL,
+      ECOLOGIST_STATION, PHYSICIAN_STATION, ENGINEER_STATION,
+      CANTINA, SUPPLY_DEPOT, STOCK_EXCHANGE,
+      NURSERY, HARVESTER, EXCAVATOR,
+    }
   ;
   static {
     
@@ -461,10 +473,10 @@ public class GameContent {
     BASTION.tint = TINT_MILITARY;
     BASTION.model = CutoutModel.fromImage(
       GameContent.class, "bastion_model",
-      "media/Buildings/mil_bastion.png", 5, 2
+      "media/Buildings/mil_bastion.png", 6, 3
     );
     
-    BASTION.setDimensions(5, 5, 2);
+    BASTION.setDimensions(6, 6, 3);
     BASTION.maxHealth = 300;
     BASTION.setBuildMaterials(PLASTICS, 10, PARTS, 25);
     BASTION.workerTypes.setWith(Nobles.NOBLE, 1, Vassals.AUDITOR, 1, Vassals.PYON, 2);
@@ -475,6 +487,7 @@ public class GameContent {
     BASTION.maxStock     = 5;
     BASTION.setFeatures(IS_HOUSING, IS_REFUGE);
     BASTION.worksBeforeBuilt = true;
+    BASTION.uniqueBuilding = true;
     
     BASTION_L2.name = "Bastion Level 2";
     BASTION_L2.setBuildMaterials(PLASTICS, 5, PARTS, 15);
@@ -515,9 +528,9 @@ public class GameContent {
     ECOLOGIST_STATION.tint = TINT_INDUSTRIAL;
     ECOLOGIST_STATION.model = CutoutModel.fromImage(
       GameContent.class, "ecologist_station_model",
-      "media/Buildings/station_ecologist.png", 4, 2
+      "media/Buildings/station_ecologist.png", 3, 2
     );
-    ECOLOGIST_STATION.setDimensions(4, 4, 1);
+    ECOLOGIST_STATION.setDimensions(3, 3, 2);
     ECOLOGIST_STATION.setBuildMaterials(PLASTICS, 7, PARTS, 1);
     ECOLOGIST_STATION.workerTypes.setWith(ECOLOGIST, 2);
     ECOLOGIST_STATION.worksBeforeBuilt = true;
@@ -546,7 +559,7 @@ public class GameContent {
     
     PHYSICIAN_STATION.name = "Physician Station";
     PHYSICIAN_STATION.tint = TINT_INDUSTRIAL;
-    ENFORCER_BLOC.model = CutoutModel.fromImage(
+    PHYSICIAN_STATION.model = CutoutModel.fromImage(
       GameContent.class, "physician_station_model",
       "media/Buildings/station_physician.png", 3, 2
     );
@@ -568,9 +581,9 @@ public class GameContent {
     STOCK_EXCHANGE.tint = TINT_COMMERCIAL;
     STOCK_EXCHANGE.model = CutoutModel.fromImage(
       GameContent.class, "stock_exchange_model",
-      "media/Buildings/civ_stock_exchange.png", 4, 2
+      "media/Buildings/com_stock_exchange.png", 3, 1
     );
-    STOCK_EXCHANGE.setDimensions(4, 4, 1);
+    STOCK_EXCHANGE.setDimensions(3, 3, 1);
     STOCK_EXCHANGE.setBuildMaterials(PLASTICS, 4, PARTS, 2);
     STOCK_EXCHANGE.workerTypes.setWith(Vassals.VENDOR, 2);
     STOCK_EXCHANGE.needed    = MARKET_GOODS;
@@ -582,10 +595,10 @@ public class GameContent {
     SUPPLY_DEPOT.name = "Supply Depot";
     SUPPLY_DEPOT.tint = TINT_COMMERCIAL;
     SUPPLY_DEPOT.model = CutoutModel.fromImage(
-      GameContent.class, "civ_supply_depot_model",
-      "media/Buildings/supply_depot.png", 4, 1
+      GameContent.class, "supply_depot_model",
+      "media/Buildings/com_supply_depot.png", 3, 1
     );
-    SUPPLY_DEPOT.setDimensions(4, 4, 1);
+    SUPPLY_DEPOT.setDimensions(3, 3, 1);
     SUPPLY_DEPOT.setBuildMaterials(PLASTICS, 4, PARTS, 2);
     SUPPLY_DEPOT.workerTypes.setWith(Vassals.PYON, 2);
     SUPPLY_DEPOT.worksBeforeBuilt = true;
@@ -598,13 +611,13 @@ public class GameContent {
     SCHOOL_LOG.name = "Logician School";
     SCHOOL_LOG.model = CutoutModel.fromImage(
       GameContent.class, "logician_school_model",
-      "media/Buildings/school_logician.png", 5, 2
+      "media/Buildings/school_logician.png", 4, 2
     );
     
     SCHOOL_COL.name = "Collective School";
     SCHOOL_COL.model = CutoutModel.fromImage(
       GameContent.class, "collective_school_model",
-      "media/Buildings/school_collective.png", 5, 2
+      "media/Buildings/school_collective.png", 4, 2
     );
     
     SCHOOL_COL.workerTypes.setWith(Collective.COLLECTIVE, 2);
@@ -613,30 +626,30 @@ public class GameContent {
     SCHOOL_LEN.name = "LENSR School";
     SCHOOL_LEN.model = CutoutModel.fromImage(
       GameContent.class, "lensr_school_model",
-      "media/Buildings/school_LENSR.png", 5, 2
+      "media/Buildings/school_LENSR.png", 4, 2
     );
     
     SCHOOL_SHA.name = "Shaper School";
     SCHOOL_SHA.model = CutoutModel.fromImage(
       GameContent.class, "shaper_school_model",
-      "media/Buildings/school_shaper.png", 5, 2
+      "media/Buildings/school_shaper.png", 4, 2
     );
     
     SCHOOL_TEK.name = "Tek Priest School";
     SCHOOL_TEK.model = CutoutModel.fromImage(
       GameContent.class, "tek_priest_school_model",
-      "media/Buildings/school_tek_priest.png", 5, 2
+      "media/Buildings/school_tek_priest.png", 4, 2
     );
     
     SCHOOL_SPA.name = "Spacer School";
     SCHOOL_SPA.model = CutoutModel.fromImage(
       GameContent.class, "spacer_school_model",
-      "media/Buildings/school_spacer.png", 5, 2
+      "media/Buildings/school_spacer.png", 4, 2
     );
     
     for (BuildType t : PSI_SCHOOL_BUILDINGS) {
       t.tint = TINT_RELIGIOUS;
-      t.setDimensions(5, 5, 2);
+      t.setDimensions(4, 4, 2);
       t.setBuildMaterials(PARTS, 15);
       t.maxHealth       = 150;
       t.homeSocialClass = CLASS_NOBLE;
@@ -649,6 +662,7 @@ public class GameContent {
     WALKWAY.pathing = PATH_PAVE;
     WALKWAY.setDimensions(1, 1, 0);
     WALKWAY.setBuildMaterials(PARTS, 1);
+    WALKWAY.rulerBuilt = false;
     
     CutoutModel WALL_MODELS[][] = CutoutModel.fromImageGrid(
       GameContent.class, "shield_wall_models",
@@ -664,6 +678,7 @@ public class GameContent {
     SHIELD_WALL.isWall  = true;
     SHIELD_WALL.setDimensions(1, 1, 2);
     SHIELD_WALL.setBuildMaterials(PARTS, 2);
+    SHIELD_WALL.rulerBuilt = false;
     
     BLAST_DOOR.name = "Blast Door";
     BLAST_DOOR.modelVariants = WALL_MODELS[1];
@@ -674,6 +689,7 @@ public class GameContent {
     BLAST_DOOR.setDimensions(2, 2, 2);
     BLAST_DOOR.setBuildMaterials(PARTS, 10);
     BLAST_DOOR.setFeatures(IS_GATE);
+    BLAST_DOOR.rulerBuilt = false;
     
     TURRET.name = "Turret";
     TURRET.modelVariants = WALL_MODELS[2];
@@ -688,6 +704,7 @@ public class GameContent {
     TURRET.rangeDist   = 6;
     TURRET.armourClass = 0;
     TURRET.sightRange  = 8;
+    TURRET.rulerBuilt = false;
     
     
     CutoutModel HOUSE_MODELS[][] = CutoutModel.fromImageGrid(
@@ -709,6 +726,7 @@ public class GameContent {
     HOLDING.buildsWith   = new Good[] { PLASTICS, PARTS };
     HOLDING.setFeatures(IS_HOUSING);
     HOLDING.setUpgradeTiers(HOLDING, HOUSE_T1, HOUSE_T2);
+    HOLDING.rulerBuilt = false;
     
     HOUSE_T1.name = "Improved Holding";
     HOUSE_T1.modelVariants = HOUSE_MODELS[1];
@@ -730,7 +748,7 @@ public class GameContent {
     CANTINA.tint = TINT_AMENITY;
     CANTINA.model = CutoutModel.fromImage(
       GameContent.class, "cantina_model",
-      "media/Buildings/civ_cantina.png", 3, 1
+      "media/Buildings/com_cantina.png", 3, 1
     );
     CANTINA.setDimensions(3, 3, 1);
     CANTINA.setBuildMaterials(PARTS, 10);
@@ -758,20 +776,20 @@ public class GameContent {
       new Recipe(GREENS, SKILL_FARM, -1)
     };
     
-    FORMER_BAY.name = "Former Bay";
-    FORMER_BAY.tint = TINT_LITE_INDUSTRIAL;
-    FORMER_BAY.model = CutoutModel.fromImage(
-      GameContent.class, "former_bay_model",
-      "media/Buildings/res_former_bay.png", 4, 2
+    HARVESTER.name = "Harvester";
+    HARVESTER.tint = TINT_LITE_INDUSTRIAL;
+    HARVESTER.model = CutoutModel.fromImage(
+      GameContent.class, "harvester_model",
+      "media/Buildings/res_harvester.png", 3, 1
     );
-    FORMER_BAY.setDimensions(4, 4, 2);
-    FORMER_BAY.setBuildMaterials(PLASTICS, 5, PARTS, 2);
-    FORMER_BAY.workerTypes.setWith(Vassals.PYON, 2);
-    FORMER_BAY.worksBeforeBuilt = true;
-    FORMER_BAY.gatherFlag = IS_TREE;
-    FORMER_BAY.maxStock   = 25;
-    FORMER_BAY.produced   = new Good[] { CARBONS };
-    FORMER_BAY.recipes = new Recipe[] {
+    HARVESTER.setDimensions(3, 3, 1);
+    HARVESTER.setBuildMaterials(PLASTICS, 5, PARTS, 2);
+    HARVESTER.workerTypes.setWith(Vassals.PYON, 2);
+    HARVESTER.worksBeforeBuilt = true;
+    HARVESTER.gatherFlag = IS_TREE;
+    HARVESTER.maxStock   = 25;
+    HARVESTER.produced   = new Good[] { CARBONS };
+    HARVESTER.recipes = new Recipe[] {
       new Recipe(CARBONS, SKILL_CRAFT, -1)
     };
     
