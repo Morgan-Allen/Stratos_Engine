@@ -109,8 +109,8 @@ public class GameContent {
       "media/Buildings/res_all_crops.png",
       4, 4, 1, 1, false
     );
-    CARBS .modelVariants = CROP_MODELS[0];
-    GREENS.modelVariants = CROP_MODELS[1];
+    CARBS .modelVariants = CROP_MODELS[1];
+    GREENS.modelVariants = CROP_MODELS[2];
   }
   
   
@@ -166,8 +166,6 @@ public class GameContent {
     DESERT.attachFixtures(DESERT_ROCK1, 0.15f, DESERT_ROCK2, 0.20f);
     
     
-    //  TODO:  Add the various images for rocks!
-    
     JUNGLE_TREE1  .tint = colour(0, 3, 0);
     DESERT_ROCK1  .tint = colour(6, 4, 4);
     DESERT_ROCK2  .tint = colour(6, 4, 4);
@@ -185,6 +183,15 @@ public class GameContent {
     JUNGLE_TREE1.modelVariants = (ModelAsset[]) Visit.compose(
       ModelAsset.class, (Object[][]) JUNGLE_TREE_MODELS
     );
+    
+    ModelAsset DESERT_ROCK_MODELS[][] = CutoutModel.fromImageGrid(
+      GameContent.class, "model_desert_rock",
+      "media/Terrain/all_outcrops.png", 3, 3,
+      2, 2, false
+    );
+    DESERT_ROCK1.modelVariants = DESERT_ROCK_MODELS[2];
+    DESERT_ROCK2.modelVariants = DESERT_ROCK_MODELS[0];
+    CARBON_DEPOSIT.modelVariants = DESERT_ROCK_MODELS[1];
     
     JUNGLE_TREE1.growRate = 0.5f;
     DESERT_ROCK1  .setDimensions(2, 2, 1);
