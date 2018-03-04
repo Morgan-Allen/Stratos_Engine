@@ -308,6 +308,13 @@ public class World implements Session.Saveable {
   }
   
   
+  public int arriveTime(Journeys going) {
+    Journey j = journeyFor(going);
+    if (j == null) return -1;
+    return j.arriveTime;
+  }
+  
+  
   
   /**  Recording events:
     */

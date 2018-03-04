@@ -375,7 +375,7 @@ public class GameContent {
     
     ECOLOGIST.name = "Ecologist";
     ECOLOGIST.attachCostume(GameContent.class, "ecologist_skin.gif");
-
+    
     ECOLOGIST.rangeDamage = 4;
     ECOLOGIST.armourClass = 3;
     ECOLOGIST.rangeDist   = 6;
@@ -519,7 +519,7 @@ public class GameContent {
     );
     TROOPER_LODGE.setDimensions(3, 3, 2);
     TROOPER_LODGE.setBuildMaterials(PLASTICS, 1, PARTS, 7);
-    TROOPER_LODGE.workerTypes.setWith(Trooper.TROOPER, 2);
+    TROOPER_LODGE.workerTypes.setWith(Trooper.TROOPER, 3);
     TROOPER_LODGE.maxHealth = 250;
     
     ENFORCER_BLOC.name = "Enforcer Bloc";
@@ -544,7 +544,7 @@ public class GameContent {
     );
     ECOLOGIST_STATION.setDimensions(3, 3, 2);
     ECOLOGIST_STATION.setBuildMaterials(PLASTICS, 7, PARTS, 1);
-    ECOLOGIST_STATION.workerTypes.setWith(ECOLOGIST, 2);
+    ECOLOGIST_STATION.workerTypes.setWith(ECOLOGIST, 3);
     ECOLOGIST_STATION.worksBeforeBuilt = true;
     ECOLOGIST_STATION.maxHealth  = 100;
     ECOLOGIST_STATION.produced   = new Good[] { PROTEIN };
@@ -557,7 +557,7 @@ public class GameContent {
     );
     ENGINEER_STATION.setDimensions(3, 3, 2);
     ENGINEER_STATION.setBuildMaterials(PARTS, 8);
-    ENGINEER_STATION.workerTypes.setWith(ENGINEER, 2);
+    ENGINEER_STATION.workerTypes.setWith(ENGINEER, 3);
     ENGINEER_STATION.needed   = new Good[] { CARBONS, ORES };
     ENGINEER_STATION.produced = new Good[] { PLASTICS, PARTS };
     ENGINEER_STATION.maxStock = 3;
@@ -577,7 +577,7 @@ public class GameContent {
     );
     PHYSICIAN_STATION.setDimensions(3, 3, 2);
     PHYSICIAN_STATION.setBuildMaterials(PLASTICS, 4, PARTS, 2);
-    PHYSICIAN_STATION.workerTypes.setWith(PHYSICIAN, 2);
+    PHYSICIAN_STATION.workerTypes.setWith(PHYSICIAN, 3);
     PHYSICIAN_STATION.needed   = new Good[] { GREENS };
     PHYSICIAN_STATION.produced = new Good[] { MEDICINE };
     PHYSICIAN_STATION.maxStock = 3;

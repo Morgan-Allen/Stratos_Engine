@@ -28,6 +28,7 @@ public class VenuePane extends DetailPane {
     
     BuildType type = venue.type();
     boolean controls = venue.base() == PlayUI.playerBase();
+    World world = venue.map().world;
     
     d.append(""+venue.toString());
     d.append("\n");
@@ -51,10 +52,10 @@ public class VenuePane extends DetailPane {
       d.append("\n\n"+w.name+": ("+num+"/"+max+")");
       for (Actor a : venue.workers()) if (a.type() == w) {
         if (a.onMap()) {
-          d.appendAll("\n  ", a);//, "  ", a.task());
+          d.appendAll("\n  ", a, "  ", a.jobDesc());
         }
         else {
-          d.appendAll("\n  ", a, " (pending arrival)");
+          d.appendAll("\n  ", a, " (ETA "+world.arriveTime(a)+")");
         }
       }
       
@@ -73,10 +74,10 @@ public class VenuePane extends DetailPane {
       d.append("\n\nResidents: ("+num+"/"+max+")");
       for (Actor a : venue.residents()) {
         if (a.onMap()) {
-          d.appendAll("\n  ", a);//, "  ", a.task());
+          d.appendAll("\n  ", a, "  ", a.jobDesc());
         }
         else {
-          d.appendAll("\n  ", a, " (pending arrival)");
+          d.appendAll("\n  ", a, " (ETA T"+world.arriveTime(a)+")");
         }
       }
     }

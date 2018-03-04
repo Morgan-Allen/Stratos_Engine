@@ -138,7 +138,9 @@ public class ScenarioBlankMap extends CityMapScenario {
     //  the main settlement.
     
     
-    /*
+    final int MIN_LAIR_DIST = 32;
+    final int NUM_LAIRS = 2;
+    
     class SiteOption { Tile at; float rating; }
     List <SiteOption> options = new List <SiteOption> () {
       protected float queuePriority(SiteOption r) {
@@ -148,7 +150,7 @@ public class ScenarioBlankMap extends CityMapScenario {
     for (Coord c : Visit.grid(0, 0, stage.size(), stage.size(), 8)) {
       Tile at = stage.tileAt(c);
       float dist = AreaMap.distance(bastion, at);
-      if (dist <= 16) continue;
+      if (dist <= MIN_LAIR_DIST) continue;
       
       float rating = 16f * Rand.num() * dist;
       SiteOption option = new SiteOption();
@@ -159,17 +161,15 @@ public class ScenarioBlankMap extends CityMapScenario {
     
     options.queueSort();
     
-    int NUM_LAIRS = 3;
     Object spawnArgs[] = { TRIPOD, 0.33f, DRONE, 0.66f };
     
     for (int n = NUM_LAIRS; n-- > 0;) {
       SiteOption o = options.removeFirst();
       BuildingForNest nest = (BuildingForNest) RUINS_LAIR.generate();
       nest.enterMap(stage, o.at.x, o.at.y, 1, stage.locals);
-      nest.assignSpawnParameters(MONTH_LENGTH, 4, spawnArgs);
+      nest.assignSpawnParameters(MONTH_LENGTH * 3, 2, spawnArgs);
       nests.add(nest);
     }
-    //*/
     
     Base.setPosture(base, stage.locals, Base.POSTURE.ENEMY, true);
   }

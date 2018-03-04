@@ -720,7 +720,7 @@ public class Actor extends Element implements
   
   public String jobDesc() {
     if (task == null) return "Idle";
-    return task.toString();
+    return task.type.name();
   }
   
 
