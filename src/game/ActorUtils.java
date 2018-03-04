@@ -55,8 +55,6 @@ public class ActorUtils {
   public static Actor generateMigrant(
     ActorType jobType, Building employs, boolean payHireCost
   ) {
-    if (! jobType.isPerson()) return null;
-    
     //  TODO:  Consider a wider variety of cities to source from!
     
     AreaMap map  = employs.map();
@@ -66,8 +64,11 @@ public class ActorUtils {
     
     if (payHireCost) goes.incFunds(0 - cost);
     
-    ActorAsPerson migrant = (ActorAsPerson) jobType.generate();
-    jobType.initAsMigrant(migrant);
+    Actor migrant = (Actor) jobType.generate();
+    if (jobType.isPerson()) {
+      jobType.initAsMigrant((ActorAsPerson) migrant);
+    }
+    
     migrant.assignHomeCity(goes);
     employs.setWorker(migrant, true);
     map.world.beginJourney(from, goes, migrant);

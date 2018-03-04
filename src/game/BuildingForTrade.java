@@ -124,7 +124,7 @@ public class BuildingForTrade extends Building implements Trader {
     */
   public Task selectActorBehaviour(Actor actor) {
     
-    if (actor == workers.first() && ! tradeOff) {
+    if (actor.type().isVessel() && ! tradeOff) {
       return selectTraderBehaviour(actor);
     }
     else {

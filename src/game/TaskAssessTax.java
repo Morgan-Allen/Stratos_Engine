@@ -53,7 +53,7 @@ public class TaskAssessTax extends Task {
       pick.compare(b, Nums.abs(amount) * AreaMap.distancePenalty(distW));
     }
     
-    if (cashCarried > maxCollect || (pick.empty() && cashCarried > 0)) {
+    if (cashCarried > maxCollect || (pick.empty() && cashCarried != 0)) {
       Task task = new TaskAssessTax(actor, from, maxCollect);
       task = task.configTask(from, from, null, JOB.RETURNING, 0);
       return (TaskAssessTax) task;

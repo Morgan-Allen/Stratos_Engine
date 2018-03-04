@@ -336,7 +336,7 @@ public class BuildingForHome extends Building {
     //
     //  Failing that, select a leisure behaviour to perform:
     
-    //  TODO:  Move this out to the basic AI for citizens.
+    //  TODO:  Move this out to the basic AI for citizens!
     //  TODO:  Compare all nearby amenities!
     Pick <Building> pickV = new Pick();
     

@@ -158,7 +158,7 @@ public class World implements Session.Saveable {
     for (Locale l : locales) {
       s.saveInt(l.distances.size());
       for (Locale d : l.distances.keySet()) {
-        s.saveInt(locales.indexOf(l));
+        s.saveInt(locales.indexOf(d));
         s.saveInt(l.distances.get(d));
       }
     }
@@ -257,6 +257,7 @@ public class World implements Session.Saveable {
     if (from == null || goes == null) return null;
     
     float distance = Nums.max(1, from.distance(goes));
+    
     Journey j = new Journey();
     j.from       = from;
     j.goes       = goes;

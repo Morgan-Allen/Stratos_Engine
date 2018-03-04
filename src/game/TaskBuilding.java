@@ -4,8 +4,6 @@ package game;
 import util.*;
 import static game.AreaMap.*;
 import static game.GameConstants.*;
-
-import game.GameConstants.Target;
 import graphics.common.*;
 
 

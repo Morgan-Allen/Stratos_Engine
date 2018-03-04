@@ -3,9 +3,9 @@
 package content;
 import game.*;
 import graphics.common.*;
-import util.*;
+import graphics.solids.*;
 import static game.GameConstants.*;
-//import static content.GameContent.*;
+import util.*;
 
 
 
@@ -99,6 +99,20 @@ public class Vassals {
     PYON.name = "Pyon";
     PYON.attachCostume(Vassals.class, "pyon_skin.gif");
     PYON.initTraits.setWith(SKILL_FARM, 1, SKILL_BUILD, 1, SKILL_CRAFT, 1);
+  }
+  
+  
+  final public static ActorType CARGO_BARGE = new ActorType(
+    ActorAsVessel.class, "vessel_cargo_barge", Type.IS_VESSEL_ACT
+  );
+  static {
+    CARGO_BARGE.name = "Cargo Barge";
+    CARGO_BARGE.model = MS3DModel.loadFrom(
+      "media/Actors/vehicles/", "loader_2.ms3d",
+      HumanType.class, "VehicleModels.xml", "CargoBarge"
+    );
+    CARGO_BARGE.organic = false;
+    CARGO_BARGE.maxHealth = 35;
   }
   
   

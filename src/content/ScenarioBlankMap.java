@@ -90,13 +90,12 @@ public class ScenarioBlankMap extends CityMapScenario {
     
     Building bastion = (Building) BASTION.generate();
     int w = bastion.type().wide, h = bastion.type().high;
-    Tile centre = stage.tileAt(stage.size() / 2, stage.size() / 2);
+    Tile ideal = stage.tileAt(16, 16);
     Pick <Tile> pickLanding = new Pick();
     
     //
     //  Look for a suitable entry-point within the world...
     for (Tile t : stage.allTiles()) {
-      
       boolean canPlace = true;
       
       for (Tile f : stage.tilesUnder(t.x - 1, t.y - 1, w + 2, h + 2)) {
@@ -108,23 +107,29 @@ public class ScenarioBlankMap extends CityMapScenario {
       if (! canPlace) continue;
       
       Tile sited = stage.tileAt(t.x + (w / 2), t.y + (h / 2));
-      float dist = AreaMap.distance(sited, centre);
+      float dist = AreaMap.distance(sited, ideal);
       pickLanding.compare(t, 0 - dist);
     }
     
     //
     //  And insert the Bastion at the appropriate site:
     if (! pickLanding.empty()) {
+      BuildingForTrade depot = (BuildingForTrade) SUPPLY_DEPOT.generate();
+      
       Tile at = pickLanding.result();
       CityMapPlanning.markDemolish(stage, true, at.x - 1, at.y - 1, w + 2, h + 2);
+      CityMapPlanning.markDemolish(stage, true, at.x - 6, at.y - 1, 5, 5);
       bastion.enterMap(stage, at.x, at.y, 1, base);
-      
-      base.initFunds(4000);
-      bastion.addInventory(100, PLASTICS);
-      bastion.addInventory(100, PARTS   );
+      depot.enterMap(stage, at.x, at.y - 5, 1, base);
       
       Test.fillWorkVacancies(bastion);
+      Test.fillWorkVacancies(depot);
       playUI().assignHomePoint(bastion);
+      
+      base.initFunds(4000);
+      bastion.addInventory(35, PLASTICS);
+      bastion.addInventory(15, PARTS   );
+      depot.needLevels().set(CARBS, 20);
     }
     
     

@@ -14,6 +14,7 @@ public class ActorAsVessel extends Actor implements Trader, Employer {
   
   
   
+  Actor pilot = null;
   List <Actor> passengers = new List();
   
   
@@ -24,18 +25,27 @@ public class ActorAsVessel extends Actor implements Trader, Employer {
   
   public ActorAsVessel(Session s) throws Exception {
     super(s);
+    pilot = (Actor) s.loadObject();
     s.loadObjects(passengers);
   }
   
   
   public void saveState(Session s) throws Exception {
     super.saveState(s);
+    s.saveObject(pilot);
     s.saveObjects(passengers);
   }
   
   
-
   void beginNextBehaviour() {
+    assignTask(null);
+    
+    if (idle() && work() != null && work().accessible()) {
+      assignTask(work().selectActorBehaviour(this));
+    }
+    if (idle()) {
+      assignTask(TaskResting.configResting(this, home()));
+    }
   }
   
   
@@ -78,11 +88,6 @@ public class ActorAsVessel extends Actor implements Trader, Employer {
   
   
   public Tally <Good> prodLevels() {
-    return null;
-  }
-  
-  
-  public Tally<Good> inventory() {
     return null;
   }
   

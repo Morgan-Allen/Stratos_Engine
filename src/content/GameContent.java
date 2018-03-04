@@ -612,7 +612,7 @@ public class GameContent {
     );
     SUPPLY_DEPOT.setDimensions(3, 3, 1);
     SUPPLY_DEPOT.setBuildMaterials(PLASTICS, 4, PARTS, 2);
-    SUPPLY_DEPOT.workerTypes.setWith(Vassals.PYON, 2);
+    SUPPLY_DEPOT.workerTypes.setWith(Vassals.PYON, 1, Vassals.CARGO_BARGE, 1);
     SUPPLY_DEPOT.worksBeforeBuilt = true;
     SUPPLY_DEPOT.features = new Good[] { IS_TRADER };
     SUPPLY_DEPOT.buildsWith = new Good[] { PLASTICS, PARTS };

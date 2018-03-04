@@ -72,7 +72,7 @@ public class Test {
   public static void fillWorkVacancies(Building b) {
     for (ActorType t : b.type().workerTypes.keys()) {
       while (b.numWorkers(t) < b.maxWorkers(t)) {
-        spawnPerson(b, t, false);
+        spawnActor(b, t, false);
       }
     }
   }
@@ -81,17 +81,20 @@ public class Test {
   public static void fillHomeVacancies(Building b, ActorType... types) {
     for (ActorType t : types) {
       while (b.numResidents(t.socialClass) < b.maxResidents(t.socialClass)) {
-        spawnPerson(b, t, true);
+        spawnActor(b, t, true);
       }
     }
   }
   
   
-  public static Actor spawnPerson(Building b, ActorType type, boolean resident) {
+  public static Actor spawnActor(Building b, ActorType type, boolean resident) {
     
-    ActorAsPerson actor = (ActorAsPerson) type.generate();
+    Actor actor = (Actor) type.generate();
     Tile at = b.at();
-    type.initAsMigrant(actor);
+    
+    if (type.isPerson()) {
+      type.initAsMigrant((ActorAsPerson) actor);
+    }
     
     if (resident) b.setResident(actor, true);
     else          b.setWorker  (actor, true);

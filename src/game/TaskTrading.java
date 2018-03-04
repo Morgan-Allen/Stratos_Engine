@@ -27,7 +27,7 @@ public class TaskTrading extends Task {
   
   public TaskTrading(Session s) throws Exception {
     super(s);
-    s.loadTally(taken);
+    s.loadTally(taken = new Tally());
     homeCity  = (Base  ) s.loadObject();
     tradeFrom = (Trader) s.loadObject();
     tradeGoes = (Trader) s.loadObject();
@@ -41,7 +41,7 @@ public class TaskTrading extends Task {
     s.saveTally(taken);
     s.saveObject(homeCity );
     s.saveObject(tradeFrom);
-    s.saveObject(tradeFrom);
+    s.saveObject(tradeGoes);
     s.saveBool(didExport);
     s.saveBool(didImport);
   }

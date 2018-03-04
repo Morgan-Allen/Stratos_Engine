@@ -37,7 +37,8 @@ public class Type extends Index.Entry implements Session.Saveable {
     IS_NEST_BLD    =  17,
     IS_ACTOR       =  18,
     IS_PERSON_ACT  =  19,
-    IS_ANIMAL_ACT  =  20
+    IS_ANIMAL_ACT  =  20,
+    IS_VESSEL_ACT  =  21
   ;
   
   final static Index <Type> INDEX = new Index();
@@ -236,6 +237,11 @@ public class Type extends Index.Entry implements Session.Saveable {
   
   public boolean isAnimal() {
     return category == IS_ANIMAL_ACT;
+  }
+  
+  
+  public boolean isVessel() {
+    return category == IS_VESSEL_ACT;
   }
   
   
