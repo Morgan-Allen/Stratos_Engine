@@ -495,8 +495,8 @@ public class GameContent {
     BASTION.homeSocialClass = CLASS_NOBLE;
     BASTION.maxResidents = 2;
     BASTION.buildsWith   = new Good[] { PLASTICS, PARTS };
-    BASTION.needed       = BASTION.buildsWith;
-    BASTION.maxStock     = 5;
+    BASTION.needed       = new Good[] { CARBS, GREENS, PLASTICS, PARTS };
+    BASTION.maxStock     = 10;
     BASTION.setFeatures(IS_HOUSING, IS_REFUGE);
     BASTION.worksBeforeBuilt = true;
     BASTION.uniqueBuilding = true;

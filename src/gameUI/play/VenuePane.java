@@ -111,9 +111,18 @@ public class VenuePane extends DetailPane {
     }
     else if (! venue.inventory().empty()) {
       d.append("\n\nInventory:");
-      for (Good g : venue.inventory().keys()) {
-        String amount = I.shorten(venue.inventory(g), 1);
-        d.appendAll("\n  ", g, ": ", amount);
+      
+      Batch <Good> goods = new Batch();
+      Visit.appendTo(goods, venue.map().world.goodTypes());
+      for (Good g : venue.inventory().keys()) goods.include(g);
+      
+      for (Good g : goods) {
+        float have = venue.inventory(g);
+        int demand = (int) venue.stockLimit(g);
+        if (have == 0 && demand == 0) continue;
+        
+        d.appendAll("\n  ", g, ": ", I.shorten(have, 1));
+        if (demand > 0) d.append("/"+demand);
       }
     }
     
