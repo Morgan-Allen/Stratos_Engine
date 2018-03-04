@@ -18,10 +18,16 @@ public class TestExploring extends Test {
   
   static boolean testExploring(boolean graphics) {
     Test test = new TestExploring();
-
-    Base base = setupTestCity(16, ALL_GOODS, true, JUNGLE, MEADOW);
+    
+    Base base = setupTestCity(32, ALL_GOODS, true, JUNGLE, MEADOW);
     AreaMap map = base.activeMap();
     World world = map.world;
+    
+    world.settings.toggleFatigue   = false;
+    world.settings.toggleHunger    = false;
+    world.settings.toggleMigrate   = false;
+    world.settings.toggleAutoBuild = false;
+    
     
     CityMapPlanning.markDemolish(map, true, 3, 3, 6, 6);
     Building lodge = (Building) ECOLOGIST_STATION.generate();

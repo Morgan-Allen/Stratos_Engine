@@ -38,9 +38,6 @@ public class BuildingForHunt extends Building {
       return delivery;
     }
     
-    Task coming = returnActorHere(actor);
-    if (coming != null) return coming;
-    
     TaskHunting hunting = new TaskHunting(actor);
     hunting = hunting.configHunting(this, produced());
     if (hunting != null) return hunting;

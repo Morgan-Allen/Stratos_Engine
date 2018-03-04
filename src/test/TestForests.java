@@ -18,7 +18,6 @@ public class TestForests extends Test {
   
   static boolean testForests(boolean graphics) {
     Test test = new TestForests();
-    
 
     Base base = setupTestCity(32, ALL_GOODS, true, JUNGLE, MEADOW);
     AreaMap map = base.activeMap();
@@ -36,7 +35,7 @@ public class TestForests extends Test {
       test.runLoop(base, 10, graphics, "saves/test_forests.tlt");
       
       if (! loggingDone) {
-        loggingDone = logs.inventory(CARBONS) >= logs.type().maxStock;
+        loggingDone = logs.inventory(CARBONS) >= 10;
         
         if (loggingDone) {
           I.say("\nFOREST TEST CONCLUDED SUCCESSFULLY!");
@@ -51,9 +50,6 @@ public class TestForests extends Test {
   }
   
 }
-
-
-
 
 
 

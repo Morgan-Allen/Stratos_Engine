@@ -44,6 +44,7 @@ public class TaskRetreat extends Task {
     for (Building b : map.buildings) {
       if (b != home && b.base() != actor.base()) continue;
       if (b != home && ! b.type().hasFeature(IS_REFUGE)) continue;
+      if (! b.complete()) continue;
       
       float rating = 1.0f;
       rating *= AreaMap.distancePenalty(actor, b);

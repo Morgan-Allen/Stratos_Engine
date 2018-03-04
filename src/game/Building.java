@@ -397,7 +397,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   /**  Utility methods for demand-levels, materials and construction/upgrades-
     */
   public float demandFor(Good g) {
-    float needD = stockLimit(g);
+    float needD = Visit.arrayIncludes(needed(), g) ? stockLimit(g) : 0;
     float needM = razing() ? 0 : materialNeed(g);
     float hasM  = materialLevel(g);
     float hasG  = inventory.valueFor(g);
@@ -406,8 +406,11 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   
   
   public float stockLimit(Good g) {
-    boolean consumes = accessible() && Visit.arrayIncludes(needed(), g);
-    return consumes ? type().maxStock : 0;
+    if (! accessible()) return 0;
+    boolean needs = Visit.arrayIncludes(needed  (), g);
+    boolean prods = Visit.arrayIncludes(produced(), g);
+    if (needs || prods) return type().maxStock;
+    return 0;
   }
   
   

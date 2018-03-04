@@ -23,13 +23,14 @@ public class WorldSettings {
     toggleCombat      = true,
     togglePurchases   = true,
     
+    toggleMigrate     = true,
     toggleAging       = true,
     toggleChildMort   = true,
     
     toggleBuilding    = true,
     toggleSalvage     = true,
-    toggleMigrate     = true,
     toggleBuildEvolve = true,
+    toggleAutoBuild   = true,
     
     toggleEasyHunger  = true,
     toggleEasyCraft   = true,

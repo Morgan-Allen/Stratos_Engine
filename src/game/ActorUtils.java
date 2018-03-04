@@ -121,7 +121,6 @@ public class ActorUtils {
   
   
   static void findHome(AreaMap map, Actor migrant) {
-    
     //  Each citizen prompts the search based on proximity to their place of
     //  work, proximity to needed services, and safety of the location (they
     //  prefer being behind walls, for example- either that, or you have a
@@ -129,6 +128,7 @@ public class ActorUtils {
     
     if (migrant.work() == null) return;
     if (migrant.home() != null) return;
+    if (! migrant.type().isPerson()) return;
     
     class SumPos extends Vec2D {
       float sumWeights;
@@ -187,7 +187,7 @@ public class ActorUtils {
     if (home != null) {
       home.setResident(migrant, true);
     }
-    else {
+    else if (map.world.settings.toggleAutoBuild) {
       Type baseHomeType = migrant.type().nestType();
       home = (Building) baseHomeType.generate();
       Tile goes = findEntryPoint(home, map, from, maxRange / 2);

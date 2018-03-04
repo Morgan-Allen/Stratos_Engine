@@ -47,14 +47,17 @@ public class TaskCrafting extends Task {
       boolean anyRoom = false, allMaterials = true;
       ItemOrder fills = null;
       Good made = recipe.made;
+      boolean standardGood = Visit.arrayIncludes(venue.produced(), made);
       float supply = venue.base().inventory(made) + 0;
       float demand = venue.base().needLevel(made) + 1;
+      float amount = venue.inventory(made);
+      float limit  = venue.stockLimit(made);
       float rating = 2.0f - Nums.clamp(supply / demand, 0, 1);
       
-      if (venue.inventory(made) < venue.stockLimit(made)) {
+      if (standardGood && amount < limit) {
         anyRoom = true;
       }
-      else for (ItemOrder order : venue.orders()) {
+      else if (! standardGood) for (ItemOrder order : venue.orders()) {
         if (order.progress < 1 && order.itemType == made) {
           anyRoom = true;
           fills = order;
@@ -64,9 +67,6 @@ public class TaskCrafting extends Task {
       }
       for (Good need : recipe.inputs) {
         if (venue.inventory(need) <= 0) allMaterials = false;
-      }
-      if (fills == null && ! Visit.arrayIncludes(venue.produced(), made)) {
-        continue;
       }
       
       if (anyRoom && allMaterials) {
@@ -83,11 +83,11 @@ public class TaskCrafting extends Task {
     Actor actor, BuildingForCrafts venue, Recipe recipe, ItemOrder fills
   ) {
     TaskCrafting task = new TaskCrafting(actor, venue, recipe);
-    if (task.configTask(venue, venue, null, JOB.CRAFTING, 10) == null) {
+    if (task.configTask(venue, venue, null, JOB.CRAFTING, 10) != null) {
       task.order = fills;
-      return null;
+      return task;
     }
-    return task;
+    return null;
   }
   
   
@@ -106,7 +106,7 @@ public class TaskCrafting extends Task {
     Trait skill     = recipe.craftSkill;
     float skillMult = actor.levelOf(skill) / MAX_SKILL_LEVEL;
     
-    //I.say("Progress on "+recipe.made+": "+progress);
+    ///I.say("Progress on "+recipe.made+": "+progress+"/"+maxAmount);
     
     float progInc = 1f + (1f * skillMult);
     progInc *= 1f / recipe.craftTime;
@@ -125,7 +125,7 @@ public class TaskCrafting extends Task {
       venue.setInventory(recipe.made, progress + progInc);
     }
     else {
-      order.progress = progress;
+      order.progress = progress + progInc;
     }
     venue.base().makeTotals.add(progInc, recipe.made);
   }

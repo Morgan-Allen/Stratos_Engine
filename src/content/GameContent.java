@@ -798,7 +798,7 @@ public class GameContent {
     HARVESTER.workerTypes.setWith(Vassals.PYON, 1);
     HARVESTER.worksBeforeBuilt = true;
     HARVESTER.gatherFlag = IS_TREE;
-    HARVESTER.maxStock   = 25;
+    HARVESTER.maxStock   = 10;
     HARVESTER.produced   = new Good[] { CARBONS };
     HARVESTER.recipes = new Recipe[] {
       new Recipe(CARBONS, SKILL_CRAFT, -1)

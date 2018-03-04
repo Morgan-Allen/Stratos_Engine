@@ -43,6 +43,7 @@ public class TestPurchases extends Test {
     buys.incCarried(CASH, 10000);
     
     forge.addInventory(20, ORES);
+    forge.addInventory(20, CARBONS);
     
     
     boolean orderPlaced = false;
