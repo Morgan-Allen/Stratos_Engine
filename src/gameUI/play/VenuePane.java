@@ -112,7 +112,8 @@ public class VenuePane extends DetailPane {
     else if (! venue.inventory().empty()) {
       d.append("\n\nInventory:");
       for (Good g : venue.inventory().keys()) {
-        d.appendAll("\n  ", g, ": ", venue.inventory(g));
+        String amount = I.shorten(venue.inventory(g), 1);
+        d.appendAll("\n  ", g, ": ", amount);
       }
     }
     

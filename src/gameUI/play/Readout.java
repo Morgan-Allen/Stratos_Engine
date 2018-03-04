@@ -48,12 +48,21 @@ public class Readout extends UIGroup {
     super.updateState();
     
     final Base played = UI.base;
+    final AreaMap map = UI.stage;
+    
     read.setText("");
     //
     //  Credits first-
     final int credits = played.funds();
     read.append("    ");
-    read.append(credits+" Credits", Colour.WHITE);
+    read.append(I.padToLength(credits+" Credits", 18), Colour.WHITE);
+    //
+    //  Then time-
+    int time = map.time();
+    int days = time / GameConstants.DAY_LENGTH;
+    read.append("    ");
+    read.append(I.padToLength("Day "+days+" (Time "+time+")", 21), Colour.WHITE);
+    
     
     /*
     //
@@ -69,11 +78,6 @@ public class Readout extends UIGroup {
       read.append("/"+I.lengthen(maxPsy   , 2, true));
       read.append("   ");
     }
-    
-    //
-    //  Then time and date-
-    final String timeStamp = SaveUtils.timeStamp(world.currentTime());
-    read.append(timeStamp);
     
     //
     //  Finally, include the set of provisions and their supply/demand:

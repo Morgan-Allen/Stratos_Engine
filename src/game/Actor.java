@@ -402,12 +402,12 @@ public class Actor extends Element implements
   }
   
   
-  public Task restingTask(Building rests) {
+  public Task restingTask(Building rests, Employer e) {
     if (rests == null) return null;
     if (reports()) I.say(this+" will rest at "+rests);
     
     Task t = new Task(this);
-    return t.configTask(rests, rests, null, JOB.RESTING, -1);
+    return t.configTask(e, rests, null, JOB.RESTING, 10);
   }
   
   

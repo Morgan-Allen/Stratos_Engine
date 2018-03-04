@@ -51,6 +51,16 @@ public class GameConstants {
     MONTH_LENGTH     = DAY_LENGTH * DAYS_PER_MONTH,
     YEAR_LENGTH      = DAY_LENGTH * DAYS_PER_YEAR ,
     //
+    //  Health and survival-
+    STARVE_INTERVAL  = MONTH_LENGTH * 2,
+    FATIGUE_INTERVAL = MONTH_LENGTH * 2,
+    HUNGER_REGEN     = 5   ,
+    FOOD_UNIT_PER_HP = 2   ,
+    FECES_UNIT_TIME  = MONTH_LENGTH * 3,
+    FATIGUE_REGEN    = MONTH_LENGTH / 4,
+    HEALTH_REGEN     = MONTH_LENGTH / 2,
+    AVG_MAX_HEALTH   = 5   ,
+    //
     //  Growth and crops-
     SCAN_PERIOD      = MONTH_LENGTH * 1,
     RIPEN_PERIOD     = MONTH_LENGTH * 6,
@@ -117,16 +127,6 @@ public class GameConstants {
     //  free time, you can expect to master a skill within 10 years.  For some
     //  activities, this gets boosted/reduced based on the frequency of the
     //  behaviour.  (NOTE- this will need fine-tuning later...)
-    //
-    //  Health and survival-
-    STARVE_INTERVAL  = MONTH_LENGTH * 2,
-    FATIGUE_INTERVAL = MONTH_LENGTH * 2,
-    HUNGER_REGEN     = 5   ,
-    FOOD_UNIT_PER_HP = 2   ,
-    FECES_UNIT_TIME  = MONTH_LENGTH * 3,
-    FATIGUE_REGEN    = MONTH_LENGTH / 4,
-    HEALTH_REGEN     = MONTH_LENGTH / 2,
-    AVG_MAX_HEALTH   = 5   ,
     //
     //  Building-update, commerce and manufacture-
     AVG_UPDATE_GAP   = 60  ,  //  seconds between updates

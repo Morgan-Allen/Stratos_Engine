@@ -69,6 +69,7 @@ public class ScenarioBlankMap extends CityMapScenario {
   
   protected Base createBase(AreaMap stage, World world) {
     World.Locale homeworld = world.addLocale(1, 1, "Homeworld");
+    World.setupRoute(homeworld, stage.locale, 1);
     
     Base patron = new Base(world, homeworld);
     patron.setName("Homeworld Base");

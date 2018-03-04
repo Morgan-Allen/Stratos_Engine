@@ -247,7 +247,7 @@ public class ActorAsPerson extends Actor {
     Batch <Good> menu = menuAt(home());
     float hurtRating = fatigue + injury + (menu.size() > 0 ? hunger : 0);
     if (hurtRating > (type().maxHealth * (Rand.num() + 0.5f))) {
-      assignTask(restingTask(home()));
+      assignTask(restingTask(home(), home()));
     }
     
     //  See if there's a formation worth joining:
@@ -307,8 +307,8 @@ public class ActorAsPerson extends Actor {
     if (idle() && home() != null && home().accessible()) {
       assignTask(home().selectActorBehaviour(this));
     }
-    if (idle() && (hurtRating >= 1 || injury > 0)) {
-      assignTask(restingTask(home()));
+    if (idle() && (hurtRating > Rand.num() || injury > 0)) {
+      assignTask(restingTask(home(), home()));
     }
     if (idle()) {
       assignTask(TaskWander.configWandering(this));

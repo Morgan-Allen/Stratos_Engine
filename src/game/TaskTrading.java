@@ -55,10 +55,6 @@ public class TaskTrading extends Task {
     this.tradeGoes = goes ;
     this.homeCity  = from.base();
     
-    if (tradeFrom == tradeGoes) {
-      I.say("???");
-    }
-    
     configTravel(from, from, JOB.TRADING, from);
     return this;
   }
@@ -347,12 +343,40 @@ public class TaskTrading extends Task {
   /**  Graphical, debug and interface methods-
     */
   boolean reports() {
-    //if (true) return true;
-    //return tradeFrom instanceof City || tradeGoes instanceof City;
     return super.reports();
   }
   
+  
+  public String toString() {
+    Actor actor = (Actor) active;
+    World.Journey j = homeCity.world.journeyFor(actor);
+    String arriveDesc = "";
+    if (j != null) arriveDesc = " (Arrival T"+j.arriveTime+")";
+    
+    if (! didExport) {
+      return "Collecting goods from "+tradeFrom+arriveDesc;
+    }
+    else if (! didImport) {
+      return "Travelling to "+tradeGoes+arriveDesc;
+    }
+    else {
+      return "Returning to "+tradeFrom+arriveDesc;
+    }
+  }
+  
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

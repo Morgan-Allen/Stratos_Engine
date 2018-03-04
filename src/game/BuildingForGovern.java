@@ -48,7 +48,7 @@ public class BuildingForGovern extends Building {
     }
     
     if (actor.type().isNoble()) {
-      return actor.restingTask(this);
+      return actor.restingTask(this, this);
     }
     
     return null;
