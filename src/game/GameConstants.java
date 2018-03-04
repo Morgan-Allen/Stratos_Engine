@@ -133,14 +133,17 @@ public class GameConstants {
     AVG_CRAFT_TIME   = YEAR_LENGTH / 6,
     AVG_MAX_STOCK    = 10  ,
     MAX_TRADER_RANGE = 100 ,
-    MAX_WANDER_RANGE = 20  ,
-    AVG_VISIT_TIME   = 20  ,
     MAX_SHOP_RANGE   = 50  ,
     HOME_USE_TIME    = YEAR_LENGTH * 2,
     AVG_SERVICE_GIVE = 10  ,  //  value of education, diversion, etc.
     AVG_MAX_VISITORS = 4   ,
+    AVG_VISIT_TIME   = 20  ,
     //
-    //  Military, recon and combat-
+    //  Exploration and wandering-
+    MAX_WANDER_RANGE = 20  ,
+    AVG_EXPLORE_DIST = 8   ,
+    //
+    //  Military, and combat-
     AVG_ARMY_SIZE    = 16  ,
     AVG_RANKS        = 4   ,
     AVG_FILE         = 4   ,

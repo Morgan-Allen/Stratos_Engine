@@ -349,9 +349,9 @@ public class TaskTrading extends Task {
   
   public String toString() {
     Actor actor = (Actor) active;
-    World.Journey j = homeCity.world.journeyFor(actor);
+    int arriveTime = homeCity.world.arriveTime(actor);
     String arriveDesc = "";
-    if (j != null) arriveDesc = " (Arrival T"+j.arriveTime+")";
+    if (arriveTime != -1) arriveDesc = " (ETA "+arriveTime+")";
     
     if (! didExport) {
       return "Collecting goods from "+tradeFrom+arriveDesc;

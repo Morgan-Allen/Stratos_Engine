@@ -50,7 +50,8 @@ public class BuildingForArmy extends BuildingForCrafts {
     //  TODO:  On larger maps you will need a more efficient protocol
     //  here-
     if (recruits.size() < type().maxRecruits) {
-      for (Building b : map.buildings) {
+      for (Building b : map.buildings()) {
+        if (b.base() != base()) continue;
         float rating = AreaMap.distancePenalty(this, b);
         if (b == this) rating *= 10;
         float sumE = 0;

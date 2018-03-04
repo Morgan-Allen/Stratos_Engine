@@ -249,7 +249,7 @@ public class ActorAsPerson extends Actor {
     }
     //
     //  See if there's a formation worth joining:
-    if (idle() && mission == null && base() != null) {
+    if (idle() && mission == null && type().socialClass == CLASS_SOLDIER) {
       Pick <Mission> pick = new Pick(Task.ROUTINE * Rand.num());
       
       for (Mission f : base().missions) {

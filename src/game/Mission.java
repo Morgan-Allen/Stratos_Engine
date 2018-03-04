@@ -26,8 +26,9 @@ public class Mission implements
     OBJECTIVE_RECON    = 3,
     OBJECTIVE_DIALOG   = 4
   ;
+  
   final static String OBJECTIVE_NAMES[] = {
-    "Standby", "Conquer", "Garrison", "Dialog"
+    "Standby", "Conquer", "Garrison", "Recon", "Dialog"
   };
   
   final public int objective;
@@ -63,7 +64,7 @@ public class Mission implements
   private Object  focus       ;
   private int     facing      ;
   
-  float exploreRange = -1;
+  float exploreRange = AVG_EXPLORE_DIST;
   
   List <Tile> guardPoints = new List();
   int lastUpdateTime = -1;
@@ -565,6 +566,7 @@ public class Mission implements
           if (dist > r) continue;
           if (map.fog.maxSightLevel(t) == 0) allSeen = false;
         }
+        
         return allSeen;
       }
     }
