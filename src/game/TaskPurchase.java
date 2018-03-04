@@ -46,6 +46,37 @@ public class TaskPurchase extends Task {
   }
   
   
+  static TaskPurchase nextPurchase(ActorAsPerson actor) {
+    //  TODO:  Base the chance of this on intelligence, etc.?
+    
+    Pick <TaskPurchase> pick = new Pick(0);
+    boolean hasPurchase = false;
+    
+    for (Task t : actor.todo) if (t instanceof TaskPurchase) {
+      TaskPurchase p = (TaskPurchase) t;
+      if (! p.shop.hasItemOrder(p.itemType, actor)) {
+        actor.todo.remove(t);
+      }
+      else {
+        hasPurchase = true;
+        p = resumePurchase(p);
+        if (p != null) pick.compare(p, p.priority() * Rand.num());
+      }
+    }
+    
+    if (! hasPurchase) for (Building b : actor.map().buildings()) {
+      if (b.base() != actor.base()) continue;
+      if (! (b instanceof BuildingForCrafts)) continue;
+      BuildingForCrafts shop = (BuildingForCrafts) b;
+      for (TaskPurchase p : configPurchases(actor, shop)) {
+        if (p == null) continue;
+        pick.compare(p, p.priority() * Rand.num());
+      }
+    }
+    
+    return pick.result();
+  }
+  
   
   static Series <TaskPurchase> configPurchases(
     Actor actor, BuildingForCrafts shop

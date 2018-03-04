@@ -229,27 +229,25 @@ public class ActorAsPerson extends Actor {
     */
   void beginNextBehaviour() {
     //
+    //  TODO:  You will need to ensure that work/home/formation venues are
+    //  present on the same map to derive related bahaviours!
+    //
     //  Establish some facts about the citizen first:
     boolean adult = adult();
     assignTask(null);
-    
+    //
     //  Adults will search for work and a place to live:
     //  Children and retirees don't work:
     if (adult && work() == null) ActorUtils.findWork(map, this);
     if (adult && home() == null) ActorUtils.findHome(map, this);
     if (work() != null && ! adult) work().setWorker(this, false);
-    
-    //  TODO:  You will need to ensure that work/home/formation venues are
-    //  present on the same map to derive related bahaviours!
-    
-    //  TODO:  Merge this with retreat behaviours...?
+    //
     //  If you're seriously hungry/beat/tired, try going home:
-    Batch <Good> menu = menuAt(home());
-    float hurtRating = fatigue + injury + (menu.size() > 0 ? hunger : 0);
-    if (hurtRating > (type().maxHealth * (Rand.num() + 0.5f))) {
-      assignTask(restingTask(home(), home()));
+    float needRest = TaskResting.restUrgency(this, home());
+    if (needRest > Rand.num() + 0.5f) {
+      assignTask(TaskResting.configResting(this, home()));
     }
-    
+    //
     //  See if there's a formation worth joining:
     if (idle() && mission == null && base() != null) {
       Pick <Mission> pick = new Pick(Task.ROUTINE * Rand.num());
@@ -264,42 +262,14 @@ public class ActorAsPerson extends Actor {
       Mission joins = pick.result();
       if (joins != null) joins.toggleRecruit(this, true);
     }
-    
-    //  TODO:  Base this on intelligence, etc.?  Or move into the task class?
-    //  Make any necessary purchases-
-    if (idle()) {
-      Pick <TaskPurchase> pick = new Pick(0);
-      boolean hasPurchase = false;
-      
-      for (Task t : todo) if (t instanceof TaskPurchase) {
-        TaskPurchase p = (TaskPurchase) t;
-        if (! p.shop.hasItemOrder(p.itemType, this)) {
-          todo.remove(t);
-        }
-        else {
-          hasPurchase = true;
-          p = TaskPurchase.resumePurchase(p);
-          if (p != null) pick.compare(p, p.priority() * Rand.num());
-        }
-      }
-      
-      if (! hasPurchase) for (Building b : map.buildings()) {
-        if (b.base() != base()        ) continue;
-        if (! (b instanceof BuildingForCrafts)) continue;
-        BuildingForCrafts shop = (BuildingForCrafts) b;
-        for (TaskPurchase p : TaskPurchase.configPurchases(this, shop)) {
-          if (p == null) continue;
-          pick.compare(p, p.priority() * Rand.num());
-        }
-      }
-      
-      assignTask(pick.result());
-    }
-    
-    //  Once home & work have been established, try to derive a task to
-    //  perform-
+    //
+    //  See if your home, workplace, shopping demands or current mission have
+    //  anything to say-
     if (idle() && mission != null && mission.active()) {
       assignTask(mission.selectActorBehaviour(this));
+    }
+    if (idle()) {
+      assignTask(TaskPurchase.nextPurchase(this));
     }
     if (idle() && work() != null && work().accessible()) {
       assignTask(work().selectActorBehaviour(this));
@@ -307,8 +277,10 @@ public class ActorAsPerson extends Actor {
     if (idle() && home() != null && home().accessible()) {
       assignTask(home().selectActorBehaviour(this));
     }
-    if (idle() && (hurtRating > Rand.num() || injury > 0)) {
-      assignTask(restingTask(home(), home()));
+    //
+    //  Failing that, try either resting or wandering-
+    if (idle() && (needRest > (Rand.num() / maxHealth()) || injury > 0)) {
+      assignTask(TaskResting.configResting(this, home()));
     }
     if (idle()) {
       assignTask(TaskWander.configWandering(this));
@@ -406,35 +378,6 @@ public class ActorAsPerson extends Actor {
     }
     
     super.update();
-  }
-  
-  
-  Batch <Good> menuAt(Building visits) {
-    Batch <Good> menu = new Batch();
-    if (type().foodsAllowed == null) return menu;
-    
-    if (visits != null) for (Good g : type().foodsAllowed) {
-      if (visits.inventory(g) >= 1) menu.add(g);
-    }
-    return menu;
-  }
-  
-  
-  protected void onVisit(Building visits) {
-    if (jobType() == JOB.RESTING) {
-      
-      if (hunger >= 1f / HUNGER_REGEN) {
-        Batch <Good> menu = menuAt(visits);
-        boolean adult = adult();
-        
-        if (menu.size() > 0) for (Good g : menu) {
-          float eats = 1f / (menu.size() * HUNGER_REGEN);
-          if (! adult) eats /= 2;
-          visits.addInventory(0 - eats, g);
-          hunger -= eats / FOOD_UNIT_PER_HP;
-        }
-      }
-    }
   }
   
   

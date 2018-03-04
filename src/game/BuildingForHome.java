@@ -348,11 +348,11 @@ public class BuildingForHome extends Building {
     goes = pickV.result();
     
     if (goes != this && goes != null) {
-      Task visit = actor.restingTask(goes, this);
+      Task visit = TaskResting.configResting(actor, goes);
       if (visit != null) return visit;
     }
     if (goes == this && Rand.yes()) {
-      Task visit = actor.restingTask(this, this);
+      Task visit = TaskResting.configResting(actor, this);
       if (visit != null) return visit;
     }
     if (goes == this) {

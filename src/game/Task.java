@@ -41,6 +41,7 @@ public class Task implements Session.Saveable {
   };
   final public static float
     NO_PRIORITY = -1.0f,
+    IDLE        =  1.0f,
     CASUAL      =  2.5f,
     ROUTINE     =  5.0f,
     URGENT      =  7.5f,
@@ -265,6 +266,9 @@ public class Task implements Session.Saveable {
           visits.visitedBy(visitor);
           if (origin != null) origin.actorVisits(visitor, visits);
         }
+        if (timeSpent > maxTime) {
+          onVisitEnds(visits);
+        }
         return true;
       }
       else {
@@ -281,6 +285,9 @@ public class Task implements Session.Saveable {
           //  be assigned a task will have delegate methods for this.
           visitor.onTarget(target);
           if (origin != null) origin.actorTargets(visitor, target);
+        }
+        if (timeSpent > maxTime) {
+          onTargetEnds(target);
         }
         return true;
       }
@@ -310,7 +317,17 @@ public class Task implements Session.Saveable {
   }
   
   
+  protected void onVisitEnds(Building visits) {
+    return;
+  }
+  
+  
   protected void onTarget(Target target) {
+    return;
+  }
+  
+  
+  protected void onTargetEnds(Target target) {
     return;
   }
   
