@@ -55,11 +55,11 @@ public class GameContent {
   static {
     FLAG_STRIKE.model = CutoutModel.fromImage(
       GameContent.class, "flag_strike_model",
-      "media/GUI/Missions/flag_strike.gif", 1, 1
+      "media/GUI/Missions/flag_strike.gif", 0.5f, 1
     );
     FLAG_RECON.model = CutoutModel.fromImage(
       GameContent.class, "flag_recon_model",
-      "media/GUI/Missions/flag_recon.gif", 1, 1
+      "media/GUI/Missions/flag_recon.gif", 0.5f, 1
     );
   }
   
@@ -166,7 +166,7 @@ public class GameContent {
     DESERT.attachFixtures(DESERT_ROCK1, 0.15f, DESERT_ROCK2, 0.20f);
     
     
-    //  TODO:  Add the various images here.
+    //  TODO:  Add the various images for rocks!
     
     JUNGLE_TREE1  .tint = colour(0, 3, 0);
     DESERT_ROCK1  .tint = colour(6, 4, 4);
@@ -286,6 +286,7 @@ public class GameContent {
     );
     
     TRIPOD.predator    = false;
+    TRIPOD.deep        = 2;
     TRIPOD.meleeDamage = 4;
     TRIPOD.rangeDamage = 6;
     TRIPOD.armourClass = 6;
@@ -338,6 +339,7 @@ public class GameContent {
   static {
     CHILD.name = "Child";
     CHILD.attachCostume(GameContent.class, "child_skin.gif");
+
     CHILD.meleeDamage = 0;
     CHILD.rangeDamage = 0;
     CHILD.rangeDist   = 0;
@@ -347,6 +349,7 @@ public class GameContent {
     
     ENFORCER.name = "Enforcer";
     ENFORCER.attachCostume(GameContent.class, "enforcer_skin.gif");
+
     ENFORCER.meleeDamage = 2;
     ENFORCER.rangeDamage = 4;
     ENFORCER.rangeDist   = 6;
@@ -356,6 +359,7 @@ public class GameContent {
     
     RUNNER.name = "Runner";
     RUNNER.attachCostume(GameContent.class, "runner_skin.gif");
+
     RUNNER.rangeDamage = 6;
     RUNNER.rangeDist   = 8;
     RUNNER.armourClass = 3;
@@ -364,6 +368,7 @@ public class GameContent {
     
     ECOLOGIST.name = "Ecologist";
     ECOLOGIST.attachCostume(GameContent.class, "ecologist_skin.gif");
+
     ECOLOGIST.rangeDamage = 4;
     ECOLOGIST.armourClass = 3;
     ECOLOGIST.rangeDist   = 6;
@@ -372,6 +377,7 @@ public class GameContent {
     
     ENGINEER.name = "Engineer";
     ENGINEER.attachCostume(GameContent.class, "engineer_skin.gif");
+    
     ENGINEER.meleeDamage = 5;
     ENGINEER.armourClass = 5;
     ENGINEER.maxHealth   = 4;
@@ -379,6 +385,7 @@ public class GameContent {
     
     PHYSICIAN.name = "Physician";
     PHYSICIAN.attachCostume(GameContent.class, "physician_skin.gif");
+    
     PHYSICIAN.meleeDamage = 0;
     PHYSICIAN.rangeDamage = 0;
     PHYSICIAN.armourClass = 1;
@@ -466,8 +473,6 @@ public class GameContent {
     }
   ;
   static {
-    
-    //  TODO:  Maybe this should be a little bigger too?
     
     BASTION.name = "Bastion";
     BASTION.tint = TINT_MILITARY;
@@ -585,7 +590,7 @@ public class GameContent {
     );
     STOCK_EXCHANGE.setDimensions(3, 3, 1);
     STOCK_EXCHANGE.setBuildMaterials(PLASTICS, 4, PARTS, 2);
-    STOCK_EXCHANGE.workerTypes.setWith(Vassals.VENDOR, 2);
+    STOCK_EXCHANGE.workerTypes.setWith(Vassals.VENDOR, 1);
     STOCK_EXCHANGE.needed    = MARKET_GOODS;
     STOCK_EXCHANGE.features  = new Good[] { IS_VENDOR };
     STOCK_EXCHANGE.shopItems = new Good[] {
@@ -710,7 +715,7 @@ public class GameContent {
     CutoutModel HOUSE_MODELS[][] = CutoutModel.fromImageGrid(
       GameContent.class, "housing_models",
       "media/Buildings/civ_holdings.png",
-      3, 4, 2, 2, false
+      4, 3, 2, 2, false
     );
     
     HOLDING.name = "Holding";
@@ -719,7 +724,6 @@ public class GameContent {
     
     HOLDING.setDimensions(2, 2, 1);
     HOLDING.setBuildMaterials(PLASTICS, 1, PARTS, 0);
-    HOLDING.workerTypes.setWith(Vassals.PYON, 1);
     HOLDING.homeFoods    = FOOD_TYPES;
     HOLDING.maxResidents = 4;
     HOLDING.maxStock     = 1;
@@ -765,7 +769,7 @@ public class GameContent {
     );
     NURSERY.setDimensions(2, 2, 1);
     NURSERY.setBuildMaterials(PLASTICS, 5, PARTS, 2);
-    NURSERY.workerTypes.setWith(Vassals.PYON, 2);
+    NURSERY.workerTypes.setWith(Vassals.PYON, 1);
     NURSERY.worksBeforeBuilt = true;
     NURSERY.gatherFlag  = IS_CROP;
     NURSERY.claimMargin = 4;
@@ -784,7 +788,7 @@ public class GameContent {
     );
     HARVESTER.setDimensions(3, 3, 1);
     HARVESTER.setBuildMaterials(PLASTICS, 5, PARTS, 2);
-    HARVESTER.workerTypes.setWith(Vassals.PYON, 2);
+    HARVESTER.workerTypes.setWith(Vassals.PYON, 1);
     HARVESTER.worksBeforeBuilt = true;
     HARVESTER.gatherFlag = IS_TREE;
     HARVESTER.maxStock   = 25;

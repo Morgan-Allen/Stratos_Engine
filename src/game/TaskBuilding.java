@@ -5,6 +5,9 @@ import util.*;
 import static game.AreaMap.*;
 import static game.GameConstants.*;
 
+import game.GameConstants.Target;
+import graphics.common.*;
+
 
 
 public class TaskBuilding extends Task {
@@ -384,6 +387,19 @@ public class TaskBuilding extends Task {
       I.say("  New: "+newT);
       I.say("  ???");
     }
+  }
+  
+  
+  
+  /**  Graphical, debug and interface methods-
+    */
+  String animName() {
+    return AnimNames.BUILD;
+  }
+  
+  
+  Target faceTarget() {
+    return site;
   }
 }
 

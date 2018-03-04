@@ -311,7 +311,7 @@ public class ActorAsPerson extends Actor {
       assignTask(restingTask(home()));
     }
     if (idle()) {
-      assignTask(wanderTask());
+      assignTask(TaskWander.configWandering(this));
     }
   }
   
@@ -325,7 +325,7 @@ public class ActorAsPerson extends Actor {
         if (combat != null) assignTask(combat);
       }
       
-      float oldPriority = jobPriority();
+      float oldPriority = Nums.max(jobPriority(), 0);
       TaskRetreat retreat = TaskRetreat.configRetreat(this);
       if (retreat != null && retreat.priority() > oldPriority) {
         assignTask(retreat);
@@ -377,18 +377,27 @@ public class ActorAsPerson extends Actor {
     */
   void update() {
     WorldSettings settings = map.world.settings;
+    boolean organic = type().organic;
     
-    hunger += settings.toggleHunger ? (1f / STARVE_INTERVAL) : 0;
-    if (jobType() == JOB.RESTING) {
-      float rests = 1f / FATIGUE_REGEN;
-      float heals = 1f / HEALTH_REGEN ;
-      fatigue = Nums.max(0, fatigue - rests);
-      injury  = Nums.max(0, injury  - heals);
+    //  TODO:  Unify this with the method in ActorAsAnimal.
+    
+    if (organic) {
+      hunger += settings.toggleHunger ? (1f / STARVE_INTERVAL ) : 0;
+      if (jobType() == JOB.RESTING) {
+        float rests = 1f / FATIGUE_REGEN;
+        float heals = 1f / HEALTH_REGEN ;
+        fatigue = Nums.max(0, fatigue - rests);
+        injury  = Nums.max(0, injury  - heals);
+      }
+      else {
+        fatigue += settings.toggleFatigue ? (1f / FATIGUE_INTERVAL) : 0;
+        float heals = 0.5f / HEALTH_REGEN;
+        injury = Nums.max(0, injury - heals);
+      }
     }
     else {
-      fatigue += settings.toggleFatigue ? (1f / FATIGUE_INTERVAL) : 0;
-      float heals = 0.5f / HEALTH_REGEN;
-      injury = Nums.max(0, injury - heals);
+      float rests = 1f / FATIGUE_REGEN;
+      fatigue = Nums.max(0, fatigue - rests);
     }
     
     for (Technique t : type().classTechniques) {

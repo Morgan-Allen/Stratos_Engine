@@ -117,10 +117,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   
   public Tile centre() {
     if (at == null) return null;
-    return map.tileAt(
-      at.x + (type.wide / 2),
-      at.y + (type.high / 2)
-    );
+    return map.tileAt(at.x + (type.wide / 2), at.y + (type.high / 2));
   }
   
   
@@ -571,7 +568,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   
   protected float renderedFog(Base base) {
     //return 1;//sightLevel();
-    return sightLevel();
+    return ((sightLevel() * 2) + maxSightLevel()) / 3;
     //final Vec3D p = trackPosition();
     //return base.fogMap().renderedFog(p.x, p.y, this);
   }

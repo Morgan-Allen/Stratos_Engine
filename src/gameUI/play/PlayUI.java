@@ -68,6 +68,9 @@ public class PlayUI extends HUD implements UIConstants {
     progressOptions.alignVertical  (0, 0);
     progressOptions.alignHorizontal(0, 0);
     progressOptions.attachTo(this);
+    
+    optionList = new OptionList(this);
+    optionList.attachTo(this);
   }
   
   
@@ -78,6 +81,7 @@ public class PlayUI extends HUD implements UIConstants {
     }
     this.stage = stage;
     this.base  = base ;
+    optionList.setupFrom(stage, base);
   }
   
   
@@ -97,6 +101,7 @@ public class PlayUI extends HUD implements UIConstants {
     home  = (Element) s.loadObject();
     selection.loadState(s);
     tracking .loadState(s);
+    optionList.setupFrom(stage, base);
   }
   
   
@@ -154,14 +159,15 @@ public class PlayUI extends HUD implements UIConstants {
   }
   
   
+  /*
   public void setOptionList(OptionList list) {
     if (optionList != null) optionList.detach();
     this.optionList = list;
     if (optionList != null) {
-      
       optionList.attachTo(this);
     }
   }
+  //*/
   
   
   public void assignTask(PlayTask task) {

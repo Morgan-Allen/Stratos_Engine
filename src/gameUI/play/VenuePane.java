@@ -27,6 +27,7 @@ public class VenuePane extends DetailPane {
     final Description d = this.text;
     
     BuildType type = venue.type();
+    boolean controls = venue.base() == PlayUI.playerBase();
     
     d.append(""+venue.toString());
     d.append("\n");
@@ -50,14 +51,14 @@ public class VenuePane extends DetailPane {
       d.append("\n\n"+w.name+": ("+num+"/"+max+")");
       for (Actor a : venue.workers()) if (a.type() == w) {
         if (a.onMap()) {
-          d.appendAll("\n  ", a, "  ", a.task());
+          d.appendAll("\n  ", a);//, "  ", a.task());
         }
         else {
           d.appendAll("\n  ", a, " (pending arrival)");
         }
       }
       
-      if (num < max && w.socialClass != CLASS_COMMON && canHire) {
+      if (num < max && w.socialClass >= CLASS_SOLDIER && canHire) {
         d.append("\n  ");
         d.append(new Description.Link("Hire "+w.name+" ("+cost+" Cr)") {
           public void whenClicked(Object context) {
@@ -67,7 +68,48 @@ public class VenuePane extends DetailPane {
       }
     }
     
-    if (! venue.inventory().empty()) {
+    if (! venue.residents().empty()) {
+      int num = venue.residents().size(), max = venue.maxResidents(-1);
+      d.append("\n\nResidents: ("+num+"/"+max+")");
+      for (Actor a : venue.residents()) {
+        if (a.onMap()) {
+          d.appendAll("\n  ", a);//, "  ", a.task());
+        }
+        else {
+          d.appendAll("\n  ", a, " (pending arrival)");
+        }
+      }
+    }
+    
+    
+    if (venue instanceof Trader) {
+      final Trader t = (Trader) venue;
+      d.append("\n\nTrade Levels:");
+      
+      for (final Good g : venue.map().world.goodTypes()) {
+        if (g == CASH) continue;
+        
+        final int have = (int) t.inventory ().valueFor(g);
+        final int need = (int) t.needLevels().valueFor(g);
+        final int prod = (int) t.prodLevels().valueFor(g);
+        
+        d.append("\n  "+I.padToLength(g.name+":", 10));
+        d.append(I.padToLength(""+have, 2)+" Get ");
+        d.append(new Description.Link(""+need) {
+          public void whenClicked(Object context) {
+            t.needLevels().set(g, (need + 5) % 25);
+          }
+        });
+        d.append(" Allow ");
+        d.append(new Description.Link(""+(need + prod)) {
+          public void whenClicked(Object context) {
+            t.prodLevels().set(g, (prod + 5) % 25);
+          }
+        });
+      }
+      d.append("\n  Cash: "+((int) t.inventory().valueFor(CASH)));
+    }
+    else if (! venue.inventory().empty()) {
       d.append("\n\nInventory:");
       for (Good g : venue.inventory().keys()) {
         d.appendAll("\n  ", g, ": ", venue.inventory(g));
@@ -76,8 +118,7 @@ public class VenuePane extends DetailPane {
     
     
     BuildType upgrades[] = venue.type().allUpgrades;
-    
-    if (! Visit.empty(upgrades)) {
+    if (controls && ! Visit.empty(upgrades)) {
       int num = venue.numSideUpgrades(), max = venue.maxUpgrades();
       d.append("\n\nUpgrades: ("+num+"/"+max+")");
       
@@ -112,28 +153,28 @@ public class VenuePane extends DetailPane {
       }
     }
     
-    
     d.append("\n\nVisitors:");
     for (Element i : venue.inside()) {
       d.appendAll("\n  ", i);
     }
     
+    if (controls) {
+      d.append("\n\n");
+      d.append(new Description.Link("DEMOLISH") {
+        public void whenClicked(Object context) {
+          AreaMap map = venue.map();
+          if (map == null) return;
+          map.planning.unplaceObject(venue);
+          venue.exitMap(venue.map());
+        }
+      });
+    }
     
     super.updateState();
   }
   
+  
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 

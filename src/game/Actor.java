@@ -271,7 +271,7 @@ public class Actor extends Element implements
   
   void beginNextBehaviour() {
     assignTask(null);
-    assignTask(wanderTask());
+    assignTask(TaskWander.configWandering(this));
   }
   
   
@@ -399,14 +399,6 @@ public class Actor extends Element implements
     
     Task t = new Task(this);
     return t.configTask(e, null, goes, jobType, maxTime);
-  }
-  
-  
-  public Task wanderTask() {
-    if (reports()) I.say(this+" beginning random walk...");
-    
-    Task t = new TaskWander(this);
-    return t.configTask(null, null, null, JOB.WANDERING, 0);
   }
   
   
@@ -749,7 +741,6 @@ public class Actor extends Element implements
   
   public boolean setSelected(PlayUI UI) {
     UI.setDetailPane(new ActorPane (UI, this));
-    UI.setOptionList(new OptionList(UI, this));
     return true;
   }
   
@@ -765,15 +756,17 @@ public class Actor extends Element implements
     if (s == null) return;
     
     Tile from = at(), goes = from;
-    Pathing next = task == null ? null : task.nextOnPath();
+    Target next = task == null ? null : task.nextOnPath();
     if (next != null && next.isTile()) goes = (Tile) next;
+    if (from == next && task != null ) next = task.faceTarget();
     
     //  TODO:  Factor this out below!
     float alpha = Rendering.frameAlpha(), rem = 1 - alpha;
     s.position.set(
       (from.x * rem) + (goes.x * alpha) + 0.5f,
       (from.y * rem) + (goes.y * alpha) + 0.5f,
-    0);
+      0
+    );
     if (goes != from) {
       float angle = new Vec2D(goes.x - from.x, goes.y - from.y).toAngle();
       s.rotation = angle;

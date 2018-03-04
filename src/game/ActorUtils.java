@@ -52,44 +52,6 @@ public class ActorUtils {
   
   /**  Finding migrants in and out-
     */
-  /*
-  static class Assessment {
-    float jobsTotal = 0, jobsFilled = 0;
-    float homeTotal = 0, homeFilled = 0;
-    float jobsCrowding, homeCrowding;
-    
-    Tally <Type> jobsDemand = new Tally();
-    Tally <Type> jobsSupply = new Tally();
-    
-    Assessment(AreaMap map) {
-      int MR, NR, MW, NW;
-      
-      for (Building b : map.buildings) {
-        boolean report = b.reports();
-        if (report) {
-          I.say("\nGetting job assessment for "+b);
-        }
-        for (int socialClass : ALL_CLASSES) {
-          homeTotal  += MR = b.maxResidents(socialClass);
-          homeFilled += NR = b.numResidents(socialClass);
-          if (report) I.say("  Class "+socialClass+": "+NR+"/"+MR);
-        }
-        for (ActorType t : b.type().workerTypes.keys()) {
-          jobsTotal  += MW = b.maxWorkers(t);
-          jobsFilled += NW = b.numWorkers(t);
-          jobsDemand.add(MW, t);
-          jobsSupply.add(NW, t);
-          if (report) I.say("  Job "+t+": "+NW+"/"+MW);
-        }
-      }
-      
-      jobsCrowding = jobsTotal == 0 ? 1 : (jobsFilled / jobsTotal);
-      homeCrowding = homeTotal == 0 ? 1 : (homeFilled / homeTotal);
-    }
-  }
-  //*/
-  
-  
   public static Actor generateMigrant(
     ActorType jobType, Building employs, boolean payHireCost
   ) {
@@ -128,10 +90,14 @@ public class ActorUtils {
         int space = b.maxWorkers(t) - b.numWorkers(t);
         if (space <= 0) continue;
         
-        float fitness = 2;
+        float fitness = 0, sumWeights = 0;
         for (Trait skill : t.initTraits.keys()) {
-          fitness += migrant.levelOf(skill) * t.initTraits.valueFor(skill);
+          float level = t.initTraits.valueFor(skill);
+          fitness += migrant.levelOf(skill) / level;
+          sumWeights += level;
         }
+        fitness /= Nums.max(1, sumWeights);
+        if (fitness <= 0.5f) continue;
         
         float near = AreaMap.distancePenalty(from, b);
         Opening o = new Opening();
@@ -186,22 +152,34 @@ public class ActorUtils {
     sumPos.addPos(market, 1);
     
     sumPos.scale(1f / sumPos.sumWeights);
-    Tile from = map.tileAt(sumPos.x, sumPos.y);
+    
+    final Tile from = map.tileAt(sumPos.x, sumPos.y);
+    final int socialClass = migrant.type().socialClass;
     
     
-    Pick <Building> pick = new Pick();
-    int socialClass = migrant.type().socialClass;
+    Pick <Building> pick = new Pick <Building> () {
+      public void compare(Building b, float rating) {
+        int max   = b.maxResidents(socialClass);
+        int space = max - b.numResidents(socialClass);
+        if (space <= 0) return;
+        float near = 10 / (10f + AreaMap.distance(from, b));
+        super.compare(b, rating * space * near);
+      }
+    };
     
     //  TODO:  Check the actor's work venue first to see if that will allow
-    //  residence...
+    //  residence?
+    //  TODO:  This could get very computationally-intensive on large maps.
+    //  Try to improve on that?
     
     for (Building b : map.buildings) if (b.accessible()) {
-      int max   = b.maxResidents(socialClass);
-      int space = max - b.numResidents(socialClass);
-      if (space <= 0) continue;
-      
-      float near = 10 / (10f + AreaMap.distance(from, b));
-      pick.compare(b, space * near);
+      pick.compare(b, 1);
+    }
+    for (Element e : map.planning.toBuild) {
+      if (e.type().isHomeBuilding() && ! e.onMap()) {
+        Building b = (Building) e;
+        pick.compare(b, 1);
+      }
     }
     
     Building home = pick.result();
@@ -212,6 +190,11 @@ public class ActorUtils {
       Type baseHomeType = migrant.type().nestType();
       home = (Building) baseHomeType.generate();
       Tile goes = findEntryPoint(home, map, from, maxRange / 2);
+      
+      if (! home.canPlace(map, goes.x, goes.y, 1)) {
+        I.say("???");
+        home.canPlace(map, goes.x, goes.y, 1);
+      }
       
       if (goes != null) {
         home.assignBase(migrant.base());
@@ -235,10 +218,14 @@ public class ActorUtils {
         
         for (Tile n : AreaMap.adjacent(front, temp, map)) {
           if (n == null || n.flaggedWith() != null) continue;
+          ///I.say("Check at: "+n);
           
-          if (enters.canPlace(map, n.x, n.y, 0)) {
+          if (enters.canPlace(map, n.x, n.y, 1)) {
             result.value = n;
             return;
+          }
+          else {
+            tryAdding(n);
           }
         }
       }
@@ -248,8 +235,49 @@ public class ActorUtils {
     return result.value;
   }
   
-  
 }
 
+
+
+
+
+
+
+/*
+static class Assessment {
+  float jobsTotal = 0, jobsFilled = 0;
+  float homeTotal = 0, homeFilled = 0;
+  float jobsCrowding, homeCrowding;
+  
+  Tally <Type> jobsDemand = new Tally();
+  Tally <Type> jobsSupply = new Tally();
+  
+  Assessment(AreaMap map) {
+    int MR, NR, MW, NW;
+    
+    for (Building b : map.buildings) {
+      boolean report = b.reports();
+      if (report) {
+        I.say("\nGetting job assessment for "+b);
+      }
+      for (int socialClass : ALL_CLASSES) {
+        homeTotal  += MR = b.maxResidents(socialClass);
+        homeFilled += NR = b.numResidents(socialClass);
+        if (report) I.say("  Class "+socialClass+": "+NR+"/"+MR);
+      }
+      for (ActorType t : b.type().workerTypes.keys()) {
+        jobsTotal  += MW = b.maxWorkers(t);
+        jobsFilled += NW = b.numWorkers(t);
+        jobsDemand.add(MW, t);
+        jobsSupply.add(NW, t);
+        if (report) I.say("  Job "+t+": "+NW+"/"+MW);
+      }
+    }
+    
+    jobsCrowding = jobsTotal == 0 ? 1 : (jobsFilled / jobsTotal);
+    homeCrowding = homeTotal == 0 ? 1 : (homeFilled / homeTotal);
+  }
+}
+//*/
 
 

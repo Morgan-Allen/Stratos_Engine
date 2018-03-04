@@ -65,6 +65,7 @@ public class Text extends UIGroup implements Description {
   
   final protected Alphabet alphabet;
   public float scale = 1.0f;
+  public boolean monospace = true;
   protected List <Box2D> allEntries = new List();
   private boolean needsFormat = false;
   
@@ -464,6 +465,8 @@ public class Text extends UIGroup implements Description {
     final boolean report = verbose;
     if (report) I.say("\nFormatting text, max. width: "+maxWidth+"\n");
     
+    float monoWide = alphabet.monospaceWidth() / 2;
+    
     boolean
       newWord,
       newLine;
@@ -501,8 +504,8 @@ public class Text extends UIGroup implements Description {
         if (key == '\n') newLine = newWord = true;
         if (key == ' ' ) newWord = true;
         if (entry.letter != null) {
-          entry.xdim(entry.letter.width  * scale);
-          entry.ydim(entry.letter.height * scale);
+          entry.xdim((monospace ? monoWide : entry.letter.width) * scale);
+          entry.ydim(                        entry.letter.height * scale);
         }
         if (report) I.say("  Text entry: "+key+", across: "+across);
       }
@@ -557,7 +560,8 @@ public class Text extends UIGroup implements Description {
     final boolean bulleted = head == lastBullet;
     
     float across = lastBullet == null ? 0 : lastBullet.xdim();
-    float down   = alphabet.letterFor(' ').height * scale;
+    float down   = alphabet.lineHeight() * scale;
+    
     for (Box2D entry : entries) {
       if (bulleted && entry == head) continue;
       down = Nums.max(down, entry.ymax());

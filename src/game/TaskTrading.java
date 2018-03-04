@@ -55,6 +55,10 @@ public class TaskTrading extends Task {
     this.tradeGoes = goes ;
     this.homeCity  = from.base();
     
+    if (tradeFrom == tradeGoes) {
+      I.say("???");
+    }
+    
     configTravel(from, from, JOB.TRADING, from);
     return this;
   }
@@ -109,9 +113,11 @@ public class TaskTrading extends Task {
     //
     //  If you've arrived at the edge of the map, begin your journey to a
     //  foreign city-
-    Base city = tradeGoes.base();
-    city.world.beginJourney(city, (Base) tradeGoes, actor);
-    actor.exitMap(actor.map);
+    if (tradeGoes.base() == tradeGoes) {
+      Base city = tradeFrom.base();
+      city.world.beginJourney(city, (Base) tradeGoes, actor);
+      actor.exitMap(actor.map);
+    }
   }
   
   
@@ -193,6 +199,7 @@ public class TaskTrading extends Task {
     Base fromB = from.base(), goesB = goes.base();
     boolean paymentDue = fromB != goesB;
     boolean tributeDue = fromB.isLoyalVassalOf(goesB);
+    boolean fromFlex   = from == goes.base().homeland();
     Base.Relation relation = fromB.relationWith(goesB);
     
     Tally <Good> stock = from.inventory();
@@ -203,8 +210,12 @@ public class TaskTrading extends Task {
 
       float priceP = goesB.importPrice(g, fromB);
       float priceG = fromB.exportPrice(g, goesB);
-      float amount = Nums.min(cargo.valueFor(g), stock.valueFor(g));
-      from.inventory().add(0 - amount, g);
+      float amount = cargo.valueFor(g);
+      
+      if (! fromFlex) {
+        amount = Nums.min(amount, stock.valueFor(g));
+        from.inventory().add(0 - amount, g);
+      }
       goes.inventory().add(amount + 0, g);
       
       float paysFor = amount;
@@ -261,9 +272,8 @@ public class TaskTrading extends Task {
     Tally <Good> cargo = new Tally();
     boolean fromCity = from.base() == from;
     boolean goesCity = goes.base() == goes;
-    boolean fromFlex = from.base() == goes.base().homeland();
-    boolean goesFlex = goes.base() == from.base().homeland();
-    
+    boolean fromFlex = from == goes.base().homeland();
+    boolean goesFlex = goes == from.base().homeland();
     
     boolean report = false;
     if (report) I.say("\nDoing cargo config for "+from+" -> "+goes);

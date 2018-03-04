@@ -4,6 +4,7 @@ package game;
 import util.*;
 import static game.GameConstants.*;
 import static game.BuildingForCrafts.*;
+import graphics.common.*;
 
 
 
@@ -129,9 +130,14 @@ public class TaskCrafting extends Task {
     venue.base().makeTotals.add(progInc, recipe.made);
   }
   
+  
+  
+  /**  Graphical, debug and interface methods-
+    */
+  String animName() {
+    return AnimNames.BUILD;
+  }
 }
-
-
 
 
 

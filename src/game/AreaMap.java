@@ -655,6 +655,9 @@ public class AreaMap implements Session.Saveable {
     }
     
     for (Base base : bases) {
+      //  TODO:  Reconsider this bit...
+      if (base != playing) continue;
+      
       for (Mission mission : base.missions()) {
         if (! mission.canRender(playing, rendering.view)) continue;
         mission.renderFlag(rendering);

@@ -20,6 +20,7 @@ public class Alphabet extends Assets.Loadable {
   private String path, mmlFile;
   private Texture fontTex;
   private Letter letters[], map[];
+  private float maxLetterHigh = 0, maxLetterWide = 0;
   
   public static class Letter {
     public char map;
@@ -124,6 +125,9 @@ public class Alphabet extends Assets.Loadable {
             letter.height = lineHigh;
             letter.width = (int) ((letter.umax - letter.umin) * wide);
             scanned.addLast(letter);
+            
+            maxLetterWide = Nums.max(maxLetterWide, letter.width );
+            maxLetterHigh = Nums.max(maxLetterHigh, letter.height);
           }
         }
       }
@@ -156,7 +160,12 @@ public class Alphabet extends Assets.Loadable {
   
   
   public float lineHeight() {
-    return letterFor(' ').height;
+    return maxLetterHigh;
+  }
+  
+  
+  public float monospaceWidth() {
+    return maxLetterWide;
   }
   
   

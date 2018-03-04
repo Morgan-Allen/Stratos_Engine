@@ -72,7 +72,6 @@ public class Tracking {
     if (drift >= 1) viewPos.setTo(targPos);
     else viewPos.add(displace.scale(drift));
     view.lookedAt.setTo(viewPos);
-    
   }
   
   

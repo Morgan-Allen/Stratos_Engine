@@ -48,7 +48,7 @@ public class TestBridging extends Test {
     
     
     Building palace = (Building) BASTION.generate();
-    palace.enterMap(map, 8, 10, 1, base);
+    palace.enterMap(map, 6, 8, 1, base);
     for (Good g : palace.type().buildsWith) {
       palace.setInventory(g, 100);
     }

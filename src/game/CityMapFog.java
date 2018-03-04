@@ -93,11 +93,11 @@ public class CityMapFog {
       byte val = oldVals[c.x][c.y] = fogVals[c.x][c.y];
       fogVals[c.x][c.y] = 0;
       
-      int oldVal = maxMap.flagVal(c.x, c.y);
+      int maxVal = maxMap.flagVal(c.x, c.y);
       int newVal = MAX_FOG - val;
-      if (oldVal > newVal) maxMap.setFlagVal(c.x, c.y, newVal);
+      if (maxVal > newVal) maxMap.setFlagVal(c.x, c.y, newVal);
       
-      floatVals[c.x][c.y] = 1 - (newVal * 1f / MAX_FOG);
+      floatVals[c.x][c.y] = 1 - (((newVal * 2) + maxVal) * 1f / (MAX_FOG * 3));
     }
   }
   

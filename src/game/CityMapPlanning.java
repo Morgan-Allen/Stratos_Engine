@@ -43,6 +43,34 @@ public class CityMapPlanning {
   
   
   
+  /**  These are calls made to the planning-map by any elements already
+    *  present on the map:
+    */
+  private void updateBuildDemands(Element e) {
+    //  TODO:  Migrate the 'check build need' function in here?
+    
+    for (Good m : e.materials()) {
+      TaskBuilding.checkNeedForBuilding(e, m, map, true);
+    }
+  }
+  
+  
+  public void updatePlanning() {
+    int maxChecked = Nums.min(100, toBuild.size());
+    //
+    //  We regularly 'check up' on scheduled structures to see whether they
+    //  need maintenance or have become possible to build-
+    for (int i = maxChecked; i-- > 0;) {
+      Element e = toBuild.removeFirst();
+      if (e.buildLevel() < 1 || ! e.onMap()) {
+        togglePlacement(e, true);
+      }
+      toBuild.addLast(e);
+    }
+  }
+  
+  
+  
   /**  Support methods for object-placement within the plan:
     */
   private void togglePlacement(Element e, boolean doPlace) {
@@ -115,36 +143,6 @@ public class CityMapPlanning {
   }
   
   
-  
-  
-  /**  These are calls made to the planning-map by any elements already
-    *  present on the map:
-    */
-  private void updateBuildDemands(Element e) {
-    //  TODO:  Migrate the 'check build need' function in here?
-    
-    for (Good m : e.materials()) {
-      TaskBuilding.checkNeedForBuilding(e, m, map, true);
-    }
-  }
-  
-  
-  public void updatePlanning() {
-    int maxChecked = Nums.min(100, toBuild.size());
-    //
-    //  We regularly 'check up' on scheduled structures to see whether
-    //  they need maintenance or have become possible to build-
-    for (int i = maxChecked; i-- > 0;) {
-      Element e = toBuild.removeFirst();
-      if (e.buildLevel() < 1 || ! e.onMap()) {
-        togglePlacement(e, true);
-      }
-      toBuild.addLast(e);
-    }
-  }
-  
-  
-
   
   /**  Some helper methods for dealing with infrastructure:
     */

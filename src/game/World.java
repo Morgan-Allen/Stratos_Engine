@@ -196,6 +196,7 @@ public class World implements Session.Saveable {
   /**  Accessing types:
     */
   public Type[] buildTypes() { return buildTypes; }
+  public Good[] goodTypes () { return goodTypes ; }
   
   
   

@@ -32,18 +32,16 @@ public class OptionList extends UIGroup implements UIConstants {
   
   
   final PlayUI BUI;
-  //final Element subject;
+  List <UINode> options = new List();
   
   
   //  TODO:  Just have this auto-renew automagically, rather than being
   //  dependent on a particular subject.
   
-  public OptionList(PlayUI UI, Element subject) {
+  public OptionList(PlayUI UI) {
     super(UI);
     this.BUI = UI;
-    //this.subject = subject;
     this.relAlpha = 0;
-    setup();
   }
   
   
@@ -53,9 +51,44 @@ public class OptionList extends UIGroup implements UIConstants {
   }
   
   
+  protected void setupFrom(AreaMap stage, Base base) {
+    
+    for (UINode option : options) {
+      option.detach();
+    }
+    
+    options.add(new MissionButton(
+      BUI, STRIKE_BUTTON_ID, STRIKE_BUTTON_IMG,
+      "Destroy or raze subject"
+    ) {
+      Mission initMission() {
+        return new Mission(Mission.OBJECTIVE_CONQUER, base, false);
+      }
+    });
+    
+    options.add(new MissionButton(
+      BUI, RECON_BUTTON_ID, RECON_BUTTON_IMG,
+      "Explore area"
+    ) {
+      Mission initMission() {
+        return new Mission(Mission.OBJECTIVE_RECON, base, false);
+      }
+    });
+    
+    for (Technique t : base.rulerPowers()) {
+      options.add(new PowerButton(BUI, t, base));
+    }
+    
+    final int sizeB = OPT_BUTTON_SIZE, spaceB = sizeB + OPT_MARGIN;
+    int sumWide = options.size() * spaceB, across = 0;
+    for (UINode option : options) {
+      option.alignToArea(across - (sumWide / 2), 0, sizeB, sizeB);
+      option.attachTo(this);
+      across += spaceB;
+    }
+  }
   
-  //  TODO:  This mission has to be replenished whenever it's placed in the
-  //  world...
+  
   
   private abstract class MissionButton extends Button {
     
@@ -87,6 +120,7 @@ public class OptionList extends UIGroup implements UIConstants {
               mission.setAsBounty(0);
               PlayUI.pushSelection(mission);
               mission = null;
+              UI.assignTask(null);
             }
             else {
               //mission.renderFlag(rendering);
@@ -140,44 +174,6 @@ public class OptionList extends UIGroup implements UIConstants {
         }
       };
       BUI.assignTask(task);
-    }
-  }
-  
-  
-  private void setup() {
-    
-    final AreaMap stage = BUI.stage;
-    final Base    base  = BUI.base ;
-    final List <UINode> options = new List();
-    
-    options.add(new MissionButton(
-      BUI, STRIKE_BUTTON_ID, STRIKE_BUTTON_IMG,
-      "Destroy or raze subject"
-    ) {
-      Mission initMission() {
-        return new Mission(Mission.OBJECTIVE_CONQUER, base, false);
-      }
-    });
-    
-    options.add(new MissionButton(
-      BUI, RECON_BUTTON_ID, RECON_BUTTON_IMG,
-      "Explore area"
-    ) {
-      Mission initMission() {
-        return new Mission(Mission.OBJECTIVE_RECON, base, false);
-      }
-    });
-    
-    for (Technique t : base.rulerPowers()) {
-      options.add(new PowerButton(BUI, t, base));
-    }
-    
-    final int sizeB = OPT_BUTTON_SIZE, spaceB = sizeB + OPT_MARGIN;
-    int sumWide = options.size() * spaceB, across = 0;
-    for (UINode option : options) {
-      option.alignToArea(across - (sumWide / 2), 0, sizeB, sizeB);
-      option.attachTo(this);
-      across += spaceB;
     }
   }
   

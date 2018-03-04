@@ -4,7 +4,9 @@ package game;
 import util.*;
 import static game.AreaMap.*;
 import static game.GameConstants.*;
-import static util.TileConstants.*;
+
+import game.Task.JOB;
+import graphics.common.*;
 
 
 
@@ -27,6 +29,18 @@ public class TaskWander extends Task {
   
   
   
+  static TaskWander configWandering(Actor actor) {
+    ///if (reports()) I.say(this+" beginning random walk...");
+    Task t = new TaskWander(actor);
+    t = t.configTask(null, null, null, JOB.WANDERING, 0);
+    if (t == null) return null;
+    if (t.path == null) t.path = t.updatePathing();
+    if (t.path != null) t.target = (Target) Visit.last(t.path);
+    return (TaskWander) t;
+  }
+  
+  
+  
   Pathing[] updatePathing() {
     Actor actor = (Actor) this.active;
     Batch <Pathing> walk = new Batch();
@@ -41,7 +55,7 @@ public class TaskWander extends Task {
     walk.add(next);
     
     while (walk.size() < range) {
-      boolean prefPave = next.pathType() == PATH_PAVE;
+      boolean prefPave = false;// next.pathType() == PATH_PAVE;
       
       int numA = 0;
       for (Pathing n : next.adjacent(temp, map)) {
@@ -62,5 +76,15 @@ public class TaskWander extends Task {
   }
   
   
+  
+  /**  Graphical, debug and interface methods-
+    */
+  String animName() {
+    return AnimNames.LOOK;
+  }
 }
+
+
+
+
 

@@ -131,6 +131,8 @@ public class ScenarioBlankMap extends CityMapScenario {
     //  Ideally, you want to place the lairs in sectors where you don't find
     //  the main settlement.
     
+    
+    /*
     class SiteOption { Tile at; float rating; }
     List <SiteOption> options = new List <SiteOption> () {
       protected float queuePriority(SiteOption r) {
@@ -161,6 +163,7 @@ public class ScenarioBlankMap extends CityMapScenario {
       nest.assignSpawnParameters(MONTH_LENGTH, 4, spawnArgs);
       nests.add(nest);
     }
+    //*/
     
     Base.setPosture(base, stage.locals, Base.POSTURE.ENEMY, true);
   }

@@ -122,24 +122,31 @@ public class Building extends Element implements Pathing, Employer, Carrier {
     return type().claimMargin > 0;
   }
   
-
+  
+  Box2D claimArea(Tile from) {
+    //  TODO:  I really don't like having a separate method for this?
+    BuildType t = type();
+    Box2D area = new Box2D(from.x, from.y, t.wide, t.high);
+    if (t.claimMargin > 0) area.expandBy(t.claimMargin);
+    return area;
+  }
+  
+  
   public boolean canPlace(AreaMap map, int x, int y, int margin) {
     if (! super.canPlace(map, x, y, margin)) return false;
-    
+    //
     //  TODO:  The efficiency of this might be improved on larger maps.
-    Box2D claims = claimArea();
-    for (Building b : map.claimants()) {
-      if (b.claimArea().intersects(claims)) return false;
+    Box2D claims = claimArea(map.tileAt(x, y));
+    for (Building b : map.buildings()) {
+      if (b.claimArea().axisDistance(claims) < margin) return false;
     }
     return true;
   }
   
   
   public Box2D claimArea() {
-    int margin = type().claimMargin;
-    Box2D area = area();
-    if (area == null || margin <= 0) return area;
-    return area.expandBy(margin);
+    if (at() == null) return null;
+    return claimArea(at());
   }
   
   
@@ -574,7 +581,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
     */
   void updateWorkers(int period) {
     for (ActorType w : type().workerTypes.keys()) {
-      if (numWorkers(w) < maxWorkers(w) && w.socialClass == CLASS_COMMON) {
+      if (numWorkers(w) < maxWorkers(w) && w.socialClass <= CLASS_TRADER) {
         ActorUtils.generateMigrant(w, this, false);
       }
     }
@@ -795,8 +802,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   
   
   public boolean setSelected(PlayUI UI) {
-    UI.setDetailPane(new VenuePane (UI, this));
-    UI.setOptionList(new OptionList(UI, this));
+    UI.setDetailPane(new VenuePane(UI, this));
     return true;
   }
   

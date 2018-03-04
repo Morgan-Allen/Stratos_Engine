@@ -157,13 +157,13 @@ public class BuildingForTrade extends Building implements Trader {
     for (Building b : map.buildings) {
       if (b == this || ! (b instanceof Trader)) continue;
       if (b.base() != base()) {
-        if      (tradePartner == null        ) continue;
+        if      (tradePartner == null    ) continue;
         else if (b.base() != tradePartner) continue;
       }
       targets.add((Trader) b);
     }
     
-    if (tradePartner != null) {
+    if (tradePartner != null && tradePartner.activeMap() != trader.map()) {
       targets.add(tradePartner);
     }
     else for (Base c : world.bases) {

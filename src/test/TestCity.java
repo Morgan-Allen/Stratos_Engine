@@ -36,7 +36,7 @@ public class TestCity extends Test {
     Building court  = (Building) CANTINA          .generate();
     Building admin  = (Building) ENFORCER_BLOC    .generate();
     
-    palace.enterMap(map, 3 , 3 , 1, base);
+    palace.enterMap(map, 2 , 2 , 1, base);
     court .enterMap(map, 9 , 9 , 1, base);
     school.enterMap(map, 9 , 2 , 1, base);
     admin .enterMap(map, 18, 9 , 1, base);

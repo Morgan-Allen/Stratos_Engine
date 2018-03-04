@@ -818,12 +818,12 @@ public class Mission implements
   
   
   public String toString() {
-    return "Formation ("+homeCity+")";
+    return "Mission ("+homeCity+")";
   }
   
   
   public String fullName() {
-    return "Formation: "+OBJECTIVE_NAMES[objective]+": "+focus;
+    return "Mission: "+OBJECTIVE_NAMES[objective]+": "+focus;
   }
   
   
@@ -873,6 +873,9 @@ public class Mission implements
       flag.position.setTo(t.trackPosition());
       flag.position.z += 1;
     }
+    
+    //  TODO:  Tint the flag if it's been highlit!
+    
     flag.readyFor(rendering);
   }
   
@@ -891,14 +894,13 @@ public class Mission implements
   
   public boolean setSelected(PlayUI UI) {
     UI.setDetailPane(new MissionPane(UI, this));
-    UI.setOptionList(null);
     return true;
   }
   
   
   public boolean trackSelection() {
     if (focus instanceof Selection.Focus) {
-      return ((Selection.Focus) focus).trackSelection();
+      return true;
     }
     else {
       return false;

@@ -38,23 +38,19 @@ public class TaskAssessTax extends Task {
   static TaskAssessTax nextAssessment(
     Actor actor, Building from, int maxCollect
   ) {
-    //  TODO:  Maybe use a different Good for this, to distinguish from
-    //  personal savings?
-    
     float cashCarried = actor.carried(CASH);
     Pick <Building> pick = new Pick();
     Tile entrance = from.mainEntrance();
     
     for (Building b : from.map.buildings) {
-      if (! b.type().hasFeature(IS_HOUSING)) continue;
       float distW = AreaMap.distance(actor.at(), b.mainEntrance());
       float distB = AreaMap.distance(entrance  , b.mainEntrance());
       if (distB > from.type().maxDeliverRange) continue;
       
       int amount = (int) b.inventory(CASH);
-      if (amount <= 0) continue;
+      if (amount == 0) continue;
       
-      pick.compare(b, amount * AreaMap.distancePenalty(distW));
+      pick.compare(b, Nums.abs(amount) * AreaMap.distancePenalty(distW));
     }
     
     if (cashCarried > maxCollect || (pick.empty() && cashCarried > 0)) {
@@ -76,9 +72,14 @@ public class TaskAssessTax extends Task {
   protected void onVisit(Building visits) {
     Actor actor = (Actor) this.active;
     
+    //  NOTE:  Operations with cash need some special handling to allow for
+    //  negative numbers...
+    
     if (actor.jobType() == JOB.COLLECTING) {
       float cash = visits.inventory(CASH);
-      actor.pickupGood(CASH, cash, visits);
+      
+      actor.inventory().add(cash, CASH);
+      visits.setInventory(CASH, 0);
       
       TaskAssessTax next = nextAssessment(actor, store, maxCollect);
       if (next != null) actor.assignTask(next);
@@ -86,7 +87,7 @@ public class TaskAssessTax extends Task {
     
     if (actor.jobType() == JOB.RETURNING && visits == store) {
       float cash = actor.carried(CASH);
-      actor.clearCarried();
+      actor.setCarried(CASH, 0);
       store.base().incFunds((int) cash);
     }
   }

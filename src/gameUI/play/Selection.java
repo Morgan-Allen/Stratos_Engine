@@ -18,10 +18,11 @@ public class Selection {
   }
   
   final PlayUI UI;
-  private Focus    hovered   ;
-  private Tile     hoverSpot ;
+  private Focus    hovered;
+  private Tile     hoverSpot;
   private Actor    hoverActor;
   private Building hoverVenue;
+  private Mission  hoverMission;
   private Focus    hoverOther;
   
   
@@ -55,6 +56,9 @@ public class Selection {
       hoverSpot = stage.tileAt(groundPoint.x, groundPoint.y);
       
       final Element owner = stage.above(hoverSpot);
+      
+      //if (I.used60Frames) I.say("Hovering above: "+owner);
+      
       if (
         owner != null &&
         owner.canRender(base, port) &&
@@ -67,20 +71,21 @@ public class Selection {
       //  TODO:  Use a more efficient technique here?
       final Pick <Actor> pickA = new Pick();
       for (Actor e : stage.actors()) {
+        if (e.indoors()) continue;
         trySelection(e, base, port, pickA);
       }
       hoverActor = pickA.result();
       
       final Pick <Mission> pickM = new Pick();
-      for (Base b : stage.cities()) {
-        for (Mission m : b.missions()) {
-          trySelection(m, base, port, pickM);
-        }
+      for (Mission m : base.missions()) {
+        trySelection(m, base, port, pickM);
       }
+      hoverMission = pickM.result();
       
-      if      (hoverOther != null) hovered = hoverOther;
-      else if (hoverActor != null) hovered = hoverActor;
-      else if (hoverVenue != null) hovered = hoverVenue;
+      if      (hoverOther   != null) hovered = hoverOther;
+      else if (hoverMission != null) hovered = hoverMission;
+      else if (hoverActor   != null) hovered = hoverActor;
+      else if (hoverVenue   != null) hovered = hoverVenue;
       else hovered = hoverSpot;
       
       if (I.used60Frames) {
@@ -99,6 +104,7 @@ public class Selection {
   ) {
     if (! e.testSelection(UI, base, port)) return;
     final float dist = port.translateToScreen(e.trackPosition()).z;
+    ///if (I.used60Frames) I.say("  Trying selection: "+e+", depth: "+dist);
     pick.compare(e, 0 - dist);
   }
   
@@ -120,7 +126,6 @@ public class Selection {
   void presentSelectionPane(Focus selected) {
     if (selected == null) {
       UI.setDetailPane(null);
-      UI.setOptionList(null);
     }
     else {
       selected.setSelected(UI);

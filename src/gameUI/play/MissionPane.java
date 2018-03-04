@@ -29,6 +29,9 @@ public class MissionPane extends DetailPane {
     
     d.append(mission.fullName());
     
+    Base declares = mission.base();
+    d.append("\nDeclared by: "+declares);
+    
     int credits = mission.cashReward();
     d.append("\nReward: "+credits+" credits");
     
@@ -46,6 +49,17 @@ public class MissionPane extends DetailPane {
     d.append("\n\nApplied: ");
     for (Actor a : applied) {
       d.appendAll("\n  ", a);
+    }
+    
+    
+    if (declares == PlayUI.playerBase()) {
+      d.append("\n\n");
+      d.append(new Description.Link("CANCEL") {
+        public void whenClicked(Object context) {
+          mission.disbandFormation();
+          PlayUI.pushSelection(null);
+        }
+      });
     }
     
     super.updateState();

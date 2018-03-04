@@ -156,6 +156,9 @@ public class Task implements Session.Saveable {
     //  tasks can be configured for assessment at the same time.
     if (activeNow) active.assignTask(null);
     
+    //  TODO:  Don't actually generate the path now!  Just check that pathing
+    //  is possible.
+    
     this.origin    = origin ;
     this.type      = jobType;
     this.timeSpent = 0      ;
@@ -520,6 +523,11 @@ public class Task implements Session.Saveable {
   
   String animName() {
     return AnimNames.STAND;
+  }
+  
+  
+  Target faceTarget() {
+    return visits == null ? target : visits;
   }
 }
 

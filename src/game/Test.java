@@ -244,6 +244,7 @@ public class Test {
     }
     //*/
     //else
+    
     if (placing != null) {
       Building builds = (Building) placing;
       Type type = builds.type();
@@ -552,6 +553,8 @@ public class Test {
         "\n  Hunger:           "+I.shorten(a.hunger , 1)+"/"+t.maxHealth
       );
       report.append("\n  Task: "+a.jobDesc());
+      report.append("\n  Home: "+a.home());
+      report.append("\n  Work: "+a.work());
       
       if (! a.carried().empty()) {
         report.append("\n  Carried:");

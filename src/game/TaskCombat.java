@@ -6,6 +6,9 @@ import static game.Base.*;
 import static game.AreaMap.*;
 import static game.GameConstants.*;
 
+import game.GameConstants.Target;
+import graphics.common.*;
+
 
 
 public class TaskCombat extends Task {
@@ -468,10 +471,19 @@ public class TaskCombat extends Task {
   public String toString() {
     return "Fighting "+primary+" from "+target;
   }
+  
+  
+  String animName() {
+    if (attackMode == ATTACK_MELEE) return AnimNames.STRIKE;
+    if (attackMode == ATTACK_RANGE) return AnimNames.FIRE  ;
+    return AnimNames.STRIKE;
+  }
+  
+
+  Target faceTarget() {
+    return primary;
+  }
 }
-
-
-
 
 
 

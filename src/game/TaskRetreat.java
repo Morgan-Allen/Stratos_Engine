@@ -103,6 +103,8 @@ public class TaskRetreat extends Task {
       if (alliance  > 0) allySum   += power * alliance ;
     }
     
+    if (dangerSum <= 0) return 0;
+    
     float lossChance = 0, sumFactors = dangerSum + allySum;
     if (sumFactors > 0) lossChance = dangerSum / sumFactors;
     lossChance += actor.injury () * 1.0f / actor.maxHealth();

@@ -356,7 +356,7 @@ public class BuildingForHome extends Building {
       if (visit != null) return visit;
     }
     if (goes == this) {
-      return actor.wanderTask();
+      return TaskWander.configWandering(actor);
     }
     else {
       return super.selectActorBehaviour(actor);

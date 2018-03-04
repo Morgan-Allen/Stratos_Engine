@@ -14,7 +14,7 @@ public class TestTrading extends Test {
   
   
   public static void main(String args[]) {
-    testTrading(false);
+    testTrading(true);
   }
   
   
