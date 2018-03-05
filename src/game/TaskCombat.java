@@ -97,7 +97,7 @@ public class TaskCombat extends Task {
   
   public static float attackPower(Type t) {
     float power = Nums.max(t.meleeDamage, t.rangeDamage) + t.armourClass;
-    power /= Nums.max(AVG_MELEE, AVG_MISSILE) + AVG_DEFEND;
+    power /= TOP_DAMAGE + TOP_ARMOUR;
     power *= t.maxHealth * 1f / AVG_MAX_HEALTH;
     return power;
   }

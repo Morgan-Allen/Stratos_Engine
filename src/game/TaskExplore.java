@@ -43,7 +43,7 @@ public class TaskExplore extends Task {
   /**  Configuration and behavioural updates-
     */
   static TaskExplore configExploration(Actor actor) {
-    return configExploration(actor, actor, (int) actor.sightRange());
+    return configExploration(actor, actor, -1);
   }
   
   
@@ -66,8 +66,9 @@ public class TaskExplore extends Task {
   protected void onTarget(Target target) {
     Actor actor = (Actor) this.active;
     AreaMap map = actor.map();
-
-    Tile goes = map.fog.findNearbyFogPoint(from, maxRange);
+    
+    int range = maxRange > 0 ? maxRange : (int) (actor.sightRange() * 2);
+    Tile goes = map.fog.findNearbyFogPoint(from, range);
     if (goes == null) return;
     
     goes = Tile.nearestOpenTile(goes, map);
@@ -80,12 +81,6 @@ public class TaskExplore extends Task {
   }
   
 }
-
-
-
-
-
-
 
 
 

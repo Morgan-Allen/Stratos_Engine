@@ -30,7 +30,7 @@ public class TestExploring extends Test {
     
     
     CityMapPlanning.markDemolish(map, true, 3, 3, 6, 6);
-    Building lodge = (Building) ECOLOGIST_STATION.generate();
+    Building lodge = (Building) KOMMANDO_REDOUBT.generate();
     lodge.enterMap(map, 4, 4, 1, base);
     Test.fillWorkVacancies(lodge);
     

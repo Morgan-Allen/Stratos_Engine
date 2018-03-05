@@ -324,6 +324,7 @@ public class GameContent {
     
     ENFORCER  = new HumanType("actor_enforcer" , CLASS_SOLDIER),
     RUNNER    = new HumanType("actor_runner"   , CLASS_SOLDIER),
+    KOMMANDO  = new HumanType("actor_kommando" , CLASS_SOLDIER),
     
     ECOLOGIST = new HumanType("actor_ecologist", CLASS_SOLDIER),
     ENGINEER  = new HumanType("actor_engineer" , CLASS_SOLDIER),
@@ -354,6 +355,7 @@ public class GameContent {
     CHILD.maxHealth   = 2;
     CHILD.initTraits.setWith();
     
+    
     ENFORCER.name = "Enforcer";
     ENFORCER.attachCostume(GameContent.class, "enforcer_skin.gif");
 
@@ -372,6 +374,15 @@ public class GameContent {
     RUNNER.armourClass = 3;
     RUNNER.maxHealth   = 3;
     RUNNER.initTraits.setWith(SKILL_RANGE, 5, SKILL_EVADE, 4);
+    
+    KOMMANDO.name = "Kommando";
+    KOMMANDO.attachCostume(GameContent.class, "kommando_skin.gif");
+    
+    KOMMANDO.meleeDamage = 8;
+    KOMMANDO.armourClass = 4;
+    KOMMANDO.maxHealth   = 9;
+    KOMMANDO.initTraits.setWith(SKILL_MELEE, 7, SKILL_EVADE, 5);
+    
     
     ECOLOGIST.name = "Ecologist";
     ECOLOGIST.attachCostume(GameContent.class, "ecologist_skin.gif");
@@ -416,8 +427,8 @@ public class GameContent {
     
     TROOPER_LODGE     = new BuildType(BuildingForArmy.class   , "venue_trooper"  , IS_ARMY_BLD   ),
     //  TODO:  Add the Runner Market for assassinations and contraband.
-    //  TODO:  Add the Kommando Redoubt for hunting and scouting.
-    //KOMMANDO_REDOUBT
+    //  TODO:  Kommando redoubt is just here for behaviour-testing at the moment...
+    KOMMANDO_REDOUBT  = new BuildType(BuildingForHunt.class  , "venue_kommando"  , IS_HUNTS_BLD  ),
     MILITARY_BUILDINGS[] =
     {
       BASTION, ENFORCER_BLOC, TROOPER_LODGE,  SHIELD_WALL, BLAST_DOOR, TURRET
@@ -497,7 +508,7 @@ public class GameContent {
     BASTION.buildsWith   = new Good[] { PLASTICS, PARTS };
     BASTION.needed       = new Good[] { CARBS, GREENS, PLASTICS, PARTS };
     BASTION.maxStock     = 10;
-    BASTION.setFeatures(IS_HOUSING, IS_REFUGE);
+    BASTION.setFeatures(IS_HOUSING, IS_REFUGE, IS_ADMIN);
     BASTION.worksBeforeBuilt = true;
     BASTION.uniqueBuilding = true;
     
@@ -531,8 +542,18 @@ public class GameContent {
     ENFORCER_BLOC.setDimensions(2, 2, 1);
     ENFORCER_BLOC.setBuildMaterials(PARTS, 4);
     ENFORCER_BLOC.workerTypes.setWith(ENFORCER, 2);
-    ENFORCER_BLOC.produced = new Good[] { CASH };
     ENFORCER_BLOC.features = new Good[] { IS_ADMIN };
+    
+    KOMMANDO_REDOUBT.name = "Kommando Redoubt";
+    KOMMANDO_REDOUBT.tint = TINT_MILITARY;
+    KOMMANDO_REDOUBT.model = CutoutModel.fromImage(
+      GameContent.class, "kommando_redoubt_model",
+      "media/Buildings/mil_kommando_redoubt.png", 3, 2
+    );
+    KOMMANDO_REDOUBT.setDimensions(3, 3, 1);
+    KOMMANDO_REDOUBT.setBuildMaterials(PLASTICS, 5, PARTS, 1);
+    KOMMANDO_REDOUBT.workerTypes.setWith(KOMMANDO, 3);
+    KOMMANDO_REDOUBT.produced = new Good[] { PROTEIN };
     
     //
     //  Science structures:

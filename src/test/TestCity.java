@@ -28,8 +28,8 @@ public class TestCity extends Test {
     
     base.initFunds(5000);
     
-    CityMapPlanning.placeStructure(WALKWAY, base, true, 3, 8, 25 , 1);
-    CityMapPlanning.placeStructure(WALKWAY, base, true, 8, 2 , 1, 25);
+    CityMapPlanning.placeStructure(WALKWAY, base, true, 3, 8, 25, 1);
+    CityMapPlanning.placeStructure(WALKWAY, base, true, 8, 2, 1, 25);
     
     Building palace = (Building) BASTION          .generate();
     Building school = (Building) PHYSICIAN_STATION.generate();

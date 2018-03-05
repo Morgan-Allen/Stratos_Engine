@@ -109,6 +109,7 @@ public class TestBounties extends Test {
     
     Base base = Test.setupTestCity(32, ALL_GOODS, false);
     AreaMap map = base.activeMap();
+    //World world = base.world;
     
     int initFunds = 1000, reward = 500;
     base.initFunds(initFunds);
@@ -144,6 +145,10 @@ public class TestBounties extends Test {
     
     while (map.time() < 1000 || graphics) {
       runLoop(base, 10, graphics, "saves/test_bounties.tlt");
+      
+      for (Actor a : fort.workers()) {
+        if (a.injury() > 0) a.liftDamage(a.injury());
+      }
       
       if (! fundsTaken) {
         fundsTaken = mission.cashReward() == initFunds - base.funds();

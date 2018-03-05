@@ -147,9 +147,8 @@ public class GameConstants {
     AVG_ARMY_SIZE    = 16  ,
     AVG_RANKS        = 4   ,
     AVG_FILE         = 4   ,
-    AVG_MELEE        = 2   ,
-    AVG_MISSILE      = 1   ,
-    AVG_DEFEND       = 2   ,
+    TOP_DAMAGE       = 2  ,  //  TODO: Fix for the sake of balance.
+    TOP_ARMOUR       = 2  ,  //  TODO: Fix for the sake of balance.
     AVG_SIGHT        = 6   ,
     AVG_RANGE        = 3   ,
     MAX_RANGE        = 6   ,
@@ -368,16 +367,22 @@ public class GameConstants {
       SKILL_SPEAK, SKILL_WRITE, SKILL_PRAY ,
     },
     
-    TRAIT_COMPASSION = new Trait("trait_compassion",
-      "Compassionate", null, "Cruel"
+    TRAIT_EMPATHY = new Trait("trait_empathy",
+      "Empathic", null, "Cruel"
     ),
-    TRAIT_DILIGENCE  = new Trait("trait_diligence",
+    TRAIT_DILIGENCE = new Trait("trait_diligence",
       "Diligent", null, "Fickle"
     ),
-    TRAIT_BRAVERY    = new Trait("trait_bravery",
+    TRAIT_BRAVERY = new Trait("trait_bravery",
       "Brave", null, "Nervous"
     ),
-    ALL_PERSONALITY[] = { TRAIT_COMPASSION, TRAIT_DILIGENCE, TRAIT_BRAVERY }
+    TRAIT_CURIOSITY = new Trait("trait_curiosity",
+      "Curious", null, "Dull"
+    ),
+    ALL_PERSONALITY[] =
+    {
+      TRAIT_EMPATHY, TRAIT_DILIGENCE, TRAIT_BRAVERY, TRAIT_CURIOSITY
+    }
   ;
   
   

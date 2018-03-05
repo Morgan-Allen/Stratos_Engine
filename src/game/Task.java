@@ -45,7 +45,8 @@ public class Task implements Session.Saveable {
     CASUAL      =  2.5f,
     ROUTINE     =  5.0f,
     URGENT      =  7.5f,
-    PARAMOUNT   =  10.0f
+    PARAMOUNT   =  10.0f,
+    SWITCH_DIFF =  5.0f
   ;
   final public static float
     HARM_NULL   = -1.0f,

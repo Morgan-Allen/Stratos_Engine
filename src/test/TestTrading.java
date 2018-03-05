@@ -135,7 +135,7 @@ public class TestTrading extends Test {
           I.say("  Expected: "+estimate        );
           I.say("  Actual:   "+baseC.funds());
           projectedEarnings(baseC, awayC, initFunds, true);
-          return false;
+          break;
         }
         moneyOkay = true;
       }

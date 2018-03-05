@@ -360,7 +360,7 @@ public class CityCouncil {
     //  We calculate the attractiveness of invasion using a relatively
     //  straightforward cost/benefit evaluation:
     float diligence  = membersTraitAvg(TRAIT_DILIGENCE );
-    float compassion = membersTraitAvg(TRAIT_COMPASSION);
+    float compassion = membersTraitAvg(TRAIT_EMPATHY);
     float casValueA  = casualtyValue(a.fromC);
     float casValueD  = casualtyValue(a.goesC);
     float tribValue  = 0;

@@ -34,13 +34,10 @@ public class BuildingForHunt extends Building {
   public Task selectActorBehaviour(Actor actor) {
     
     Task delivery = TaskDelivery.pickNextDelivery(actor, this, produced());
-    if (delivery != null) {
-      return delivery;
-    }
+    if (delivery != null) return delivery;
     
-    TaskHunting hunting = new TaskHunting(actor);
-    hunting = hunting.configHunting(this, produced());
-    if (hunting != null) return hunting;
+    TaskHunting hunt = TaskHunting.configHunting(actor, this, produced());
+    if (hunt != null) return hunt;
     
     TaskExplore exploring = TaskExplore.configExploration(actor);
     if (exploring != null) return exploring;
@@ -49,9 +46,6 @@ public class BuildingForHunt extends Building {
   }
   
 }
-
-
-
 
 
 

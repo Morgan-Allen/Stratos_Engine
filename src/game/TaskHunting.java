@@ -7,6 +7,9 @@ import static game.GameConstants.*;
 
 
 
+//  TODO:  Extend TaskCombat?
+
+
 public class TaskHunting extends Task {
   
   
@@ -38,9 +41,9 @@ public class TaskHunting extends Task {
   
   /**  Scripting and events-
     */
-  TaskHunting configHunting(Building store, Good... meatTypes) {
-    Actor actor = (Actor) this.active;
-    
+  static TaskHunting configHunting(
+    Actor actor, Building store, Good... meatTypes
+  ) {
     Pick <Actor> forHunt = new Pick();
     for (Actor a : actor.map().actors) {
       if (a.maxSightLevel() == 0                 ) continue;
@@ -55,14 +58,16 @@ public class TaskHunting extends Task {
       float dist = AreaMap.distance(actor.at(), a.at());
       if (dist > MAX_EXPLORE_DIST) continue;
       
+      //  TODO:  Check to make sure there's pathing access!
+      
       forHunt.compare(a, AreaMap.distancePenalty(dist));
     }
     if (forHunt.empty()) return null;
     
-    this.store = store;
-    this.prey  = forHunt.result();
-    
-    return (TaskHunting) configTask(store, null, prey, JOB.HUNTING, 0);
+    TaskHunting hunt = new TaskHunting(actor);
+    hunt.store = store;
+    hunt.prey  = forHunt.result();
+    return (TaskHunting) hunt.configTask(store, null, hunt.prey, JOB.HUNTING, 0);
   }
   
   
@@ -72,8 +77,8 @@ public class TaskHunting extends Task {
     if (target == prey) {
       Tile site = prey.at();
       
-      //  TODO:  Check for this dynamically, or extend TaskCombat...
-      actor.performAttack(prey, false);
+      boolean melee = actor.meleeDamage() > actor.rangeDamage();
+      actor.performAttack(prey, melee);
       
       if (! prey.dead()) {
         configTask(store, null, prey, JOB.HUNTING, 0);

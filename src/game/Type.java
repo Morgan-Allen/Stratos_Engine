@@ -137,10 +137,10 @@ public class Type extends Index.Entry implements Session.Saveable {
   public Good armourType = null;
   public Good useItemTypes[] = {};
   public int maxHealth   = AVG_MAX_HEALTH;
-  public int meleeDamage = AVG_MELEE;
-  public int rangeDamage = AVG_MISSILE;
-  public int rangeDist   = AVG_RANGE;
-  public int armourClass = AVG_DEFEND;
+  public int meleeDamage = 2;  //  TODO:  Zero this.
+  public int rangeDamage = 2;  //  TODO:  Zero this.
+  public int rangeDist   = 4;  //  TODO:  Zero this.
+  public int armourClass = 2;  //  TODO:  Zero this.
   public int sightRange  = AVG_SIGHT;
   
   

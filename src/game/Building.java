@@ -414,12 +414,6 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   }
   
   
-  /*
-  public float stockNeeded(Good need) { return type().maxStock; }
-  public float stockLimit (Good made) { return type().maxStock; }
-  //*/
-  
-  
   public float materialNeed(Good g) {
     return materialNeed(g, null);
   }
