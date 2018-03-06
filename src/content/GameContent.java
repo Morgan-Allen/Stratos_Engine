@@ -47,6 +47,15 @@ public class GameContent {
     }
   ;
   
+  final static ModelAsset FOUNDATIONS[] = new ModelAsset[6 + 1];
+  static {
+    for (int i = 6; i > 0; i--) FOUNDATIONS[i] = CutoutModel.fromImage(
+      GameContent.class, "foundation_"+i,
+      "media/Buildings/foundation_"+i+"x"+i+".png", i, 0
+    );
+    FOUNDATIONS[0] = FOUNDATIONS[1];
+  }
+  
   
   final public static Type
     FLAG_STRIKE = new Type(null, "flag_strike", IS_MEDIA),
@@ -498,6 +507,7 @@ public class GameContent {
       GameContent.class, "bastion_model",
       "media/Buildings/mil_bastion.png", 6, 3
     );
+    BASTION.foundationModel = FOUNDATIONS[6];
     
     BASTION.setDimensions(6, 6, 3);
     BASTION.maxHealth = 300;
@@ -528,6 +538,8 @@ public class GameContent {
       GameContent.class, "trooper_lodge_model",
       "media/Buildings/mil_trooper_lodge.png", 3, 2
     );
+    TROOPER_LODGE.foundationModel = FOUNDATIONS[3];
+    
     TROOPER_LODGE.setDimensions(3, 3, 2);
     TROOPER_LODGE.setBuildMaterials(PLASTICS, 1, PARTS, 7);
     TROOPER_LODGE.workerTypes.setWith(Trooper.TROOPER, 3);
@@ -539,6 +551,8 @@ public class GameContent {
       GameContent.class, "enforcer_bloc_model",
       "media/Buildings/mil_enforcer_bloc.png", 3, 2
     );
+    ENFORCER_BLOC.foundationModel = FOUNDATIONS[3];
+    
     ENFORCER_BLOC.setDimensions(2, 2, 1);
     ENFORCER_BLOC.setBuildMaterials(PARTS, 4);
     ENFORCER_BLOC.workerTypes.setWith(ENFORCER, 2);
@@ -550,6 +564,8 @@ public class GameContent {
       GameContent.class, "kommando_redoubt_model",
       "media/Buildings/mil_kommando_redoubt.png", 3, 2
     );
+    KOMMANDO_REDOUBT.foundationModel = FOUNDATIONS[3];
+    
     KOMMANDO_REDOUBT.setDimensions(3, 3, 1);
     KOMMANDO_REDOUBT.setBuildMaterials(PLASTICS, 5, PARTS, 1);
     KOMMANDO_REDOUBT.workerTypes.setWith(KOMMANDO, 3);
@@ -563,6 +579,8 @@ public class GameContent {
       GameContent.class, "ecologist_station_model",
       "media/Buildings/station_ecologist.png", 3, 2
     );
+    ECOLOGIST_STATION.foundationModel = FOUNDATIONS[3];
+    
     ECOLOGIST_STATION.setDimensions(3, 3, 2);
     ECOLOGIST_STATION.setBuildMaterials(PLASTICS, 7, PARTS, 1);
     ECOLOGIST_STATION.workerTypes.setWith(ECOLOGIST, 3);
@@ -576,6 +594,8 @@ public class GameContent {
       GameContent.class, "engineer_station_model",
       "media/Buildings/station_engineer.png", 3, 2
     );
+    ENGINEER_STATION.foundationModel = FOUNDATIONS[3];
+    
     ENGINEER_STATION.setDimensions(3, 3, 2);
     ENGINEER_STATION.setBuildMaterials(PARTS, 8);
     ENGINEER_STATION.workerTypes.setWith(ENGINEER, 3);
@@ -596,6 +616,8 @@ public class GameContent {
       GameContent.class, "physician_station_model",
       "media/Buildings/station_physician.png", 3, 2
     );
+    PHYSICIAN_STATION.foundationModel = FOUNDATIONS[3];
+    
     PHYSICIAN_STATION.setDimensions(3, 3, 2);
     PHYSICIAN_STATION.setBuildMaterials(PLASTICS, 4, PARTS, 2);
     PHYSICIAN_STATION.workerTypes.setWith(PHYSICIAN, 3);
@@ -616,6 +638,8 @@ public class GameContent {
       GameContent.class, "stock_exchange_model",
       "media/Buildings/com_stock_exchange.png", 3, 1
     );
+    STOCK_EXCHANGE.foundationModel = FOUNDATIONS[3];
+    
     STOCK_EXCHANGE.setDimensions(3, 3, 1);
     STOCK_EXCHANGE.setBuildMaterials(PLASTICS, 4, PARTS, 2);
     STOCK_EXCHANGE.workerTypes.setWith(Vassals.VENDOR, 1);
@@ -631,6 +655,8 @@ public class GameContent {
       GameContent.class, "supply_depot_model",
       "media/Buildings/com_supply_depot.png", 3, 1
     );
+    SUPPLY_DEPOT.foundationModel = FOUNDATIONS[3];
+    
     SUPPLY_DEPOT.setDimensions(3, 3, 1);
     SUPPLY_DEPOT.setBuildMaterials(PLASTICS, 4, PARTS, 2);
     SUPPLY_DEPOT.workerTypes.setWith(Vassals.PYON, 1, Vassals.CARGO_BARGE, 1);
@@ -646,12 +672,14 @@ public class GameContent {
       GameContent.class, "logician_school_model",
       "media/Buildings/school_logician.png", 4, 2
     );
+    SCHOOL_LOG.foundationModel = FOUNDATIONS[4];
     
     SCHOOL_COL.name = "Collective School";
     SCHOOL_COL.model = CutoutModel.fromImage(
       GameContent.class, "collective_school_model",
       "media/Buildings/school_collective.png", 4, 2
     );
+    SCHOOL_COL.foundationModel = FOUNDATIONS[4];
     
     SCHOOL_COL.workerTypes.setWith(Collective.COLLECTIVE, 2);
     SCHOOL_COL.rulerPowers = new Technique[] { Collective.PSY_HEAL };
@@ -661,24 +689,28 @@ public class GameContent {
       GameContent.class, "lensr_school_model",
       "media/Buildings/school_LENSR.png", 4, 2
     );
+    SCHOOL_LEN.foundationModel = FOUNDATIONS[4];
     
     SCHOOL_SHA.name = "Shaper School";
     SCHOOL_SHA.model = CutoutModel.fromImage(
       GameContent.class, "shaper_school_model",
       "media/Buildings/school_shaper.png", 4, 2
     );
+    SCHOOL_SHA.foundationModel = FOUNDATIONS[4];
     
     SCHOOL_TEK.name = "Tek Priest School";
     SCHOOL_TEK.model = CutoutModel.fromImage(
       GameContent.class, "tek_priest_school_model",
       "media/Buildings/school_tek_priest.png", 4, 2
     );
+    SCHOOL_TEK.foundationModel = FOUNDATIONS[4];
     
     SCHOOL_SPA.name = "Spacer School";
     SCHOOL_SPA.model = CutoutModel.fromImage(
       GameContent.class, "spacer_school_model",
       "media/Buildings/school_spacer.png", 4, 2
     );
+    SCHOOL_SPA.foundationModel = FOUNDATIONS[4];
     
     for (BuildType t : PSI_SCHOOL_BUILDINGS) {
       t.tint = TINT_RELIGIOUS;
@@ -751,6 +783,7 @@ public class GameContent {
     HOLDING.name = "Holding";
     HOLDING.tint = TINT_LITE_RESIDENTIAL;
     HOLDING.modelVariants = HOUSE_MODELS[0];
+    HOLDING.foundationModel = FOUNDATIONS[2];
     
     HOLDING.setDimensions(2, 2, 1);
     HOLDING.setBuildMaterials(PLASTICS, 1, PARTS, 0);
@@ -784,6 +817,8 @@ public class GameContent {
       GameContent.class, "cantina_model",
       "media/Buildings/com_cantina.png", 3, 1
     );
+    CANTINA.foundationModel = FOUNDATIONS[3];
+    
     CANTINA.setDimensions(3, 3, 1);
     CANTINA.setBuildMaterials(PARTS, 10);
     CANTINA.setFeatures(DIVERSION, IS_REFUGE);
@@ -797,6 +832,8 @@ public class GameContent {
       GameContent.class, "nursery_model",
       "media/Buildings/res_nursery.png", 2, 1
     );
+    NURSERY.foundationModel = FOUNDATIONS[2];
+    
     NURSERY.setDimensions(2, 2, 1);
     NURSERY.setBuildMaterials(PLASTICS, 5, PARTS, 2);
     NURSERY.workerTypes.setWith(Vassals.PYON, 1);
@@ -816,6 +853,8 @@ public class GameContent {
       GameContent.class, "harvester_model",
       "media/Buildings/res_harvester.png", 3, 1
     );
+    HARVESTER.foundationModel = FOUNDATIONS[3];
+    
     HARVESTER.setDimensions(3, 3, 1);
     HARVESTER.setBuildMaterials(PLASTICS, 5, PARTS, 2);
     HARVESTER.workerTypes.setWith(Vassals.PYON, 1);
@@ -833,6 +872,8 @@ public class GameContent {
       GameContent.class, "excavator_model",
       "media/Buildings/res_excavator.png", 4, 2
     );
+    EXCAVATOR.foundationModel = FOUNDATIONS[4];
+    
     EXCAVATOR.setDimensions(4, 4, 1);
     EXCAVATOR.setBuildMaterials(PLASTICS, 2, PARTS, 5);
     EXCAVATOR.workerTypes.setWith(Vassals.PYON, 2);

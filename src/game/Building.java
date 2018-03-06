@@ -801,6 +801,20 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   }
   
   
+  public Sprite sprite() {
+    BuildType type = type();
+    ModelAsset foundM = type.foundationModel;
+    boolean showDone = complete() || foundM == null;
+    
+    if (sprite == null || (sprite.model() == foundM) != ! showDone) {
+      if (showDone) sprite = type.makeSpriteFor(this);
+      else sprite = foundM.makeSprite();
+      if (sprite != null) type.prepareMedia(sprite, this);
+    }
+    return sprite;
+  }
+  
+  
   public void renderElement(Rendering rendering, Base base) {
     super.renderElement(rendering, base);
     
@@ -818,21 +832,6 @@ public class Building extends Element implements Pathing, Employer, Carrier {
     }
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

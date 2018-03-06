@@ -2,11 +2,15 @@
 
 package game;
 import static game.GameConstants.*;
+import graphics.common.*;
 import util.*;
 
 
 
 public class BuildType extends Type {
+  
+  
+  public ModelAsset foundationModel = null;
   
   
   public boolean isUpgrade = false;

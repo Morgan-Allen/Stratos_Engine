@@ -37,7 +37,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   private List <Active> focused = null;
   private Object pathFlag;  //  Note- used during temporary search.
   
-  private Sprite sprite = null;
+  protected Sprite sprite = null;
   
   
   public Element(Type type) {
