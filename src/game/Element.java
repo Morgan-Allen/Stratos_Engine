@@ -153,6 +153,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
       for (Tile t : footprint(map)) {
         if (t.above != null) t.above.exitMap(map);
         map.setAbove(t, this);
+        map.pathCache.checkPathingChanged(t);
       }
       
       map.planning.placeObject(this);
@@ -236,7 +237,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   
   
   public int pathType() {
-    return complete() ? type.pathing : PATH_NONE;
+    return type.pathing;
   }
   
   
@@ -339,10 +340,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   
   
   void onCompletion() {
-    //  Underlying tiles may have become blocked now-
-    for (Tile t : map.tilesUnder(at.x, at.y, type.wide, type.high)) {
-      map.pathCache.checkPathingChanged(t);
-    }
+    return;
   }
   
   

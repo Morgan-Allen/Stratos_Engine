@@ -126,14 +126,11 @@ public class TestMilitary extends Test {
       
       if (awayWin && ! backHome) {
         
-        backHome = true;
         boolean someAway = false;
         for (Actor w : fort1.workers()) if (w.map() != map) someAway = true;
         for (Actor w : fort2.workers()) if (w.map() != map) someAway = true;
-        
-        float max = fort1.maxWorkers(Trooper.TROOPER);
-        backHome &= fort1.workers().size() > (max / 2) && ! someAway;
-        backHome &= fort2.workers().size() > (max / 2) && ! someAway;
+        int numW = fort1.workers().size() + fort2.workers().size();
+        backHome = numW > 0 && ! someAway;
         
         if (baseC.prestige() <= initPrestige) {
           I.say("\nPrestige should be boosted by conquest!");

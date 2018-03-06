@@ -13,11 +13,11 @@ public class TestAutoBuild extends Test {
   
   
   public static void main(String args[]) {
-    testAutoBuilding(true);
+    testAutoBuild(true);
   }
   
   
-  static boolean testAutoBuilding(boolean graphics) {
+  static boolean testAutoBuild(boolean graphics) {
     Test test = new TestAutoBuild();
     
     Base base = setupTestCity(16, ALL_GOODS, false);
