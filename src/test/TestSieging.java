@@ -39,7 +39,7 @@ public class TestSieging extends Test {
     
     
     
-    awayC.initBuildLevels(TROOPER_LODGE, 5, HOLDING, 1);
+    awayC.initBuildLevels(TROOPER_LODGE, 9, HOLDING, 1);
     awayC.council.setTypeAI(CityCouncil.AI_OFF);
     
     World.setupRoute(baseC.locale, awayC.locale, 1);
@@ -80,22 +80,15 @@ public class TestSieging extends Test {
     CityMapPlanning.placeStructure(WALKWAY, baseC, true, 16, 9, 1 , 9 );
     CityMapPlanning.placeStructure(WALKWAY, baseC, true, 24, 9, 8 , 1 );
     
-    for (int n = 3, s = 0; n-- > 0;) {
+    for (int n = 3; n-- > 0;) {
       Building home = (Building) HOLDING.generate();
       home.enterMap(map, 17, 10 + (n * 3), 1, baseC);
       fillHomeVacancies(home, Vassals.PYON);
-      for (Actor a : home.residents()) {
-        a.setSexData((s++ % 2 == 0) ? SEX_MALE : SEX_FEMALE);
-        if (fort.eligible(a, false)) fort.toggleRecruit(a, true);
-      }
-    }
-    for (Actor a : fort.workers()) {
-      fort.toggleRecruit(a, true);
     }
     
     Mission guarding;
     guarding = new Mission(Mission.OBJECTIVE_GARRISON, baseC, false);
-    fort.deployOnMission(guarding, true);
+    for (Actor w : fort.workers()) guarding.toggleRecruit(w, true);
     guarding.setFocus(tower, TileConstants.E, map);
     
     Building store = (Building) SUPPLY_DEPOT.generate();
@@ -119,9 +112,11 @@ public class TestSieging extends Test {
     boolean tributePaid = false;
     boolean siegedOkay  = false;
     
+    
+    int NUM_T = (int) TROOPER_LODGE.workerTypes.valueFor(Trooper.TROOPER);
     final int RUN_TIME = 1000;
-    final int MIN_DEFENDERS = 4;
-    final int MIN_INVADERS  = 8;
+    final int MIN_INVADERS  = NUM_T * 2;
+    final int MIN_DEFENDERS = NUM_T - 1;
     
     
     while (map.time() < RUN_TIME || graphics) {

@@ -722,6 +722,7 @@ public class GameContent {
     BLAST_DOOR.setDimensions(2, 2, 2);
     BLAST_DOOR.setBuildMaterials(PARTS, 10);
     BLAST_DOOR.setFeatures(IS_GATE);
+    BLAST_DOOR.maxHealth  = 28;
     BLAST_DOOR.rulerBuilt = false;
     
     TURRET.name = "Turret";
@@ -730,13 +731,14 @@ public class GameContent {
     TURRET.tint = TINT_MILITARY;
     TURRET.pathing = PATH_BLOCK;
     TURRET.isWall  = true;
-    TURRET.setDimensions(2, 2, 4);
+    TURRET.setDimensions(2, 2, 3);
     TURRET.setBuildMaterials(PARTS, 10);
     TURRET.setFeatures(IS_TOWER, IS_TURRET);
     TURRET.rangeDamage = 4;
     TURRET.rangeDist   = 6;
     TURRET.armourClass = 0;
     TURRET.sightRange  = 8;
+    TURRET.maxHealth   = 20;
     TURRET.rulerBuilt = false;
     
     

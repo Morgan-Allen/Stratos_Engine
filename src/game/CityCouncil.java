@@ -580,7 +580,7 @@ public class CityCouncil {
     //
     //  This is something of a hack at the moment, but it helps prevent some
     //  of the more bitty exchanges...
-    if (city.armyPower() < AVG_ARMY_POWER / 2) {
+    if (city.armyPower() < city.idealArmyPower() / 3) {
       return choices;
     }
     //
@@ -619,10 +619,8 @@ public class CityCouncil {
     Type soldier = (Type) Visit.first(city.world.soldierTypes);
     Type noble   = (Type) Visit.first(city.world.nobleTypes  );
     
-    int n = 0;
     while (force.powerSum() < city.armyPower() / 2) {
-      Type  type   = (n++ % 4 == 0) ? soldier : citizen;
-      Actor fights = (Actor) type.generate();
+      Actor fights = (Actor) soldier.generate();
       fights.assignHomeCity(IA.fromC);
       force.toggleRecruit(fights, true);
     }

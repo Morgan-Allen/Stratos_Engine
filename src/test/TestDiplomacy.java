@@ -16,7 +16,7 @@ public class TestDiplomacy extends Test {
   
   
   public static void main(String args[]) {
-    testDiplomacy(true);
+    testDiplomacy(false);
   }
   
   
@@ -128,7 +128,7 @@ public class TestDiplomacy extends Test {
       if (escortDeparted && ! escortSent) {
         escort = new Mission(Mission.OBJECTIVE_DIALOG, baseC, true);
         escort.assignTerms(POSTURE.TRADING, null, null, null);
-        garrison.deployOnMission(escort, true);
+        for (Actor w : garrison.workers()) escort.toggleRecruit(w, true);
         escort.toggleEscorted(minister, true);
         escort.setFocus(neutC);
         escortSent = true;

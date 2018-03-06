@@ -655,16 +655,6 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   }
   
   
-  public Series <Actor> recruits() {
-    return NO_ACTORS;
-  }
-  
-  
-  public void deployOnMission(Mission m, boolean is) {
-    return;
-  }
-  
-  
   
   /**  Customising actor behaviour-
     */

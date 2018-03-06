@@ -54,7 +54,7 @@ public class Trooper {
     TROOPER.rangeDist   = 4;
     TROOPER.armourClass = 4;
     TROOPER.maxHealth   = 6;
-    TROOPER.initTraits.setWith(SKILL_MELEE, 3, SKILL_RANGE, 4, SKILL_EVADE, 1);
+    TROOPER.initTraits.setWith(SKILL_MELEE, 4, SKILL_RANGE, 6, SKILL_EVADE, 2);
   }
   
 }

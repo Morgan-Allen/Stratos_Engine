@@ -389,7 +389,7 @@ public class TestWorld extends Test {
     world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES());
     
     final int NUM_CITIES = 4;
-    final String names[] = { "Tollan", "Texcoco", "Tlacopan", "Tlaxcala" };
+    final String names[] = { "Base A", "Base B", "Base C", "Base D" };
     final Good goods[] = { ORES, CARBS, CARBONS, GREENS, PARTS, MEDICINE };
     final int tints[] = {
       colour(9, 0, 0),
@@ -415,7 +415,7 @@ public class TestWorld extends Test {
       }
       city.initBuildLevels(
         TROOPER_LODGE, 2f + Rand.index(3),
-        HOLDING   , 6f + Rand.index(10)
+        HOLDING      , 6f + Rand.index(10)
       );
       world.addCities(city);
     }
@@ -452,7 +452,7 @@ public class TestWorld extends Test {
           Base home = force.base();
           if (j.goes() == home) continue;
           
-          if (force.powerSum() < AVG_ARMY_POWER / 4) {
+          if (force.powerSum() < home.idealArmyPower() / 6) {
             I.say("\n"+home+" is fighting with inadequate forces:");
             I.say("  Formation power: "+force.powerSum());
             I.say("  Average power:   "+AVG_ARMY_POWER);

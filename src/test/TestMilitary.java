@@ -19,7 +19,7 @@ public class TestMilitary extends Test {
   
   static boolean testMilitary(boolean graphics) {
     Test test = new TestMilitary();
-
+    
     World   world = new World(ALL_GOODS);
     Base    baseC = new Base(world, world.addLocale(2, 2));
     Base    awayC = new Base(world, world.addLocale(3, 3));
@@ -31,15 +31,20 @@ public class TestMilitary extends Test {
     baseC.setName("Home City");
     awayC.setName("Away City");
     awayC.council.setTypeAI(CityCouncil.AI_OFF);
+    
     world.settings.toggleFog = false;
     
     World.setupRoute(baseC.locale, awayC.locale, 1);
     Base.setPosture(baseC, awayC, Base.POSTURE.ENEMY, true);
+    awayC.setArmyPower(AVG_ARMY_POWER / 4);
     
     
-    BuildingForArmy fort = (BuildingForArmy) TROOPER_LODGE.generate();
-    fort.enterMap(map, 10, 10, 1, baseC);
-    fillWorkVacancies(fort);
+    BuildingForArmy fort1 = (BuildingForArmy) TROOPER_LODGE.generate();
+    fort1.enterMap(map, 10, 10, 1, baseC);
+    fillWorkVacancies(fort1);
+    BuildingForArmy fort2 = (BuildingForArmy) TROOPER_LODGE.generate();
+    fort2.enterMap(map, 14, 10, 1, baseC);
+    fillWorkVacancies(fort2);
     CityMapPlanning.placeStructure(WALKWAY, baseC, true, 2, 9, 30, 1);
     
     for (int n = 8; n-- > 0;) {
@@ -55,13 +60,11 @@ public class TestMilitary extends Test {
     
     Mission troops  = null;
     Mission enemies = new Mission(Mission.OBJECTIVE_CONQUER, awayC, true);
-    for (int n = 4; n-- > 0;) {
-      Actor fights = (Actor) ((n == 0) ? Trooper.TROOPER : Vassals.PYON).generate();
+    for (int n = 3; n-- > 0;) {
+      Actor fights = (Actor) Trooper.TROOPER.generate();
       fights.assignHomeCity(awayC);
       enemies.toggleRecruit(fights, true);
     }
-    awayC.setArmyPower(AVG_ARMY_POWER / 4);
-    
     
     boolean recruited = false;
     boolean invaded   = false;
@@ -77,9 +80,10 @@ public class TestMilitary extends Test {
     while (map.time() < 1000 || graphics) {
       test.runLoop(baseC, 10, graphics, "saves/test_military.tlt");
       
-      if (fort.recruits().size() >= 8 && ! recruited) {
+      if (! recruited) {
         troops = new Mission(Mission.OBJECTIVE_GARRISON, baseC, false);
-        fort.deployOnMission(troops, true);
+        for (Actor w : fort1.workers()) troops.toggleRecruit(w, true);
+        for (Actor w : fort2.workers()) troops.toggleRecruit(w, true);
         troops.setFocus(map.tileAt(25, 25), TileConstants.E, map);
         
         Visit.appendTo(fromTroops, troops.recruits());
@@ -95,7 +99,7 @@ public class TestMilitary extends Test {
         invaded = true;
       }
       
-      if (recruited && ! homeWin) {
+      if (! homeWin) {
         boolean survivors = false;
         for (Actor w : enemies.recruits()) {
           if (w.alive()) survivors = true;
@@ -107,9 +111,10 @@ public class TestMilitary extends Test {
         }
       }
       
-      if (homeWin && fort.recruits().size() >= 12 && ! invading) {
+      if (homeWin && ! invading) {
         troops = new Mission(Mission.OBJECTIVE_CONQUER, baseC, false);
-        fort.deployOnMission(troops, true);
+        for (Actor w : fort1.workers()) troops.toggleRecruit(w, true);
+        for (Actor w : fort2.workers()) troops.toggleRecruit(w, true);
         troops.setFocus(awayC);
         troops.assignTerms(Base.POSTURE.VASSAL, null, null, null);
         invading = true;
@@ -120,11 +125,15 @@ public class TestMilitary extends Test {
       }
       
       if (awayWin && ! backHome) {
+        
+        backHome = true;
         boolean someAway = false;
-        for (Actor w : fort.recruits()) {
-          if (w.map() != map) someAway = true;
-        }
-        backHome = fort.recruits().size() > 8 && ! someAway;
+        for (Actor w : fort1.workers()) if (w.map() != map) someAway = true;
+        for (Actor w : fort2.workers()) if (w.map() != map) someAway = true;
+        
+        float max = fort1.maxWorkers(Trooper.TROOPER);
+        backHome &= fort1.workers().size() > (max / 2) && ! someAway;
+        backHome &= fort2.workers().size() > (max / 2) && ! someAway;
         
         if (baseC.prestige() <= initPrestige) {
           I.say("\nPrestige should be boosted by conquest!");
@@ -151,7 +160,6 @@ public class TestMilitary extends Test {
     I.say("  Invading:  "+invading );
     I.say("  Away win:  "+awayWin  );
     I.say("  Back home: "+backHome );
-    I.say("  Current recuits: "+fort.recruits().size());
     reportSkills(fromTroops, COMBAT_SKILLS, initSkills);
     
     return false;

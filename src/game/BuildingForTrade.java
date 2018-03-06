@@ -125,21 +125,18 @@ public class BuildingForTrade extends Building implements Trader {
   public Task selectActorBehaviour(Actor actor) {
     
     if (actor.type().isVessel() && ! tradeOff) {
-      return selectTraderBehaviour(actor);
-    }
-    else {
+      Task trading = selectTraderBehaviour(actor);
+      if (trading != null) return trading;
+      
       Task coming = returnActorHere(actor);
       if (coming != null) return coming;
-      
+    }
+    else {
       Task delivery = TaskDelivery.pickNextDelivery(actor, this, produced());
-      if (delivery != null) {
-        return delivery;
-      }
+      if (delivery != null) return delivery;
       
       Task building = TaskBuilding.nextBuildingTask(this, actor);
-      if (building != null) {
-        return building;
-      }
+      if (building != null) return building;
     }
     
     return null;

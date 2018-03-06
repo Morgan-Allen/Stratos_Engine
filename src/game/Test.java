@@ -583,6 +583,11 @@ public class Test {
     
     StringBuffer report = new StringBuffer(""+b+"\n");
     
+    int maxHP = b.type().maxHealth;
+    int HP = (int) b.buildLevel() * maxHP;
+    
+    report.append("\n\nHealth: "+HP+"/"+maxHP);
+    
     if (b.workers.size() > 0) {
       report.append("\nWorkers:");
       for (Actor w : b.workers) {
@@ -601,13 +606,6 @@ public class Test {
       report.append("\nVisitors:");
       for (Actor w : b.visitors) {
         report.append("\n  "+w+" ("+w.jobType()+")");
-      }
-    }
-    
-    if (! b.recruits().empty()) {
-      report.append("\nRecruits:");
-      for (Actor w : b.recruits()) {
-        report.append("\n  "+w);
       }
     }
     

@@ -137,10 +137,10 @@ public class Type extends Index.Entry implements Session.Saveable {
   public Good armourType = null;
   public Good useItemTypes[] = {};
   public int maxHealth   = AVG_MAX_HEALTH;
-  public int meleeDamage = 2;  //  TODO:  Zero this.
-  public int rangeDamage = 2;  //  TODO:  Zero this.
-  public int rangeDist   = 4;  //  TODO:  Zero this.
-  public int armourClass = 2;  //  TODO:  Zero this.
+  public int meleeDamage = 0;
+  public int rangeDamage = 0;
+  public int rangeDist   = 0;
+  public int armourClass = 0;
   public int sightRange  = AVG_SIGHT;
   
   
@@ -148,7 +148,7 @@ public class Type extends Index.Entry implements Session.Saveable {
     this.wide = w;
     this.high = h;
     this.deep = d;
-    this.maxHealth = (int) (10 * w * h * (1 + ((d - 1) / 2f)));
+    this.maxHealth = (int) (BUILD_TILE_HP * w * h * ((d + 1) / 2f));
   }
   
   

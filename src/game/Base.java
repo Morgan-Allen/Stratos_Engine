@@ -555,7 +555,8 @@ public class Base implements Session.Saveable, Trader {
   
   /**  Handling army strength and population (for off-map cities-)
     */
-  float idealPopulation() {
+  public float idealPopulation() {
+    //  TODO:  Cache this?
     float sum = 0;
     for (BuildType t : buildLevel.keys()) {
       float l = buildLevel.valueFor(t);
@@ -565,21 +566,15 @@ public class Base implements Session.Saveable, Trader {
   }
   
   
-  float idealArmyPower() {
-    Type citizen = (Type) Visit.first(world.citizenTypes);
-    float powerC = citizen == null ? 0 : TaskCombat.attackPower(citizen);
-    
+  public float idealArmyPower() {
+    //  TODO:  Cache this?
     float sum = 0;
     for (BuildType t : buildLevel.keys()) {
       if (t.isArmyOrWallsBuilding()) {
-        float l = buildLevel.valueFor(t), sumW = 0;
+        float l = buildLevel.valueFor(t);
         for (ActorType w : t.workerTypes.keys()) {
           float maxW = t.workerTypes.valueFor(w);
           sum += l * TaskCombat.attackPower(w) * maxW;
-          sumW += maxW;
-        }
-        if (t.maxRecruits > sumW) {
-          sum += l * (t.maxRecruits - sumW) * powerC;
         }
       }
     }
@@ -652,7 +647,7 @@ public class Base implements Session.Saveable, Trader {
       float armyPower = 0;
       for (Building b : map.buildings) {
         if (b.type().category == Type.IS_ARMY_BLD) {
-          armyPower += Mission.powerSum(b.recruits(), map);
+          armyPower += Mission.powerSum(b.workers(), map);
         }
       }
       this.armyPower = armyPower;

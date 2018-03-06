@@ -46,7 +46,6 @@ public class BuildType extends Type {
   public Tally <ActorType> workerTypes = new Tally();
   public int maxResidents = 0;
   public int maxVisitors  = AVG_MAX_VISITORS;
-  public int maxRecruits  = AVG_ARMY_SIZE;
   
   
   public void setUpgradeTiers(BuildType... tiers) {

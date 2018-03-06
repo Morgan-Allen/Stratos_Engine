@@ -12,6 +12,7 @@ public class World implements Session.Saveable {
   /**  Public interfaces-
     */
   public static class Locale {
+    
     float mapX, mapY;
     Table <Locale, Integer> distances = new Table();
     
@@ -20,6 +21,7 @@ public class World implements Session.Saveable {
   }
   
   public static class Journey {
+    
     Base from;
     Base goes;
     int startTime;
@@ -32,6 +34,7 @@ public class World implements Session.Saveable {
   }
   
   public static class Event {
+    
     String label;
     int time;
     Object[] involved;

@@ -144,11 +144,11 @@ public class GameConstants {
     AVG_EXPLORE_DIST = 8   ,
     //
     //  Military, and combat-
-    AVG_ARMY_SIZE    = 16  ,
-    AVG_RANKS        = 4   ,
-    AVG_FILE         = 4   ,
-    TOP_DAMAGE       = 2  ,  //  TODO: Fix for the sake of balance.
-    TOP_ARMOUR       = 2  ,  //  TODO: Fix for the sake of balance.
+    AVG_ARMY_SIZE    = 9   ,
+    AVG_RANKS        = 3   ,
+    AVG_FILE         = 3   ,
+    TOP_DAMAGE       = 10  ,
+    TOP_ARMOUR       = 10  ,
     AVG_SIGHT        = 6   ,
     AVG_RANGE        = 3   ,
     MAX_RANGE        = 6   ,
@@ -158,6 +158,7 @@ public class GameConstants {
     WALL_DEF_BONUS   = 25  ,  //  percent chance
     WALL_ARM_BONUS   = 2   ,
     WALL_DMG_BONUS   = 1   ,
+    BUILD_TILE_HP    = 2   ,
     //
     //  Trade and migration-
     TRADE_DIST_TIME  = 50  ,
