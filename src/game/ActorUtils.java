@@ -192,11 +192,6 @@ public class ActorUtils {
       home = (Building) baseHomeType.generate();
       Tile goes = findEntryPoint(home, map, from, maxRange / 2);
       
-      if (! home.canPlace(map, goes.x, goes.y, 1)) {
-        I.say("???");
-        home.canPlace(map, goes.x, goes.y, 1);
-      }
-      
       if (goes != null) {
         home.assignBase(migrant.base());
         home.setLocation(goes, map);
@@ -221,7 +216,7 @@ public class ActorUtils {
           if (n == null || n.flaggedWith() != null) continue;
           ///I.say("Check at: "+n);
           
-          if (enters.canPlace(map, n.x, n.y, 1)) {
+          if (enters.canPlace(map, n.x, n.y)) {
             result.value = n;
             return;
           }

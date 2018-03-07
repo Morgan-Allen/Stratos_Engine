@@ -153,11 +153,11 @@ public class BuildingForCrafts extends Building {
     if (delivery != null) return delivery;
     //
     //  Failing all that, start crafting:
-    TaskCrafting crafting = TaskCrafting.nextCraftingTask(actor, this);
+    Task crafting = TaskCrafting.nextCraftingTask(actor, this);
     if (crafting != null) return crafting;
     //
     //  Or just tend shop otherwise-
-    TaskSupervise tending = TaskSupervise.configSupervision(actor, this);
+    Task tending = TaskSupervise.configSupervision(actor, this);
     if (tending != null) return tending;
     return null;
   }

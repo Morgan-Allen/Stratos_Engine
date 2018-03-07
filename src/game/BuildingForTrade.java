@@ -137,6 +137,9 @@ public class BuildingForTrade extends Building implements Trader {
       
       Task building = TaskBuilding.nextBuildingTask(this, actor);
       if (building != null) return building;
+      
+      Task tending = TaskSupervise.configSupervision(actor, this);
+      if (tending != null) return tending;
     }
     
     return null;

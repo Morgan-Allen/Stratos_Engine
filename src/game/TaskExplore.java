@@ -1,9 +1,9 @@
 
 
 package game;
-import util.*;
-import static game.AreaMap.*;
 import static game.GameConstants.*;
+import graphics.common.*;
+import util.*;
 
 
 
@@ -63,9 +63,17 @@ public class TaskExplore extends Task {
   }
   
   
+  float actionRange() {
+    Actor actor = (Actor) this.active;
+    return actor.sightRange();
+  }
+  
+  
   protected void onTarget(Target target) {
     Actor actor = (Actor) this.active;
     AreaMap map = actor.map();
+    
+    map.fog.liftFog(target.at(), actor.sightRange());
     
     int range = maxRange > 0 ? maxRange : (int) (actor.sightRange() * 2);
     Tile goes = map.fog.findNearbyFogPoint(from, range);
@@ -80,6 +88,13 @@ public class TaskExplore extends Task {
     }
   }
   
+
+
+  /**  Graphical, debug and interface methods-
+    */
+  String animName() {
+    return AnimNames.LOOK;
+  }
 }
 
 

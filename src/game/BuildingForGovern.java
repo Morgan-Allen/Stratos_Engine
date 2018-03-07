@@ -32,19 +32,23 @@ public class BuildingForGovern extends Building {
     
     if (actor.type().isCommoner()) {
       Task building = TaskBuilding.nextBuildingTask(this, actor);
-      if (building != null) {
-        return building;
-      }
+      if (building != null) return building;
+      
+      Task tending = TaskSupervise.configSupervision(actor, this);
+      if (tending != null) return tending;
     }
     
     if (actor.type().isSoldier()) {
-      //  TODO:  Assign some patrolling tasks, or just rely on the actor's own
-      //  behaviour-script.
+      Task patrol = TaskPatrol.nextGuardPatrol(actor, this, Task.ROUTINE);
+      if (patrol != null) return patrol;
     }
     
     if (actor.type().isTrader()) {
       Task taxing = TaskAssessTax.nextAssessment(actor, this, 100);
       if (taxing != null) return taxing;
+      
+      Task tending = TaskSupervise.configSupervision(actor, this);
+      if (tending != null) return tending;
     }
     
     if (actor.type().isNoble()) {

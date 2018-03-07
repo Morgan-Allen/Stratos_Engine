@@ -5,6 +5,7 @@
   */
 package game;
 import static game.GameConstants.*;
+import graphics.common.*;
 import util.*;
 
 
@@ -19,7 +20,8 @@ public class TaskPatrol extends Task implements TileConstants {
     TYPE_STREET_PATROL = 1,
     TYPE_SENTRY_DUTY   = 2;
   final static int
-    WATCH_TIME = 10;
+    WATCH_TIME = 10,
+    MAX_STOPS  = 4;
   
   
   private static boolean
@@ -30,7 +32,7 @@ public class TaskPatrol extends Task implements TileConstants {
   final Element guarded;
   
   private Target onPoint;
-  private float postTime = -1;
+  private int numStops = 0;
   private List <Target> patrolled;
   
   
@@ -51,8 +53,18 @@ public class TaskPatrol extends Task implements TileConstants {
     type     = s.loadInt();
     guarded  = (Element) s.loadObject();
     onPoint  = (Target) s.loadObject();
-    postTime = s.loadFloat();
-    s.loadObjects(patrolled = new List());
+    numStops = s.loadInt();
+    
+    AreaMap map = guarded.map();
+    patrolled = new List();
+    for (int n = s.loadInt(); n-- > 0;) {
+      if (s.loadBool()) {
+        patrolled.add(AreaMap.loadTile(map, s));
+      }
+      else {
+        patrolled.add((Target) s.loadObject());
+      }
+    }
   }
   
   
@@ -61,8 +73,20 @@ public class TaskPatrol extends Task implements TileConstants {
     s.saveInt   (type    );
     s.saveObject(guarded );
     s.saveObject(onPoint );
-    s.saveFloat (postTime);
-    s.saveObjects(patrolled);
+    s.saveInt   (numStops);
+    
+    AreaMap map = guarded.map();
+    s.saveInt(patrolled.size());
+    for (Target t : patrolled) {
+      if (t.isTile()) {
+        s.saveBool(true);
+        AreaMap.saveTile((Tile) t, map, s);
+      }
+      else {
+        s.saveBool(false);
+        s.saveObject(t);
+      }
+    }
   }
   
   
@@ -82,24 +106,24 @@ public class TaskPatrol extends Task implements TileConstants {
       patrolled.add(guarded);
     }
     else {
-      final float range = Nums.max(
-        guarded.radius() * 2,
-        actor.sightRange() / 2
-      );
-      Tile at = guarded.centre();
-      if (report) I.say("  Range is: "+range+", centre: "+at);
+      Tile from = actor.at();
+      if (actor.indoors()) from = ((Building) actor.inside()).mainEntrance();
+      Batch <Tile> around = new Batch();
       
-      for (int n : T_ADJACENT) {
-        Tile point = map.tileAt(
-          Nums.clamp(at.x + (T_X[n] * range), 0, map.size - 1),
-          Nums.clamp(at.y + (T_Y[n] * range), 0, map.size - 1)
-        );
-        if (point != null) {
-          if (report) I.say("  Patrol point: "+point);
-          patrolled.include(point);
-        }
+      for (Tile t : guarded.perimeter(map)) {
+        if (t == null || ! map.pathCache.pathConnects(from, t)) continue;
+        around.include(t);
+      }
+      
+      int divS = around.size() / 4;
+      for (int n = 0; n < around.size();) {
+        Tile adds = around.atIndex(n);
+        patrolled.add(adds);
+        n += divS;
       }
     }
+    
+    if (patrolled.empty()) return null;
     
     TaskPatrol p = new TaskPatrol(actor, guarded, patrolled, TYPE_PROTECTION);
     return (TaskPatrol) p.configTask(null, null, guarded, JOB.PATROLLING, 1);
@@ -115,10 +139,10 @@ public class TaskPatrol extends Task implements TileConstants {
       destT = Tile.nearestOpenTile(dest.at(), map, 4);
     
     if (! map.pathCache.pathConnects(initT, destT)) return null;
-
+    
     final List <Target> patrolled = new List();
-    patrolled.add(initT);
-    patrolled.add(destT);
+    patrolled.include(initT);
+    patrolled.include(destT);
     
     TaskPatrol p = new TaskPatrol(actor, init, patrolled, TYPE_STREET_PATROL);
     return (TaskPatrol) p.configTask(null, null, initT, JOB.PATROLLING, 1);
@@ -143,6 +167,7 @@ public class TaskPatrol extends Task implements TileConstants {
     for (Building b : map.buildings()) if (b.base() == base) {
       float dist = AreaMap.distance(origin, b);
       if (dist > range) continue;
+      if (Task.hasTaskFocus(b, JOB.PATROLLING)) continue;
       pick.compare(b, Rand.num());
     }
     
@@ -150,42 +175,48 @@ public class TaskPatrol extends Task implements TileConstants {
     if (report) I.say("  Venue picked: "+goes);
     
     if (goes == null) return null;
-    return TaskPatrol.streetPatrol(actor, goes, goes, priority);
+    return protectionFor(actor, goes, priority);
+    //else return streetPatrol(actor, origin, goes, priority);
   }
+  
   
   
   /**  Behaviour execution-
     */
+  void toggleFocus(boolean activeNow) {
+    super.toggleFocus(activeNow);
+    guarded.setFocused(active, activeNow);
+  }
+  
+  
   protected void onTarget(Target target) {
     final Actor actor = (Actor) active;
     if (onPoint == null) return;
     
-    final boolean report = I.talkAbout == actor && stepsVerbose;
+    final boolean report = I.talkAbout == actor;
     if (report) {
       I.say("\nGetting next patrol step for "+actor);
-      I.say("  Going to: "+onPoint+", post time: "+postTime);
+      I.say("  Going to: "+onPoint+", num stops: "+numStops);
+      I.say("  All patrol points: "+patrolled);
     }
     
     final AreaMap map = actor.map();
-    Target stop = onPoint;
+    Tile stop = onPoint.at();
     
     if (onPoint.type().isActor()) {
       final Task t = ((Actor) onPoint).task();
       final Target ahead = t == null ? onPoint : t.nextOnPath();
-      Tile open = ActorUtils.pickRandomTile(ahead, 2, map);
-      open = Tile.nearestOpenTile(open, map);
-      if (open == null) return;
-      else stop = open;
+      stop = ActorUtils.pickRandomTile(ahead, 2, map);
+      stop = Tile.nearestOpenTile(stop, map);
+      if (++numStops >= MAX_STOPS) return;
     }
     
     else {
-      Tile open = onPoint.at();
-      open = Tile.nearestOpenTile(open, map);
-      if (open == null) return;
-      else stop = open;
-
+      Target last = onPoint;
+      stop = Tile.nearestOpenTile(stop, map);
+      
       final int index = patrolled.indexOf(onPoint) + 1;
-      if (index < patrolled.size()) {
+      if (index < patrolled.size() && last != patrolled.atIndex(index)) {
         onPoint = (Target) patrolled.atIndex(index);
       }
       else {
@@ -193,13 +224,16 @@ public class TaskPatrol extends Task implements TileConstants {
       }
     }
     
+    if (report) {
+      I.say("  Next stop: "+stop);
+    }
+    
     if (stop != null) {
       configTask(null, null, stop, JOB.PATROLLING, 1);
     }
   }
-  
-  
-  
+
+
   /**  Rendering and interface methods-
     */
   public String toString() {
@@ -222,152 +256,12 @@ public class TaskPatrol extends Task implements TileConstants {
     }
     return d.toString();
   }
+  
+  
+  String animName() {
+    return AnimNames.LOOK;
+  }
 }
-
-
-
-
-
-
-//  TODO:  Return to this later...
-/*
-public static TaskPatrol sentryDuty(
-  Actor actor, ShieldWall start, Venue barracks, float priority
-) {
-  if (start == null || start.base() != barracks.base()) {
-    return null;
-  }
-  
-  final Vec3D between = Spacing.between(barracks, start);
-  final Vec2D prefHeading = new Vec2D(between).perp();
-  final float maxDist = Stage.ZONE_SIZE;
-  
-  final List <Target> patrolled = new List();
-  final Batch <Target> flagged = new Batch();
-  ShieldWall doors = null;
-  ShieldWall next = start;
-  float sumDist = 0; Vec3D temp = new Vec3D();
-  
-  while (next != null) {
-    if (next.isTower()) patrolled.include(next);
-    if (next.isGate() && doors == null) doors = next;
-    sumDist += next.radius() * 2;
-    
-    if (sumDist > maxDist) break;
-    next.flagWith(flagged);
-    flagged.add(next);
-    
-    final Pick <Boarding> pick = new Pick();
-    for (Boarding b : next.canBoard()) {
-      if (! (b instanceof ShieldWall)) continue;
-      if (b.flaggedWith() != null) continue;
-      b.position(temp);
-      pick.compare(b, prefHeading.dot(temp.x, temp.y));
-    }
-    next = (ShieldWall) pick.result();
-  }
-  
-  for (Target t : flagged) t.flagWith(null);
-  if (doors == null) {
-    return null;
-  }
-  
-  TaskPatrol p = new TaskPatrol(actor, doors, patrolled, TYPE_SENTRY_DUTY);
-  return (TaskPatrol) p.addMotives(Plan.NO_PROPERTIES, priority);
-}
-//*/
-
-
-
-/*
-  
-  final static Trait BASE_TRAITS[] = { FEARLESS, PERSISTENT, SOLITARY };
-  
-  protected float getPriority() {
-    if (onPoint == null || patrolled.size() == 0) return 0;
-    
-    float urgency, avgDanger = 0, modifier;
-    if (actor.base() != null) for (Target t : patrolled) {
-      avgDanger += actor.base().dangerMap.sampleAround(t, Stage.ZONE_SIZE);
-    }
-    avgDanger = Nums.clamp(avgDanger / patrolled.size(), 0, 2);
-    urgency   = avgDanger;
-    modifier  = 0 - actor.senses.fearLevel();
-    
-    int teamSize = hasMotives(MOTIVE_MISSION) ? Mission.AVG_PARTY_LIMIT : 1;
-    setCompetence(rateCompetence(actor, guarded, teamSize));
-    
-    toggleMotives(MOTIVE_EMERGENCY, PlanUtils.underAttack(guarded));
-    final float priority = PlanUtils.jobPlanPriority(
-      actor, this, urgency + modifier, competence(),
-      -1, Plan.REAL_FAIL_RISK * avgDanger, BASE_TRAITS
-    );
-    return priority;
-  }
-  
-  
-  public static void addFormalPatrols(
-    Actor actor, Venue origin, Choice choice
-  ) {
-    ShieldWall wall = (ShieldWall) origin.world().presences.randomMatchNear(
-      ShieldWall.class, origin, Stage.ZONE_SIZE
-    );
-    choice.add(TaskPatrol.sentryDuty(actor, wall, origin, Plan.ROUTINE));
-    choice.add(TaskPatrol.nextGuardPatrol(actor, origin, Plan.CASUAL));
-  }
-  
-  
-  public static ShieldWall turretIsAboard(Target t) {
-    if (! (t instanceof Mobile)) return null;
-    final Boarding aboard = ((Mobile) t).aboard();
-    if (aboard instanceof ShieldWall) return (ShieldWall) aboard;
-    else return null;
-  }
-  
-  
-  public static float rateCompetence(
-    Actor actor, Target guarded, int teamSize
-  ) {
-    //  TODO:  Include bonus from first aid or assembly skills, depending on the
-    //  target and damage done?
-    
-    if (! PlanUtils.isArmed(actor)) return 0;
-    final Tile under = actor.world().tileAt(guarded);
-    return PlanUtils.combatWinChance(actor, under, teamSize);
-  }
-  
-  
-  public boolean finished() {
-    if (onPoint == null) return true;
-    return super.finished();
-  }
-
-
-public int motionType(Actor actor) {
-  
-  //
-  //  TODO:  Revisit this later...
-  
-  if (actor.senses.isEmergency()) {
-    return MOTION_FAST;
-  }
-  
-  if (guarded.isMobile()) {
-    final Mobile m = (Mobile) guarded;
-    final float dist = Spacing.distance(actor, m.aboard());
-    if (dist >= actor.health.sightRange() / 2) return MOTION_FAST;
-  }
-  
-  //  TODO:  Replace this with a general 'harm intended' clause?
-  final Activities a = actor.world().activities;
-  if (a.includesActivePlan(guarded, Combat.class)) return MOTION_FAST;
-  
-  return super.motionType(actor);
-}
-//*/
-
-
-
 
 
 
