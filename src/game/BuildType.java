@@ -14,7 +14,8 @@ public class BuildType extends Type {
   
   
   public boolean isUpgrade = false;
-  public boolean worksBeforeBuilt = false;
+  public boolean worksBeforeBuilt = false;  //  TODO:  Remove this...
+  public int entranceDir = Building.FACE_EAST;
   
   public Technique rulerPowers[] = {};
   public Technique actorPowers[] = {};

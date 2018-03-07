@@ -126,8 +126,8 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
-  public boolean canPlace(AreaMap map, int x, int y, int margin) {
-    int w = type.wide, h = type.high, m = margin;
+  public boolean canPlace(AreaMap map, int x, int y) {
+    int w = type.wide, h = type.high, m = type.paveMargin;
     for (Tile t : map.tilesUnder(x - m, y - m, w + (m * 2), h + (m * 2))) {
       if (t == null) return false;
       if (t.above != null && ! t.above.type().isClearable()) return false;

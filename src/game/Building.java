@@ -16,6 +16,17 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   
   /**  Data fields and setup/initialisation-
     */
+  final public static int
+    FACE_INIT   = -2,
+    FACE_NONE   = -1,
+    FACE_NORTH  =  N / 2,
+    FACE_EAST   =  E / 2,
+    FACE_SOUTH  =  S / 2,
+    FACE_WEST   =  W / 2,
+    ALL_FACES[] = { FACE_SOUTH, FACE_EAST, FACE_NORTH, FACE_WEST },
+    NUM_FACES   =  ALL_FACES.length
+  ;
+  
   static int nextID = 0;
   
   protected String ID;
@@ -132,10 +143,11 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   }
   
   
-  public boolean canPlace(AreaMap map, int x, int y, int margin) {
-    if (! super.canPlace(map, x, y, margin)) return false;
+  public boolean canPlace(AreaMap map, int x, int y) {
+    if (! super.canPlace(map, x, y)) return false;
     //
     //  TODO:  The efficiency of this might be improved on larger maps.
+    int margin = type().paveMargin;
     Box2D claims = claimArea(map.tileAt(x, y));
     for (Building b : map.buildings()) {
       if (b.claimArea().axisDistance(claims) < margin) return false;
@@ -371,7 +383,24 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   
   Tile[] selectEntrances() {
     Tile at = at();
-    Pick <Tile> pick = new Pick();
+    
+    Pick <Tile> pick = new Pick <Tile> () {
+      public void compare(Tile t, float rating) {
+        
+        int pathT = t.pathType();
+        if (pathT != PATH_FREE && pathT != PATH_PAVE) return;
+        if (pathT != PATH_PAVE) rating /= 2;
+        
+        super.compare(t, rating);
+      }
+    };
+    
+    int faceCoords[] = entranceCoords(type().wide, type().high, type().entranceDir);
+    {
+      Tile e = map.tileAt(at.x + faceCoords[0], at.y + faceCoords[1]);
+      pick.compare(e, 1);
+      if (! pick.empty()) return new Tile[] { pick.result() };
+    }
     
     for (Coord c : Visit.perimeter(at.x, at.y, type().wide, type().high)) {
       Tile t = map.tileAt(c);
@@ -379,18 +408,43 @@ public class Building extends Element implements Pathing, Employer, Carrier {
       boolean outx = t.x == at.x - 1 || t.x == at.x + type().wide;
       boolean outy = t.y == at.y - 1 || t.y == at.y + type().high;
       if (outx && outy) continue;
-      
-      int pathT = t.pathType();
-      if (pathT != PATH_FREE && pathT != PATH_PAVE) continue;
-      
-      float rating = 1;
-      if (pathT != PATH_PAVE) rating /= 2;
-      pick.compare(t, rating);
+      pick.compare(t, 1);
     }
     
     if (pick.empty()) return new Tile[0];
     return new Tile[] { pick.result() };
   }
+  
+  
+  static int[] entranceCoords(int xdim, int ydim, float face) {
+    if (face == FACE_NONE) return new int[] { 0, 0 };
+    face = (face + 0.5f) % NUM_FACES;
+    float edgeVal = face % 1;
+    int enterX = 1, enterY = -1;
+    
+    if (face < FACE_EAST) {
+      //  This is the north edge.
+      enterX = xdim;
+      enterY = (int) (ydim * edgeVal);
+    }
+    else if (face < FACE_SOUTH) {
+      //  This is the east edge.
+      enterX = (int) (xdim * (1 - edgeVal));
+      enterY = ydim;
+    }
+    else if (face < FACE_WEST) {
+      //  This is the south edge.
+      enterX = -1;
+      enterY = (int) (ydim * (1 - edgeVal));
+    }
+    else {
+      //  This is the west edge.
+      enterX = (int) (xdim * edgeVal);
+      enterY = -1;
+    }
+    return new int[] { enterX, enterY };
+  }
+  
   
   
   
@@ -804,7 +858,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   public Sprite sprite() {
     BuildType type = type();
     ModelAsset foundM = type.foundationModel;
-    boolean showDone = complete() || foundM == null;
+    boolean showDone = complete() || foundM == null || ! onMap();
     
     if (sprite == null || (sprite.model() == foundM) != ! showDone) {
       if (showDone) sprite = type.makeSpriteFor(this);

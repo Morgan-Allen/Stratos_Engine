@@ -115,6 +115,7 @@ public class Type extends Index.Entry implements Session.Saveable {
   public int category;
   public Type flagKey = null;
   public int wide = 1, high = 1, deep = 1;
+  public int paveMargin = AVG_PAVE_MARGIN;
   
   public boolean rulerBuilt     = true ;
   public boolean uniqueBuilding = false;

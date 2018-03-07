@@ -138,6 +138,7 @@ public class GameConstants {
     AVG_SERVICE_GIVE = 10  ,  //  value of education, diversion, etc.
     AVG_MAX_VISITORS = 4   ,
     AVG_VISIT_TIME   = 20  ,
+    AVG_PAVE_MARGIN  = 1   ,
     //
     //  Exploration and wandering-
     MAX_WANDER_RANGE = 20  ,
