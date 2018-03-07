@@ -236,6 +236,19 @@ public class ActorUtils {
     return result.value;
   }
   
+  
+  
+  
+  public static Tile pickRandomTile(Target t, float range, AreaMap map) {
+    final float angle = Rand.num() * Nums.PI * 2;
+    final float dist = (Rand.num() * range) + 1, max = map.size - 1;
+    final Tile at = t.at();
+    return map.tileAt(
+      Nums.clamp(at.x + (float) (Nums.cos(angle) * dist), 0, max),
+      Nums.clamp(at.y + (float) (Nums.sin(angle) * dist), 0, max)
+    );
+  }
+  
 }
 
 

@@ -121,6 +121,11 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
+  public float radius() {
+    return Nums.max(type.wide, type.high) * Nums.ROOT2;
+  }
+  
+  
   public boolean canPlace(AreaMap map, int x, int y, int margin) {
     int w = type.wide, h = type.high, m = margin;
     for (Tile t : map.tilesUnder(x - m, y - m, w + (m * 2), h + (m * 2))) {

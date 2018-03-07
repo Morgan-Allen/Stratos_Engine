@@ -144,32 +144,30 @@ public class BuildingForCrafts extends Building {
     */
   public Task selectActorBehaviour(Actor actor) {
     //
-    //  Different construction approach...
+    //  See if construction is possible-
     Task building = TaskBuilding.nextBuildingTask(this, actor);
-    if (building != null) {
-      return building;
-    }
+    if (building != null) return building;
     //
-    //  Go here if you aren't already:
-    //Task coming = returnActorHere(actor);
-    //if (coming != null) return coming;
-    //
-    //  If you're already home, see if any deliveries are required:
+    //  See if any deliveries are required:
     Task delivery = TaskDelivery.pickNextDelivery(actor, this, produced());
-    if (delivery != null) {
-      return delivery;
-    }
+    if (delivery != null) return delivery;
     //
-    //  And failing all that, start crafting:
+    //  Failing all that, start crafting:
     TaskCrafting crafting = TaskCrafting.nextCraftingTask(actor, this);
-    if (crafting != null) {
-      return crafting;
-    }
+    if (crafting != null) return crafting;
+    //
+    //  Or just tend shop otherwise-
+    TaskSupervise tending = TaskSupervise.configSupervision(actor, this);
+    if (tending != null) return tending;
     return null;
   }
   
   
 }
+
+
+
+
 
 
 
