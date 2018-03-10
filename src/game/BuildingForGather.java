@@ -32,6 +32,7 @@ public class BuildingForGather extends Building {
       Plot p = new Plot();
       p.loadFrom(s.input());
       p.plantOnly = (Type) s.loadObject();
+      plots.add(p);
     }
   }
   

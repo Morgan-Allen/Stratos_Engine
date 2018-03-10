@@ -89,27 +89,60 @@ public class TaskGathering extends Task {
     BuildingForGather store, Actor actor, boolean close, Object... cropTypes
   ) {
     if (Visit.empty(cropTypes)) return null;
-    
+
+    AreaMap map = store.map();
     int spaceTaken = 0;
+    Pathing from = Task.pathOrigin(actor);
+    
     for (Good g : store.type().produced) {
       spaceTaken += store.inventory(g);
     }
     if (spaceTaken >= store.type().maxStock) return null;
     
-    CityMapFlagging flagging = store.map.flagging.get(store.type().gatherFlag);
-    if (flagging == null) return null;
+    if (store.plots().size() > 0) {
+      Pick <Tile> pick = new Pick(0);
+
+      for (Plot p : store.plots()) {
+        for (Tile t : map.tilesUnder(p)) {
+          if (t == null || t.hasFocus()) continue;
+          if (! map.pathCache.pathConnects(from, t, true, false)) continue;
+          
+          Element above = t.above;
+          if (above == null || above.growLevel() <= 0) continue;
+          if (! Visit.arrayIncludes(cropTypes, above.type().yields)) continue;
+          
+          float rating = AreaMap.distancePenalty(actor, t);
+          rating *= above.growLevel();
+          pick.compare(t, rating);
+        }
+      }
+      
+      if (pick.empty()) return null;
+      
+      Tile goes = pick.result();
+      TaskGathering task = new TaskGathering(actor, store);
+      
+      if (task.configTask(store, null, goes, JOB.HARVEST, 2) != null) {
+        return task;
+      }
+    }
     
-    Tile goes = null;
-    if (close) goes = flagging.findNearbyPoint(actor, AVG_GATHER_RANGE);
-    else goes = flagging.pickRandomPoint(store, store.type().maxDeliverRange);
-    Element above = goes == null ? null : goes.above;
-    
-    if (above == null) return null;
-    if (! Visit.arrayIncludes(cropTypes, above.type().yields)) return null;
-    
-    TaskGathering task = new TaskGathering(actor, store);
-    if (task.configTask(store, null, goes, JOB.HARVEST, 2) != null) {
-      return task;
+    else {
+      CityMapFlagging flagging = store.map.flagging.get(store.type().gatherFlag);
+      if (flagging == null) return null;
+      
+      Tile goes = null;
+      if (close) goes = flagging.findNearbyPoint(actor, AVG_GATHER_RANGE);
+      else goes = flagging.pickRandomPoint(store, store.type().maxDeliverRange);
+      Element above = goes == null ? null : goes.above;
+      
+      if (above == null) return null;
+      if (! Visit.arrayIncludes(cropTypes, above.type().yields)) return null;
+      
+      TaskGathering task = new TaskGathering(actor, store);
+      if (task.configTask(store, null, goes, JOB.HARVEST, 2) != null) {
+        return task;
+      }
     }
     
     return null;
@@ -161,10 +194,7 @@ public class TaskGathering extends Task {
       Element above = map.above(at);
       if (above == null || above.type().yields == null) return;
       
-      Type plants = above.type();
-      if      (plants.isCrop      ) above.setGrowLevel(-1);
-      else if (plants.growRate > 0) above.setGrowLevel( 0);
-      
+      Type   plants     = above.type();
       Recipe recipe     = recipeFor(plants);
       Trait  skill      = recipe.craftSkill;
       float  skillBonus = actor.levelOf(skill) / MAX_SKILL_LEVEL;
@@ -172,16 +202,20 @@ public class TaskGathering extends Task {
       
       Good gathers = plants.yields;
       float yield  = plants.yieldAmount;
+      yield *= plants.isCrop ? above.growLevel() : 1;
       yield *= 1 + (skillBonus * 0.5f);
       
       actor.incCarried(gathers, yield);
       actor.gainXP(skill, 1 * multXP / 100);
       
+      if      (plants.isCrop      ) above.setGrowLevel(-1);
+      else if (plants.growRate > 0) above.setGrowLevel( 0);
+      
       if (actor.carried(gathers) >= 2) {
         returnToStore();
       }
       else {
-        Task pick = pickNextCrop(store, actor, true, actor.carried());
+        Task pick = pickNextCrop(store, actor, true, plants.yields);
         if (pick != null) {
           actor.assignTask(pick);
         }
