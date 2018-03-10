@@ -9,7 +9,7 @@ import util.*;
 
 
 
-public class TaskSupervise extends Task {
+public class TaskWaiting extends Task {
   
   
   /**  Data fields, setup and save/load functions-
@@ -33,14 +33,14 @@ public class TaskSupervise extends Task {
   private float beginTime = -1;
   
   
-  private TaskSupervise(Actor actor, Building supervised, int stayType) {
+  private TaskWaiting(Actor actor, Building supervised, int stayType) {
     super(actor);
     this.venue = supervised;
     this.type  = stayType  ;
   }
   
   
-  public TaskSupervise(Session s) throws Exception {
+  public TaskWaiting(Session s) throws Exception {
     super(s);
     this.venue     = (Building) s.loadObject();
     this.type      = s.loadInt();
@@ -61,22 +61,32 @@ public class TaskSupervise extends Task {
   
   /**  Factory methods-
     */
-  public static TaskSupervise configSupervision(Actor actor, Building venue) {
-    return configSupervision(actor, venue, TYPE_OVERSIGHT);
+  public static TaskWaiting configWaiting(Actor actor, Building venue) {
+    return configWaiting(actor, venue, TYPE_OVERSIGHT);
   }
-
   
-  public static TaskSupervise configSupervision(
+  
+  public static TaskWaiting configWaiting(
     Actor actor, Building venue, int stayType
   ) {
-    TaskSupervise task = new TaskSupervise(actor, venue, stayType);
-    return (TaskSupervise) task.configTask(venue, venue, null, JOB.TENDING, 10);
+    TaskWaiting task = new TaskWaiting(actor, venue, stayType);
+    return (TaskWaiting) task.configTask(venue, venue, null, JOB.WAITING, 10);
   }
   
   
   
   /**  Behaviour implementation-
     */
+  protected float successPriority() {
+    if (type == TYPE_DOMESTIC || type == TYPE_INVENTORY) {
+      return Task.ROUTINE;
+    }
+    else {
+      return Task.CASUAL;
+    }
+  }
+  
+  
   protected void onVisit(Building visits) {
     Actor actor = (Actor) active;
     
@@ -109,7 +119,5 @@ public class TaskSupervise extends Task {
     return "Supervising "+venue;
   }
 }
-
-
 
 

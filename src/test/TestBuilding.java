@@ -29,32 +29,30 @@ public class TestBuilding extends Test {
     world.settings.toggleMigrate     = false;
     world.settings.toggleBuildEvolve = false;
     
-    Building farm = (Building) NURSERY.generate();
-    farm.enterMap(map, 1, 1, 1, base);
+    Building mine = (Building) EXCAVATOR.generate();
+    mine.enterMap(map, 1, 1, 1, base);
     Element tree = (Element) JUNGLE_TREE1.generate();
     tree.enterMap(map, 6, 2, 1, base);
-    Element toRaze[] = { farm, tree };
+    Element toRaze[] = { mine, tree };
     
     BuildingForHome home = (BuildingForHome) HOLDING.generate();
     map.planning.placeObject(home, 6, 3, base);
     
-    BuildingForTrade post = (BuildingForTrade) SUPPLY_DEPOT.generate();
-    post.enterMap(map, 2, 10, 0, base);
-    post.setID("(Stock of Goods)");
-    post.setProdLevels(true,
+    Building forge = (Building) ENGINEER_STATION.generate();
+    forge.enterMap(map, 2, 10, 1, base);
+    forge.inventory().setWith(
       PARTS   , 80,
       PLASTICS, 60,
       MEDICINE, 20
     );
-    fillWorkVacancies(post);
-    map.planning.placeObject(post);
+    fillWorkVacancies(forge);
     
     Building palace = (Building) BASTION.generate();
-    palace.enterMap(map, 9, 6, 0, base);
+    palace.enterMap(map, 9, 9, 0, base);
     fillWorkVacancies(palace);
     map.planning.placeObject(palace);
     
-    Building toBuild[] = { post, home, palace };
+    Building toBuild[] = { forge, home, palace };
     Series <Element> road = CityMapPlanning.placeStructure(
       WALKWAY, base, false, 2, 2, 10, 1
     );

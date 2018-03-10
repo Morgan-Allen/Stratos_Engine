@@ -253,7 +253,7 @@ public class FormationUtils {
           Element above = t.above;
           int pathT = t.pathType();
           
-          if (above != null && (pathT == PATH_BLOCK || pathT == PATH_WALLS)) {
+          if (above != null && (pathT == Type.PATH_BLOCK || pathT == Type.PATH_WALLS)) {
             parent.setFocus(above, parent.facing(), map);
             return true;
           }
@@ -307,7 +307,7 @@ public class FormationUtils {
           if (AreaMap.distance(front, focus) > MAX_DIST) return;
           
           for (Pathing p : front.adjacent(temp, map)) {
-            if (p == null || p.pathType() != PATH_WALLS) continue;
+            if (p == null || p.pathType() != Type.PATH_WALLS) continue;
             tryAdding(p);
           }
         }

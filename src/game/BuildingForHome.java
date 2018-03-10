@@ -283,17 +283,20 @@ public class BuildingForHome extends Building {
     //
     //  Non-adults don't do much-
     if (! actor.adult()) {
-      return returnActorHere(actor);
+      return TaskWaiting.configWaiting(actor, this, TaskWaiting.TYPE_DOMESTIC);
     }
     //
     //  Non-nobles have work to do-
     if (actor.type().socialClass != CLASS_NOBLE) {
+      //  TODO:  Restore this later?
+      /*
       //
       //  See if you can assist with building-projects:
       Task building = TaskBuilding.nextBuildingTask(this, actor);
       if (building != null) {
         return building;
       }
+      //*/
       //
       //  Failing that, see if you can go shopping:
       BuildType tier = tierOffset(1);
@@ -327,10 +330,8 @@ public class BuildingForHome extends Building {
       if (! pickS.empty()) {
         Order o = pickS.result();
         TaskDelivery d = new TaskDelivery(actor);
-        d.configDelivery(o.b, this, JOB.SHOPPING, o.g, o.amount, this);
-        if (d != null) {
-          return d;
-        }
+        d = d.configDelivery(o.b, this, JOB.SHOPPING, o.g, o.amount, this);
+        if (d != null) return d;
       }
     }
     //

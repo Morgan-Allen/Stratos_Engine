@@ -40,6 +40,21 @@ public class Type extends Index.Entry implements Session.Saveable {
     IS_ANIMAL_ACT  =  20,
     IS_VESSEL_ACT  =  21
   ;
+  final public static int
+    PATH_NONE   = -1,
+    PATH_PAVE   =  1,
+    PATH_FREE   =  2,
+    PATH_HINDER =  3,
+    PATH_WALLS  =  4,
+    PATH_BLOCK  =  5,
+    PATH_WATER  =  6
+  ;
+  final public static int
+    NO_MARGIN   = 0,
+    THIN_MARGIN = 1,
+    WIDE_MARGIN = 2
+  ;
+  
   
   final static Index <Type> INDEX = new Index();
   
@@ -115,7 +130,9 @@ public class Type extends Index.Entry implements Session.Saveable {
   public int category;
   public Type flagKey = null;
   public int wide = 1, high = 1, deep = 1;
-  public int paveMargin = AVG_PAVE_MARGIN;
+  
+  private byte[][] footprint = {{ 1 }};
+  int clearMargin;
   
   public boolean rulerBuilt     = true ;
   public boolean uniqueBuilding = false;
@@ -126,7 +143,7 @@ public class Type extends Index.Entry implements Session.Saveable {
   public Good    builtFrom  [] = EMPTY_MATERIAL;
   public Integer builtAmount[] = { 1 };
   
-  public int     pathing  = AreaMap.PATH_BLOCK;
+  public int     pathing  = PATH_BLOCK;
   public boolean mobile   = false;
   public float   growRate = 0;
   public int     ambience = 0;
@@ -145,11 +162,37 @@ public class Type extends Index.Entry implements Session.Saveable {
   public int sightRange  = AVG_SIGHT;
   
   
+  
+  
   public void setDimensions(int w, int h, int d) {
+    setDimensions(w, h, d, NO_MARGIN);
+  }
+  
+  
+  public void setDimensions(int w, int h, int d, int clearMargin) {
     this.wide = w;
     this.high = h;
     this.deep = d;
+    this.clearMargin = clearMargin;
     this.maxHealth = (int) (BUILD_TILE_HP * w * h * ((d + 1) / 2f));
+    
+    int m = this.clearMargin;
+    int spanW = w + (m * 2), spanH = h + (m * 2);
+    footprint = new byte[spanW][spanH];
+    for (Coord c : Visit.grid(0, 0, w, h, 1)) footprint[c.x + m][c.y + m] = 1;
+  }
+  
+  
+  public int footprint(Tile at, Element e) {
+    if (at == null || e == null) return -1;
+    
+    int m = this.clearMargin;
+    int spanW = wide + (m * 2), spanH = high + (m * 2);
+    
+    Tile o = e.at();
+    int x = at.x + m - o.x, y = at.y + m - o.y;
+    if (x < 0 || x >= spanW || y < 0 || y >= spanH) return -1;
+    return footprint[x][y];
   }
   
   

@@ -51,6 +51,9 @@ public class ScenarioBlankMap extends CityMapScenario {
       World.KEY_ATTACK_FLAG , FLAG_STRIKE,
       World.KEY_EXPLORE_FLAG, FLAG_RECON
     );
+    
+    //world.settings.toggleFog = false;
+    
     return world;
   }
   
@@ -99,7 +102,7 @@ public class ScenarioBlankMap extends CityMapScenario {
       boolean canPlace = true;
       
       for (Tile f : stage.tilesUnder(t.x - 1, t.y - 1, w + 2, h + 2)) {
-        if (f == null || f.terrain().pathing != AreaMap.PATH_FREE) {
+        if (f == null || f.terrain().pathing != Type.PATH_FREE) {
           canPlace = false;
           break;
         }

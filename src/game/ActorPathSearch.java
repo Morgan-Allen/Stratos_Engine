@@ -73,8 +73,8 @@ public class ActorPathSearch extends Search <Pathing> {
   protected float cost(Pathing prior, Pathing spot) {
     float dist = distance(prior, spot);
     int type = spot.pathType();
-    if (type == PATH_PAVE  ) dist *= 0.75f;
-    if (type == PATH_HINDER) dist *= 2.50f;
+    if (type == Type.PATH_PAVE  ) dist *= 0.75f;
+    if (type == Type.PATH_HINDER) dist *= 2.50f;
     if (stealthy) dist += map.fog.sightLevel(spot.at());
     return dist;
   }

@@ -14,6 +14,7 @@ public class TaskCrafting extends Task {
   final BuildingForCrafts venue;
   final Recipe recipe;
   ItemOrder order;
+  int timeSpent = 0;
   
   
   
@@ -29,13 +30,16 @@ public class TaskCrafting extends Task {
     venue  = (BuildingForCrafts) s.loadObject();
     recipe = venue.type().recipes[s.loadInt()];
     order  = venue.orders.atIndex(s.loadInt());
+    timeSpent = s.loadInt();
   }
   
   
   public void saveState(Session s) throws Exception {
     super.saveState(s);
+    s.saveObject(venue);
     s.saveInt(Visit.indexOf(recipe, venue.type().recipes));
     s.saveInt(venue.orders.indexOf(order));
+    s.saveInt(timeSpent);
   }
   
   
@@ -128,6 +132,11 @@ public class TaskCrafting extends Task {
       order.progress = progress + progInc;
     }
     venue.base().makeTotals.add(progInc, recipe.made);
+    
+    if (++timeSpent < AVG_CRAFT_TIME) {
+      Task next = TaskCrafting.nextCraftingTask(actor, venue);
+      if (next != null) actor.assignTask(next);
+    }
   }
   
   

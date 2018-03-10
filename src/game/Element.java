@@ -15,12 +15,13 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   /**  Data fields, construction and save/load methods-
     */
   final static int
-    FLAG_SITED  = 1 << 0,
-    FLAG_ON_MAP = 1 << 1,
-    FLAG_BUILT  = 1 << 2,
-    FLAG_RAZING = 1 << 3,
-    FLAG_EXIT   = 1 << 4,
-    FLAG_DEST   = 1 << 5
+    FLAG_SITED   = 1 << 0,
+    FLAG_ON_PLAN = 1 << 1,
+    FLAG_ON_MAP  = 1 << 2,
+    FLAG_BUILT   = 1 << 3,
+    FLAG_RAZING  = 1 << 4,
+    FLAG_EXIT    = 1 << 5,
+    FLAG_DEST    = 1 << 6
   ;
   
   private static int nextVarID = 0;
@@ -97,9 +98,10 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   
   /**  Entering and exiting the map-
     */
-  public Visit <Tile> footprint(AreaMap map) {
+  public Visit <Tile> footprint(AreaMap map, boolean withClearance) {
     if (at == null) return map.tilesAround(0, 0, 0, 0);
-    return map.tilesUnder(at.x, at.y, type.wide, type.high);
+    int m = withClearance ? type.clearMargin : 0, m2 = m * 2;
+    return map.tilesUnder(at.x - m, at.y - m, type.wide + m2, type.high + m2);
   }
   
   
@@ -122,18 +124,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   
   
   public float radius() {
-    return Nums.max(type.wide, type.high) * Nums.ROOT2;
-  }
-  
-  
-  public boolean canPlace(AreaMap map, int x, int y) {
-    int w = type.wide, h = type.high, m = type.paveMargin;
-    for (Tile t : map.tilesUnder(x - m, y - m, w + (m * 2), h + (m * 2))) {
-      if (t == null) return false;
-      if (t.above != null && ! t.above.type().isClearable()) return false;
-      if (t.terrain.pathing != PATH_FREE) return false;
-    }
-    return true;
+    return Nums.max(type.wide, type.high) * Nums.ROOT2 / 2f;
   }
   
   
@@ -149,16 +140,94 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
+  void setOnPlan(boolean is) {
+    if (is) stateBits |= FLAG_ON_PLAN;
+    else stateBits &= ~FLAG_ON_PLAN;
+  }
+  
+  
+  boolean onPlan() {
+    return (stateBits & FLAG_ON_PLAN) != 0;
+  }
+  
+  
+  
+  final static int
+    CANNOT_PLACE = -1,
+    MUST_CLEAR   =  0,
+    IS_OKAY      =  1
+  ;
+  
+  
+  boolean canPlaceOver(Tile t) {
+    if (t.terrain.pathing > Type.PATH_FREE) return false;
+    return true;
+  }
+  
+  
+  int canPlaceOver(Element above, int footMask) {
+    if (above == null || above == this) return IS_OKAY;
+    Type aboveT = above.type();
+    if (aboveT.pathing <= Type.PATH_FREE && footMask == 0) return IS_OKAY;
+    else if (aboveT.isClearable()) return MUST_CLEAR;
+    else return CANNOT_PLACE;
+  }
+  
+  
+  boolean checkPlacingConflicts(AreaMap map, Batch <Element> conflicts) {
+    
+    if (! sited()) return false;
+    boolean footprintOkay = true;
+    
+    for (Tile t : footprint(map, true)) {
+      if (t == null) footprintOkay = false;
+      
+      int footMask = type.footprint(t, this);
+      if (footMask == -1) continue;
+      
+      boolean paves    = pathType() <= Type.PATH_FREE;
+      boolean tileOkay = canPlaceOver(t);
+      boolean planOkay = map.planning.reserveCounter[t.x][t.y] == 0 || paves;
+      if (! (tileOkay && planOkay)) footprintOkay = false;
+      
+      Element onPlan = map.planning.objectAt(t);
+      Element onMap  = map.above(t);
+      int checkPlan = canPlaceOver(onPlan, footMask);
+      int checkMap  = canPlaceOver(onMap , footMask);
+      
+      if (checkPlan == CANNOT_PLACE) footprintOkay = false;
+      if (checkMap  == CANNOT_PLACE) footprintOkay = false;
+      if (checkPlan != IS_OKAY && conflicts != null) conflicts.include(onPlan);
+      if (checkMap  != IS_OKAY && conflicts != null) conflicts.include(onMap );
+    }
+    
+    return footprintOkay;
+  }
+  
+  
+  public boolean canPlace(AreaMap map) {
+    return checkPlacingConflicts(map, null);
+  }
+  
+  
   public void enterMap(AreaMap map, int x, int y, float buildLevel, Base owns) {
+    
     stateBits |= FLAG_ON_MAP;
     setLocation(map.tileAt(x, y), map);
     
     if (! type.mobile) {
       
-      for (Tile t : footprint(map)) {
-        if (t.above != null) t.above.exitMap(map);
-        map.setAbove(t, this);
-        map.pathCache.checkPathingChanged(t);
+      for (Tile t : footprint(map, true)) if (t != null) {
+        int footMask = type.footprint(t, this);
+        int check = canPlaceOver(t.above, footMask);
+        
+        if (t.above != null && check != IS_OKAY) {
+          t.above.exitMap(map);
+        }
+        if (footMask == 1) {
+          map.setAbove(t, this);
+          map.pathCache.checkPathingChanged(t);
+        }
       }
       
       map.planning.placeObject(this);
@@ -167,14 +236,13 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
         float need = materialNeed(g);
         setMaterialLevel(g, need * buildLevel);
       }
+      
     }
   }
   
   
   public void exitMap(AreaMap map) {
     
-    //setLocation(null, map);
-    //this.map = null;
     stateBits |=  FLAG_EXIT;
     stateBits &= ~FLAG_ON_MAP;
     
@@ -182,8 +250,9 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
       if (true       ) setFlagging(false, type.flagKey);
       if (type.isCrop) setFlagging(false, NEED_PLANT  );
       
-      for (Tile t : footprint(map)) {
+      for (Tile t : footprint(map, false)) {
         if (t.above == this) map.setAbove(t, null);
+        map.pathCache.checkPathingChanged(t);
       }
       
       map.planning.unplaceObject(this);

@@ -78,7 +78,10 @@ public class CityMapFog {
       Tile t = map.tileAt(c.x, c.y);
       float distance = distance(t, around);
       if (distance > range) continue;
-      fogVals[c.x][c.y] = MAX_FOG;
+      if (distance < 0) distance = 0;
+      byte newVal = (byte) (MAX_FOG * (1f - (distance / range)));
+      byte oldVal = fogVals[c.x][c.y];
+      if (newVal > oldVal) fogVals[c.x][c.y] = newVal;
     }
   }
   
@@ -94,7 +97,7 @@ public class CityMapFog {
       fogVals[c.x][c.y] = 0;
       
       int maxVal = maxMap.flagVal(c.x, c.y);
-      int newVal = MAX_FOG - val;
+      int newVal = val > 0 ? 0 : MAX_FOG;
       if (maxVal > newVal) maxMap.setFlagVal(c.x, c.y, newVal);
       
       floatVals[c.x][c.y] = 1 - (((newVal * 2) + maxVal) * 1f / (MAX_FOG * 3));

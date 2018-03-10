@@ -14,7 +14,6 @@ public class BuildType extends Type {
   
   
   public boolean isUpgrade = false;
-  public boolean worksBeforeBuilt = false;  //  TODO:  Remove this...
   public int entranceDir = Building.FACE_EAST;
   
   public Technique rulerPowers[] = {};
@@ -53,6 +52,8 @@ public class BuildType extends Type {
   public int maxVisitors  = AVG_MAX_VISITORS;
   
   
+
+
   public void setUpgradeTiers(BuildType... tiers) {
     this.upgradeTiers = tiers;
   }

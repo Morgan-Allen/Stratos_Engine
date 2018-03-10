@@ -32,7 +32,7 @@ public class ActorUtils {
       
       temp.set(c.x - (map.size / 2), c.y - (map.size / 2)).normalise();
       float rating = 1 + temp.dot(cityDir);
-      if (map.pathType(c) == PATH_PAVE) rating *= 2;
+      if (map.pathType(c) == Type.PATH_PAVE) rating *= 2;
       
       Tile u = map.tileAt(c.x, c.y);
       pick.compare(u, rating);
@@ -84,7 +84,7 @@ public class ActorUtils {
     Base homeC = migrant.base();
     final Pick <Opening> pick = new Pick();
     
-    for (Building b : map.buildings) if (b.accessible()) {
+    for (Building b : map.buildings) if (b.complete()) {
       if (homeC != null && b.base() != homeC) continue;
       
       for (ActorType t : b.type().workerTypes.keys()) {
@@ -173,7 +173,7 @@ public class ActorUtils {
     //  TODO:  This could get very computationally-intensive on large maps.
     //  Try to improve on that?
     
-    for (Building b : map.buildings) if (b.accessible()) {
+    for (Building b : map.buildings) if (b.complete()) {
       pick.compare(b, 1);
     }
     for (Element e : map.planning.toBuild) {
@@ -214,9 +214,9 @@ public class ActorUtils {
         
         for (Tile n : AreaMap.adjacent(front, temp, map)) {
           if (n == null || n.flaggedWith() != null) continue;
-          ///I.say("Check at: "+n);
           
-          if (enters.canPlace(map, n.x, n.y)) {
+          enters.setLocation(n, map);
+          if (enters.canPlace(map)) {
             result.value = n;
             return;
           }

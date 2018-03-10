@@ -66,13 +66,13 @@ public class BuildingForGather extends Building {
   
   boolean canPlant(Tile at) {
     if (at == null) return false;
-    if (at.terrain.pathing != PATH_FREE) return false;
+    if (at.terrain.pathing != Type.PATH_FREE) return false;
     if (at.above != null && ! at.above.type().isClearable()) return false;
     
     for (Tile t : AreaMap.adjacent(at, temp, map())) {
       if (t == null || t.above == null) continue;
       if (t.above.type().isClearable()) continue;
-      if (t.above.type().pathing <= PATH_FREE) continue;
+      if (t.above.type().pathing <= Type.PATH_FREE) continue;
       return false;
     }
     

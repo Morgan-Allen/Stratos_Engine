@@ -34,7 +34,7 @@ public class BuildingForGovern extends Building {
       Task building = TaskBuilding.nextBuildingTask(this, actor);
       if (building != null) return building;
       
-      Task tending = TaskSupervise.configSupervision(actor, this);
+      Task tending = TaskWaiting.configWaiting(actor, this);
       if (tending != null) return tending;
     }
     
@@ -47,7 +47,7 @@ public class BuildingForGovern extends Building {
       Task taxing = TaskAssessTax.nextAssessment(actor, this, 100);
       if (taxing != null) return taxing;
       
-      Task tending = TaskSupervise.configSupervision(actor, this);
+      Task tending = TaskWaiting.configWaiting(actor, this);
       if (tending != null) return tending;
     }
     

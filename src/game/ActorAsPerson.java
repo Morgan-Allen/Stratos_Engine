@@ -148,15 +148,6 @@ public class ActorAsPerson extends Actor {
   
   
   
-  /**  Supplemental combat methods-
-    */
-  public boolean armed() {
-    Good weapon = type().weaponType;
-    return weapon != null && carried(weapon) > 0;
-  }
-  
-  
-  
   /**  Handling bonds with other actors-
     */
   Bond bondWith(Actor with, boolean init) {
@@ -243,6 +234,7 @@ public class ActorAsPerson extends Actor {
     if (work() != null && ! adult) work().setWorker(this, false);
     //
     //  If you're seriously hungry/beat/tired, try going home:
+    //  TODO:  Work this in as an emergency reaction...
     float needRest = TaskResting.restUrgency(this, home());
     if (needRest > Rand.num() + 0.5f) {
       assignTask(TaskResting.configResting(this, home()));
@@ -263,27 +255,28 @@ public class ActorAsPerson extends Actor {
       if (joins != null) joins.toggleRecruit(this, true);
     }
     //
-    //  See if your home, workplace, shopping demands or current mission have
-    //  anything to say-
+    //  If you currently have an active mission, undertake the next associated
+    //  task-
     if (idle() && mission != null && mission.active()) {
       assignTask(mission.selectActorBehaviour(this));
     }
-    if (idle()) {
-      assignTask(TaskPurchase.nextPurchase(this));
-    }
-    if (idle() && work() != null && work().accessible()) {
-      assignTask(work().selectActorBehaviour(this));
-    }
-    if (idle() && home() != null && home().accessible()) {
-      assignTask(home().selectActorBehaviour(this));
-    }
     //
-    //  Failing that, try either resting or wandering-
-    if (idle() && (needRest > (Rand.num() / maxHealth()) || injury > 0)) {
-      assignTask(TaskResting.configResting(this, home()));
-    }
+    //  Failing that, see if your home, place of work, purchases or other idle
+    //  impulses have anything to say.
     if (idle()) {
-      assignTask(TaskWander.configWandering(this));
+      Choice choice = new Choice(this);
+      
+      if (work() != null && work().complete()) {
+        choice.add(work().selectActorBehaviour(this));
+      }
+      if (home() != null && home().complete()) {
+        choice.add(home().selectActorBehaviour(this));
+        choice.add(TaskResting.configResting(this, home()));
+      }
+      choice.add(TaskPurchase.nextPurchase(this));
+      choice.add(TaskWander.configWandering(this));
+      
+      assignTask(choice.weightedPick());
     }
   }
   
@@ -292,7 +285,7 @@ public class ActorAsPerson extends Actor {
     if (! map.world.settings.toggleReacts) return;
     
     if (jobType() != Task.JOB.RETREAT) {
-      if (! Task.inCombat(this)) {
+      if (armed() && ! Task.inCombat(this)) {
         TaskCombat combat = TaskCombat.nextReaction(this);
         if (combat != null) assignTask(combat);
       }
@@ -384,17 +377,6 @@ public class ActorAsPerson extends Actor {
   
   /**  Handling sight-range and combat-stats:
     */
-  void updateVision() {
-    if (indoors()) return;
-    
-    float range = sightRange();
-    map.fog.liftFog(at(), range);
-    
-    //  TODO:  Allow buildings to update fog-of-war as well (possibly on a
-    //  different map-overlay for convenience.)
-  }
-  
-  
   public float sightRange() {
     return super.sightRange() * (map.fog.lightLevel() + 1f) / 2;
   }
@@ -430,6 +412,11 @@ public class ActorAsPerson extends Actor {
       return amount;
     }
     else return super.armourClass();
+  }
+  
+  
+  public boolean armed() {
+    return Nums.max(meleeDamage(), rangeDamage()) > 0;
   }
   
   

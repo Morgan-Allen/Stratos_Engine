@@ -56,7 +56,10 @@ public class BuildingForNest extends Building {
   
   void update() {
     super.update();
-    if (! accessible()) return;
+    
+    if (! complete()) {
+      return;
+    }
     
     if (spawnCountdown != -1 && --spawnCountdown <= 0) {
       spawnCountdown = spawnInterval;

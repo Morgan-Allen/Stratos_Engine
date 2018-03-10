@@ -62,7 +62,7 @@ public class BuildingForWalls extends Building implements Active {
     */
   boolean checkEntranceOkay(Tile e, int index) {
     if (super.checkEntranceOkay(e, index)) return true;
-    if (tower && index > 0 && e.pathType() == PATH_WALLS) return true;
+    if (tower && index > 0 && e.pathType() == Type.PATH_WALLS) return true;
     return false;
   }
   

@@ -15,16 +15,8 @@ public class AreaMap implements Session.Saveable {
   /**  Data fields and initialisation-
     */
   final public static int
-    SCAN_RES    = 16,
-    FLAG_RES    =  4,
-    
-    PATH_NONE   = -1,
-    PATH_WATER  =  0,
-    PATH_PAVE   =  1,
-    PATH_FREE   =  2,
-    PATH_HINDER =  3,
-    PATH_BLOCK  =  4,
-    PATH_WALLS  =  5
+    SCAN_RES = 16,
+    FLAG_RES =  4
   ;
   
   Terrain terrainTypes[] = { EMPTY };
@@ -427,13 +419,13 @@ public class AreaMap implements Session.Saveable {
   
   
   public int pathType(Tile t) {
-    if (t == null) return PATH_BLOCK;
+    if (t == null) return Type.PATH_BLOCK;
     return t.pathType();
   }
   
   
   public int pathType(Coord c) {
-    if (c == null) return PATH_BLOCK;
+    if (c == null) return Type.PATH_BLOCK;
     return pathType(c.x, c.y);
   }
   
@@ -445,7 +437,7 @@ public class AreaMap implements Session.Saveable {
   
   public boolean blocked(Tile t) {
     int pathing = pathType(t);
-    return pathing == PATH_BLOCK || pathing == PATH_WATER;
+    return pathing == Type.PATH_BLOCK || pathing == Type.PATH_WATER;
   }
   
   

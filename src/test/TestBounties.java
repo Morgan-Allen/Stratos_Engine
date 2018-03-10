@@ -25,7 +25,7 @@ public class TestBounties extends Test {
   //  Explore bounty on actor.
   //  Contact bounty on actor.
   //  Contact bounty on building.
-
+  
   
   static boolean testAttackBuildingMission(boolean graphics) {
     TestBounties test = new TestBounties() {
@@ -155,12 +155,11 @@ public class TestBounties extends Test {
       }
       
       if (fundsTaken && ! missionTaken) {
-        boolean allOn = true, someOn = false;
+        boolean someOn = false;
         for (Actor a : fort.workers()) {
           if (a.mission() == mission) someOn = true;
-          else allOn = false;
         }
-        missionTaken = allOn && someOn;
+        missionTaken = someOn;
       }
       
       if (missionTaken && ! targetFinished) {

@@ -7,12 +7,14 @@ import static game.GameConstants.*;
 
 
 
+
 public class CityMapPlanning {
   
   
   final AreaMap map;
   List <Element> toBuild = new List();
   Element grid[][];
+  byte reserveCounter[][];
   
   
   
@@ -26,6 +28,7 @@ public class CityMapPlanning {
     for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
       grid[c.x][c.y] = (Element) s.loadObject();
     }
+    s.loadByteArray(reserveCounter);
   }
   
   
@@ -34,11 +37,13 @@ public class CityMapPlanning {
     for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
       s.saveObject(grid[c.x][c.y]);
     }
+    s.saveByteArray(reserveCounter);
   }
   
   
   void performSetup(int size) {
     this.grid = new Element[map.size][map.size];
+    this.reserveCounter = new byte[map.size][map.size];
   }
   
   
@@ -62,9 +67,7 @@ public class CityMapPlanning {
     //  need maintenance or have become possible to build-
     for (int i = maxChecked; i-- > 0;) {
       Element e = toBuild.removeFirst();
-      if (e.buildLevel() < 1 || ! e.onMap()) {
-        togglePlacement(e, true);
-      }
+      if (e.buildLevel() < 1 || ! e.onMap()) placeObject(e);
       toBuild.addLast(e);
     }
   }
@@ -73,51 +76,71 @@ public class CityMapPlanning {
   
   /**  Support methods for object-placement within the plan:
     */
-  private void togglePlacement(Element e, boolean doPlace) {
-    if (e == null) return;
+  public void placeObject(Element e) {
     //
-    //  First, we compile a list of all elements that might interfere
-    //  with this placement, either in the physical area or within the
-    //  plan-map:
+    //  NOTE:  This method may be called repeatedly, even after initial
+    //  placement, to check for conditions that allow construction to actually
+    //  proceed (i.e, once all conflicting elements have been removed.)
+    
+    boolean unplaced = ! e.onPlan();
+    boolean reserves = ! e.type().isClearable();
     Type type = e.type();
-    Tile at   = e.at();
-    Batch <Element> inArea = new Batch();
-    Batch <Element> inPlan = new Batch();
-    for (Coord c : Visit.grid(at.x, at.y, type.wide, type.high, 1)) {
-      Element areaE = map.above(c);
-      Element planE = grid[c.x][c.y];
-      if (areaE != null && areaE != e) inArea.include(areaE);
-      if (planE != null && planE != e) inPlan.include(planE);
+    Batch <Element> conflicts = new Batch();
+    
+    if (unplaced) {
+      ///I.say("Placing "+e+" at "+e.at());
+      toBuild.add(e);
+      e.setOnPlan(true);
     }
-    //
-    //  If we're placing a fresh element, give any prior elements a
-    //  chance to remove themselves, marking the underlying grid
-    //  accordingly-
-    if (doPlace) for (Element i : inPlan) {
-      togglePlacement(i, false);
+    
+    e.checkPlacingConflicts(map, conflicts);
+
+    if (unplaced) for (Tile t : e.footprint(map, true)) {
+      int footMask = type.footprint(t, e);
+      if (footMask == -1) continue;
+      
+      if (reserves) {
+        reserveCounter[t.x][t.y] += 1;
+      }
+      if (footMask == 1) {
+        grid[t.x][t.y] = e;
+      }
     }
-    else {
-      toBuild.remove(e);
-      ///I.say("  REMOVING FROM BUILD LIST: "+e);
+    
+    for (Element i : conflicts) {
+      if (i.onPlan()) unplaceObject(i);
+      if (i.onMap()) updateBuildDemands(i);
     }
-    for (Coord c : Visit.grid(at.x, at.y, type.wide, type.high, 1)) {
-      grid[c.x][c.y] = doPlace ? e : null;
-    }
-    //
-    //  If the ground is cleared (or you're already on the map,) start
-    //  (or stop) signalling demands for building or salvage-
-    if (inArea.empty() || e.onMap()) {
+    if (conflicts.empty() || e.onMap()) {
       updateBuildDemands(e);
-    }
-    for (Element i : inArea) {
-      updateBuildDemands(i);
     }
   }
   
   
-  public void placeObject(Element e) {
-    toBuild.add(e);
-    togglePlacement(e, true);
+  public void unplaceObject(Element e) {
+    if (! e.onPlan()) return;
+    ///I.say("UNPLACING: "+e);
+    
+    boolean reserves = ! e.type().isClearable();
+    Type type = e.type();
+    
+    toBuild.remove(e);
+    e.setOnPlan(false);
+    
+    for (Tile t : e.footprint(map, true)) {
+      int footMask = type.footprint(t, e);
+      if (footMask == -1) continue;
+      
+      if (reserves) {
+        reserveCounter[t.x][t.y] -= 1;
+      }
+      if (footMask == 1) {
+        Element onPlan = grid[t.x][t.y];
+        if (onPlan == e) grid[t.x][t.y] = null;
+      }
+    }
+    
+    updateBuildDemands(e);
   }
   
   
@@ -125,11 +148,6 @@ public class CityMapPlanning {
     e.setLocation(map.tileAt(x, y), map);
     if (e.type().isBuilding()) ((Building) e).assignBase(owns);
     placeObject(e);
-  }
-  
-  
-  public void unplaceObject(Element e) {
-    togglePlacement(e, false);
   }
   
   
@@ -203,10 +221,6 @@ public class CityMapPlanning {
     }
   }
 }
-
-
-
-
 
 
 

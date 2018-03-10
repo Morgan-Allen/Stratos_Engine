@@ -5,8 +5,6 @@ import util.*;
 import static game.Base.*;
 import static game.AreaMap.*;
 import static game.GameConstants.*;
-
-import game.GameConstants.Target;
 import graphics.common.*;
 
 
@@ -97,7 +95,7 @@ public class TaskCombat extends Task {
   
   public static float attackPower(Type t) {
     float power = Nums.max(t.meleeDamage, t.rangeDamage) + t.armourClass;
-    power /= TOP_DAMAGE + TOP_ARMOUR;
+    power /= (TOP_DAMAGE / 2) + (TOP_ARMOUR / 2);
     power *= t.maxHealth * 1f / AVG_MAX_HEALTH;
     return power;
   }
@@ -123,8 +121,8 @@ public class TaskCombat extends Task {
   
   public static boolean wallBonus(Element from, Element goes) {
     boolean wallBonus = false;
-    wallBonus |= from.at().pathType() == PATH_WALLS;
-    wallBonus &= goes.at().pathType() != PATH_WALLS;
+    wallBonus |= from.at().pathType() == Type.PATH_WALLS;
+    wallBonus &= goes.at().pathType() != Type.PATH_WALLS;
     return wallBonus;
   }
   
@@ -353,8 +351,8 @@ public class TaskCombat extends Task {
     
     boolean needsConfig = true;
     Tile t = pick.result();
-    boolean standWall = t          .pathType() == PATH_WALLS;
-    boolean targWall  = target.at().pathType() == PATH_WALLS;
+    boolean standWall = t          .pathType() == Type.PATH_WALLS;
+    boolean targWall  = target.at().pathType() == Type.PATH_WALLS;
     boolean canTouch  = standWall == targWall;
     
     if (currentTask == null) {

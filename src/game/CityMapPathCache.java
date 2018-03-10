@@ -495,7 +495,7 @@ public class CityMapPathCache {
     area = new Area();
     area.ID       = nextAreaID++;
     area.numTiles = covered.size();
-    area.grounded = t.pathType() != PATH_WALLS;
+    area.grounded = t.pathType() != Type.PATH_WALLS;
     area.tiles    = covered.toArray(Tile.class);
     area.aX       = aX;
     area.aY       = aY;

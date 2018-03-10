@@ -23,7 +23,7 @@ public class Task implements Session.Saveable {
     DELIVER   ,
     SHOPPING  ,
     TRADING   ,
-    TENDING   ,
+    WAITING   ,
     VISITING  ,
     PLANTING  ,
     HARVEST   ,

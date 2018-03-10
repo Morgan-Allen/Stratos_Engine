@@ -113,12 +113,12 @@ public class Tile implements Pathing, Selection.Focus {
   public int pathType() {
     if (above != null) {
       int pathing = above.pathType();
-      if (pathing != PATH_NONE) return pathing;
+      if (pathing != Type.PATH_NONE) return pathing;
     }
     if (terrain != null) {
       return terrain.pathing;
     }
-    return PATH_FREE;
+    return Type.PATH_FREE;
   }
   
   
@@ -126,7 +126,7 @@ public class Tile implements Pathing, Selection.Focus {
     if (temp == null) temp = new Pathing[9];
     
     int pathT = pathType();
-    boolean blocked = pathT == PATH_BLOCK || pathT == PATH_WATER;
+    boolean blocked = pathT == Type.PATH_BLOCK || pathT == Type.PATH_WATER;
     
     if (above != null && above.allowsEntryFrom(this)) {
       temp[8] = (Pathing) above;
@@ -143,10 +143,10 @@ public class Tile implements Pathing, Selection.Focus {
       if (n.above != above && n.above != null && n.above.allowsEntryFrom(this)) {
         temp[dir] = (Pathing) n.above;
       }
-      else if (pathN == PATH_BLOCK || pathN == PATH_WATER) {
+      else if (pathN == Type.PATH_BLOCK || pathN == Type.PATH_WATER) {
         temp[dir] = null;
       }
-      else if (pathN == PATH_WALLS || pathT == PATH_WALLS) {
+      else if (pathN == Type.PATH_WALLS || pathT == Type.PATH_WALLS) {
         temp[dir] = pathN == pathT ? n : null;
       }
       else {

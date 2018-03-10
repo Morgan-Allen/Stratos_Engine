@@ -81,23 +81,21 @@ public class TaskExplore extends Task {
     
     goes = Tile.nearestOpenTile(goes, map);
     if (goes == null) return;
-
+    
     if (goes != null && totalDist < MAX_EXPLORE_DIST) {
       totalDist += AreaMap.distance(actor.at(), goes);
       configTask(null, null, goes, JOB.EXPLORING, 0);
     }
   }
   
-
-
+  
+  
   /**  Graphical, debug and interface methods-
     */
   String animName() {
     return AnimNames.LOOK;
   }
 }
-
-
 
 
 

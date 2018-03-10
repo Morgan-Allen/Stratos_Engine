@@ -30,13 +30,14 @@ public class TestCity extends Test {
     
     CityMapPlanning.placeStructure(WALKWAY, base, true, 3, 8, 25, 1);
     CityMapPlanning.placeStructure(WALKWAY, base, true, 8, 2, 1, 25);
+    CityMapPlanning.placeStructure(WALKWAY, base, true, 0, 0, 9, 9 );
     
     Building palace = (Building) BASTION          .generate();
     Building school = (Building) PHYSICIAN_STATION.generate();
     Building court  = (Building) CANTINA          .generate();
     Building admin  = (Building) ENFORCER_BLOC    .generate();
     
-    palace.enterMap(map, 2 , 2 , 1, base);
+    palace.enterMap(map, 1 , 1 , 1, base);
     court .enterMap(map, 9 , 9 , 1, base);
     school.enterMap(map, 9 , 2 , 1, base);
     admin .enterMap(map, 18, 9 , 1, base);
@@ -173,6 +174,11 @@ public class TestCity extends Test {
         testOkay = true;
         reportOnMap(map, base, true, PARTS, MEDICINE);
         if (! graphics) return true;
+      }
+      
+      if (map.time() > RUN_TIME - 100) {
+        //world.settings.paused = true;
+        //graphics = true;
       }
     }
     

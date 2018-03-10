@@ -59,11 +59,11 @@ public class Test {
   //  TODO:  Move these into the Scenario class!
   
   public static void fillAllVacancies(AreaMap map, ActorType defaultCitizen) {
-    for (Building b : map.buildings) if (b.accessible()) {
+    for (Building b : map.buildings) if (b.complete()) {
       fillWorkVacancies(b);
       for (Actor w : b.workers) ActorUtils.findHome(map, w);
     }
-    for (Building b : map.buildings) if (b.accessible()) {
+    for (Building b : map.buildings) if (b.complete()) {
       fillHomeVacancies(b, defaultCitizen);
     }
   }
@@ -90,7 +90,7 @@ public class Test {
   public static Actor spawnActor(Building b, ActorType type, boolean resident) {
     
     Actor actor = (Actor) type.generate();
-    Tile at = b.at();
+    Tile at = b.centre();
     
     if (type.isPerson()) {
       type.initAsMigrant((ActorAsPerson) actor);
@@ -104,8 +104,8 @@ public class Test {
       actor.setInside(b, true);
     }
     else {
-      Tile t = b.centre();
-      actor.enterMap(b.map, t.x, t.y, 1, b.base());
+      at = randomTileNear(at, b.radius(), b.map, true);
+      actor.enterMap(b.map, at.x, at.y, 1, b.base());
     }
     
     return actor;
@@ -118,7 +118,7 @@ public class Test {
     int x = (int) (at.x + (range * Rand.range(-1, 1)));
     int y = (int) (at.y + (range * Rand.range(-1, 1)));
     Tile t = map.tileAt(Nums.clamp(x, map.size), Nums.clamp(y, map.size));
-    if (open) t = Tile.nearestOpenTile(t, map);
+    if (open) t = Tile.nearestOpenTile(t, map, (int) range);
     return t;
   }
   
@@ -251,11 +251,10 @@ public class Test {
     if (placing != null) {
       Building builds = (Building) placing;
       Type type = builds.type();
-      int x = hover.x, y = hover.y, w = type.wide, h = type.high;
-      boolean canPlace = builds.canPlace(map, x, y);
-      
-      for (Coord c : Visit.grid(x, y, w, h, 1)) try {
-        graphic[c.x][c.y] = canPlace ? type.tint : NO_BLD_COLOR;
+      builds.setLocation(map.tileAt(hover), map);
+      boolean canPlace = builds.canPlace(map);
+      for (Tile t : builds.footprint(map, false)) try {
+        graphic[t.x][t.y] = canPlace ? type.tint : NO_BLD_COLOR;
       }
       catch (Exception e) {}
     }
@@ -633,7 +632,8 @@ public class Test {
       for (BuildingForCrafts.ItemOrder order : BC.orders()) {
         Good g = order.itemType;
         float amount = order.progress;
-        goodRep.add("\n  "+g+": "+I.shorten(amount, 1));
+        Actor client = order.client;
+        goodRep.add("\n  "+g+" ("+client+"): "+I.shorten(amount, 1));
       }
     }
     
@@ -648,6 +648,8 @@ public class Test {
       float demand = b.materialNeed(g);
       report.append("\n  "+g+": "+I.shorten(amount, 1)+"/"+I.shorten(demand, 1));
     }
+    
+    report.append("\nEntrances: "+I.list(b.entrances()));
     
     return report.toString();
   }
@@ -710,7 +712,9 @@ public class Test {
       report.append("\n  (S) confirm site");
       
       int x = hover.x, y = hover.y;
-      if (pressed.includes('s') && builds.canPlace(map, x, y)) {
+      builds.setLocation(map.tileAt(hover), map);
+      
+      if (pressed.includes('s') && builds.canPlace(map)) {
         builds.enterMap(map, x, y, 1, city);
         placing = (Building) builds.type().generate();
       }

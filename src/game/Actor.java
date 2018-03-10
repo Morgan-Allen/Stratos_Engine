@@ -233,14 +233,14 @@ public class Actor extends Element implements
   void update() {
     //
     //  Some checks to assist in case of blockage...
-    Tile at = at();
-    if (inside == null && at != null && ! map.pathCache.hasGroundAccess(at)) {
-      if (at.above != null && at.above.type().isBuilding()) {
-        setInside((Building) at.above, true);
-      }
-      else {
-        Tile free = map.pathCache.mostOpenNeighbour(at);
-        if (free != null) setLocation(free, map);
+    boolean trapped = false;
+    trapped |= inside == null && ! map.pathCache.hasGroundAccess(at());
+    trapped |= inside != null && Visit.empty(((Building) inside).entrances());
+    if (trapped) {
+      Tile free = map.pathCache.mostOpenNeighbour(at());
+      if (free != null) {
+        setInside(inside, false);
+        setLocation(free, map);
       }
     }
     //
@@ -574,7 +574,12 @@ public class Actor extends Element implements
   
   
   void updateVision() {
-    return;
+    if (indoors()) return;
+    
+    if (base() != map.locals) {
+      float range = sightRange();
+      map.fog.liftFog(at(), range);
+    }
   }
   
   

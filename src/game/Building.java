@@ -1,12 +1,12 @@
 
 
 package game;
+import static game.AreaMap.*;
+import static game.GameConstants.*;
 import gameUI.play.*;
 import graphics.common.*;
 import graphics.sfx.*;
 import util.*;
-import static game.AreaMap.*;
-import static game.GameConstants.*;
 import static util.TileConstants.*;
 
 
@@ -134,31 +134,29 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   }
   
   
-  Box2D claimArea(Tile from) {
-    //  TODO:  I really don't like having a separate method for this?
-    BuildType t = type();
-    Box2D area = new Box2D(from.x, from.y, t.wide, t.high);
-    if (t.claimMargin > 0) area.expandBy(t.claimMargin);
-    return area;
-  }
-  
-  
-  public boolean canPlace(AreaMap map, int x, int y) {
-    if (! super.canPlace(map, x, y)) return false;
+  public boolean canPlace(AreaMap map) {
+    if (! super.canPlace(map)) return false;
     //
     //  TODO:  The efficiency of this might be improved on larger maps.
-    int margin = type().paveMargin;
-    Box2D claims = claimArea(map.tileAt(x, y));
-    for (Building b : map.buildings()) {
+    boolean claimant = isClaimant();
+    int margin = type().clearMargin;
+    Box2D claims = claimArea();
+    for (Building b : (claimant ? map.buildings() : map.claimants())) {
       if (b.claimArea().axisDistance(claims) < margin) return false;
     }
+    //
+    //  TODO:  Make sure you can grab an entrance here as well!
     return true;
   }
   
   
   public Box2D claimArea() {
     if (at() == null) return null;
-    return claimArea(at());
+    Tile at = at();
+    BuildType t = type();
+    Box2D area = new Box2D(at.x, at.y, t.wide, t.high);
+    if (t.claimMargin > 0) area.expandBy(t.claimMargin);
+    return area;
   }
   
   
@@ -220,6 +218,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   
   
   public boolean allowsEntryFrom(Pathing p) {
+    if (! complete()) return false;
     return Visit.arrayIncludes(entrances, p);
   }
   
@@ -246,11 +245,6 @@ public class Building extends Element implements Pathing, Employer, Carrier {
     refreshEntrances(selectEntrances());
     super.onCompletion();
     updateOnPeriod(0);
-  }
-  
-  
-  boolean accessible() {
-    return complete() || type().worksBeforeBuilt;
   }
   
   
@@ -299,7 +293,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   /**  Regular updates:
     */
   void update() {
-    if (! accessible()) {
+    if (! complete()) {
       return;
     }
     
@@ -316,6 +310,11 @@ public class Building extends Element implements Pathing, Employer, Carrier {
       updateOnPeriod(type().updateTime);
       updateWorkers(type().updateTime);
       updateGap = type().updateTime;
+    }
+    
+    if (base() != map.locals) {
+      float fogLift = sightRange() + (radius() / 2);
+      map.fog.liftFog(centre(), fogLift);
     }
   }
   
@@ -376,7 +375,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   boolean checkEntranceOkay(Tile e, int index) {
     if (e.above == this) return true;
     int pathT = e.pathType();
-    if (pathT == PATH_FREE || pathT == PATH_PAVE) return true;
+    if (pathT == Type.PATH_FREE || pathT == Type.PATH_PAVE) return true;
     return false;
   }
   
@@ -388,8 +387,8 @@ public class Building extends Element implements Pathing, Employer, Carrier {
       public void compare(Tile t, float rating) {
         
         int pathT = t.pathType();
-        if (pathT != PATH_FREE && pathT != PATH_PAVE) return;
-        if (pathT != PATH_PAVE) rating /= 2;
+        if (pathT != Type.PATH_FREE && pathT != Type.PATH_PAVE) return;
+        if (pathT != Type.PATH_PAVE) rating /= 2;
         
         super.compare(t, rating);
       }
@@ -460,7 +459,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   
   
   public float stockLimit(Good g) {
-    if (! accessible()) return 0;
+    if (! complete()) return 0;
     boolean needs = Visit.arrayIncludes(needed  (), g);
     boolean prods = Visit.arrayIncludes(produced(), g);
     if (needs || prods) return type().maxStock;

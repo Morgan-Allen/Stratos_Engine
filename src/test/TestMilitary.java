@@ -36,7 +36,7 @@ public class TestMilitary extends Test {
     
     World.setupRoute(baseC.locale, awayC.locale, 1);
     Base.setPosture(baseC, awayC, Base.POSTURE.ENEMY, true);
-    awayC.setArmyPower(AVG_ARMY_POWER / 4);
+    awayC.setArmyPower(0);
     
     
     BuildingForArmy fort1 = (BuildingForArmy) TROOPER_LODGE.generate();

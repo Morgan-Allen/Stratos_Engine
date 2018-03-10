@@ -29,7 +29,8 @@ public class TaskResting extends Task {
   }
   
   
-  /**  Factory methods for outside access-
+  
+  /**  Factory methods for outside access and other helper functions-
     */
   static TaskResting configResting(Actor actor, Building rests) {
     if (actor == null || rests == null) return null;
@@ -52,7 +53,7 @@ public class TaskResting extends Task {
   
   
   static float restUrgency(Actor actor, Building rests) {
-    if (actor == null || rests == null) return -1;
+    if (actor == null || rests == null || ! rests.complete()) return -1;
     
     Batch <Good> menu = menuAt(rests, actor);
     float hurtRating = actor.fatigue() + actor.injury();
@@ -93,10 +94,6 @@ public class TaskResting extends Task {
     }
   }
 }
-
-
-
-
 
 
 

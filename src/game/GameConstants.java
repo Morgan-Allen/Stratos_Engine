@@ -143,6 +143,7 @@ public class GameConstants {
     //  Exploration and wandering-
     MAX_WANDER_RANGE = 20  ,
     AVG_EXPLORE_DIST = 8   ,
+    MAX_EXPLORE_DIST = 200 ,
     //
     //  Military, and combat-
     AVG_ARMY_SIZE    = 9   ,
@@ -154,7 +155,6 @@ public class GameConstants {
     AVG_RANGE        = 3   ,
     MAX_RANGE        = 6   ,
     MAX_CASUALTIES   = 50  ,  //  percent of total force before retreat
-    MAX_EXPLORE_DIST = 200 ,
     WALL_HIT_BONUS   = 40  ,  //  percent chance
     WALL_DEF_BONUS   = 25  ,  //  percent chance
     WALL_ARM_BONUS   = 2   ,

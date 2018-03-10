@@ -37,10 +37,13 @@ public class ActorAsVessel extends Actor implements Trader, Employer {
   }
   
   
+  
+  /**  Regular updates and behaviour methods-
+    */
   void beginNextBehaviour() {
     assignTask(null);
     
-    if (idle() && work() != null && work().accessible()) {
+    if (idle() && work() != null && work().complete()) {
       assignTask(work().selectActorBehaviour(this));
     }
     if (idle()) {
@@ -48,8 +51,8 @@ public class ActorAsVessel extends Actor implements Trader, Employer {
     }
   }
   
-  
-  
+
+
   /**  Implementing Employer interface-
     */
   public Task selectActorBehaviour(Actor actor) {

@@ -114,7 +114,7 @@ public class TestFarming extends Test {
       //  Then actual harvesting needs to proceed correctly:
       if (planted && ! harvest) {
         boolean enough = true;
-        for (Good n : needed) if (farm.inventory(n) < 5) {
+        for (Good n : needed) if (farm.inventory(n) < 2.5f) {
           enough = false;
         }
         harvest = enough;

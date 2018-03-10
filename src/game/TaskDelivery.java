@@ -134,8 +134,8 @@ public class TaskDelivery extends Task {
       //
       //  We need to allow for structures that aren't built yet, as well as
       //  those that are-
-      Tile fromT = from.accessible() ? from.mainEntrance() : from.at();
-      Tile goesT = b   .accessible() ? b   .mainEntrance() : b   .at();
+      Tile fromT = from.complete() ? from.mainEntrance() : from.at();
+      Tile goesT = b   .complete() ? b   .mainEntrance() : b   .at();
       float dist = AreaMap.distance(fromT, goesT);
       if (maxDist > 0 && dist > maxDist) continue;
       

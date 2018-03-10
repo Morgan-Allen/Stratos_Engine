@@ -509,7 +509,7 @@ public class GameContent {
     );
     BASTION.foundationModel = FOUNDATIONS[6];
     
-    BASTION.setDimensions(6, 6, 3);
+    BASTION.setDimensions(6, 6, 3, WIDE_MARGIN);
     BASTION.maxHealth = 300;
     BASTION.setBuildMaterials(PLASTICS, 10, PARTS, 25);
     BASTION.workerTypes.setWith(Nobles.NOBLE, 1, Vassals.AUDITOR, 1, Vassals.PYON, 2);
@@ -519,7 +519,6 @@ public class GameContent {
     BASTION.needed       = new Good[] { CARBS, GREENS, PLASTICS, PARTS };
     BASTION.maxStock     = 10;
     BASTION.setFeatures(IS_HOUSING, IS_REFUGE, IS_ADMIN);
-    BASTION.worksBeforeBuilt = true;
     BASTION.uniqueBuilding = true;
     
     BASTION_L2.name = "Bastion Level 2";
@@ -540,7 +539,7 @@ public class GameContent {
     );
     TROOPER_LODGE.foundationModel = FOUNDATIONS[3];
     
-    TROOPER_LODGE.setDimensions(3, 3, 2);
+    TROOPER_LODGE.setDimensions(3, 3, 2, THIN_MARGIN);
     TROOPER_LODGE.setBuildMaterials(PLASTICS, 1, PARTS, 7);
     TROOPER_LODGE.workerTypes.setWith(Trooper.TROOPER, 3);
     TROOPER_LODGE.maxHealth = 250;
@@ -553,7 +552,7 @@ public class GameContent {
     );
     ENFORCER_BLOC.foundationModel = FOUNDATIONS[3];
     
-    ENFORCER_BLOC.setDimensions(2, 2, 1);
+    ENFORCER_BLOC.setDimensions(2, 2, 1, THIN_MARGIN);
     ENFORCER_BLOC.setBuildMaterials(PARTS, 4);
     ENFORCER_BLOC.workerTypes.setWith(ENFORCER, 2);
     ENFORCER_BLOC.features = new Good[] { IS_ADMIN };
@@ -566,7 +565,7 @@ public class GameContent {
     );
     KOMMANDO_REDOUBT.foundationModel = FOUNDATIONS[3];
     
-    KOMMANDO_REDOUBT.setDimensions(3, 3, 1);
+    KOMMANDO_REDOUBT.setDimensions(3, 3, 1, THIN_MARGIN);
     KOMMANDO_REDOUBT.setBuildMaterials(PLASTICS, 5, PARTS, 1);
     KOMMANDO_REDOUBT.workerTypes.setWith(KOMMANDO, 3);
     KOMMANDO_REDOUBT.produced = new Good[] { PROTEIN };
@@ -581,10 +580,9 @@ public class GameContent {
     );
     ECOLOGIST_STATION.foundationModel = FOUNDATIONS[3];
     
-    ECOLOGIST_STATION.setDimensions(3, 3, 2);
+    ECOLOGIST_STATION.setDimensions(3, 3, 2, THIN_MARGIN);
     ECOLOGIST_STATION.setBuildMaterials(PLASTICS, 7, PARTS, 1);
     ECOLOGIST_STATION.workerTypes.setWith(ECOLOGIST, 3);
-    ECOLOGIST_STATION.worksBeforeBuilt = true;
     ECOLOGIST_STATION.maxHealth  = 100;
     ECOLOGIST_STATION.produced   = new Good[] { PROTEIN };
     
@@ -596,7 +594,7 @@ public class GameContent {
     );
     ENGINEER_STATION.foundationModel = FOUNDATIONS[3];
     
-    ENGINEER_STATION.setDimensions(3, 3, 2);
+    ENGINEER_STATION.setDimensions(3, 3, 2, THIN_MARGIN);
     ENGINEER_STATION.setBuildMaterials(PARTS, 8);
     ENGINEER_STATION.workerTypes.setWith(ENGINEER, 3);
     ENGINEER_STATION.needed   = new Good[] { CARBONS, ORES };
@@ -618,7 +616,7 @@ public class GameContent {
     );
     PHYSICIAN_STATION.foundationModel = FOUNDATIONS[3];
     
-    PHYSICIAN_STATION.setDimensions(3, 3, 2);
+    PHYSICIAN_STATION.setDimensions(3, 3, 2, THIN_MARGIN);
     PHYSICIAN_STATION.setBuildMaterials(PLASTICS, 4, PARTS, 2);
     PHYSICIAN_STATION.workerTypes.setWith(PHYSICIAN, 3);
     PHYSICIAN_STATION.needed   = new Good[] { GREENS };
@@ -640,7 +638,7 @@ public class GameContent {
     );
     STOCK_EXCHANGE.foundationModel = FOUNDATIONS[3];
     
-    STOCK_EXCHANGE.setDimensions(3, 3, 1);
+    STOCK_EXCHANGE.setDimensions(3, 3, 1, THIN_MARGIN);
     STOCK_EXCHANGE.setBuildMaterials(PLASTICS, 4, PARTS, 2);
     STOCK_EXCHANGE.workerTypes.setWith(Vassals.VENDOR, 1);
     STOCK_EXCHANGE.needed    = MARKET_GOODS;
@@ -657,10 +655,9 @@ public class GameContent {
     );
     SUPPLY_DEPOT.foundationModel = FOUNDATIONS[3];
     
-    SUPPLY_DEPOT.setDimensions(3, 3, 1);
+    SUPPLY_DEPOT.setDimensions(3, 3, 1, THIN_MARGIN);
     SUPPLY_DEPOT.setBuildMaterials(PLASTICS, 4, PARTS, 2);
     SUPPLY_DEPOT.workerTypes.setWith(Vassals.PYON, 1, Vassals.CARGO_BARGE, 1);
-    SUPPLY_DEPOT.worksBeforeBuilt = true;
     SUPPLY_DEPOT.features = new Good[] { IS_TRADER };
     SUPPLY_DEPOT.buildsWith = new Good[] { PLASTICS, PARTS };
     
@@ -714,7 +711,7 @@ public class GameContent {
     
     for (BuildType t : PSI_SCHOOL_BUILDINGS) {
       t.tint = TINT_RELIGIOUS;
-      t.setDimensions(4, 4, 2);
+      t.setDimensions(4, 4, 2, WIDE_MARGIN);
       t.setBuildMaterials(PARTS, 15);
       t.maxHealth       = 150;
       t.homeSocialClass = CLASS_NOBLE;
@@ -785,7 +782,7 @@ public class GameContent {
     HOLDING.modelVariants = HOUSE_MODELS[0];
     HOLDING.foundationModel = FOUNDATIONS[2];
     
-    HOLDING.setDimensions(2, 2, 1);
+    HOLDING.setDimensions(2, 2, 1, THIN_MARGIN);
     HOLDING.setBuildMaterials(PLASTICS, 1, PARTS, 0);
     HOLDING.homeFoods    = FOOD_TYPES;
     HOLDING.maxResidents = 4;
@@ -819,8 +816,8 @@ public class GameContent {
     );
     CANTINA.foundationModel = FOUNDATIONS[3];
     
-    CANTINA.setDimensions(3, 3, 1);
-    CANTINA.setBuildMaterials(PARTS, 10);
+    CANTINA.setDimensions(3, 3, 1, THIN_MARGIN);
+    CANTINA.setBuildMaterials(PLASTICS, 5, PARTS, 2);
     CANTINA.setFeatures(DIVERSION, IS_REFUGE);
     CANTINA.featureAmount = 15;
     
@@ -834,10 +831,9 @@ public class GameContent {
     );
     NURSERY.foundationModel = FOUNDATIONS[2];
     
-    NURSERY.setDimensions(2, 2, 1);
-    NURSERY.setBuildMaterials(PLASTICS, 5, PARTS, 2);
+    NURSERY.setDimensions(2, 2, 1, THIN_MARGIN);
+    NURSERY.setBuildMaterials(PLASTICS, 3, PARTS, 1);
     NURSERY.workerTypes.setWith(Vassals.PYON, 1);
-    NURSERY.worksBeforeBuilt = true;
     NURSERY.gatherFlag  = IS_CROP;
     NURSERY.claimMargin = 4;
     NURSERY.produced    = new Good[] { CARBS, GREENS };
@@ -855,10 +851,9 @@ public class GameContent {
     );
     HARVESTER.foundationModel = FOUNDATIONS[3];
     
-    HARVESTER.setDimensions(3, 3, 1);
+    HARVESTER.setDimensions(3, 3, 1, THIN_MARGIN);
     HARVESTER.setBuildMaterials(PLASTICS, 5, PARTS, 2);
     HARVESTER.workerTypes.setWith(Vassals.PYON, 1);
-    HARVESTER.worksBeforeBuilt = true;
     HARVESTER.gatherFlag = IS_TREE;
     HARVESTER.maxStock   = 10;
     HARVESTER.produced   = new Good[] { CARBONS };
@@ -874,10 +869,9 @@ public class GameContent {
     );
     EXCAVATOR.foundationModel = FOUNDATIONS[4];
     
-    EXCAVATOR.setDimensions(4, 4, 1);
+    EXCAVATOR.setDimensions(4, 4, 1, THIN_MARGIN);
     EXCAVATOR.setBuildMaterials(PLASTICS, 2, PARTS, 5);
     EXCAVATOR.workerTypes.setWith(Vassals.PYON, 2);
-    EXCAVATOR.worksBeforeBuilt = true;
     EXCAVATOR.gatherFlag = IS_STONE;
     EXCAVATOR.maxStock   = 25;
     EXCAVATOR.produced   = new Good[] { CARBONS, ORES };
@@ -917,6 +911,7 @@ public class GameContent {
     RUINS_LAIR.name = "Ruins";
     RUINS_LAIR.tint = TINT_LITE_INDUSTRIAL;
     RUINS_LAIR.setDimensions(3, 3, 1);
+    RUINS_LAIR.claimMargin = 1;
     RUINS_LAIR.setBuildMaterials(VOID, 10);
     RUINS_LAIR.maxHealth = 300;
   }

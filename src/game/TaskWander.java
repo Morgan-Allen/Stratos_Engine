@@ -40,6 +40,10 @@ public class TaskWander extends Task {
   }
   
   
+  protected float successPriority() {
+    return Task.IDLE;
+  }
+  
   
   Pathing[] updatePathing() {
     Actor actor = (Actor) this.active;
@@ -54,13 +58,14 @@ public class TaskWander extends Task {
     next.flagWith(walk);
     walk.add(next);
     
+    boolean prefPave = Rand.yes() && next.pathType() == Type.PATH_PAVE;
+    
     while (walk.size() < range) {
-      boolean prefPave = false;// next.pathType() == PATH_PAVE;
       
       int numA = 0;
       for (Pathing n : next.adjacent(temp, map)) {
         if (n == null || n.flaggedWith() != null) continue;
-        if (prefPave && n.pathType() != PATH_PAVE) continue; 
+        if (prefPave && n.pathType() != Type.PATH_PAVE) continue; 
         adj[numA] = n;
         numA += 1;
       }

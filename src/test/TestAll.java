@@ -39,8 +39,8 @@ public class TestAll {
     record(TestExploring.testExploring(false));
     record(TestWorld    .testWorld    (false));
     
-    record(TestBounties.testAttackActorMission   (false));
     record(TestBounties.testAttackBuildingMission(false));
+    record(TestBounties.testAttackActorMission   (false));
     record(TestBounties.testExploreAreaMission   (false));
     
     long taken = System.currentTimeMillis() - init;
