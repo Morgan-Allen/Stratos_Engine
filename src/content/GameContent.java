@@ -788,7 +788,7 @@ public class GameContent {
     
     HOLDING.setDimensions(2, 2, 1, THIN_MARGIN);
     HOLDING.setBuildMaterials(PLASTICS, 1, PARTS, 0);
-    HOLDING.homeFoods    = FOOD_TYPES;
+    HOLDING.homeUseGoods.setWith(CARBS, 4);
     HOLDING.maxResidents = 4;
     HOLDING.maxStock     = 1;
     HOLDING.buildsWith   = new Good[] { PLASTICS, PARTS };
@@ -799,15 +799,18 @@ public class GameContent {
     HOUSE_T1.name = "Improved Holding";
     HOUSE_T1.modelVariants = HOUSE_MODELS[1];
     
-    HOUSE_T1.setBuildMaterials(PLASTICS, 1, PARTS, 1);
+    HOUSE_T1.setBuildMaterials(PLASTICS, 2, PARTS, 1);
+    HOUSE_T1.homeUseGoods.setWith();
+    HOUSE_T1.homeUseGoods.add(HOLDING.homeUseGoods);
     HOUSE_T1.maxStock = 2;
     HOUSE_T1.serviceNeeds.setWith(DIVERSION, 10);
     
     HOUSE_T2.name = "Fancy Holding";
     HOUSE_T2.modelVariants = HOUSE_MODELS[2];
     
-    HOUSE_T2.setBuildMaterials(PLASTICS, 1, PARTS, 1);
-    HOUSE_T2.homeUseGoods.setWith(MEDICINE, 1);
+    HOUSE_T2.setBuildMaterials(PLASTICS, 3, PARTS, 2);
+    HOUSE_T2.homeUseGoods.setWith(MEDICINE, 1, GREENS, 1);
+    HOUSE_T2.homeUseGoods.add(HOUSE_T1.homeUseGoods);
     HOUSE_T2.maxStock = 2;
     HOUSE_T2.serviceNeeds.setWith(DIVERSION, 15, PHYSICIAN_STATION, 1);
     

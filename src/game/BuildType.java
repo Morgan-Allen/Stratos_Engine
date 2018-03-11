@@ -28,7 +28,6 @@ public class BuildType extends Type {
   public BuildType allUpgrades[] = NO_UPGRADES;
   public BuildType needsAsUpgrade[] = {};
   
-  public Good homeFoods[] = {};
   public int homeSocialClass  = CLASS_COMMON;
   public int homeAmbienceNeed = AMBIENCE_MIN;
   public int homeUseTime      = HOME_USE_TIME;

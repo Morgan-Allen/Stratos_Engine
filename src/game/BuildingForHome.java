@@ -160,14 +160,12 @@ public class BuildingForHome extends Building {
   
   
   float maxTierStock(Good g, BuildType tier) {
-    if (Visit.arrayIncludes(type().homeFoods, g)) return 5;
     return tier.homeUseGoods.valueFor(g);
   }
   
   
   public Batch <Good> usedBy(BuildType tier) {
     Batch <Good> consumes = new Batch();
-    for (Good g : type().homeFoods        ) consumes.add(g);
     for (Good g : tier.homeUseGoods.keys()) consumes.add(g);
     return consumes;
   }
