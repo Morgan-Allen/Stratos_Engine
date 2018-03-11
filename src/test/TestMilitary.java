@@ -9,7 +9,7 @@ import static game.GameConstants.*;
 
 
 
-public class TestMilitary extends Test {
+public class TestMilitary extends LogicTest {
   
   
   public static void main(String args[]) {
@@ -18,7 +18,7 @@ public class TestMilitary extends Test {
   
   
   static boolean testMilitary(boolean graphics) {
-    Test test = new TestMilitary();
+    LogicTest test = new TestMilitary();
     
     World   world = new World(ALL_GOODS);
     Base    baseC = new Base(world, world.addLocale(2, 2));
@@ -27,7 +27,7 @@ public class TestMilitary extends Test {
       baseC, 32, 0, MEADOW, JUNGLE
     );
     world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES());
-    world.addCities(baseC, awayC);
+    world.addBases(baseC, awayC);
     baseC.setName("Home City");
     awayC.setName("Away City");
     awayC.council.setTypeAI(CityCouncil.AI_OFF);
@@ -41,16 +41,16 @@ public class TestMilitary extends Test {
     
     BuildingForArmy fort1 = (BuildingForArmy) TROOPER_LODGE.generate();
     fort1.enterMap(map, 10, 10, 1, baseC);
-    fillWorkVacancies(fort1);
+    ActorUtils.fillWorkVacancies(fort1);
     BuildingForArmy fort2 = (BuildingForArmy) TROOPER_LODGE.generate();
     fort2.enterMap(map, 14, 10, 1, baseC);
-    fillWorkVacancies(fort2);
+    ActorUtils.fillWorkVacancies(fort2);
     CityMapPlanning.placeStructure(WALKWAY, baseC, true, 2, 9, 30, 1);
     
     for (int n = 8; n-- > 0;) {
       Building house = (Building) HOLDING.generate();
       house.enterMap(map, 2 + (n * 3), 7, 1, baseC);
-      fillHomeVacancies(house, Vassals.PYON);
+      ActorUtils.fillHomeVacancies(house, Vassals.PYON);
       for (Actor a : house.residents()) a.setSexData(SEX_MALE);
     }
     
@@ -107,7 +107,7 @@ public class TestMilitary extends Test {
         homeWin = ! survivors;
         if (homeWin) {
           troops.disbandFormation();
-          fillAllVacancies(map, Vassals.PYON);
+          ActorUtils.fillAllVacancies(map, Vassals.PYON);
         }
       }
       

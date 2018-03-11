@@ -76,9 +76,9 @@ public abstract class CityMapScenario implements Session.Saveable {
   
   protected abstract String savePath();
   protected abstract World createWorld();
-  protected abstract AreaMap createStage(World verse);
-  protected abstract Base createBase(AreaMap stage, World verse);
-  protected abstract void configScenario(World verse, AreaMap stage, Base base);
+  protected abstract AreaMap createStage(World world);
+  protected abstract Base createBase(AreaMap map, World world);
+  protected abstract void configScenario(World world, AreaMap map, Base base);
   
   
   public float loadProgress() {

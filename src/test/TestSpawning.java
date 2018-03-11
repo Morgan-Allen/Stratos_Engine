@@ -8,7 +8,7 @@ import static game.GameConstants.*;
 
 
 
-public class TestSpawning extends Test {
+public class TestSpawning extends LogicTest {
   
   
   public static void main(String args[]) {
@@ -17,9 +17,9 @@ public class TestSpawning extends Test {
   
   
   static boolean testSpawning(boolean graphics) {
-    Test test = new TestSpawning();
+    LogicTest test = new TestSpawning();
     
-    Base base = setupTestCity(32, ALL_GOODS, true, JUNGLE, MEADOW);
+    Base base = setupTestBase(32, ALL_GOODS, true, JUNGLE, MEADOW);
     AreaMap map = base.activeMap();
     World world = map.world;
     

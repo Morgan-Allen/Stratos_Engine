@@ -291,8 +291,10 @@ public class GameContent {
     DRONE.predator    = false;
     DRONE.meleeDamage = 0;
     DRONE.rangeDamage = 2;
+    DRONE.rangeDist   = 4;
     DRONE.armourClass = 4;
     DRONE.maxHealth   = 8;
+    DRONE.weaponType  = Devices.INTRINSIC_BEAM;
     
     
     TRIPOD.name  = "Tripod";
@@ -305,8 +307,10 @@ public class GameContent {
     TRIPOD.deep        = 2;
     TRIPOD.meleeDamage = 4;
     TRIPOD.rangeDamage = 6;
+    TRIPOD.rangeDist   = 6;
     TRIPOD.armourClass = 6;
     TRIPOD.maxHealth   = 15;
+    TRIPOD.weaponType = Devices.INTRINSIC_BEAM;
     
     
     CRANIAL.name  = "Cranial";
@@ -937,7 +941,7 @@ public class GameContent {
       TROOPER_LODGE, 2f ,
       HOLDING      , 10f
     );
-    world.addCities(cityA);
+    world.addBases(cityA);
     
     cityB.setName("Pavonis Base");
     cityB.setTradeLevel(CARBS, 0, 5 );
@@ -950,7 +954,7 @@ public class GameContent {
       TROOPER_LODGE, 0.75f,
       HOLDING      , 5f
     );
-    world.addCities(cityB);
+    world.addBases(cityB);
     
     World.setupRoute(cityA.locale, cityB.locale, AVG_CITY_DIST / 2);
     world.setMapSize(10, 10);

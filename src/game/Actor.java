@@ -4,6 +4,7 @@ package game;
 import gameUI.play.*;
 import graphics.common.*;
 import graphics.sfx.*;
+import test.LogicTest;
 import util.*;
 import static game.Task.*;
 import static game.AreaMap.*;
@@ -61,6 +62,9 @@ public class Actor extends Element implements
   float stress  ;
   float cooldown;
   int   state = STATE_OKAY;
+  
+  
+  private Vec3D renderPos = new Vec3D();
   
   
   
@@ -709,7 +713,7 @@ public class Actor extends Element implements
   public String toString() {
     
     Base player = PlayUI.playerBase();
-    if (player == null) player = Test.currentCity();
+    if (player == null) player = LogicTest.currentCity();
     
     String from = "";
     if (map != null && player != null && homeCity != null) {
@@ -747,28 +751,43 @@ public class Actor extends Element implements
   }
   
   
+  public Vec3D renderedPosition(Vec3D store) {
+    if (store != null) store.setTo(renderPos);
+    return renderPos;
+  }
+  
+  
   public void renderElement(Rendering rendering, Base base) {
     Sprite s = sprite();
     if (s == null) return;
     
     Tile from = at(), goes = from;
-    Target next = task == null ? null : task.nextOnPath();
+    boolean contact = task != null && task.checkContact(task.path);
+    Target next = (task == null || contact) ? null : task.nextOnPath();
     if (next != null && next.isTile()) goes = (Tile) next;
-    if (from == next && task != null ) next = task.faceTarget();
+    if (contact) next = task.faceTarget().at();
     
-    //  TODO:  Factor this out below!
+    //  TODO:  There is also a problem where the actor continues 'sliding'
+    //  toward the target after the actual task-animation has begun.  Fix that!
+    
     float alpha = Rendering.frameAlpha(), rem = 1 - alpha;
     s.position.set(
       (from.x * rem) + (goes.x * alpha) + 0.5f,
       (from.y * rem) + (goes.y * alpha) + 0.5f,
       0
     );
-    if (goes != from) {
+    renderPos.setTo(s.position);
+    if (from != next) {
+      goes = next.at();
       float angle = new Vec2D(goes.x - from.x, goes.y - from.y).toAngle();
       s.rotation = angle;
     }
     
-    if (task != null && task.inContact()) {
+    //  TODO:  The problem here is that the task only enters contact range at
+    //  the same moment that the action is delivered, thereby replacing
+    //  itself with a new task not flagged as in contact.  Aha.
+    
+    if (contact) {
       float animProg = Rendering.activeTime() % 1;
       //final float animProg = progress + ((nextProg - progress) * frameAlpha);
       s.setAnimation(task.animName(), animProg, true);
@@ -800,15 +819,23 @@ public class Actor extends Element implements
       return ((Element) inside).trackPosition();
     }
     else {
+      Vec3D s = new Vec3D();
       Tile from = at(), goes = from;
-      Pathing next = task == null ? null : task.nextOnPath();
+      boolean contact = task != null && task.checkContact(task.path);
+      Target next = (task == null || contact) ? null : task.nextOnPath();
       if (next != null && next.isTile()) goes = (Tile) next;
+      if (contact) next = task.faceTarget().at();
+      
+      //  TODO:  There is also a problem where the actor continues 'sliding'
+      //  toward the target after the actual task-animation has begun.  Fix that!
       
       float alpha = Rendering.frameAlpha(), rem = 1 - alpha;
-      return new Vec3D(
+      s.set(
         (from.x * rem) + (goes.x * alpha) + 0.5f,
         (from.y * rem) + (goes.y * alpha) + 0.5f,
-      0);
+        0
+      );
+      return s;
     }
   }
 }

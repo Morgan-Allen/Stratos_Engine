@@ -163,6 +163,13 @@ public class BuildingForCrafts extends Building {
   }
   
   
+  
+  /**  Rendering, debug and graphics methods-
+    */
+  public String descOrder(Object order) {
+    ItemOrder o = (ItemOrder) order;
+    return o.itemType+" ("+o.client+"): "+I.shorten(o.progress, 1);
+  }
 }
 
 

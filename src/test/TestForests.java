@@ -8,7 +8,7 @@ import static content.GameContent.*;
 
 
 
-public class TestForests extends Test {
+public class TestForests extends LogicTest {
   
   
   public static void main(String args[]) {
@@ -17,17 +17,16 @@ public class TestForests extends Test {
   
   
   static boolean testForests(boolean graphics) {
-    Test test = new TestForests();
+    LogicTest test = new TestForests();
 
-    Base base = setupTestCity(32, ALL_GOODS, true, JUNGLE, MEADOW);
+    Base base = setupTestBase(32, ALL_GOODS, true, JUNGLE, MEADOW);
     AreaMap map = base.activeMap();
     World world = map.world;
     world.settings.toggleFog = false;
     
     Building logs = (Building) HARVESTER.generate();
     logs.enterMap(map, 5, 5, 1, base);
-    clearMargins(logs, 2);
-    fillWorkVacancies(logs);
+    ActorUtils.fillWorkVacancies(logs);
     
     boolean loggingDone = false;
     

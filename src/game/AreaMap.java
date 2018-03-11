@@ -46,7 +46,9 @@ public class AreaMap implements Session.Saveable {
   List <Actor   > actors    = new List();
   final public CityMapPathCache pathCache = new CityMapPathCache(this);
   
+  
   String saveName;
+  final public Ephemera ephemera = new Ephemera(this);
   
   
   public AreaMap(World world, World.Locale locale, Base... cities) {
@@ -115,6 +117,7 @@ public class AreaMap implements Session.Saveable {
     pathCache.loadState(s);
     
     saveName = s.loadString();
+    ephemera.loadState(s);
   }
   
   
@@ -167,6 +170,7 @@ public class AreaMap implements Session.Saveable {
     pathCache.saveState(s);
     
     s.saveString(saveName);
+    ephemera.saveState(s);
   }
   
   
@@ -515,6 +519,7 @@ public class AreaMap implements Session.Saveable {
     }
     
     time += 1;
+    numUpdates += 1;
     
     fog.updateFog();
     terrain.updateTerrain();
@@ -582,10 +587,15 @@ public class AreaMap implements Session.Saveable {
   
   
   public void renderStage(Rendering rendering, Base playing) {
+    
+    //  TODO:  You might watch out for loss-of-precision over longer games?
     float renderTime = (numUpdates + Rendering.frameAlpha()) / ticksPS;
+    
     
     Box2D area = new Box2D(0, 0, size, size);
     terrain.readyAllMeshes();
+    
+    boolean report = false;
     int totalChunks = 0, chunksShown = 0;
     
     List <Box2D> descent = new List();
@@ -624,17 +634,15 @@ public class AreaMap implements Session.Saveable {
     }
     
     totalChunks = (size / 4) * (size / 4);
-    if (I.used60Frames) {
-      //I.say("Displayed "+chunksShown+" chunks out of "+totalChunks);
+    if (I.used60Frames && report) {
+      I.say("Displayed "+chunksShown+" chunks out of "+totalChunks);
     }
     
     fog.renderFor(renderTime, rendering);
     
-    /*
-    for (Ghost ghost : ephemera.visibleFor(rendering, playing, renderTime)) {
-      ghost.renderFor(rendering, playing);
+    for (Ephemera.Ghost ghost : ephemera.visibleFor(rendering, playing, renderTime)) {
+      ephemera.renderGhost(ghost, rendering, playing);
     }
-    //*/
     
     for (Building venue : buildings) {
       if (! venue.canRender(playing, rendering.view)) continue;
@@ -647,7 +655,7 @@ public class AreaMap implements Session.Saveable {
     }
     
     for (Base base : bases) {
-      //  TODO:  Reconsider this bit...
+      //  TODO:  Reconsider this bit?
       if (base != playing) continue;
       
       for (Mission mission : base.missions()) {
@@ -657,11 +665,6 @@ public class AreaMap implements Session.Saveable {
     }
     
   }
-  
-  
-  //public Ephemera ephemera() {
-    //return ephemera;
-  //}
 }
 
 

@@ -9,7 +9,7 @@ import static game.GameConstants.*;
 
 
 
-public class TestAutoBuild extends Test {
+public class TestAutoBuild extends LogicTest {
   
   
   public static void main(String args[]) {
@@ -18,9 +18,9 @@ public class TestAutoBuild extends Test {
   
   
   static boolean testAutoBuild(boolean graphics) {
-    Test test = new TestAutoBuild();
+    LogicTest test = new TestAutoBuild();
     
-    Base base = setupTestCity(16, ALL_GOODS, false);
+    Base base = setupTestBase(16, ALL_GOODS, false);
     AreaMap map = base.activeMap();
     World world = map.world;
     world.settings.toggleFog         = false;
@@ -39,8 +39,8 @@ public class TestAutoBuild extends Test {
     forge.setInventory(PARTS   , 10);
     forge.setInventory(PLASTICS, 25);
     
-    Test.fillWorkVacancies(farm );
-    Test.fillWorkVacancies(forge);
+    ActorUtils.fillWorkVacancies(farm );
+    ActorUtils.fillWorkVacancies(forge);
     
     boolean allHoused = false;
     boolean builtOkay = false;

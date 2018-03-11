@@ -123,11 +123,6 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
-  public float radius() {
-    return Nums.max(type.wide, type.high) * Nums.ROOT2 / 2f;
-  }
-  
-  
   public void setLocation(Tile at, AreaMap map) {
     this.at  = at;
     this.map = map;
@@ -290,13 +285,23 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
-  public boolean onMap() {
-    return (stateBits & FLAG_ON_MAP) != 0;
+  public Tile at() {
+    return at;
   }
   
   
-  public Tile at() {
-    return at;
+  public float radius() {
+    return Nums.max(type.wide, type.high) * Nums.ROOT2 / 2f;
+  }
+  
+  
+  public float height() {
+    return type.deep;
+  }
+  
+  
+  public boolean onMap() {
+    return (stateBits & FLAG_ON_MAP) != 0;
   }
   
   
@@ -616,13 +621,20 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
+  public Vec3D renderedPosition(Vec3D store) {
+    if (store == null) store = new Vec3D();
+    store.set(at.x + (type.wide / 2f), at.y + (type.high / 2f), 0);
+    return store;
+  }
+  
+  
   public boolean canRender(Base base, Viewport view) {
     final Sprite s = sprite();
     if (s == null) return false;
     
-    s.position.set(at.x + (type.wide / 2f), at.y + (type.high / 2f), 0);
-    float height = type.deep;
-    float radius = 1.5f * Nums.max(type.wide, type.high) / 2;
+    renderedPosition(s.position);
+    float height = height();
+    float radius = radius();
     return s != null && view.intersects(s.position, radius + height + 1);
   }
   
@@ -649,10 +661,11 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   public void renderPreview(Rendering rendering, boolean canPlace, Tile puts) {
     final Sprite s = sprite();
     if (s == null) return;
-    s.position.set(puts.x + (type.wide / 2f), puts.y + (type.high / 2f), 0);
+    renderedPosition(s.position);
     s.colour = canPlace ? Colour.SOFT_GREEN : Colour.SOFT_RED;
     renderElement(rendering, null);
   }
+  
   
 }
 

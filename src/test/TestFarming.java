@@ -14,7 +14,7 @@ import static game.BuildingForGather.*;
 //  TODO:  Test other gathering tasks here as well!
 
 
-public class TestFarming extends Test {
+public class TestFarming extends LogicTest {
   
   
   public static void main(String args[]) {
@@ -23,9 +23,9 @@ public class TestFarming extends Test {
   
   
   static boolean testFarming(boolean graphics) {
-    Test test = new TestFarming();
+    LogicTest test = new TestFarming();
 
-    Base base = setupTestCity(20, ALL_GOODS, true, DESERT, MEADOW, JUNGLE);
+    Base base = setupTestBase(20, ALL_GOODS, true, DESERT, MEADOW, JUNGLE);
     AreaMap map = base.activeMap();
     World world = map.world;
     world.settings.toggleFog     = false;
@@ -34,7 +34,7 @@ public class TestFarming extends Test {
     
     BuildingForGather farm = (BuildingForGather) NURSERY.generate();
     farm.enterMap(map, 9, 9, 1, base);
-    fillWorkVacancies(farm);
+    ActorUtils.fillWorkVacancies(farm);
     CityMapPlanning.placeStructure(WALKWAY, base, true, 9, 8, 10, 1);
     
     

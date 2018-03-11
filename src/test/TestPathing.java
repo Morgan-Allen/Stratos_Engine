@@ -9,7 +9,7 @@ import static game.GameConstants.*;
 
 
 
-public class TestPathing extends Test {
+public class TestPathing extends LogicTest {
   
   
   
@@ -19,11 +19,11 @@ public class TestPathing extends Test {
   
   
   static boolean testPathing(boolean graphics) {
-    Test test = new TestPathing();
+    LogicTest test = new TestPathing();
     
     boolean testOkay = true;
     
-    Base base = setupTestCity(32, ALL_GOODS, false);
+    Base base = setupTestBase(32, ALL_GOODS, false);
     AreaMap map = base.activeMap();
     World world = map.world;
     world.settings.toggleFog     = false;

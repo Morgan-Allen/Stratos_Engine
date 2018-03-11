@@ -58,6 +58,7 @@ public class PlaneFX extends SFX {
     
     protected State loadAsset() {
       texture = ImageAsset.getTexture(imageName);
+      if (texture == null) return state = State.ERROR;
       
       float
         w = texture.getWidth(),
@@ -77,7 +78,7 @@ public class PlaneFX extends SFX {
     
     
     protected State disposeAsset() {
-      texture.dispose();
+      if (texture != null) texture.dispose();
       return state = State.DISPOSED;
     }
     

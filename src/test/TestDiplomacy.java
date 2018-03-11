@@ -12,7 +12,7 @@ import static content.GameContent.*;
 
 
 
-public class TestDiplomacy extends Test {
+public class TestDiplomacy extends LogicTest {
   
   
   public static void main(String args[]) {
@@ -21,7 +21,7 @@ public class TestDiplomacy extends Test {
   
   
   static boolean testDiplomacy(boolean graphics) {
-    Test test = new TestDiplomacy();
+    LogicTest test = new TestDiplomacy();
     
     World   world = new World(ALL_GOODS);
     Base    baseC = new Base(world, world.addLocale(2, 2));
@@ -31,7 +31,7 @@ public class TestDiplomacy extends Test {
       baseC, 32, 0, MEADOW, JUNGLE
     );
     world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES());
-    world.addCities(baseC, awayC, neutC);
+    world.addBases(baseC, awayC, neutC);
     baseC.setName("Home City");
     awayC.setName("Away City");
     neutC.setName("Neutral City");
@@ -66,7 +66,7 @@ public class TestDiplomacy extends Test {
     Building garrison = (Building) TROOPER_LODGE.generate();
     garrison.enterMap(map, 12, 1, 1, baseC);
     
-    Test.fillAllVacancies(map, Vassals.PYON);
+    ActorUtils.fillAllVacancies(map, Vassals.PYON);
     
     
     Mission escort;

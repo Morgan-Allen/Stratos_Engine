@@ -9,7 +9,7 @@ import static game.GameConstants.*;
 
 
 
-public class TestBuilding extends Test {
+public class TestBuilding extends LogicTest {
   
   
   public static void main(String args[]) {
@@ -18,9 +18,9 @@ public class TestBuilding extends Test {
   
   
   static boolean testBuilding(boolean graphics) {
-    Test test = new TestBuilding();
+    LogicTest test = new TestBuilding();
     
-    Base base = setupTestCity(16, ALL_GOODS, false);
+    Base base = setupTestBase(16, ALL_GOODS, false);
     AreaMap map = base.activeMap();
     World world = map.world;
     world.settings.toggleFog         = false;
@@ -45,11 +45,11 @@ public class TestBuilding extends Test {
       PLASTICS, 60,
       MEDICINE, 20
     );
-    fillWorkVacancies(forge);
+    ActorUtils.fillWorkVacancies(forge);
     
     Building palace = (Building) BASTION.generate();
     palace.enterMap(map, 9, 9, 0, base);
-    fillWorkVacancies(palace);
+    ActorUtils.fillWorkVacancies(palace);
     map.planning.placeObject(palace);
     
     Building toBuild[] = { forge, home, palace };

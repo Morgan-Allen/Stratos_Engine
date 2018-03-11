@@ -104,7 +104,7 @@ public class TaskCombat extends Task {
   public static float attackPower(Active f) {
     if (f.isActor()) {
       Actor a = (Actor) f;
-      if (a.state >= Actor.STATE_DEAD) return 0;
+      if (a.state >= Actor.STATE_SLEEP) return 0;
       float power = attackPower(a.type());
       power *= 1 - ((a.injury + a.hunger) / a.type().maxHealth);
       return power;
@@ -131,7 +131,6 @@ public class TaskCombat extends Task {
   
   /**  Factory methods for actual combat behaviours-
     */
-  
   static TaskCombat nextSieging(Actor actor, Mission formation) {
     if (formation.focus() instanceof Element) {
       Element e = (Element) formation.focus();
@@ -168,9 +167,10 @@ public class TaskCombat extends Task {
     
     for (Active other : others) if (hostile(other, actor)) {
       if (other.indoors()) continue;
+      if (attackPower(other) == 0) continue;
       
       Tile goes = other.at();
-      float distF = distance(goes, from  );
+      float distF = distance(goes, from);
       float distA = anchor == null ? 0 : distance(goes, anchor);
       if (distA > noticeRange) continue;
       
@@ -203,12 +203,12 @@ public class TaskCombat extends Task {
   }
   
   
-  static TaskCombat configCombat(Actor actor, Element target) {
+  public static TaskCombat configCombat(Actor actor, Element target) {
     return configCombat(actor, target, null, null, JOB.COMBAT);
   }
   
   
-  static TaskCombat configHunting(Actor actor, Element target) {
+  public static TaskCombat configHunting(Actor actor, Element target) {
     return configCombat(actor, target, null, null, JOB.HUNTING);
   }
   
@@ -382,7 +382,7 @@ public class TaskCombat extends Task {
   /**  Behaviour-execution-
     */
   boolean checkAndUpdateTask() {
-    Task self = configCombat(active, primary, active.mission(), this, type);
+    Task self = configCombat(active, primary, origin, this, type);
     if (self == null) return false;
     return super.checkAndUpdateTask();
   }
@@ -395,25 +395,55 @@ public class TaskCombat extends Task {
   
   
   float actionRange() {
-    if (attackMode == ATTACK_MELEE) return 0;
+    if (attackMode == ATTACK_MELEE) return 1.5f;
     if (attackMode == ATTACK_RANGE) return active.type().rangeDist + 1;
     if (attackMode == ATTACK_FIRE ) return active.type().rangeDist + 1;
     return -1;
   }
   
   
+  boolean checkContact(Pathing[] path) {
+    float range = AreaMap.distance(active, primary);
+    float maxRange = actionRange();
+    
+    ///I.say("Distance to "+primary+": "+range+"/"+maxRange);
+    ///if (range < maxRange) I.say("SHOULD FIRE");
+    
+    return range < maxRange;
+  }
+
+
   public float harmLevel() {
     return FULL_HARM;
   }
+  
   
   //  TODO:  You should also update the risk-assessment methods- win priority
   //  and success-chance, plus the motive-bonus for any reward attached.
   
   protected void onTarget(Target other) {
     active.performAttack(primary, attackMode == ATTACK_MELEE);
+    
+    ///I.say("PERFORMING ATTACK VS. "+primary);
+    
+    if (primary.type().isActor() && attackPower((Actor) primary) > 0) {
+      Task next = TaskCombat.configCombat(active, primary, origin, null, type);
+      if (next != null) active.assignTask(next);
+    }
+    
+    if (primary.type().isBuilding() && ! ((Building) primary).destroyed()) {
+      Task next = TaskCombat.configCombat(active, primary, origin, null, type);
+      if (next != null) active.assignTask(next);
+    }
   }
   
   
+  protected void onTargetEnds(Target target) {
+    //I.say("???");
+    super.onTargetEnds(target);
+  }
+
+
   static void performAttack(Element attacks, Element other, boolean melee) {
     
     int damage = melee ? attacks.meleeDamage() : attacks.rangeDamage();
@@ -460,6 +490,16 @@ public class TaskCombat extends Task {
       Actor otherA = (Actor) other;
       otherA.gainXP(defendSkill, otherXP);
     }
+    
+    
+    //*
+    //  TODO:  I don't actually want the ephemera being registered unless
+    //  active rendering is in progress!
+    
+    AreaMap map = attacks.map();
+    Good weaponType = attacks.type().weaponType;
+    Ephemera.applyCombatFX(weaponType, (Active) attacks, other, ! melee, hits, map);
+    //*/
   }
   
   
@@ -482,9 +522,6 @@ public class TaskCombat extends Task {
     return primary;
   }
 }
-
-
-
 
 
 

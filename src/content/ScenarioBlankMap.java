@@ -83,7 +83,7 @@ public class ScenarioBlankMap extends CityMapScenario {
     landing.assignBuildTypes(RULER_BUILT);
     
     stage.addCity(landing);
-    world.addCities(patron, landing);
+    world.addBases(patron, landing);
     
     return landing;
   }
@@ -125,8 +125,8 @@ public class ScenarioBlankMap extends CityMapScenario {
       bastion.enterMap(stage, at.x, at.y, 1, base);
       depot.enterMap(stage, at.x, at.y - 5, 1, base);
       
-      Test.fillWorkVacancies(bastion);
-      Test.fillWorkVacancies(depot);
+      ActorUtils.fillWorkVacancies(bastion);
+      ActorUtils.fillWorkVacancies(depot);
       playUI().assignHomePoint(bastion);
       
       base.initFunds(4000);

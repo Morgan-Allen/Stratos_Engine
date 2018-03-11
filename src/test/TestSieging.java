@@ -11,7 +11,7 @@ import static game.Task.*;
 
 
 
-public class TestSieging extends Test {
+public class TestSieging extends LogicTest {
   
   
   public static void main(String args[]) {
@@ -20,7 +20,7 @@ public class TestSieging extends Test {
   
   
   static boolean testSieging(boolean graphics) {
-    Test test = new TestSieging();
+    LogicTest test = new TestSieging();
     
     World   world = new World(ALL_GOODS);
     Base    baseC = new Base(world, world.addLocale(2, 2));
@@ -31,7 +31,7 @@ public class TestSieging extends Test {
     baseC.setName("Home City");
     awayC.setName("Away City");
     world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES());
-    world.addCities(baseC, awayC);
+    world.addBases(baseC, awayC);
     
     world.settings.toggleFog     = false;
     world.settings.toggleFatigue = false;
@@ -74,7 +74,7 @@ public class TestSieging extends Test {
     
     BuildingForArmy fort = (BuildingForArmy) TROOPER_LODGE.generate();
     fort.enterMap(map, 10, 10, 1, baseC);
-    fillWorkVacancies(fort);
+    ActorUtils.fillWorkVacancies(fort);
     CityMapPlanning.placeStructure(WALKWAY, baseC, true, 10, 9, 12, 1 );
     CityMapPlanning.placeStructure(WALKWAY, baseC, true, 21, 9, 1 , 5 );
     CityMapPlanning.placeStructure(WALKWAY, baseC, true, 16, 9, 1 , 9 );
@@ -83,7 +83,7 @@ public class TestSieging extends Test {
     for (int n = 3; n-- > 0;) {
       Building home = (Building) HOLDING.generate();
       home.enterMap(map, 17, 10 + (n * 3), 1, baseC);
-      fillHomeVacancies(home, Vassals.PYON);
+      ActorUtils.fillHomeVacancies(home, Vassals.PYON);
     }
     
     Mission guarding;
@@ -255,7 +255,7 @@ public class TestSieging extends Test {
         if (baseC.isVassalOf(awayC)) {
           victorious = true;
           store.addInventory(tribute);
-          fillWorkVacancies(store);
+          ActorUtils.fillWorkVacancies(store);
         }
       }
       

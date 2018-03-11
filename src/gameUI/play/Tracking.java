@@ -33,7 +33,12 @@ public class Tracking {
   }
   
   
-
+  public void zoomNow(Vec3D position) {
+    UI.rendering.view.lookedAt.setTo(position);
+  }
+  
+  
+  
   /**  Updates general camera behaviour.
     */
   protected void updateTracking(AreaMap stage, Selection.Focus tracked) {

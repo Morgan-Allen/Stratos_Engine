@@ -30,7 +30,11 @@ public class Trooper {
     BODY_ARMOUR = new Good("Body Armour", -1)
   ;
   static {
-    BLASTER.setAsWeapon(8, true, 100, 200, 300);
+    BLASTER.setAsWeapon(
+      8, true, new int[] { 150, 250, 350 },
+      "pistol", AnimNames.FIRE,
+      Devices.LASER_FX_MODEL, Devices.LASER_BURST_MODEL
+    );
     BODY_ARMOUR.setAsArmour(8, true, 150, 250, 350);
   }
   

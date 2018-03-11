@@ -10,7 +10,7 @@ import static game.GameConstants.*;
 
 
 
-public class TestBridging extends Test {
+public class TestBridging extends LogicTest {
   
   
   public static void main(String args[]) {
@@ -19,10 +19,10 @@ public class TestBridging extends Test {
   
   
   static boolean testBridging(boolean graphics) {
-    Test test = new TestBridging();
+    LogicTest test = new TestBridging();
     
     Terrain terrTypes[] = { LAKE, MEADOW, JUNGLE };
-    Base base = setupTestCity(16, ALL_GOODS, false, terrTypes);
+    Base base = setupTestBase(16, ALL_GOODS, false, terrTypes);
     AreaMap map = base.activeMap();
     World world = base.world;
     world.settings.toggleFog     = false;
@@ -52,7 +52,7 @@ public class TestBridging extends Test {
     for (Good g : palace.type().buildsWith) {
       palace.setInventory(g, 100);
     }
-    fillWorkVacancies(palace);
+    ActorUtils.fillWorkVacancies(palace);
     
     
     CityMapPlanning.placeStructure(SHIELD_WALL, base, false, 14, 2, 2, 10);

@@ -10,7 +10,7 @@ import static game.Task.*;
 
 
 
-public class TestCity extends Test {
+public class TestCity extends LogicTest {
   
   
   public static void main(String args[]) {
@@ -19,9 +19,9 @@ public class TestCity extends Test {
   
   
   static boolean testCity(boolean graphics) {
-    Test test = new TestCity();
+    LogicTest test = new TestCity();
     
-    Base base = setupTestCity(32, ALL_GOODS, false);
+    Base base = setupTestBase(32, ALL_GOODS, false);
     AreaMap map = base.activeMap();
     World world = map.world;
     world.settings.toggleFog = false;
@@ -42,7 +42,7 @@ public class TestCity extends Test {
     school.enterMap(map, 9 , 2 , 1, base);
     admin .enterMap(map, 18, 9 , 1, base);
     
-    fillWorkVacancies(palace);
+    ActorUtils.fillWorkVacancies(palace);
     
     for (int n = 4; n-- > 0;) {
       Building house = (Building) HOLDING.generate();

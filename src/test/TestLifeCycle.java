@@ -13,7 +13,7 @@ import static game.CityMapPlanning.*;
 
 
 
-public class TestLifeCycle extends Test {
+public class TestLifeCycle extends LogicTest {
   
   
   public static void main(String args[]) {
@@ -22,9 +22,9 @@ public class TestLifeCycle extends Test {
   
   
   static boolean testLifeCycle(boolean graphics) {
-    Test test = new TestLifeCycle();
+    LogicTest test = new TestLifeCycle();
     
-    Base base = setupTestCity(16, ALL_GOODS, false);
+    Base base = setupTestBase(16, ALL_GOODS, false);
     AreaMap map = base.activeMap();
     World world = map.world;
     
@@ -91,7 +91,7 @@ public class TestLifeCycle extends Test {
     boolean succession = false;
     boolean testOkay   = false;
     
-    Test.fillAllVacancies(map, Vassals.PYON);
+    ActorUtils.fillAllVacancies(map, Vassals.PYON);
     for (Actor a : map.actors()) a.setHungerLevel(0.75f);
     
     

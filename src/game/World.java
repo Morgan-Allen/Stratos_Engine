@@ -17,6 +17,9 @@ public class World implements Session.Saveable {
     Table <Locale, Integer> distances = new Table();
     
     String label;
+    
+    public float mapX() { return mapX; }
+    public float mapY() { return mapY; }
     public String toString() { return label; }
   }
   
@@ -231,24 +234,24 @@ public class World implements Session.Saveable {
   }
   
   
-  public void addCities(Base... cities) {
+  public void addBases(Base... cities) {
     Visit.appendTo(this.bases, cities);
   }
   
   
-  public Base cityNamed(String n) {
+  public Base baseNamed(String n) {
     for (Base c : bases) if (c.name.equals(n)) return c;
     return null;
   }
   
   
-  public AreaMap activeCityMap() {
+  public AreaMap activeBaseMap() {
     for (Base c : bases) if (c.activeMap() != null) return c.activeMap();
     return null;
   }
   
   
-  public Series <Base> cities() {
+  public Series <Base> bases() {
     return bases;
   }
   
@@ -353,7 +356,7 @@ public class World implements Session.Saveable {
   public void updateWithTime(int time) {
     this.time = time;
     
-    AreaMap active = activeCityMap();
+    AreaMap active = activeBaseMap();
     if (active != null) {
       active.locals.updateCity();
     }
@@ -390,7 +393,7 @@ public class World implements Session.Saveable {
   }
   
   
-  Vec2D journeyPos(Journey j) {
+  public Vec2D journeyPos(Journey j) {
     float timeGone = time - j.startTime;
     float a = timeGone / (j.arriveTime - j.startTime), i = 1 - a;
     
@@ -415,7 +418,11 @@ public class World implements Session.Saveable {
   }
   
   
-  Base onMap(int mapX, int mapY) {
+  public int mapWide() { return mapWide; }
+  public int mapHigh() { return mapHigh; }
+  
+  
+  public Base onMap(int mapX, int mapY) {
     for (Base city : bases) {
       int x = (int) city.locale.mapX, y = (int) city.locale.mapY;
       if (x == mapX && y == mapY) return city;

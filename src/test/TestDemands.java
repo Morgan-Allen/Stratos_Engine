@@ -8,7 +8,7 @@ import static content.GameContent.*;
 
 
 
-public class TestDemands extends Test {
+public class TestDemands extends LogicTest {
   
   
   public static void main(String args[]) {
@@ -18,7 +18,7 @@ public class TestDemands extends Test {
   
   static boolean testDemands(boolean graphics) {
     
-    Base base = setupTestCity(32, ALL_GOODS, false);
+    Base base = setupTestBase(32, ALL_GOODS, false);
     AreaMap map = base.activeMap();
     World world = map.world;
     CityMapDemands demands = new CityMapDemands(map, "AAA");

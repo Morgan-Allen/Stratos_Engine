@@ -233,7 +233,6 @@ public class ActorUtils {
   
   
   
-  
   public static Tile pickRandomTile(Target t, float range, AreaMap map) {
     final float angle = Rand.num() * Nums.PI * 2;
     final float dist = (Rand.num() * range) + 1, max = map.size - 1;
@@ -242,6 +241,74 @@ public class ActorUtils {
       Nums.clamp(at.x + (float) (Nums.cos(angle) * dist), 0, max),
       Nums.clamp(at.y + (float) (Nums.sin(angle) * dist), 0, max)
     );
+  }
+  
+
+  
+  /**  More utility methods for scenario setup-
+    */
+  public static void fillAllVacancies(AreaMap map, ActorType defaultCitizen) {
+    for (Building b : map.buildings) if (b.complete()) {
+      fillWorkVacancies(b);
+      for (Actor w : b.workers) ActorUtils.findHome(map, w);
+    }
+    for (Building b : map.buildings) if (b.complete()) {
+      fillHomeVacancies(b, defaultCitizen);
+    }
+  }
+  
+  
+  public static void fillWorkVacancies(Building b) {
+    for (ActorType t : b.type().workerTypes.keys()) {
+      while (b.numWorkers(t) < b.maxWorkers(t)) {
+        spawnActor(b, t, false);
+      }
+    }
+  }
+  
+  
+  public static void fillHomeVacancies(Building b, ActorType... types) {
+    for (ActorType t : types) {
+      while (b.numResidents(t.socialClass) < b.maxResidents(t.socialClass)) {
+        spawnActor(b, t, true);
+      }
+    }
+  }
+  
+  
+  public static Actor spawnActor(Building b, ActorType type, boolean resident) {
+    
+    Actor actor = (Actor) type.generate();
+    Tile at = b.centre();
+    
+    if (type.isPerson()) {
+      type.initAsMigrant((ActorAsPerson) actor);
+    }
+    
+    if (resident) b.setResident(actor, true);
+    else          b.setWorker  (actor, true);
+    
+    if (b.complete()) {
+      actor.enterMap(b.map, at.x, at.y, 1, b.base());
+      actor.setInside(b, true);
+    }
+    else {
+      at = randomTileNear(at, b.radius(), b.map, true);
+      actor.enterMap(b.map, at.x, at.y, 1, b.base());
+    }
+    
+    return actor;
+  }
+  
+  
+  public static Tile randomTileNear(
+    Tile at, float range, AreaMap map, boolean open
+  ) {
+    int x = (int) (at.x + (range * Rand.range(-1, 1)));
+    int y = (int) (at.y + (range * Rand.range(-1, 1)));
+    Tile t = map.tileAt(Nums.clamp(x, map.size), Nums.clamp(y, map.size));
+    if (open) t = Tile.nearestOpenTile(t, map, (int) range);
+    return t;
   }
   
 }

@@ -8,7 +8,7 @@ import static game.GameConstants.*;
 
 
 
-public class TestBounties extends Test {
+public class TestBounties extends LogicTest {
   
   
   public static void main(String args[]) {
@@ -107,7 +107,7 @@ public class TestBounties extends Test {
   
   boolean bountyTest(boolean graphics, String title) {
     
-    Base base = Test.setupTestCity(32, ALL_GOODS, false);
+    Base base = LogicTest.setupTestBase(32, ALL_GOODS, false);
     AreaMap map = base.activeMap();
     //World world = base.world;
     
@@ -116,7 +116,7 @@ public class TestBounties extends Test {
     
     BuildingForArmy fort = (BuildingForArmy) TROOPER_LODGE.generate();
     fort.enterMap(map, 2, 2, 1, base);
-    fillWorkVacancies(fort);
+    ActorUtils.fillWorkVacancies(fort);
     
     float initActorFunds = 0;
     for (Actor a : fort.workers()) initActorFunds += a.carried(CASH);

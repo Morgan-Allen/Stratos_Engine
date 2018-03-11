@@ -40,7 +40,7 @@ public class CityEvents {
     Base    from   = journey.from;
     World   world  = from.world;
     int     time   = world.time;
-    AreaMap map    = world.activeCityMap();
+    AreaMap map    = world.activeBaseMap();
     boolean report = reportEvents(map);
     //
     //  We use the same math that estimates the appeal of invasion to play out

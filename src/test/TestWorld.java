@@ -15,7 +15,7 @@ import static content.GameContent.*;
 
 
 
-public class TestWorld extends Test {
+public class TestWorld extends LogicTest {
   
   
   public static void main(String args[]) {
@@ -24,7 +24,7 @@ public class TestWorld extends Test {
   
   
   static boolean testWorld(boolean graphics) {
-    Test test = new TestWorld();
+    LogicTest test = new TestWorld();
     
     //  This tests for regeneration/consumption of goods, and normalisation of
     //  prestige and loyalty over time:
@@ -188,10 +188,10 @@ public class TestWorld extends Test {
       World world = strong.world;
       
       Base lord = new Base(world, world.addLocale(0, 1));
-      world.addCities(lord);
+      world.addBases(lord);
       Base.setPosture(lord, weak, Base.POSTURE.VASSAL, true);
       Base capital = new Base(world, world.addLocale(1, 1));
-      world.addCities(capital);
+      world.addBases(capital);
       Base.setPosture(capital, lord, Base.POSTURE.VASSAL, true);
       
       if (capital != weak.capitalLord()) {
@@ -317,8 +317,8 @@ public class TestWorld extends Test {
       for (int i = goes.length; i-- > 0;) {
         goes[i] = new Base(world, world.addLocale(1, i), "Goes_"+i);
       }
-      world.addCities(from);
-      world.addCities(goes);
+      world.addBases(from);
+      world.addBases(goes);
       
       for (int i = from.length; i-- > 0;) {
         for (int j = goes.length; j-- > 0;) {
@@ -327,9 +327,9 @@ public class TestWorld extends Test {
         }
       }
       
-      for (Base c : world.cities()) {
+      for (Base c : world.bases()) {
         c.initBuildLevels(HOLDING, 2f, TROOPER_LODGE, 2f);
-        for (Base o : world.cities()) if (c != o) {
+        for (Base o : world.bases()) if (c != o) {
           World.setupRoute(c.locale, o.locale, 1);
         }
       }
@@ -417,11 +417,11 @@ public class TestWorld extends Test {
         TROOPER_LODGE, 2f + Rand.index(3),
         HOLDING      , 6f + Rand.index(10)
       );
-      world.addCities(city);
+      world.addBases(city);
     }
     world.setMapSize(5, 5);
     
-    for (Base c : world.cities()) for (Base o : world.cities()) {
+    for (Base c : world.bases()) for (Base o : world.bases()) {
       if (c == o) continue;
       float dist = World.mapCoords(c).lineDist(World.mapCoords(o));
       World.setupRoute(c.locale, o.locale, (int) dist);
@@ -469,7 +469,7 @@ public class TestWorld extends Test {
         }
         world.clearHistory();
         
-        for (Base c : world.cities()) {
+        for (Base c : world.bases()) {
           if (! testRelationsOkay(c)) relationsOkay = false;
         }
         
@@ -484,9 +484,9 @@ public class TestWorld extends Test {
       int timeStep = world.settings.speedUp ? 100 : 10;
       boolean empireExists = false;
       
-      for (Base c : world.cities()) {
+      for (Base c : world.bases()) {
         boolean hasEmpire = true;
-        for (Base o : world.cities()) {
+        for (Base o : world.bases()) {
           if (o == mapCity || o == c) continue;
           if (o.capitalLord() != c) hasEmpire = false;
           if (o.isAllyOf(c)) timeWithAllies += timeStep;
@@ -503,7 +503,7 @@ public class TestWorld extends Test {
     timeWithEmpire /= YEAR_LENGTH;
     timeWithAllies /= YEAR_LENGTH * NUM_CITIES * (NUM_CITIES - 1);
     int minBattles  = (NUM_YEARS - (timeWithEmpire + timeWithAllies)) / 2;
-    int maxBattles  = NUM_YEARS * world.cities().size() * 2;
+    int maxBattles  = NUM_YEARS * world.bases().size() * 2;
     boolean testOkay = true;
     
     if (totalBattles < minBattles) {
@@ -540,7 +540,7 @@ public class TestWorld extends Test {
     Base b = new Base(world, world.addLocale(1, 0));
     a.setName("Victim City" );
     b.setName("Invader City");
-    world.addCities(a, b);
+    world.addBases(a, b);
     setupRoute(a.locale, b.locale, 1);
     a.initBuildLevels(HOLDING, 1f, TROOPER_LODGE, 1f);
     b.initBuildLevels(HOLDING, 9f, TROOPER_LODGE, 6f);
@@ -591,7 +591,7 @@ public class TestWorld extends Test {
   static boolean testRelationsOkay(Base city) {
     int numLords = 0;
     
-    for (Base o : city.world.cities()) {
+    for (Base o : city.world.bases()) {
       POSTURE p = city.posture(o);
       POSTURE i = o.posture(city);
       if (p == POSTURE.LORD) numLords++;
@@ -609,7 +609,7 @@ public class TestWorld extends Test {
   
   static void reportOnWorld(World world) {
     I.say("\nReporting world state:");
-    for (Base c : world.cities()) {
+    for (Base c : world.bases()) {
       I.say("  "+c+":");
       I.say("    Pop:    "+c.population  ());
       I.say("    Arm:    "+c.armyPower   ());
@@ -619,7 +619,7 @@ public class TestWorld extends Test {
       I.say("    Bld:    "+c.buildLevel  ());
       I.say("    Inv:    "+c.inventory   ());
       I.say("    Relations-");
-      for (Base o : world.cities()) if (o != c) {
+      for (Base o : world.bases()) if (o != c) {
         I.add(" "+o+": "+c.posture(o)+" "+c.loyalty(o));
       }
     }

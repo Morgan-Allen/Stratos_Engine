@@ -1,49 +1,50 @@
 
 
-package game;
-import util.*;
+package test;
+import game.*;
 import static game.CityMapPathCache.*;
 import static game.GameConstants.*;
 import static game.World.*;
+import util.*;
 
 
 
-public class Test {
+
+public class LogicTest {
   
   
   /**  Initial setup utilities:
     */
-  protected static Base setupTestCity(
+  protected static Base setupTestBase(
     int size, Good goods[], boolean genTerrain, Terrain... gradient
   ) {
     World   world  = new World(goods);
     Locale  locale = world.addLocale(5, 5);
-    Base    city   = new Base(world, locale, "Test City");
+    Base    base   = new Base(world, locale, "Test City");
     AreaMap map    = null;
     
     if (! genTerrain) {
-      map = new AreaMap(world, locale, city);
+      map = new AreaMap(world, locale, base);
       map.performSetup(size, gradient);
     }
     else {
-      map = CityMapTerrain.generateTerrain(city, size, 0, gradient);
+      map = CityMapTerrain.generateTerrain(base, size, 0, gradient);
       CityMapTerrain.populateFixtures(map);
     }
     
-    world.mapHigh = 10;
-    world.mapWide = 10;
-    world.addCities(city);
+    world.setMapSize(10, 10);
+    world.addBases(base);
     
-    return city;
+    return base;
   }
   
   
-  protected static Base setupTestCity(
+  protected static Base setupTestBase(
     byte layout[][], byte elevation[][], Good goods[], Terrain... gradient
   ) {
     int wide = layout.length, high = layout[0].length;
-    Base city = setupTestCity(Nums.max(wide, high), goods, false, gradient);
-    AreaMap map = city.activeMap();
+    Base base = setupTestBase(Nums.max(wide, high), goods, false, gradient);
+    AreaMap map = base.activeMap();
     
     for (Tile t : map.allTiles()) {
       Terrain terr = gradient[layout[t.x][t.y]];
@@ -51,78 +52,11 @@ public class Test {
       map.setTerrain(t, terr, (byte) 0, elev);
     }
     
-    return city;
+    return base;
   }
   
   
-  
-  //  TODO:  Move these into the Scenario class!
-  
-  public static void fillAllVacancies(AreaMap map, ActorType defaultCitizen) {
-    for (Building b : map.buildings) if (b.complete()) {
-      fillWorkVacancies(b);
-      for (Actor w : b.workers) ActorUtils.findHome(map, w);
-    }
-    for (Building b : map.buildings) if (b.complete()) {
-      fillHomeVacancies(b, defaultCitizen);
-    }
-  }
-  
-  
-  public static void fillWorkVacancies(Building b) {
-    for (ActorType t : b.type().workerTypes.keys()) {
-      while (b.numWorkers(t) < b.maxWorkers(t)) {
-        spawnActor(b, t, false);
-      }
-    }
-  }
-  
-  
-  public static void fillHomeVacancies(Building b, ActorType... types) {
-    for (ActorType t : types) {
-      while (b.numResidents(t.socialClass) < b.maxResidents(t.socialClass)) {
-        spawnActor(b, t, true);
-      }
-    }
-  }
-  
-  
-  public static Actor spawnActor(Building b, ActorType type, boolean resident) {
-    
-    Actor actor = (Actor) type.generate();
-    Tile at = b.centre();
-    
-    if (type.isPerson()) {
-      type.initAsMigrant((ActorAsPerson) actor);
-    }
-    
-    if (resident) b.setResident(actor, true);
-    else          b.setWorker  (actor, true);
-    
-    if (b.complete()) {
-      actor.enterMap(b.map, at.x, at.y, 1, b.base());
-      actor.setInside(b, true);
-    }
-    else {
-      at = randomTileNear(at, b.radius(), b.map, true);
-      actor.enterMap(b.map, at.x, at.y, 1, b.base());
-    }
-    
-    return actor;
-  }
-  
-  
-  public static Tile randomTileNear(
-    Tile at, float range, AreaMap map, boolean open
-  ) {
-    int x = (int) (at.x + (range * Rand.range(-1, 1)));
-    int y = (int) (at.y + (range * Rand.range(-1, 1)));
-    Tile t = map.tileAt(Nums.clamp(x, map.size), Nums.clamp(y, map.size));
-    if (open) t = Tile.nearestOpenTile(t, map, (int) range);
-    return t;
-  }
-  
-  
+  /*
   public static void clearMargins(Building b, int marginWide) {
     Type type = b.type();
     Tile at = b.at();
@@ -138,6 +72,7 @@ public class Test {
       if (e != null && e != b) e.exitMap(map);
     }
   }
+  //*/
   
   
   
@@ -197,30 +132,30 @@ public class Test {
     if (drawnTile != null) b.include(drawnTile.x, drawnTile.y, 0);
     b.incHigh(1);
     b.incWide(1);
-    Box2D full = new Box2D(0, 0, map.size, map.size);
+    Box2D full = new Box2D(0, 0, map.size(), map.size());
     b.cropBy(full);
     return b;
   }
   
   
   void updateCityMapView(AreaMap map) {
-    configGraphic(map.size, map.size);
+    configGraphic(map.size(), map.size());
     
-    for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
+    for (Tile at : map.allTiles()) {
       int fill = BLANK_COLOR;
-      Tile at = map.tileAt(c.x, c.y);
+      Element above = map.above(at);
       
-      if (at.above != null) {
-        if (at.above.growLevel() == -1) fill = MISSED_COLOR;
-        else fill = at.above.debugTint();
+      if (above != null) {
+        if (above.growLevel() == -1) fill = MISSED_COLOR;
+        else fill = above.debugTint();
       }
-      else if (at.terrain != null) {
-        fill = at.terrain.tint;
+      else if (at.terrain() != null) {
+        fill = at.terrain().tint;
       }
-      graphic[c.x][c.y] = fill;
+      graphic[at.x][at.y] = fill;
     }
     
-    for (Actor a : map.actors) {
+    for (Actor a : map.actors()) {
       Tile at = a.at();
       //I.say("At: "+at);
       if (at == null || a.indoors()) continue;
@@ -265,7 +200,7 @@ public class Test {
   
   
   void updateCityPathingView(AreaMap map) {
-    configGraphic(map.size, map.size);
+    configGraphic(map.size(), map.size());
     
     Tile hovered = map.tileAt(hover.x, hover.y);
     hovered = Tile.nearestOpenTile(hovered, map);
@@ -273,15 +208,15 @@ public class Test {
     Area area = map.pathCache.rawArea(hovered), around[] = null;
     AreaGroup group = null;
     if (area != null) {
-      group  = area.group;
-      around = new Area[area.borders.size()];
+      group  = area.group();
+      around = new Area[area.borders().size()];
       int i = 0;
-      //for (Area b : area.borders) around[i++] = b;
-      for (Border b : area.borders) around[i++] = b.with;
+      for (Border b : area.borders()) around[i++] = b.with();
     }
     
     for (Tile t : map.allTiles()) {
-      int fill = t.above == null ? BLANK_COLOR : t.above.debugTint();
+      Element above = map.above(t);
+      int fill = above == null ? BLANK_COLOR : above.debugTint();
       if (Visit.arrayIncludes(keyTiles, t)) {
         fill = NO_BLD_COLOR;
       }
@@ -296,9 +231,9 @@ public class Test {
         else if (Visit.arrayIncludes(around, under)) {
           fill = WALKER_COLOR;
         }
-        else if (t.above != null) {
+        else if (above != null) {
         }
-        else if (under != null && under.group == group) {
+        else if (under != null && under.group() == group) {
           fill = MISSED_COLOR;
         }
       }
@@ -315,7 +250,7 @@ public class Test {
       sight += map.fog.maxSightLevel(t);
       
       int fog  = Nums.clamp((int) ((1 - (sight / 2)) * 10), 10);
-      int high = Nums.clamp(t.elevation, 10);
+      int high = Nums.clamp(t.elevation(), 10);
       fogLayer[t.x][t.y] = FOG_SCALE[fog][high];
     }
   }
@@ -323,7 +258,7 @@ public class Test {
   
   private void updateWorldMapView(AreaMap map) {
     World world = map.world;
-    int wide = world.mapWide * 2, high = world.mapHigh * 2;
+    int wide = world.mapWide() * 2, high = world.mapHigh() * 2;
     configGraphic(wide, high);
     
     //  Note- you could just calculate a bounding-box for the map based on the
@@ -333,17 +268,17 @@ public class Test {
       graphic[c.x][c.y] = BLANK_COLOR;
     }
     
-    for (World.Journey j : world.journeys) {
+    for (World.Journey j : world.journeys()) {
       Vec2D c = world.journeyPos(j);
       int x = 1 + (int) (c.x * 2), y = 1 + (int) (c.y * 2);
-      graphic[x][y] = j.going.first().base().tint;
+      graphic[x][y] = j.going().first().base().tint();
     }
     
-    for (Base city : world.bases) {
+    for (Base city : world.bases()) {
       Base lord = city.currentLord();
-      int x = (int) city.locale.mapX * 2, y = (int) city.locale.mapY * 2;
-      for (Coord c : Visit.grid(x, y, 2, 2, 1)) graphic[c.x][c.y] = city.tint;
-      if (lord != null) graphic[x + 1][y] = lord.tint;
+      int x = (int) city.locale.mapX() * 2, y = (int) city.locale.mapY() * 2;
+      for (Coord c : Visit.grid(x, y, 2, 2, 1)) graphic[c.x][c.y] = city.tint();
+      if (lord != null) graphic[x + 1][y] = lord.tint();
     }
     
     try { graphic[hover.x][hover.y] = WHITE_COLOR; }
@@ -355,10 +290,10 @@ public class Test {
   
 
   
-  private static Test currentTest = null;
+  private static LogicTest currentTest = null;
   private static Base currentCity = null;
   
-  public static Test currentTest() {
+  public static LogicTest currentTest() {
     return currentTest;
   }
   
@@ -377,8 +312,8 @@ public class Test {
     
     while (! doQuit) {
       
-      Test.currentTest = this;
-      Test.currentCity = city;
+      LogicTest.currentTest = this;
+      LogicTest.currentCity = city;
       
       if (graphics) {
         World world = map.world;
@@ -403,7 +338,7 @@ public class Test {
           above = map.above(hover.x, hover.y);
           
           //  TODO:  Have actors register within nearby tiles themselves.
-          for (Actor a : map.actors) {
+          for (Actor a : map.actors()) {
             Tile at = a.at();
             if (at.x == hover.x && at.y == hover.y) above = a;
           }
@@ -498,7 +433,7 @@ public class Test {
     report.append("\n  Prestige: "+c.prestige());
     
     List <String> borderRep = new List();
-    for (Base other : c.world.bases) if (other != c) {
+    for (Base other : c.world.bases()) if (other != c) {
       Base.POSTURE r = c.posture(other);
       float loyalty = c.loyalty(other);
       borderRep.add("\n  "+other+": "+r+", "+Base.descLoyalty(loyalty));
@@ -509,7 +444,7 @@ public class Test {
     }
     
     List <String> goodRep = new List();
-    for (Good g : c.world.goodTypes) {
+    for (Good g : c.world.goodTypes()) {
       float amount = c.inventory(g);
       float need   = c.needLevel(g);
       float accept = c.prodLevel(g);
@@ -528,10 +463,10 @@ public class Test {
       for (String s : goodRep) report.append(s);
     }
     
-    if (! c.buildLevel.empty()) {
+    if (! c.buildLevel().empty()) {
       report.append("\n\nBuilt:");
-      for (BuildType t : c.buildLevel.keys()) {
-        int level = (int) c.buildLevel.valueFor(t);
+      for (BuildType t : c.buildLevel().keys()) {
+        int level = (int) c.buildLevel().valueFor(t);
         report.append("\n  "+level+"x "+t);
       }
     }
@@ -550,9 +485,9 @@ public class Test {
         "\n  Melee/Range dmg:  "+t.meleeDamage+"/"+t.rangeDamage+
         "\n  Armour class:     "+t.armourClass+
         "\n  Sight/attack rng: "+t.sightRange+"/"+t.rangeDist+
-        "\n  Injury:           "+I.shorten(a.injury , 1)+"/"+t.maxHealth+
-        "\n  Fatigue:          "+I.shorten(a.fatigue, 1)+"/"+t.maxHealth+
-        "\n  Hunger:           "+I.shorten(a.hunger , 1)+"/"+t.maxHealth
+        "\n  Injury:           "+I.shorten(a.injury() , 1)+"/"+t.maxHealth+
+        "\n  Fatigue:          "+I.shorten(a.fatigue(), 1)+"/"+t.maxHealth+
+        "\n  Hunger:           "+I.shorten(a.hunger() , 1)+"/"+t.maxHealth
       );
       report.append("\n  Task: "+a.jobDesc());
       report.append("\n  Home: "+a.home());
@@ -587,23 +522,23 @@ public class Test {
     
     report.append("\n\nHealth: "+HP+"/"+maxHP);
     
-    if (b.workers.size() > 0) {
+    if (b.workers().size() > 0) {
       report.append("\nWorkers:");
-      for (Actor w : b.workers) {
+      for (Actor w : b.workers()) {
         report.append("\n  "+w+" ("+w.jobType()+")");
       }
     }
     
-    if (b.residents.size() > 0) {
+    if (b.residents().size() > 0) {
       report.append("\nResidents:");
-      for (Actor w : b.residents) {
+      for (Actor w : b.residents()) {
         report.append("\n  "+w+" ("+w.jobType()+")");
       }
     }
     
-    if (b.visitors.size() > 0) {
+    if (b.inside().size() > 0) {
       report.append("\nVisitors:");
-      for (Actor w : b.visitors) {
+      for (Actor w : b.inside()) {
         report.append("\n  "+w+" ("+w.jobType()+")");
       }
     }
@@ -617,7 +552,7 @@ public class Test {
     Tally <Good> homeCons = b.homeUsed();
     List <String> goodRep = new List();
     
-    for (Good g : b.map.world.goodTypes) {
+    for (Good g : b.map().world.goodTypes()) {
       float amount   = b.inventory(g);
       float demand   = b.stockLimit(g);
       float consumes = homeCons.valueFor(g);
@@ -629,11 +564,8 @@ public class Test {
     
     if (b instanceof BuildingForCrafts) {
       BuildingForCrafts BC = (BuildingForCrafts) b;
-      for (BuildingForCrafts.ItemOrder order : BC.orders()) {
-        Good g = order.itemType;
-        float amount = order.progress;
-        Actor client = order.client;
-        goodRep.add("\n  "+g+" ("+client+"): "+I.shorten(amount, 1));
+      for (Object order : BC.orders()) {
+        goodRep.add("\n  "+BC.descOrder(order));
       }
     }
     
@@ -781,15 +713,15 @@ public class Test {
     WorldSettings settings = map.world.settings;
     
     report.append("\n\nFunds: "+city.funds());
-    report.append("\n\nTime: "+map.time);
+    report.append("\n\nTime: "+map.time());
     report.append("\nPaused: "+settings.paused);
     report.append("\n");
     
     float avgHunger = 0;
-    for (Actor a : map.actors) avgHunger += a.hunger / a.type().maxHealth;
-    avgHunger /= map.actors.size();
+    for (Actor a : map.actors()) avgHunger += a.hunger() / a.type().maxHealth;
+    avgHunger /= map.actors().size();
     
-    report.append("\nTOTAL POPULATION: "+map.actors.size());
+    report.append("\nTOTAL POPULATION: "+map.actors().size());
     report.append("\nHUNGER LEVEL: "+I.percent(avgHunger)+"\n\n");
     
     report.append("\n(C) city view");

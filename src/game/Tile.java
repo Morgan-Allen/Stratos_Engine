@@ -60,13 +60,23 @@ public class Tile implements Pathing, Selection.Focus {
   }
   
   
-  public Type type() {
-    return terrain;
+  public float radius() {
+    return 0.5f;
+  }
+  
+  
+  public float height() {
+    return 0;
   }
   
   
   public boolean onMap() {
     return true;
+  }
+  
+  
+  public Type type() {
+    return terrain;
   }
   
   
@@ -260,7 +270,14 @@ public class Tile implements Pathing, Selection.Focus {
   
   
   public Vec3D trackPosition() {
-    return new Vec3D(x, y, 0);
+    return new Vec3D(x + 0.5f, y + 0.5f, 0);
+  }
+  
+  
+  public Vec3D renderedPosition(Vec3D store) {
+    if (store == null) store = new Vec3D();
+    store.set(x + 0.5f, y + 0.5f, 0);
+    return store;
   }
 }
 

@@ -8,7 +8,7 @@ import static content.GameContent.*;
 
 
 
-public class TestBlankMap extends Test {
+public class TestBlankMap extends LogicTest {
   
   
   final static BuildType BUILD_MENUS[][] = {
@@ -25,11 +25,11 @@ public class TestBlankMap extends Test {
   public static void main(String args[]) {
     String filename = "saves/blank_map.tlt";
     
-    Test test = new TestBlankMap();
+    LogicTest test = new TestBlankMap();
     test.attachBuildMenu(BUILD_MENUS, BUILD_MENU_NAMES);
     
     Base base = loadCity(null, filename);
-    if (base == null) base = setupTestCity(32, ALL_GOODS, true, MEADOW, JUNGLE);
+    if (base == null) base = setupTestBase(32, ALL_GOODS, true, MEADOW, JUNGLE);
     
     while (true) {
       test.runLoop(base, 10, true, filename);

@@ -19,14 +19,19 @@ public class DesktopLauncher {
     DEFAULT_HERTZ  = 60;
   
   
-  public static void main (String[] arg) {
+  public static void main(String[] arg) {
+    launchScenario(new ScenarioBlankMap());
+  }
+  
+  
+  public static void launchScenario(CityMapScenario s) {
     
     //Assets.callsVerbose = true;
     //Assets.extraVerbose = true;
-    //PlayLoop.verbose = true;
+    //PlayLoop.verbose    = true;
     
     new LwjglApplication(new PlayLoop(), getConfig());
-    MainGame.playScenario(new ScenarioBlankMap());
+    MainGame.playScenario(s);
   }
   
   
@@ -52,7 +57,10 @@ public class DesktopLauncher {
     }
     return config;
   }
+  
 }
+
+
 
 
 

@@ -12,7 +12,7 @@ import static content.GameContent.*;
 
 
 
-public class TestRetreat extends Test {
+public class TestRetreat extends LogicTest {
   
   
   public static void main(String args[]) {
@@ -23,7 +23,7 @@ public class TestRetreat extends Test {
   static boolean testRetreat(boolean graphics) {
     TestRetreat test = new TestRetreat();
     
-    Base base = Test.setupTestCity(32, ALL_GOODS, false);
+    Base base = LogicTest.setupTestBase(32, ALL_GOODS, false);
     AreaMap map = base.activeMap();
     World world = base.world;
     
@@ -39,7 +39,7 @@ public class TestRetreat extends Test {
     //  Generate an actor.
     Building home = (Building) ECOLOGIST_STATION.generate();
     home.enterMap(map, 2, 2, 1, base);
-    Actor subject = spawnActor(home, ECOLOGIST, false);
+    Actor subject = ActorUtils.spawnActor(home, ECOLOGIST, false);
     subject.setInside(subject.inside(), false);
     subject.setLocation(map.tileAt(20, 20), map);
     float nearRange = subject.sightRange() - 1;
@@ -78,7 +78,7 @@ public class TestRetreat extends Test {
       
       if (braveOkay && ! enemiesDone) {
         for (Actor enemy : enemies) {
-          Tile goes = randomTileNear(subject.at(), nearRange, map, true);
+          Tile goes = ActorUtils.randomTileNear(subject.at(), nearRange, map, true);
           enemy.enterMap(map, goes.x, goes.y, 1, enemy.base());
         }
         enemiesDone = true;
@@ -90,7 +90,7 @@ public class TestRetreat extends Test {
       
       if (scareOkay && ! alliesDone) {
         for (Actor friend : allies) {
-          Tile goes = randomTileNear(subject.at(), nearRange, map, true);
+          Tile goes = ActorUtils.randomTileNear(subject.at(), nearRange, map, true);
           friend.enterMap(map, goes.x, goes.y, 1, friend.base());
         }
         alliesDone = true;

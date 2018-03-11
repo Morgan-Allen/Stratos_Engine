@@ -26,7 +26,7 @@ import static game.CityMapPathCache.*;
 
 
 
-public class TestPathCache extends Test {
+public class TestPathCache extends LogicTest {
   
 
   public static void main(String args[]) {
@@ -50,7 +50,7 @@ public class TestPathCache extends Test {
       { 1, 1, 1, 1, 1, 1, 1, 1 },
     };
     int miniSize = 8;
-    Base miniBase = setupTestCity(miniSize, ALL_GOODS, false, ALL_TERRAINS);
+    Base miniBase = setupTestBase(miniSize, ALL_GOODS, false, ALL_TERRAINS);
     AreaMap miniMap = miniBase.activeMap();
     
     for (Coord c : Visit.grid(0, 0, miniSize, miniSize, 1)) {
@@ -128,7 +128,7 @@ public class TestPathCache extends Test {
     //
     //  Now, set up a larger map for testing of connections between
     //  more distant areas:
-    Base base = setupTestCity(128, ALL_GOODS, false, ALL_TERRAINS);
+    Base base = setupTestBase(128, ALL_GOODS, false, ALL_TERRAINS);
     AreaMap map = base.activeMap();
     World world = map.world;
     world.settings.toggleFog   = false;

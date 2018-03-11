@@ -9,7 +9,7 @@ import static game.GameConstants.*;
 
 
 
-public class TestEcology extends Test {
+public class TestEcology extends LogicTest {
   
   
   public static void main(String args[]) {
@@ -18,9 +18,9 @@ public class TestEcology extends Test {
   
   
   static void testAnimals(boolean graphics) {
-    Test test = new TestEcology();
+    LogicTest test = new TestEcology();
     
-    Base base = setupTestCity(64, ALL_GOODS, true, JUNGLE, MEADOW);
+    Base base = setupTestBase(64, ALL_GOODS, true, JUNGLE, MEADOW);
     AreaMap map = base.activeMap();
     World world = map.world;
     ActorAsAnimal.reportCycle = graphics;

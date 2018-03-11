@@ -836,7 +836,7 @@ public class Base implements Session.Saveable, Trader {
   }
   
   
-  static String descLoyalty(float l) {
+  public static String descLoyalty(float l) {
     Pick <String> pick = new Pick();
     for (int i = LOYALTIES.length; i-- > 0;) {
       float dist = Nums.abs(l - LOYALTIES[i]);

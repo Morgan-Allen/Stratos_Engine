@@ -10,7 +10,7 @@ import static game.GameConstants.*;
 
 
 
-public class TestTrading extends Test {
+public class TestTrading extends LogicTest {
   
   
   public static void main(String args[]) {
@@ -19,12 +19,12 @@ public class TestTrading extends Test {
   
   
   static boolean testTrading(boolean graphics) {
-    Test test = new TestTrading();
+    LogicTest test = new TestTrading();
     
     World world = new World(ALL_GOODS);
     Base  baseC = new Base(world, world.addLocale(2, 2));
     Base  awayC = new Base(world, world.addLocale(3, 3));
-    world.addCities(baseC, awayC);
+    world.addBases(baseC, awayC);
     awayC.council.setTypeAI(CityCouncil.AI_OFF);
     baseC.setName("(Home City)");
     awayC.setName("(Away City)");
@@ -84,7 +84,7 @@ public class TestTrading extends Test {
     
     CityMapPlanning.placeStructure(WALKWAY, baseC, true, 1, 5, 8, 1);
     
-    fillAllVacancies(map, Vassals.PYON);
+    ActorUtils.fillAllVacancies(map, Vassals.PYON);
     int initFunds = 100;
     baseC.initFunds(initFunds);
     

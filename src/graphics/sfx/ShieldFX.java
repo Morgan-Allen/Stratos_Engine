@@ -4,10 +4,10 @@
   *  for now, feel free to poke around for non-commercial purposes.
   */
 package graphics.sfx;
+import graphics.common.*;
 import util.*;
 import java.io.*;
-
-import graphics.common.*;
+import com.badlogic.gdx.graphics.*;
 
 
 
@@ -16,38 +16,64 @@ public class ShieldFX extends SFX {
   
   /**  Fields, constants, setup and save/load methods-
     */
-  final public static ModelAsset SHIELD_MODEL = new ClassModel(
-    "shield_fx_model", ShieldFX.class
-  ) {
-    public Sprite makeSprite() { return new ShieldFX(); }
-  };
-  
-  final public static ImageAsset
-    SHIELD_BURST_TEX = ImageAsset.fromImage(
-      ShieldFX.class, "shield_fx_burst_img", "media/SFX/shield_burst.png"
-    ),
-    SHIELD_HALO_TEX  = ImageAsset.fromImage(
-      ShieldFX.class, "shield_fx_halo_img" , "media/SFX/shield_halo.png"
-    );
   final public static float
     BURST_FADE_INC  = 0.033f,
     MIN_ALPHA_GLOW  = 0.00f,
-    MAX_BURST_ALPHA = 0.99f;
+    MAX_BURST_ALPHA = 0.99f
+  ;
+
+  public static class Model extends graphics.common.ModelAsset {
+    
+    String texName, haloName;
+    Texture burstTex;
+    Texture haloTex;
+    
+    public Model(
+      String modelName, Class modelClass,
+      String texFileName, String haloFileName
+    ) {
+      super(modelClass, modelName);
+      this.texName = texFileName;
+      this.haloName = haloFileName;
+    }
+    
+    
+    protected State loadAsset() {
+      burstTex = ImageAsset.getTexture(texName );
+      haloTex  = ImageAsset.getTexture(haloName);
+      if (burstTex != null && haloTex != null) return state = State.LOADED;
+      else return state = State.ERROR;
+    }
+    
+    
+    protected State disposeAsset() {
+      if (burstTex != null) burstTex.dispose();
+      if (haloTex  != null) haloTex .dispose();
+      return state = State.DISPOSED;
+    }
+    
+    
+    public Sprite makeSprite() { return new ShieldFX(this); }
+    public Object sortingKey() { return haloTex; }
+  }
   
+  
+  
+  final Model model;
   
   class Burst { float angle, timer; }
-  //public float radius = 1.0f;
   private Stack <Burst> bursts = new Stack <Burst> ();
   private float glowAlpha = 0.0f;
   private static Mat3D rotMat = new Mat3D();
   
   
-  public ShieldFX() {
+  public ShieldFX(Model model) {
     super(PRIORITY_MIDDLE);
+    this.model = model;
   }
   
   
-  public ModelAsset model() { return SHIELD_MODEL; }
+  public ModelAsset model() { return model; }
   
   
   public void saveTo(DataOutputStream out) throws Exception {
@@ -131,8 +157,7 @@ public class ShieldFX extends SFX {
     //  Render the halo itself-
     final float r = scale * pass.rendering.view.screenScale();
     pass.compileQuad(
-      SHIELD_HALO_TEX.asTexture(),
-      Colour.transparency(glowAlpha),
+      model.haloTex, Colour.transparency(glowAlpha),
       true, flatPos.x - r, flatPos.y - r, r * 2,
       r * 2, 0, 0, 1,
       1, flatPos.z, true
@@ -164,8 +189,7 @@ public class ShieldFX extends SFX {
     }
     
     pass.compileQuad(
-      SHIELD_BURST_TEX.asTexture(),
-      Colour.transparency(burst.timer * MAX_BURST_ALPHA),
+      model.burstTex, Colour.transparency(burst.timer * MAX_BURST_ALPHA),
       true, verts, 0, 0, 1, 1
     );
   }

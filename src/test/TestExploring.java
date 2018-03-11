@@ -8,7 +8,7 @@ import static content.GameContent.*;
 
 
 
-public class TestExploring extends Test {
+public class TestExploring extends LogicTest {
   
   
   public static void main(String args[]) {
@@ -17,9 +17,9 @@ public class TestExploring extends Test {
   
   
   static boolean testExploring(boolean graphics) {
-    Test test = new TestExploring();
+    LogicTest test = new TestExploring();
     
-    Base base = setupTestCity(32, ALL_GOODS, true, JUNGLE, MEADOW);
+    Base base = setupTestBase(32, ALL_GOODS, true, JUNGLE, MEADOW);
     AreaMap map = base.activeMap();
     World world = map.world;
     
@@ -32,7 +32,7 @@ public class TestExploring extends Test {
     CityMapPlanning.markDemolish(map, true, 3, 3, 6, 6);
     Building lodge = (Building) KOMMANDO_REDOUBT.generate();
     lodge.enterMap(map, 4, 4, 1, base);
-    Test.fillWorkVacancies(lodge);
+    ActorUtils.fillWorkVacancies(lodge);
     
     CityMapTerrain.populateAnimals(map, QUDU);
     

@@ -30,8 +30,8 @@ public class PlayUI extends HUD implements UIConstants {
   DetailPane detailPane;
   OptionList optionList;
   
-  final Selection selection = new Selection(this);
-  final Tracking  tracking  = new Tracking (this);
+  final public Selection selection = new Selection(this);
+  final public Tracking  tracking  = new Tracking (this);
   
   Readout readout;
   ProgressOptions progressOptions;

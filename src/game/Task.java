@@ -158,7 +158,10 @@ public class Task implements Session.Saveable {
     
     //  TODO:  This should probably *not* be done this way, now that multiple
     //  tasks can be configured for assessment at the same time.
-    if (activeNow) active.assignTask(null);
+    if (activeNow) {
+      //active.assignTask(null);
+      this.toggleFocus(false);
+    }
     
     //  TODO:  Don't actually generate the path now!  Just check that pathing
     //  is possible.
@@ -171,11 +174,21 @@ public class Task implements Session.Saveable {
     this.target    = target ;
     
     if (maxTime == -1) this.maxTime = AVG_VISIT_TIME;
-    this.pathIndex = -1;
-    path = updatePathing();
     
-    if (Visit.empty(path)) return null;
-    if (activeNow) active.assignTask(this);
+    path = updatePathing();
+    if (Visit.empty(path)) {
+      path = null;
+      pathIndex = -1;
+      return null;
+    }
+    else {
+      pathIndex = 0;
+    }
+    
+    if (activeNow) {
+      //active.assignTask(this);
+      this.toggleFocus(true);
+    }
     return this;
   }
   
@@ -238,9 +251,7 @@ public class Task implements Session.Saveable {
     }
     
     if (active.isActor() && ! checkPathing(pathTarget())) {
-      this.path = updatePathing();
-      this.pathIndex = -1;
-      
+      updatePathing();
       if (! checkPathing(pathTarget())) {
         return false;
       }
@@ -251,9 +262,7 @@ public class Task implements Session.Saveable {
     Actor    visitor  = canVisit ? (Actor) active : null;
     Pathing  inside   = canVisit ? visitor.inside() : null;
     Pathing  path[]   = this.path;
-    Pathing  pathEnd  = (Pathing) Visit.last(path);
-    float    distance = AreaMap.distance(active.at(), pathEnd);
-    float    minRange = actionRange();
+    boolean  contacts = checkContact(path);
     Building visits   = this.visits;
     Target   target   = this.target;
     
@@ -278,7 +287,7 @@ public class Task implements Session.Saveable {
         return false;
       }
     }
-    else if (distance <= minRange) {
+    else if (contacts) {
       if (target != null && timeSpent++ <= maxTime) {
         inContact = true;
         onTarget(target);
@@ -295,12 +304,12 @@ public class Task implements Session.Saveable {
         return true;
       }
       else {
+        I.say("ENDING TASK: "+this);
         return false;
       }
     }
     else if (canVisit) {
-      int index = Nums.clamp(pathIndex + 1, path.length);
-      Pathing ahead = path[pathIndex = index];
+      Pathing ahead = nextOnPath();
       if (ahead.isTile()) visitor.setInside(inside, false);
       else visitor.setInside(ahead, true);
       visitor.setLocation(ahead.at(), map);
@@ -401,6 +410,12 @@ public class Task implements Session.Saveable {
       if (a.inside() != null) return a.inside();
     }
     return from.at();
+  }
+  
+  
+  boolean checkContact(Pathing path[]) {
+    Pathing from = (Pathing) Visit.last(path);
+    return AreaMap.distance(active.at(), from) < actionRange();
   }
   
   
@@ -507,7 +522,7 @@ public class Task implements Session.Saveable {
     Pathing path[], Pathing start, Pathing end, AreaMap map
   ) {
     if (Visit.empty(path) || path[0] != start) return false;
-
+    
     Pathing temp[] = new Pathing[9];
     Pathing last = (Pathing) Visit.last(path);
     if (last != end && AreaMap.distance(last, end) > 1.5f) {

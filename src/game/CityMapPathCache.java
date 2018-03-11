@@ -44,6 +44,9 @@ public class CityMapPathCache {
     public Tile[] tiles() { return tiles; }
     public int numTiles() { return numTiles; }
     public Coord coord() { return new Coord(aX, aY); }
+    
+    public AreaGroup group() { return group; }
+    public Series <Border> borders() { return borders; }
   }
   
   public static class Border {
@@ -51,6 +54,8 @@ public class CityMapPathCache {
     Area with;
     int size;
     boolean open;
+    
+    public Area with() { return with; }
   }
   
   public static class AreaGroup {

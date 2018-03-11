@@ -9,7 +9,7 @@ import static content.GameContent.*;
 
 
 
-public class TestPurchases extends Test {
+public class TestPurchases extends LogicTest {
   
   
   public static void main(String args[]) {
@@ -20,7 +20,7 @@ public class TestPurchases extends Test {
   static boolean testPurchases(boolean graphics) {
     TestPurchases test = new TestPurchases();
     
-    Base base = Test.setupTestCity(16, ALL_GOODS, false);
+    Base base = LogicTest.setupTestBase(16, ALL_GOODS, false);
     AreaMap map = base.activeMap();
     World world = map.world;
     
@@ -31,11 +31,11 @@ public class TestPurchases extends Test {
     
     Building fort = (Building) TROOPER_LODGE.generate();
     fort.enterMap(map, 2, 2, 1, base);
-    fillWorkVacancies(fort);
+    ActorUtils.fillWorkVacancies(fort);
     
     BuildingForCrafts forge = (BuildingForCrafts) ENGINEER_STATION.generate();
     forge.enterMap(map, 10, 2, 1, base);
-    fillWorkVacancies(forge);
+    ActorUtils.fillWorkVacancies(forge);
     
     Actor buys = fort.workers().first();
     Good itemType = buys.type().weaponType;

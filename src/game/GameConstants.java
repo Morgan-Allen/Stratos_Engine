@@ -3,8 +3,7 @@
 package game;
 import util.*;
 import graphics.common.*;
-import static game.Type.*;
-import static game.AreaMap.*;
+import graphics.sfx.*;
 import java.awt.Color;
 
 
@@ -205,6 +204,19 @@ public class GameConstants {
     */
   public static class Good extends Type {
     
+    final public static int
+      NONE     = 0,
+      //
+      //  These are properties of equipped weapons-
+      MELEE    = 1 << 0,
+      RANGED   = 1 << 1,
+      ENERGY   = 1 << 2,
+      KINETIC  = 1 << 3,
+      STUN     = 1 << 4,
+      NO_AMMO  = 1 << 5
+    ;
+    
+    
     final public int price;
     public boolean isWeapon = false;
     public boolean isArmour = false;
@@ -214,6 +226,12 @@ public class GameConstants {
     public int priceLevels[] = {};
     public Technique allows[] = {};
     
+    public String groupName, animName;
+    public PlaneFX.Model  slashModel ;
+    public ShotFX.Model   shotModel  ;
+    public PlaneFX.Model  burstModel ;
+    public ShieldFX.Model shieldModel;
+    
     
     public Good(String name, int price) {
       super(null, "good_"+name.toLowerCase().replace(' ', '_'), IS_GOOD);
@@ -222,24 +240,37 @@ public class GameConstants {
       this.pathing = PATH_HINDER;
     }
     
-    public void setAsWeapon(int damage, boolean ranged, int... prices) {
+    public Good setAsWeapon(
+      int damage, boolean ranged, int prices[],
+      String groupName, String animName,
+      ShotFX.Model shotModel, PlaneFX.Model burstModel
+    ) {
       this.isWeapon    = true;
       this.meleeDamage = ranged ? 0 : damage;
       this.rangeDamage = ranged ? damage : 0;
       this.priceLevels = prices;
       this.maxQuality  = prices.length;
+      
+      this.groupName  = groupName ;
+      this.animName   = animName  ;
+      this.shotModel  = shotModel ;
+      this.burstModel = burstModel;
+      
+      return this;
     }
     
-    public void setAsArmour(int armour, boolean shields, int... prices) {
+    public Good setAsArmour(int armour, boolean shields, int... prices) {
       this.isArmour    = true;
       this.armourClass = armour;
       this.priceLevels = prices;
       this.maxQuality  = prices.length;
+      return this;
     }
     
-    public void setUsable(Technique... allows) {
+    public Good setUsable(Technique... allows) {
       this.isUsable = true;
       this.allows = allows;
+      return this;
     }
   }
   
@@ -424,16 +455,21 @@ public class GameConstants {
   
   public static interface Target extends Flood.Fill {
     
-    Type type();
     Tile at();
-    boolean isTile();
+    float radius();
+    float height();
     boolean onMap();
     boolean indoors();
+    
+    Type type();
+    boolean isTile();
     
     void targetedBy(Active a);
     void setFocused(Active a, boolean is);
     Series <Active> focused();
     boolean hasFocus();
+    
+    Vec3D renderedPosition(Vec3D store);
   }
   
   
