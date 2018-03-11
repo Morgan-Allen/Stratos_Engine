@@ -552,10 +552,6 @@ public class Actor extends Element implements
   
   
   public void setAsKilled(String cause) {
-    
-    //I.say("  "+this+" killed, cause: "+cause);
-    //I.say("    Home: "+home+", work: "+work);
-    
     state = STATE_DEAD;
     if (map != null) exitMap(map);
     setDestroyed();

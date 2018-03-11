@@ -48,6 +48,10 @@ public class ActorAsAnimal extends Actor {
     Tile rests = type().organic ? findGrazePoint() : null;
     assignTask(null);
     
+    if (hunger > 1 & ! type().predator) {
+      ///I.say("???");
+    }
+    
     if (type().organic) {
       //
       //  If you're seriously tired or hurt, but not hungry, find a place to rest:

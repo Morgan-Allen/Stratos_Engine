@@ -385,7 +385,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
     
     Pick <Tile> pick = new Pick <Tile> () {
       public void compare(Tile t, float rating) {
-        
+        if (t == null) return;
         int pathT = t.pathType();
         if (pathT != Type.PATH_FREE && pathT != Type.PATH_PAVE) return;
         if (pathT != Type.PATH_PAVE) rating /= 2;

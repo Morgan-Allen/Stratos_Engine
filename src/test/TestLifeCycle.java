@@ -1,14 +1,14 @@
 
 
 package test;
-import game.*;
 import content.*;
-import util.*;
 import static content.GameContent.*;
+import game.*;
 import static game.ActorAsPerson.*;
 import static game.GameConstants.*;
 import static game.CityCouncil.*;
 import static game.CityMapPlanning.*;
+import util.*;
 
 
 
@@ -43,15 +43,19 @@ public class TestLifeCycle extends LogicTest {
       I.say("\nXP gain did not function correctly!");
       return false;
     }
-    
-    for (int x = 9; x > 0; x -= 4) {
-      for (int y = 13; y > 0; y -= 3) {
-        Type type = (y >= 7) ? HOLDING : ENGINEER_STATION;
-        Building built = (Building) type.generate();
-        built.enterMap(map, x, y, 1, base);
+
+    for (int x = 2; x-- > 0;) {
+      for (int y = 2; y-- > 0;) {
+        Building house = (Building) HOLDING.generate();
+        house.enterMap(map, 1 + (x * 4), 10 + (y * 3), 1, base);
       }
-      placeStructure(WALKWAY, base, true, x - 1, 0, 1, 15);
     }
+    for (int x = 3; x-- > 0;) {
+      Building built = (Building) ENGINEER_STATION.generate();
+      built.enterMap(map, 1 + (x * 4), 1, 1, base);
+      placeStructure(WALKWAY, base, true, built.at().x - 1, 0, 1, 15);
+    }
+    
     placeStructure(WALKWAY, base, true, 0, 0, 10, 1);
     placeStructure(WALKWAY, base, true, 0, 9, 16, 1);
     
@@ -127,7 +131,7 @@ public class TestLifeCycle extends LogicTest {
         
         for (Building b : map.buildings()) {
           if (b.type() == ENGINEER_STATION) {
-            b.setInventory(ORES   , 5);
+            b.setInventory(ORES , 5);
             b.setInventory(PARTS, 5);
           }
           if (b.type() == HOLDING || b.type() == BASTION) {

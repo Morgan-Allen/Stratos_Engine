@@ -23,6 +23,8 @@ public class TestEcology extends LogicTest {
     Base base = setupTestBase(64, ALL_GOODS, true, JUNGLE, MEADOW);
     AreaMap map = base.activeMap();
     World world = map.world;
+    
+    world.settings.toggleFog = false;
     ActorAsAnimal.reportCycle = graphics;
     
     ActorType species[] = { VAREEN, MICOVORE };

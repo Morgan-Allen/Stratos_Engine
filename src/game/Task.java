@@ -175,16 +175,11 @@ public class Task implements Session.Saveable {
     
     if (maxTime == -1) this.maxTime = AVG_VISIT_TIME;
     
-    path = updatePathing();
+    updatePathing();
+    
     if (Visit.empty(path)) {
-      path = null;
-      pathIndex = -1;
       return null;
     }
-    else {
-      pathIndex = 0;
-    }
-    
     if (activeNow) {
       //active.assignTask(this);
       this.toggleFocus(true);
@@ -304,7 +299,6 @@ public class Task implements Session.Saveable {
         return true;
       }
       else {
-        I.say("ENDING TASK: "+this);
         return false;
       }
     }
@@ -313,6 +307,7 @@ public class Task implements Session.Saveable {
       if (ahead.isTile()) visitor.setInside(inside, false);
       else visitor.setInside(ahead, true);
       visitor.setLocation(ahead.at(), map);
+      pathIndex += 1;
       return true;
     }
     else {
@@ -474,7 +469,7 @@ public class Task implements Session.Saveable {
   }
   
   
-  Pathing[] updatePathing() {
+  boolean updatePathing() {
     boolean report  = reports();
     boolean verbose = false;
     
@@ -483,12 +478,15 @@ public class Task implements Session.Saveable {
     Pathing from     = pathOrigin(active);
     Pathing heads    = pathTarget();
     
+    this.path = null;
+    this.pathIndex = -1;
+    
     if (report && verbose) {
       I.say(this+" pathing toward "+(visiting ? visits : target));
     }
     if (from == null || heads == null) {
       if (report) I.say("  Bad endpoints: "+from+" -> "+heads);
-      return null;
+      return false;
     }
     
     ActorPathSearch search = new ActorPathSearch(map, from, heads, -1);
@@ -501,19 +499,20 @@ public class Task implements Session.Saveable {
     }
     //search.verbosity = Search.VERBOSE;
     search.doSearch();
-    Pathing path[] = search.fullPath(Pathing.class);
+    this.path = search.fullPath(Pathing.class);
     
     if (path == null) {
       if (report) I.say("  Could not find path for "+this);
-      return null;
+      return false;
     }
     else if (path.length < (AreaMap.distance(from, heads) / 2) - 1) {
       if (report) I.say("  Path is impossible!");
-      return null;
+      this.path = null;
+      return false;
     }
     else {
-      ///if (report) I.say("  Path is: "+path.length+" tiles long...");
-      return path;
+      this.pathIndex = 0;
+      return true;
     }
   }
   
