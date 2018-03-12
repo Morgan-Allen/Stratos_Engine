@@ -31,8 +31,8 @@ public class TaskPatrol extends Task implements TileConstants {
   final int type;
   final Element guarded;
   
-  private Target onPoint;
   private int numStops = 0;
+  private Target onPoint;
   private List <Target> patrolled;
   
   
@@ -50,42 +50,32 @@ public class TaskPatrol extends Task implements TileConstants {
   
   public TaskPatrol(Session s) throws Exception {
     super(s);
+    AreaMap map = active.map();
+    
     type     = s.loadInt();
     guarded  = (Element) s.loadObject();
-    onPoint  = (Target) s.loadObject();
     numStops = s.loadInt();
+    onPoint  = AreaMap.loadTarget(map, s);
     
-    AreaMap map = guarded.map();
     patrolled = new List();
     for (int n = s.loadInt(); n-- > 0;) {
-      if (s.loadBool()) {
-        patrolled.add(AreaMap.loadTile(map, s));
-      }
-      else {
-        patrolled.add((Target) s.loadObject());
-      }
+      patrolled.add(AreaMap.loadTarget(map, s));
     }
   }
   
   
   public void saveState(Session s) throws Exception {
     super.saveState(s);
+    AreaMap map = active.map();
+    
     s.saveInt   (type    );
     s.saveObject(guarded );
-    s.saveObject(onPoint );
     s.saveInt   (numStops);
+    AreaMap.saveTarget(onPoint, map, s);
     
-    AreaMap map = guarded.map();
     s.saveInt(patrolled.size());
     for (Target t : patrolled) {
-      if (t.isTile()) {
-        s.saveBool(true);
-        AreaMap.saveTile((Tile) t, map, s);
-      }
-      else {
-        s.saveBool(false);
-        s.saveObject(t);
-      }
+      AreaMap.saveTarget(t, map, s);
     }
   }
   

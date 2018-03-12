@@ -66,14 +66,10 @@ public class AreaMap implements Session.Saveable {
   
   public AreaMap(Session s) throws Exception {
     s.cacheInstance(this);
-    
+    //
+    //  NOTE:  Tiles MUST be set up before all other objects in the world to
+    //  avoid problems with target-loading!
     terrainTypes = (Terrain[]) s.loadObjectArray(Terrain.class);
-    
-    world = (World) s.loadObject();
-    locale = world.locales.atIndex(s.loadInt());
-    locals = (Base) s.loadObject();
-    s.loadObjects(bases);
-    
     performSetup(s.loadInt(), terrainTypes);
     for (Coord c : Visit.grid(0, 0, size, size, 1)) {
       grid[c.x][c.y].loadState(s, this);
@@ -81,6 +77,11 @@ public class AreaMap implements Session.Saveable {
     for (Coord c : Visit.grid(0, 0, flagSize, flagSize, 1)) {
       s.loadObjects(actorGrid[c.x][c.y]);
     }
+    
+    world = (World) s.loadObject();
+    locale = world.locales.atIndex(s.loadInt());
+    locals = (Base) s.loadObject();
+    s.loadObjects(bases);
     
     time = s.loadInt();
     numUpdates = s.loadInt();
@@ -122,14 +123,10 @@ public class AreaMap implements Session.Saveable {
   
   
   public void saveState(Session s) throws Exception {
-    
+    //
+    //  NOTE:  Tiles MUST be set up before all other objects in the world to
+    //  avoid problems with target-loading!
     s.saveObjectArray(terrainTypes);
-    
-    s.saveObject(world);
-    s.saveInt(world.locales.indexOf(locale));
-    s.saveObject(locals);
-    s.saveObjects(bases);
-    
     s.saveInt(size);
     for (Coord c : Visit.grid(0, 0, size, size, 1)) {
       grid[c.x][c.y].saveState(s, this);
@@ -137,6 +134,11 @@ public class AreaMap implements Session.Saveable {
     for (Coord c : Visit.grid(0, 0, flagSize, flagSize, 1)) {
       s.saveObjects(actorGrid[c.x][c.y]);
     }
+    
+    s.saveObject(world);
+    s.saveInt(world.locales.indexOf(locale));
+    s.saveObject(locals);
+    s.saveObjects(bases);
     
     s.saveInt(time);
     s.saveInt(numUpdates);
@@ -227,7 +229,7 @@ public class AreaMap implements Session.Saveable {
   }
   
   
-  public Series <Base> cities() {
+  public Series <Base> bases() {
     return bases;
   }
   

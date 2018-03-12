@@ -111,10 +111,16 @@ public class Mission implements
     awayCity     = (Base   ) s.loadObject();
     map          = (AreaMap) s.loadObject();
     
-    active       = s.loadBool();
+    active = s.loadBool();
+    if (s.loadBool()) {
+      focus = loadTile(map, s);
+    }
+    else {
+      focus = s.loadObject();
+    }
+    
     transitPoint = loadTile(map, s);
     standPoint   = loadTile(map, s);
-    focus        = s.loadObject();
     facing       = s.loadInt();
     
     exploreRange = s.loadFloat();
@@ -156,9 +162,17 @@ public class Mission implements
     s.saveObject(map     );
     
     s.saveBool(active);
+    if (focus instanceof Tile) {
+      s.saveBool(true);
+      saveTile((Tile) focus, map, s);
+    }
+    else {
+      s.saveBool(false);
+      s.saveObject(focus);
+    }
+    
     saveTile(transitPoint, map, s);
     saveTile(standPoint  , map, s);
-    s.saveObject(focus);
     s.saveInt(facing);
     
     s.saveFloat(exploreRange);

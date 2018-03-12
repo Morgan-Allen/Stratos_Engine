@@ -18,6 +18,7 @@ public class TestBounties extends LogicTest {
   }
   
   
+  //  TODO:
   //  What are the cases I need to cover here?
   
   //  Defend bounty on building.
@@ -108,6 +109,7 @@ public class TestBounties extends LogicTest {
   boolean bountyTest(boolean graphics, String title) {
     
     Base base = LogicTest.setupTestBase(32, ALL_GOODS, false);
+    base.setName("Client Base");
     AreaMap map = base.activeMap();
     //World world = base.world;
     
@@ -133,6 +135,24 @@ public class TestBounties extends LogicTest {
     if (given == null) {
       I.say("\n"+title+" TEST FAILED!");
       I.say("  No task provided for actor: "+sample);
+      return false;
+    }
+    
+    
+    try {
+      Session.saveSession("saves/test_save.tlt", map);
+      Session session = Session.loadSession("saves/test_save.tlt", true);
+      AreaMap loaded = (AreaMap) session.loaded()[0];
+      
+      Mission m = loaded.world.baseNamed("Client Base").missions().first();
+      if (m.focus() == null) {
+        I.say("???");
+      }
+      
+      I.say("\nSuccessfully loaded map: "+loaded);
+    }
+    catch(Exception e) {
+      I.report(e);
       return false;
     }
     

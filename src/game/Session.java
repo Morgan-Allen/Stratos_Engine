@@ -420,7 +420,13 @@ public final class Session {
   
   
   public void saveObject(Object o) throws Exception {
-    if (! (o instanceof Saveable)) { out.writeInt(-1); return; }
+    if (! (o instanceof Saveable)) {
+      if (o != null) {
+        I.say("\nWARNING: OBJECT NOT SAVEABLE: "+o);
+      }
+      out.writeInt(-1);
+      return;
+    }
     final Saveable s = (Saveable) o;
     
     final Integer saveID = saveIDs.get(s);
