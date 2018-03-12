@@ -290,11 +290,12 @@ public class GameContent {
     
     DRONE.predator    = false;
     DRONE.meleeDamage = 0;
-    DRONE.rangeDamage = 2;
+    DRONE.rangeDamage = 4;
     DRONE.rangeDist   = 4;
-    DRONE.armourClass = 4;
-    DRONE.maxHealth   = 8;
+    DRONE.armourClass = 8;
+    DRONE.maxHealth   = 15;
     DRONE.weaponType  = Devices.INTRINSIC_BEAM;
+    DRONE.initTraits.setWith(SKILL_RANGE, 2, SKILL_EVADE, 4);
     
     
     TRIPOD.name  = "Tripod";
@@ -305,12 +306,13 @@ public class GameContent {
     
     TRIPOD.predator    = false;
     TRIPOD.deep        = 2;
-    TRIPOD.meleeDamage = 4;
-    TRIPOD.rangeDamage = 6;
+    TRIPOD.meleeDamage = 8;
+    TRIPOD.rangeDamage = 12;
     TRIPOD.rangeDist   = 6;
-    TRIPOD.armourClass = 6;
-    TRIPOD.maxHealth   = 15;
+    TRIPOD.armourClass = 12;
+    TRIPOD.maxHealth   = 45;
     TRIPOD.weaponType = Devices.INTRINSIC_BEAM;
+    TRIPOD.initTraits.setWith(SKILL_RANGE, 3, SKILL_MELEE, 2);
     
     
     CRANIAL.name  = "Cranial";
@@ -320,9 +322,10 @@ public class GameContent {
     );
     
     CRANIAL.predator    = false;
-    CRANIAL.meleeDamage = 6;
-    CRANIAL.armourClass = 8;
-    CRANIAL.maxHealth   = 12;
+    CRANIAL.meleeDamage = 12;
+    CRANIAL.armourClass = 16;
+    CRANIAL.maxHealth   = 30;
+    CRANIAL.initTraits.setWith(SKILL_MELEE, 7, SKILL_EVADE, 6);
     
     
     for (ActorType t : ALL_ARTILECTS) {
@@ -365,53 +368,59 @@ public class GameContent {
     CHILD.rangeDamage = 0;
     CHILD.rangeDist   = 0;
     CHILD.armourClass = 0;
-    CHILD.maxHealth   = 2;
+    CHILD.maxHealth   = 5;
+    CHILD.moveSpeed   = 80;
     CHILD.initTraits.setWith();
     
     
     ENFORCER.name = "Enforcer";
     ENFORCER.attachCostume(GameContent.class, "enforcer_skin.gif");
-
-    ENFORCER.meleeDamage = 2;
-    ENFORCER.rangeDamage = 4;
+    
+    ENFORCER.meleeDamage = 4;
+    ENFORCER.rangeDamage = 8;
     ENFORCER.rangeDist   = 6;
-    ENFORCER.armourClass = 3;
-    ENFORCER.maxHealth   = 4;
+    ENFORCER.armourClass = 6;
+    ENFORCER.maxHealth   = 16;
+    ENFORCER.moveSpeed   = 100;
     ENFORCER.initTraits.setWith(SKILL_MELEE, 2, SKILL_RANGE, 5, SKILL_EVADE, 3);
     
     RUNNER.name = "Runner";
     RUNNER.attachCostume(GameContent.class, "runner_skin.gif");
 
-    RUNNER.rangeDamage = 6;
+    RUNNER.rangeDamage = 12;
     RUNNER.rangeDist   = 8;
-    RUNNER.armourClass = 3;
-    RUNNER.maxHealth   = 3;
+    RUNNER.armourClass = 6;
+    RUNNER.maxHealth   = 12;
+    RUNNER.moveSpeed   = 125;
     RUNNER.initTraits.setWith(SKILL_RANGE, 5, SKILL_EVADE, 4);
     
     KOMMANDO.name = "Kommando";
     KOMMANDO.attachCostume(GameContent.class, "kommando_skin.gif");
     
-    KOMMANDO.meleeDamage = 8;
-    KOMMANDO.armourClass = 4;
-    KOMMANDO.maxHealth   = 9;
+    KOMMANDO.meleeDamage = 16;
+    KOMMANDO.armourClass = 5;
+    KOMMANDO.maxHealth   = 25;
+    KOMMANDO.moveSpeed   = 125;
     KOMMANDO.initTraits.setWith(SKILL_MELEE, 7, SKILL_EVADE, 5);
     
     
     ECOLOGIST.name = "Ecologist";
     ECOLOGIST.attachCostume(GameContent.class, "ecologist_skin.gif");
     
-    ECOLOGIST.rangeDamage = 4;
-    ECOLOGIST.armourClass = 3;
+    ECOLOGIST.rangeDamage = 8;
+    ECOLOGIST.armourClass = 6;
     ECOLOGIST.rangeDist   = 6;
-    ECOLOGIST.maxHealth   = 4;
+    ECOLOGIST.maxHealth   = 16;
+    ECOLOGIST.moveSpeed   = 110;
     ECOLOGIST.initTraits.setWith(SKILL_RANGE, 5, SKILL_EVADE, 3, SKILL_FARM, 4);
     
     ENGINEER.name = "Engineer";
     ENGINEER.attachCostume(GameContent.class, "engineer_skin.gif");
     
-    ENGINEER.meleeDamage = 5;
-    ENGINEER.armourClass = 5;
-    ENGINEER.maxHealth   = 4;
+    ENGINEER.meleeDamage = 10;
+    ENGINEER.armourClass = 14;
+    ENGINEER.maxHealth   = 20;
+    ENGINEER.moveSpeed   = 70;
     ENGINEER.initTraits.setWith(SKILL_MELEE, 3, SKILL_CRAFT, 5, SKILL_BUILD, 5);
     
     PHYSICIAN.name = "Physician";
@@ -419,8 +428,9 @@ public class GameContent {
     
     PHYSICIAN.meleeDamage = 0;
     PHYSICIAN.rangeDamage = 0;
-    PHYSICIAN.armourClass = 1;
-    PHYSICIAN.maxHealth   = 3;
+    PHYSICIAN.armourClass = 2;
+    PHYSICIAN.maxHealth   = 12;
+    PHYSICIAN.moveSpeed   = 110;
     PHYSICIAN.initTraits.setWith(SKILL_CRAFT, 6, SKILL_WRITE, 4, SKILL_SPEAK, 3);
   }
   
@@ -527,9 +537,11 @@ public class GameContent {
     
     BASTION_L2.name = "Bastion Level 2";
     BASTION_L2.setBuildMaterials(PLASTICS, 5, PARTS, 15);
+    BASTION_L2.maxHealth = 550;
     
     BASTION_L3.name = "Bastion Level 3";
     BASTION_L3.setBuildMaterials(PLASTICS, 5, PARTS, 15);
+    BASTION_L3.maxHealth = 800;
     
     BASTION.setUpgradeTiers(BASTION, BASTION_L2, BASTION_L3);
     BASTION.setAllUpgrades(BASTION.upgradeTiers);
@@ -560,6 +572,7 @@ public class GameContent {
     ENFORCER_BLOC.setBuildMaterials(PARTS, 4);
     ENFORCER_BLOC.workerTypes.setWith(ENFORCER, 2);
     ENFORCER_BLOC.features = new Good[] { IS_ADMIN };
+    ENFORCER_BLOC.maxHealth = 200;
     
     KOMMANDO_REDOUBT.name = "Kommando Redoubt";
     KOMMANDO_REDOUBT.tint = TINT_MILITARY;
@@ -573,6 +586,7 @@ public class GameContent {
     KOMMANDO_REDOUBT.setBuildMaterials(PLASTICS, 5, PARTS, 1);
     KOMMANDO_REDOUBT.workerTypes.setWith(KOMMANDO, 3);
     KOMMANDO_REDOUBT.produced = new Good[] { PROTEIN };
+    KOMMANDO_REDOUBT.maxHealth = 135;
     
     //
     //  Science structures:
@@ -587,7 +601,7 @@ public class GameContent {
     ECOLOGIST_STATION.setDimensions(3, 3, 2, THIN_MARGIN);
     ECOLOGIST_STATION.setBuildMaterials(PLASTICS, 7, PARTS, 1);
     ECOLOGIST_STATION.workerTypes.setWith(ECOLOGIST, 3);
-    ECOLOGIST_STATION.maxHealth  = 100;
+    ECOLOGIST_STATION.maxHealth  = 85;
     ECOLOGIST_STATION.produced   = new Good[] { PROTEIN };
     
     ENGINEER_STATION.name = "Engineer Station";
@@ -601,9 +615,10 @@ public class GameContent {
     ENGINEER_STATION.setDimensions(3, 3, 2, THIN_MARGIN);
     ENGINEER_STATION.setBuildMaterials(PARTS, 8);
     ENGINEER_STATION.workerTypes.setWith(ENGINEER, 3);
-    ENGINEER_STATION.needed   = new Good[] { CARBONS, ORES };
-    ENGINEER_STATION.produced = new Good[] { PLASTICS, PARTS };
-    ENGINEER_STATION.maxStock = 3;
+    ENGINEER_STATION.needed    = new Good[] { CARBONS, ORES };
+    ENGINEER_STATION.produced  = new Good[] { PLASTICS, PARTS };
+    ENGINEER_STATION.maxHealth = 120;
+    ENGINEER_STATION.maxStock  = 3;
     ENGINEER_STATION.recipes = new Recipe[] {
       new Recipe(PLASTICS           , SKILL_CRAFT, AVG_CRAFT_TIME, CARBONS),
       new Recipe(PARTS              , SKILL_CRAFT, AVG_CRAFT_TIME, ORES   ),
@@ -623,9 +638,10 @@ public class GameContent {
     PHYSICIAN_STATION.setDimensions(3, 3, 2, THIN_MARGIN);
     PHYSICIAN_STATION.setBuildMaterials(PLASTICS, 4, PARTS, 2);
     PHYSICIAN_STATION.workerTypes.setWith(PHYSICIAN, 3);
-    PHYSICIAN_STATION.needed   = new Good[] { GREENS };
-    PHYSICIAN_STATION.produced = new Good[] { MEDICINE };
-    PHYSICIAN_STATION.maxStock = 3;
+    PHYSICIAN_STATION.needed    = new Good[] { GREENS };
+    PHYSICIAN_STATION.produced  = new Good[] { MEDICINE };
+    PHYSICIAN_STATION.maxHealth = 100;
+    PHYSICIAN_STATION.maxStock  = 3;
     PHYSICIAN_STATION.recipes = new Recipe[] {
       new Recipe(MEDICINE, SKILL_CRAFT, AVG_CRAFT_TIME, GREENS)
     };
@@ -647,6 +663,7 @@ public class GameContent {
     STOCK_EXCHANGE.workerTypes.setWith(Vassals.VENDOR, 1);
     STOCK_EXCHANGE.needed    = MARKET_GOODS;
     STOCK_EXCHANGE.features  = new Good[] { IS_VENDOR };
+    STOCK_EXCHANGE.maxHealth = 100;
     STOCK_EXCHANGE.shopItems = new Good[] {
       StockExGoods.MEDIKIT//, StockExGoods.SHIELD_BAND, StockExGoods.COMM_RELAY
     };
@@ -662,8 +679,9 @@ public class GameContent {
     SUPPLY_DEPOT.setDimensions(3, 3, 1, THIN_MARGIN);
     SUPPLY_DEPOT.setBuildMaterials(PLASTICS, 4, PARTS, 2);
     SUPPLY_DEPOT.workerTypes.setWith(Vassals.PYON, 1, Vassals.CARGO_BARGE, 1);
-    SUPPLY_DEPOT.features = new Good[] { IS_TRADER };
+    SUPPLY_DEPOT.features   = new Good[] { IS_TRADER };
     SUPPLY_DEPOT.buildsWith = new Good[] { PLASTICS, PARTS };
+    SUPPLY_DEPOT.maxHealth  = 55;
     
     //
     //  Religious structures:
@@ -729,6 +747,7 @@ public class GameContent {
     WALKWAY.setDimensions(1, 1, 0);
     WALKWAY.setBuildMaterials(PARTS, 1);
     WALKWAY.rulerBuilt = false;
+    WALKWAY.maxHealth  = 30;
     
     CutoutModel WALL_MODELS[][] = CutoutModel.fromImageGrid(
       GameContent.class, "shield_wall_models",
@@ -743,7 +762,8 @@ public class GameContent {
     SHIELD_WALL.pathing = PATH_WALLS;
     SHIELD_WALL.isWall  = true;
     SHIELD_WALL.setDimensions(1, 1, 2);
-    SHIELD_WALL.setBuildMaterials(PARTS, 2);
+    SHIELD_WALL.setBuildMaterials(PARTS, 1);
+    SHIELD_WALL.maxHealth = 20;
     SHIELD_WALL.rulerBuilt = false;
     
     BLAST_DOOR.name = "Blast Door";
@@ -753,9 +773,9 @@ public class GameContent {
     BLAST_DOOR.pathing = PATH_WALLS;
     BLAST_DOOR.isWall  = true;
     BLAST_DOOR.setDimensions(2, 2, 2);
-    BLAST_DOOR.setBuildMaterials(PARTS, 10);
+    BLAST_DOOR.setBuildMaterials(PARTS, 5);
     BLAST_DOOR.setFeatures(IS_GATE);
-    BLAST_DOOR.maxHealth  = 28;
+    BLAST_DOOR.maxHealth  = 110;
     BLAST_DOOR.rulerBuilt = false;
     
     TURRET.name = "Turret";
@@ -765,13 +785,13 @@ public class GameContent {
     TURRET.pathing = PATH_BLOCK;
     TURRET.isWall  = true;
     TURRET.setDimensions(2, 2, 3);
-    TURRET.setBuildMaterials(PARTS, 10);
+    TURRET.setBuildMaterials(PARTS, 5);
     TURRET.setFeatures(IS_TOWER, IS_TURRET);
-    TURRET.rangeDamage = 4;
+    TURRET.rangeDamage = 8;
     TURRET.rangeDist   = 6;
     TURRET.armourClass = 0;
     TURRET.sightRange  = 8;
-    TURRET.maxHealth   = 20;
+    TURRET.maxHealth   = 135;
     TURRET.rulerBuilt = false;
     
     
@@ -794,6 +814,7 @@ public class GameContent {
     HOLDING.buildsWith   = new Good[] { PLASTICS, PARTS };
     HOLDING.setFeatures(IS_HOUSING);
     HOLDING.setUpgradeTiers(HOLDING, HOUSE_T1, HOUSE_T2);
+    HOLDING.maxHealth  = 35;
     HOLDING.rulerBuilt = false;
     
     HOUSE_T1.name = "Improved Holding";
@@ -803,6 +824,7 @@ public class GameContent {
     HOUSE_T1.homeUseGoods.setWith();
     HOUSE_T1.homeUseGoods.add(HOLDING.homeUseGoods);
     HOUSE_T1.maxStock = 2;
+    HOUSE_T1.maxHealth = 50;
     HOUSE_T1.serviceNeeds.setWith(DIVERSION, 10);
     
     HOUSE_T2.name = "Fancy Holding";
@@ -812,6 +834,7 @@ public class GameContent {
     HOUSE_T2.homeUseGoods.setWith(MEDICINE, 1, GREENS, 1);
     HOUSE_T2.homeUseGoods.add(HOUSE_T1.homeUseGoods);
     HOUSE_T2.maxStock = 2;
+    HOUSE_T2.maxHealth = 60;
     HOUSE_T2.serviceNeeds.setWith(DIVERSION, 15, PHYSICIAN_STATION, 1);
     
     
@@ -827,6 +850,7 @@ public class GameContent {
     CANTINA.setBuildMaterials(PLASTICS, 5, PARTS, 2);
     CANTINA.setFeatures(DIVERSION, IS_REFUGE);
     CANTINA.featureAmount = 15;
+    CANTINA.maxHealth = 60;
     
     //
     //  Industrial structures:
@@ -849,6 +873,7 @@ public class GameContent {
       new Recipe(CARBS , SKILL_FARM, -1),
       new Recipe(GREENS, SKILL_FARM, -1)
     };
+    NURSERY.maxHealth = 40;
     
     HARVESTER.name = "Harvester";
     HARVESTER.tint = TINT_LITE_INDUSTRIAL;
@@ -867,6 +892,7 @@ public class GameContent {
     HARVESTER.recipes = new Recipe[] {
       new Recipe(CARBONS, SKILL_CRAFT, -1)
     };
+    HARVESTER.maxHealth = 55;
     
     EXCAVATOR.name = "Excavator";
     EXCAVATOR.tint = TINT_LITE_INDUSTRIAL;
@@ -886,6 +912,7 @@ public class GameContent {
       new Recipe(CARBONS, SKILL_CRAFT, -1),
       new Recipe(ORES   , SKILL_CRAFT, -1),
     };
+    EXCAVATOR.maxHealth = 85;
     
     //  This isn't actually needed for now, and won't be until you get
     //  power-supplies working.

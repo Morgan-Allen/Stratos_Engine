@@ -16,6 +16,7 @@ public class BuildingForNest extends Building {
   int spawnInterval  = MONTH_LENGTH;
   int spawnCountdown = 0;
   int maxResidents   = -1;
+  boolean doRaids = false;
 
   Building parent = null;
   Mission activeMission = null;
@@ -35,6 +36,7 @@ public class BuildingForNest extends Building {
     spawnInterval = s.loadInt();
     spawnCountdown = s.loadInt();
     maxResidents = s.loadInt();
+    doRaids = s.loadBool();
     
     parent = (Building) s.loadObject();
     activeMission = (Mission) s.loadObject();
@@ -48,6 +50,7 @@ public class BuildingForNest extends Building {
     s.saveInt(spawnInterval);
     s.saveInt(spawnCountdown);
     s.saveInt(maxResidents);
+    s.saveBool(doRaids);
     
     s.saveObject(parent);
     s.saveObject(activeMission);
@@ -72,10 +75,11 @@ public class BuildingForNest extends Building {
   /**  Supplemental configuration methods-
     */
   public void assignSpawnParameters(
-    int interval, int maxResidents, Object... spawnChanceArgs
+    int interval, int maxResidents, boolean doRaids, Object... spawnChanceArgs
   ) {
     this.spawnInterval = interval;
     this.maxResidents  = maxResidents;
+    this.doRaids       = doRaids;
     this.spawnChances.setWith(spawnChanceArgs);
   }
   
@@ -112,7 +116,7 @@ public class BuildingForNest extends Building {
     //  And have them raid hostile targets if and when present...
     //  TODO:  Ideally, you'd like this to piggyback off the tactical AI for
     //  Missions in general...
-    else if (activeMission == null || activeMission.complete()) {
+    else if (doRaids && (activeMission == null || activeMission.complete())) {
       
       Pick <Building> pick = new Pick();
       for (Building b : map().buildings()) {

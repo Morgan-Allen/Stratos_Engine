@@ -159,6 +159,7 @@ public class Type extends Index.Entry implements Session.Saveable {
   public int rangeDamage = 0;
   public int rangeDist   = 0;
   public int armourClass = 0;
+  public int moveSpeed   = AVG_MOVE_SPEED;
   public int sightRange  = AVG_SIGHT;
   
   

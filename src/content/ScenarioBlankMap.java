@@ -142,7 +142,7 @@ public class ScenarioBlankMap extends CityMapScenario {
     
     
     final int MIN_LAIR_DIST = 32;
-    final int NUM_LAIRS = 2;
+    final int NUM_LAIRS = 1;
     
     class SiteOption { Tile at; float rating; }
     List <SiteOption> options = new List <SiteOption> () {
@@ -164,13 +164,14 @@ public class ScenarioBlankMap extends CityMapScenario {
     
     options.queueSort();
     
-    Object spawnArgs[] = { TRIPOD, 0.33f, DRONE, 0.66f };
+    //Object spawnArgs[] = { TRIPOD, 0.33f, DRONE, 0.66f };
+    Object spawnArgs[] = { DRONE, 1 };
     
     for (int n = NUM_LAIRS; n-- > 0;) {
       SiteOption o = options.removeFirst();
       BuildingForNest nest = (BuildingForNest) RUINS_LAIR.generate();
       nest.enterMap(stage, o.at.x, o.at.y, 1, stage.locals);
-      nest.assignSpawnParameters(MONTH_LENGTH * 3, 2, spawnArgs);
+      nest.assignSpawnParameters(MONTH_LENGTH * 3, 2, false, spawnArgs);
       nests.add(nest);
     }
     

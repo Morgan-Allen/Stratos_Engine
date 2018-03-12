@@ -53,11 +53,12 @@ public class Trooper {
     TROOPER.attachCostume(Trooper.class, "trooper_skin.gif");
     TROOPER.weaponType = BLASTER;
     TROOPER.armourType = BODY_ARMOUR;
-    TROOPER.meleeDamage = 2;
-    TROOPER.rangeDamage = 5;
+    TROOPER.meleeDamage = 4;
+    TROOPER.rangeDamage = 10;
     TROOPER.rangeDist   = 4;
-    TROOPER.armourClass = 4;
-    TROOPER.maxHealth   = 6;
+    TROOPER.armourClass = 8;
+    TROOPER.maxHealth   = 20;
+    TROOPER.moveSpeed   = 80;
     TROOPER.initTraits.setWith(SKILL_MELEE, 4, SKILL_RANGE, 6, SKILL_EVADE, 2);
   }
   

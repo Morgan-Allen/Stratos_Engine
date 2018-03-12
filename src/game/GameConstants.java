@@ -58,7 +58,8 @@ public class GameConstants {
     FECES_UNIT_TIME  = MONTH_LENGTH * 3,
     FATIGUE_REGEN    = MONTH_LENGTH / 4,
     HEALTH_REGEN     = MONTH_LENGTH / 2,
-    AVG_MAX_HEALTH   = 5   ,
+    AVG_MAX_HEALTH   = 10  ,
+    AVG_MOVE_SPEED   = 100 ,  //  percent of 1 tile/second
     //
     //  Growth and crops-
     SCAN_PERIOD      = MONTH_LENGTH * 1,
