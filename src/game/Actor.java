@@ -242,6 +242,7 @@ public class Actor extends Element implements
     trapped |= inside != null && Visit.empty(((Building) inside).entrances());
     if (trapped) {
       Tile free = map.pathCache.mostOpenNeighbour(at());
+      if (free == null) free = Tile.nearestOpenTile(at(), map, 6);
       if (free != null) {
         setInside(inside, false);
         setLocation(free, map);
@@ -748,8 +749,8 @@ public class Actor extends Element implements
   
   
   public Vec3D renderedPosition(Vec3D store) {
-    if (store != null) store.setTo(renderPos);
-    return renderPos;
+    if (store != null) store.setTo(trackPosition());
+    return trackPosition();
   }
   
   
@@ -773,7 +774,7 @@ public class Actor extends Element implements
       0
     );
     renderPos.setTo(s.position);
-    if (from != next) {
+    if (from != next && next != null) {
       goes = next.at();
       float angle = new Vec2D(goes.x - from.x, goes.y - from.y).toAngle();
       s.rotation = angle;

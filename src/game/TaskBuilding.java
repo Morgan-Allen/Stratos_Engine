@@ -66,9 +66,11 @@ public class TaskBuilding extends Task {
     Tile at = b.at();
     if (at == null) return 0;
     
-    Element onPlan  = map.planning.objectAt(at);
+    //  TODO: Move this onto the planning-map!
+    
+    //Element onPlan  = map.planning.objectAt(at);
     boolean natural = b.type().isNatural();
-    boolean raze    = onPlan != b && (onPlan != null || ! natural);
+    boolean raze    = ! b.canPlace(map);
     
     b.flagTeardown(raze);
     

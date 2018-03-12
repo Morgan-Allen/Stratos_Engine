@@ -145,9 +145,7 @@ public class TestBounties extends LogicTest {
       AreaMap loaded = (AreaMap) session.loaded()[0];
       
       Mission m = loaded.world.baseNamed("Client Base").missions().first();
-      if (m.focus() == null) {
-        I.say("???");
-      }
+      if (m.focus() == null) I.say("LOADED MISSION HAS NO FOCUS!");
       
       I.say("\nSuccessfully loaded map: "+loaded);
     }

@@ -26,7 +26,7 @@ public class TaskExplore extends Task {
   public TaskExplore(Session s) throws Exception {
     super(s);
     totalDist += s.loadInt();
-    from = (Target) s.loadObject();
+    from = AreaMap.loadTarget(active.map(), s);
     maxRange = s.loadInt();
   }
   
@@ -34,7 +34,7 @@ public class TaskExplore extends Task {
   public void saveState(Session s) throws Exception {
     super.saveState(s);
     s.saveInt(totalDist);
-    s.saveObject(from);
+    AreaMap.saveTarget(from, active.map(), s);
     s.saveInt(maxRange);
   }
   

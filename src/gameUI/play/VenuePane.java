@@ -50,14 +50,6 @@ public class VenuePane extends DetailPane {
       boolean canHire = venue.base().funds() >= cost;
       
       d.append("\n\n"+w.name+": ("+num+"/"+max+")");
-      for (Actor a : venue.workers()) if (a.type() == w) {
-        if (a.onMap()) {
-          d.appendAll("\n  ", a, "  ", a.jobDesc());
-        }
-        else {
-          d.appendAll("\n  ", a, " (ETA "+world.arriveTime(a)+")");
-        }
-      }
       
       if (num < max && w.socialClass >= CLASS_SOLDIER && canHire) {
         d.append("\n  ");
@@ -66,6 +58,15 @@ public class VenuePane extends DetailPane {
             ActorUtils.generateMigrant(w, venue, true);
           }
         });
+      }
+      
+      for (Actor a : venue.workers()) if (a.type() == w) {
+        if (a.onMap()) {
+          d.appendAll("\n  ", a, "  ", a.jobDesc());
+        }
+        else {
+          d.appendAll("\n  ", a, " (ETA "+world.arriveTime(a)+")");
+        }
       }
     }
     

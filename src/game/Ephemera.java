@@ -34,6 +34,8 @@ public class Ephemera {
   
   
   final AreaMap map;
+  
+  private boolean active = false;
   private Colour fadeColour = null;
   List <Ghost> ghosts = new List();
   //final Table <AreaMpPatch, List <Ghost>> ghosts = new Table(100);
@@ -159,6 +161,7 @@ public class Ephemera {
     */
   protected Batch <Ghost> visibleFor(Rendering rendering, Base base, float timeNow) {
     final Batch <Ghost> results = new Batch <Ghost> ();
+    this.active = true;
     
     for (Ghost ghost : ghosts) {
       final float
@@ -188,6 +191,11 @@ public class Ephemera {
     //sprite.fog = b.intelMap.fogAt((int) p.x, (int) p.y);
     //if (sprite.fog == 0) return;
     g.sprite.readyFor(r);
+  }
+  
+  
+  public boolean active() {
+    return active;
   }
   
   

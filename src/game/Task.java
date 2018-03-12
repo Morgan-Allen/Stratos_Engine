@@ -307,7 +307,7 @@ public class Task implements Session.Saveable {
       if (ahead.isTile()) visitor.setInside(inside, false);
       else visitor.setInside(ahead, true);
       visitor.setLocation(ahead.at(), map);
-      pathIndex += 1;
+      pathIndex = Nums.clamp(pathIndex + 1, path.length);
       return true;
     }
     else {
@@ -478,9 +478,6 @@ public class Task implements Session.Saveable {
     Pathing from     = pathOrigin(active);
     Pathing heads    = pathTarget();
     
-    this.path = null;
-    this.pathIndex = -1;
-    
     if (report && verbose) {
       I.say(this+" pathing toward "+(visiting ? visits : target));
     }
@@ -500,6 +497,7 @@ public class Task implements Session.Saveable {
     //search.verbosity = Search.VERBOSE;
     search.doSearch();
     this.path = search.fullPath(Pathing.class);
+    this.pathIndex = 0;
     
     if (path == null) {
       if (report) I.say("  Could not find path for "+this);
@@ -511,7 +509,6 @@ public class Task implements Session.Saveable {
       return false;
     }
     else {
-      this.pathIndex = 0;
       return true;
     }
   }

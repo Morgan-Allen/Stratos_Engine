@@ -180,20 +180,32 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
       int footMask = type.footprint(t, this);
       if (footMask == -1) continue;
       
-      boolean paves    = pathType() <= Type.PATH_FREE;
-      boolean tileOkay = canPlaceOver(t);
-      boolean planOkay = map.planning.reserveCounter[t.x][t.y] == 0 || paves;
-      if (! (tileOkay && planOkay)) footprintOkay = false;
+      boolean paves     = pathType() <= Type.PATH_FREE;
+      boolean tileOkay  = canPlaceOver(t) || footMask == 0;
+      boolean planOkay  = map.planning.reserveCounter[t.x][t.y] == 0 || paves;
+      Element onPlan    = map.planning.objectAt(t);
+      Element onMap     = map.above(t);
+      int     checkPlan = canPlaceOver(onPlan, footMask);
+      int     checkMap  = canPlaceOver(onMap , footMask);
       
-      Element onPlan = map.planning.objectAt(t);
-      Element onMap  = map.above(t);
-      int checkPlan = canPlaceOver(onPlan, footMask);
-      int checkMap  = canPlaceOver(onMap , footMask);
-      
-      if (checkPlan == CANNOT_PLACE) footprintOkay = false;
-      if (checkMap  == CANNOT_PLACE) footprintOkay = false;
-      if (checkPlan != IS_OKAY && conflicts != null) conflicts.include(onPlan);
-      if (checkMap  != IS_OKAY && conflicts != null) conflicts.include(onMap );
+      if (footMask == 0 || onPlan == this) {
+        planOkay = true;
+      }
+      if (! (tileOkay && planOkay)) {
+        footprintOkay = false;
+      }
+      if (checkPlan == CANNOT_PLACE) {
+        footprintOkay = false;
+      }
+      if (checkMap  == CANNOT_PLACE) {
+        footprintOkay = false;
+      }
+      if (checkPlan != IS_OKAY && conflicts != null) {
+        conflicts.include(onPlan);
+      }
+      if (checkMap  != IS_OKAY && conflicts != null) {
+        conflicts.include(onMap );
+      }
     }
     
     return footprintOkay;

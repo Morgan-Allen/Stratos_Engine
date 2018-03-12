@@ -88,6 +88,13 @@ public class TestSpawning extends LogicTest {
         I.say("\nSPAWNING TEST CONCLUDED SUCCESSFULLY!");
         if (! graphics) return true;
       }
+      
+      /*
+      if (map.time() > RUN_TIME - 100 && ! graphics) {
+        graphics = true;
+        world.settings.paused = true;
+      }
+      //*/
     }
     
     I.say("\nSPAWNING TEST FAILED!");

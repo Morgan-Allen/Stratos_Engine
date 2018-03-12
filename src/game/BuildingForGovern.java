@@ -2,6 +2,7 @@
 
 package game;
 import static game.GameConstants.*;
+import util.*;
 
 
 
@@ -52,7 +53,7 @@ public class BuildingForGovern extends Building {
     }
     
     if (actor.type().isNoble()) {
-      return TaskResting.configResting(actor, this);
+      return TaskWaiting.configWaiting(actor, this, TaskWaiting.TYPE_VIP_STAY);
     }
     
     return null;

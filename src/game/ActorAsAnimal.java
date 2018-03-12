@@ -84,6 +84,11 @@ public class ActorAsAnimal extends Actor {
       assignTask(mission.selectActorBehaviour(this));
     }
     //
+    //  If you have a home, see what that has for you:
+    if (idle() && home() != null && home().complete()) {
+      assignTask(home().selectActorBehaviour(this));
+    }
+    //
     //  If that all fails, wander about a little-
     if (idle()) {
       assignTask(TaskWander.configWandering(this));

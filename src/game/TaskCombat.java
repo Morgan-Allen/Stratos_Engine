@@ -319,7 +319,7 @@ public class TaskCombat extends Task {
     float maxRange     = Nums.max(rangeMelee, rangeMissile);
     
     Pick <Tile> pick = new Pick();
-    Box2D area = target.area();
+    //Box2D area = target.area();
     
     //  TODO:  It would be helpful if tiles were in strictly ascending order
     //  by distance.
@@ -330,13 +330,13 @@ public class TaskCombat extends Task {
       I.say("  Melee range:   "+rangeMelee  );
       I.say("  Missile range: "+rangeMissile);
       I.say("  Max. range:    "+maxRange    );
-      I.say("  Target area:   "+area        );
+      I.say("  Target at:     "+target.at() );
     }
     
     for (Tile t : inRange) {
       if (Task.hasTaskFocus(t, jobType, active)) continue;
       
-      float dist = area.distance(t.x, t.y);
+      float dist = AreaMap.distance(target, t);
       if (report) I.say("  "+t+" dist: "+dist);
       
       if (dist > maxRange) continue;
@@ -362,7 +362,9 @@ public class TaskCombat extends Task {
       needsConfig = false;
     }
     
-    if (canTouch && area.distance(t.x, t.y) < rangeMelee) {
+    //  TODO:  Decide on a preferred attack-mode first?
+    
+    if (canTouch && AreaMap.distance(target, t) < rangeMelee) {
       currentTask.attackMode = ATTACK_MELEE;
     }
     else {
@@ -439,7 +441,6 @@ public class TaskCombat extends Task {
   
   
   protected void onTargetEnds(Target target) {
-    //I.say("???");
     super.onTargetEnds(target);
   }
 
@@ -469,7 +470,7 @@ public class TaskCombat extends Task {
     if (wallBonus  ) attackBonus += WALL_HIT_BONUS / 100f;
     if (wallPenalty) defendBonus += WALL_DEF_BONUS / 100f;
     
-    hitChance = Nums.clamp(attackBonus + 0.5f - defendBonus, 0, 1);
+    hitChance = Nums.clamp(attackBonus + 1 - defendBonus, 0, 2) / 2;
     hits      = Rand.num() < hitChance;
     XP        = (1.5f - hitChance) * FIGHT_XP_PERCENT / 100f;
     otherXP   = (0.5f + hitChance) * FIGHT_XP_PERCENT / 100f;
@@ -492,14 +493,11 @@ public class TaskCombat extends Task {
     }
     
     
-    //*
-    //  TODO:  I don't actually want the ephemera being registered unless
-    //  active rendering is in progress!
-    
     AreaMap map = attacks.map();
-    Good weaponType = attacks.type().weaponType;
-    Ephemera.applyCombatFX(weaponType, (Active) attacks, other, ! melee, hits, map);
-    //*/
+    if (map.ephemera.active()) {
+      Good weaponType = attacks.type().weaponType;
+      Ephemera.applyCombatFX(weaponType, (Active) attacks, other, ! melee, hits, map);
+    }
   }
   
   

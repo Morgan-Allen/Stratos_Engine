@@ -266,6 +266,8 @@ public class ActorAsPerson extends Actor {
     if (idle()) {
       Choice choice = new Choice(this);
       
+      choice.add(TaskPurchase.nextPurchase(this));
+      
       if (work() != null && work().complete()) {
         choice.add(work().selectActorBehaviour(this));
       }
@@ -273,9 +275,9 @@ public class ActorAsPerson extends Actor {
         choice.add(home().selectActorBehaviour(this));
         choice.add(TaskResting.configResting(this, home()));
       }
-      choice.add(TaskPurchase.nextPurchase(this));
-      choice.add(TaskWander.configWandering(this));
-      
+      if (choice.empty()) {
+        choice.add(TaskWander.configWandering(this));
+      }
       assignTask(choice.weightedPick());
     }
   }
