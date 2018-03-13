@@ -953,8 +953,7 @@ public class GameContent {
     //*/
     RUINS_LAIR.name = "Ruins";
     RUINS_LAIR.tint = TINT_LITE_INDUSTRIAL;
-    RUINS_LAIR.setDimensions(3, 3, 1);
-    RUINS_LAIR.claimMargin = 1;
+    RUINS_LAIR.setDimensions(3, 3, 1, THIN_MARGIN);
     RUINS_LAIR.setBuildMaterials(VOID, 10);
     RUINS_LAIR.maxHealth = 300;
   }

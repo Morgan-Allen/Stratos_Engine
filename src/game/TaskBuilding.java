@@ -98,11 +98,15 @@ public class TaskBuilding extends Task {
     if (Visit.empty(store.type().buildsWith)   ) return null;
     {
       Task clearing = nextBuildingTask(store, a, VOID, false);
-      if (clearing != null) return clearing;
+      if (clearing != null) {
+        return clearing;
+      }
     }
     for (Good g : store.type().buildsWith) {
       Task building = nextBuildingTask(store, a, g, false);
-      if (building != null) return building;
+      if (building != null) {
+        return building;
+      }
     }
     return null;
   }
@@ -124,8 +128,11 @@ public class TaskBuilding extends Task {
       
       for (CityMapDemands.Entry e : demands.nearbyEntries(at.x, at.y)) {
         Element source = (Element) e.source;
+        boolean canClear = source.type().isClearable();
+        
         if (AreaMap.distance(source.at(), at) > maxRange  ) continue;
         if (AreaMap.distance(store .at(), at) > storeRange) continue;
+        if (source.base() != store.base() && ! canClear   ) continue;
         
         Pathing from = Task.pathOrigin(actor);
         Target goes = source;
