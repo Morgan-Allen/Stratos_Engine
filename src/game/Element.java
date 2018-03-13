@@ -472,12 +472,14 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   /**  Support methods for sight and fog-levels:
     */
   public float sightLevel() {
-    return map.fog.sightLevel(at);
+    Tile from = (type.wide == 1 && type.high == 1) ? at : centre();
+    return map.fog.sightLevel(from);
   }
   
   
   public float maxSightLevel() {
-    return map.fog.maxSightLevel(at);
+    Tile from = (type.wide == 1 && type.high == 1) ? at : centre();
+    return map.fog.maxSightLevel(from);
   }
   
   

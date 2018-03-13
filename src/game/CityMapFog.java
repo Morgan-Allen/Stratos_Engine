@@ -92,16 +92,18 @@ public class CityMapFog {
     if (! isToggled()) {
       return;
     }
+    
     for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
       byte val = oldVals[c.x][c.y] = fogVals[c.x][c.y];
       fogVals[c.x][c.y] = 0;
       
-      int maxVal = maxMap.flagVal(c.x, c.y);
-      int newVal = val > 0 ? 0 : MAX_FOG;
-      if (maxVal > newVal) maxMap.setFlagVal(c.x, c.y, newVal);
+      int oldMaxVal = maxMap.flagVal(c.x, c.y);
+      int newMaxVal = val > 0 ? 0 : MAX_FOG;
+      if (newMaxVal > oldMaxVal) maxMap.setFlagVal(c.x, c.y, newMaxVal);
       
-      floatVals[c.x][c.y] = 1 - (((newVal * 2) + maxVal) * 1f / (MAX_FOG * 3));
+      floatVals[c.x][c.y] = (((val * 2) + (MAX_FOG - oldMaxVal)) * 1f / (MAX_FOG * 3));
     }
+    
   }
   
   
