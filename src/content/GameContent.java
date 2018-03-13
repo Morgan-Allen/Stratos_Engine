@@ -942,6 +942,15 @@ public class GameContent {
     ALL_NESTS[] = { RUINS_LAIR };
   
   static {
+    //*
+    RUINS_LAIR.modelVariants = CutoutModel.fromImages(
+      GameContent.class, "model_ruins",
+      "media/Lairs/", 3, 1, false,
+      "ruins_a.png",
+      "ruins_b.png",
+      "ruins_c.png"
+    );
+    //*/
     RUINS_LAIR.name = "Ruins";
     RUINS_LAIR.tint = TINT_LITE_INDUSTRIAL;
     RUINS_LAIR.setDimensions(3, 3, 1);

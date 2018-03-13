@@ -187,27 +187,22 @@ public class BuildingForGather extends Building {
   /**  Life-cycle, update and economic functions-
     */
   public Task selectActorBehaviour(Actor actor) {
-    Task coming = returnActorHere(actor);
-    if (coming != null) return coming;
     
-    Task delivery = TaskDelivery.pickNextDelivery(actor, this, produced());
-    if (delivery != null) {
-      return delivery;
-    }
+    Task delivery = TaskDelivery.pickNextDelivery(actor, this, 5, produced());
+    if (delivery != null) return delivery;
     
     Object[] crops = type().produced;
     Task pick = TaskGathering.pickNextCrop(this, actor, false, crops);
-    if (pick != null) {
-      return pick;
-    }
+    if (pick != null) return pick;
     
     //  TODO:  Modify the pick-plant method to apply to all eligible tiles
     //  within a certain area.
     
     Task plant = TaskGathering.pickPlantPoint(this, actor, false, true);
-    if (plant != null) {
-      return plant;
-    }
+    if (plant != null) return plant;
+    
+    delivery = TaskDelivery.pickNextDelivery(actor, this, 0, produced());
+    if (delivery != null) return delivery;
     
     return null;
   }

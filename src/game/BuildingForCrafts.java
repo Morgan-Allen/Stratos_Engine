@@ -17,9 +17,11 @@ public class BuildingForCrafts extends Building {
     Actor client;
     float progress;
     int timePlaced = -1;
+    int orderID = -1;
   }
   
   List <ItemOrder> orders = new List();
+  private int nextOrderID = 0;
   
   
   public BuildingForCrafts(BuildType type) {
@@ -32,18 +34,21 @@ public class BuildingForCrafts extends Building {
     
     for (int n = s.loadInt(); n-- > 0;) {
       ItemOrder o = new ItemOrder();
-      o.itemType = (Good) s.loadObject();
-      o.quality  = s.loadInt();
-      o.client   = (Actor) s.loadObject();
-      o.progress = s.loadFloat();
+      o.itemType   = (Good) s.loadObject();
+      o.quality    = s.loadInt();
+      o.client     = (Actor) s.loadObject();
+      o.progress   = s.loadFloat();
       o.timePlaced = s.loadInt();
+      o.orderID    = s.loadInt();
       orders.add(o);
     }
+    nextOrderID = s.loadInt();
   }
   
   
   public void saveState(Session s) throws Exception {
     super.saveState(s);
+    
     s.saveInt(orders.size());
     for (ItemOrder o : orders) {
       s.saveObject(o.itemType);
@@ -51,7 +56,9 @@ public class BuildingForCrafts extends Building {
       s.saveObject(o.client);
       s.saveFloat(o.progress);
       s.saveInt(o.timePlaced);
+      s.saveInt(o.orderID);
     }
+    s.saveInt(nextOrderID);
   }
   
   
@@ -65,25 +72,6 @@ public class BuildingForCrafts extends Building {
       if (spent > MONTH_LENGTH * 2) orders.remove(order);
     }
   }
-  
-  
-  /*
-  boolean canAdvanceCrafting(Recipe recipe) {
-    boolean anyRoom = false, allMaterials = true;
-    
-    for (Good made : produced()) {
-      if (inventory(made) < stockLimit(made)) anyRoom = true;
-    }
-    for (ItemOrder order : orders()) {
-      if (order.progress < 1) anyRoom = true;
-    }
-    for (Good need : needed()) {
-      if (inventory(need) <= 0) allMaterials = false;
-    }
-    
-    return anyRoom && allMaterials;
-  }
-  //*/
   
   
   public ItemOrder nextUnfinishedOrder() {
@@ -102,12 +90,19 @@ public class BuildingForCrafts extends Building {
   }
   
   
+  ItemOrder orderWithID(int orderID) {
+    for (ItemOrder order : orders) if (order.orderID == orderID) return order;
+    return null;
+  }
+  
+  
   public void addItemOrder(Good type, int quality, Actor client) {
     ItemOrder order = new ItemOrder();
     order.itemType   = type;
     order.quality    = quality;
     order.client     = client;
     order.timePlaced = map.time();
+    order.orderID    = nextOrderID++;
     orders.add(order);
   }
   
@@ -149,12 +144,16 @@ public class BuildingForCrafts extends Building {
     if (building != null) return building;
     //
     //  See if any deliveries are required:
-    Task delivery = TaskDelivery.pickNextDelivery(actor, this, produced());
+    Task delivery = TaskDelivery.pickNextDelivery(actor, this, 1, produced());
     if (delivery != null) return delivery;
     //
     //  Failing all that, start crafting:
     Task crafting = TaskCrafting.nextCraftingTask(actor, this);
     if (crafting != null) return crafting;
+    //
+    //  See if any deliveries are required:
+    delivery = TaskDelivery.pickNextDelivery(actor, this, 0, produced());
+    if (delivery != null) return delivery;
     //
     //  Or just tend shop otherwise-
     Task tending = TaskWaiting.configWaiting(actor, this);

@@ -112,6 +112,7 @@ public class TaskPurchase extends Task {
       return null;
     }
     
+    int cash     = (int) actor.carried(CASH);
     int oldLevel = (int) actor.carried(good);
     int levelCap = good.isWeapon || good.isArmour ? good.maxQuality : good.maxCarried;
     
@@ -120,7 +121,7 @@ public class TaskPurchase extends Task {
       if (level > levelCap) continue;
       
       int price = good.isUsable ? good.price : good.priceLevels[level - 1];
-      if (price > actor.carried(CASH)) return null;
+      if (price > cash) continue;
       
       TaskPurchase task = new TaskPurchase(actor, shop, good, level, price);
       return (TaskPurchase) task.configTask(null, shop, null, JOB.SHOPPING, 0);
@@ -136,17 +137,35 @@ public class TaskPurchase extends Task {
   }
   
   
+  
+  protected float successChance() {
+    Actor actor = (Actor) this.active;
+    float priority = ROUTINE;
+    
+    if (type == JOB.SHOPPING) {
+      //priority *= 1 + (actor.levelOf(TRAIT_INTELLECT) / MAX_SKILL_LEVEL);
+      priority = URGENT;
+    }
+    if (type == JOB.COLLECTING) {
+      priority = PARAMOUNT;
+    }
+    
+    return priority;
+  }
+
+
   protected void onVisit(Building visits) {
     Actor actor = (Actor) this.active;
     
-    if (actor.jobType() == JOB.SHOPPING && visits == shop) {
+    if (type == JOB.SHOPPING && visits == shop) {
       shop.addItemOrder(itemType, quality, actor);
       ((ActorAsPerson) actor).todo.add(this);
       
-      actor.incCarried(CASH, pricePays);
+      actor.incCarried(CASH, 0 - pricePays);
       shop.addInventory(pricePays, CASH);
     }
-    if (actor.jobType() == JOB.COLLECTING) {
+    
+    if (type == JOB.COLLECTING) {
       shop.removeOrder(itemType, actor);
       ((ActorAsPerson) actor).todo.remove(this);
       
@@ -154,7 +173,6 @@ public class TaskPurchase extends Task {
       else actor.setCarried(itemType, quality);
     }
   }
-  
   
 }
 

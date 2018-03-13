@@ -13,7 +13,7 @@ public class TaskCrafting extends Task {
   
   final BuildingForCrafts venue;
   final Recipe recipe;
-  ItemOrder order;
+  int orderID = -1;
   int timeSpent = 0;
   
   
@@ -27,9 +27,9 @@ public class TaskCrafting extends Task {
   
   public TaskCrafting(Session s) throws Exception {
     super(s);
-    venue  = (BuildingForCrafts) s.loadObject();
-    recipe = venue.type().recipes[s.loadInt()];
-    order  = venue.orders.atIndex(s.loadInt());
+    venue     = (BuildingForCrafts) s.loadObject();
+    recipe    = venue.type().recipes[s.loadInt()];
+    orderID   = s.loadInt();
     timeSpent = s.loadInt();
   }
   
@@ -38,7 +38,7 @@ public class TaskCrafting extends Task {
     super.saveState(s);
     s.saveObject(venue);
     s.saveInt(Visit.indexOf(recipe, venue.type().recipes));
-    s.saveInt(venue.orders.indexOf(order));
+    s.saveInt(orderID);
     s.saveInt(timeSpent);
   }
   
@@ -87,8 +87,10 @@ public class TaskCrafting extends Task {
     Actor actor, BuildingForCrafts venue, Recipe recipe, ItemOrder fills
   ) {
     TaskCrafting task = new TaskCrafting(actor, venue, recipe);
-    if (task.configTask(venue, venue, null, JOB.CRAFTING, 10) != null) {
-      task.order = fills;
+    if (fills != null) {
+      task.orderID = fills.orderID;
+    }
+    if (task.configTask(venue, venue, null, JOB.CRAFTING, 5) != null) {
       return task;
     }
     return null;
@@ -104,6 +106,7 @@ public class TaskCrafting extends Task {
 
   protected void onVisit(Building visits) {
     
+    ItemOrder order = venue.orderWithID(orderID);
     Actor actor     = (Actor) this.active;
     float maxAmount = order == null ? venue.stockLimit(recipe.made) : 1;
     float progress  = order == null ? venue.inventory(recipe.made) : order.progress;
@@ -133,7 +136,7 @@ public class TaskCrafting extends Task {
     }
     venue.base().makeTotals.add(progInc, recipe.made);
     
-    if (++timeSpent < AVG_CRAFT_TIME) {
+    if (++timeSpent < (AVG_CRAFT_TIME / 2)) {
       Task next = TaskCrafting.nextCraftingTask(actor, venue);
       if (next != null) actor.assignTask(next);
     }

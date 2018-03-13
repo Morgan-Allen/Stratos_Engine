@@ -158,6 +158,9 @@ public class TaskBuilding extends Task {
       return false;
     }
     
+    //  TODO:  Ideally, you want to check against all materials relevant to the
+    //  site.
+    
     float atStore   = store.inventory(material);
     float needBuild = checkNeedForBuilding(b, material, map, false);
     float carried   = getCarryAmount(material, b, false);
@@ -165,7 +168,7 @@ public class TaskBuilding extends Task {
     if (needBuild > 0) {
       //  Decide whether to obtain the materials from your store, based
       //  on whether they're available and not already present on-site.
-      if (carried <= 0 && atStore > 0) {
+      if (carried <= 0 && atStore > 0.1f) {
         //  Go to the store and pick up the material!
         return configTravel(store, JOB.COLLECTING, store);
       }

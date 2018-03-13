@@ -3,6 +3,8 @@
 
 package gameUI.play;
 import game.*;
+import static game.GameConstants.*;
+import graphics.common.*;
 import graphics.widgets.*;
 import util.*;
 import com.badlogic.gdx.Input.Keys;
@@ -13,6 +15,7 @@ public class InstallPane extends DetailPane {
   
   
   final PlayUI UI;
+  private Element placed = null;
   
   
   InstallPane(PlayUI UI) {
@@ -39,12 +42,26 @@ public class InstallPane extends DetailPane {
       });
     }
     
+    if (placed != null) {
+      Type type = placed.type();
+      
+      int cashCost = 0;
+      d.append("\n  (");
+      for (Good g : type.builtFrom) if (g != VOID) {
+        int amount = (int) type.buildNeed(g);
+        Text.appendColour(amount+" "+g+" ", Colour.LITE_GREY, d);
+        cashCost += g.price * amount;
+      }
+      d.append(cashCost+" credits");
+      d.append(")");
+    }
+    
     super.updateState();
   }
   
   
   private void beginInstallTask(Type type) {
-    final Element placed = (Element) type.generate();
+    placed = (Element) type.generate();
     final AreaMap stage  = UI.stage;
     final Base    base   = UI.base;
     
@@ -64,6 +81,7 @@ public class InstallPane extends DetailPane {
           if (canPlace) {
             placed.enterMap(stage, puts.x, puts.y, 0.0f, base);
             stage.planning.placeObject(placed);
+            placed = null;
             //UI.base.incCredits(0 - placed.blueprint().buildCost);
           }
           UI.assignTask(null);

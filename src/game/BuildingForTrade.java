@@ -124,7 +124,7 @@ public class BuildingForTrade extends Building implements Trader {
     */
   public Task selectActorBehaviour(Actor actor) {
     
-    if (actor.type().isVessel() && ! tradeOff) {
+    if (actor.type().isVessel()) {
       Task trading = selectTraderBehaviour(actor);
       if (trading != null) return trading;
       
@@ -132,7 +132,7 @@ public class BuildingForTrade extends Building implements Trader {
       if (coming != null) return coming;
     }
     else {
-      Task delivery = TaskDelivery.pickNextDelivery(actor, this, produced());
+      Task delivery = TaskDelivery.pickNextDelivery(actor, this, 0, produced());
       if (delivery != null) return delivery;
       
       Task building = TaskBuilding.nextBuildingTask(this, actor);
@@ -147,6 +147,7 @@ public class BuildingForTrade extends Building implements Trader {
   
   
   Task selectTraderBehaviour(Actor trader) {
+    if (tradeOff) return null;
     
     class Order { Tally <Good> cargo; Trader goes; float rating; }
     List <Trader> targets = new List();

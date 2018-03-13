@@ -47,7 +47,7 @@ public class TaskDelivery extends Task {
   
   
   static TaskDelivery pickNextDelivery(
-    Actor actor, Building from, Good... produced
+    Actor actor, Building from, int minStock, Good... produced
   ) {
     //
     //  Find someone to deliver to:
@@ -57,7 +57,7 @@ public class TaskDelivery extends Task {
     
     for (Good made : produced) {
       int amount = (int) from.inventory(made);
-      if (amount <= 0) continue;
+      if (amount <= minStock) continue;
       
       //  TODO:  Iterate over suitable building-types here.
       Building goes = findNearestDemanding(null, made, maxRange, from);

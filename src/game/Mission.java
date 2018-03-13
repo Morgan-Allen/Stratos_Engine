@@ -683,6 +683,8 @@ public class Mission implements
     
     boolean haveTerms  = hasTerms();
     boolean isEnvoy    = escorted.includes(actor);
+    boolean standby    = objective == OBJECTIVE_STANDBY;
+    boolean defensive  = objective == OBJECTIVE_GARRISON;
     boolean diplomatic = objective == OBJECTIVE_DIALOG;
     boolean explores   = objective == OBJECTIVE_RECON;
     boolean onAwayMap  = awayCity != null && map == awayCity.activeMap();
@@ -725,7 +727,7 @@ public class Mission implements
     }
     
     Task standT = actor.targetTask(stands, 10, Task.JOB.MILITARY, this);
-    if (standT != null) {
+    if (standT != null && (standby || defensive)) {
       return standT;
     }
     

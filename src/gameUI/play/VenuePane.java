@@ -126,6 +126,13 @@ public class VenuePane extends DetailPane {
         d.appendAll("\n  ", g, ": ", I.shorten(have, 1));
         if (demand > 0) d.append("/"+demand);
       }
+      
+      if (venue instanceof BuildingForCrafts) {
+        BuildingForCrafts BC = (BuildingForCrafts) venue;
+        for (Object order : BC.orders()) {
+          d.append("\n  "+BC.descOrder(order));
+        }
+      }
     }
     
     

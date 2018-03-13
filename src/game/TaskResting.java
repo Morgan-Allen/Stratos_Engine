@@ -46,7 +46,7 @@ public class TaskResting extends Task {
       return menu;
     }
     if (visits != null) for (Good g : actor.type().foodsAllowed) {
-      if (visits.inventory(g) >= 1) menu.add(g);
+      if (visits.inventory(g) > 0) menu.add(g);
     }
     return menu;
   }
@@ -89,7 +89,7 @@ public class TaskResting extends Task {
   
   protected void onVisitEnds(Building visits) {
     Actor actor = (Actor) active;
-    if (priority() >= CASUAL) {
+    if (priority() >= IDLE) {
       actor.assignTask(configResting(actor, visits));
     }
   }
