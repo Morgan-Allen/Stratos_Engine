@@ -22,9 +22,10 @@ public class CityMapFog {
   int  dayState = -1;
   byte fogVals[][];
   byte oldVals[][];
-  CityMapFlagging maxMap;
+  byte maxVals[][];
+  CityMapFlagging flagMap;
   
-  float floatVals[][];
+  float viewVals[][];
   private FogOverlay fogOver;
   
   
@@ -39,7 +40,8 @@ public class CityMapFog {
     dayState = s.loadInt();
     s.loadByteArray(fogVals);
     s.loadByteArray(oldVals);
-    maxMap.loadState(s);
+    s.loadByteArray(maxVals);
+    flagMap.loadState(s);
   }
   
   
@@ -47,21 +49,23 @@ public class CityMapFog {
     s.saveInt(dayState);
     s.saveByteArray(fogVals);
     s.saveByteArray(oldVals);
-    maxMap.saveState(s);
+    s.saveByteArray(maxVals);
+    flagMap.saveState(s);
   }
   
   
   void performSetup(int size) {
     this.fogVals = new byte[size][size];
     this.oldVals = new byte[size][size];
-    this.maxMap = new CityMapFlagging(map, "max. fog", MAX_FOG);
-    maxMap.setupWithSize(size);
+    this.maxVals = new byte[size][size];
+    this.flagMap = new CityMapFlagging(map, "max. fog", MAX_FOG);
+    flagMap.setupWithSize(size);
     
     for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
-      maxMap.setFlagVal(c.x, c.y, MAX_FOG);
+      flagMap.setFlagVal(c.x, c.y, MAX_FOG);
     }
     
-    this.floatVals = new float[size][size];
+    this.viewVals = new float[size][size];
   }
   
   
@@ -94,14 +98,16 @@ public class CityMapFog {
     }
     
     for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
+      byte oldMax = maxVals[c.x][c.y];
       byte val = oldVals[c.x][c.y] = fogVals[c.x][c.y];
       fogVals[c.x][c.y] = 0;
       
-      int oldMaxVal = maxMap.flagVal(c.x, c.y);
-      int newMaxVal = val > 0 ? 0 : MAX_FOG;
-      if (newMaxVal < oldMaxVal) maxMap.setFlagVal(c.x, c.y, newMaxVal);
+      if (val > oldMax) {
+        maxVals[c.x][c.y] = val;
+        flagMap.setFlagVal(c.x, c.y, 0);
+      }
       
-      floatVals[c.x][c.y] = (((val * 2) + (MAX_FOG - oldMaxVal)) * 1f / (MAX_FOG * 3));
+      viewVals[c.x][c.y] = ((val * 2f) + (oldMax * 1f)) / (3 * MAX_FOG);
     }
     
   }
@@ -112,13 +118,13 @@ public class CityMapFog {
     */
   Tile pickRandomFogPoint(Target near, int range) {
     if (! isToggled()) return null;
-    return maxMap.pickRandomPoint(near, range);
+    return flagMap.pickRandomPoint(near, range);
   }
   
   
   Tile findNearbyFogPoint(Target near, int range) {
     if (! isToggled()) return null;
-    return maxMap.findNearbyPoint(near, range);
+    return flagMap.findNearbyPoint(near, range);
   }
   
   
@@ -140,7 +146,7 @@ public class CityMapFog {
   public float maxSightLevel(Tile t) {
     if (! isToggled()) return 1;
     if (t == null) return 0;
-    return 1 - (maxMap.flagVal(t.x, t.y) / MAX_FOG);
+    return maxVals[t.x][t.y]  * 1f / MAX_FOG;
   }
   
   
@@ -168,7 +174,7 @@ public class CityMapFog {
     if (fogOver == null) {
       fogOver = new FogOverlay(map.size, map.size);
     }
-    fogOver.updateVals(renderTime, floatVals);
+    fogOver.updateVals(renderTime, viewVals);
     fogOver.registerFor(rendering);
   }
 }

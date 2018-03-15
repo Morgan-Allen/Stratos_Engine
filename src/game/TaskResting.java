@@ -30,7 +30,7 @@ public class TaskResting extends Task {
   
   /**  Factory methods for outside access and other helper functions-
     */
-  static Building findRestVenue(Actor actor, AreaMap map) {
+  public static Building findRestVenue(Actor actor, AreaMap map) {
     Pick <Building> pick = new Pick();
     for (Building b : map.buildings()) {
       
@@ -50,7 +50,7 @@ public class TaskResting extends Task {
   }
   
   
-  static TaskResting configResting(Actor actor, Building rests) {
+  public static TaskResting configResting(Actor actor, Building rests) {
     if (actor == null || rests == null) return null;
     
     TaskResting t = new TaskResting(actor);
@@ -58,7 +58,7 @@ public class TaskResting extends Task {
   }
   
   
-  static Batch <Good> menuAt(Building visits, Actor actor) {
+  public static Batch <Good> menuAt(Building visits, Actor actor) {
     Batch <Good> menu = new Batch();
     for (Good g : visits.inventory().keys()) {
       if (g.isEdible) menu.add(g);

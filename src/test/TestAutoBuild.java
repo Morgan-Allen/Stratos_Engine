@@ -2,10 +2,11 @@
 
 
 package test;
-import util.*;
+import content.*;
 import game.*;
 import static content.GameContent.*;
 import static game.GameConstants.*;
+import util.*;
 
 
 
@@ -46,6 +47,18 @@ public class TestAutoBuild extends LogicTest {
     Building farm = (Building) NURSERY.generate();
     farm.enterMap(map, 1, 1, 1, base);
     ActorUtils.fillWorkVacancies(farm);
+
+    
+    Actor peon = farm.workers().first();
+    Building rests = TaskResting.findRestVenue(peon, map);
+    Task resting = TaskResting.configResting(peon, rests);
+    
+    if (rests != vault || resting == null) {
+      I.say("\nBastion should act as refuge until housing is complete!");
+      I.say("\nAUTO-BUILD TEST FAILED!");
+      return false;
+    }
+    
     
     boolean allHoused = false;
     boolean builtOkay = false;
