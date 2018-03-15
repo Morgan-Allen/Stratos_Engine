@@ -137,6 +137,7 @@ public class Type extends Index.Entry implements Session.Saveable {
   public boolean rulerBuilt     = true ;
   public boolean uniqueBuilding = false;
   public boolean buildAsArea    = false;
+  public boolean buildOnWater   = false;
   
   public Good    yields      = null;
   public float   yieldAmount = 0;
@@ -147,7 +148,6 @@ public class Type extends Index.Entry implements Session.Saveable {
   public boolean mobile   = false;
   public float   growRate = 0;
   public int     ambience = 0;
-  public boolean isWater  = false;
   public boolean isCrop   = false;
   public boolean isWall   = false;
   

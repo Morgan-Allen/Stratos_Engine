@@ -38,7 +38,6 @@ public class TestSieging extends LogicTest {
     world.settings.toggleHunger  = false;
     
     
-    
     awayC.initBuildLevels(TROOPER_LODGE, 9, HOLDING, 1);
     awayC.council.setTypeAI(CityCouncil.AI_OFF);
     
@@ -83,7 +82,6 @@ public class TestSieging extends LogicTest {
     for (int n = 3; n-- > 0;) {
       Building home = (Building) HOLDING.generate();
       home.enterMap(map, 17, 10 + (n * 3), 1, baseC);
-      ActorUtils.fillHomeVacancies(home, Vassals.PYON);
     }
     
     Mission guarding;
@@ -228,9 +226,7 @@ public class TestSieging extends LogicTest {
         for (Actor a : enemy.recruits()) {
           if (a.jobType() != JOB.COMBAT) continue;
           TaskCombat task = (TaskCombat) a.task();
-          if (! task.primary.type().isActor()) continue;
-          Actor struck = (Actor) task.primary;
-          if (guarding.recruits().includes(struck)) numFighting += 1;
+          if (task.primary.base() == baseC) numFighting += 1;
         }
         invadeFight = numFighting > MIN_INVADERS / 2;
       }
@@ -320,7 +316,7 @@ public class TestSieging extends LogicTest {
     
     for (int n = 8; n-- > 0;) {
       Actor fights = (Actor) ((n < 3) ? SOLDIER : CITIZEN).generate();
-      fights.assignHomeCity(cityB);
+      fights.assignBase(cityB);
       enemies.toggleRecruit(fights, true);
     }
     enemies.beginSecuring(cityA);

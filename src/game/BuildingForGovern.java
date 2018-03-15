@@ -27,29 +27,44 @@ public class BuildingForGovern extends Building {
   
   
   
+  /**  Accomodating actors-
+    */
+  public boolean allowsResidence(Actor actor) {
+    int maxR = type().maxResidents;
+    if (maxR <= 0) return false;
+    if (actor.work() == this) return true;
+    else return false;
+  }
+  
+  
+  
   /**  Assigning actor behaviours:
     */
   public Task selectActorBehaviour(Actor actor) {
     
+    
     if (actor.type().isCommoner()) {
-      Task building = TaskBuilding.nextBuildingTask(this, actor);
-      if (building != null) return building;
+      //  TODO:  THIS IS AN UGLY HACK AND SHOULD BE FIXED ASAP!
+      if (actor.levelOf(SKILL_WRITE) > 0) {
+        Task taxing = TaskAssessTax.nextAssessment(actor, this, 100);
+        if (taxing != null) return taxing;
+        
+        Task tending = TaskWaiting.configWaiting(actor, this);
+        if (tending != null) return tending;
+      }
       
-      Task tending = TaskWaiting.configWaiting(actor, this);
-      if (tending != null) return tending;
+      else {
+        Task building = TaskBuilding.nextBuildingTask(this, actor);
+        if (building != null) return building;
+        
+        Task tending = TaskWaiting.configWaiting(actor, this);
+        if (tending != null) return tending;
+      }
     }
     
     if (actor.type().isSoldier()) {
       Task patrol = TaskPatrol.nextGuardPatrol(actor, this, Task.ROUTINE);
       if (patrol != null) return patrol;
-    }
-    
-    if (actor.type().isTrader()) {
-      Task taxing = TaskAssessTax.nextAssessment(actor, this, 100);
-      if (taxing != null) return taxing;
-      
-      Task tending = TaskWaiting.configWaiting(actor, this);
-      if (tending != null) return tending;
     }
     
     if (actor.type().isNoble()) {

@@ -71,8 +71,7 @@ public class VenuePane extends DetailPane {
     }
     
     if (! venue.residents().empty()) {
-      int num = venue.residents().size(), max = venue.maxResidents(-1);
-      d.append("\n\nResidents: ("+num+"/"+max+")");
+      d.append("\n\nResidents:");
       for (Actor a : venue.residents()) {
         if (a.onMap()) {
           d.appendAll("\n  ", a, "  ", a.jobDesc());

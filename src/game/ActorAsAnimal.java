@@ -80,8 +80,8 @@ public class ActorAsAnimal extends Actor {
     
     //
     //  If you're assigned a mission, take it on:
-    if (idle() && mission != null && mission.active()) {
-      assignTask(mission.selectActorBehaviour(this));
+    if (idle() && mission() != null && mission().active()) {
+      assignTask(mission().selectActorBehaviour(this));
     }
     //
     //  If you have a home, see what that has for you:
@@ -109,7 +109,7 @@ public class ActorAsAnimal extends Actor {
       TaskRetreat retreat = TaskRetreat.configRetreat(this);
       if (retreat != null && retreat.priority() > oldPriority) {
         assignTask(retreat);
-        if (mission != null) mission.toggleRecruit(this, false);
+        if (mission() != null) mission().toggleRecruit(this, false);
       }
     }
   }

@@ -56,25 +56,6 @@ public class LogicTest {
   }
   
   
-  /*
-  public static void clearMargins(Building b, int marginWide) {
-    Type type = b.type();
-    Tile at = b.at();
-    AreaMap map = b.map();
-    int
-      x = at.x - marginWide,
-      y = at.y - marginWide,
-      w = type.wide + (marginWide * 2),
-      h = type.high + (marginWide * 2)
-    ;
-    for (Tile t : map.tilesUnder(x, y, w, h)) {
-      Element e = map.above(t);
-      if (e != null && e != b) e.exitMap(map);
-    }
-  }
-  //*/
-  
-  
   
   /**  Graphical display and loop-execution:
     */
@@ -117,6 +98,8 @@ public class LogicTest {
   Series <Character> pressed = new Batch();
   
   protected Tile keyTiles[];
+  protected boolean viewPathMap = false;
+  protected boolean viewPlanMap = false;
   
   
   void configGraphic(int w, int h) {
@@ -143,19 +126,21 @@ public class LogicTest {
     
     for (Tile at : map.allTiles()) {
       int fill = BLANK_COLOR;
-      Element above = map.above(at);
+      Element above;
+      if (viewPlanMap) above = map.planning.objectAt(at);
+      else above = map.above(at);
       
       if (above != null) {
         if (above.growLevel() == -1) fill = MISSED_COLOR;
         else fill = above.debugTint();
       }
-      else if (at.terrain() != null) {
+      else if (at.terrain() != null && ! viewPlanMap) {
         fill = at.terrain().tint;
       }
       graphic[at.x][at.y] = fill;
     }
     
-    for (Actor a : map.actors()) {
+    if (! viewPlanMap) for (Actor a : map.actors()) {
       Tile at = a.at();
       //I.say("At: "+at);
       if (at == null || a.indoors()) continue;
@@ -318,7 +303,7 @@ public class LogicTest {
       if (graphics) {
         World world = map.world;
         if (! world.settings.worldView) {
-          if (world.settings.viewPathMap) {
+          if (viewPathMap) {
             updateCityPathingView(map);
           }
           else {
@@ -734,7 +719,11 @@ public class LogicTest {
     }
     report.append("\n(T) toggle pathing view");
     if (pressed.includes('t')) {
-      settings.viewPathMap = ! settings.viewPathMap;
+      viewPathMap = ! viewPathMap;
+    }
+    report.append("\n(N) toggle planning view");
+    if (pressed.includes('n')) {
+      viewPlanMap = ! viewPlanMap;
     }
     report.append("\n(B) build menu");
     if (pressed.includes('b')) {

@@ -22,7 +22,6 @@ public class ActorType extends Type {
   public boolean predator     = false;
   public boolean organic      = true;
   public int     lifespan     = LIFESPAN_LENGTH;
-  public Good[]  foodsAllowed = null;
   public Good    meatType     = null;
   public Type    nestType     = null;
   
@@ -83,7 +82,6 @@ public class ActorType extends Type {
   
   
   public boolean isCommoner() { return socialClass == CLASS_COMMON ; }
-  public boolean isTrader  () { return socialClass == CLASS_TRADER ; }
   public boolean isSoldier () { return socialClass == CLASS_SOLDIER; }
   public boolean isNoble   () { return socialClass == CLASS_NOBLE  ; }
 }

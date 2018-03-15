@@ -19,18 +19,21 @@ public class BuildType extends Type {
   public Technique rulerPowers[] = {};
   public Technique actorPowers[] = {};
   
-  public Good features[] = NO_GOODS;
+  public Good features[]   = NO_GOODS;
   public int featureAmount = AVG_SERVICE_GIVE;
-  public int updateTime = AVG_UPDATE_GAP;
+  public int updateTime    = AVG_UPDATE_GAP;
+  public int maxVisitors   = AVG_MAX_VISITORS;
   
   public int maxUpgrades = 0;
   public BuildType upgradeTiers[] = NO_TIERS;
   public BuildType allUpgrades[] = NO_UPGRADES;
   public BuildType needsAsUpgrade[] = {};
   
-  public int homeSocialClass  = CLASS_COMMON;
-  public int homeAmbienceNeed = AMBIENCE_MIN;
-  public int homeUseTime      = HOME_USE_TIME;
+  public int residentClasses[] = {};
+  public int maxResidents      = 0;
+  public int homeComfortLevel  = 0;
+  public int homeAmbienceNeed  = AMBIENCE_MIN;
+  public int homeUseTime       = HOME_USE_TIME;
   public Tally <Good> homeUseGoods = new Tally();
   public Tally <Type> serviceNeeds = new Tally();
   
@@ -40,15 +43,13 @@ public class BuildType extends Type {
   public Good   needed    [] = NO_GOODS;
   public Good   produced  [] = NO_GOODS;
   public int    maxStock     = AVG_MAX_STOCK;
+  public Tally <ActorType> workerTypes = new Tally();
   
   public Type gatherFlag = null;
   public int claimMargin = -1;
   public int gatherRange     = AVG_GATHER_RANGE;
   public int maxDeliverRange = MAX_TRADER_RANGE;
   
-  public Tally <ActorType> workerTypes = new Tally();
-  public int maxResidents = 0;
-  public int maxVisitors  = AVG_MAX_VISITORS;
   
   
 

@@ -37,6 +37,7 @@ public class TestAll {
     record(TestBridging .testBridging (false));
     record(TestAutoBuild.testAutoBuild(false));
     record(TestExploring.testExploring(false));
+    record(TestRetreat  .testRetreat  (false));
     record(TestWorld    .testWorld    (false));
     
     record(TestBounties.testAttackBuildingMission(false));

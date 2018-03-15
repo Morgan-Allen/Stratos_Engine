@@ -69,7 +69,7 @@ public class ActorUtils {
       jobType.initAsMigrant((ActorAsPerson) migrant);
     }
     
-    migrant.assignHomeCity(goes);
+    migrant.assignBase(goes);
     employs.setWorker(migrant, true);
     map.world.beginJourney(from, goes, migrant);
     
@@ -111,20 +111,22 @@ public class ActorUtils {
     Opening o = pick.result();
     if (o != null) {
       Building b = o.b;
-      int SC = o.position.socialClass;
-      
       migrant.assignType(o.position);
       b.setWorker(migrant, true);
-      if (b.maxResidents(SC) > b.numResidents(SC)) b.setResident(migrant, true);
+      if (b.allowsResidence(migrant)) b.setResident(migrant, true);
     }
   }
   
   
-  static void findHome(AreaMap map, Actor migrant) {
+  static void findHome(AreaMap map, final Actor migrant) {
+    
     //  Each citizen prompts the search based on proximity to their place of
     //  work, proximity to needed services, and safety of the location (they
     //  prefer being behind walls, for example- either that, or you have a
     //  high safety rating.)
+    
+    //  TODO:  You should, ideally, be making this check periodically to see if
+    //  a better opening for a home is available.
     
     if (migrant.work() == null) return;
     if (migrant.home() != null) return;
@@ -146,30 +148,32 @@ public class ActorUtils {
     Building work = migrant.work();
     sumPos.addPos(work, 1);
     
+    Building market = findNearestWithFeature(IS_VENDOR, maxRange, work);
+    sumPos.addPos(market, 1);
+    
     Building refuge = findNearestWithFeature(IS_REFUGE, maxRange, work);
     sumPos.addPos(refuge, 1);
     
-    Building market = findNearestWithFeature(IS_VENDOR, maxRange, work);
-    sumPos.addPos(market, 1);
+    if (market == null) return;
+    if (refuge == null) return;
     
     sumPos.scale(1f / sumPos.sumWeights);
     
     final Tile from = map.tileAt(sumPos.x, sumPos.y);
-    final int socialClass = migrant.type().socialClass;
-    
-    
     Pick <Building> pick = new Pick <Building> () {
       public void compare(Building b, float rating) {
-        int max   = b.maxResidents(socialClass);
-        int space = max - b.numResidents(socialClass);
-        if (space <= 0) return;
+        if (! b.allowsResidence(migrant)) return;
+        
+        float numR = b.numResidents(migrant.type().socialClass);
+        if (b == migrant.home()) numR = 0;
+        
         float near = 10 / (10f + AreaMap.distance(from, b));
-        super.compare(b, rating * space * near);
+        float comfort = b.type().homeComfortLevel * 1f / AVG_HOME_COMFORT;
+        
+        super.compare(b, rating * near * (1 + comfort) / (2 + numR));
       }
     };
     
-    //  TODO:  Check the actor's work venue first to see if that will allow
-    //  residence?
     //  TODO:  This could get very computationally-intensive on large maps.
     //  Try to improve on that?
     
@@ -247,13 +251,10 @@ public class ActorUtils {
   
   /**  More utility methods for scenario setup-
     */
-  public static void fillAllVacancies(AreaMap map, ActorType defaultCitizen) {
+  public static void fillAllWorkVacancies(AreaMap map) {
     for (Building b : map.buildings) if (b.complete()) {
       fillWorkVacancies(b);
       for (Actor w : b.workers) ActorUtils.findHome(map, w);
-    }
-    for (Building b : map.buildings) if (b.complete()) {
-      fillHomeVacancies(b, defaultCitizen);
     }
   }
   
@@ -262,15 +263,6 @@ public class ActorUtils {
     for (ActorType t : b.type().workerTypes.keys()) {
       while (b.numWorkers(t) < b.maxWorkers(t)) {
         spawnActor(b, t, false);
-      }
-    }
-  }
-  
-  
-  public static void fillHomeVacancies(Building b, ActorType... types) {
-    for (ActorType t : types) {
-      while (b.numResidents(t.socialClass) < b.maxResidents(t.socialClass)) {
-        spawnActor(b, t, true);
       }
     }
   }

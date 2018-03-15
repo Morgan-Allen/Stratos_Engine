@@ -34,6 +34,9 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   private float growLevel = 0;
   private int   buildBits = 0;
   private int   stateBits = 0;
+  private int   facing = TileConstants.N;
+  
+  private Base base;
   
   private List <Active> focused = null;
   private Object pathFlag;  //  Note- used during temporary search.
@@ -58,6 +61,9 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
     growLevel = s.loadFloat();
     buildBits = s.loadInt();
     stateBits = s.loadInt();
+    facing    = s.loadInt();
+    
+    base = (Base) s.loadObject();
     
     if (s.loadBool()) s.loadObjects(focused = new List());
   }
@@ -73,6 +79,9 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
     s.saveFloat(growLevel);
     s.saveInt(buildBits);
     s.saveInt(stateBits);
+    s.saveInt(facing);
+    
+    s.saveObject(base);
     
     s.saveBool(focused != null);
     if (focused != null) s.saveObjects(focused);
@@ -95,9 +104,21 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
+  public void assignBase(Base base) {
+    this.base = base;
+  }
   
-  /**  Entering and exiting the map-
+  
+  
+  /**  Utility methods for location-planning:
     */
+  final static int
+    CANNOT_PLACE = -1,
+    MUST_CLEAR   =  0,
+    IS_OKAY      =  1
+  ;
+  
+  
   public Visit <Tile> footprint(AreaMap map, boolean withClearance) {
     if (at == null) return map.tilesAround(0, 0, 0, 0);
     int m = withClearance ? type.clearMargin : 0, m2 = m * 2;
@@ -145,18 +166,22 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
     return (stateBits & FLAG_ON_PLAN) != 0;
   }
   
+
+  public void setFacing(int facing) {
+    this.facing = facing;
+  }
   
   
-  final static int
-    CANNOT_PLACE = -1,
-    MUST_CLEAR   =  0,
-    IS_OKAY      =  1
-  ;
+  public int facing() {
+    return facing;
+  }
   
   
   boolean canPlaceOver(Tile t) {
-    if (t.terrain.pathing > Type.PATH_FREE) return false;
-    return true;
+    int pathing = t.terrain.pathing;
+    if (type.buildOnWater && pathing == Type.PATH_WATER) return true;
+    else if (pathing > Type.PATH_FREE) return false;
+    else return true;
   }
   
   
@@ -175,16 +200,18 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
     boolean footprintOkay = true;
     
     for (Tile t : footprint(map, true)) {
-      if (t == null) footprintOkay = false;
+      if (t == null) {
+        footprintOkay = false;
+      }
       
       int footMask = type.footprint(t, this);
       if (footMask == -1) continue;
       
-      boolean paves     = pathType() <= Type.PATH_FREE;
-      boolean tileOkay  = canPlaceOver(t) || footMask == 0;
-      boolean planOkay  = map.planning.reserveCounter[t.x][t.y] == 0 || paves;
       Element onPlan    = map.planning.objectAt(t);
       Element onMap     = map.above(t);
+      boolean paves     = pathType() <= Type.PATH_FREE;
+      boolean tileOkay  = canPlaceOver(t) || footMask == 0 || onMap == this;
+      boolean planOkay  = map.planning.reserveCounter[t.x][t.y] == 0 || paves;
       int     checkPlan = canPlaceOver(onPlan, footMask);
       int     checkMap  = canPlaceOver(onMap , footMask);
       
@@ -216,11 +243,23 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
     return checkPlacingConflicts(map, null);
   }
   
+
   
+  /**  Entering and exiting the map-
+    */
   public void enterMap(AreaMap map, int x, int y, float buildLevel, Base owns) {
+    if (onMap()) {
+      I.complain("\nALREADY ON MAP: "+this);
+      return;
+    }
+    if (owns == null) {
+      I.complain("\nCANNOT ASSIGN NULL OWNER! "+this);
+      return;
+    }
     
     stateBits |= FLAG_ON_MAP;
     setLocation(map.tileAt(x, y), map);
+    assignBase(owns);
     
     if (! type.mobile) {
       
@@ -282,8 +321,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   
   
   public Base base() {
-    if (! onMap()) return null;
-    return map.locals;
+    return base;
   }
   
   
@@ -442,7 +480,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   
   public float incMaterialLevel(Good material, float inc) {
     float level = materialLevel(material) + inc;
-    return setMaterialLevel(material, level);
+    return setMaterialLevel(material, Nums.max(0, level));
   }
   
   

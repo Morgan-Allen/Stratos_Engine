@@ -235,15 +235,19 @@ public class ActorAsPerson extends Actor {
     //
     //  If you're seriously hungry/beat/tired, try going home:
     //  TODO:  Work this in as an emergency reaction...
-    float needRest = TaskResting.restUrgency(this, home());
+    Building rests = TaskResting.findRestVenue(this, map);
+    float needRest = TaskResting.restUrgency(this, rests);
     if (needRest > Rand.num() + 0.5f) {
-      assignTask(TaskResting.configResting(this, home()));
+      assignTask(TaskResting.configResting(this, rests));
     }
+    
     //
-    //  See if there's a formation worth joining:
-    if (idle() && mission == null && type().socialClass == CLASS_SOLDIER) {
+    //  See if there's a missions worth joining.  Or, if you have an active
+    //  mission, undertake the next associated task-
+    if (idle() && mission() == null && type().socialClass == CLASS_SOLDIER) {
       Pick <Mission> pick = new Pick(Task.ROUTINE * Rand.num());
       
+      //  TODO:  Use a Choice for this.
       for (Mission f : base().missions) {
         if (! f.isBounty()) continue;
         Task t = f.selectActorBehaviour(this);
@@ -254,11 +258,8 @@ public class ActorAsPerson extends Actor {
       Mission joins = pick.result();
       if (joins != null) joins.toggleRecruit(this, true);
     }
-    //
-    //  If you currently have an active mission, undertake the next associated
-    //  task-
-    if (idle() && mission != null && mission.active()) {
-      assignTask(mission.selectActorBehaviour(this));
+    if (idle() && mission() != null && mission().active()) {
+      assignTask(mission().selectActorBehaviour(this));
     }
     //
     //  Failing that, see if your home, place of work, purchases or other idle
@@ -267,16 +268,16 @@ public class ActorAsPerson extends Actor {
       Choice choice = new Choice(this);
       
       choice.add(TaskPurchase.nextPurchase(this));
+      choice.add(TaskWander.configWandering(this));
       
       if (work() != null && work().complete()) {
         choice.add(work().selectActorBehaviour(this));
       }
       if (home() != null && home().complete()) {
         choice.add(home().selectActorBehaviour(this));
-        choice.add(TaskResting.configResting(this, home()));
       }
-      if (choice.empty()) {
-        choice.add(TaskWander.configWandering(this));
+      if (rests != null) {
+        choice.add(TaskResting.configResting(this, rests));
       }
       assignTask(choice.weightedPick());
     }
@@ -296,7 +297,7 @@ public class ActorAsPerson extends Actor {
       TaskRetreat retreat = TaskRetreat.configRetreat(this);
       if (retreat != null && retreat.priority() > oldPriority) {
         assignTask(retreat);
-        if (mission != null) mission.toggleRecruit(this, false);
+        if (mission() != null) mission().toggleRecruit(this, false);
       }
     }
     

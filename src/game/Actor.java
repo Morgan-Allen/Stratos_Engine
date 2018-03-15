@@ -39,10 +39,8 @@ public class Actor extends Element implements
   
   private Building work;
   private Building home;
-  private Base     homeCity;
-  private Base     guestCity;
-  Building recruiter;
-  Mission  mission  ;
+  private Base     guestBase;
+  private Mission  mission;
   
   private Task task;
   private Task reaction;
@@ -81,9 +79,7 @@ public class Actor extends Element implements
     
     work      = (Building) s.loadObject();
     home      = (Building) s.loadObject();
-    homeCity  = (Base    ) s.loadObject();
-    guestCity = (Base    ) s.loadObject();
-    recruiter = (Building) s.loadObject();
+    guestBase = (Base    ) s.loadObject();
     mission   = (Mission ) s.loadObject();
     
     task     = (Task) s.loadObject();
@@ -115,9 +111,7 @@ public class Actor extends Element implements
     
     s.saveObject(work     );
     s.saveObject(home     );
-    s.saveObject(homeCity );
-    s.saveObject(guestCity);
-    s.saveObject(recruiter);
+    s.saveObject(guestBase);
     s.saveObject(mission  );
     
     s.saveObject(task    );
@@ -156,18 +150,8 @@ public class Actor extends Element implements
   /**  World entry and exit-
     */
   public void enterMap(AreaMap map, int x, int y, float buildLevel, Base owns) {
-    if (onMap()) {
-      I.complain("\nALREADY ON MAP: "+this);
-      return;
-    }
-    if (owns == null) {
-      I.complain("\nCANNOT ASSIGN NULL OWNER! "+this);
-      return;
-    }
-    
     super.enterMap(map, x, y, buildLevel, owns);
     map.actors.add(this);
-    assignHomeCity(owns);
   }
   
   
@@ -188,21 +172,15 @@ public class Actor extends Element implements
     if (home      != null) home.setResident(this, false);
     if (work      != null) work.setWorker  (this, false);
     if (task      != null) task.onCancel();
-    home      = null;
-    work      = null;
-    recruiter = null;
+    home    = null;
+    work    = null;
     mission = null;
     assignTask(null);
   }
   
   
-  public void assignHomeCity(Base city) {
-    this.homeCity = city;
-  }
-  
-  
-  public void assignGuestCity(Base city) {
-    this.guestCity = city;
+  public void assignGuestBase(Base city) {
+    this.guestBase = city;
   }
   
   
@@ -374,6 +352,13 @@ public class Actor extends Element implements
   }
   
   
+  void setMission(Mission m) {
+    //  NOTE:  This method should only be called by the Mission class, so I'm
+    //  not making it public...
+    this.mission = m;
+  }
+  
+  
   public Mission mission() {
     return mission;
   }
@@ -495,7 +480,7 @@ public class Actor extends Element implements
       Tile entry = ActorUtils.findTransitPoint(
         goes.activeMap(), goes, journey.from
       );
-      enterMap(goes.activeMap(), entry.x, entry.y, 1, homeCity);
+      enterMap(goes.activeMap(), entry.x, entry.y, 1, base());
     }
     if (task != null) {
       task.onArrival(goes, journey);
@@ -503,13 +488,8 @@ public class Actor extends Element implements
   }
   
   
-  public Base base() {
-    return homeCity;
-  }
-  
-  
   public Base guestBase() {
-    return guestCity;
+    return guestBase;
   }
   
   
@@ -713,8 +693,8 @@ public class Actor extends Element implements
     if (player == null) player = LogicTest.currentCity();
     
     String from = "";
-    if (map != null && player != null && homeCity != null) {
-      Base.POSTURE p = player.posture(homeCity);
+    if (map != null && player != null && base() != null) {
+      Base.POSTURE p = player.posture(base());
       if (p == Base.POSTURE.ENEMY ) from = " (E)";
       if (p == Base.POSTURE.ALLY  ) from = " (A)";
       if (p == Base.POSTURE.VASSAL) from = " (V)";

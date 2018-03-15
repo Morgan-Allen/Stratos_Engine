@@ -95,7 +95,7 @@ public class TestLifeCycle extends LogicTest {
     boolean succession = false;
     boolean testOkay   = false;
     
-    ActorUtils.fillAllVacancies(map, Vassals.PYON);
+    ActorUtils.fillAllWorkVacancies(map);
     for (Actor a : map.actors()) a.setHungerLevel(0.75f);
     
     

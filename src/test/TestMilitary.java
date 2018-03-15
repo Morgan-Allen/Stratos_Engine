@@ -50,8 +50,6 @@ public class TestMilitary extends LogicTest {
     for (int n = 8; n-- > 0;) {
       Building house = (Building) HOLDING.generate();
       house.enterMap(map, 2 + (n * 3), 7, 1, baseC);
-      ActorUtils.fillHomeVacancies(house, Vassals.PYON);
-      for (Actor a : house.residents()) a.setSexData(SEX_MALE);
     }
     
     float initPrestige = baseC.prestige();
@@ -62,7 +60,7 @@ public class TestMilitary extends LogicTest {
     Mission enemies = new Mission(Mission.OBJECTIVE_CONQUER, awayC, true);
     for (int n = 3; n-- > 0;) {
       Actor fights = (Actor) Trooper.TROOPER.generate();
-      fights.assignHomeCity(awayC);
+      fights.assignBase(awayC);
       enemies.toggleRecruit(fights, true);
     }
     
@@ -107,7 +105,7 @@ public class TestMilitary extends LogicTest {
         homeWin = ! survivors;
         if (homeWin) {
           troops.disbandFormation();
-          ActorUtils.fillAllVacancies(map, Vassals.PYON);
+          ActorUtils.fillAllWorkVacancies(map);
         }
       }
       

@@ -53,7 +53,6 @@ public class CityMapPlanning {
     */
   private void updateBuildDemands(Element e) {
     //  TODO:  Migrate the 'check build need' function in here?
-    
     for (Good m : e.materials()) {
       TaskBuilding.checkNeedForBuilding(e, m, map, true);
     }
@@ -77,6 +76,7 @@ public class CityMapPlanning {
   /**  Support methods for object-placement within the plan:
     */
   public void placeObject(Element e) {
+    
     //
     //  NOTE:  This method may be called repeatedly, even after initial
     //  placement, to check for conditions that allow construction to actually
@@ -88,7 +88,6 @@ public class CityMapPlanning {
     Batch <Element> conflicts = new Batch();
     
     if (unplaced) {
-      ///I.say("Placing "+e+" at "+e.at());
       toBuild.add(e);
       e.setOnPlan(true);
     }
@@ -146,7 +145,7 @@ public class CityMapPlanning {
   
   public void placeObject(Element e, int x, int y, Base owns) {
     e.setLocation(map.tileAt(x, y), map);
-    if (e.type().isBuilding()) ((Building) e).assignBase(owns);
+    e.assignBase(owns);
     placeObject(e);
   }
   
@@ -212,11 +211,11 @@ public class CityMapPlanning {
   ) {
     for (Tile t : map.tilesUnder(x, y, w, h)) if (t != null) {
       Element plans = map.planning.objectAt(t);
-      if (plans != null && plans != t.above) {
-        map.planning.unplaceObject(plans);
-      }
       if (t.above != null && now) {
         t.above.exitMap(map);
+      }
+      else if (plans != null) {
+        map.planning.unplaceObject(plans);
       }
     }
   }

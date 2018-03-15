@@ -792,7 +792,7 @@ public class Base implements Session.Saveable, Trader {
       f.update();
     }
     for (Actor a : council.members()) {
-      if (a.mission != null || a.onMap()) continue;
+      if (a.mission() != null || a.onMap()) continue;
       a.updateOffMap(this);
     }
   }

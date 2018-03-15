@@ -168,10 +168,10 @@ public class CityEvents {
     if (monarch == null || monarch.dead()) return;
     
     setBond(monarch, marries, BOND_MARRIED, BOND_MARRIED, 0);
-    marries.assignHomeCity(monarch.base());
+    marries.assignBase(monarch.base());
     if (monarch.home() != null) monarch.home().setResident(marries, true);
     
-    Mission party = marries.mission;
+    Mission party = marries.mission();
     if (party != null) {
       party.toggleRecruit (marries, false);
       party.toggleEscorted(marries, false);

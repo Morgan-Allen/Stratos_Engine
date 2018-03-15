@@ -99,7 +99,7 @@ public class CityMapFog {
       
       int oldMaxVal = maxMap.flagVal(c.x, c.y);
       int newMaxVal = val > 0 ? 0 : MAX_FOG;
-      if (newMaxVal > oldMaxVal) maxMap.setFlagVal(c.x, c.y, newMaxVal);
+      if (newMaxVal < oldMaxVal) maxMap.setFlagVal(c.x, c.y, newMaxVal);
       
       floatVals[c.x][c.y] = (((val * 2) + (MAX_FOG - oldMaxVal)) * 1f / (MAX_FOG * 3));
     }

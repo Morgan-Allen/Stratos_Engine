@@ -31,11 +31,9 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   
   protected String ID;
   
-  private int facing = TileConstants.N;
   private Tile entrances[] = new Tile[0];
   
   private int updateGap = 0;
-  private Base homeCity = null;
   List <Actor> workers   = new List();
   List <Actor> residents = new List();
   List <Actor> visitors  = new List();
@@ -58,13 +56,11 @@ public class Building extends Element implements Pathing, Employer, Carrier {
     super(s);
     ID = s.loadString();
 
-    facing = s.loadInt();
     int numE = s.loadInt();
     entrances = new Tile[numE];
     for (int i = 0; i < numE; i++) entrances[i] = loadTile(map, s);
     
     updateGap = s.loadInt();
-    homeCity = (Base) s.loadObject();
     s.loadObjects(workers  );
     s.loadObjects(residents);
     s.loadObjects(visitors );
@@ -82,12 +78,10 @@ public class Building extends Element implements Pathing, Employer, Carrier {
     super.saveState(s);
     s.saveString(ID);
     
-    s.saveInt(facing);
     s.saveInt(entrances.length);
     for (Tile e : entrances) saveTile(e, map, s);
     
     s.saveInt(updateGap);
-    s.saveObject(homeCity);
     s.saveObjects(workers  );
     s.saveObjects(residents);
     s.saveObjects(visitors );
@@ -109,26 +103,6 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   
   /**  World entry and exit-
     */
-  public void setFacing(int facing) {
-    this.facing = facing;
-  }
-  
-  
-  public int facing() {
-    return facing;
-  }
-  
-  
-  public void assignBase(Base belongs) {
-    this.homeCity = belongs;
-  }
-  
-  
-  public Base base() {
-    return homeCity;
-  }
-  
-  
   public boolean isClaimant() {
     return type().claimMargin > 0;
   }
@@ -161,26 +135,16 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   
   
   public void enterMap(AreaMap map, int x, int y, float buildLevel, Base owns) {
-    if (onMap()) {
-      I.complain("\nALREADY ON MAP: "+this);
-      return;
-    }
-    if (owns == null) {
-      I.complain("\nCANNOT ASSIGN NULL OWNER! "+this);
-      return;
-    }
-    
     super.enterMap(map, x, y, buildLevel, owns);
-    
     if (isClaimant()) map.claimants.add(this);
     map.buildings.add(this);
-    assignBase(owns);
   }
   
   
   public void exitMap(AreaMap map) {
     
     //I.say("EXITING MAP: "+this);
+    //I.reportStackTrace();
     
     refreshEntrances(new Tile[0]);
     super.exitMap(map);
@@ -638,7 +602,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
     */
   void updateWorkers(int period) {
     for (ActorType w : type().workerTypes.keys()) {
-      if (numWorkers(w) < maxWorkers(w) && w.socialClass <= CLASS_TRADER) {
+      if (numWorkers(w) < maxWorkers(w) && w.socialClass == CLASS_COMMON) {
         ActorUtils.generateMigrant(w, this, false);
       }
     }
@@ -670,19 +634,24 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   
   
   public int numResidents(int socialClass) {
-    return residents.size();
-    //  TODO:  Restore this later once you have multiple housing types...
-    //int sum = 0;
-    //for (Actor w : residents) if (w.type.socialClass == socialClass) sum++;
-    //return sum;
+    int sum = 0;
+    for (Actor a : residents) if (a.type().socialClass == socialClass) sum++;
+    return sum;
   }
   
   
-  public int maxResidents(int socialClass) {
-    return type().maxResidents;
-    //  TODO:  Restore this later once you have multiple housing types...
-    //if (type.homeSocialClass != socialClass) return 0;
-    //return type.maxResidents;
+  public boolean allowsResidence(Actor actor) {
+    int actorClass   = actor.type().socialClass;
+    int maxResidents = type().maxResidents;
+    int classAllow[] = type().residentClasses;
+    
+    boolean matchClass = false;
+    for (int c : classAllow) if (c == actorClass) matchClass = true;
+    if (! matchClass) return false;
+    
+    int numR = residents.size();
+    if (numR >= maxResidents && actor.home() != this) return false;
+    return true;
   }
   
   
@@ -705,6 +674,11 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   
   public Series <Actor> residents() {
     return residents;
+  }
+  
+  
+  public Series <Actor> visitors() {
+    return visitors;
   }
   
   

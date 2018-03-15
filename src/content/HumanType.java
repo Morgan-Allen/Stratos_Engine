@@ -42,7 +42,6 @@ public class HumanType extends ActorType {
   
   public HumanType(String ID, int socialClass) {
     super(ActorAsPerson.class, ID, IS_PERSON_ACT, socialClass);
-    this.foodsAllowed = GameContent.FOOD_TYPES;
   }
   
   

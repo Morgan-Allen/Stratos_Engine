@@ -52,7 +52,7 @@ public class Vassals {
   
   
   final public static HumanType AUDITOR = new HumanType(
-    "actor_auditor", CLASS_TRADER
+    "actor_auditor", CLASS_COMMON
   ) {
     public void initAsMigrant(ActorAsPerson p) {
       super.initAsMigrant(p);
@@ -69,7 +69,7 @@ public class Vassals {
   
   
   final public static HumanType VENDOR = new HumanType(
-    "actor_vendor", CLASS_TRADER
+    "actor_vendor", CLASS_COMMON
   ) {
     public void initAsMigrant(ActorAsPerson p) {
       super.initAsMigrant(p);

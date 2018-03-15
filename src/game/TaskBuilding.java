@@ -68,20 +68,21 @@ public class TaskBuilding extends Task {
     
     //  TODO: Move this onto the planning-map!
     
-    //Element onPlan  = map.planning.objectAt(at);
     boolean natural = b.type().isNatural();
-    boolean raze    = ! b.canPlace(map);
+    boolean raze    = ! b.onPlan();
     
-    b.flagTeardown(raze);
-    
+    //  NOTE:  The 'fudge' here is to ensure that any structure still on the
+    //  map is attended to, even with all raw materials depleted...
     float need       = raze ? 0 : b.materialNeed(w);
-    float amountDone = b.onMap() ? b.materialLevel(w) : 0;
+    float minFudge   = Nums.min(need, 0.1f);
+    float amountDone = b.onMap() ? Nums.max(minFudge, b.materialLevel(w)) : 0;
     float amountGap  = need - amountDone;
     
     if (natural && ! raze           ) amountGap = 0;
     if (need == 0 && amountDone <= 0) amountGap = 0;
     
     if (doUpdate) {
+      b.flagTeardown(raze);
       CityMapDemands demands = demandsFor(w, map);
       demands.setAmount(amountGap, b, at.x, at.y);
     }
@@ -289,8 +290,7 @@ public class TaskBuilding extends Task {
       return;
     }
     if (amountGap > 0 && ! b.onMap()) {
-      Base owns = store.base();
-      if (b.type().isBuilding()) owns = ((Building) b).base();
+      Base owns = b.base();
       b.enterMap(map, at.x, at.y, 0, owns);
     }
     //

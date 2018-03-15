@@ -112,7 +112,10 @@ public class GameContent {
       c.yields      = c;
       c.yieldAmount = CROP_YIELD / 100f;
     }
-
+    for (Good c : FOOD_TYPES) {
+      c.isEdible = true;
+    }
+    
     CutoutModel CROP_MODELS[][] = CutoutModel.fromImageGrid(
       GameContent.class, "crop_models",
       "media/Buildings/res_all_crops.png",
@@ -198,15 +201,14 @@ public class GameContent {
       "media/Terrain/all_outcrops.png", 3, 3,
       2, 2, false
     );
-    DESERT_ROCK1.modelVariants = DESERT_ROCK_MODELS[2];
-    DESERT_ROCK2.modelVariants = DESERT_ROCK_MODELS[0];
+    DESERT_ROCK1  .modelVariants = DESERT_ROCK_MODELS[2];
+    DESERT_ROCK2  .modelVariants = DESERT_ROCK_MODELS[0];
     CARBON_DEPOSIT.modelVariants = DESERT_ROCK_MODELS[1];
     
     JUNGLE_TREE1.growRate = 0.5f;
     DESERT_ROCK1  .setDimensions(2, 2, 1);
     CARBON_DEPOSIT.setDimensions(2, 2, 0);
-    LAKE.pathing = PATH_BLOCK;
-    LAKE.isWater = true;
+    LAKE.pathing = PATH_WATER;
     
     
     for (Type t : ALL_TREES) {
@@ -527,7 +529,7 @@ public class GameContent {
     BASTION.maxHealth = 300;
     BASTION.setBuildMaterials(PLASTICS, 10, PARTS, 25);
     BASTION.workerTypes.setWith(Nobles.NOBLE, 1, Vassals.AUDITOR, 1, Vassals.PYON, 2);
-    BASTION.homeSocialClass = CLASS_NOBLE;
+    BASTION.residentClasses = new int[] { CLASS_NOBLE };
     BASTION.maxResidents = 2;
     BASTION.buildsWith   = new Good[] { PLASTICS, PARTS };
     BASTION.needed       = new Good[] { CARBS, GREENS, PLASTICS, PARTS };
@@ -736,7 +738,7 @@ public class GameContent {
       t.setDimensions(4, 4, 2, WIDE_MARGIN);
       t.setBuildMaterials(PARTS, 15);
       t.maxHealth       = 150;
-      t.homeSocialClass = CLASS_NOBLE;
+      t.residentClasses = new int[] { CLASS_SOLDIER };
       t.features        = new Good[] { RELIGION };
     }
     
@@ -746,8 +748,9 @@ public class GameContent {
     WALKWAY.pathing = PATH_PAVE;
     WALKWAY.setDimensions(1, 1, 0);
     WALKWAY.setBuildMaterials(PARTS, 1);
-    WALKWAY.rulerBuilt = false;
     WALKWAY.maxHealth  = 30;
+    WALKWAY.rulerBuilt = false;
+    WALKWAY.buildOnWater = true;
     
     CutoutModel WALL_MODELS[][] = CutoutModel.fromImageGrid(
       GameContent.class, "shield_wall_models",
@@ -765,6 +768,7 @@ public class GameContent {
     SHIELD_WALL.setBuildMaterials(PARTS, 1);
     SHIELD_WALL.maxHealth = 20;
     SHIELD_WALL.rulerBuilt = false;
+    SHIELD_WALL.buildOnWater = true;
     
     BLAST_DOOR.name = "Blast Door";
     BLAST_DOOR.modelVariants = WALL_MODELS[1];
@@ -793,6 +797,7 @@ public class GameContent {
     TURRET.sightRange  = 8;
     TURRET.maxHealth   = 135;
     TURRET.rulerBuilt = false;
+    TURRET.buildOnWater = true;
     
     
     CutoutModel HOUSE_MODELS[][] = CutoutModel.fromImageGrid(
@@ -812,6 +817,7 @@ public class GameContent {
     HOLDING.maxResidents = 4;
     HOLDING.maxStock     = 1;
     HOLDING.buildsWith   = new Good[] { PLASTICS, PARTS };
+    HOLDING.residentClasses = new int[] { CLASS_COMMON, CLASS_SOLDIER };
     HOLDING.setFeatures(IS_HOUSING);
     HOLDING.setUpgradeTiers(HOLDING, HOUSE_T1, HOUSE_T2);
     HOLDING.maxHealth  = 35;

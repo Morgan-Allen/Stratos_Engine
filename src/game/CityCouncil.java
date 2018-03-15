@@ -621,7 +621,7 @@ public class CityCouncil {
     
     while (force.powerSum() < city.armyPower() / 2) {
       Actor fights = (Actor) soldier.generate();
-      fights.assignHomeCity(IA.fromC);
+      fights.assignBase(IA.fromC);
       force.toggleRecruit(fights, true);
     }
     
@@ -638,13 +638,13 @@ public class CityCouncil {
       );
       if (IA.marriageDemand != null) {
         Actor marries = IA.marriageDemand;
-        marries.assignHomeCity(city);
+        marries.assignBase(city);
         force.toggleEscorted(marries, true);
       }
       if (IA.objective == Mission.OBJECTIVE_DIALOG) {
         while (force.escorted.size() < 2) {
           Actor talks = (Actor) noble.generate();
-          talks.assignHomeCity(city);
+          talks.assignBase(city);
           force.toggleEscorted(talks, true);
         }
       }

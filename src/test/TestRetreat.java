@@ -48,7 +48,7 @@ public class TestRetreat extends LogicTest {
     Batch <Actor> enemies = new Batch();
     for (int n = 3; n-- > 0;) {
       Actor enemy = (Actor) Trooper.TROOPER.generate();
-      enemy.assignHomeCity(enemyBase);
+      enemy.assignBase(enemyBase);
       enemies.add(enemy);
     }
     
@@ -56,7 +56,7 @@ public class TestRetreat extends LogicTest {
     Batch <Actor> allies = new Batch();
     for (int n = 5; n-- > 0;) {
       Actor ally = (Actor) Trooper.TROOPER.generate();
-      ally.assignHomeCity(base);
+      ally.assignBase(base);
       allies.add(ally);
     }
     

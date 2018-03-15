@@ -30,17 +30,22 @@ public class TestAutoBuild extends LogicTest {
     world.settings.toggleBuildEvolve = false;
     
     
+    Building vault = (Building) BASTION.generate();
+    vault.enterMap(map, 8, 8, 1, base);
+    vault.inventory().setWith(
+      PARTS   , 10,
+      PLASTICS, 25,
+      CARBS   , 20
+    );
+    ActorUtils.fillWorkVacancies(vault);
+    
+    Building vendor = (Building) STOCK_EXCHANGE.generate();
+    vendor.enterMap(map, 1, 8, 1, base);
+    ActorUtils.fillWorkVacancies(vendor);
+    
     Building farm = (Building) NURSERY.generate();
     farm.enterMap(map, 1, 1, 1, base);
-    
-    Building forge = (Building) ENGINEER_STATION.generate();
-    forge.enterMap(map, 8, 8, 1, base);
-    
-    forge.setInventory(PARTS   , 10);
-    forge.setInventory(PLASTICS, 25);
-    
-    ActorUtils.fillWorkVacancies(farm );
-    ActorUtils.fillWorkVacancies(forge);
+    ActorUtils.fillWorkVacancies(farm);
     
     boolean allHoused = false;
     boolean builtOkay = false;

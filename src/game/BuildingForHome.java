@@ -147,6 +147,7 @@ public class BuildingForHome extends Building {
     */
   boolean performConsumerCheck(BuildType tier, Tally <Type> access) {
     for (Good g : tier.homeUseGoods.keys()) {
+      if (g.isEdible) continue;
       float amount = inventory(g);
       if (amount < maxTierStock(g, tier)) return false;
     }
@@ -207,9 +208,10 @@ public class BuildingForHome extends Building {
     ) {
       beginRemovingUpgrade(currentTier);
     }
+    
     else if (
-      nextAmbOK && nextSerOK && nextConOK &&
-      canBeginUpgrade(nextTier, false)
+      canBeginUpgrade(nextTier, false) &&
+      (nextAmbOK && nextSerOK && nextConOK)
     ) {
       beginUpgrade(nextTier);
     }
@@ -246,7 +248,8 @@ public class BuildingForHome extends Building {
   
   
   void generateOutputs(BuildType tier) {
-    float taxLevel = residents.size() * TAX_VALUES[type().homeSocialClass];
+    float taxLevel = 0;
+    for (Actor a : residents) taxLevel += TAX_VALUES[a.type().socialClass];
     taxLevel *= (1 + Visit.indexOf(tier, type().upgradeTiers));
     taxLevel *= type().updateTime;
     taxLevel /= TAX_INTERVAL;
@@ -265,7 +268,7 @@ public class BuildingForHome extends Building {
       BuildType currentTier = home.currentBuildingTier();
       float tier = Visit.indexOf(currentTier, type.upgradeTiers);
       tier /= Nums.max(1, type.upgradeTiers.length - 1);
-      tier += type.homeSocialClass * 1f / CLASS_NOBLE;
+      tier += type.homeComfortLevel * 1f / AVG_HOME_COMFORT;
       return tier / 2;
     }
     else {

@@ -28,25 +28,25 @@ public class TestCity extends LogicTest {
     
     base.initFunds(5000);
     
-    CityMapPlanning.placeStructure(WALKWAY, base, true, 3, 8, 25, 1);
-    CityMapPlanning.placeStructure(WALKWAY, base, true, 8, 2, 1, 25);
-    CityMapPlanning.placeStructure(WALKWAY, base, true, 0, 0, 9, 9 );
+    CityMapPlanning.placeStructure(WALKWAY, base, true, 4, 9, 25, 1);
+    CityMapPlanning.placeStructure(WALKWAY, base, true, 9, 3, 1, 25);
+    CityMapPlanning.placeStructure(WALKWAY, base, true, 1, 1, 9, 9 );
     
     Building palace = (Building) BASTION          .generate();
     Building school = (Building) PHYSICIAN_STATION.generate();
     Building court  = (Building) CANTINA          .generate();
     Building admin  = (Building) ENFORCER_BLOC    .generate();
     
-    palace.enterMap(map, 1 , 1 , 1, base);
-    court .enterMap(map, 9 , 9 , 1, base);
-    school.enterMap(map, 9 , 2 , 1, base);
-    admin .enterMap(map, 18, 9 , 1, base);
+    palace.enterMap(map, 2 , 2 , 1, base);
+    court .enterMap(map, 10, 10, 1, base);
+    school.enterMap(map, 10, 3 , 1, base);
+    admin .enterMap(map, 19, 10, 1, base);
     
     ActorUtils.fillWorkVacancies(palace);
     
     for (int n = 4; n-- > 0;) {
       Building house = (Building) HOLDING.generate();
-      house.enterMap(map, 9 + (n * 3), 6, 1f, base);
+      house.enterMap(map, 10 + (n * 3), 7, 1f, base);
     }
     
     Building quarry = (Building) EXCAVATOR       .generate();
@@ -54,10 +54,10 @@ public class TestCity extends LogicTest {
     Building kiln2  = (Building) ENGINEER_STATION.generate();
     Building market = (Building) STOCK_EXCHANGE  .generate();
     
-    quarry.enterMap(map, 4 , 15, 1, base);
-    kiln1 .enterMap(map, 9 , 18, 1, base);
-    kiln2 .enterMap(map, 9 , 14, 1, base);
-    market.enterMap(map, 4 , 9 , 1, base);
+    quarry.enterMap(map, 5 , 16, 1, base);
+    kiln1 .enterMap(map, 10, 19, 1, base);
+    kiln2 .enterMap(map, 10, 15, 1, base);
+    market.enterMap(map, 5 , 10, 1, base);
     
     for (int n = 4; n-- > 0;) {
       Element rock = new Element(DESERT_ROCK1);
@@ -98,6 +98,8 @@ public class TestCity extends LogicTest {
     boolean housesOkay = false;
     boolean goodsOkay  = true ;
     boolean testOkay   = false;
+    float   goodExcess = -1;
+    Good    excessGood = null;
     
     while (map.time() < RUN_TIME || graphics) {
       test.runLoop(base, 1, graphics, "saves/test_city.tlt");
@@ -117,7 +119,7 @@ public class TestCity extends LogicTest {
       //
       //  Check to ensure stocks are under control:
       if (goodsOkay) {
-        for (Building b : map.buildings()) {
+        search: for (Building b : map.buildings()) {
           if (b.type() == HOLDING) {
             BuildingForHome home = (BuildingForHome) b;
             for (Good g : home.usedBy(home.currentBuildingTier())) {
@@ -125,6 +127,9 @@ public class TestCity extends LogicTest {
               float have = home.inventory(g);
               if (have > need + 2) {
                 goodsOkay = false;
+                goodExcess = have - need;
+                excessGood = g;
+                break search;
               }
             }
           }
@@ -175,16 +180,12 @@ public class TestCity extends LogicTest {
         reportOnMap(map, base, true, PARTS, MEDICINE);
         if (! graphics) return true;
       }
-      
-      if (map.time() > RUN_TIME - 100) {
-        //world.settings.paused = true;
-        //graphics = true;
-      }
     }
     
     I.say("\nCITY SERVICES TEST FAILED!");
     I.say("  Houses okay: "+housesOkay);
     I.say("  Goods okay:  "+goodsOkay );
+    I.say("  Good excess: "+goodExcess+" "+excessGood);
     I.say("  Time idle/crafting: "+timeIdle+" / "+timeCrafting);
     
     I.say("  RUN TIME: "+RUN_TIME+", YEAR LENGTH: "+YEAR_LENGTH);

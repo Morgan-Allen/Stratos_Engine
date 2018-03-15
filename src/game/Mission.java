@@ -286,15 +286,13 @@ public class Mission implements
   
   public void toggleRecruit(Actor a, boolean is) {
     this.recruits.toggleMember(a, is);
-    if (is) a.mission = this;
-    else    a.mission = null;
+    a.setMission(is ? this : null);
   }
   
   
   public void toggleEscorted(Actor a, boolean is) {
     this.escorted.toggleMember(a, is);
-    if (is) a.mission = this;
-    else    a.mission = null;
+    a.setMission(is ? this : null);
   }
   
   
@@ -601,7 +599,7 @@ public class Mission implements
     }
     for (Actor e : escorted) if (e.onMap(map)) {
       e.exitMap(map);
-      e.assignGuestCity(null);
+      e.assignGuestBase(null);
     }
     away         = true;
     map          = null;
@@ -632,7 +630,7 @@ public class Mission implements
       }
       for (Actor e : escorted) {
         e.enterMap(map, transits.x, transits.y, 1, e.base());
-        e.assignGuestCity(goes);
+        e.assignGuestBase(goes);
       }
       setFocus(transitPoint, N, map);
       
@@ -683,8 +681,9 @@ public class Mission implements
     
     boolean haveTerms  = hasTerms();
     boolean isEnvoy    = escorted.includes(actor);
-    boolean standby    = objective == OBJECTIVE_STANDBY;
-    boolean defensive  = objective == OBJECTIVE_GARRISON;
+    //boolean standby    = objective == OBJECTIVE_STANDBY;
+    //boolean offensive  = objective == OBJECTIVE_CONQUER;
+    //boolean defensive  = objective == OBJECTIVE_GARRISON;
     boolean diplomatic = objective == OBJECTIVE_DIALOG;
     boolean explores   = objective == OBJECTIVE_RECON;
     boolean onAwayMap  = awayCity != null && map == awayCity.activeMap();
@@ -726,8 +725,8 @@ public class Mission implements
       return recon;
     }
     
-    Task standT = actor.targetTask(stands, 10, Task.JOB.MILITARY, this);
-    if (standT != null && (standby || defensive)) {
+    Task standT = actor.targetTask(stands, 1, Task.JOB.MILITARY, this);
+    if (standT != null) {
       return standT;
     }
     

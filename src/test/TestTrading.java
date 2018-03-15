@@ -84,7 +84,7 @@ public class TestTrading extends LogicTest {
     
     CityMapPlanning.placeStructure(WALKWAY, baseC, true, 1, 5, 8, 1);
     
-    ActorUtils.fillAllVacancies(map, Vassals.PYON);
+    ActorUtils.fillAllWorkVacancies(map);
     int initFunds = 100;
     baseC.initFunds(initFunds);
     

@@ -16,7 +16,7 @@ public class TestDiplomacy extends LogicTest {
   
   
   public static void main(String args[]) {
-    testDiplomacy(false);
+    testDiplomacy(true);
   }
   
   
@@ -66,14 +66,14 @@ public class TestDiplomacy extends LogicTest {
     Building garrison = (Building) TROOPER_LODGE.generate();
     garrison.enterMap(map, 12, 1, 1, baseC);
     
-    ActorUtils.fillAllVacancies(map, Vassals.PYON);
+    ActorUtils.fillAllWorkVacancies(map);
     
     
     Mission escort;
     escort = new Mission(Mission.OBJECTIVE_DIALOG, awayC, true);
     for (int n = 4; n-- > 0;) {
       Actor s = (Actor) Trooper.TROOPER.generate();
-      s.assignHomeCity(awayC);
+      s.assignBase(awayC);
       escort.toggleRecruit(s, true);
     }
     
@@ -82,7 +82,7 @@ public class TestDiplomacy extends LogicTest {
     Actor bride = (Actor) Nobles.CONSORT.generate();
     escort.toggleEscorted(bride, true);
     
-    for (Actor e : escort.escorted()) e.assignHomeCity(awayC);
+    for (Actor e : escort.escorted()) e.assignBase(awayC);
     
     escort.assignTerms(Base.POSTURE.ALLY, null, bride, null);
     escort.setFocus(baseC);

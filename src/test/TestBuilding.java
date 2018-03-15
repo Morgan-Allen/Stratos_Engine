@@ -48,7 +48,7 @@ public class TestBuilding extends LogicTest {
     ActorUtils.fillWorkVacancies(forge);
     
     Building palace = (Building) BASTION.generate();
-    palace.enterMap(map, 9, 9, 0, base);
+    palace.enterMap(map, 8, 8, 0, base);
     ActorUtils.fillWorkVacancies(palace);
     map.planning.placeObject(palace);
     

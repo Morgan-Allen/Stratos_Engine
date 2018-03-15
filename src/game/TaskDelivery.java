@@ -93,34 +93,35 @@ public class TaskDelivery extends Task {
   static Building findNearestOfType(
     Type type, int maxDist, Building from
   ) {
-    return findNearestDemanding(type, null, null, -1, from);
+    return findNearestDemanding(type, null, null, -1, from, false);
   }
   
   
   static Building findNearestWithFeature(
     Good feature, int maxDist, Building from
   ) {
-    return findNearestDemanding(null, feature, null, -1, from);
+    return findNearestDemanding(null, feature, null, -1, from, false);
   }
   
   
   static Building findNearestDemanding(
     Type type, Good needed, int maxDist, Building from
   ) {
-    return findNearestDemanding(type, null, needed, maxDist, from);
+    return findNearestDemanding(type, null, needed, maxDist, from, false);
   }
   
   
   static Building findNearestDemanding(
     Type type, Good feature,
     Good needed, int maxDist,
-    Building from
+    Building from, boolean excludeFrom
   ) {
     Pick <Building> pick = new Pick();
     boolean trades = from.type().isTradeBuilding();
     
-    for (Building b : from.map.buildings) if (b != from) {
+    for (Building b : from.map.buildings) {
       if (type != null && b.type() != type) continue;
+      if (excludeFrom && b == from) continue;
       
       //
       //  Check to ensure that traders don't deliver to other traders using a

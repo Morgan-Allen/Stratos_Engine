@@ -134,6 +134,7 @@ public class GameConstants {
     AVG_MAX_STOCK    = 10  ,
     MAX_TRADER_RANGE = 100 ,
     MAX_SHOP_RANGE   = 50  ,
+    AVG_HOME_COMFORT = 10  ,
     HOME_USE_TIME    = YEAR_LENGTH * 2,
     AVG_SERVICE_GIVE = 10  ,  //  value of education, diversion, etc.
     AVG_MAX_VISITORS = 4   ,
@@ -169,11 +170,10 @@ public class GameConstants {
     //
     //  Social-class constants-
     CLASS_COMMON   = 0,
-    CLASS_TRADER   = 1,
-    CLASS_SOLDIER  = 2,
-    CLASS_NOBLE    = 3,
-    ALL_CLASSES[]  = { 0, 1, 2, 3 },
-    TAX_VALUES []  = { 0, 25, 75, 250 },
+    CLASS_SOLDIER  = 1,
+    CLASS_NOBLE    = 2,
+    ALL_CLASSES[]  = { 0, 1, 2 },
+    TAX_VALUES []  = { 0, 25, 100 },
     AVG_HIRE_COST  = 400,
     AVG_TAX_VALUE  = 25,
     AVG_GOOD_VALUE = 25,
@@ -222,6 +222,7 @@ public class GameConstants {
     public boolean isWeapon = false;
     public boolean isArmour = false;
     public boolean isUsable = false;
+    public boolean isEdible = false;
     public int maxQuality = -1;
     public int maxCarried = -1;
     public int priceLevels[] = {};

@@ -131,8 +131,8 @@ public class TestPathCache extends LogicTest {
     Base base = setupTestBase(128, ALL_GOODS, false, ALL_TERRAINS);
     AreaMap map = base.activeMap();
     World world = map.world;
-    world.settings.toggleFog   = false;
-    world.settings.viewPathMap = true ;
+    world.settings.toggleFog = false;
+    test.viewPathMap = true;
     
     final int div = map.size() / layout.length, rand = div / 4;
     for (Tile t : map.allTiles()) {

@@ -41,7 +41,6 @@ public class WorldSettings {
     paused            = false,
     worldView         = false,
     
-    viewPathMap       = false,
     reportBattle      = false,
     reportPathCache   = false;
   

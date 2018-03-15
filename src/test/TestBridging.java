@@ -148,12 +148,9 @@ public class TestBridging extends LogicTest {
         e.exitMap(map);
         
         Element copy = (Element) e.type().generate();
-        if (e.type().isBuilding()) {
-          Building b = (Building) e, c = (Building) copy;
-          c.setFacing(b.facing());
-          c.assignBase(b.base());
-        }
+        copy.setFacing(e.facing());
         copy.setLocation(at, map);
+        copy.assignBase(e.base());
         freshBuilt.add(copy);
         
         if (e == tower1) tower1 = (Building) copy;

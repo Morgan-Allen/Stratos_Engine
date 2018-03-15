@@ -2,8 +2,6 @@
 
 package game;
 import static game.GameConstants.*;
-
-import game.GameConstants.Good;
 import util.*;
 
 
@@ -32,6 +30,26 @@ public class TaskResting extends Task {
   
   /**  Factory methods for outside access and other helper functions-
     */
+  static Building findRestVenue(Actor actor, AreaMap map) {
+    Pick <Building> pick = new Pick();
+    for (Building b : map.buildings()) {
+      
+      if (b.base() != actor.base() || ! b.complete()) continue;
+      if (b != actor.home() && ! b.type().hasFeature(IS_REFUGE)) continue;
+      
+      float rating = 1f;
+      rating *= AreaMap.distancePenalty(actor, b);
+      rating *= restUrgency(actor, b);
+      
+      if (b == actor.home()) rating *= 3;
+      else rating /= 2 + b.visitors().size();
+      
+      pick.compare(b, rating);
+    }
+    return pick.result();
+  }
+  
+  
   static TaskResting configResting(Actor actor, Building rests) {
     if (actor == null || rests == null) return null;
     
@@ -42,11 +60,8 @@ public class TaskResting extends Task {
   
   static Batch <Good> menuAt(Building visits, Actor actor) {
     Batch <Good> menu = new Batch();
-    if (actor.type().foodsAllowed == null) {
-      return menu;
-    }
-    if (visits != null) for (Good g : actor.type().foodsAllowed) {
-      if (visits.inventory(g) > 0) menu.add(g);
+    for (Good g : visits.inventory().keys()) {
+      if (g.isEdible) menu.add(g);
     }
     return menu;
   }
