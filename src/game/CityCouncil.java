@@ -237,7 +237,7 @@ public class CityCouncil {
     if (typeAI == AI_OFF || onMap) return;
     //
     //  Once per month, otherwise, evaluate any major independent decisions-
-    if (city.world.time % (MONTH_LENGTH / 2) == 0) {
+    if (city.world.time % (DAY_LENGTH / 2) == 0) {
       updateCouncilAI();
     }
   }

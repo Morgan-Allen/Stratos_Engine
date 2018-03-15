@@ -246,7 +246,7 @@ public class ActorAsAnimal extends Actor {
     //  Once per month, check to see if breeding conditions are correct.  (In
     //  the event that your numbers are really low, pregnancy is set to -1 to
     //  discourage predators.)
-    if (ageSeconds % MONTH_LENGTH == 0) {
+    if (ageSeconds % DAY_LENGTH == 0) {
       if (growLevel() == 1 && pregnancy <= 0) {
         
         float idealPop = CityMapTerrain.idealPopulation(type(), map);

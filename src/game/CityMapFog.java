@@ -1,12 +1,11 @@
 
 
 package game;
+import static game.AreaMap.*;
+import static game.GameConstants.*;
 import graphics.common.*;
 import graphics.terrain.*;
 import util.*;
-import static game.AreaMap.*;
-import static game.WorldCalendar.*;
-import static game.GameConstants.*;
 
 
 
@@ -18,8 +17,8 @@ public class CityMapFog {
   final static int MAX_FOG = 100;
   
   AreaMap map;
+  float lightLevel;
   
-  int  dayState = -1;
   byte fogVals[][];
   byte oldVals[][];
   byte maxVals[][];
@@ -37,7 +36,7 @@ public class CityMapFog {
   
   
   void loadState(Session s) throws Exception {
-    dayState = s.loadInt();
+    lightLevel = s.loadFloat();
     s.loadByteArray(fogVals);
     s.loadByteArray(oldVals);
     s.loadByteArray(maxVals);
@@ -46,7 +45,7 @@ public class CityMapFog {
   
   
   void saveState(Session s) throws Exception {
-    s.saveInt(dayState);
+    s.saveFloat(lightLevel);
     s.saveByteArray(fogVals);
     s.saveByteArray(oldVals);
     s.saveByteArray(maxVals);
@@ -91,11 +90,12 @@ public class CityMapFog {
   
   
   void updateFog() {
-    dayState = WorldCalendar.dayState(map.time);
-    
     if (! isToggled()) {
       return;
     }
+    
+    float dayProg = map.world.calendar.dayProgress();
+    lightLevel = (dayProg * (1 - dayProg)) / 4;
     
     for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
       byte oldMax = maxVals[c.x][c.y];
@@ -146,24 +146,12 @@ public class CityMapFog {
   public float maxSightLevel(Tile t) {
     if (! isToggled()) return 1;
     if (t == null) return 0;
-    return maxVals[t.x][t.y]  * 1f / MAX_FOG;
-  }
-  
-  
-  public boolean day() {
-    return dayState == STATE_LIGHT;
-  }
-  
-  
-  public boolean night() {
-    return dayState == STATE_DARKNESS;
+    return maxVals[t.x][t.y] * 1f / MAX_FOG;
   }
   
   
   public float lightLevel() {
-    if (day  ()) return 1;
-    if (night()) return 0;
-    return 0.5f;
+    return lightLevel;
   }
   
   

@@ -62,6 +62,8 @@ public class World implements Session.Saveable {
   Type nobleTypes  [] = {};
   
   int time = 0;
+  final public WorldCalendar calendar = new WorldCalendar(this);
+  
   List <Locale > locales  = new List();
   List <Base   > bases    = new List();
   List <Journey> journeys = new List();

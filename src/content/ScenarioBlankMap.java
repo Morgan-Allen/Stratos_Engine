@@ -171,7 +171,7 @@ public class ScenarioBlankMap extends CityMapScenario {
       SiteOption o = options.removeFirst();
       BuildingForNest nest = (BuildingForNest) RUINS_LAIR.generate();
       nest.enterMap(stage, o.at.x, o.at.y, 1, stage.locals);
-      nest.assignSpawnParameters(MONTH_LENGTH * 3, 2, false, spawnArgs);
+      nest.assignSpawnParameters(DAY_LENGTH * 3, 2, false, spawnArgs);
       nests.add(nest);
     }
     

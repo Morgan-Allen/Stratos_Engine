@@ -42,28 +42,25 @@ public class GameConstants {
     */
   final public static int
     //
-    //  Time and distance-
-    DAY_LENGTH       = 6   ,
-    DAYS_PER_MONTH   = 20  ,
-    MONTHS_PER_YEAR  = 18  ,
-    DAYS_PER_YEAR    = 365 ,
-    MONTH_LENGTH     = DAY_LENGTH * DAYS_PER_MONTH,
-    YEAR_LENGTH      = DAY_LENGTH * DAYS_PER_YEAR ,
+    //  Time constants-
+    DAY_LENGTH       = 120,
+    DAYS_PER_YEAR    = 18,
+    YEAR_LENGTH      = DAY_LENGTH * DAYS_PER_YEAR,
     //
     //  Health and survival-
-    STARVE_INTERVAL  = MONTH_LENGTH * 2,
-    FATIGUE_INTERVAL = MONTH_LENGTH * 2,
+    STARVE_INTERVAL  = DAY_LENGTH * 2,
+    FATIGUE_INTERVAL = DAY_LENGTH * 2,
     HUNGER_REGEN     = 5   ,
     FOOD_UNIT_PER_HP = 2   ,
-    FECES_UNIT_TIME  = MONTH_LENGTH * 3,
-    FATIGUE_REGEN    = MONTH_LENGTH / 4,
-    HEALTH_REGEN     = MONTH_LENGTH / 2,
+    FECES_UNIT_TIME  = DAY_LENGTH * 3,
+    FATIGUE_REGEN    = DAY_LENGTH / 4,
+    HEALTH_REGEN     = DAY_LENGTH / 2,
     AVG_MAX_HEALTH   = 10  ,
     AVG_MOVE_SPEED   = 100 ,  //  percent of 1 tile/second
     //
     //  Growth and crops-
-    SCAN_PERIOD      = MONTH_LENGTH * 1,
-    RIPEN_PERIOD     = MONTH_LENGTH * 6,
+    SCAN_PERIOD      = DAY_LENGTH * 1,
+    RIPEN_PERIOD     = DAY_LENGTH * 6,
     CROP_YIELD       = 50  ,  //  percent of 1 full item
     AVG_GATHER_RANGE = 4   ,
     //
@@ -76,11 +73,11 @@ public class GameConstants {
     TILES_PER_GRAZER = 100 ,
     TILES_PER_HUNTER = 400 ,
     AVG_ANIMAL_YIELD = 8   ,
-    ANIMAL_MATURES   = MONTH_LENGTH * 4,
+    ANIMAL_MATURES   = DAY_LENGTH * 4,
     GRAZER_LIFESPAN  = YEAR_LENGTH  * 2,
     HUNTER_LIFESPAN  = YEAR_LENGTH  * 8,
     ANIMAL_PREG_TIME = ANIMAL_MATURES / 2,
-    AVG_BUTCHER_TIME = MONTH_LENGTH / (AVG_ANIMAL_YIELD * 2),
+    AVG_BUTCHER_TIME = DAY_LENGTH / (AVG_ANIMAL_YIELD * 2),
     //
     //  If 1 animal is worth 8 food, and 1 of them fit within 10x10 tiles, then
     //  if they 'ripen' within 1 month, that would be 8 units of food.
@@ -103,7 +100,7 @@ public class GameConstants {
     AVG_RETIREMENT   = 60  ,
     MIN_PREG_CHANCE  = 35  ,
     MAX_PREG_CHANCE  = 65  ,
-    PREGNANCY_LENGTH = 9 * MONTH_LENGTH,
+    PREGNANCY_LENGTH = 9 * DAY_LENGTH,
     AVG_CHILD_MORT   = 75  ,  //  child mortality percent
     AVG_SENIOR_MORT  = 10  ,  //  senior mortality percent
     LIFESPAN_LENGTH  = AVG_RETIREMENT * YEAR_LENGTH,

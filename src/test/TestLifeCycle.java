@@ -36,7 +36,7 @@ public class TestLifeCycle extends LogicTest {
     ActorAsPerson single = (ActorAsPerson) Vassals.PYON.generate();
     for (int n = MAX_TRAIN_TIME; n-- > 0;) {
       single.gainXP(SKILL_BUILD, 1);
-      if (n % MONTH_LENGTH == 0) I.say("  "+single.levelOf(SKILL_BUILD));
+      if (n % DAY_LENGTH == 0) I.say("  "+single.levelOf(SKILL_BUILD));
     }
     
     if (single.levelOf(SKILL_BUILD) < MAX_SKILL_LEVEL) {

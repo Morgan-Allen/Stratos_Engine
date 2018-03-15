@@ -51,7 +51,7 @@ public class TestExploring extends LogicTest {
         for (Tile t : map.allTiles()) {
           if (map.blocked(t)) continue;
           tilesOpen += 1;
-          if (map.fog.maxSightLevel(t) == 1) tilesSeen += 1;
+          if (map.fog.maxSightLevel(t) > 0) tilesSeen += 1;
         }
         
         exploreOkay = tilesSeen == tilesOpen;

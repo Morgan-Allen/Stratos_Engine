@@ -501,8 +501,8 @@ public class Mission implements
     boolean hasEnvoy = escorted.size() > 0;
     
     if (hasEnvoy && (
-      sinceTerms > MONTH_LENGTH ||
-      (timeTermsSent == -1 && sinceArrive > MONTH_LENGTH * 2)
+      sinceTerms > DAY_LENGTH ||
+      (timeTermsSent == -1 && sinceArrive > DAY_LENGTH * 2)
     )) {
       timeTermsSent = homeCity.world.time;
       termsRefused  = true;

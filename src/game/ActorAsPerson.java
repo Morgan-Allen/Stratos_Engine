@@ -380,11 +380,6 @@ public class ActorAsPerson extends Actor {
   
   /**  Handling sight-range and combat-stats:
     */
-  public float sightRange() {
-    return super.sightRange() * (map.fog.lightLevel() + 1f) / 2;
-  }
-  
-  
   public int meleeDamage() {
     Good weapon = type().weaponType;
     if (weapon != null) {
@@ -448,7 +443,7 @@ public class ActorAsPerson extends Actor {
           //I.say(this+" LOST THEIR CHILD.");
         }
       }
-      if (pregnancy > PREGNANCY_LENGTH + MONTH_LENGTH) {
+      if (pregnancy > PREGNANCY_LENGTH + DAY_LENGTH) {
         pregnancy = 0;
         //I.say(this+" CANCELLED PREGNANCY!");
       }

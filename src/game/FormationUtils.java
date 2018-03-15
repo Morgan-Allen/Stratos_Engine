@@ -343,7 +343,7 @@ public class FormationUtils {
   
   static Tile standingPointPatrol(Actor member, Mission parent) {
     
-    int span = MONTH_LENGTH, numRecruits = parent.recruits.size();
+    int span = DAY_LENGTH, numRecruits = parent.recruits.size();
     int epoch = (parent.map().time / span) % numRecruits;
     
     int index = parent.recruits.indexOf(member);

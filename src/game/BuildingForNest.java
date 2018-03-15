@@ -13,7 +13,7 @@ public class BuildingForNest extends Building {
   /**  Data fields, construction and save/load methods-
     */
   Tally <ActorType> spawnChances = new Tally();
-  int spawnInterval  = MONTH_LENGTH;
+  int spawnInterval  = DAY_LENGTH;
   int spawnCountdown = 0;
   int maxResidents   = -1;
   boolean doRaids = false;

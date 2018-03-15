@@ -570,9 +570,14 @@ public class Actor extends Element implements
     }
   }
   
+
+  public float sightRange() {
+    float light = map == null ? 0.5f : map.fog.lightLevel();
+    return type().sightRange * (0.75f + (light * 0.5f));
+  }
+  
   
   public float maxHealth () { return type().maxHealth ; }
-  public float sightRange() { return type().sightRange; }
   public float injury  () { return injury  ; }
   public float fatigue () { return fatigue ; }
   public float cooldown() { return cooldown; }

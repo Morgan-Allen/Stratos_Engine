@@ -9,21 +9,36 @@ public class WorldCalendar {
   
   
   final static int
-    STATE_LIGHT      = 0,
-    STATE_DARKNESS   = 1,
-    STATE_GREY_DAYS  = 2
+    STATE_LIGHT     = 0,
+    STATE_DARKNESS  = 1,
+    STATE_GREY_DAYS = 2
   ;
   
+  final World world;
   
-  public static int dayState(int time) {
-    int calDay = (time / DAY_LENGTH) % DAYS_PER_YEAR;
-    int maxDay = DAYS_PER_MONTH * MONTHS_PER_YEAR;
-    
-    if (calDay > maxDay) return STATE_GREY_DAYS;
-    int month = calDay / DAYS_PER_MONTH;
-    return (month % 2) == 1 ? STATE_DARKNESS : STATE_LIGHT;
+  
+  WorldCalendar(World world) {
+    this.world = world;
   }
   
   
+  public int currentDay() {
+    return world.time % DAY_LENGTH;
+  }
   
+  
+  public float dayProgress() {
+    return (world.time % DAY_LENGTH) * 1f / DAY_LENGTH;
+  }
+  
+  
+  public boolean isDay() {
+    float prog = dayProgress();
+    return prog >= 0.25f && prog < 0.75f;
+  }
+  
+  
+  public boolean isNight() {
+    return ! isDay();
+  }
 }

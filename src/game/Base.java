@@ -629,7 +629,7 @@ public class Base implements Session.Saveable, Trader {
   /**  Regular updates-
     */
   void updateCity() {
-    boolean updateStats = world.time % MONTH_LENGTH == 0;
+    boolean updateStats = world.time % DAY_LENGTH == 0;
     boolean activeMap   = map != null;
     Base    lord        = currentLord();
     //
@@ -683,8 +683,8 @@ public class Base implements Session.Saveable, Trader {
     if (updateStats && ! activeMap) {
       council.updateCouncil(false);
       
-      float popRegen  = MONTH_LENGTH * 1f / LIFESPAN_LENGTH;
-      float usageInc  = MONTH_LENGTH * 1f / YEAR_LENGTH;
+      float popRegen  = DAY_LENGTH * 1f / LIFESPAN_LENGTH;
+      float usageInc  = DAY_LENGTH * 1f / YEAR_LENGTH;
       float idealPop  = idealPopulation();
       float idealArmy = idealArmyPower();
       
@@ -711,7 +711,7 @@ public class Base implements Session.Saveable, Trader {
       }
       
       if (isLoyalVassalOf(lord)) {
-        if (council.considerRevolt(lord, MONTH_LENGTH)) {
+        if (council.considerRevolt(lord, DAY_LENGTH)) {
           toggleRebellion(lord, true);
         }
         //  TODO:  You may have to generate caravans to visit player cities...
@@ -728,7 +728,7 @@ public class Base implements Session.Saveable, Trader {
     //  Either way, we allow prestige and loyalty to return gradually to
     //  defaults over time:
     if (updateStats) {
-      float presDrift = MONTH_LENGTH * PRESTIGE_AVG * 1f / PRES_FADEOUT_TIME;
+      float presDrift = DAY_LENGTH * PRESTIGE_AVG * 1f / PRES_FADEOUT_TIME;
       float presDiff = PRESTIGE_AVG - prestige;
       if (Nums.abs(presDiff) > presDrift) {
         presDiff = presDrift * (presDiff > 0 ? 1 : -1);
@@ -737,7 +737,7 @@ public class Base implements Session.Saveable, Trader {
       
       for (Relation r : relations.values()) {
         float diff = LOY_CIVIL - r.loyalty;
-        diff *= MONTH_LENGTH * 1f / LOY_FADEOUT_TIME;
+        diff *= DAY_LENGTH * 1f / LOY_FADEOUT_TIME;
         r.loyalty += diff;
       }
     }
