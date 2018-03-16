@@ -289,15 +289,6 @@ public class BuildingForHome extends Building {
     //
     //  Non-nobles have work to do-
     if (actor.type().socialClass != CLASS_NOBLE) {
-      //  TODO:  Restore this later?
-      /*
-      //
-      //  See if you can assist with building-projects:
-      Task building = TaskBuilding.nextBuildingTask(this, actor);
-      if (building != null) {
-        return building;
-      }
-      //*/
       //
       //  Failing that, see if you can go shopping:
       BuildType tier = tierOffset(1);

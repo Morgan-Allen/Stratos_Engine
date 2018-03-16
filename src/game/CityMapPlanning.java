@@ -60,6 +60,9 @@ public class CityMapPlanning {
   
   
   public void updatePlanning() {
+    if (toBuild.empty()) return;
+    //
+    //  Assess what a reasonable fraction of structures to update would be-
     int maxChecked = Nums.min(100, toBuild.size()) / map.ticksPS;
     maxChecked = Nums.max(1, maxChecked);
     //

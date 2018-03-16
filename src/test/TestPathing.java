@@ -176,6 +176,7 @@ public class TestPathing extends LogicTest {
         if (dest == a.at() || dest == a.inside()) {
           numReachedDest += 1;
           
+          dest = Task.pathOrigin(a);
           Pathing goes;
           if (a.inside() != home && ! home.hasFocus()) {
             goes = home;
@@ -194,6 +195,7 @@ public class TestPathing extends LogicTest {
             I.say("\n"+a+" CONSTRUCTED INVALID PATH-");
             I.say("  From: "+a.at()+", Goes: "+goes+"\n  ");
             I.add(I.list(path));
+            //Task.verifyPath(path, dest, goes, map);
             pathWrong = true;
           }
         }

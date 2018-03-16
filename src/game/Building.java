@@ -219,6 +219,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   
   
   public float setInventory(Good g, float amount) {
+    if (amount < 0 && g != CASH) amount = 0;
     return inventory.set(g, amount);
   }
   

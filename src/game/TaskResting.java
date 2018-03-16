@@ -95,6 +95,7 @@ public class TaskResting extends Task {
       if (menu.size() > 0) for (Good g : menu) {
         float eats = 1f / (menu.size() * HUNGER_REGEN);
         if (! adult) eats /= 2;
+        eats = Nums.min(eats, visits.inventory(g));
         visits.addInventory(0 - eats, g);
         actor.hunger -= eats / FOOD_UNIT_PER_HP;
       }

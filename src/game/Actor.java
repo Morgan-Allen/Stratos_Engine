@@ -299,7 +299,10 @@ public class Actor extends Element implements
     
     if (at != null) {
       float height = at.elevation;
-      if (inside == null && at.above != null) height += at.above.type().deep;
+      Element above = at.above;
+      if (inside == null && above != null && above.pathType() == Type.PATH_WALLS) {
+        height += above.height();
+      }
       exactPosition.set(at.x + 0.5f, at.y + 0.5f, height);
     }
     

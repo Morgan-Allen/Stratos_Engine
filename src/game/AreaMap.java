@@ -295,6 +295,7 @@ public class AreaMap implements Session.Saveable {
     if (a == null || b == null) return 1000000000;
     a.exactPosition(v1);
     b.exactPosition(v2);
+    v1.z = v2.z = 0;
     return v1.distance(v2);
   }
   

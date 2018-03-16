@@ -550,7 +550,9 @@ public class Task implements Session.Saveable {
   public static boolean verifyPath(
     Pathing path[], Pathing start, Pathing end, AreaMap map
   ) {
-    if (Visit.empty(path) || path[0] != start) return false;
+    if (Visit.empty(path) || path[0] != start) {
+      return false;
+    }
     
     Pathing temp[] = new Pathing[9];
     Pathing last = (Pathing) Visit.last(path);
@@ -560,8 +562,8 @@ public class Task implements Session.Saveable {
     
     Pathing prior = path[0];
     for (Pathing p : path) {
-      Pathing a[] = p.adjacent(temp, map);
-      if (p != prior && ! Visit.arrayIncludes(a, prior)) {
+      Pathing a[] = prior.adjacent(temp, map);
+      if (p != prior && ! Visit.arrayIncludes(a, p)) {
         return false;
       }
       prior = p;
