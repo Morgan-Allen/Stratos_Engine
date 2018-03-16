@@ -53,6 +53,8 @@ public interface UIConstants {
   
   final public static int
     
+    CURSOR_SIZE       = 25,
+    
     MINIMAP_WIDE      = 200,
     MINIMAP_HIGH      = 200,
     CHARTS_WIDE       = 500,

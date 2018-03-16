@@ -13,6 +13,7 @@ import static game.GameConstants.*;
 
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.graphics.Texture;
 
 
 
@@ -133,6 +134,10 @@ public class OptionList extends UIGroup implements UIConstants {
             UI.assignTask(null);
           }
         }
+
+        public Texture cursor() {
+          return texture;
+        }
       };
       BUI.assignTask(task);
     }
@@ -173,6 +178,10 @@ public class OptionList extends UIGroup implements UIConstants {
           else {
             //  TODO:  Render a disabled icon!
           }
+        }
+        
+        public Texture cursor() {
+          return texture;
         }
       };
       BUI.assignTask(task);

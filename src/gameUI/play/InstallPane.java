@@ -8,6 +8,7 @@ import graphics.common.*;
 import graphics.widgets.*;
 import util.*;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.graphics.Texture;
 
 
 
@@ -90,6 +91,10 @@ public class InstallPane extends DetailPane {
         if (KeyInput.wasTyped(Keys.ESCAPE)) {
           UI.assignTask(null);
         }
+      }
+      
+      public Texture cursor() {
+        return null;
       }
     };
     UI.assignTask(task);

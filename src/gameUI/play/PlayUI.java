@@ -8,6 +8,9 @@ import gameUI.misc.*;
 import start.*;
 import util.*;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
+
 
 
 public class PlayUI extends HUD implements UIConstants {
@@ -18,6 +21,13 @@ public class PlayUI extends HUD implements UIConstants {
     INSTALL_TAB_IMG = ImageAsset.fromImage(
       PlayUI.class, "img_install_tab",
       "media/GUI/panels/installations_tab.png"
+    ),
+    DEFAULT_CURSOR = ImageAsset.fromImage(
+      PlayUI.class, "img_default_cursor",
+      "media/GUI/default_cursor.png"
+    ),
+    BLANK_CURSOR = ImageAsset.withColor(
+      32, Colour.HIDE, PlayUI.class
     );
   
   AreaMap stage;
@@ -27,16 +37,19 @@ public class PlayUI extends HUD implements UIConstants {
   Button     installTab ;
   DetailPane installPane;
   
+  UIGroup    detailArea;
   DetailPane detailPane;
   OptionList optionList;
+  Readout readout;
+  ProgressOptions progressOptions;
   
   final public Selection selection = new Selection(this);
   final public Tracking  tracking  = new Tracking (this);
   
-  Readout readout;
-  ProgressOptions progressOptions;
-  
   private PlayTask currentTask = null;
+  
+  Cursor cursor;
+  com.badlogic.gdx.graphics.Cursor cursorGDX = null;
   
   
   
@@ -59,6 +72,14 @@ public class PlayUI extends HUD implements UIConstants {
     
     installPane = new InstallPane(this);
     
+    detailArea = new UIGroup(this);
+    detailArea.alignLeft    (0, INFO_PANEL_WIDE);
+    detailArea.alignVertical(BAR_BUTTON_SIZE, 0);
+    detailArea.attachTo(this);
+    
+    optionList = new OptionList(this);
+    optionList.attachTo(this);
+    
     readout = new Readout(this);
     readout.alignHorizontal(INFO_PANEL_WIDE, 0);
     readout.alignTop(0, READOUT_HIGH);
@@ -69,8 +90,9 @@ public class PlayUI extends HUD implements UIConstants {
     progressOptions.alignHorizontal(0, 0);
     progressOptions.attachTo(this);
     
-    optionList = new OptionList(this);
-    optionList.attachTo(this);
+    cursor = new Cursor(this, DEFAULT_CURSOR);
+    cursor.alignToArea(0, 0, CURSOR_SIZE, CURSOR_SIZE);
+    cursor.attachTo(this);
   }
   
   
@@ -129,11 +151,6 @@ public class PlayUI extends HUD implements UIConstants {
     if (UI.detailPane != null && UI.detailPane.subject != null) {
       return UI.detailPane.subject;
     }
-    /*
-    if (UI.optionList != null && UI.optionList.subject != null) {
-      return UI.optionList.subject;
-    }
-    //*/
     return null;
   }
   
@@ -152,22 +169,10 @@ public class PlayUI extends HUD implements UIConstants {
     if (detailPane != null) detailPane.detach();
     this.detailPane = pane;
     if (detailPane != null) {
-      detailPane.alignLeft    (0, INFO_PANEL_WIDE);
-      detailPane.alignVertical(BAR_BUTTON_SIZE, 0);
-      detailPane.attachTo(this);
+      detailPane.alignToFill();
+      detailPane.attachTo(detailArea);
     }
   }
-  
-  
-  /*
-  public void setOptionList(OptionList list) {
-    if (optionList != null) optionList.detach();
-    this.optionList = list;
-    if (optionList != null) {
-      optionList.attachTo(this);
-    }
-  }
-  //*/
   
   
   public void assignTask(PlayTask task) {
@@ -194,23 +199,26 @@ public class PlayUI extends HUD implements UIConstants {
   }
   
   
+  
   public void renderHUD(Rendering rendering) {
-    if (currentTask != null) currentTask.doTask(this);
+    if (cursorGDX == null) try {
+      cursorGDX = Gdx.graphics.newCursor(BLANK_CURSOR.asPixels(), 0, 0);
+      Gdx.graphics.setCursor(cursorGDX);
+    }
+    catch (Exception e) { I.report(e); }
+    
+    Texture cursorTex = currentTask == null ? null : currentTask.cursor();
+    if (cursorTex == null) cursorTex = DEFAULT_CURSOR.asTexture();
+    cursor.setBaseTexture(cursorTex);
+    
+    if (currentTask != null) {
+      currentTask.doTask(this);
+    }
+    
     super.renderHUD(rendering);
   }
   
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 
