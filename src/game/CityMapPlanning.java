@@ -60,7 +60,8 @@ public class CityMapPlanning {
   
   
   public void updatePlanning() {
-    int maxChecked = Nums.min(100, toBuild.size());
+    int maxChecked = Nums.min(100, toBuild.size()) / map.ticksPS;
+    maxChecked = Nums.max(1, maxChecked);
     //
     //  We regularly 'check up' on scheduled structures to see whether they
     //  need maintenance or have become possible to build-

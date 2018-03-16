@@ -60,7 +60,7 @@ public class TestRetreat extends LogicTest {
       allies.add(ally);
     }
     
-    for (int n = 3; n-- > 0;) map.update();
+    for (int n = 3; n-- > 0;) map.update(1);
     
     boolean braveOkay   = false;
     boolean enemiesDone = false;

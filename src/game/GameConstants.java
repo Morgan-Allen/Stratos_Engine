@@ -57,6 +57,8 @@ public class GameConstants {
     HEALTH_REGEN     = DAY_LENGTH / 2,
     AVG_MAX_HEALTH   = 10  ,
     AVG_MOVE_SPEED   = 100 ,  //  percent of 1 tile/second
+    RUN_MOVE_SPEED   = 250 ,
+    HIDE_MOVE_SPEED  = 75  ,
     //
     //  Growth and crops-
     SCAN_PERIOD      = DAY_LENGTH * 1,
@@ -468,6 +470,7 @@ public class GameConstants {
     Series <Active> focused();
     boolean hasFocus();
     
+    Vec3D exactPosition(Vec3D store);
     Vec3D renderedPosition(Vec3D store);
   }
   

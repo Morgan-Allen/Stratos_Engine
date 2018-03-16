@@ -31,7 +31,7 @@ public class AreaMap implements Session.Saveable {
   List <Active> actorGrid[][];
   
   int time = 0;
-  int numUpdates = 0, ticksPS = PlayLoop.UPDATES_PER_SECOND;
+  int numUpdates = 0, ticksPS = 1;
   
   final public CityMapPlanning planning = new CityMapPlanning(this);
   final public CityMapFog      fog      = new CityMapFog     (this);
@@ -83,7 +83,7 @@ public class AreaMap implements Session.Saveable {
     locals = (Base) s.loadObject();
     s.loadObjects(bases);
     
-    time = s.loadInt();
+    time       = s.loadInt();
     numUpdates = s.loadInt();
     ticksPS    = s.loadInt();
     
@@ -289,9 +289,13 @@ public class AreaMap implements Session.Saveable {
   }
   
   
+  private static Vec3D v1 = new Vec3D(), v2 = new Vec3D();
+  
   public static float distance(Target a, Target b) {
     if (a == null || b == null) return 1000000000;
-    return distance(a.at(), b.at());
+    a.exactPosition(v1);
+    b.exactPosition(v2);
+    return v1.distance(v2);
   }
   
   
@@ -497,7 +501,11 @@ public class AreaMap implements Session.Saveable {
   
   /**  Active updates:
     */
-  public void update() {
+  public void update(int ticksPS) {
+    
+    this.ticksPS = ticksPS;
+    numUpdates += 1;
+    time = numUpdates / ticksPS;
     
     world.updateWithTime(time);
     
@@ -520,13 +528,9 @@ public class AreaMap implements Session.Saveable {
       transitPoints.clear();
     }
     
-    time += 1;
-    numUpdates += 1;
-    
     fog.updateFog();
     terrain.updateTerrain();
     planning.updatePlanning();
-    
     pathCache.updatePathCache();
   }
   

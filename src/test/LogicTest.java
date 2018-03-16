@@ -363,7 +363,7 @@ public class LogicTest {
       World world = map.world;
       if (skipUpdate <= 0 && ! world.settings.paused) {
         int iterUpdates = world.settings.speedUp ? 10 : 1;
-        for (int i = iterUpdates; i-- > 0;) map.update();
+        for (int i = iterUpdates; i-- > 0;) map.update(1);
         
         skipUpdate = world.settings.slowed ? 10 : 1;
         if (numUpdates > 0 && --numUpdates == 0) doQuit = true;

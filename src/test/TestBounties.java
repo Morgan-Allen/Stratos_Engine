@@ -123,7 +123,7 @@ public class TestBounties extends LogicTest {
     float initActorFunds = 0;
     for (Actor a : fort.workers()) initActorFunds += a.carried(CASH);
 
-    map.update();
+    map.update(1);
     
     Mission mission = setupMission(map, base);
     mission.setAsBounty(reward);

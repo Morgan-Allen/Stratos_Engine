@@ -164,6 +164,12 @@ public class Tile implements Pathing, Selection.Focus {
       }
     }
     
+    for (int dir : T_DIAGONAL) {
+      Pathing bef = temp[(dir + 1) % 8];
+      Pathing aft = temp[(dir + 7) % 8];
+      if (bef == null || aft == null) temp[dir] = null;
+    }
+    
     return temp;
   }
   
@@ -193,6 +199,13 @@ public class Tile implements Pathing, Selection.Focus {
     */
   public int elevation() {
     return elevation;
+  }
+  
+  
+  public Vec3D exactPosition(Vec3D store) {
+    if (store == null) store = new Vec3D();
+    store.set(x + 0.5f, y + 0.5f, 0);
+    return store;
   }
   
   

@@ -61,7 +61,7 @@ public class TestSieging extends LogicTest {
     Actor foe = (Actor) Trooper.TROOPER.generate();
     foe.enterMap(map, 25, 12, 1, awayC);
     
-    map.update();
+    map.update(1);
     
     if (! Task.inCombat(tower)) {
       I.say("\nTOWER DID NOT REACT TO ENEMIES!");

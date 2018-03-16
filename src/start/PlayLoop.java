@@ -25,7 +25,7 @@ public final class PlayLoop implements ApplicationListener {
   };
   
   public final static int
-    UPDATES_PER_SECOND = 1,
+    UPDATES_PER_SECOND = 10,
     FRAMES_PER_SECOND  = 60,
     
     MIN_SLEEP    = 10,

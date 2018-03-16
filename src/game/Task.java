@@ -253,9 +253,9 @@ public class Task implements Session.Saveable {
     }
     
     AreaMap  map      = active.map();
-    boolean  canVisit = active.isActor();
-    Actor    visitor  = canVisit ? (Actor) active : null;
-    Pathing  inside   = canVisit ? visitor.inside() : null;
+    boolean  canMove  = active.isActor();
+    Actor    visitor  = canMove ? (Actor) active : null;
+    Pathing  inside   = canMove ? visitor.inside() : null;
     Pathing  path[]   = this.path;
     boolean  contacts = checkContact(path);
     Building visits   = this.visits;
@@ -267,7 +267,7 @@ public class Task implements Session.Saveable {
     if (visits != null && inside == visits) {
       if (timeSpent++ <= maxTime) {
         inContact = true;
-        if (canVisit) {
+        if (canMove) {
           onVisit(visits);
           visitor.onVisit(visits);
           visits.visitedBy(visitor);
@@ -287,9 +287,7 @@ public class Task implements Session.Saveable {
         inContact = true;
         onTarget(target);
         target.targetedBy(active);
-        if (canVisit) {
-          //  TODO:  Revisit the interface here.  Ideally, anything that can
-          //  be assigned a task will have delegate methods for this.
+        if (canMove) {
           visitor.onTarget(target);
           if (origin != null) origin.actorTargets(visitor, target);
         }
@@ -302,12 +300,42 @@ public class Task implements Session.Saveable {
         return false;
       }
     }
-    else if (canVisit) {
-      Pathing ahead = nextOnPath();
-      if (ahead.isTile()) visitor.setInside(inside, false);
-      else visitor.setInside(ahead, true);
-      visitor.setLocation(ahead.at(), map);
-      pathIndex = Nums.clamp(pathIndex + 1, path.length);
+    else if (canMove) {
+      
+      float motion = 1f / map.ticksPS;
+      motion *= visitor.moveSpeed();
+      
+      while (motion > 0) {
+        Pathing from     = Task.pathOrigin(visitor);
+        Pathing ahead    = nextOnPath();
+        Vec3D   actorPos = visitor .exactPosition(null);
+        Vec3D   aheadPos = ahead   .exactPosition(null);
+        Vec3D   diff     = aheadPos.sub(actorPos, null);
+        float   dist     = diff.length();
+        boolean jump     = from.isTile() != ahead.isTile();
+        
+        if (jump) {
+          ///I.say(active+" jumping from "+from+" to "+ahead);
+          visitor.setExactLocation(aheadPos, map);
+          if (! from .isTile()) visitor.setInside(inside, false);
+          if (! ahead.isTile()) visitor.setInside(ahead , true );
+        }
+        else if (dist > 0) {
+          diff.normalise();
+          float distMoved = Nums.min(dist, motion);
+          actorPos.x += distMoved * diff.x;
+          actorPos.y += distMoved * diff.y;
+          motion -= distMoved;
+          visitor.setExactLocation(actorPos, map);
+        }
+        
+        if (visitor.at().above == ahead || visitor.at() == ahead) {
+          pathIndex = Nums.clamp(pathIndex + 1, path.length);
+        }
+        
+        if (dist == 0) break;
+      }
+      
       return true;
     }
     else {
@@ -410,7 +438,7 @@ public class Task implements Session.Saveable {
   
   boolean checkContact(Pathing path[]) {
     Pathing from = (Pathing) Visit.last(path);
-    return AreaMap.distance(active.at(), from) < actionRange();
+    return AreaMap.distance(active, from) < actionRange();
   }
   
   
@@ -421,6 +449,11 @@ public class Task implements Session.Saveable {
   
   boolean inContact() {
     return inContact;
+  }
+  
+  
+  int motionMode() {
+    return Actor.MOVE_NORMAL;
   }
   
   

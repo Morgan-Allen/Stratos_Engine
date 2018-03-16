@@ -33,7 +33,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   
   private Tile entrances[] = new Tile[0];
   
-  private int updateGap = 0;
+  private int lastUpdateTime = -1;
   List <Actor> workers   = new List();
   List <Actor> residents = new List();
   List <Actor> visitors  = new List();
@@ -60,7 +60,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
     entrances = new Tile[numE];
     for (int i = 0; i < numE; i++) entrances[i] = loadTile(map, s);
     
-    updateGap = s.loadInt();
+    lastUpdateTime = s.loadInt();
     s.loadObjects(workers  );
     s.loadObjects(residents);
     s.loadObjects(visitors );
@@ -81,7 +81,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
     s.saveInt(entrances.length);
     for (Tile e : entrances) saveTile(e, map, s);
     
-    s.saveInt(updateGap);
+    s.saveInt(lastUpdateTime);
     s.saveObjects(workers  );
     s.saveObjects(residents);
     s.saveObjects(visitors );
@@ -269,11 +269,12 @@ public class Building extends Element implements Pathing, Employer, Carrier {
       }
     }
     
-    if (--updateGap <= 0) {
+    int time = map.time(), maxGap = type().updateTime;
+    if (lastUpdateTime == -1 || time - lastUpdateTime > maxGap) {
       refreshEntrances(selectEntrances());
       updateOnPeriod(type().updateTime);
       updateWorkers(type().updateTime);
-      updateGap = type().updateTime;
+      lastUpdateTime = time;
     }
     
     if (base() != map.locals) {

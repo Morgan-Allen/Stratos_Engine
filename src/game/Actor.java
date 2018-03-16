@@ -46,8 +46,9 @@ public class Actor extends Element implements
   private Task reaction;
   
   private Pathing inside;
-  private int moveMode = MOVE_NORMAL;
-  private Vec3D position = new Vec3D();
+  private boolean wasIndoors = true;
+  Vec3D lastPosition  = new Vec3D();
+  Vec3D exactPosition = new Vec3D();
   
   Tally <Good> carried = new Tally();
   
@@ -61,8 +62,6 @@ public class Actor extends Element implements
   float cooldown;
   int   state = STATE_OKAY;
   
-  
-  private Vec3D renderPos = new Vec3D();
   
   
   
@@ -86,8 +85,9 @@ public class Actor extends Element implements
     reaction = (Task) s.loadObject();
     
     inside = (Pathing) s.loadObject();
-    moveMode = s.loadInt();
-    position.loadFrom(s.input());
+    wasIndoors = s.loadBool();
+    lastPosition .loadFrom(s.input());
+    exactPosition.loadFrom(s.input());
     
     s.loadTally(carried);
     
@@ -118,8 +118,9 @@ public class Actor extends Element implements
     s.saveObject(reaction);
     
     s.saveObject(inside);
-    s.saveInt(moveMode);
-    position.saveTo(s.output());
+    s.saveBool(wasIndoors);
+    lastPosition .saveTo(s.output());
+    exactPosition.saveTo(s.output());
     
     s.saveTally(carried);
     
@@ -214,7 +215,9 @@ public class Actor extends Element implements
     */
   void update() {
     //
-    //  Some checks to assist in case of blockage...
+    //  Some checks to assist in case of blockage, and refreshing position-
+    lastPosition.setTo(exactPosition);
+    wasIndoors = indoors();
     boolean trapped = false;
     trapped |= inside == null && ! map.pathCache.hasGroundAccess(at());
     trapped |= inside != null && Visit.empty(((Building) inside).entrances());
@@ -297,11 +300,26 @@ public class Actor extends Element implements
     if (at != null) {
       float height = at.elevation;
       if (inside == null && at.above != null) height += at.above.type().deep;
-      position.set(at.x, at.y, height);
+      exactPosition.set(at.x + 0.5f, at.y + 0.5f, height);
     }
     
     map.flagActive(this, old, false);
     map.flagActive(this, at , true );
+  }
+  
+  
+  public void setExactLocation(Vec3D location, AreaMap map) {
+    Tile goes = map.tileAt(location.x, location.y);
+    setLocation(goes, map);
+    
+    float height = exactPosition.z;
+    exactPosition.set(location.x, location.y, height);
+  }
+  
+  
+  public Vec3D exactPosition(Vec3D store) {
+    if (store == null) store = new Vec3D();
+    return store.setTo(exactPosition);
   }
   
   
@@ -577,6 +595,15 @@ public class Actor extends Element implements
   }
   
   
+  public float moveSpeed() {
+    int mode = task == null ? MOVE_NORMAL : task.motionMode();
+    float speed = type().moveSpeed * 1f / AVG_MOVE_SPEED;
+    if (mode == MOVE_RUN  ) speed *= RUN_MOVE_SPEED  / 100f;
+    if (mode == MOVE_SNEAK) speed *= HIDE_MOVE_SPEED / 100f;
+    return speed;
+  }
+  
+  
   public float maxHealth () { return type().maxHealth ; }
   public float injury  () { return injury  ; }
   public float fatigue () { return fatigue ; }
@@ -728,7 +755,7 @@ public class Actor extends Element implements
   
 
   public boolean canRender(Base base, Viewport view) {
-    if (indoors()) return false;
+    if (indoors() || wasIndoors) return false;
     return super.canRender(base, view);
   }
   
@@ -742,40 +769,30 @@ public class Actor extends Element implements
   public void renderElement(Rendering rendering, Base base) {
     Sprite s = sprite();
     if (s == null) return;
-    
-    Tile from = at(), goes = from;
-    boolean contact = task != null && task.checkContact(task.path);
-    Target next = (task == null || contact) ? null : task.nextOnPath();
-    if (next != null && next.isTile()) goes = (Tile) next;
-    if (contact) next = task.faceTarget().at();
-    
-    //  TODO:  There is also a problem where the actor continues 'sliding'
-    //  toward the target after the actual task-animation has begun.  Fix that!
-    
+
+    Vec3D from = lastPosition, goes = exactPosition;
     float alpha = Rendering.frameAlpha(), rem = 1 - alpha;
     s.position.set(
-      (from.x * rem) + (goes.x * alpha) + 0.5f,
-      (from.y * rem) + (goes.y * alpha) + 0.5f,
+      (from.x * rem) + (goes.x * alpha),
+      (from.y * rem) + (goes.y * alpha),
       0
     );
-    renderPos.setTo(s.position);
-    if (from != next && next != null) {
-      goes = next.at();
-      float angle = new Vec2D(goes.x - from.x, goes.y - from.y).toAngle();
-      s.rotation = angle;
-    }
     
-    //  TODO:  The problem here is that the task only enters contact range at
-    //  the same moment that the action is delivered, thereby replacing
-    //  itself with a new task not flagged as in contact.  Aha.
+    boolean contact = task != null && task.checkContact(task.path);
+    if (contact) task.faceTarget().exactPosition(goes);
+    Vec2D angleVec = new Vec2D(goes.x - from.x, goes.y - from.y);
+    if (angleVec.length() > 0) s.rotation = angleVec.toAngle();
     
     if (contact) {
       float animProg = Rendering.activeTime() % 1;
-      //final float animProg = progress + ((nextProg - progress) * frameAlpha);
       s.setAnimation(task.animName(), animProg, true);
     }
     else {
-      s.setAnimation(AnimNames.MOVE, Rendering.activeTime() % 1, true);
+      int mode = task == null ? MOVE_NORMAL : task.motionMode();
+      String animName = AnimNames.MOVE;
+      if (mode == MOVE_RUN  ) animName = AnimNames.MOVE_FAST;
+      if (mode == MOVE_SNEAK) animName = AnimNames.MOVE_SNEAK;
+      s.setAnimation(animName, Rendering.activeTime() % 1, true);
     }
     super.renderElement(rendering, base);
     
@@ -802,19 +819,11 @@ public class Actor extends Element implements
     }
     else {
       Vec3D s = new Vec3D();
-      Tile from = at(), goes = from;
-      boolean contact = task != null && task.checkContact(task.path);
-      Target next = (task == null || contact) ? null : task.nextOnPath();
-      if (next != null && next.isTile()) goes = (Tile) next;
-      if (contact) next = task.faceTarget().at();
-      
-      //  TODO:  There is also a problem where the actor continues 'sliding'
-      //  toward the target after the actual task-animation has begun.  Fix that!
-      
+      Vec3D from = lastPosition, goes = exactPosition;
       float alpha = Rendering.frameAlpha(), rem = 1 - alpha;
       s.set(
-        (from.x * rem) + (goes.x * alpha) + 0.5f,
-        (from.y * rem) + (goes.y * alpha) + 0.5f,
+        (from.x * rem) + (goes.x * alpha),
+        (from.y * rem) + (goes.y * alpha),
         0
       );
       return s;

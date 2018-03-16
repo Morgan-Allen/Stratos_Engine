@@ -340,6 +340,12 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
+  public Vec3D exactPosition(Vec3D store) {
+    if (at == null) return null;
+    return at.exactPosition(store);
+  }
+  
+  
   public float radius() {
     return Nums.max(type.wide, type.high) * Nums.ROOT2 / 2f;
   }

@@ -30,12 +30,10 @@ public class TaskWander extends Task {
   
   
   static TaskWander configWandering(Actor actor) {
-    ///if (reports()) I.say(this+" beginning random walk...");
     Task t = new TaskWander(actor);
-    t = t.configTask(null, null, null, JOB.WANDERING, 0);
-    if (t == null) return null;
-    if (t.path == null) t.updatePathing();
-    if (t.path != null) t.target = (Target) Visit.last(t.path);
+    t.updatePathing();
+    if (t.path == null) return null;
+    t = t.configTask(null, null, (Pathing) Visit.last(t.path), JOB.WANDERING, 0);
     return (TaskWander) t;
   }
   

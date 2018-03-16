@@ -404,6 +404,11 @@ public class TaskCombat extends Task {
   }
   
   
+  int motionMode() {
+    return Actor.MOVE_RUN;
+  }
+
+
   boolean checkContact(Pathing[] path) {
     float range = AreaMap.distance(active, primary);
     float maxRange = actionRange();

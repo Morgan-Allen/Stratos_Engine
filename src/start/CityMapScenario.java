@@ -87,8 +87,7 @@ public abstract class CityMapScenario implements Session.Saveable {
   
   
   public void updateScenario() {
-    stage.update();
-    //stage.updateStage(PlayLoop.UPDATES_PER_SECOND);
+    stage.update(PlayLoop.UPDATES_PER_SECOND);
   }
   
   
