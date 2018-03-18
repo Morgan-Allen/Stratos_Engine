@@ -1,0 +1,70 @@
+
+<!-- PLEASE NOTE-
+    This script expects the OSX JRE folder to be present in the parent
+    workspace.  e.g, if this file is sitting in-
+      /Users/user_dir/Desktop/workspace/Stratos/resource/build_osx.xml
+    Then whatever JRE you're bundling should be under-
+      /Users/user_dir/Desktop/workspace/OSX_JRE
+    
+    Thank you
+-->
+
+<project name="Stratos Build OSX" basedir=".." default="build">
+  
+  <property name="JRE_dir"   value="../OSX_JRE" />
+  <property name="java_bin"  value="Contents/Home/jre/bin/java" />
+  <property name="output"    value="../Stratos_Build_OSX" />
+  <property name="outZip"    value="../Stratos_Build_OSX.zip" />
+  <property name="insideApp" value="${output}/Stratos.app/Contents" />
+  <property file="local.properties" />
+  
+  <target name="build">
+    
+    <!-- First step- copy over the app structure and the JRE. -->
+    
+    <copy todir="${insideApp}">
+      <fileset dir="./resource/OSX_App_Assets"/>
+    </copy>
+    
+    <copy todir="${insideApp}/Plugins/OSX_JRE">
+      <fileset dir="${JRE_dir}"/>
+    </copy>
+    
+    <exec executable="/bin/sh" os="Mac OS X">
+      <arg value="-c"/>
+      <arg value="chmod +x ${insideApp}/Plugins/OSX_JRE/${java_bin}"/>
+    </exec>
+    
+    <exec executable="/bin/sh" os="Mac OS X">
+      <arg value="-c"/>
+      <arg value="chmod +x ${insideApp}/MacOS/stratos_launcher.command"/>
+    </exec>
+    
+    <!-- Second step- package all the code into a single jar. -->
+    
+    <jar destfile="${output}/stratos_base.jar" basedir="bin">
+    </jar>
+    <jar destfile="${insideApp}/Java/stratos.jar">
+      <zipgroupfileset dir="${output}" includes="stratos_base.jar" />
+      <zipgroupfileset dir="lib" includes="*.jar" />
+    </jar>
+    <delete file="${output}/stratos_base.jar"/>
+    
+    <!-- Third step- copy over the media and saves folder, then zip. -->
+    
+    <copy todir="${output}/media">
+      <fileset dir="media"/>
+    </copy>
+    <mkdir dir="${output}/saves"/>
+    
+    <zip destfile="${outZip}">
+      <zipfileset dir="${output}" filemode="755"/>
+    </zip>
+    <delete dir="${output}"/>
+    
+  </target>
+</project>
+
+
+
+
