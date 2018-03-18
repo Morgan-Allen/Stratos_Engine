@@ -8,7 +8,7 @@ import static game.GameConstants.*;
 
 
 
-public class CityCouncil {
+public class BaseCouncil {
   
   
   /**  Data fields, construction and save/load methods-
@@ -35,7 +35,7 @@ public class CityCouncil {
   };
   
   
-  final Base city;
+  final Base base;
   private int typeAI = AI_NORMAL;
   
   private List <Actor> members = new List();
@@ -44,8 +44,8 @@ public class CityCouncil {
   private List <Mission> petitions = new List();
   
   
-  CityCouncil(Base city) {
-    this.city = city;
+  BaseCouncil(Base base) {
+    this.base = base;
   }
   
   
@@ -237,17 +237,18 @@ public class CityCouncil {
     if (typeAI == AI_OFF || onMap) return;
     //
     //  Once per month, otherwise, evaluate any major independent decisions-
-    if (city.world.time % (DAY_LENGTH / 2) == 0) {
+    if (base.world.time % (DAY_LENGTH / 2) == 0) {
       updateCouncilAI();
     }
   }
   
   
   void updateCouncilAI() {
-    
+    //
+    //  See if any of the current petitions are worth responding to-
     for (Mission petition : petitions) {
       float appeal = appealOfTerms(
-        petition.base(), city,
+        petition.base(), base,
         petition.postureDemand,
         petition.actionDemand,
         petition.marriageDemand,
@@ -261,7 +262,6 @@ public class CityCouncil {
       }
       petitions.remove(petition);
     }
-    
     //
     //  Put together a list of possible missions:
     Pick <MissionAssessment> pickI = new Pick(0);
@@ -273,7 +273,7 @@ public class CityCouncil {
     MissionAssessment IA = pickI.result();
     if (IA != null) {
       Mission force = spawnFormation(IA);
-      CityEvents.handleDeparture(force, IA.fromC, IA.goesC);
+      BaseEvents.handleDeparture(force, IA.fromC, IA.goesC);
     }
   }
   
@@ -311,7 +311,7 @@ public class CityCouncil {
     //  based on what the attacker is hungry for and the defender seems to have
     //  plenty of-
     Tally <Good> tribute = new Tally();
-    for (Good g : city.world.goodTypes) {
+    for (Good g : base.world.goodTypes) {
       float prodVal = 5 + a.goesC.inventory(g);
       prodVal      += 0 + a.goesC.prodLevel(g);  //  Use prod-level!
       float consVal = 0 + a.fromC.needLevel(g);
@@ -456,15 +456,15 @@ public class CityCouncil {
     synergyVal /= Nums.max(1, count);
     
     float tradeVal = 0;
-    for (Good g : city.world.goodTypes) {
+    for (Good g : base.world.goodTypes) {
       float perYear = from.prodLevel(g);
       if (perYear <= 0) continue;
-      tradeVal += tributeValue(g, perYear, city);
+      tradeVal += tributeValue(g, perYear, base);
     }
     tradeVal *= AVG_ALLIANCE_YEARS * 1f / AVG_TRIBUTE_YEARS;
     
     float powerVal = from.idealArmyPower() / POP_PER_CITIZEN;
-    powerVal *= casualtyValue(city);
+    powerVal *= casualtyValue(base);
     powerVal *= AVG_ALLIANCE_YEARS * 1f / AVG_RETIREMENT;
     
     float marriageVal = 0;
@@ -498,10 +498,10 @@ public class CityCouncil {
     
     //  See if it's possible to arrange a marriage as well.
     
-    Actor monarch = goes.council.memberWithRole(CityCouncil.Role.MONARCH);
+    Actor monarch = goes.council.memberWithRole(BaseCouncil.Role.MONARCH);
     Pick <Actor> pickM = new Pick();
     
-    for (Actor a : from.council.allMembersWithRole(CityCouncil.Role.HEIR)) {
+    for (Actor a : from.council.allMembersWithRole(BaseCouncil.Role.HEIR)) {
       Actor spouse = a.allBondedWith(BOND_MARRIED).first();
       if (spouse != null) continue;
       if (monarch.sexData == a.sexData) continue;
@@ -532,7 +532,7 @@ public class CityCouncil {
     //I.say("  Total value: "+synergyVal);
     
     float tradeVal = 0;
-    for (Good g : city.world.goodTypes) {
+    for (Good g : base.world.goodTypes) {
       float exports = from.prodLevel(g);
       if (exports > 0) {
         tradeVal += tributeValue(g, exports, goes);
@@ -547,7 +547,7 @@ public class CityCouncil {
     //I.say("  Trade value: "+tradeVal);
     
     float powerVal = from.idealArmyPower() / POP_PER_CITIZEN;
-    powerVal *= casualtyValue(city);
+    powerVal *= casualtyValue(base);
     powerVal *= AVG_ALLIANCE_YEARS * 1f / AVG_RETIREMENT;
     
     float marriageCost = 0;
@@ -580,30 +580,30 @@ public class CityCouncil {
     //
     //  This is something of a hack at the moment, but it helps prevent some
     //  of the more bitty exchanges...
-    if (city.armyPower() < city.idealArmyPower() / 3) {
+    if (base.armyPower() < base.idealArmyPower() / 3) {
       return choices;
     }
     //
     //  TODO:  Allow for multiple levels of force-commitment, since you don't
     //  want your own city to be vulnerable?  And multiple options for terms
     //  during diplomacy?
-    for (Base other : city.world.bases) if (other != city) {
-      Integer distance = city.locale.distances.get(other.locale);
+    for (Base other : base.world.bases) if (other != base) {
+      Integer distance = base.locale.distances.get(other.locale);
       if (distance == null) continue;
       
       if (! (
-        other.isLoyalVassalOf(city) ||
-        other.isVassalOfSameLord(city)
+        other.isLoyalVassalOf(base) ||
+        other.isVassalOfSameLord(base)
       )) {
-        MissionAssessment IA = invasionAssessment(city, other, 0.5f, true);
+        MissionAssessment IA = invasionAssessment(base, other, 0.5f, true);
         choices.add(IA);
       }
       
       if (! (
-        other.isLordOf(city) ||
-        other.isAllyOf(city)
+        other.isLordOf(base) ||
+        other.isAllyOf(base)
       )) {
-        MissionAssessment DA = dialogAssessment(city, other, true);
+        MissionAssessment DA = dialogAssessment(base, other, true);
         choices.add(DA);
       }
       
@@ -613,19 +613,19 @@ public class CityCouncil {
   
   
   public Mission spawnFormation(MissionAssessment IA) {
-    Mission force = new Mission(IA.objective, city, true);
+    Mission force = new Mission(IA.objective, base, true);
     
-    Type citizen = (Type) Visit.first(city.world.citizenTypes);
-    Type soldier = (Type) Visit.first(city.world.soldierTypes);
-    Type noble   = (Type) Visit.first(city.world.nobleTypes  );
+    Type citizen = (Type) Visit.first(base.world.citizenTypes);
+    Type soldier = (Type) Visit.first(base.world.soldierTypes);
+    Type noble   = (Type) Visit.first(base.world.nobleTypes  );
     
-    while (force.powerSum() < city.armyPower() / 2) {
+    while (force.powerSum() < base.armyPower() / 2) {
       Actor fights = (Actor) soldier.generate();
       fights.assignBase(IA.fromC);
       force.toggleRecruit(fights, true);
     }
     
-    if (city.government == GOVERNMENT.BARBARIAN) {
+    if (base.government == GOVERNMENT.BARBARIAN) {
       //  Only non-barbarian governments will set up permanent command-fx or
       //  attempt diplomacy...
     }
@@ -638,13 +638,13 @@ public class CityCouncil {
       );
       if (IA.marriageDemand != null) {
         Actor marries = IA.marriageDemand;
-        marries.assignBase(city);
+        marries.assignBase(base);
         force.toggleEscorted(marries, true);
       }
       if (IA.objective == Mission.OBJECTIVE_DIALOG) {
         while (force.escorted.size() < 2) {
           Actor talks = (Actor) noble.generate();
-          talks.assignBase(city);
+          talks.assignBase(base);
           force.toggleEscorted(talks, true);
         }
       }
@@ -659,7 +659,7 @@ public class CityCouncil {
     if (typeAI == AI_COMPLIANT) return false;
     if (typeAI == AI_OFF      ) return false;
     
-    MissionAssessment IA = invasionAssessment(city, lord, 0.5f, true);
+    MissionAssessment IA = invasionAssessment(base, lord, 0.5f, true);
     float chance = period * 1f / AVG_TRIBUTE_YEARS;
     return IA.evaluatedAppeal > 0 && Rand.num() < chance;
   }

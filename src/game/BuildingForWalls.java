@@ -1,7 +1,7 @@
 
 
 package game;
-import static game.AreaMap.*;
+import static game.Area.*;
 import static game.GameConstants.*;
 import util.*;
 
@@ -45,13 +45,13 @@ public class BuildingForWalls extends Building implements Active {
   
   /**  Entering and exiting the world-
     */
-  public void enterMap(AreaMap map, int x, int y, float buildLevel, Base owns) {
+  public void enterMap(Area map, int x, int y, float buildLevel, Base owns) {
     super.enterMap(map, x, y, buildLevel, owns);
     map.flagActive(this, centre(), true);
   }
   
   
-  public void exitMap(AreaMap map) {
+  public void exitMap(Area map) {
     map.flagActive(this, centre(), false);
     super.exitMap(map);
   }
@@ -60,28 +60,28 @@ public class BuildingForWalls extends Building implements Active {
   
   /**  Selecting and filtering entrances and visitors-
     */
-  boolean checkEntranceOkay(Tile e, int index) {
+  boolean checkEntranceOkay(AreaTile e, int index) {
     if (super.checkEntranceOkay(e, index)) return true;
     if (tower && index > 0 && e.pathType() == Type.PATH_WALLS) return true;
     return false;
   }
   
   
-  Tile[] selectEntrances() {
+  AreaTile[] selectEntrances() {
     int facing = facing();
     
     //  TODO:  Scrub any null entrances from these lists!
     
     if (tower) {
-      Tile stair = tileAt(1, -1, facing);
-      Tile left  = tileAt(-1, 0, facing);
-      Tile right = tileAt(type().wide, 0, facing);
-      return new Tile[] { stair, left, right };
+      AreaTile stair = tileAt(1, -1, facing);
+      AreaTile left  = tileAt(-1, 0, facing);
+      AreaTile right = tileAt(type().wide, 0, facing);
+      return new AreaTile[] { stair, left, right };
     }
     if (gate) {
-      Tile front = tileAt(1, -1, facing);
-      Tile back  = tileAt(1, type().high, facing);
-      return new Tile[] { front, back };
+      AreaTile front = tileAt(1, -1, facing);
+      AreaTile back  = tileAt(1, type().high, facing);
+      return new AreaTile[] { front, back };
     }
     return super.selectEntrances();
   }

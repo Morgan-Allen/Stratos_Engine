@@ -3,7 +3,7 @@
 package game;
 import util.*;
 import static game.Task.*;
-import static game.AreaMap.*;
+import static game.Area.*;
 import static game.GameConstants.*;
 
 
@@ -37,7 +37,7 @@ public class ActorAsPerson extends Actor {
   List <Bond > bonds  = new List();
   List <Task > todo   = new List();
   
-  List <Technique> known = new List();
+  List <ActorTechnique> known = new List();
   
   String customName = "";
   
@@ -265,7 +265,7 @@ public class ActorAsPerson extends Actor {
     //  Failing that, see if your home, place of work, purchases or other idle
     //  impulses have anything to say.
     if (idle()) {
-      Choice choice = new Choice(this);
+      ActorChoice choice = new ActorChoice(this);
       
       choice.add(TaskPurchase.nextPurchase(this));
       choice.add(TaskWander.configWandering(this));
@@ -308,11 +308,11 @@ public class ActorAsPerson extends Actor {
     
     if (cooldown() == 0 && map.world.settings.toggleReacts) {
       
-      class Reaction { Technique used; Target subject; float rating; }
+      class Reaction { ActorTechnique used; Target subject; float rating; }
       Pick <Reaction> pick = new Pick(0);
       
       for (Active other : map.activeInRange(at(), sightRange())) {
-        for (Technique used : known) {
+        for (ActorTechnique used : known) {
           if (used.canUseActive(this, other)) {
             Reaction r = new Reaction();
             r.rating  = used.rateUse(this, other);
@@ -321,7 +321,7 @@ public class ActorAsPerson extends Actor {
             pick.compare(r, r.rating);
           }
         }
-        for (Good g : carried.keys()) for (Technique used : g.allows) {
+        for (Good g : carried.keys()) for (ActorTechnique used : g.allows) {
           if (used.canUseActive(this, other)) {
             Reaction r = new Reaction();
             r.rating  = used.rateUse(this, other);
@@ -368,7 +368,7 @@ public class ActorAsPerson extends Actor {
       fatigue = Nums.max(0, fatigue - rests);
     }
     
-    for (Technique t : type().classTechniques) {
+    for (ActorTechnique t : type().classTechniques) {
       if (known.includes(t)) continue;
       if (t.canLearn(this)) known.add(t);
     }
@@ -495,7 +495,7 @@ public class ActorAsPerson extends Actor {
     pregnancy = 0;
     
     if (onMap) {
-      Tile at = venue.at();
+      AreaTile at = venue.at();
       child.enterMap(map, at.x, at.y, 1, base());
       child.setInside(venue, true);
       venue.setResident(child, true);

@@ -45,7 +45,7 @@ public class ActorAsAnimal extends Actor {
     //
     //  Establish a few details first...
     float hurtRating = fatigue() + injury();
-    Tile rests = type().organic ? findGrazePoint() : null;
+    AreaTile rests = type().organic ? findGrazePoint() : null;
     assignTask(null);
     
     if (hunger > 1 & ! type().predator) {
@@ -118,10 +118,10 @@ public class ActorAsAnimal extends Actor {
 
   /**  Custom behaviour-scripting...
     */
-  Tile findGrazePoint() {
+  AreaTile findGrazePoint() {
     
-    Pick <Tile> pick = new Pick();
-    for (Tile t : AreaMap.adjacent(at(), null, map)) {
+    Pick <AreaTile> pick = new Pick();
+    for (AreaTile t : Area.adjacent(at(), null, map)) {
       if (t == null || map.blocked(t)) continue;
       if (! Visit.arrayIncludes(type().habitats, t.terrain)) continue;
       pick.compare(t, Rand.num());
@@ -133,7 +133,7 @@ public class ActorAsAnimal extends Actor {
     }
     
     grazeFail += 1;
-    return CityMapTerrain.findGrazePoint(type(), map);
+    return AreaTerrain.findGrazePoint(type(), map);
   }
   
   
@@ -151,8 +151,8 @@ public class ActorAsAnimal extends Actor {
       if (a.type().predator) continue;
       if (a.pregnancy != 0) continue;
       
-      float dist   = AreaMap.distance(a.at(), at());
-      float rating = AreaMap.distancePenalty(dist);
+      float dist   = Area.distance(a.at(), at());
+      float rating = Area.distancePenalty(dist);
       if (category != Type.IS_ANIMAL_ACT) rating /= 2;
       
       pick.compare(a, rating);
@@ -249,7 +249,7 @@ public class ActorAsAnimal extends Actor {
     if (ageSeconds % DAY_LENGTH == 0) {
       if (growLevel() == 1 && pregnancy <= 0) {
         
-        float idealPop = CityMapTerrain.idealPopulation(type(), map);
+        float idealPop = AreaTerrain.idealPopulation(type(), map);
         float actualPop = 0;
         for (Actor a : map.actors) if (a.type() == type()) {
           actualPop += a.pregnancy > 0 ? 2 : 1;
@@ -279,7 +279,7 @@ public class ActorAsAnimal extends Actor {
         pregnancy = 0;
         
         Actor child = (ActorAsAnimal) type().generate();
-        Tile at = this.at();
+        AreaTile at = this.at();
         child.enterMap(map, at.x, at.y, 1, base());
         if (reportCycle) I.say(this+" GAVE BIRTH");
       }

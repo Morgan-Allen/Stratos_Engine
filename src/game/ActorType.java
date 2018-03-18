@@ -26,7 +26,7 @@ public class ActorType extends Type {
   public Type    nestType     = null;
   
   
-  public Technique[] classTechniques = {};
+  public ActorTechnique[] classTechniques = {};
   
   public ActorType(Class baseClass, String ID, int category, int socialClass) {
     super(baseClass, ID, category);

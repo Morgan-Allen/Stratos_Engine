@@ -124,7 +124,7 @@ public class BuildingForNest extends Building {
         if (! map().pathCache.pathConnects(this, b, true, false)) continue;
         
         float rating = 1f;
-        rating *= AreaMap.distancePenalty(this, b);
+        rating *= Area.distancePenalty(this, b);
         pick.compare(b, rating);
       }
       
@@ -140,7 +140,7 @@ public class BuildingForNest extends Building {
   
   
   public Task selectActorBehaviour(Actor actor) {
-    if (AreaMap.distance(actor, this) > MAX_WANDER_RANGE) {
+    if (Area.distance(actor, this) > MAX_WANDER_RANGE) {
       Task waits = TaskWaiting.configWaiting(actor, this);
       return waits;
     }

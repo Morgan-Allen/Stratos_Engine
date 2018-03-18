@@ -10,7 +10,7 @@ import static game.GameConstants.*;
 
 
 
-public abstract class Technique extends Trait {
+public abstract class ActorTechnique extends Trait {
   
   
   /**  Data fields, construction and setup methods-
@@ -67,7 +67,7 @@ public abstract class Technique extends Trait {
   public float powerLevel = 0;
   
   
-  public Technique(String ID, String name) {
+  public ActorTechnique(String ID, String name) {
     super(ID, name);
   }
   
@@ -131,7 +131,7 @@ public abstract class Technique extends Trait {
   public boolean canUseActive(Actor using, Target subject) {
     if (using.cooldown() > 0) return false;
     if (using.maxHealth() - using.fatigue() < costTire) return false;
-    if (AreaMap.distance(using, subject) > maxRange) return false;
+    if (Area.distance(using, subject) > maxRange) return false;
     return canTarget(subject);
   }
   
@@ -165,12 +165,12 @@ public abstract class Technique extends Trait {
     */
   public static class Use extends Task {
     
-    final Technique used;
+    final ActorTechnique used;
     float rating;
     float success;
     
     
-    Use(Technique used, Actor using, Target subject, int properties) {
+    Use(ActorTechnique used, Actor using, Target subject, int properties) {
       super(using);
       this.used   = used;
       this.rating = used.rateUse(using, subject);
@@ -179,7 +179,7 @@ public abstract class Technique extends Trait {
     
     public Use(Session s) throws Exception {
       super(s);
-      used    = (Technique) s.loadObject();
+      used    = (ActorTechnique) s.loadObject();
       rating  = s.loadFloat();
       success = s.loadFloat();
     }

@@ -19,9 +19,9 @@ public class TestDemands extends LogicTest {
   static boolean testDemands(boolean graphics) {
     
     Base base = setupTestBase(32, ALL_GOODS, false);
-    AreaMap map = base.activeMap();
+    Area map = base.activeMap();
     World world = map.world;
-    CityMapDemands demands = new CityMapDemands(map, "AAA");
+    AreaDemands demands = new AreaDemands(map, "AAA");
     
     class TestItem {
       int x, y, amount;
@@ -98,9 +98,9 @@ public class TestDemands extends LogicTest {
     float lastDist = 0;
     int numIters = 0;
     
-    for (CityMapDemands.Entry e : demands.nearbyEntries(fromX, fromY)) {
+    for (AreaDemands.Entry e : demands.nearbyEntries(fromX, fromY)) {
       Coord c = e.coord();
-      float dist = AreaMap.distance(fromX, fromY, c.x, c.y);
+      float dist = Area.distance(fromX, fromY, c.x, c.y);
       
       if (dist < lastDist) {
         I.say("\nDID NOT SORT ENTRIES BY DISTANCE:");

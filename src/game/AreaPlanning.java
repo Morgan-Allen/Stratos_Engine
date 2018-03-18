@@ -2,23 +2,23 @@
 
 package game;
 import util.*;
-import static game.AreaMap.*;
+import static game.Area.*;
 import static game.GameConstants.*;
 
 
 
 
-public class CityMapPlanning {
+public class AreaPlanning {
   
   
-  final AreaMap map;
+  final Area map;
   List <Element> toBuild = new List();
   Element grid[][];
   byte reserveCounter[][];
   
   
   
-  CityMapPlanning(AreaMap map) {
+  AreaPlanning(Area map) {
     this.map  = map;
   }
   
@@ -98,7 +98,7 @@ public class CityMapPlanning {
     
     e.checkPlacingConflicts(map, conflicts);
 
-    if (unplaced) for (Tile t : e.footprint(map, true)) {
+    if (unplaced) for (AreaTile t : e.footprint(map, true)) {
       int footMask = type.footprint(t, e);
       if (footMask == -1) continue;
       
@@ -130,7 +130,7 @@ public class CityMapPlanning {
     toBuild.remove(e);
     e.setOnPlan(false);
     
-    for (Tile t : e.footprint(map, true)) {
+    for (AreaTile t : e.footprint(map, true)) {
       int footMask = type.footprint(t, e);
       if (footMask == -1) continue;
       
@@ -154,7 +154,7 @@ public class CityMapPlanning {
   }
   
   
-  public Element objectAt(Tile t) {
+  public Element objectAt(AreaTile t) {
     return grid[t.x][t.y];
   }
   
@@ -182,9 +182,9 @@ public class CityMapPlanning {
     Type s, Base city, boolean built, int x, int y, int w, int h
   ) {
     Batch <Element> placed = new Batch();
-    AreaMap map = city.activeMap();
+    Area map = city.activeMap();
     for (Coord c : Visit.grid(x, y, w, h, 1)) {
-      Tile t = map.tileAt(c.x, c.y);
+      AreaTile t = map.tileAt(c.x, c.y);
       if (t == null) continue;
       Element e = (Element) s.generate();
       if (built) {
@@ -200,7 +200,7 @@ public class CityMapPlanning {
   
   
   public static void markDemolish(
-    AreaMap map, boolean now, Box2D area
+    Area map, boolean now, Box2D area
   ) {
     markDemolish(
       map, now,
@@ -211,9 +211,9 @@ public class CityMapPlanning {
   
   
   public static void markDemolish(
-    AreaMap map, boolean now, int x, int y, int w, int h
+    Area map, boolean now, int x, int y, int w, int h
   ) {
-    for (Tile t : map.tilesUnder(x, y, w, h)) if (t != null) {
+    for (AreaTile t : map.tilesUnder(x, y, w, h)) if (t != null) {
       Element plans = map.planning.objectAt(t);
       if (t.above != null && now) {
         t.above.exitMap(map);

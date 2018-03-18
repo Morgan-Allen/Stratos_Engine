@@ -38,7 +38,7 @@ public class TaskRetreat extends Task {
     
     Building home = actor.home();
     if (home == null) home = actor.work();
-    AreaMap map = actor.map;
+    Area map = actor.map;
     Pick <Building> pickHide = new Pick();
     
     for (Building b : map.buildings) {
@@ -47,7 +47,7 @@ public class TaskRetreat extends Task {
       if (! b.complete()) continue;
       
       float rating = 1.0f;
-      rating *= AreaMap.distancePenalty(actor, b);
+      rating *= Area.distancePenalty(actor, b);
       if (b == home) rating *= 2;
       
       pickHide.compare(b, rating);

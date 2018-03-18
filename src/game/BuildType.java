@@ -16,8 +16,8 @@ public class BuildType extends Type {
   public boolean isUpgrade = false;
   public int entranceDir = Building.FACE_EAST;
   
-  public Technique rulerPowers[] = {};
-  public Technique actorPowers[] = {};
+  public ActorTechnique rulerPowers[] = {};
+  public ActorTechnique actorPowers[] = {};
   
   public Good features[]   = NO_GOODS;
   public int featureAmount = AVG_SERVICE_GIVE;

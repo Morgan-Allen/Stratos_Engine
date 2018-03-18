@@ -24,7 +24,7 @@ public class TestRetreat extends LogicTest {
     TestRetreat test = new TestRetreat();
     
     Base base = LogicTest.setupTestBase(32, ALL_GOODS, false);
-    AreaMap map = base.activeMap();
+    Area map = base.activeMap();
     World world = base.world;
     
     Base enemyBase = new Base(world, map.locale, "Enemy Base");
@@ -78,7 +78,7 @@ public class TestRetreat extends LogicTest {
       
       if (braveOkay && ! enemiesDone) {
         for (Actor enemy : enemies) {
-          Tile goes = ActorUtils.randomTileNear(subject.at(), nearRange, map, true);
+          AreaTile goes = ActorUtils.randomTileNear(subject.at(), nearRange, map, true);
           enemy.enterMap(map, goes.x, goes.y, 1, enemy.base());
         }
         enemiesDone = true;
@@ -90,7 +90,7 @@ public class TestRetreat extends LogicTest {
       
       if (scareOkay && ! alliesDone) {
         for (Actor friend : allies) {
-          Tile goes = ActorUtils.randomTileNear(subject.at(), nearRange, map, true);
+          AreaTile goes = ActorUtils.randomTileNear(subject.at(), nearRange, map, true);
           friend.enterMap(map, goes.x, goes.y, 1, friend.base());
         }
         alliesDone = true;

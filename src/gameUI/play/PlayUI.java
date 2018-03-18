@@ -30,7 +30,7 @@ public class PlayUI extends HUD implements UIConstants {
       32, Colour.HIDE, PlayUI.class
     );
   
-  AreaMap stage;
+  Area    area;
   Base    base;
   Element home;
   
@@ -96,12 +96,12 @@ public class PlayUI extends HUD implements UIConstants {
   }
   
   
-  public void assignParameters(AreaMap stage, Base base) {
+  public void assignParameters(Area stage, Base base) {
     if (stage == null || base == null) {
       I.complain("\nCANNOT ASSIGN NULL STAGE/BASE TO UI!");
       return;
     }
-    this.stage = stage;
+    this.area = stage;
     this.base  = base ;
     optionList.setupFrom(stage, base);
   }
@@ -118,17 +118,17 @@ public class PlayUI extends HUD implements UIConstants {
   
   
   public void loadState(Session s) throws Exception {
-    stage = (AreaMap) s.loadObject();
+    area = (Area) s.loadObject();
     base  = (Base   ) s.loadObject();
     home  = (Element) s.loadObject();
     selection.loadState(s);
     tracking .loadState(s);
-    optionList.setupFrom(stage, base);
+    optionList.setupFrom(area, base);
   }
   
   
   public void saveState(Session s) throws Exception {
-    s.saveObject(stage);
+    s.saveObject(area);
     s.saveObject(base );
     s.saveObject(home );
     selection.saveState(s);
@@ -192,9 +192,9 @@ public class PlayUI extends HUD implements UIConstants {
   public void updateInput() {
     super.updateInput();
     
-    if (stage != null && base != null) {
-      selection.updateSelection(stage, base);
-      tracking.updateTracking(stage, selectionFocus());
+    if (area != null && base != null) {
+      selection.updateSelection(area, base);
+      tracking.updateTracking(area, selectionFocus());
     }
   }
   

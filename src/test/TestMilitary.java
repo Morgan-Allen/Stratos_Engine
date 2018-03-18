@@ -20,17 +20,17 @@ public class TestMilitary extends LogicTest {
   static boolean testMilitary(boolean graphics) {
     LogicTest test = new TestMilitary();
     
-    World   world = new World(ALL_GOODS);
-    Base    baseC = new Base(world, world.addLocale(2, 2));
-    Base    awayC = new Base(world, world.addLocale(3, 3));
-    AreaMap map   = CityMapTerrain.generateTerrain(
+    World world = new World(ALL_GOODS);
+    Base  baseC = new Base(world, world.addLocale(2, 2));
+    Base  awayC = new Base(world, world.addLocale(3, 3));
+    Area  map   = AreaTerrain.generateTerrain(
       baseC, 32, 0, MEADOW, JUNGLE
     );
     world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES());
     world.addBases(baseC, awayC);
     baseC.setName("Home City");
     awayC.setName("Away City");
-    awayC.council.setTypeAI(CityCouncil.AI_OFF);
+    awayC.council.setTypeAI(BaseCouncil.AI_OFF);
     
     world.settings.toggleFog = false;
     
@@ -45,7 +45,7 @@ public class TestMilitary extends LogicTest {
     BuildingForArmy fort2 = (BuildingForArmy) TROOPER_LODGE.generate();
     fort2.enterMap(map, 14, 10, 1, baseC);
     ActorUtils.fillWorkVacancies(fort2);
-    CityMapPlanning.placeStructure(WALKWAY, baseC, true, 2, 9, 30, 1);
+    AreaPlanning.placeStructure(WALKWAY, baseC, true, 2, 9, 30, 1);
     
     for (int n = 8; n-- > 0;) {
       Building house = (Building) HOLDING.generate();

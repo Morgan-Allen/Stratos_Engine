@@ -4,17 +4,17 @@ package game;
 import util.*;
 import static game.ActorAsPerson.*;
 import static game.Base.*;
-import static game.CityCouncil.*;
+import static game.BaseCouncil.*;
 import static game.GameConstants.*;
 
 
 
-public class CityEvents {
+public class BaseEvents {
   
   
   /**  Rendering, debug and interface methods-
     */
-  static boolean reportEvents(AreaMap map) {
+  static boolean reportEvents(Area map) {
     if (map == null) return false;
     return map.world.settings.reportBattle;
   }
@@ -40,13 +40,13 @@ public class CityEvents {
     Base    from   = journey.from;
     World   world  = from.world;
     int     time   = world.time;
-    AreaMap map    = world.activeBaseMap();
+    Area    map    = world.activeBaseMap();
     boolean report = reportEvents(map);
     //
     //  We use the same math that estimates the appeal of invasion to play out
     //  the real event, and report accordingly:
     //  TODO:  Use separate math for the purpose?
-    CityCouncil.MissionAssessment IA = new CityCouncil.MissionAssessment();
+    BaseCouncil.MissionAssessment IA = new BaseCouncil.MissionAssessment();
     IA.fromC     = from;
     IA.goesC     = goes;
     IA.fromPower = mission.powerSum() / POP_PER_CITIZEN;

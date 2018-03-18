@@ -4,24 +4,24 @@
 
 package game;
 import util.*;
-import static game.AreaMap.*;
-import static game.CityCouncil.*;
+import static game.Area.*;
+import static game.BaseCouncil.*;
 import static game.GameConstants.*;
 
 
 
-public class FormationUtils {
+public class MissionUtils {
   
   
-  static float rateCampingPoint(Tile t, Mission parent) {
+  static float rateCampingPoint(AreaTile t, Mission parent) {
     if (t == null || parent == null || parent.map() == null) return -1;
     
-    AreaMap map = parent.map();
+    Area map = parent.map();
     Pathing from = parent.pathFrom();
     float rating = 0;
     boolean blocked = false;
     
-    for (Tile n : map.tilesUnder(
+    for (AreaTile n : map.tilesUnder(
       t.x - (AVG_RANKS / 2),
       t.y - (AVG_FILE  / 2),
       AVG_RANKS,
@@ -44,19 +44,19 @@ public class FormationUtils {
   }
   
   
-  static Tile findCampingPoint(final Mission parent) {
+  static AreaTile findCampingPoint(final Mission parent) {
     if (parent == null || parent.map() == null) return null;
     
-    final AreaMap map = parent.map();
-    final Tile init = Tile.nearestOpenTile(parent.standPoint(), map);
+    final Area map = parent.map();
+    final AreaTile init = AreaTile.nearestOpenTile(parent.standPoint(), map);
     if (init == null) return null;
     
-    final Tile temp[] = new Tile[9];
-    final Pick <Tile> pick = new Pick(0);
+    final AreaTile temp[] = new AreaTile[9];
+    final Pick <AreaTile> pick = new Pick(0);
     
-    Flood <Tile> flood = new Flood <Tile> () {
-      protected void addSuccessors(Tile front) {
-        for (Tile n : AreaMap.adjacent(front, temp, map)) {
+    Flood <AreaTile> flood = new Flood <AreaTile> () {
+      protected void addSuccessors(AreaTile front) {
+        for (AreaTile n : Area.adjacent(front, temp, map)) {
           if (map.blocked(n) || n.flaggedWith() != null) continue;
           tryAdding(n);
           
@@ -73,7 +73,7 @@ public class FormationUtils {
   //  TODO:  Move this to the Council class?
   
   static Actor findOfferRecipient(Mission parent) {
-    CityCouncil council = parent.awayCity().council;
+    BaseCouncil council = parent.awayCity().council;
     
     Actor monarch = council.memberWithRole(Role.MONARCH);
     if (monarch != null && monarch.onMap()) return monarch;
@@ -91,26 +91,26 @@ public class FormationUtils {
   
   static class SiegeSearch extends ActorPathSearch {
     
-    Tile tempT[] = new Tile[9];
+    AreaTile tempT[] = new AreaTile[9];
     
-    public SiegeSearch(AreaMap map, Tile init, Tile dest) {
+    public SiegeSearch(Area map, AreaTile init, AreaTile dest) {
       super(map, init, dest, -1);
     }
     
     protected Pathing[] adjacent(Pathing spot) {
-      AreaMap.adjacent((Tile) spot, tempT, map);
+      Area.adjacent((AreaTile) spot, tempT, map);
       return tempT;
     }
     
     protected boolean canEnter(Pathing spot) {
       if (super.canEnter(spot)) return true;
-      Element above = ((Tile) spot).above;
+      Element above = ((AreaTile) spot).above;
       if (above != null && ! above.type().isNatural()) return true;
       return false;
     }
     
     protected float cost(Pathing prior, Pathing spot) {
-      Element above = ((Tile) spot).above;
+      Element above = ((AreaTile) spot).above;
       if (above != null && ! above.type().isNatural()) return 20;
       return super.cost(prior, spot);
     }
@@ -118,10 +118,10 @@ public class FormationUtils {
   
   
   
-  static class Option { Object target; Tile secures; float rating; }
+  static class Option { Object target; AreaTile secures; float rating; }
   
   static Option tacticalOptionFor(
-    Object focus, AreaMap map, Pathing pathFrom, boolean checkPathing
+    Object focus, Area map, Pathing pathFrom, boolean checkPathing
   ) {
     
     if (focus instanceof Mission) {
@@ -131,7 +131,7 @@ public class FormationUtils {
       if (f.powerSum() == 0 || ! f.active()) return null;
       
       int power = f.powerSum();
-      Tile secures = f.standPoint();
+      AreaTile secures = f.standPoint();
       if (power <= 0) return null;
 
       if (checkPathing) {
@@ -139,8 +139,8 @@ public class FormationUtils {
         if (! hasPath) return null;
       }
       
-      float dist = AreaMap.distance(goes, pathFrom);
-      float rating = AreaMap.distancePenalty(dist);
+      float dist = Area.distance(goes, pathFrom);
+      float rating = Area.distancePenalty(dist);
       
       Option o = new Option();
       o.target  = focus;
@@ -160,9 +160,9 @@ public class FormationUtils {
         if (! hasPath) return null;
       }
       
-      Tile secures = e.centre();
-      float dist = AreaMap.distance(secures, pathFrom);
-      float rating = AreaMap.distancePenalty(dist);
+      AreaTile secures = e.centre();
+      float dist = Area.distance(secures, pathFrom);
+      float rating = Area.distancePenalty(dist);
       
       Option o = new Option();
       o.target  = focus;
@@ -177,13 +177,13 @@ public class FormationUtils {
   
   static boolean updateTacticalTarget(Mission parent) {
     
-    AreaMap map    = parent.map();
-    Base    home   = parent.base();
-    Pathing from   = parent.pathFrom();
-    Tile    stands = parent.standPoint();
-    Object  focus  = parent.focus();
-    Base    sieges = parent.awayCity();
-    boolean envoy  = parent.escorted.size() > 0;
+    Area     map    = parent.map();
+    Base     home   = parent.base();
+    Pathing  from   = parent.pathFrom();
+    AreaTile stands = parent.standPoint();
+    Object   focus  = parent.focus();
+    Base     sieges = parent.awayCity();
+    boolean  envoy  = parent.escorted.size() > 0;
     
     //
     //  If this is a diplomatic mission, stay in camp unless and until terms
@@ -197,7 +197,7 @@ public class FormationUtils {
       if (rateCampingPoint(stands, parent) > 0) {
         return false;
       }
-      Tile campPoint = findCampingPoint(parent);
+      AreaTile campPoint = findCampingPoint(parent);
       parent.setFocus(campPoint, parent.facing(), map);
       return true;
     }
@@ -205,8 +205,8 @@ public class FormationUtils {
     //
     //  If you're beaten, disband or turn around and go home:
     if (parent.casualtyLevel() > MAX_CASUALTIES / 100f) {
-      CityEvents.enterHostility(sieges, home, false, 1);
-      CityEvents.signalVictory(sieges, home, parent);
+      BaseEvents.enterHostility(sieges, home, false, 1);
+      BaseEvents.signalVictory(sieges, home, parent);
       parent.setFocus(home);
       return true;
     }
@@ -249,7 +249,7 @@ public class FormationUtils {
         search.doSearch();
         Pathing path[] = (Pathing[]) search.fullPath(Pathing.class);
         for (Pathing p : path) {
-          Tile t = (Tile) p;
+          AreaTile t = (AreaTile) p;
           Element above = t.above;
           int pathT = t.pathType();
           
@@ -265,9 +265,9 @@ public class FormationUtils {
     //
     //  If there are no targets left here, declare victory and go home:
     else {
-      CityEvents.enterHostility(sieges, home, true, 1);
-      CityEvents.imposeTerms(sieges, home, parent);
-      CityEvents.signalVictory(home, sieges, parent);
+      BaseEvents.enterHostility(sieges, home, true, 1);
+      BaseEvents.imposeTerms(sieges, home, parent);
+      BaseEvents.signalVictory(home, sieges, parent);
       parent.setFocus(home);
       return true;
     }
@@ -279,7 +279,7 @@ public class FormationUtils {
     //
     //  First, check to see if an update is due:
     final Target focus = (Target) parent.focus();
-    final AreaMap map = parent.map();
+    final Area map = parent.map();
     final int updateTime = parent.lastUpdateTime;
     int nextUpdate = updateTime >= 0 ? (updateTime + 10) : 0;
     
@@ -304,7 +304,7 @@ public class FormationUtils {
       Flood <Pathing> flood = new Flood <Pathing> () {
         
         protected void addSuccessors(Pathing front) {
-          if (AreaMap.distance(front, focus) > MAX_DIST) return;
+          if (Area.distance(front, focus) > MAX_DIST) return;
           
           for (Pathing p : front.adjacent(temp, map)) {
             if (p == null || p.pathType() != Type.PATH_WALLS) continue;
@@ -320,7 +320,7 @@ public class FormationUtils {
       else {
         covered = flood.floodFrom(focus.at());
       }
-      Batch <Tile> touched = new Batch();
+      Batch <AreaTile> touched = new Batch();
       parent.guardPoints.clear();
       
       for (Pathing p : covered) {
@@ -328,20 +328,20 @@ public class FormationUtils {
         for (Pathing n : p.adjacent(temp, map)) {
           if (n != null && n.isTile()) {
             n.flagWith(covered);
-            touched.add((Tile) n);
+            touched.add((AreaTile) n);
           }
         }
         p.flagWith(covered);
-        touched.add((Tile) p);
-        parent.guardPoints.add((Tile) p);
+        touched.add((AreaTile) p);
+        parent.guardPoints.add((AreaTile) p);
       }
       
-      for (Tile t : touched) t.flagWith(null);
+      for (AreaTile t : touched) t.flagWith(null);
     }
   }
   
   
-  static Tile standingPointPatrol(Actor member, Mission parent) {
+  static AreaTile standingPointPatrol(Actor member, Mission parent) {
     
     int span = DAY_LENGTH, numRecruits = parent.recruits.size();
     int epoch = (parent.map().time / span) % numRecruits;
@@ -355,10 +355,10 @@ public class FormationUtils {
   }
   
   
-  static Tile standingPointRanks(Actor member, Mission parent) {
+  static AreaTile standingPointRanks(Actor member, Mission parent) {
     
-    AreaMap map = parent.map();
-    Tile goes = parent.standPoint();
+    Area map = parent.map();
+    AreaTile goes = parent.standPoint();
     if (goes == null || map == null) return null;
     
     int index = parent.recruits.indexOf(member);
@@ -378,8 +378,8 @@ public class FormationUtils {
     x = Nums.clamp(x, map.size);
     y = Nums.clamp(y, map.size);
     
-    Tile stands = map.tileAt(x, y);
-    stands = Tile.nearestOpenTile(stands, map, AVG_FILE);
+    AreaTile stands = map.tileAt(x, y);
+    stands = AreaTile.nearestOpenTile(stands, map, AVG_FILE);
     return stands;
   }
   

@@ -9,7 +9,7 @@ import static util.TileConstants.*;
 
 
 
-public class AreaMap implements Session.Saveable {
+public class Area implements Session.Saveable {
   
   
   /**  Data fields and initialisation-
@@ -27,44 +27,44 @@ public class AreaMap implements Session.Saveable {
   List <Base> bases = new List();
   
   int size, scanSize, flagSize;
-  Tile grid[][];
+  AreaTile grid[][];
   List <Active> actorGrid[][];
   
   int time = 0;
   int numUpdates = 0, ticksPS = 1;
   
-  final public CityMapPlanning planning = new CityMapPlanning(this);
-  final public CityMapFog      fog      = new CityMapFog     (this);
-  final public CityMapTerrain  terrain  = new CityMapTerrain (this);
+  final public AreaPlanning planning = new AreaPlanning(this);
+  final public AreaFog      fog      = new AreaFog     (this);
+  final public AreaTerrain  terrain  = new AreaTerrain (this);
   
-  Table <Base, Tile> transitPoints = new Table();
-  Table <Type, CityMapFlagging> flagging = new Table();
-  Table <String, CityMapDemands> demands = new Table();
+  Table <Base, AreaTile> transitPoints = new Table();
+  Table <Type, AreaFlagging> flagging = new Table();
+  Table <String, AreaDemands> demands = new Table();
   
   List <Building> claimants = new List();
   List <Building> buildings = new List();
   List <Actor   > actors    = new List();
-  final public CityMapPathCache pathCache = new CityMapPathCache(this);
+  final public AreaPathCache pathCache = new AreaPathCache(this);
   
   
   String saveName;
   final public Ephemera ephemera = new Ephemera(this);
   
   
-  public AreaMap(World world, World.Locale locale, Base... cities) {
+  public Area(World world, World.Locale locale, Base... cities) {
     this.world = world;
     this.locale = locale;
     this.locals = new Base(world, locale, "Locals: "+locale);
     
     locals.setGovernment(Base.GOVERNMENT.BARBARIAN);
-    locals.council.setTypeAI(CityCouncil.AI_OFF);
+    locals.council.setTypeAI(BaseCouncil.AI_OFF);
     addCity(locals);
     
     for (Base c : cities) addCity(c);
   }
   
   
-  public AreaMap(Session s) throws Exception {
+  public Area(Session s) throws Exception {
     s.cacheInstance(this);
     //
     //  NOTE:  Tiles MUST be set up before all other objects in the world to
@@ -93,13 +93,13 @@ public class AreaMap implements Session.Saveable {
     
     for (int n = s.loadInt(); n-- > 0;) {
       Base with = (Base) s.loadObject();
-      Tile point = loadTile(this, s);
+      AreaTile point = loadTile(this, s);
       transitPoints.put(with, point);
     }
     
     for (int n = s.loadInt(); n-- > 0;) {
       Type key = (Type) s.loadObject();
-      CityMapFlagging forKey = new CityMapFlagging(this, key, 1);
+      AreaFlagging forKey = new AreaFlagging(this, key, 1);
       forKey.setupWithSize(size);
       forKey.loadState(s);
       flagging.put(key, forKey);
@@ -107,7 +107,7 @@ public class AreaMap implements Session.Saveable {
     
     for (int n = s.loadInt(); n-- > 0;) {
       String key = s.loadString();
-      CityMapDemands forKey = new CityMapDemands(this, key);
+      AreaDemands forKey = new AreaDemands(this, key);
       forKey.loadState(s);
       demands.put(key, forKey);
     }
@@ -188,9 +188,9 @@ public class AreaMap implements Session.Saveable {
     this.scanSize = Nums.round(size * 1f / SCAN_RES, 1, true);
     this.flagSize = Nums.round(size * 1f / FLAG_RES, 1, true);
     
-    this.grid = new Tile[size][size];
+    this.grid = new AreaTile[size][size];
     for (Coord c : Visit.grid(0, 0, size, size, 1)) {
-      grid[c.x][c.y] = new Tile(c.x, c.y);
+      grid[c.x][c.y] = new AreaTile(c.x, c.y);
     }
     
     this.actorGrid = new List[flagSize][flagSize];
@@ -237,7 +237,7 @@ public class AreaMap implements Session.Saveable {
   
   /**  Tiles and related setup/query methods-
     */
-  static Tile loadTile(AreaMap map, Session s) throws Exception {
+  static AreaTile loadTile(Area map, Session s) throws Exception {
     int x = s.loadInt();
     if (x == -1) return null;
     int y = s.loadInt();
@@ -245,7 +245,7 @@ public class AreaMap implements Session.Saveable {
   }
   
   
-  static void saveTile(Tile t, AreaMap map, Session s) throws Exception {
+  static void saveTile(AreaTile t, Area map, Session s) throws Exception {
     if (t != null && map == null) {
       I.complain("CANNOT SAVE TILE WITHOUT MAP");
       return;
@@ -259,21 +259,21 @@ public class AreaMap implements Session.Saveable {
   }
   
   
-  static Target loadTarget(AreaMap map, Session s) throws Exception {
+  static Target loadTarget(Area map, Session s) throws Exception {
     if (s.loadBool()) return loadTile(map, s);
     else return (Target) s.loadObject();
   }
   
   
-  static void saveTarget(Target t, AreaMap map, Session s) throws Exception {
+  static void saveTarget(Target t, Area map, Session s) throws Exception {
     if (t == null ) { s.saveBool(false); s.saveObject(null); return; }
-    if (t.isTile()) { s.saveBool(true ); saveTile((Tile) t, map, s); }
+    if (t.isTile()) { s.saveBool(true ); saveTile((AreaTile) t, map, s); }
     else            { s.saveBool(false); s.saveObject(t)           ; }
   }
   
   
-  public static Tile[] adjacent(Tile spot, Tile temp[], AreaMap map) {
-    if (temp == null) temp = new Tile[9];
+  public static AreaTile[] adjacent(AreaTile spot, AreaTile temp[], Area map) {
+    if (temp == null) temp = new AreaTile[9];
     if (map == null || spot == null) return temp;
     for (int dir : T_INDEX) {
       int x = spot.x + T_X[dir], y = spot.y + T_Y[dir];
@@ -283,7 +283,7 @@ public class AreaMap implements Session.Saveable {
   }
   
   
-  public static float distance(Tile a, Tile b) {
+  public static float distance(AreaTile a, AreaTile b) {
     if (a == null || b == null) return 1000000000;
     return distance(a.x, a.y, b.x, b.y);
   }
@@ -302,7 +302,7 @@ public class AreaMap implements Session.Saveable {
   
   public static boolean adjacent(Target a, Target b) {
     if (a == null || b == null) return false;
-    Tile AA = a.at(), AB = b.at();
+    AreaTile AA = a.at(), AB = b.at();
     if (AA == null || AB == null) return false;
     Type TA = a.type(), TB = b.type();
     if (AA.x > AB.x + TB.wide) return false;
@@ -330,7 +330,7 @@ public class AreaMap implements Session.Saveable {
   }
   
   
-  public static float distancePenalty(Tile a, Tile b) {
+  public static float distancePenalty(AreaTile a, AreaTile b) {
     return distancePenalty(distance(a, b));
   }
   
@@ -351,48 +351,48 @@ public class AreaMap implements Session.Saveable {
   }
   
   
-  public Tile tileAt(int x, int y) {
+  public AreaTile tileAt(int x, int y) {
     if (x < 0 || x >= size || y < 0 || y >= size) return null;
     return grid[x][y];
   }
   
   
-  public Tile tileAt(float x, float y) {
+  public AreaTile tileAt(float x, float y) {
     return tileAt((int) x, (int) y);
   }
   
   
-  public Tile tileAt(Coord c) {
+  public AreaTile tileAt(Coord c) {
     return tileAt(c.x, c.y);
   }
   
   
-  public Visit <Tile> allTiles() {
+  public Visit <AreaTile> allTiles() {
     return tilesUnder(0, 0, size, size);
   }
   
   
-  public Visit <Tile> tilesUnder(int x, int y, int w, int h) {
+  public Visit <AreaTile> tilesUnder(int x, int y, int w, int h) {
     final Visit <Coord> VC = Visit.grid(x, y, w, h, 1);
-    Visit <Tile> VT = new Visit <Tile> () {
+    Visit <AreaTile> VT = new Visit <AreaTile> () {
       public boolean hasNext() { return VC.hasNext(); }
-      public Tile next() { return tileAt(VC.next()); }
+      public AreaTile next() { return tileAt(VC.next()); }
     };
     return VT;
   }
   
   
-  public Visit <Tile> tilesAround(int x, int y, int w, int h) {
+  public Visit <AreaTile> tilesAround(int x, int y, int w, int h) {
     final Visit <Coord> VC = Visit.perimeter(x, y, w, h);
-    Visit <Tile> VT = new Visit <Tile> () {
+    Visit <AreaTile> VT = new Visit <AreaTile> () {
       public boolean hasNext() { return VC.hasNext(); }
-      public Tile next() { return tileAt(VC.next()); }
+      public AreaTile next() { return tileAt(VC.next()); }
     };
     return VT;
   }
   
   
-  public Visit <Tile> tilesUnder(Box2D area) {
+  public Visit <AreaTile> tilesUnder(Box2D area) {
     return tilesUnder(
       (int) area.xpos(), (int) area.ypos(),
       (int) area.xdim(), (int) area.ydim()
@@ -400,7 +400,7 @@ public class AreaMap implements Session.Saveable {
   }
   
   
-  public Visit <Tile> tilesAround(Box2D area) {
+  public Visit <AreaTile> tilesAround(Box2D area) {
     return tilesAround(
       (int) area.xpos(), (int) area.ypos(),
       (int) area.xdim(), (int) area.ydim()
@@ -412,12 +412,12 @@ public class AreaMap implements Session.Saveable {
   /**  Blockage and paving methods-
     */
   public Element above(int x, int y) {
-    Tile under = tileAt(x, y);
+    AreaTile under = tileAt(x, y);
     return under == null ? null : under.above;
   }
   
   
-  public Element above(Tile t) {
+  public Element above(AreaTile t) {
     if (t == null) return null;
     return above(t.x, t.y);
   }
@@ -429,7 +429,7 @@ public class AreaMap implements Session.Saveable {
   }
   
   
-  public int pathType(Tile t) {
+  public int pathType(AreaTile t) {
     if (t == null) return Type.PATH_BLOCK;
     return t.pathType();
   }
@@ -446,7 +446,7 @@ public class AreaMap implements Session.Saveable {
   }
   
   
-  public boolean blocked(Tile t) {
+  public boolean blocked(AreaTile t) {
     int pathing = pathType(t);
     return pathing == Type.PATH_BLOCK || pathing == Type.PATH_WATER;
   }
@@ -462,7 +462,7 @@ public class AreaMap implements Session.Saveable {
   }
   
   
-  public void setTerrain(Tile t, Terrain ter, byte var, int elevation) {
+  public void setTerrain(AreaTile t, Terrain ter, byte var, int elevation) {
     int oldP = t.pathType();
     t.terrain   = ter;
     t.elevation = elevation;
@@ -482,7 +482,7 @@ public class AreaMap implements Session.Saveable {
   }
   
   
-  public void setAbove(Tile t, Element above) {
+  public void setAbove(AreaTile t, Element above) {
     int oldP = t.pathType();
     t.above = above;
     if (oldP != t.pathType()) pathCache.checkPathingChanged(t);
@@ -539,11 +539,11 @@ public class AreaMap implements Session.Saveable {
   
   /**  Various presence-related queries and updates-
     */
-  public CityMapFlagging flagMap(Type key, boolean init) {
-    CityMapFlagging forKey = flagging.get(key);
+  public AreaFlagging flagMap(Type key, boolean init) {
+    AreaFlagging forKey = flagging.get(key);
     if (forKey != null) return forKey;
     if (init) {
-      forKey = new CityMapFlagging(this, key, 1);
+      forKey = new AreaFlagging(this, key, 1);
       forKey.setupWithSize(size);
       flagging.put(key, forKey);
     }
@@ -552,12 +552,12 @@ public class AreaMap implements Session.Saveable {
   
   
   void flagType(Type key, int x, int y, boolean is) {
-    CityMapFlagging forKey = flagMap(key, true);
+    AreaFlagging forKey = flagMap(key, true);
     forKey.setFlagVal(x, y, is ? 1 : 0);
   }
   
   
-  void flagActive(Active a, Tile at, boolean is) {
+  void flagActive(Active a, AreaTile at, boolean is) {
     if (at == null || a == null) return;
     List <Active> inBigGrid = actorGrid[at.x / FLAG_RES][at.y / FLAG_RES];
     inBigGrid.toggleMember(a, is);
@@ -565,7 +565,7 @@ public class AreaMap implements Session.Saveable {
   }
   
   
-  Series <Active> activeInRange(Tile point, float range) {
+  Series <Active> activeInRange(AreaTile point, float range) {
     
     Box2D area = new Box2D(point.x / FLAG_RES, point.y / FLAG_RES, 0, 0);
     area.expandBy(Nums.round(range / FLAG_RES, 1, true));
@@ -619,7 +619,7 @@ public class AreaMap implements Session.Saveable {
       
       if (b.xdim() <= 4) {
         int x = (int) b.xpos(), y = (int) b.ypos();
-        for (Tile t : tilesUnder(x, y, 4, 4)) {
+        for (AreaTile t : tilesUnder(x, y, 4, 4)) {
           if (t.above == null || t.above.type().isBuilding()) continue;
           
           if (t.above.at() == t) {

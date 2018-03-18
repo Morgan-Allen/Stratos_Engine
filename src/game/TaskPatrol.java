@@ -50,32 +50,32 @@ public class TaskPatrol extends Task implements TileConstants {
   
   public TaskPatrol(Session s) throws Exception {
     super(s);
-    AreaMap map = active.map();
+    Area map = active.map();
     
     type     = s.loadInt();
     guarded  = (Element) s.loadObject();
     numStops = s.loadInt();
-    onPoint  = AreaMap.loadTarget(map, s);
+    onPoint  = Area.loadTarget(map, s);
     
     patrolled = new List();
     for (int n = s.loadInt(); n-- > 0;) {
-      patrolled.add(AreaMap.loadTarget(map, s));
+      patrolled.add(Area.loadTarget(map, s));
     }
   }
   
   
   public void saveState(Session s) throws Exception {
     super.saveState(s);
-    AreaMap map = active.map();
+    Area map = active.map();
     
     s.saveInt   (type    );
     s.saveObject(guarded );
     s.saveInt   (numStops);
-    AreaMap.saveTarget(onPoint, map, s);
+    Area.saveTarget(onPoint, map, s);
     
     s.saveInt(patrolled.size());
     for (Target t : patrolled) {
-      AreaMap.saveTarget(t, map, s);
+      Area.saveTarget(t, map, s);
     }
   }
   
@@ -89,25 +89,25 @@ public class TaskPatrol extends Task implements TileConstants {
     final boolean report = evalVerbose && I.talkAbout == actor;
     if (report) I.say("\nGetting next perimeter patrol for "+actor);
     
-    final AreaMap map = actor.map();
+    final Area map = actor.map();
     final List <Target> patrolled = new List();
     
     if (guarded.type().mobile) {
       patrolled.add(guarded);
     }
     else {
-      Tile from = actor.at();
+      AreaTile from = actor.at();
       if (actor.indoors()) from = ((Building) actor.inside()).mainEntrance();
-      Batch <Tile> around = new Batch();
+      Batch <AreaTile> around = new Batch();
       
-      for (Tile t : guarded.perimeter(map)) {
+      for (AreaTile t : guarded.perimeter(map)) {
         if (t == null || ! map.pathCache.pathConnects(from, t)) continue;
         around.include(t);
       }
       
       int divS = around.size() / 4;
       for (int n = 0; n < around.size();) {
-        Tile adds = around.atIndex(n);
+        AreaTile adds = around.atIndex(n);
         patrolled.add(adds);
         n += divS;
       }
@@ -123,10 +123,10 @@ public class TaskPatrol extends Task implements TileConstants {
   public static TaskPatrol streetPatrol(
     Actor actor, Element init, Element dest, float priority
   ) {
-    final AreaMap map = actor.map();
-    final Tile
-      initT = Tile.nearestOpenTile(init.at(), map, 4),
-      destT = Tile.nearestOpenTile(dest.at(), map, 4);
+    final Area map = actor.map();
+    final AreaTile
+      initT = AreaTile.nearestOpenTile(init.at(), map, 4),
+      destT = AreaTile.nearestOpenTile(dest.at(), map, 4);
     
     if (! map.pathCache.pathConnects(initT, destT)) return null;
     
@@ -149,13 +149,13 @@ public class TaskPatrol extends Task implements TileConstants {
     }
     
     //  Grab a random building nearby and patrol around it.
-    final AreaMap map = actor.map();
+    final Area map = actor.map();
     final Base base = origin.base();
     final float range = GameConstants.MAX_WANDER_RANGE;
     
     Pick <Building> pick = new Pick();
     for (Building b : map.buildings()) if (b.base() == base) {
-      float dist = AreaMap.distance(origin, b);
+      float dist = Area.distance(origin, b);
       if (dist > range) continue;
       if (Task.hasTaskFocus(b, JOB.PATROLLING)) continue;
       pick.compare(b, Rand.num());
@@ -190,20 +190,20 @@ public class TaskPatrol extends Task implements TileConstants {
       I.say("  All patrol points: "+patrolled);
     }
     
-    final AreaMap map = actor.map();
-    Tile stop = onPoint.at();
+    final Area map = actor.map();
+    AreaTile stop = onPoint.at();
     
     if (onPoint.type().isActor()) {
       final Task t = ((Actor) onPoint).task();
       final Target ahead = t == null ? onPoint : t.nextOnPath();
       stop = ActorUtils.pickRandomTile(ahead, 2, map);
-      stop = Tile.nearestOpenTile(stop, map);
+      stop = AreaTile.nearestOpenTile(stop, map);
       if (++numStops >= MAX_STOPS) return;
     }
     
     else {
       Target last = onPoint;
-      stop = Tile.nearestOpenTile(stop, map);
+      stop = AreaTile.nearestOpenTile(stop, map);
       
       final int index = patrolled.indexOf(onPoint) + 1;
       if (index < patrolled.size() && last != patrolled.atIndex(index)) {

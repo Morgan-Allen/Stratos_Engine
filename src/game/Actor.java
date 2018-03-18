@@ -7,7 +7,7 @@ import graphics.sfx.*;
 import test.LogicTest;
 import util.*;
 import static game.Task.*;
-import static game.AreaMap.*;
+import static game.Area.*;
 import static game.GameConstants.*;
 
 
@@ -150,13 +150,13 @@ public class Actor extends Element implements
   
   /**  World entry and exit-
     */
-  public void enterMap(AreaMap map, int x, int y, float buildLevel, Base owns) {
+  public void enterMap(Area map, int x, int y, float buildLevel, Base owns) {
     super.enterMap(map, x, y, buildLevel, owns);
     map.actors.add(this);
   }
   
   
-  public void exitMap(AreaMap map) {
+  public void exitMap(Area map) {
     if (inside != null) setInside(inside, false);
     map.actors.remove(this);
     
@@ -185,7 +185,7 @@ public class Actor extends Element implements
   }
   
   
-  public boolean onMap(AreaMap map) {
+  public boolean onMap(Area map) {
     return map != null && map == this.map;
   }
   
@@ -222,8 +222,8 @@ public class Actor extends Element implements
     trapped |= inside == null && ! map.pathCache.hasGroundAccess(at());
     trapped |= inside != null && Visit.empty(((Building) inside).entrances());
     if (trapped) {
-      Tile free = map.pathCache.mostOpenNeighbour(at());
-      if (free == null) free = Tile.nearestOpenTile(at(), map, 6);
+      AreaTile free = map.pathCache.mostOpenNeighbour(at());
+      if (free == null) free = AreaTile.nearestOpenTile(at(), map, 6);
       if (free != null) {
         setInside(inside, false);
         setLocation(free, map);
@@ -289,12 +289,12 @@ public class Actor extends Element implements
   }
   
   
-  public void setLocation(Tile at, AreaMap map) {
+  public void setLocation(AreaTile at, Area map) {
     if (! onMap()) {
       super.setLocation(at, map);
       return;
     }
-    Tile old = this.at();
+    AreaTile old = this.at();
     super.setLocation(at, map);
     
     if (at != null) {
@@ -311,8 +311,8 @@ public class Actor extends Element implements
   }
   
   
-  public void setExactLocation(Vec3D location, AreaMap map) {
-    Tile goes = map.tileAt(location.x, location.y);
+  public void setExactLocation(Vec3D location, Area map) {
+    AreaTile goes = map.tileAt(location.x, location.y);
     setLocation(goes, map);
     
     float height = exactPosition.z;
@@ -498,7 +498,7 @@ public class Actor extends Element implements
   
   public void onArrival(Base goes, World.Journey journey) {
     if (goes.activeMap() != null) {
-      Tile entry = ActorUtils.findTransitPoint(
+      AreaTile entry = ActorUtils.findTransitPoint(
         goes.activeMap(), goes, journey.from
       );
       enterMap(goes.activeMap(), entry.x, entry.y, 1, base());

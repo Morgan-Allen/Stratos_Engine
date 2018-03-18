@@ -2,7 +2,7 @@
 
 package test;
 import game.*;
-import static game.CityMapPathCache.*;
+import static game.AreaPathCache.*;
 import static game.GameConstants.*;
 import static game.World.*;
 import util.*;
@@ -21,15 +21,15 @@ public class LogicTest {
     World   world  = new World(goods);
     Locale  locale = world.addLocale(5, 5);
     Base    base   = new Base(world, locale, "Test City");
-    AreaMap map    = null;
+    Area map    = null;
     
     if (! genTerrain) {
-      map = new AreaMap(world, locale, base);
+      map = new Area(world, locale, base);
       map.performSetup(size, gradient);
     }
     else {
-      map = CityMapTerrain.generateTerrain(base, size, 0, gradient);
-      CityMapTerrain.populateFixtures(map);
+      map = AreaTerrain.generateTerrain(base, size, 0, gradient);
+      AreaTerrain.populateFixtures(map);
     }
     
     world.setMapSize(10, 10);
@@ -44,9 +44,9 @@ public class LogicTest {
   ) {
     int wide = layout.length, high = layout[0].length;
     Base base = setupTestBase(Nums.max(wide, high), goods, false, gradient);
-    AreaMap map = base.activeMap();
+    Area map = base.activeMap();
     
-    for (Tile t : map.allTiles()) {
+    for (AreaTile t : map.allTiles()) {
       Terrain terr = gradient[layout[t.x][t.y]];
       int elev = elevation[t.x][t.y];
       map.setTerrain(t, terr, (byte) 0, elev);
@@ -97,7 +97,7 @@ public class LogicTest {
   Object   above     = null;
   Series <Character> pressed = new Batch();
   
-  protected Tile keyTiles[];
+  protected AreaTile keyTiles[];
   protected boolean viewPathMap = false;
   protected boolean viewPlanMap = false;
   
@@ -110,7 +110,7 @@ public class LogicTest {
   }
   
   
-  Box2D drawnBox(AreaMap map) {
+  Box2D drawnBox(Area map) {
     Box2D b = new Box2D(hover.x, hover.y, 0, 0);
     if (drawnTile != null) b.include(drawnTile.x, drawnTile.y, 0);
     b.incHigh(1);
@@ -121,10 +121,10 @@ public class LogicTest {
   }
   
   
-  void updateCityMapView(AreaMap map) {
+  void updateCityMapView(Area map) {
     configGraphic(map.size(), map.size());
     
-    for (Tile at : map.allTiles()) {
+    for (AreaTile at : map.allTiles()) {
       int fill = BLANK_COLOR;
       Element above;
       if (viewPlanMap) above = map.planning.objectAt(at);
@@ -141,7 +141,7 @@ public class LogicTest {
     }
     
     if (! viewPlanMap) for (Actor a : map.actors()) {
-      Tile at = a.at();
+      AreaTile at = a.at();
       //I.say("At: "+at);
       if (at == null || a.indoors()) continue;
       int fill = WALKER_COLOR;
@@ -173,7 +173,7 @@ public class LogicTest {
       Type type = builds.type();
       builds.setLocation(map.tileAt(hover), map);
       boolean canPlace = builds.canPlace(map);
-      for (Tile t : builds.footprint(map, false)) try {
+      for (AreaTile t : builds.footprint(map, false)) try {
         graphic[t.x][t.y] = canPlace ? type.tint : NO_BLD_COLOR;
       }
       catch (Exception e) {}
@@ -184,22 +184,22 @@ public class LogicTest {
   }
   
   
-  void updateCityPathingView(AreaMap map) {
+  void updateCityPathingView(Area map) {
     configGraphic(map.size(), map.size());
     
-    Tile hovered = map.tileAt(hover.x, hover.y);
-    hovered = Tile.nearestOpenTile(hovered, map);
+    AreaTile hovered = map.tileAt(hover.x, hover.y);
+    hovered = AreaTile.nearestOpenTile(hovered, map);
     
-    Area area = map.pathCache.rawArea(hovered), around[] = null;
-    AreaGroup group = null;
+    Zone area = map.pathCache.rawZone(hovered), around[] = null;
+    ZoneGroup group = null;
     if (area != null) {
       group  = area.group();
-      around = new Area[area.borders().size()];
+      around = new Zone[area.borders().size()];
       int i = 0;
       for (Border b : area.borders()) around[i++] = b.with();
     }
     
-    for (Tile t : map.allTiles()) {
+    for (AreaTile t : map.allTiles()) {
       Element above = map.above(t);
       int fill = above == null ? BLANK_COLOR : above.debugTint();
       if (Visit.arrayIncludes(keyTiles, t)) {
@@ -209,7 +209,7 @@ public class LogicTest {
         fill = BLACK_COLOR;
       }
       else if (area != null) {
-        Area under = map.pathCache.rawArea(t);
+        Zone under = map.pathCache.rawZone(t);
         if (area == under) {
           fill = WHITE_COLOR;
         }
@@ -228,8 +228,8 @@ public class LogicTest {
   
   
   
-  private void updateCityFogLayer(AreaMap map) {
-    for (Tile t : map.allTiles()) {
+  private void updateCityFogLayer(Area map) {
+    for (AreaTile t : map.allTiles()) {
       float sight = 0;
       sight += map.fog.sightLevel(t);
       sight += map.fog.maxSightLevel(t);
@@ -241,7 +241,7 @@ public class LogicTest {
   }
   
   
-  private void updateWorldMapView(AreaMap map) {
+  private void updateWorldMapView(Area map) {
     World world = map.world;
     int wide = world.mapWide() * 2, high = world.mapHigh() * 2;
     configGraphic(wide, high);
@@ -290,7 +290,7 @@ public class LogicTest {
   public Base runLoop(
     Base city, int numUpdates, boolean graphics, String filename
   ) {
-    AreaMap map = city.activeMap();
+    Area map = city.activeMap();
     int skipUpdate = 0;
     boolean doQuit = false;
     this.filename = filename;
@@ -324,7 +324,7 @@ public class LogicTest {
           
           //  TODO:  Have actors register within nearby tiles themselves.
           for (Actor a : map.actors()) {
-            Tile at = a.at();
+            AreaTile at = a.at();
             if (at.x == hover.x && at.y == hover.y) above = a;
           }
         }
@@ -572,7 +572,7 @@ public class LogicTest {
   }
   
   
-  private String reportForBuildMenu(AreaMap map, Base city) {
+  private String reportForBuildMenu(Area map, Base city) {
     StringBuffer report = new StringBuffer("");
     
     /*
@@ -693,7 +693,7 @@ public class LogicTest {
   }
   
   
-  private String baseReport(AreaMap map, Base city) {
+  private String baseReport(Area map, Base city) {
     StringBuffer report = new StringBuffer("Home City: "+city);
     WorldSettings settings = map.world.settings;
     

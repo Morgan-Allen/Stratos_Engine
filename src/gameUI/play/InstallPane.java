@@ -26,15 +26,15 @@ public class InstallPane extends DetailPane {
   
   
   protected void updateState() {
-    final AreaMap stage = UI.stage;
-    final Base    base  = UI.base;
+    final Area area = UI.area;
+    final Base base = UI.base;
     
     this.text.setText("");
     final Description d = this.text;
     d.append("\nFacilities: ");
     
     for (final Type type : UI.base.buildTypes()) {
-      if (! type.rulerCanBuild(base, stage)) continue;
+      if (! type.rulerCanBuild(base, area)) continue;
       d.append("\n  ");
       d.append(type.name, new Description.Link() {
         public void whenClicked(Object context) {
@@ -63,12 +63,12 @@ public class InstallPane extends DetailPane {
   
   private void beginInstallTask(Type type) {
     placed = (Element) type.generate();
-    final AreaMap stage  = UI.stage;
+    final Area stage  = UI.area;
     final Base    base   = UI.base;
     
     final PlayTask task = new PlayTask() {
       public void doTask(PlayUI UI) {
-        final Tile puts = UI.selection.hoverSpot();
+        final AreaTile puts = UI.selection.hoverTile();
         //final Account reasons = new Account();
         boolean canPlace = false;
         

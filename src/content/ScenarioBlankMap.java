@@ -10,7 +10,7 @@ import static content.GameContent.*;
 
 
 
-public class ScenarioBlankMap extends CityMapScenario {
+public class ScenarioBlankMap extends AreaMapScenario {
   
   
   List <BuildingForNest> nests = new List();
@@ -58,19 +58,19 @@ public class ScenarioBlankMap extends CityMapScenario {
   }
   
   
-  protected AreaMap createStage(World world) {
+  protected Area createArea(World world) {
     
     final int MAP_SIZE = 64;
     final Terrain GRADIENT[] = { JUNGLE, MEADOW, DESERT };
     
     World.Locale locale = world.addLocale(5, 5, "Test Area");
-    AreaMap map = CityMapTerrain.generateTerrain(world, locale, MAP_SIZE, 0, GRADIENT);
-    CityMapTerrain.populateFixtures(map);
+    Area map = AreaTerrain.generateTerrain(world, locale, MAP_SIZE, 0, GRADIENT);
+    AreaTerrain.populateFixtures(map);
     return map;
   }
   
   
-  protected Base createBase(AreaMap stage, World world) {
+  protected Base createBase(Area stage, World world) {
     World.Locale homeworld = world.addLocale(1, 1, "Homeworld");
     World.setupRoute(homeworld, stage.locale, 1);
     
@@ -89,19 +89,19 @@ public class ScenarioBlankMap extends CityMapScenario {
   }
   
   
-  protected void configScenario(World world, AreaMap stage, Base base) {
+  protected void configScenario(World world, Area stage, Base base) {
     
     Building bastion = (Building) BASTION.generate();
     int w = bastion.type().wide, h = bastion.type().high;
-    Tile ideal = stage.tileAt(16, 16);
-    Pick <Tile> pickLanding = new Pick();
+    AreaTile ideal = stage.tileAt(16, 16);
+    Pick <AreaTile> pickLanding = new Pick();
     
     //
     //  Look for a suitable entry-point within the world...
-    for (Tile t : stage.allTiles()) {
+    for (AreaTile t : stage.allTiles()) {
       boolean canPlace = true;
       
-      for (Tile f : stage.tilesUnder(t.x - 1, t.y - 1, w + 2, h + 2)) {
+      for (AreaTile f : stage.tilesUnder(t.x - 1, t.y - 1, w + 2, h + 2)) {
         if (f == null || f.terrain().pathing != Type.PATH_FREE) {
           canPlace = false;
           break;
@@ -109,8 +109,8 @@ public class ScenarioBlankMap extends CityMapScenario {
       }
       if (! canPlace) continue;
       
-      Tile sited = stage.tileAt(t.x + (w / 2), t.y + (h / 2));
-      float dist = AreaMap.distance(sited, ideal);
+      AreaTile sited = stage.tileAt(t.x + (w / 2), t.y + (h / 2));
+      float dist = Area.distance(sited, ideal);
       pickLanding.compare(t, 0 - dist);
     }
     
@@ -119,9 +119,9 @@ public class ScenarioBlankMap extends CityMapScenario {
     if (! pickLanding.empty()) {
       BuildingForTrade depot = (BuildingForTrade) SUPPLY_DEPOT.generate();
       
-      Tile at = pickLanding.result();
-      CityMapPlanning.markDemolish(stage, true, at.x - 1, at.y - 1, w + 2, h + 2);
-      CityMapPlanning.markDemolish(stage, true, at.x - 6, at.y - 1, 5, 5);
+      AreaTile at = pickLanding.result();
+      AreaPlanning.markDemolish(stage, true, at.x - 1, at.y - 1, w + 2, h + 2);
+      AreaPlanning.markDemolish(stage, true, at.x - 6, at.y - 1, 5, 5);
       bastion.enterMap(stage, at.x, at.y, 1, base);
       depot.enterMap(stage, at.x, at.y - 5, 1, base);
       
@@ -144,15 +144,15 @@ public class ScenarioBlankMap extends CityMapScenario {
     final int MIN_LAIR_DIST = 32;
     final int NUM_LAIRS = 1;
     
-    class SiteOption { Tile at; float rating; }
+    class SiteOption { AreaTile at; float rating; }
     List <SiteOption> options = new List <SiteOption> () {
       protected float queuePriority(SiteOption r) {
         return r.rating;
       }
     };
     for (Coord c : Visit.grid(0, 0, stage.size(), stage.size(), 8)) {
-      Tile at = stage.tileAt(c);
-      float dist = AreaMap.distance(bastion, at);
+      AreaTile at = stage.tileAt(c);
+      float dist = Area.distance(bastion, at);
       if (dist <= MIN_LAIR_DIST) continue;
       
       float rating = 16f * Rand.num() * dist;

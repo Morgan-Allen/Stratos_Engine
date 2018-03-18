@@ -5,7 +5,7 @@ import game.*;
 import content.*;
 import util.*;
 import static content.GameContent.*;
-import static game.AreaMap.*;
+import static game.Area.*;
 import static game.GameConstants.*;
 import static game.Task.*;
 
@@ -22,10 +22,10 @@ public class TestSieging extends LogicTest {
   static boolean testSieging(boolean graphics) {
     LogicTest test = new TestSieging();
     
-    World   world = new World(ALL_GOODS);
-    Base    baseC = new Base(world, world.addLocale(2, 2));
-    Base    awayC = new Base(world, world.addLocale(3, 3));
-    AreaMap map   = CityMapTerrain.generateTerrain(
+    World world = new World(ALL_GOODS);
+    Base  baseC = new Base(world, world.addLocale(2, 2));
+    Base  awayC = new Base(world, world.addLocale(3, 3));
+    Area  map   = AreaTerrain.generateTerrain(
       baseC, 32, 0, MEADOW, JUNGLE
     );
     baseC.setName("Home City");
@@ -39,14 +39,14 @@ public class TestSieging extends LogicTest {
     
     
     awayC.initBuildLevels(TROOPER_LODGE, 9, HOLDING, 1);
-    awayC.council.setTypeAI(CityCouncil.AI_OFF);
+    awayC.council.setTypeAI(BaseCouncil.AI_OFF);
     
     World.setupRoute(baseC.locale, awayC.locale, 1);
     Base.setPosture(baseC, awayC, Base.POSTURE.ENEMY, true);
     
     
-    CityMapPlanning.placeStructure(SHIELD_WALL, baseC, true, 4, 4, 20, 20);
-    CityMapPlanning.markDemolish(map, true, 6, 6, 16, 16);
+    AreaPlanning.placeStructure(SHIELD_WALL, baseC, true, 4, 4, 20, 20);
+    AreaPlanning.markDemolish(map, true, 6, 6, 16, 16);
     
     map.planning.updatePlanning();
     
@@ -74,10 +74,10 @@ public class TestSieging extends LogicTest {
     BuildingForArmy fort = (BuildingForArmy) TROOPER_LODGE.generate();
     fort.enterMap(map, 10, 10, 1, baseC);
     ActorUtils.fillWorkVacancies(fort);
-    CityMapPlanning.placeStructure(WALKWAY, baseC, true, 10, 9, 12, 1 );
-    CityMapPlanning.placeStructure(WALKWAY, baseC, true, 21, 9, 1 , 5 );
-    CityMapPlanning.placeStructure(WALKWAY, baseC, true, 16, 9, 1 , 9 );
-    CityMapPlanning.placeStructure(WALKWAY, baseC, true, 24, 9, 8 , 1 );
+    AreaPlanning.placeStructure(WALKWAY, baseC, true, 10, 9, 12, 1 );
+    AreaPlanning.placeStructure(WALKWAY, baseC, true, 21, 9, 1 , 5 );
+    AreaPlanning.placeStructure(WALKWAY, baseC, true, 16, 9, 1 , 9 );
+    AreaPlanning.placeStructure(WALKWAY, baseC, true, 24, 9, 8 , 1 );
     
     for (int n = 3; n-- > 0;) {
       Building home = (Building) HOLDING.generate();
@@ -95,7 +95,7 @@ public class TestSieging extends LogicTest {
     
     float initPrestige = awayC.prestige();
     float initLoyalty  = baseC.loyalty(awayC);
-    Table <Actor, Tile> initPatrolPoints = new Table();
+    Table <Actor, AreaTile> initPatrolPoints = new Table();
     Mission enemy = null;
     Tally <Good> tribute = null;
     
@@ -144,14 +144,14 @@ public class TestSieging extends LogicTest {
       if (patrolInit && ! patrolDone) {
         int numMoved = 0;
         for (Actor a : guarding.recruits()) {
-          Tile init = initPatrolPoints.get(a);
+          AreaTile init = initPatrolPoints.get(a);
           if (init != null && a.at() != init) {
             numMoved += 1;
           }
         }
         if (numMoved >= MIN_DEFENDERS) {
           patrolDone = true;
-          awayC.council.setTypeAI(CityCouncil.AI_WARLIKE);
+          awayC.council.setTypeAI(BaseCouncil.AI_WARLIKE);
         }
       }
       
@@ -178,7 +178,7 @@ public class TestSieging extends LogicTest {
       
       if (siegeComing && enemy.onMap() && ! siegeBegun) {
         
-        Table <Tile, Actor> standing = new Table();
+        Table <AreaTile, Actor> standing = new Table();
         boolean standWrong = false;
         Actor testPathing = null;
         
@@ -200,7 +200,7 @@ public class TestSieging extends LogicTest {
               continue;
             }
             
-            Tile stands = (Tile) task.target();
+            AreaTile stands = (AreaTile) task.target();
             if (standing.get(stands) != null) standWrong = true;
             else standing.put(stands, a);
             testPathing = a;

@@ -71,7 +71,7 @@ public class Base implements Session.Saveable, Trader {
   GOVERNMENT government = GOVERNMENT.FEUDAL;
   float prestige = PRESTIGE_AVG;
   Base homeland = null;
-  final public CityCouncil council = new CityCouncil(this);
+  final public BaseCouncil council = new BaseCouncil(this);
   final Table <Base, Relation> relations = new Table();
   
   private int   currentFunds = 0;
@@ -87,7 +87,7 @@ public class Base implements Session.Saveable, Trader {
   List <Mission> missions = new List();
   
   private boolean active;
-  private AreaMap map;
+  private Area map;
   
   Tally <Type> makeTotals = new Tally();
   Tally <Type> usedTotals = new Tally();
@@ -147,7 +147,7 @@ public class Base implements Session.Saveable, Trader {
     s.loadObjects(missions);
     
     active = s.loadBool();
-    map    = (AreaMap) s.loadObject();
+    map    = (Area) s.loadObject();
     
     s.loadTally(makeTotals);
     s.loadTally(usedTotals);
@@ -200,13 +200,13 @@ public class Base implements Session.Saveable, Trader {
   
   /**  Supplemental setup/query methods for economy, trade and geography-
     */
-  public void attachMap(AreaMap map) {
+  public void attachMap(Area map) {
     this.map    = map ;
     this.active = map == null ? false : true;
   }
   
   
-  public AreaMap activeMap() {
+  public Area activeMap() {
     return map;
   }
   
@@ -801,13 +801,13 @@ public class Base implements Session.Saveable, Trader {
 
   /**  Last-but-not-least, returning available Powers:
     */
-  public Series <Technique> rulerPowers() {
-    Batch <Technique> all = new Batch();
+  public Series <ActorTechnique> rulerPowers() {
+    Batch <ActorTechnique> all = new Batch();
     if (activeMap() == null) {
       return all;
     }
     for (Building b : map.buildings) if (b.base() == this) {
-      for (Technique t : b.rulerPowers()) all.include(t);
+      for (ActorTechnique t : b.rulerPowers()) all.include(t);
     }
     return all;
   }

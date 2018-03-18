@@ -2,7 +2,7 @@
 
 package game;
 import util.*;
-import static game.AreaMap.*;
+import static game.Area.*;
 import static game.GameConstants.*;
 import graphics.common.*;
 
@@ -46,14 +46,14 @@ public class TaskBuilding extends Task {
   /**  These methods are also used by the planning-map to flag any
     *  structures that need attention:
     */
-  public static CityMapDemands demandsFor(Good m, AreaMap map) {
+  public static AreaDemands demandsFor(Good m, Area map) {
     
     //  TODO:  Improve the lookup speed here?
     
     String key = "build_"+m.name;
-    CityMapDemands d = map.demands.get(key);
+    AreaDemands d = map.demands.get(key);
     if (d == null) {
-      d = new CityMapDemands(map, key);
+      d = new AreaDemands(map, key);
       map.demands.put(key, d);
     }
     return d;
@@ -61,9 +61,9 @@ public class TaskBuilding extends Task {
   
   
   static float checkNeedForBuilding(
-    Element b, Good w, AreaMap map, boolean doUpdate
+    Element b, Good w, Area map, boolean doUpdate
   ) {
-    Tile at = b.at();
+    AreaTile at = b.at();
     if (at == null) return 0;
     
     //  TODO: Move this onto the planning-map!
@@ -83,7 +83,7 @@ public class TaskBuilding extends Task {
     
     if (doUpdate) {
       b.flagTeardown(raze);
-      CityMapDemands demands = demandsFor(w, map);
+      AreaDemands demands = demandsFor(w, map);
       demands.setAmount(amountGap, b, at.x, at.y);
     }
     
@@ -117,23 +117,23 @@ public class TaskBuilding extends Task {
     Building store, Actor actor, Good material, boolean near
   ) {
     if (! actor.map().world.settings.toggleBuilding) return null;
-    AreaMap map = actor.map;
-    Tile at = actor.at();
+    Area map = actor.map;
+    AreaTile at = actor.at();
     //
     //  Iterate over any structures demanding your attention and see if
     //  they're close enough to attend to:
-    CityMapDemands demands = demandsFor(material, map);
+    AreaDemands demands = demandsFor(material, map);
     if (demands != null) {
       int storeRange = store.type().maxDeliverRange;
       int maxRange = near ? actor.type().sightRange : storeRange;
       
-      for (CityMapDemands.Entry e : demands.nearbyEntries(at.x, at.y)) {
+      for (AreaDemands.Entry e : demands.nearbyEntries(at.x, at.y)) {
         Element source = (Element) e.source;
         boolean canClear = source.type().isClearable();
         
-        if (AreaMap.distance(source.at(), at) > maxRange  ) continue;
-        if (AreaMap.distance(store .at(), at) > storeRange) continue;
-        if (source.base() != store.base() && ! canClear   ) continue;
+        if (Area.distance(source.at(), at) > maxRange  ) continue;
+        if (Area.distance(store .at(), at) > storeRange) continue;
+        if (source.base() != store.base() && ! canClear) continue;
         
         Pathing from = Task.pathOrigin(actor);
         Target goes = source;
@@ -156,7 +156,7 @@ public class TaskBuilding extends Task {
   }
   
   
-  boolean decideNextAction(Element b, AreaMap map) {
+  boolean decideNextAction(Element b, Area map) {
     //
     //  Avoid piling up on the same target:
     if (b != site && b.type().isFixture() && (
@@ -211,17 +211,17 @@ public class TaskBuilding extends Task {
     else {
       //
       //  You need to configure a visit to an adjacent tile here...
-      AreaMap map = goes.map;
-      Tile c = goes.at();
+      Area map = goes.map;
+      AreaTile c = goes.at();
       Type t = goes.type();
       Pathing from = Task.pathOrigin(active);
-      Pick <Tile> pick = new Pick();
+      Pick <AreaTile> pick = new Pick();
       
-      for (Tile a : map.tilesAround(c.x, c.y, t.wide, t.high)) {
+      for (AreaTile a : map.tilesAround(c.x, c.y, t.wide, t.high)) {
         if (! map.pathCache.pathConnects(from, a, false, false)) continue;
         
         float rating = 1;
-        rating *= AreaMap.distancePenalty(from, a);
+        rating *= Area.distancePenalty(from, a);
         if (Task.hasTaskFocus(a, jobType, active)) rating /= 3;
         
         pick.compare(a, rating);
@@ -275,12 +275,12 @@ public class TaskBuilding extends Task {
   }
   
   
-  void advanceBuilding(Element b, AreaMap map) {
+  void advanceBuilding(Element b, Area map) {
     Actor actor = (Actor) this.active;
     //
     //  First, we ascertain how much raw material we have, and how much
     //  building needs to be done-
-    Tile at = b.at();
+    AreaTile at = b.at();
     float amountGap = checkNeedForBuilding(b, material, map, true);
     float amountGot = getCarryAmount(material, b, false);
     //

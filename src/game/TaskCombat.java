@@ -3,7 +3,7 @@
 package game;
 import util.*;
 import static game.Base.*;
-import static game.AreaMap.*;
+import static game.Area.*;
 import static game.GameConstants.*;
 import graphics.common.*;
 
@@ -82,12 +82,12 @@ public class TaskCombat extends Task {
   public static float hostility(Target a, Target b) {
     POSTURE p = postureFor(a, b);
     switch(p) {
-      case ENEMY  : return 1;
-      case ALLY   : return -1;
-      case VASSAL : return -0.5f;
-      case LORD   : return -1;
-      case NEUTRAL: return 0;
-      case TRADING: return -0.5f;
+      case ENEMY   : return 1;
+      case ALLY    : return -1;
+      case VASSAL  : return -0.5f;
+      case LORD    : return -1;
+      case NEUTRAL : return 0;
+      case TRADING : return -0.5f;
     }
     return 0;
   }
@@ -149,14 +149,14 @@ public class TaskCombat extends Task {
   
   
   static TaskCombat nextReaction(
-    Active actor, Tile anchor, Employer employer, float noticeBonus
+    Active actor, AreaTile anchor, Employer employer, float noticeBonus
   ) {
     //  TODO:  Allow for iteration over members of a target formation, or
     //  whatever your comrades are currently fighting...
     //  TODO:  Grant a vision bonus for higher ground?
     
-    Tile from = actor.at();
-    AreaMap map = actor.map();
+    AreaTile from = actor.at();
+    Area map = actor.map();
     float noticeRange = ((Element) actor).sightRange() + noticeBonus;
     Series <Active> others = map.activeInRange(from, noticeRange);
     
@@ -169,7 +169,7 @@ public class TaskCombat extends Task {
       if (other.indoors()) continue;
       if (attackPower(other) == 0) continue;
       
-      Tile goes = other.at();
+      AreaTile goes = other.at();
       float distF = distance(goes, from);
       float distA = anchor == null ? 0 : distance(goes, anchor);
       if (distA > noticeRange) continue;
@@ -198,8 +198,8 @@ public class TaskCombat extends Task {
   static class RangeAccess {
     Element target;
     int maxRange;
-    Tile wasAt;
-    Tile tiles[];
+    AreaTile wasAt;
+    AreaTile tiles[];
   }
   
   
@@ -218,13 +218,12 @@ public class TaskCombat extends Task {
     TaskCombat currentTask, JOB jobType
   ) {
     if (active == null || target == null || ! target.onMap()) return null;
-    
-    
+    //
     //  In the case of immobile actives, such as turrets, you don't bother with
     //  the fancy pathing-connection tests.  You just check if the target is in
     //  range.
     if (! active.isActor()) {
-      float distance     = AreaMap.distance(active.at(), target);
+      float distance     = Area.distance(active.at(), target);
       float rangeMelee   = 1.5f;
       float rangeMissile = active.type().rangeDist;
       float rateMelee    = active.type().meleeDamage;
@@ -243,24 +242,23 @@ public class TaskCombat extends Task {
       
       return currentTask;
     }
-    
-    
+    //
     //  Otherwise, try and ensure that it's possible to path toward some tile
     //  within range of the target-
-    Tile inRange[] = null;
+    AreaTile inRange[] = null;
     if (currentTask != null) {
-      inRange = new Tile[] { active.at(), (Tile) currentTask.target };
+      inRange = new AreaTile[] { active.at(), (AreaTile) currentTask.target };
     }
     else {
-      final AreaMap map    = active.map();
-      final Tile    at     = target.at();
-      final Box2D   area   = target.area();
-      final int     range  = MAX_RANGE;
-      final Tile    temp[] = new Tile[9];
-      
+      final Area     map    = active.map();
+      final AreaTile at     = target.at();
+      final Box2D    area   = target.area();
+      final int      range  = MAX_RANGE;
+      final AreaTile temp[] = new AreaTile[9];
+      //
       //  TODO:  This is a temporary hack until I can get the pathing-cache to
       //  store data for particular cities...
-      final Tile from;
+      final AreaTile from;
       Pathing inside = active.isActor() ? ((Actor) active).inside() : null;
       if (inside instanceof Building) {
         from = ((Building) inside).mainEntrance();
@@ -280,10 +278,10 @@ public class TaskCombat extends Task {
       
       if (access == null && key != null) {
         
-        final Batch <Tile> accessT = new Batch();
-        Flood <Tile> flood = new Flood <Tile> () {
-          protected void addSuccessors(Tile front) {
-            for (Tile n : AreaMap.adjacent(front, temp, map)) {
+        final Batch <AreaTile> accessT = new Batch();
+        Flood <AreaTile> flood = new Flood <AreaTile> () {
+          protected void addSuccessors(AreaTile front) {
+            for (AreaTile n : Area.adjacent(front, temp, map)) {
               if (n == null || n.flaggedWith() != null) continue;
               if (area.distance(n.x, n.y) > range     ) continue;
               
@@ -297,7 +295,7 @@ public class TaskCombat extends Task {
         flood.floodFrom(target.centre());
         
         access = new RangeAccess();
-        access.tiles    = accessT.toArray(Tile.class);
+        access.tiles    = accessT.toArray(AreaTile.class);
         access.wasAt    = at;
         access.maxRange = range;
         access.target   = target;
@@ -318,7 +316,7 @@ public class TaskCombat extends Task {
     float rangeMissile = active.type().rangeDist;
     float maxRange     = Nums.max(rangeMelee, rangeMissile);
     
-    Pick <Tile> pick = new Pick();
+    Pick <AreaTile> pick = new Pick();
     //Box2D area = target.area();
     
     //  TODO:  It would be helpful if tiles were in strictly ascending order
@@ -333,10 +331,10 @@ public class TaskCombat extends Task {
       I.say("  Target at:     "+target.at() );
     }
     
-    for (Tile t : inRange) {
+    for (AreaTile t : inRange) {
       if (Task.hasTaskFocus(t, jobType, active)) continue;
       
-      float dist = AreaMap.distance(target, t);
+      float dist = Area.distance(target, t);
       if (report) I.say("  "+t+" dist: "+dist);
       
       if (dist > maxRange) continue;
@@ -350,7 +348,7 @@ public class TaskCombat extends Task {
     if (pick.empty()) return null;
     
     boolean needsConfig = true;
-    Tile t = pick.result();
+    AreaTile t = pick.result();
     boolean standWall = t          .pathType() == Type.PATH_WALLS;
     boolean targWall  = target.at().pathType() == Type.PATH_WALLS;
     boolean canTouch  = standWall == targWall;
@@ -364,7 +362,7 @@ public class TaskCombat extends Task {
     
     //  TODO:  Decide on a preferred attack-mode first?
     
-    if (canTouch && AreaMap.distance(target, t) < rangeMelee) {
+    if (canTouch && Area.distance(target, t) < rangeMelee) {
       currentTask.attackMode = ATTACK_MELEE;
     }
     else {
@@ -426,7 +424,7 @@ public class TaskCombat extends Task {
 
 
   boolean checkContact(Pathing[] path) {
-    float range = AreaMap.distance(active, primary);
+    float range = Area.distance(active, primary);
     float maxRange = actionRange();
     
     ///I.say("Distance to "+primary+": "+range+"/"+maxRange);
@@ -509,7 +507,7 @@ public class TaskCombat extends Task {
     }
     
     
-    AreaMap map = attacks.map();
+    Area map = attacks.map();
     if (map.ephemera.active()) {
       Good weaponType = attacks.type().weaponType;
       Ephemera.applyCombatFX(weaponType, (Active) attacks, other, ! melee, hits, map);

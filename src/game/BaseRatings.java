@@ -5,7 +5,7 @@ import util.*;
 
 
 
-public class CityRatings {
+public class BaseRatings {
   
   
   Base city;
@@ -29,7 +29,7 @@ public class CityRatings {
   
   
   
-  void updateRatings(AreaMap map) {
+  void updateRatings(Area map) {
     int totalPop = 0;
     
     for (Actor a : map.actors) {

@@ -4,7 +4,7 @@ package content;
 import game.*;
 import graphics.common.*;
 import static game.GameConstants.*;
-import static game.Technique.*;
+import static game.ActorTechnique.*;
 
 
 
@@ -27,7 +27,7 @@ public class Collective {
   ;
   
   
-  final public static Technique PSY_HEAL = new Technique(
+  final public static ActorTechnique PSY_HEAL = new ActorTechnique(
     "power_psy_heal", "Psy Heal"
   ) {
     
@@ -71,7 +71,7 @@ public class Collective {
     COLLECTIVE.armourClass = 0;
     COLLECTIVE.maxHealth   = 3;
     COLLECTIVE.initTraits.setWith(SKILL_SPEAK, 3, SKILL_PRAY, 4, SKILL_WRITE, 1);
-    COLLECTIVE.classTechniques = new Technique[] { PSY_HEAL };
+    COLLECTIVE.classTechniques = new ActorTechnique[] { PSY_HEAL };
   }
 }
 

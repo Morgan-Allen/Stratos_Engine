@@ -1,7 +1,7 @@
 
 
 package game;
-import static game.AreaMap.*;
+import static game.Area.*;
 import static game.GameConstants.*;
 import graphics.common.*;
 import graphics.terrain.*;
@@ -9,28 +9,27 @@ import util.*;
 
 
 
-public class CityMapFog {
+public class AreaFog {
   
   
   /**  Data fields, setup and save/load methods-
     */
   final static int MAX_FOG = 100;
   
-  AreaMap map;
+  Area map;
   float lightLevel;
   
   byte fogVals[][];
   byte oldVals[][];
   byte maxVals[][];
-  CityMapFlagging flagMap;
+  AreaFlagging flagMap;
   
   float viewVals[][];
   private FogOverlay fogOver;
   
   
   
-  
-  CityMapFog(AreaMap map) {
+  AreaFog(Area map) {
     this.map = map;
   }
   
@@ -57,7 +56,7 @@ public class CityMapFog {
     this.fogVals = new byte[size][size];
     this.oldVals = new byte[size][size];
     this.maxVals = new byte[size][size];
-    this.flagMap = new CityMapFlagging(map, "max. fog", MAX_FOG);
+    this.flagMap = new AreaFlagging(map, "max. fog", MAX_FOG);
     flagMap.setupWithSize(size);
     
     for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
@@ -71,14 +70,14 @@ public class CityMapFog {
   
   /**  Regular updates-
     */
-  void liftFog(Tile around, float range) {
+  void liftFog(AreaTile around, float range) {
     if (! isToggled()) return;
     
     Box2D area = new Box2D(around.x, around.y, 0, 0);
     area.expandBy(Nums.round(range, 1, true));
     
     for (Coord c : Visit.grid(area)) {
-      Tile t = map.tileAt(c.x, c.y);
+      AreaTile t = map.tileAt(c.x, c.y);
       float distance = distance(t, around);
       if (distance > range) continue;
       if (distance < 0) distance = 0;
@@ -116,13 +115,13 @@ public class CityMapFog {
   
   /**  Exploration-related queries:
     */
-  Tile pickRandomFogPoint(Target near, int range) {
+  AreaTile pickRandomFogPoint(Target near, int range) {
     if (! isToggled()) return null;
     return flagMap.pickRandomPoint(near, range);
   }
   
   
-  Tile findNearbyFogPoint(Target near, int range) {
+  AreaTile findNearbyFogPoint(Target near, int range) {
     if (! isToggled()) return null;
     return flagMap.findNearbyPoint(near, range);
   }
@@ -136,14 +135,14 @@ public class CityMapFog {
   }
   
   
-  public float sightLevel(Tile t) {
+  public float sightLevel(AreaTile t) {
     if (! isToggled()) return 1;
     if (t == null) return 0;
     return oldVals[t.x][t.y] * 1f / MAX_FOG;
   }
   
   
-  public float maxSightLevel(Tile t) {
+  public float maxSightLevel(AreaTile t) {
     if (! isToggled()) return 1;
     if (t == null) return 0;
     return maxVals[t.x][t.y] * 1f / MAX_FOG;

@@ -10,36 +10,37 @@ import util.*;
 
 
 
-public abstract class CityMapScenario implements Session.Saveable {
+public abstract class AreaMapScenario implements Session.Saveable {
   
   
   MainGame game;
   boolean setupDone = false;
   
-  World   verse = null;
-  AreaMap stage = null;
-  Base    base  = null;
+  World world = null;
+  Area  area  = null;
+  Base  base  = null;
   
   PlayUI UI;
   
   
-  protected CityMapScenario() {
+  protected AreaMapScenario() {
+    return;
   }
   
   
-  public CityMapScenario(Session s) throws Exception {
+  public AreaMapScenario(Session s) throws Exception {
     s.cacheInstance(this);
-    verse = (World  ) s.loadObject();
-    stage = (AreaMap) s.loadObject();
-    base  = (Base   ) s.loadObject();
+    world = (World) s.loadObject();
+    area  = (Area ) s.loadObject();
+    base  = (Base ) s.loadObject();
     UI = new PlayUI(PlayLoop.rendering());
     UI.loadState(s);
   }
   
   
   public void saveState(Session s) throws Exception {
-    s.saveObject(verse);
-    s.saveObject(stage);
+    s.saveObject(world);
+    s.saveObject(area );
     s.saveObject(base );
     UI.saveState(s);
   }
@@ -52,17 +53,17 @@ public abstract class CityMapScenario implements Session.Saveable {
     setupDone = false;
     this.game = game;
     
-    verse = null;
-    stage = null;
+    world = null;
+    area  = null;
     base  = null;
     UI    = null;
-    verse = createWorld();
-    stage = createStage(verse);
-    base  = createBase(stage, verse);
+    world = createWorld();
+    area  = createArea(world);
+    base  = createBase(area, world);
     UI    = new PlayUI(PlayLoop.rendering());
     
-    UI.assignParameters(stage, base);
-    configScenario(verse, stage, base);
+    UI.assignParameters(area, base);
+    configScenario(world, area, base);
     
     setupDone = true;
   }
@@ -76,9 +77,9 @@ public abstract class CityMapScenario implements Session.Saveable {
   
   protected abstract String savePath();
   protected abstract World createWorld();
-  protected abstract AreaMap createStage(World world);
-  protected abstract Base createBase(AreaMap map, World world);
-  protected abstract void configScenario(World world, AreaMap map, Base base);
+  protected abstract Area createArea(World world);
+  protected abstract Base createBase(Area map, World world);
+  protected abstract void configScenario(World world, Area map, Base base);
   
   
   public float loadProgress() {
@@ -87,17 +88,17 @@ public abstract class CityMapScenario implements Session.Saveable {
   
   
   public void updateScenario() {
-    stage.update(PlayLoop.UPDATES_PER_SECOND);
+    area.update(PlayLoop.UPDATES_PER_SECOND);
   }
   
   
-  public Base    base () { return base ; }
-  public AreaMap stage() { return stage; }
-  public World   verse() { return verse; }
+  public Base  base () { return base ; }
+  public Area  stage() { return area ; }
+  public World world() { return world; }
   
   
   public void renderVisuals(Rendering rendering) {
-    stage.renderStage(rendering, base);
+    area.renderStage(rendering, base);
   }
   
   

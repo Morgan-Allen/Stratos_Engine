@@ -3,7 +3,6 @@
 package gameUI.play;
 import game.*;
 import graphics.common.*;
-import graphics.widgets.*;
 import util.*;
 
 
@@ -19,7 +18,7 @@ public class Selection {
   
   final PlayUI UI;
   private Focus    hovered;
-  private Tile     hoverSpot;
+  private AreaTile hoverTile;
   private Actor    hoverActor;
   private Building hoverVenue;
   private Mission  hoverMission;
@@ -43,19 +42,19 @@ public class Selection {
   }
   
   
-  void updateSelection(AreaMap stage, Base base) {
+  void updateSelection(Area stage, Base base) {
     if (UI.selected() != null) {
       hovered    = null;
-      hoverSpot  = null;
+      hoverTile  = null;
       hoverVenue = null;
       hoverActor = null;
     }
     else {
       final Viewport port = UI.rendering.view;
       final Vec3D groundPoint = pickedGroundPoint();
-      hoverSpot = stage.tileAt(groundPoint.x, groundPoint.y);
+      hoverTile = stage.tileAt(groundPoint.x, groundPoint.y);
       
-      final Element owner = stage.above(hoverSpot);
+      final Element owner = stage.above(hoverTile);
       
       //if (I.used60Frames) I.say("Hovering above: "+owner);
       
@@ -86,7 +85,7 @@ public class Selection {
       else if (hoverMission != null) hovered = hoverMission;
       else if (hoverActor   != null) hovered = hoverActor;
       else if (hoverVenue   != null) hovered = hoverVenue;
-      else hovered = hoverSpot;
+      else hovered = hoverTile;
       
       if (I.used60Frames) {
         //I.say("\nHovering over: "+hovered);
@@ -133,14 +132,12 @@ public class Selection {
   }
   
   
-  public Tile     hoverSpot () { return hoverSpot ; }
+  public AreaTile hoverTile () { return hoverTile ; }
   public Actor    hoverActor() { return hoverActor; }
   public Building hoverVenue() { return hoverVenue; }
   public Focus    hovered   () { return hovered   ; }
   
 }
-
-
 
 
 

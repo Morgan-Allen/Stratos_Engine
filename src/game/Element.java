@@ -4,7 +4,7 @@ package game;
 import gameUI.play.*;
 import graphics.common.*;
 import util.*;
-import static game.AreaMap.*;
+import static game.Area.*;
 import static game.GameConstants.*;
 
 
@@ -29,8 +29,8 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   private Type type;
   private int varID;
   
-  AreaMap map;
-  private Tile at;
+  Area map;
+  private AreaTile at;
   private float growLevel = 0;
   private int   buildBits = 0;
   private int   stateBits = 0;
@@ -55,7 +55,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
     
     type   = (Type) s.loadObject();
     varID  = s.loadInt();
-    map    = (AreaMap) s.loadObject();
+    map    = (Area) s.loadObject();
     at     = loadTile(map, s);
     
     growLevel = s.loadFloat();
@@ -119,14 +119,14 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   ;
   
   
-  public Visit <Tile> footprint(AreaMap map, boolean withClearance) {
+  public Visit <AreaTile> footprint(Area map, boolean withClearance) {
     if (at == null) return map.tilesAround(0, 0, 0, 0);
     int m = withClearance ? type.clearMargin : 0, m2 = m * 2;
     return map.tilesUnder(at.x - m, at.y - m, type.wide + m2, type.high + m2);
   }
   
   
-  public Visit <Tile> perimeter(AreaMap map) {
+  public Visit <AreaTile> perimeter(Area map) {
     if (at == null) return map.tilesAround(0, 0, 0, 0);
     return map.tilesAround(at.x, at.y, type.wide, type.high);
   }
@@ -138,13 +138,13 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
-  public Tile centre() {
+  public AreaTile centre() {
     if (at == null) return null;
     return map.tileAt(at.x + (type.wide / 2), at.y + (type.high / 2));
   }
   
   
-  public void setLocation(Tile at, AreaMap map) {
+  public void setLocation(AreaTile at, Area map) {
     this.at  = at;
     this.map = map;
     stateBits |= FLAG_SITED;
@@ -177,7 +177,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
-  boolean canPlaceOver(Tile t) {
+  boolean canPlaceOver(AreaTile t) {
     int pathing = t.terrain.pathing;
     if (type.buildOnWater && pathing == Type.PATH_WATER) return true;
     else if (pathing > Type.PATH_FREE) return false;
@@ -194,12 +194,12 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
-  boolean checkPlacingConflicts(AreaMap map, Batch <Element> conflicts) {
+  boolean checkPlacingConflicts(Area map, Batch <Element> conflicts) {
     
     if (! sited()) return false;
     boolean footprintOkay = true;
     
-    for (Tile t : footprint(map, true)) {
+    for (AreaTile t : footprint(map, true)) {
       if (t == null) {
         footprintOkay = false;
       }
@@ -239,7 +239,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
-  public boolean canPlace(AreaMap map) {
+  public boolean canPlace(Area map) {
     return checkPlacingConflicts(map, null);
   }
   
@@ -247,7 +247,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   
   /**  Entering and exiting the map-
     */
-  public void enterMap(AreaMap map, int x, int y, float buildLevel, Base owns) {
+  public void enterMap(Area map, int x, int y, float buildLevel, Base owns) {
     if (onMap()) {
       I.complain("\nALREADY ON MAP: "+this);
       return;
@@ -263,7 +263,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
     
     if (! type.mobile) {
       
-      for (Tile t : footprint(map, true)) if (t != null) {
+      for (AreaTile t : footprint(map, true)) if (t != null) {
         int footMask = type.footprint(t, this);
         int check = canPlaceOver(t.above, footMask);
         
@@ -287,7 +287,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
-  public void exitMap(AreaMap map) {
+  public void exitMap(Area map) {
     
     stateBits |=  FLAG_EXIT;
     stateBits &= ~FLAG_ON_MAP;
@@ -296,7 +296,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
       if (true       ) setFlagging(false, type.flagKey);
       if (type.isCrop) setFlagging(false, NEED_PLANT  );
       
-      for (Tile t : footprint(map, false)) {
+      for (AreaTile t : footprint(map, false)) {
         if (t.above == this) map.setAbove(t, null);
         map.pathCache.checkPathingChanged(t);
       }
@@ -330,12 +330,12 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
-  public AreaMap map() {
+  public Area map() {
     return map;
   }
   
   
-  public Tile at() {
+  public AreaTile at() {
     return at;
   }
   
@@ -516,13 +516,13 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   /**  Support methods for sight and fog-levels:
     */
   public float sightLevel() {
-    Tile from = (type.wide == 1 && type.high == 1) ? at : centre();
+    AreaTile from = (type.wide == 1 && type.high == 1) ? at : centre();
     return map.fog.sightLevel(from);
   }
   
   
   public float maxSightLevel() {
-    Tile from = (type.wide == 1 && type.high == 1) ? at : centre();
+    AreaTile from = (type.wide == 1 && type.high == 1) ? at : centre();
     return map.fog.maxSightLevel(from);
   }
   
@@ -716,7 +716,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
-  public void renderPreview(Rendering rendering, boolean canPlace, Tile puts) {
+  public void renderPreview(Rendering rendering, boolean canPlace, AreaTile puts) {
     final Sprite s = sprite();
     if (s == null) return;
     renderedPosition(s.position);

@@ -8,7 +8,7 @@ import game.*;
 import static game.Actor.*;
 import static game.ActorAsPerson.*;
 import static game.Base.*;
-import static game.CityCouncil.*;
+import static game.BaseCouncil.*;
 import static game.GameConstants.*;
 import static game.World.*;
 import static content.GameContent.*;
@@ -121,7 +121,7 @@ public class TestWorld extends LogicTest {
     {
       Base pair[] = configWeakStrongCityPair();
       Base goes = pair[0], from = pair[1];
-      goes.council.setTypeAI(CityCouncil.AI_PACIFIST);
+      goes.council.setTypeAI(BaseCouncil.AI_PACIFIST);
       runCompleteDialog(from, goes);
       
       if (from.posture(goes) != Base.POSTURE.ALLY) {
@@ -226,7 +226,7 @@ public class TestWorld extends LogicTest {
       Base vassal = pair[0], lord = pair[1];
       World world = vassal.world;
       setPosture(vassal, lord, POSTURE.LORD, true);
-      vassal.council.setTypeAI(CityCouncil.AI_DEFIANT);
+      vassal.council.setTypeAI(BaseCouncil.AI_DEFIANT);
       
       float initPrestige = lord.prestige();
       
@@ -254,13 +254,13 @@ public class TestWorld extends LogicTest {
       Base vassal = pair[0], lord = pair[1];
       World world = vassal.world;
       setPosture(vassal, lord, POSTURE.LORD, true);
-      vassal.council.setTypeAI(CityCouncil.AI_DEFIANT);
+      vassal.council.setTypeAI(BaseCouncil.AI_DEFIANT);
       
       int time = 0;
       while (vassal.isLoyalVassalOf(lord)) {
         world.updateWithTime(time++);
       }
-      vassal.council.setTypeAI(CityCouncil.AI_OFF);
+      vassal.council.setTypeAI(BaseCouncil.AI_OFF);
 
       runCompleteInvasion(lord, vassal);
       
@@ -278,7 +278,7 @@ public class TestWorld extends LogicTest {
       World world = vassal.world;
       setPosture(vassal, lord, POSTURE.LORD, true);
       setSuppliesDue(vassal, lord, new Tally().setWith(SPYCE, 10));
-      vassal.council.setTypeAI(CityCouncil.AI_COMPLIANT);
+      vassal.council.setTypeAI(BaseCouncil.AI_COMPLIANT);
       
       int time = 0;
       while (time < YEAR_LENGTH * 0.8f) {
@@ -351,7 +351,7 @@ public class TestWorld extends LogicTest {
       
       //  TODO:  Establish a possible marriage with city 6 and test effects...
       
-      CityCouncil.MissionAssessment
+      BaseCouncil.MissionAssessment
         D1 = main.council.dialogAssessment(main, from[1], false),
         D2 = main.council.dialogAssessment(main, from[2], false),
         D3 = main.council.dialogAssessment(main, from[3], false),
@@ -359,7 +359,7 @@ public class TestWorld extends LogicTest {
         allD[] = { D1, D2, D3, D4 };
       
       I.say("\nAppeal of alliances is: ");
-      for (CityCouncil.MissionAssessment d : allD) {
+      for (BaseCouncil.MissionAssessment d : allD) {
         I.say("  "+d.goes()+": "+d.appeal());
       }
       if (D1.appeal() <= D3.appeal()) {
@@ -431,7 +431,7 @@ public class TestWorld extends LogicTest {
     //  Note:  This map is initialised purely to meet the requirements of the
     //  visual debugger...
     Base mapCity = new Base(world, world.addLocale(0, 0));
-    AreaMap map = new AreaMap(world, mapCity.locale, mapCity);
+    Area map = new Area(world, mapCity.locale, mapCity);
     map.performSetup(8, new Terrain[0]);
     world.settings.worldView    = true;
     world.settings.speedUp      = true;
@@ -544,8 +544,8 @@ public class TestWorld extends LogicTest {
     setupRoute(a.locale, b.locale, 1);
     a.initBuildLevels(HOLDING, 1f, TROOPER_LODGE, 1f);
     b.initBuildLevels(HOLDING, 9f, TROOPER_LODGE, 6f);
-    a.council.setTypeAI(CityCouncil.AI_OFF);
-    b.council.setTypeAI(CityCouncil.AI_OFF);
+    a.council.setTypeAI(BaseCouncil.AI_OFF);
+    b.council.setTypeAI(BaseCouncil.AI_OFF);
     return new Base[] { a, b };
   }
   
@@ -553,11 +553,11 @@ public class TestWorld extends LogicTest {
   static void runCompleteInvasion(Base from, Base goes) {
     World world = from.world;
     
-    CityCouncil.MissionAssessment IA = from.council.invasionAssessment(
+    BaseCouncil.MissionAssessment IA = from.council.invasionAssessment(
       from, goes, 0.5f, false
     );
     Mission force = from.council.spawnFormation(IA);
-    CityEvents.handleDeparture(force, from, goes);
+    BaseEvents.handleDeparture(force, from, goes);
     
     int time = 0;
     World.Journey j = world.journeyFor(force);
@@ -570,11 +570,11 @@ public class TestWorld extends LogicTest {
   static void runCompleteDialog(Base from, Base goes) {
     World world = from.world;
     
-    CityCouncil.MissionAssessment DA = from.council.dialogAssessment(
+    BaseCouncil.MissionAssessment DA = from.council.dialogAssessment(
       from, goes, false
     );
     Mission force = from.council.spawnFormation(DA);
-    CityEvents.handleDeparture(force, from, goes);
+    BaseEvents.handleDeparture(force, from, goes);
     
     int time = 0;
     World.Journey j = world.journeyFor(force);

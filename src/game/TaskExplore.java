@@ -26,7 +26,7 @@ public class TaskExplore extends Task {
   public TaskExplore(Session s) throws Exception {
     super(s);
     totalDist += s.loadInt();
-    from = AreaMap.loadTarget(active.map(), s);
+    from = Area.loadTarget(active.map(), s);
     maxRange = s.loadInt();
   }
   
@@ -34,7 +34,7 @@ public class TaskExplore extends Task {
   public void saveState(Session s) throws Exception {
     super.saveState(s);
     s.saveInt(totalDist);
-    AreaMap.saveTarget(from, active.map(), s);
+    Area.saveTarget(from, active.map(), s);
     s.saveInt(maxRange);
   }
   
@@ -48,14 +48,14 @@ public class TaskExplore extends Task {
   
   
   static TaskExplore configExploration(Actor actor, Target from, int range) {
-    AreaMap map  = actor.map;
-    Tile    goes = map.fog.pickRandomFogPoint(from, range);
+    Area map  = actor.map;
+    AreaTile    goes = map.fog.pickRandomFogPoint(from, range);
     if (goes == null) return null;
-    goes = Tile.nearestOpenTile(goes, map);
+    goes = AreaTile.nearestOpenTile(goes, map);
     if (goes == null) return null;
     
     TaskExplore task = new TaskExplore(actor);
-    task.totalDist = (int) AreaMap.distance(actor.at(), goes);
+    task.totalDist = (int) Area.distance(actor.at(), goes);
     task.from      = from;
     task.maxRange  = range;
     
@@ -71,19 +71,19 @@ public class TaskExplore extends Task {
   
   protected void onTarget(Target target) {
     Actor actor = (Actor) this.active;
-    AreaMap map = actor.map();
+    Area map = actor.map();
     
     map.fog.liftFog(target.at(), actor.sightRange());
     
     int range = maxRange > 0 ? maxRange : (int) (actor.sightRange() * 2);
-    Tile goes = map.fog.findNearbyFogPoint(from, range);
+    AreaTile goes = map.fog.findNearbyFogPoint(from, range);
     if (goes == null) return;
     
-    goes = Tile.nearestOpenTile(goes, map);
+    goes = AreaTile.nearestOpenTile(goes, map);
     if (goes == null) return;
     
     if (goes != null && totalDist < MAX_EXPLORE_DIST) {
-      totalDist += AreaMap.distance(actor.at(), goes);
+      totalDist += Area.distance(actor.at(), goes);
       configTask(null, null, goes, JOB.EXPLORING, 0);
     }
   }

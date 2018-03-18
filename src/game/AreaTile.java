@@ -4,13 +4,13 @@ package game;
 import gameUI.play.*;
 import graphics.common.Viewport;
 import util.*;
-import static game.AreaMap.*;
+import static game.Area.*;
 import static game.GameConstants.*;
 import static util.TileConstants.*;
 
 
 
-public class Tile implements Pathing, Selection.Focus {
+public class AreaTile implements Pathing, Selection.Focus {
   
   final public int x, y;
   
@@ -23,13 +23,13 @@ public class Tile implements Pathing, Selection.Focus {
   private Object pathFlag;  //  Only used during temporary path-searches...
   
   
-  Tile(int x, int y) {
+  AreaTile(int x, int y) {
     this.x = x;
     this.y = y;
   }
   
   
-  void loadState(Session s, AreaMap map) throws Exception {
+  void loadState(Session s, Area map) throws Exception {
     elevation = s.loadInt();
     int terrID = s.loadInt();
     terrain = terrID == -1 ? EMPTY : map.terrainTypes[terrID];
@@ -40,7 +40,7 @@ public class Tile implements Pathing, Selection.Focus {
   }
   
   
-  void saveState(Session s, AreaMap map) throws Exception {
+  void saveState(Session s, Area map) throws Exception {
     s.saveInt(elevation);
     s.saveInt(Visit.indexOf(terrain, map.terrainTypes));
     s.saveObject(above);
@@ -55,7 +55,7 @@ public class Tile implements Pathing, Selection.Focus {
   
   /**  Satisfying target and pathing interface-
     */
-  public Tile at() {
+  public AreaTile at() {
     return this;
   }
   
@@ -132,7 +132,7 @@ public class Tile implements Pathing, Selection.Focus {
   }
   
   
-  public Pathing[] adjacent(Pathing[] temp, AreaMap map) {
+  public Pathing[] adjacent(Pathing[] temp, Area map) {
     if (temp == null) temp = new Pathing[9];
     //
     //  Determine whether this tile is blocked-
@@ -149,7 +149,7 @@ public class Tile implements Pathing, Selection.Focus {
     //
     //  Visit each adjacent tile and see if they permit entry-
     for (int dir : T_INDEX) {
-      Tile n = map.tileAt(x + T_X[dir], y + T_Y[dir]);
+      AreaTile n = map.tileAt(x + T_X[dir], y + T_Y[dir]);
       if (n == null || blocked) { temp[dir] = null; continue; }
       
       int pathN = n.pathType();
@@ -223,17 +223,17 @@ public class Tile implements Pathing, Selection.Focus {
   
   /**  Various utility and convenience methods-
     */
-  public static Tile nearestOpenTile(Tile from, AreaMap map) {
+  public static AreaTile nearestOpenTile(AreaTile from, Area map) {
     return nearestOpenTile(from, map, 1);
   }
   
 
-  public static Tile nearestOpenTile(Tile from, AreaMap map, int maxRange) {
+  public static AreaTile nearestOpenTile(AreaTile from, Area map, int maxRange) {
     
     if (from == null || ! map.blocked(from)) return from;
     if (maxRange <= 0) return null;
 
-    for (Tile t : AreaMap.adjacent(from, null, map)) {
+    for (AreaTile t : Area.adjacent(from, null, map)) {
       if (t == null || map.blocked(t)) continue;
       return t;
     }
@@ -245,7 +245,7 @@ public class Tile implements Pathing, Selection.Focus {
       y -= 1;
       w += 2;
       h += 2;
-      for (Tile t : map.tilesAround(x, y, w, h)) {
+      for (AreaTile t : map.tilesAround(x, y, w, h)) {
         if (t == null || map.blocked(t)) continue;
         return t;
       }

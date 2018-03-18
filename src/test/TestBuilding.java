@@ -21,7 +21,7 @@ public class TestBuilding extends LogicTest {
     LogicTest test = new TestBuilding();
     
     Base base = setupTestBase(16, ALL_GOODS, false);
-    AreaMap map = base.activeMap();
+    Area map = base.activeMap();
     World world = map.world;
     world.settings.toggleFog         = false;
     world.settings.toggleFatigue     = false;
@@ -53,7 +53,7 @@ public class TestBuilding extends LogicTest {
     map.planning.placeObject(palace);
     
     Building toBuild[] = { forge, home, palace };
-    Series <Element> road = CityMapPlanning.placeStructure(
+    Series <Element> road = AreaPlanning.placeStructure(
       WALKWAY, base, false, 2, 2, 10, 1
     );
     
@@ -207,7 +207,7 @@ public class TestBuilding extends LogicTest {
   
   
   static Tally <Good> totalMaterials(
-    AreaMap map, boolean report, Good[] compared
+    Area map, boolean report, Good[] compared
   ) {
     if (report) I.say("\nReporting material presences...");
     

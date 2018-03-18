@@ -21,7 +21,7 @@ public class TestEcology extends LogicTest {
     LogicTest test = new TestEcology();
     
     Base base = setupTestBase(64, ALL_GOODS, true, JUNGLE, MEADOW);
-    AreaMap map = base.activeMap();
+    Area map = base.activeMap();
     World world = map.world;
     
     world.settings.toggleFog = false;
@@ -31,7 +31,7 @@ public class TestEcology extends LogicTest {
     Tally <Type> realPops  = new Tally();
     Tally <Type> popLevels = new Tally();
     
-    CityMapTerrain.populateAnimals(map, species);
+    AreaTerrain.populateAnimals(map, species);
     
     final int RUN_TIME = HUNTER_LIFESPAN;
     boolean popFailed = false;
@@ -47,7 +47,7 @@ public class TestEcology extends LogicTest {
       boolean popsOkay = true;
       for (ActorType s : species) {
         float
-          idealPop = CityMapTerrain.idealPopulation(s, map),
+          idealPop = AreaTerrain.idealPopulation(s, map),
           minPop   = (idealPop / 2.0f) - 2,
           maxPop   = (idealPop * 1.5f) + 2,
           realPop  = 0;

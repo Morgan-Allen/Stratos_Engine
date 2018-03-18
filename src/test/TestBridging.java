@@ -23,7 +23,7 @@ public class TestBridging extends LogicTest {
     
     Terrain terrTypes[] = { LAKE, MEADOW, JUNGLE };
     Base base = setupTestBase(16, ALL_GOODS, false, terrTypes);
-    AreaMap map = base.activeMap();
+    Area map = base.activeMap();
     World world = base.world;
     world.settings.toggleFog     = false;
     world.settings.toggleFatigue = false;
@@ -37,12 +37,12 @@ public class TestBridging extends LogicTest {
     byte elevation[] = {
       1, 1, 1, 1,   0, 0, 0, 0,   0, 0, 0, 0,   0, 0, 0, 0
     };
-    for (Tile t : map.allTiles()) {
+    for (AreaTile t : map.allTiles()) {
       Terrain ter = terrTypes[terrIDs[t.y]];
       int high = elevation[t.y];
       map.setTerrain(t, ter, (byte) 0, high);
     }
-    for (Tile t : map.tilesUnder(4, 0, 2, 8)) {
+    for (AreaTile t : map.tilesUnder(4, 0, 2, 8)) {
       map.setTerrain(t, LAKE, (byte) 0, t.elevation());
     }
     
@@ -55,8 +55,8 @@ public class TestBridging extends LogicTest {
     ActorUtils.fillWorkVacancies(palace);
     
     
-    CityMapPlanning.placeStructure(SHIELD_WALL, base, false, 14, 2, 2, 10);
-    CityMapPlanning.placeStructure(WALKWAY, base, false, 2 , 2, 1, 10);
+    AreaPlanning.placeStructure(SHIELD_WALL, base, false, 14, 2, 2, 10);
+    AreaPlanning.placeStructure(WALKWAY, base, false, 2 , 2, 1, 10);
     
     Building tower1 = (Building) TURRET.generate();
     tower1.setFacing(TileConstants.E);
@@ -95,7 +95,7 @@ public class TestBridging extends LogicTest {
       Element builds = pick.result();
       if (builds == null) break;
       
-      Tile at = builds.at();
+      AreaTile at = builds.at();
       Type type = builds.type();
       if (! builds.onMap()) builds.enterMap(map, at.x, at.y, 0, base);
       
@@ -107,7 +107,7 @@ public class TestBridging extends LogicTest {
       if (builds.complete()) toBuild.remove(builds);
       map.pathCache.updatePathCache();
       
-      for (Tile t : map.tilesUnder(
+      for (AreaTile t : map.tilesUnder(
         at.x - 1,
         at.y - 1,
         type.wide + 2,
@@ -126,7 +126,7 @@ public class TestBridging extends LogicTest {
       I.say("  Buildings are: ");
       for (Building b : map.buildings()) {
         I.say("  "+b+" at: "+b.at()+", entrances:");
-        for (Tile e : b.entrances()) I.say("    "+e);
+        for (AreaTile e : b.entrances()) I.say("    "+e);
       }
       
       I.say("  Still need to build: ");
@@ -143,7 +143,7 @@ public class TestBridging extends LogicTest {
       for (Element e : map.planning.toBuildCopy()) {
         if (e == palace) continue;
         
-        Tile at = e.at();
+        AreaTile at = e.at();
         map.planning.unplaceObject(e);
         e.exitMap(map);
         
@@ -176,7 +176,7 @@ public class TestBridging extends LogicTest {
       
       if (! buildOkay) {
         boolean buildDone = true;
-        for (Tile t : map.allTiles()) {
+        for (AreaTile t : map.allTiles()) {
           Element a = map.above(t);
           if (a == null || a.type().isNatural()) continue;
           if (a.buildLevel() < 1) buildDone = false;
@@ -185,7 +185,7 @@ public class TestBridging extends LogicTest {
       }
       
       if (! accessOkay) {
-        Tile from = map.tileAt(1, 1), goes = map.tileAt(15, 0);
+        AreaTile from = map.tileAt(1, 1), goes = map.tileAt(15, 0);
         
         boolean connected = true;
         connected &= map.pathCache.pathConnects(from, goes);
@@ -209,7 +209,7 @@ public class TestBridging extends LogicTest {
   
   
   private static boolean testPathing(
-    Tile t, Building base, AreaMap map
+    AreaTile t, Building base, Area map
   ) {
     ActorPathSearch s = new ActorPathSearch(map, t, base, -1);
     s.doSearch();

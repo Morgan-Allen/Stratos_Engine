@@ -48,7 +48,7 @@ public class Readout extends UIGroup {
     super.updateState();
     
     final Base played = UI.base;
-    final AreaMap map = UI.stage;
+    final Area map    = UI.area;
     
     read.setText("");
     //
@@ -62,7 +62,6 @@ public class Readout extends UIGroup {
     int days = time / GameConstants.DAY_LENGTH;
     read.append("    ");
     read.append(I.padToLength("Day "+days+" (Time "+time+")", 21), Colour.WHITE);
-    
     
     /*
     //

@@ -40,17 +40,17 @@ public class TaskAssessTax extends Task {
   ) {
     float cashCarried = actor.carried(CASH);
     Pick <Building> pick = new Pick();
-    Tile entrance = from.mainEntrance();
+    AreaTile entrance = from.mainEntrance();
     
     for (Building b : from.map.buildings) {
-      float distW = AreaMap.distance(actor.at(), b.mainEntrance());
-      float distB = AreaMap.distance(entrance  , b.mainEntrance());
+      float distW = Area.distance(actor.at(), b.mainEntrance());
+      float distB = Area.distance(entrance  , b.mainEntrance());
       if (distB > from.type().maxDeliverRange) continue;
       
       int amount = (int) b.inventory(CASH);
       if (amount == 0) continue;
       
-      pick.compare(b, Nums.abs(amount) * AreaMap.distancePenalty(distW));
+      pick.compare(b, Nums.abs(amount) * Area.distancePenalty(distW));
     }
     
     if (cashCarried > maxCollect || (pick.empty() && cashCarried != 0)) {

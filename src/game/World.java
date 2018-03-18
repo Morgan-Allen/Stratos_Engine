@@ -247,7 +247,7 @@ public class World implements Session.Saveable {
   }
   
   
-  public AreaMap activeBaseMap() {
+  public Area activeBaseMap() {
     for (Base c : bases) if (c.activeMap() != null) return c.activeMap();
     return null;
   }
@@ -358,7 +358,7 @@ public class World implements Session.Saveable {
   public void updateWithTime(int time) {
     this.time = time;
     
-    AreaMap active = activeBaseMap();
+    Area active = activeBaseMap();
     if (active != null) {
       active.locals.updateCity();
     }

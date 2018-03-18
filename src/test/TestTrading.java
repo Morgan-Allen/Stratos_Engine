@@ -25,7 +25,7 @@ public class TestTrading extends LogicTest {
     Base  baseC = new Base(world, world.addLocale(2, 2));
     Base  awayC = new Base(world, world.addLocale(3, 3));
     world.addBases(baseC, awayC);
-    awayC.council.setTypeAI(CityCouncil.AI_OFF);
+    awayC.council.setTypeAI(BaseCouncil.AI_OFF);
     baseC.setName("(Home City)");
     awayC.setName("(Away City)");
     
@@ -48,7 +48,7 @@ public class TestTrading extends LogicTest {
     //  Send parts and medicine.
     //  Get spyce and greens.
     
-    AreaMap map = new AreaMap(world, baseC.locale, baseC);
+    Area map = new Area(world, baseC.locale, baseC);
     map.performSetup(10, new Terrain[0]);
     world.settings.toggleFog       = false;
     world.settings.toggleHunger    = false;
@@ -82,7 +82,7 @@ public class TestTrading extends LogicTest {
     Building weaver = (Building) PHYSICIAN_STATION.generate();
     weaver.enterMap(map, 6, 2, 1, baseC);
     
-    CityMapPlanning.placeStructure(WALKWAY, baseC, true, 1, 5, 8, 1);
+    AreaPlanning.placeStructure(WALKWAY, baseC, true, 1, 5, 8, 1);
     
     ActorUtils.fillAllWorkVacancies(map);
     int initFunds = 100;

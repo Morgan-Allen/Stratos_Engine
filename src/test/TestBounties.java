@@ -31,7 +31,7 @@ public class TestBounties extends LogicTest {
   static boolean testAttackBuildingMission(boolean graphics) {
     TestBounties test = new TestBounties() {
       
-      Mission setupMission(AreaMap map, Base base) {
+      Mission setupMission(Area map, Base base) {
         BuildingForNest nest = (BuildingForNest) RUINS_LAIR.generate();
         nest.enterMap(map, 20, 20, 1, map.locals);
         
@@ -41,7 +41,7 @@ public class TestBounties extends LogicTest {
         return mission;
       }
       
-      boolean checkVictory(AreaMap map, Base base, Object focus) {
+      boolean checkVictory(Area map, Base base, Object focus) {
         Building nest = (Building) focus;
         return nest.destroyed();
       }
@@ -53,7 +53,7 @@ public class TestBounties extends LogicTest {
   static boolean testAttackActorMission(boolean graphics) {
     TestBounties test = new TestBounties() {
       
-      Mission setupMission(AreaMap map, Base base) {
+      Mission setupMission(Area map, Base base) {
         Actor creature = (Actor) MICOVORE.generate();
         creature.enterMap(map, 20, 20, 1, map.locals);
         creature.takeDamage(creature.maxHealth() * 0.7f);
@@ -64,7 +64,7 @@ public class TestBounties extends LogicTest {
         return mission;
       }
       
-      boolean checkVictory(AreaMap map, Base base, Object focus) {
+      boolean checkVictory(Area map, Base base, Object focus) {
         Actor creature = (Actor) focus;
         return creature.destroyed();
       }
@@ -78,8 +78,8 @@ public class TestBounties extends LogicTest {
       
       int RANGE = 8;
       
-      Mission setupMission(AreaMap map, Base base) {
-        Tile looks = map.tileAt(20, 20);
+      Mission setupMission(Area map, Base base) {
+        AreaTile looks = map.tileAt(20, 20);
         
         Mission mission;
         mission = new Mission(Mission.OBJECTIVE_RECON, base, false);
@@ -88,13 +88,13 @@ public class TestBounties extends LogicTest {
         return mission;
       }
       
-      boolean checkVictory(AreaMap map, Base base, Object focus) {
-        Tile looks = (Tile) focus;
+      boolean checkVictory(Area map, Base base, Object focus) {
+        AreaTile looks = (AreaTile) focus;
         int r = RANGE;
         boolean allSeen = true;
         
-        for (Tile t : map.tilesUnder(looks.x - r, looks.y - r, r * 2, r * 2)) {
-          float dist = AreaMap.distance(looks, t);
+        for (AreaTile t : map.tilesUnder(looks.x - r, looks.y - r, r * 2, r * 2)) {
+          float dist = Area.distance(looks, t);
           if (dist > r) continue;
           if (map.fog.maxSightLevel(t) == 0) allSeen = false;
         }
@@ -110,7 +110,7 @@ public class TestBounties extends LogicTest {
     
     Base base = LogicTest.setupTestBase(32, ALL_GOODS, false);
     base.setName("Client Base");
-    AreaMap map = base.activeMap();
+    Area map = base.activeMap();
     //World world = base.world;
     
     int initFunds = 1000, reward = 500;
@@ -142,7 +142,7 @@ public class TestBounties extends LogicTest {
     try {
       Session.saveSession("saves/test_save.tlt", map);
       Session session = Session.loadSession("saves/test_save.tlt", true);
-      AreaMap loaded = (AreaMap) session.loaded()[0];
+      Area loaded = (Area) session.loaded()[0];
       
       Mission m = loaded.world.baseNamed("Client Base").missions().first();
       if (m.focus() == null) I.say("LOADED MISSION HAS NO FOCUS!");
@@ -208,12 +208,12 @@ public class TestBounties extends LogicTest {
   }
   
   
-  Mission setupMission(AreaMap map, Base base) {
+  Mission setupMission(Area map, Base base) {
     return null;
   }
   
 
-  boolean checkVictory(AreaMap map, Base base, Object focus) {
+  boolean checkVictory(Area map, Base base, Object focus) {
     return false;
   }
   

@@ -26,7 +26,7 @@ public class TestFarming extends LogicTest {
     LogicTest test = new TestFarming();
 
     Base base = setupTestBase(20, ALL_GOODS, true, DESERT, MEADOW, JUNGLE);
-    AreaMap map = base.activeMap();
+    Area map = base.activeMap();
     World world = map.world;
     world.settings.toggleFog     = false;
     world.settings.toggleHunger  = false;
@@ -35,11 +35,11 @@ public class TestFarming extends LogicTest {
     BuildingForGather farm = (BuildingForGather) NURSERY.generate();
     farm.enterMap(map, 9, 9, 1, base);
     ActorUtils.fillWorkVacancies(farm);
-    CityMapPlanning.placeStructure(WALKWAY, base, true, 9, 8, 10, 1);
+    AreaPlanning.placeStructure(WALKWAY, base, true, 9, 8, 10, 1);
     
     
-    Batch <Tile> plantTiles = new Batch();
-    for (Plot p : farm.plots()) for (Tile t : map.tilesUnder(p)) {
+    Batch <AreaTile> plantTiles = new Batch();
+    for (Plot p : farm.plots()) for (AreaTile t : map.tilesUnder(p)) {
       if (t != null) plantTiles.add(t);
     }
     Good needed[] = farm.type().produced;
@@ -54,7 +54,7 @@ public class TestFarming extends LogicTest {
       
       //
       //  Ensure that every actor has exactly one focus-target:
-      for (Tile t : map.allTiles()) {
+      for (AreaTile t : map.allTiles()) {
         
         int numF = 0;
         for (Active a : t.focused()) {
@@ -94,7 +94,7 @@ public class TestFarming extends LogicTest {
       if (! planted) {
         Batch <Element> crops = new Batch();
         int numT = 0;
-        for (Tile t : plantTiles) {
+        for (AreaTile t : plantTiles) {
           Element aboveE = map.above(t);
           Type above = aboveE == null ? null : aboveE.type();
           if (above == null || above.growRate == 0) continue;

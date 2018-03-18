@@ -9,7 +9,7 @@ import util.*;
 
 
 
-public class Choice {
+public class ActorChoice {
   
   
   /**  Data fields, constructors and setup-
@@ -24,12 +24,12 @@ public class Choice {
   public boolean isVerbose = false;
   
   
-  public Choice(Actor actor) {
+  public ActorChoice(Actor actor) {
     this.actor = actor;
   }
   
   
-  public Choice(Actor actor, Series <Task> plans) {
+  public ActorChoice(Actor actor, Series <Task> plans) {
     this(actor);
     for (Task p : plans) add(p);
   }
