@@ -57,7 +57,7 @@ public class TestMilitary extends LogicTest {
     
     
     Mission troops  = null;
-    Mission enemies = new Mission(Mission.OBJECTIVE_CONQUER, awayC, true);
+    Mission enemies = new MissionStrike(awayC, true);
     for (int n = 3; n-- > 0;) {
       Actor fights = (Actor) Trooper.TROOPER.generate();
       fights.assignBase(awayC);
@@ -79,7 +79,7 @@ public class TestMilitary extends LogicTest {
       test.runLoop(baseC, 10, graphics, "saves/test_military.tlt");
       
       if (! recruited) {
-        troops = new Mission(Mission.OBJECTIVE_GARRISON, baseC, false);
+        troops = new MissionSecurity(baseC, false);
         for (Actor w : fort1.workers()) troops.toggleRecruit(w, true);
         for (Actor w : fort2.workers()) troops.toggleRecruit(w, true);
         troops.setFocus(map.tileAt(25, 25), TileConstants.E, map);
@@ -110,7 +110,7 @@ public class TestMilitary extends LogicTest {
       }
       
       if (homeWin && ! invading) {
-        troops = new Mission(Mission.OBJECTIVE_CONQUER, baseC, false);
+        troops = new MissionStrike(baseC, false);
         for (Actor w : fort1.workers()) troops.toggleRecruit(w, true);
         for (Actor w : fort2.workers()) troops.toggleRecruit(w, true);
         troops.setFocus(awayC);

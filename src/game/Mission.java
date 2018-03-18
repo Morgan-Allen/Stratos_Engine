@@ -10,10 +10,8 @@ import static game.ActorUtils.*;
 import static game.GameConstants.*;
 
 
-//  TODO:  Start splitting this off into separate classes...
 
-
-public class Mission implements
+public abstract class Mission implements
   Session.Saveable, Journeys, TileConstants, Employer, Selection.Focus
 {
   
@@ -56,8 +54,8 @@ public class Mission implements
   
   private boolean  away   = false;
   private boolean  active = false;
-  private Base     homeCity    ;
-  private Base     awayCity    ;
+  private Base     homeBase    ;
+  private Base     awayBase    ;
   private Area     map         ;
   private AreaTile transitPoint;
   private AreaTile standPoint  ;
@@ -77,7 +75,7 @@ public class Mission implements
   public Mission(int objective, Base belongs, boolean activeAI) {
     this.objective  = objective;
     this.tacticalAI = activeAI;
-    this.homeCity   = belongs;
+    this.homeBase   = belongs;
     this.map        = belongs.activeMap();
   }
   
@@ -107,8 +105,8 @@ public class Mission implements
     s.loadObjects(casualties);
     
     away         = s.loadBool();
-    homeCity     = (Base   ) s.loadObject();
-    awayCity     = (Base   ) s.loadObject();
+    homeBase     = (Base   ) s.loadObject();
+    awayBase     = (Base   ) s.loadObject();
     map          = (Area) s.loadObject();
     
     active = s.loadBool();
@@ -157,8 +155,8 @@ public class Mission implements
     s.saveObjects(casualties);
     
     s.saveBool  (away    );
-    s.saveObject(homeCity);
-    s.saveObject(awayCity);
+    s.saveObject(homeBase);
+    s.saveObject(awayBase);
     s.saveObject(map     );
     
     s.saveBool(active);
@@ -197,10 +195,10 @@ public class Mission implements
   public boolean incReward(int inc) {
     if (! isBounty) return false;
     
-    if (inc > homeCity.funds()) return false;
+    if (inc > homeBase.funds()) return false;
     if (inc < 0 - cashReward) inc = 0 - cashReward;
     
-    homeCity.incFunds(0 - inc);
+    homeBase.incFunds(0 - inc);
     this.cashReward += inc;
     return true;
   }
@@ -248,7 +246,7 @@ public class Mission implements
   public void setTermsAccepted(boolean accepted) {
     if (accepted) {
       termsAccepted = true;
-      BaseEvents.imposeTerms(awayCity, homeCity, this);
+      BaseEvents.imposeTerms(awayBase, homeBase, this);
       setMissionComplete(true);
     }
     else {
@@ -308,18 +306,18 @@ public class Mission implements
   
   public void setFocus(Base city) {
     
-    homeCity.missions.toggleMember(this, true);
+    homeBase.missions.toggleMember(this, true);
     this.active = true;
     
     Base from, goes;
-    if (city != homeCity) {
-      this.awayCity = city;
-      from = homeCity;
+    if (city != homeBase) {
+      this.awayBase = city;
+      from = homeBase;
       goes = city;
     }
     else {
-      from = awayCity;
-      goes = homeCity;
+      from = awayBase;
+      goes = homeBase;
     }
     
     if (onMap()) {
@@ -334,7 +332,7 @@ public class Mission implements
   
   
   public void setFocus(Object focus, int facing, Area map) {
-    homeCity.missions.toggleMember(this, true);
+    homeBase.missions.toggleMember(this, true);
     
     this.facing = facing;
     this.focus  = focus ;
@@ -356,9 +354,9 @@ public class Mission implements
       }
     }
     
-    homeCity.missions.toggleMember(this, false);
+    homeBase.missions.toggleMember(this, false);
     
-    this.awayCity = null  ;
+    this.awayBase = null  ;
     this.focus    = null  ;
     this.facing   = CENTRE;
     this.active   = false ;
@@ -402,6 +400,11 @@ public class Mission implements
   }
   
   
+  boolean onAwayMap() {
+    return awayBase != null && map == awayBase.activeMap();
+  }
+  
+  
   int facing() {
     return facing;
   }
@@ -413,9 +416,7 @@ public class Mission implements
   
   
   Pathing pathFrom() {
-    
     //  TODO:  Use the position of the member closest to average?
-    
     Actor a = recruits.atIndex(recruits.size() / 2);
     return Task.pathOrigin(a);
   }
@@ -456,7 +457,7 @@ public class Mission implements
   
   
   public Base awayCity() {
-    return awayCity;
+    return awayBase;
   }
   
   
@@ -494,17 +495,17 @@ public class Mission implements
     }
     //
     //  Check to see if an offer has expired-
-    Base local   = away ? awayCity : homeCity;
-    Base distant = away ? homeCity : awayCity;
-    int sinceArrive = Area.timeSince(timeArrived  , homeCity.world.time);
-    int sinceTerms  = Area.timeSince(timeTermsSent, homeCity.world.time);
+    Base local   = away ? awayBase : homeBase;
+    Base distant = away ? homeBase : awayBase;
+    int sinceArrive = Area.timeSince(timeArrived  , homeBase.world.time);
+    int sinceTerms  = Area.timeSince(timeTermsSent, homeBase.world.time);
     boolean hasEnvoy = escorted.size() > 0;
     
     if (hasEnvoy && (
       sinceTerms > DAY_LENGTH ||
       (timeTermsSent == -1 && sinceArrive > DAY_LENGTH * 2)
     )) {
-      timeTermsSent = homeCity.world.time;
+      timeTermsSent = homeBase.world.time;
       termsRefused  = true;
     }
     //
@@ -524,71 +525,15 @@ public class Mission implements
     }
     //
     //  And see if it's time to leave otherwise-
-    else if (focus == awayCity) {
+    else if (focus == awayBase) {
       boolean shouldLeave = false;
       shouldLeave |= termsAccepted;
       shouldLeave |= termsRefused && objective == OBJECTIVE_DIALOG;
       shouldLeave |= complete;
       if (shouldLeave) {
-        setFocus(homeCity);
+        setFocus(homeBase);
       }
     }
-  }
-  
-  
-  public boolean allowsFocus(Object newFocus) {
-    if (objective == OBJECTIVE_CONQUER) {
-      if (newFocus instanceof Building) return true;
-      if (newFocus instanceof Actor   ) return true;
-    }
-    if (objective == OBJECTIVE_RECON) {
-      if (newFocus instanceof AreaTile) return true;
-    }
-    return false;
-  }
-  
-  
-  boolean objectiveComplete() {
-    if (objective == OBJECTIVE_CONQUER) {
-      if (focus instanceof Element) {
-        Element e = (Element) focus;
-        return e.destroyed();
-      }
-      //  TODO:  Use this-
-      /*
-      if (! FormationUtils.tacticalFocusValid(this, secureFocus)) {
-        return true;
-      }
-      //*/
-    }
-    if (objective == OBJECTIVE_GARRISON) {
-      //  TODO:  In this case, you should arrange shifts and pay off at
-      //  regular intervals.
-      //int sinceStart = CityMap.timeSince(timeBegun, map.time);
-      //if (sinceStart > MONTH_LENGTH * 2) return true;
-    }
-    if (objective == OBJECTIVE_RECON) {
-      if (focus instanceof AreaTile) {
-        AreaTile looks = (AreaTile) focus;
-        int r = (int) exploreRange;
-        boolean allSeen = true;
-        
-        for (AreaTile t : map.tilesUnder(looks.x - r, looks.y - r, r * 2, r * 2)) {
-          float dist = Area.distance(looks, t);
-          if (dist > r) continue;
-          if (map.fog.maxSightLevel(t) == 0) allSeen = false;
-        }
-        
-        return allSeen;
-      }
-    }
-    if (objective == OBJECTIVE_DIALOG) {
-      return termsAccepted || termsRefused;
-    }
-    
-    //  TODO:  You also need an objective for exploring the surrounds.
-    
-    return false;
   }
   
   
@@ -612,7 +557,7 @@ public class Mission implements
     //
     //  There are 4 cases here: arriving home or away, and arriving on a map or
     //  not.
-    boolean home  = goes == homeCity;
+    boolean home  = goes == homeBase;
     boolean onMap = goes.activeMap() != null;
     //
     //  In the event that a formation arrives on the map, either it's a foreign
@@ -621,7 +566,7 @@ public class Mission implements
     if (onMap) {
       if (reports()) I.say("\nARRIVED ON MAP: "+goes+" FROM "+journey.from);
       
-      AreaTile transits     = findTransitPoint(goes.activeMap(), goes, journey.from);
+      AreaTile transits = findTransitPoint(goes.activeMap(), goes, journey.from);
       this.map          = goes.activeMap();
       this.transitPoint = transits;
       
@@ -659,91 +604,27 @@ public class Mission implements
       else {
         if (reports()) I.say("\nARRIVED AT: "+goes+" FROM "+journey.from);
         this.away = true;
-        
-        if (objective == OBJECTIVE_CONQUER) {
-          BaseEvents.handleInvasion(this, goes, journey);
-        }
-        if (objective == OBJECTIVE_GARRISON) {
-          BaseEvents.handleGarrison(this, goes, journey);
-        }
-        if (objective == OBJECTIVE_DIALOG) {
-          BaseEvents.handleDialog(this, goes, journey);
-        }
+        handleArrival(goes, journey);
       }
     }
   }
+  
+  
+  
+  /**  Delegate functions for subclasses to flesh out-
+    */
+  public abstract boolean allowsFocus(Object newFocus);
+  
+  abstract boolean objectiveComplete();
+  
+  abstract void handleArrival(Base goes, World.Journey journey);
   
   
   
   /**  Organising actors and other basic query methods-
     */
-  public Task selectActorBehaviour(Actor actor) {
-    
-    boolean haveTerms  = hasTerms();
-    boolean isEnvoy    = escorted.includes(actor);
-    //boolean standby    = objective == OBJECTIVE_STANDBY;
-    //boolean offensive  = objective == OBJECTIVE_CONQUER;
-    //boolean defensive  = objective == OBJECTIVE_GARRISON;
-    boolean diplomatic = objective == OBJECTIVE_DIALOG;
-    boolean explores   = objective == OBJECTIVE_RECON;
-    boolean onAwayMap  = awayCity != null && map == awayCity.activeMap();
-    
-    if (onAwayMap && haveTerms && isEnvoy && timeTermsSent == -1) {
-      Actor offersTerms = MissionUtils.findOfferRecipient(this);
-      Task t = actor.targetTask(offersTerms, 1, Task.JOB.DIALOG, this);
-      if (t != null) return t;
-    }
-    
-    //  TODO:  Merge with 'shouldLeave' criteria above.
-    if (complete || termsAccepted || (diplomatic && termsRefused)) {
-      AreaTile exits = standLocation(actor);
-      if (exits != null) {
-        return actor.targetTask(exits, 10, Task.JOB.RETURNING, this);
-      }
-    }
-    
-    AreaTile stands = standLocation(actor);
-    
-    TaskCombat taskC = (Task.inCombat(actor) || isEnvoy) ? null :
-      TaskCombat.nextReaction(actor, stands, this, AVG_FILE)
-    ;
-    if (taskC != null) {
-      return taskC;
-    }
-    
-    TaskCombat taskS = (Task.inCombat(actor) || isEnvoy) ? null :
-      TaskCombat.nextSieging(actor, this)
-    ;
-    if (taskS != null) {
-      return taskS;
-    }
-    
-    TaskExplore recon = (! explores) ? null :
-      TaskExplore.configExploration(actor, (Target) focus, (int) exploreRange)
-    ;
-    if (recon != null) {
-      return recon;
-    }
-    
-    Task standT = actor.targetTask(stands, 1, Task.JOB.MILITARY, this);
-    if (standT != null) {
-      return standT;
-    }
-    
-    return null;
-  }
-  
-  
   public void actorTargets(Actor actor, Target other) {
-    if (actor.jobType() == Task.JOB.DIALOG) {
-      dispatchTerms(awayCity);
-    }
-    if (actor.jobType() == Task.JOB.MILITARY) {
-      return;
-    }
-    if (actor.jobType() == Task.JOB.RETURNING) {
-      return;
-    }
+    return;
   }
   
   
@@ -763,7 +644,7 @@ public class Mission implements
   
   
   public Base base() {
-    return homeCity;
+    return homeBase;
   }
   
   
@@ -835,7 +716,7 @@ public class Mission implements
   
   
   public String toString() {
-    return "Mission ("+homeCity+")";
+    return "Mission ("+homeBase+")";
   }
   
   
@@ -870,7 +751,7 @@ public class Mission implements
       if (objective == OBJECTIVE_GARRISON) key = World.KEY_DEFEND_FLAG ;
       if (objective == OBJECTIVE_RECON   ) key = World.KEY_EXPLORE_FLAG;
       if (objective == OBJECTIVE_DIALOG  ) key = World.KEY_CONTACT_FLAG;
-      Type type = homeCity.world.mediaTypeWithKey(key);
+      Type type = homeBase.world.mediaTypeWithKey(key);
       if (type == null || type.model == null) {
         flag   = null;
         noFlag = true;
@@ -891,7 +772,7 @@ public class Mission implements
       flag.position.z += 1;
     }
     
-    //  TODO:  Tint the flag if it's been highlit!
+    //  TODO:  Tint the flag if it's been highlit.
     
     flag.readyFor(rendering);
   }

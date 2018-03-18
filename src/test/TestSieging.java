@@ -85,7 +85,7 @@ public class TestSieging extends LogicTest {
     }
     
     Mission guarding;
-    guarding = new Mission(Mission.OBJECTIVE_GARRISON, baseC, false);
+    guarding = new MissionSecurity(baseC, false);
     for (Actor w : fort.workers()) guarding.toggleRecruit(w, true);
     guarding.setFocus(tower, TileConstants.E, map);
     

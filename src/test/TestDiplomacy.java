@@ -70,7 +70,7 @@ public class TestDiplomacy extends LogicTest {
     
     
     Mission escort;
-    escort = new Mission(Mission.OBJECTIVE_DIALOG, awayC, true);
+    escort = new MissionContact(awayC, true);
     for (int n = 4; n-- > 0;) {
       Actor s = (Actor) Trooper.TROOPER.generate();
       s.assignBase(awayC);
@@ -126,7 +126,7 @@ public class TestDiplomacy extends LogicTest {
       }
       
       if (escortDeparted && ! escortSent) {
-        escort = new Mission(Mission.OBJECTIVE_DIALOG, baseC, true);
+        escort = new MissionContact(baseC, true);
         escort.assignTerms(POSTURE.TRADING, null, null, null);
         for (Actor w : garrison.workers()) escort.toggleRecruit(w, true);
         escort.toggleEscorted(minister, true);
