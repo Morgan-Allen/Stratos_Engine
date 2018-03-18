@@ -48,7 +48,8 @@ public class Task implements Session.Saveable {
     ROUTINE     =  5.0f,
     URGENT      =  7.5f,
     PARAMOUNT   =  10.0f,
-    SWITCH_DIFF =  5.0f
+    SWITCH_DIFF =  5.0f,
+    PRIORITY_PER_100_CASH = 0.5f
   ;
   final public static float
     HARM_NULL   = -1.0f,
@@ -213,14 +214,26 @@ public class Task implements Session.Saveable {
   }
   
   
+  protected float rewardPriority() {
+    if (origin instanceof Mission) {
+      Mission mission = (Mission) origin;
+      float reward = 0;
+      reward += mission.cashReward();
+      return PRIORITY_PER_100_CASH * reward / 100f;
+    }
+    return 0;
+  }
+  
+  
   public float priority() {
     if (priorityEval == NO_PRIORITY) {
       float
         chance  = successChance(),
         success = successPriority(),
-        failure = failCostPriority()
+        failure = failCostPriority(),
+        reward  = rewardPriority()
       ;
-      priorityEval = (chance * success) + ((1 - chance) * failure);
+      priorityEval = (chance * (success + reward)) + ((1 - chance) * failure);
     }
     return priorityEval;
   }

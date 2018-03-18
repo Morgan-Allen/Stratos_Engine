@@ -381,6 +381,22 @@ public class TaskCombat extends Task {
   
   
   
+  /**  Priority-evaluation:
+    */
+  protected float successPriority() {
+    //  TODO:  This needs adjustment, particularly for long-range mission-tasks
+    //  vs. local-assessment (which could prompt retreat.)
+    
+    return ROUTINE;
+  }
+  
+  
+  public float harmLevel() {
+    return FULL_HARM;
+  }
+  
+  
+  
   /**  Behaviour-execution-
     */
   boolean checkAndUpdateTask() {
@@ -394,8 +410,8 @@ public class TaskCombat extends Task {
     super.toggleFocus(activeNow);
     primary.setFocused(active, activeNow);
   }
-  
-  
+
+
   float actionRange() {
     if (attackMode == ATTACK_MELEE) return 1.5f;
     if (attackMode == ATTACK_RANGE) return active.type().rangeDist + 1;
@@ -417,11 +433,6 @@ public class TaskCombat extends Task {
     ///if (range < maxRange) I.say("SHOULD FIRE");
     
     return range < maxRange;
-  }
-
-
-  public float harmLevel() {
-    return FULL_HARM;
   }
   
   
