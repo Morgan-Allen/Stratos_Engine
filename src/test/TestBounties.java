@@ -132,12 +132,12 @@ public class TestBounties extends LogicTest {
     Actor sample = fort.workers().first();
     Task given = mission.selectActorBehaviour(sample);
     
+    
     if (given == null) {
       I.say("\n"+title+" TEST FAILED!");
       I.say("  No task provided for actor: "+sample);
       return false;
     }
-    
     
     try {
       Session.saveSession("saves/test_save.tlt", map);

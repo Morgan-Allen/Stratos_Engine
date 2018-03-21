@@ -75,9 +75,9 @@ public class GameConstants {
     TILES_PER_GRAZER = 100 ,
     TILES_PER_HUNTER = 400 ,
     AVG_ANIMAL_YIELD = 8   ,
-    ANIMAL_MATURES   = DAY_LENGTH * 4,
-    GRAZER_LIFESPAN  = YEAR_LENGTH  * 2,
-    HUNTER_LIFESPAN  = YEAR_LENGTH  * 8,
+    ANIMAL_MATURES   = DAY_LENGTH  * 4,
+    GRAZER_LIFESPAN  = YEAR_LENGTH * 2,
+    HUNTER_LIFESPAN  = YEAR_LENGTH * 8,
     ANIMAL_PREG_TIME = ANIMAL_MATURES / 2,
     AVG_BUTCHER_TIME = DAY_LENGTH / (AVG_ANIMAL_YIELD * 2),
     //
@@ -498,6 +498,7 @@ public class GameConstants {
     Tally <Good> prodLevels();
     float importPrice(Good g, Base sells);
     float exportPrice(Good g, Base buys );
+    boolean allowExport(Good g, Trader buys);
   }
   
   

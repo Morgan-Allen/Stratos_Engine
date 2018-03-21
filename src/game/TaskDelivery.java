@@ -93,14 +93,14 @@ public class TaskDelivery extends Task {
   static Building findNearestOfType(
     Type type, int maxDist, Building from
   ) {
-    return findNearestDemanding(type, null, null, -1, from, false);
+    return findNearestDemanding(type, null, null, maxDist, from, false);
   }
   
   
   static Building findNearestWithFeature(
     Good feature, int maxDist, Building from
   ) {
-    return findNearestDemanding(null, feature, null, -1, from, false);
+    return findNearestDemanding(null, feature, null, maxDist, from, false);
   }
   
   
@@ -141,15 +141,37 @@ public class TaskDelivery extends Task {
       if (maxDist > 0 && dist > maxDist) continue;
       
       float rating = 1;
-      if (needed != null) rating *= b.demandFor(needed);
-      if (rating <= 0) continue;
-      if (otherTrades) rating /= 2;
       
-      pick.compare(b, rating * AreaMap.distancePenalty(dist));
+      if (needed != null) {
+        float demand   = b.demandFor(needed);
+        float maxStock = b.maxStock (needed);
+        if (demand <= 0 || maxStock <= 0) continue;
+        if (otherTrades) rating /= 2;
+        rating *= demand / maxStock;
+      }
+      
+      rating *= AreaMap.distancePenalty(dist);
+      
+      pick.compare(b, rating);
     }
     
     return pick.result();
   }
+  
+  
+  
+  /**  Priority-evaluation:
+    */
+  protected float successPriority() {
+    Actor actor = (Actor) active;
+    float base = super.successPriority();
+    if (carried.isEdible && goes == actor.home()) {
+      float max = actor.hungerLevel();
+      return base + ((Task.PARAMOUNT - base) * max);
+    }
+    else return base;
+  }
+  
   
   
   
@@ -166,8 +188,8 @@ public class TaskDelivery extends Task {
     configTravel(from, jobType, e);
     return this;
   }
-  
-  
+
+
   void configTravel(Building site, Task.JOB jobType, Employer e) {
     if (site.complete()) {
       configTask(e, site, null, jobType, 0);
@@ -195,7 +217,7 @@ public class TaskDelivery extends Task {
         from.addInventory(cashPaid, CASH);
       }
       
-      if (amount > 0) {
+      if (amount > 0.1f) {
         actor.pickupGood(carried, amount, from);
         configTravel(goes, type, origin);
       }

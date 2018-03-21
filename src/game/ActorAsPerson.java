@@ -240,7 +240,6 @@ public class ActorAsPerson extends Actor {
     if (needRest > Rand.num() + 0.5f) {
       assignTask(TaskResting.configResting(this, rests));
     }
-    
     //
     //  See if there's a missions worth joining.  Or, if you have an active
     //  mission, undertake the next associated task-
@@ -344,35 +343,10 @@ public class ActorAsPerson extends Actor {
   /**  Handling hunger, injury, healing and eating, etc:
     */
   void update() {
-    WorldSettings settings = map.world.settings;
-    boolean organic = type().organic;
-    
-    //  TODO:  Unify this with the method in ActorAsAnimal.
-    
-    if (organic) {
-      hunger += settings.toggleHunger ? (1f / STARVE_INTERVAL ) : 0;
-      if (jobType() == JOB.RESTING) {
-        float rests = 1f / FATIGUE_REGEN;
-        float heals = 1f / HEALTH_REGEN ;
-        fatigue = Nums.max(0, fatigue - rests);
-        injury  = Nums.max(0, injury  - heals);
-      }
-      else {
-        fatigue += settings.toggleFatigue ? (1f / FATIGUE_INTERVAL) : 0;
-        float heals = 0.5f / HEALTH_REGEN;
-        injury = Nums.max(0, injury - heals);
-      }
-    }
-    else {
-      float rests = 1f / FATIGUE_REGEN;
-      fatigue = Nums.max(0, fatigue - rests);
-    }
-    
     for (Technique t : type().classTechniques) {
       if (known.includes(t)) continue;
       if (t.canLearn(this)) known.add(t);
     }
-    
     super.update();
   }
   

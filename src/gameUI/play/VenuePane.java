@@ -83,8 +83,10 @@ public class VenuePane extends DetailPane {
     }
     
     
-    if (venue instanceof Trader) {
-      final Trader t = (Trader) venue;
+    if (venue instanceof BuildingForTrade) {
+      final BuildingForTrade t = (BuildingForTrade) venue;
+      final boolean exports = t.allowExports();
+      
       d.append("\n\nTrade Levels:");
       
       for (final Good g : venue.map().world.goodTypes()) {
@@ -96,19 +98,26 @@ public class VenuePane extends DetailPane {
         
         d.append("\n  "+I.padToLength(g.name+":", 10));
         d.append(I.padToLength(""+have, 2)+" Get ");
-        d.append(new Description.Link(""+need) {
+        
+        d.append(new Description.Link(I.padToLength(""+need, 2)) {
           public void whenClicked(Object context) {
-            t.needLevels().set(g, (need + 5) % 25);
+            t.needLevels().set(g, (need + 5) % 35);
           }
         });
-        d.append(" Allow ");
-        d.append(new Description.Link(""+(need + prod)) {
+        d.append(" Store ");
+        d.append(new Description.Link(I.padToLength(""+(need + prod), 2)) {
           public void whenClicked(Object context) {
-            t.prodLevels().set(g, (prod + 5) % 25);
+            t.prodLevels().set(g, (prod + 5) % 35);
           }
         });
       }
-      d.append("\n  Cash: "+((int) t.inventory().valueFor(CASH)));
+      d.append("\n\n  Cash: "+((int) t.inventory().valueFor(CASH)));
+      d.append("\n  Export Surplus? ");
+      d.append(new Description.Link(exports ? "Yes" : "No") {
+        public void whenClicked(Object context) {
+          t.toggleExports(! exports);
+        }
+      });
     }
     else if (! venue.inventory().empty()) {
       d.append("\n\nInventory:");

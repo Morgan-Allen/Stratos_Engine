@@ -3,6 +3,9 @@
 package game;
 import util.*;
 import static game.Task.*;
+
+import game.Task.JOB;
+
 import static game.GameConstants.*;
 
 
@@ -212,30 +215,7 @@ public class ActorAsAnimal extends Actor {
   
   
   void update() {
-    WorldSettings settings = map.world.settings;
-    boolean organic = type().organic;
-    
-    //  TODO:  Unify this with the method in ActorAsPerson.
-    
-    if (organic) {
-      hunger += settings.toggleHunger ? (1f / STARVE_INTERVAL ) : 0;
-      if (jobType() == JOB.RESTING) {
-        float rests = 1f / FATIGUE_REGEN;
-        float heals = 1f / HEALTH_REGEN ;
-        fatigue = Nums.max(0, fatigue - rests);
-        injury  = Nums.max(0, injury  - heals);
-      }
-      else {
-        fatigue += settings.toggleFatigue ? (1f / FATIGUE_INTERVAL) : 0;
-        float heals = 0.5f / HEALTH_REGEN;
-        injury = Nums.max(0, injury - heals);
-      }
-    }
-    else {
-      float rests = 1f / FATIGUE_REGEN;
-      fatigue = Nums.max(0, fatigue - rests);
-    }
-    
+    //  TODO:  Add any special functions here...
     super.update();
   }
   

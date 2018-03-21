@@ -502,8 +502,8 @@ public class TestWorld extends LogicTest {
     //  bounds for the world in question:
     timeWithEmpire /= YEAR_LENGTH;
     timeWithAllies /= YEAR_LENGTH * NUM_CITIES * (NUM_CITIES - 1);
-    int minBattles  = (NUM_YEARS - (timeWithEmpire + timeWithAllies)) / 2;
-    int maxBattles  = NUM_YEARS * world.bases().size() * 2;
+    int minBattles  = (NUM_YEARS - (timeWithEmpire + timeWithAllies)) / 4;
+    int maxBattles  = NUM_YEARS * world.bases().size();
     boolean testOkay = true;
     
     if (totalBattles < minBattles) {

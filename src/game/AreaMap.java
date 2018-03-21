@@ -345,6 +345,11 @@ public class AreaMap implements Session.Saveable {
   }
   
   
+  public float timeInUpdate() {
+    return (numUpdates % ticksPS) * 1f / ticksPS;
+  }
+  
+  
   public static int timeSince(int time, int from) {
     if (time == -1) return -1;
     return from - time;

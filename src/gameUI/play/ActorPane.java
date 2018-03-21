@@ -31,7 +31,7 @@ public class ActorPane extends DetailPane {
     int maxHP = actor.type().maxHealth;
     float hurt = actor.injury ();
     float tire = actor.fatigue();
-    float hung = actor.hunger ();
+    float hung = actor.hunger();
     int HP = (int) (maxHP - (hurt + tire + hung));
     
     Type type = actor.type();
@@ -41,10 +41,14 @@ public class ActorPane extends DetailPane {
     d.append("\n  Armour class:     "+type.armourClass);
     d.append("\n  Sight/attack rng: "+type.sightRange+"/"+type.rangeDist);
     
+    Task task = actor.task();
+    float priority = task == null ? 0 : task.priority() / Task.PARAMOUNT;
+    
     d.append("\n");
     d.appendAll("\n  Works at:  ", actor.work());
     d.appendAll("\n  Lives at:  ", actor.home());
     d.appendAll("\n  Currently: ", actor.task());
+    d.appendAll("\n  Urgency:   ", I.percent(priority));
     
     Tally <Good> carried = actor.carried();
     d.append("\n  Carrying: ");

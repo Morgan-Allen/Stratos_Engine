@@ -522,6 +522,13 @@ public class Base implements Session.Saveable, Trader {
   public Base base() { return this; }
   
   
+  public boolean allowExport(Good g, Trader buys) {
+    if (buys.base().homeland() == this) return true;
+    if (Base.suppliesDue(this, buys.base(), g) > 0) return true;
+    return prodLevel.valueFor(g) > 0;
+  }
+  
+  
   
   //  Selling to where goods are abundant gets you a lower price.
   //  Buying from where goods are scarce imposes a higher price.
@@ -632,6 +639,7 @@ public class Base implements Session.Saveable, Trader {
     boolean updateStats = world.time % DAY_LENGTH == 0;
     boolean activeMap   = map != null;
     Base    lord        = currentLord();
+    
     //
     //  Local player-owned cities (i.e, with their own map), must derive their
     //  vitual statistics from that small-scale city map:

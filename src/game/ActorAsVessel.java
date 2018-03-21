@@ -105,6 +105,11 @@ public class ActorAsVessel extends Actor implements Trader, Employer {
   }
   
   
+  public boolean allowExport(Good g, Trader buys) {
+    return true;
+  }
+  
+  
   
 }
 

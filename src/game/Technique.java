@@ -138,7 +138,7 @@ public abstract class Technique extends Trait {
   
   public boolean canUsePower(Base ruler, Target subject) {
     if (ruler.funds() < costCash) return false;
-    return canTarget(subject);
+    return subject != null && canTarget(subject);
   }
   
   

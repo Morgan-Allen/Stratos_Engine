@@ -89,7 +89,7 @@ public class TestSieging extends LogicTest {
     for (Actor w : fort.workers()) guarding.toggleRecruit(w, true);
     guarding.setFocus(tower, TileConstants.E, map);
     
-    Building store = (Building) SUPPLY_DEPOT.generate();
+    BuildingForTrade store = (BuildingForTrade) SUPPLY_DEPOT.generate();
     store.enterMap(map, 12, 14, 1, baseC);
     store.setInventory(MEDICINE, 10);
     
@@ -251,6 +251,7 @@ public class TestSieging extends LogicTest {
         if (baseC.isVassalOf(awayC)) {
           victorious = true;
           store.addInventory(tribute);
+          store.prodLevels().add(tribute);
           ActorUtils.fillWorkVacancies(store);
         }
       }

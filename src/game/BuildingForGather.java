@@ -188,15 +188,12 @@ public class BuildingForGather extends Building {
     */
   public Task selectActorBehaviour(Actor actor) {
     
-    Task delivery = TaskDelivery.pickNextDelivery(actor, this, 5, produced());
+    Task delivery = TaskDelivery.pickNextDelivery(actor, this, 2, produced());
     if (delivery != null) return delivery;
     
     Object[] crops = type().produced;
     Task pick = TaskGathering.pickNextCrop(this, actor, false, crops);
     if (pick != null) return pick;
-    
-    //  TODO:  Modify the pick-plant method to apply to all eligible tiles
-    //  within a certain area.
     
     Task plant = TaskGathering.pickPlantPoint(this, actor, false, true);
     if (plant != null) return plant;

@@ -113,9 +113,9 @@ public class Building extends Element implements Pathing, Employer, Carrier {
     //
     //  TODO:  The efficiency of this might be improved on larger maps.
     boolean claimant = isClaimant();
-    int margin = type().clearMargin;
     Box2D claims = claimArea();
     for (Building b : (claimant ? map.buildings() : map.claimants())) {
+      int margin = Nums.max(type().clearMargin, b.type().clearMargin);
       if (b.claimArea().axisDistance(claims) < margin) return false;
     }
     //
