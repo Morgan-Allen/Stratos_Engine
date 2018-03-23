@@ -26,7 +26,7 @@ public class InstallPane extends DetailPane {
   
   
   protected void updateState() {
-    final AreaMap stage = UI.stage;
+    final Area stage = UI.stage;
     final Base    base  = UI.base;
     
     this.text.setText("");
@@ -63,12 +63,12 @@ public class InstallPane extends DetailPane {
   
   private void beginInstallTask(Type type) {
     placed = (Element) type.generate();
-    final AreaMap stage  = UI.stage;
+    final Area stage  = UI.stage;
     final Base    base   = UI.base;
     
     final PlayTask task = new PlayTask() {
       public void doTask(PlayUI UI) {
-        final Tile puts = UI.selection.hoverSpot();
+        final AreaTile puts = UI.selection.hoverSpot();
         //final Account reasons = new Account();
         boolean canPlace = false;
         

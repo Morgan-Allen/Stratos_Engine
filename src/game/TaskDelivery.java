@@ -68,7 +68,7 @@ public class TaskDelivery extends Task {
       amount = Nums.min(amount, demand);
       if (amount <= 0) continue;
       
-      float penalty = AreaMap.distancePenalty(
+      float penalty = Area.distancePenalty(
         from.mainEntrance(), goes.mainEntrance()
       );
       Order o = new Order();
@@ -135,9 +135,9 @@ public class TaskDelivery extends Task {
       //
       //  We need to allow for structures that aren't built yet, as well as
       //  those that are-
-      Tile fromT = from.complete() ? from.mainEntrance() : from.at();
-      Tile goesT = b   .complete() ? b   .mainEntrance() : b   .at();
-      float dist = AreaMap.distance(fromT, goesT);
+      AreaTile fromT = from.complete() ? from.mainEntrance() : from.at();
+      AreaTile goesT = b   .complete() ? b   .mainEntrance() : b   .at();
+      float dist = Area.distance(fromT, goesT);
       if (maxDist > 0 && dist > maxDist) continue;
       
       float rating = 1;
@@ -150,7 +150,7 @@ public class TaskDelivery extends Task {
         rating *= demand / maxStock;
       }
       
-      rating *= AreaMap.distancePenalty(dist);
+      rating *= Area.distancePenalty(dist);
       
       pick.compare(b, rating);
     }

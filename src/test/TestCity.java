@@ -22,15 +22,15 @@ public class TestCity extends LogicTest {
     LogicTest test = new TestCity();
     
     Base base = setupTestBase(32, ALL_GOODS, false);
-    AreaMap map = base.activeMap();
+    Area map = base.activeMap();
     World world = map.world;
     world.settings.toggleFog = false;
     
     base.initFunds(5000);
     
-    CityMapPlanning.placeStructure(WALKWAY, base, true, 4, 9, 25, 1);
-    CityMapPlanning.placeStructure(WALKWAY, base, true, 9, 3, 1, 25);
-    CityMapPlanning.placeStructure(WALKWAY, base, true, 1, 1, 9, 9 );
+    AreaPlanning.placeStructure(WALKWAY, base, true, 4, 9, 25, 1);
+    AreaPlanning.placeStructure(WALKWAY, base, true, 9, 3, 1, 25);
+    AreaPlanning.placeStructure(WALKWAY, base, true, 1, 1, 9, 9 );
     
     Building palace = (Building) BASTION          .generate();
     Building school = (Building) PHYSICIAN_STATION.generate();
@@ -64,7 +64,7 @@ public class TestCity extends LogicTest {
       rock.enterMap(map, 1 + (n * 3), 28, 1, base);
     }
     
-    CityMapFlagging forRock = map.flagMap(IS_STONE, true);
+    AreaFlagging forRock = map.flagMap(IS_STONE, true);
     if (forRock.totalSum() != 4) {
       I.say("NO ROCKS FLAGGED: "+forRock.totalSum());
       return false;
@@ -84,7 +84,7 @@ public class TestCity extends LogicTest {
     try {
       Session.saveSession("saves/test_save.tlt", map);
       Session session = Session.loadSession("saves/test_save.tlt", true);
-      AreaMap loaded = (AreaMap) session.loaded()[0];
+      Area loaded = (Area) session.loaded()[0];
       I.say("\nSuccessfully loaded map: "+loaded);
     }
     catch(Exception e) {
@@ -198,7 +198,7 @@ public class TestCity extends LogicTest {
   }
   
   
-  static void reportOnMap(AreaMap map, Base base, boolean okay, Good... goods) {
+  static void reportOnMap(Area map, Base base, boolean okay, Good... goods) {
     I.say("  Current time: "+map.time());
     if (! okay) for (Building b : map.buildings()) {
       if (b.type().isHomeBuilding()) {

@@ -27,7 +27,7 @@ public class ViewCombatFX extends ViewTest {
   
   
   
-  protected void configScenario(World world, AreaMap map, Base base) {
+  protected void configScenario(World world, Area map, Base base) {
     
     world.settings.toggleInjury  = false;
     world.settings.toggleFatigue = false;

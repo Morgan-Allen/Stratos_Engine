@@ -2,7 +2,7 @@
 
 package game;
 import util.*;
-import static game.AreaMap.*;
+import static game.Area.*;
 import static game.GameConstants.*;
 import static game.TaskDelivery.*;
 
@@ -13,15 +13,15 @@ public class ActorUtils {
   
   /**  General migration utilities-
     */
-  static Tile findTransitPoint(AreaMap map, Base base, Base with) {
+  static AreaTile findTransitPoint(Area map, Base base, Base with) {
     
     //  TODO:  Make sure there's a pathing connection to the main settlement
     //  here!
     
-    Tile current = map.transitPoints.get(with);
+    AreaTile current = map.transitPoints.get(with);
     if (current != null && ! map.blocked(current.x, current.y)) return current;
     
-    Pick <Tile> pick = new Pick();
+    Pick <AreaTile> pick = new Pick();
     Vec2D cityDir = new Vec2D(
       with.locale.mapX - base.locale.mapX,
       with.locale.mapY - base.locale.mapY
@@ -34,11 +34,11 @@ public class ActorUtils {
       float rating = 1 + temp.dot(cityDir);
       if (map.pathType(c) == Type.PATH_PAVE) rating *= 2;
       
-      Tile u = map.tileAt(c.x, c.y);
+      AreaTile u = map.tileAt(c.x, c.y);
       pick.compare(u, rating);
     }
     
-    Tile point = pick.result();
+    AreaTile point = pick.result();
     map.transitPoints.put(with, point);
     return point;
   }
@@ -57,7 +57,7 @@ public class ActorUtils {
   ) {
     //  TODO:  Consider a wider variety of cities to source from!
     
-    AreaMap map  = employs.map();
+    Area map  = employs.map();
     Base    from = map.locals;
     Base    goes = employs.base();
     int     cost = employs.hireCost(jobType);
@@ -77,10 +77,10 @@ public class ActorUtils {
   }
   
   
-  static void findWork(AreaMap map, Actor migrant) {
+  static void findWork(Area map, Actor migrant) {
     
     class Opening { Building b; ActorType position; }
-    Tile from = migrant.at();
+    AreaTile from = migrant.at();
     Base homeC = migrant.base();
     final Pick <Opening> pick = new Pick();
     
@@ -100,7 +100,7 @@ public class ActorUtils {
         fitness /= Nums.max(1, sumWeights);
         if (fitness <= 0.5f) continue;
         
-        float near = AreaMap.distancePenalty(from, b);
+        float near = Area.distancePenalty(from, b);
         Opening o = new Opening();
         o.b = b;
         o.position = t;
@@ -118,7 +118,7 @@ public class ActorUtils {
   }
   
   
-  static void findHome(AreaMap map, final Actor migrant) {
+  static void findHome(Area map, final Actor migrant) {
     
     //  Each citizen prompts the search based on proximity to their place of
     //  work, proximity to needed services, and safety of the location (they
@@ -159,7 +159,7 @@ public class ActorUtils {
     
     sumPos.scale(1f / sumPos.sumWeights);
     
-    final Tile from = map.tileAt(sumPos.x, sumPos.y);
+    final AreaTile from = map.tileAt(sumPos.x, sumPos.y);
     Pick <Building> pick = new Pick <Building> () {
       public void compare(Building b, float rating) {
         if (! b.allowsResidence(migrant)) return;
@@ -167,7 +167,7 @@ public class ActorUtils {
         float numR = b.numResidents(migrant.type().socialClass);
         if (b == migrant.home()) numR = 0;
         
-        float near = 10 / (10f + AreaMap.distance(from, b));
+        float near = 10 / (10f + Area.distance(from, b));
         float comfort = b.type().homeComfortLevel * 1f / AVG_HOME_COMFORT;
         
         super.compare(b, rating * near * (1 + comfort) / (2 + numR));
@@ -194,7 +194,7 @@ public class ActorUtils {
     else if (map.world.settings.toggleAutoBuild) {
       Type baseHomeType = migrant.type().nestType();
       home = (Building) baseHomeType.generate();
-      Tile goes = findEntryPoint(home, map, from, maxRange / 2);
+      AreaTile goes = findEntryPoint(home, map, from, maxRange / 2);
       
       if (goes != null) {
         home.assignBase(migrant.base());
@@ -206,17 +206,17 @@ public class ActorUtils {
   }
   
   
-  static Tile findEntryPoint(
-    final Building enters, final AreaMap map, Target from, int maxRange
+  static AreaTile findEntryPoint(
+    final Building enters, final Area map, Target from, int maxRange
   ) {
-    final Vars.Ref <Tile> result = new Vars.Ref();
-    final Tile temp[] = new Tile[9];
+    final Vars.Ref <AreaTile> result = new Vars.Ref();
+    final AreaTile temp[] = new AreaTile[9];
     
-    Flood <Tile> flood = new Flood <Tile> () {
-      protected void addSuccessors(Tile front) {
+    Flood <AreaTile> flood = new Flood <AreaTile> () {
+      protected void addSuccessors(AreaTile front) {
         if (result.value != null) return;
         
-        for (Tile n : AreaMap.adjacent(front, temp, map)) {
+        for (AreaTile n : Area.adjacent(front, temp, map)) {
           if (n == null || n.flaggedWith() != null) continue;
           
           enters.setLocation(n, map);
@@ -237,10 +237,10 @@ public class ActorUtils {
   
   
   
-  public static Tile pickRandomTile(Target t, float range, AreaMap map) {
+  public static AreaTile pickRandomTile(Target t, float range, Area map) {
     final float angle = Rand.num() * Nums.PI * 2;
     final float dist = (Rand.num() * range) + 1, max = map.size - 1;
-    final Tile at = t.at();
+    final AreaTile at = t.at();
     return map.tileAt(
       Nums.clamp(at.x + (float) (Nums.cos(angle) * dist), 0, max),
       Nums.clamp(at.y + (float) (Nums.sin(angle) * dist), 0, max)
@@ -251,7 +251,7 @@ public class ActorUtils {
   
   /**  More utility methods for scenario setup-
     */
-  public static void fillAllWorkVacancies(AreaMap map) {
+  public static void fillAllWorkVacancies(Area map) {
     for (Building b : map.buildings) if (b.complete()) {
       fillWorkVacancies(b);
       for (Actor w : b.workers) ActorUtils.findHome(map, w);
@@ -271,7 +271,7 @@ public class ActorUtils {
   public static Actor spawnActor(Building b, ActorType type, boolean resident) {
     
     Actor actor = (Actor) type.generate();
-    Tile at = b.centre();
+    AreaTile at = b.centre();
     
     if (type.isPerson()) {
       type.initAsMigrant((ActorAsPerson) actor);
@@ -293,13 +293,13 @@ public class ActorUtils {
   }
   
   
-  public static Tile randomTileNear(
-    Tile at, float range, AreaMap map, boolean open
+  public static AreaTile randomTileNear(
+    AreaTile at, float range, Area map, boolean open
   ) {
     int x = (int) (at.x + (range * Rand.range(-1, 1)));
     int y = (int) (at.y + (range * Rand.range(-1, 1)));
-    Tile t = map.tileAt(Nums.clamp(x, map.size), Nums.clamp(y, map.size));
-    if (open) t = Tile.nearestOpenTile(t, map, (int) range);
+    AreaTile t = map.tileAt(Nums.clamp(x, map.size), Nums.clamp(y, map.size));
+    if (open) t = AreaTile.nearestOpenTile(t, map, (int) range);
     return t;
   }
   

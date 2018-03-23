@@ -4,7 +4,7 @@ package test;
 import game.*;
 import util.*;
 import static content.GameContent.*;
-import static game.CityMapPathCache.*;
+import static game.AreaPathCache.*;
 
 
 
@@ -51,18 +51,18 @@ public class TestPathCache extends LogicTest {
     };
     int miniSize = 8;
     Base miniBase = setupTestBase(miniSize, ALL_GOODS, false, ALL_TERRAINS);
-    AreaMap miniMap = miniBase.activeMap();
+    Area miniMap = miniBase.activeMap();
     
     for (Coord c : Visit.grid(0, 0, miniSize, miniSize, 1)) {
       byte l = layout[c.x][c.y];
-      Tile t = miniMap.tileAt(c);
+      AreaTile t = miniMap.tileAt(c);
       miniMap.setTerrain(t, l == 0 ? LAKE : MEADOW, (byte) 0, 0);
     }
     //
     //  First, verify that an area's tiles conform to an expected shape:
     int coords[] = { 0, 1,   1, 0,   1, 1,   2, 0,   2, 1 };
     int numT = coords.length / 2;
-    Area area = miniMap.pathCache.areaFor(miniMap.tileAt(1, 1));
+    Zone area = miniMap.pathCache.areaFor(miniMap.tileAt(1, 1));
     if (area == null) {
       I.say("\nArea was not generated!");
       allOkay = false;
@@ -74,7 +74,7 @@ public class TestPathCache extends LogicTest {
       if (! graphics) return false;
     }
     for (int i = 0; i < coords.length;) {
-      Tile t = miniMap.tileAt(coords[i++], coords[i++]);
+      AreaTile t = miniMap.tileAt(coords[i++], coords[i++]);
       if (! Visit.arrayIncludes(area.tiles(), t)) {
         I.say("\nExpected area to include "+t);
         I.say("  Tiles were: "+I.list(area.tiles()));
@@ -103,7 +103,7 @@ public class TestPathCache extends LogicTest {
     };
     for (Coord c : Visit.grid(0, 0, miniSize, miniSize, 1)) {
       byte l = newLayout[c.x][c.y];
-      Tile t = miniMap.tileAt(c);
+      AreaTile t = miniMap.tileAt(c);
       miniMap.setTerrain(t, l == 0 ? LAKE : MEADOW, (byte) 0, 0);
     }
     miniMap.pathCache.updatePathCache();
@@ -114,7 +114,7 @@ public class TestPathCache extends LogicTest {
     //
     //  And finally, try modifying the map at random to see if the
     //  queries hold:
-    for (Tile t : miniMap.allTiles()) {
+    for (AreaTile t : miniMap.allTiles()) {
       if (Rand.yes()) {
         miniMap.setTerrain(t, miniMap.blocked(t) ? MEADOW : LAKE, (byte) 0, 0);
       }
@@ -129,13 +129,13 @@ public class TestPathCache extends LogicTest {
     //  Now, set up a larger map for testing of connections between
     //  more distant areas:
     Base base = setupTestBase(128, ALL_GOODS, false, ALL_TERRAINS);
-    AreaMap map = base.activeMap();
+    Area map = base.activeMap();
     World world = map.world;
     world.settings.toggleFog = false;
     test.viewPathMap = true;
     
     final int div = map.size() / layout.length, rand = div / 4;
-    for (Tile t : map.allTiles()) {
+    for (AreaTile t : map.allTiles()) {
       int x = t.x, y = t.y;
       
       x += Rand.range(-rand, rand);
@@ -146,15 +146,15 @@ public class TestPathCache extends LogicTest {
       byte l = layout[x / div][y / div];
       map.setTerrain(t, l == 0 ? LAKE : MEADOW, (byte) 0, 0);
     }
-    CityMapTerrain.populateFixtures(map);
+    AreaTerrain.populateFixtures(map);
     
-    Tile land1   = map.tileAt(0.5f * div, 7.5f * div);
-    Tile land2   = map.tileAt(7.5f * div, 0.5f * div);
-    Tile island0 = map.tileAt(1.5f * div, 1.5f * div);
-    land1   = Tile.nearestOpenTile(land1  , map);
-    land2   = Tile.nearestOpenTile(land2  , map);
-    island0 = Tile.nearestOpenTile(island0, map);
-    test.keyTiles = new Tile[] { land1, land2, island0 };
+    AreaTile land1   = map.tileAt(0.5f * div, 7.5f * div);
+    AreaTile land2   = map.tileAt(7.5f * div, 0.5f * div);
+    AreaTile island0 = map.tileAt(1.5f * div, 1.5f * div);
+    land1   = AreaTile.nearestOpenTile(land1  , map);
+    land2   = AreaTile.nearestOpenTile(land2  , map);
+    island0 = AreaTile.nearestOpenTile(island0, map);
+    test.keyTiles = new AreaTile[] { land1, land2, island0 };
     
     map.pathCache.updatePathCache();
     
@@ -162,9 +162,9 @@ public class TestPathCache extends LogicTest {
     if (! landLinked) {
       I.say("\nNearby regions not linked!");
       I.say("  Total groups: "+map.pathCache.groups().size());
-      for (AreaGroup g : map.pathCache.groups()) {
+      for (ZoneGroup g : map.pathCache.groups()) {
         I.say("    Group areas: ");
-        for (Area a : g.areas()) {
+        for (Zone a : g.areas()) {
           I.say("      "+a.numTiles()+" tiles: "+a.coord());
         }
       }
@@ -179,7 +179,7 @@ public class TestPathCache extends LogicTest {
       if (! graphics) return false;
     }
     
-    CityMapPlanning.placeStructure(SHIELD_WALL, base, true, 88, 20, 48, 8);
+    AreaPlanning.placeStructure(SHIELD_WALL, base, true, 88, 20, 48, 8);
     map.pathCache.updatePathCache();
     landLinked = map.pathCache.pathConnects(land1, land2);
     if (landLinked) {
@@ -188,7 +188,7 @@ public class TestPathCache extends LogicTest {
       if (! graphics) return false;
     }
     
-    CityMapPlanning.placeStructure(WALKWAY, base, true, 20, 24, 8, 48);
+    AreaPlanning.placeStructure(WALKWAY, base, true, 20, 24, 8, 48);
     map.pathCache.updatePathCache();
     islandLinked = map.pathCache.pathConnects(land1, island0);
     if (! islandLinked) {
@@ -197,7 +197,7 @@ public class TestPathCache extends LogicTest {
       if (! graphics) return false;
     }
     
-    CityMapPlanning.markDemolish(map, true, 120, 20, 2, 8);
+    AreaPlanning.markDemolish(map, true, 120, 20, 2, 8);
     Building gate = (Building) BLAST_DOOR.generate();
     gate.setFacing(TileConstants.N);
     gate.enterMap(map, 120, 23, 1, base);
@@ -221,8 +221,8 @@ public class TestPathCache extends LogicTest {
     tower.enterMap(map, 110, 20, 1, base);
     map.pathCache.updatePathCache();
     
-    CityMapPlanning.markDemolish(map, true, 100, 19, 20, 1);
-    Tile onWall = map.tileAt(110, 24);
+    AreaPlanning.markDemolish(map, true, 100, 19, 20, 1);
+    AreaTile onWall = map.tileAt(110, 24);
     landLinked = map.pathCache.pathConnects(onWall, land2);
     if (! landLinked) {
       I.say("\nTower should have allowed pathing onto wall!");
@@ -239,7 +239,7 @@ public class TestPathCache extends LogicTest {
       if (! graphics) return false;
     }
     
-    for (Tile t : map.allTiles()) {
+    for (AreaTile t : map.allTiles()) {
       if (map.pathCache.rawArea(t) == null && ! map.blocked(t)) {
         I.say("\nUnblocked tile has no area: "+t);
         allOkay = false;
@@ -248,12 +248,12 @@ public class TestPathCache extends LogicTest {
     }
     
     for (int n = 100; n-- > 0;) {
-      Tile from, goes;
+      AreaTile from, goes;
       int mapS = map.size();
       from = map.tileAt(Rand.index(mapS), Rand.index(mapS));
       goes = map.tileAt(Rand.index(mapS), Rand.index(mapS));
-      from = Tile.nearestOpenTile(from, map);
-      goes = Tile.nearestOpenTile(goes, map);
+      from = AreaTile.nearestOpenTile(from, map);
+      goes = AreaTile.nearestOpenTile(goes, map);
       if (from == null || goes == null || from == goes) continue;
       if (! verifyConnection(from, goes, map)) {
         allOkay = false;
@@ -277,15 +277,15 @@ public class TestPathCache extends LogicTest {
   }
   
   
-  static boolean verifyConnectionQueries(AreaMap map) {
+  static boolean verifyConnectionQueries(Area map) {
     for (Coord c : Visit.grid(0, 0, map.size(), map.size(), 1)) {
       if (map.blocked(c)) continue;
       
       for (Coord o : Visit.grid(0, 0, map.size(), map.size(), 1)) {
         if (map.blocked(o)) continue;
         
-        Tile from = map.tileAt(c);
-        Tile goes = map.tileAt(o);
+        AreaTile from = map.tileAt(c);
+        AreaTile goes = map.tileAt(o);
         if (from == goes) continue;
         
         if (! verifyConnection(from, goes, map)) {
@@ -297,7 +297,7 @@ public class TestPathCache extends LogicTest {
   }
   
   
-  static boolean verifyConnection(Tile from, Tile goes, AreaMap map) {
+  static boolean verifyConnection(AreaTile from, AreaTile goes, Area map) {
     
     boolean connects = map.pathCache.pathConnects(from, goes);
     ActorPathSearch search;

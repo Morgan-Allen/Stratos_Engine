@@ -4,7 +4,7 @@ package game;
 import gameUI.play.*;
 import graphics.common.*;
 import util.*;
-import static game.AreaMap.*;
+import static game.Area.*;
 import static game.Base.*;
 import static game.ActorUtils.*;
 import static game.GameConstants.*;
@@ -58,15 +58,15 @@ public class Mission implements
   private boolean active = false;
   private Base    homeCity    ;
   private Base    awayCity    ;
-  private AreaMap map         ;
-  private Tile    transitPoint;
-  private Tile    standPoint  ;
+  private Area map         ;
+  private AreaTile    transitPoint;
+  private AreaTile    standPoint  ;
   private Object  focus       ;
   private int     facing      ;
   
   float exploreRange = AVG_EXPLORE_DIST;
   
-  List <Tile> guardPoints = new List();
+  List <AreaTile> guardPoints = new List();
   int lastUpdateTime = -1;
   
   Sprite flag;
@@ -109,7 +109,7 @@ public class Mission implements
     away         = s.loadBool();
     homeCity     = (Base   ) s.loadObject();
     awayCity     = (Base   ) s.loadObject();
-    map          = (AreaMap) s.loadObject();
+    map          = (Area) s.loadObject();
     
     active = s.loadBool();
     if (s.loadBool()) {
@@ -126,7 +126,7 @@ public class Mission implements
     exploreRange = s.loadFloat();
     
     for (int n = s.loadInt(); n-- > 0;) {
-      Tile point = AreaMap.loadTile(map, s);
+      AreaTile point = Area.loadTile(map, s);
       guardPoints.add(point);
     }
     lastUpdateTime = s.loadInt();
@@ -162,9 +162,9 @@ public class Mission implements
     s.saveObject(map     );
     
     s.saveBool(active);
-    if (focus instanceof Tile) {
+    if (focus instanceof AreaTile) {
       s.saveBool(true);
-      saveTile((Tile) focus, map, s);
+      saveTile((AreaTile) focus, map, s);
     }
     else {
       s.saveBool(false);
@@ -178,7 +178,7 @@ public class Mission implements
     s.saveFloat(exploreRange);
     
     s.saveInt(guardPoints.size());
-    for (Tile t : guardPoints) AreaMap.saveTile(t, map, s);
+    for (AreaTile t : guardPoints) Area.saveTile(t, map, s);
     s.saveInt(lastUpdateTime);
   }
   
@@ -248,7 +248,7 @@ public class Mission implements
   public void setTermsAccepted(boolean accepted) {
     if (accepted) {
       termsAccepted = true;
-      CityEvents.imposeTerms(awayCity, homeCity, this);
+      BaseEvents.imposeTerms(awayCity, homeCity, this);
       setMissionComplete(true);
     }
     else {
@@ -333,7 +333,7 @@ public class Mission implements
   }
   
   
-  public void setFocus(Object focus, int facing, AreaMap map) {
+  public void setFocus(Object focus, int facing, Area map) {
     homeCity.missions.toggleMember(this, true);
     
     this.facing = facing;
@@ -376,7 +376,7 @@ public class Mission implements
   
   /**  Pathing and stand-point related methods-
     */
-  Tile standPointFrom(Object focus) {
+  AreaTile standPointFrom(Object focus) {
     
     //  TODO:  Get the nearest open tile, just for good measure?
     
@@ -397,7 +397,7 @@ public class Mission implements
   }
   
   
-  AreaMap map() {
+  Area map() {
     return map;
   }
   
@@ -407,7 +407,7 @@ public class Mission implements
   }
   
   
-  Tile standPoint() {
+  AreaTile standPoint() {
     return standPoint;
   }
   
@@ -445,7 +445,7 @@ public class Mission implements
   }
   
   
-  public boolean onMap(AreaMap map) {
+  public boolean onMap(Area map) {
     return this.map != null && this.map == map;
   }
   
@@ -496,8 +496,8 @@ public class Mission implements
     //  Check to see if an offer has expired-
     Base local   = away ? awayCity : homeCity;
     Base distant = away ? homeCity : awayCity;
-    int sinceArrive = AreaMap.timeSince(timeArrived  , homeCity.world.time);
-    int sinceTerms  = AreaMap.timeSince(timeTermsSent, homeCity.world.time);
+    int sinceArrive = Area.timeSince(timeArrived  , homeCity.world.time);
+    int sinceTerms  = Area.timeSince(timeTermsSent, homeCity.world.time);
     boolean hasEnvoy = escorted.size() > 0;
     
     if (hasEnvoy && (
@@ -542,7 +542,7 @@ public class Mission implements
       if (newFocus instanceof Actor   ) return true;
     }
     if (objective == OBJECTIVE_RECON) {
-      if (newFocus instanceof Tile) return true;
+      if (newFocus instanceof AreaTile) return true;
     }
     return false;
   }
@@ -568,13 +568,13 @@ public class Mission implements
       //if (sinceStart > MONTH_LENGTH * 2) return true;
     }
     if (objective == OBJECTIVE_RECON) {
-      if (focus instanceof Tile) {
-        Tile looks = (Tile) focus;
+      if (focus instanceof AreaTile) {
+        AreaTile looks = (AreaTile) focus;
         int r = (int) exploreRange;
         boolean allSeen = true;
         
-        for (Tile t : map.tilesUnder(looks.x - r, looks.y - r, r * 2, r * 2)) {
-          float dist = AreaMap.distance(looks, t);
+        for (AreaTile t : map.tilesUnder(looks.x - r, looks.y - r, r * 2, r * 2)) {
+          float dist = Area.distance(looks, t);
           if (dist > r) continue;
           if (map.fog.maxSightLevel(t) == 0) allSeen = false;
         }
@@ -621,7 +621,7 @@ public class Mission implements
     if (onMap) {
       if (reports()) I.say("\nARRIVED ON MAP: "+goes+" FROM "+journey.from);
       
-      Tile transits     = findTransitPoint(goes.activeMap(), goes, journey.from);
+      AreaTile transits     = findTransitPoint(goes.activeMap(), goes, journey.from);
       this.map          = goes.activeMap();
       this.transitPoint = transits;
       
@@ -654,20 +654,20 @@ public class Mission implements
       if (home) {
         if (reports()) I.say("\nARRIVED HOME: "+goes+" FROM "+journey.from);
         this.away = false;
-        CityEvents.handleReturn(this, journey.from, journey);
+        BaseEvents.handleReturn(this, journey.from, journey);
       }
       else {
         if (reports()) I.say("\nARRIVED AT: "+goes+" FROM "+journey.from);
         this.away = true;
         
         if (objective == OBJECTIVE_CONQUER) {
-          CityEvents.handleInvasion(this, goes, journey);
+          BaseEvents.handleInvasion(this, goes, journey);
         }
         if (objective == OBJECTIVE_GARRISON) {
-          CityEvents.handleGarrison(this, goes, journey);
+          BaseEvents.handleGarrison(this, goes, journey);
         }
         if (objective == OBJECTIVE_DIALOG) {
-          CityEvents.handleDialog(this, goes, journey);
+          BaseEvents.handleDialog(this, goes, journey);
         }
       }
     }
@@ -696,13 +696,13 @@ public class Mission implements
     
     //  TODO:  Merge with 'shouldLeave' criteria above.
     if (complete || termsAccepted || (diplomatic && termsRefused)) {
-      Tile exits = standLocation(actor);
+      AreaTile exits = standLocation(actor);
       if (exits != null) {
         return actor.targetTask(exits, 10, Task.JOB.RETURNING, this);
       }
     }
     
-    Tile stands = standLocation(actor);
+    AreaTile stands = standLocation(actor);
     
     TaskCombat taskC = (Task.inCombat(actor) || isEnvoy) ? null :
       TaskCombat.nextReaction(actor, stands, this, AVG_FILE)
@@ -773,7 +773,7 @@ public class Mission implements
   }
   
   
-  public Tile standLocation(Actor actor) {
+  public AreaTile standLocation(Actor actor) {
     boolean doPatrol =
       (focus instanceof Target) &&
       ((Target) focus).type().isWall
@@ -816,7 +816,7 @@ public class Mission implements
   }
   
   
-  static int powerSum(Series <Actor> recruits, AreaMap mapOnly) {
+  static int powerSum(Series <Actor> recruits, Area mapOnly) {
     float sumStats = 0;
     for (Actor a : recruits) {
       if (mapOnly != null && a.map != mapOnly) continue;
@@ -856,7 +856,7 @@ public class Mission implements
     if (focus instanceof Element) {
       return ((Element) focus).canRender(base, view);
     }
-    if (focus instanceof Tile) {
+    if (focus instanceof AreaTile) {
       return true;
     }
     else return false;
@@ -885,8 +885,8 @@ public class Mission implements
       flag.position.setTo(e.trackPosition());
       flag.position.z += e.type().deep;
     }
-    if (focus instanceof Tile) {
-      Tile t = (Tile) focus;
+    if (focus instanceof AreaTile) {
+      AreaTile t = (AreaTile) focus;
       flag.position.setTo(t.trackPosition());
       flag.position.z += 1;
     }

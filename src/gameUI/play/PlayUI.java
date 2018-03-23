@@ -30,7 +30,7 @@ public class PlayUI extends HUD implements UIConstants {
       32, Colour.HIDE, PlayUI.class
     );
   
-  AreaMap stage;
+  Area stage;
   Base    base;
   Element home;
   
@@ -96,7 +96,7 @@ public class PlayUI extends HUD implements UIConstants {
   }
   
   
-  public void assignParameters(AreaMap stage, Base base) {
+  public void assignParameters(Area stage, Base base) {
     if (stage == null || base == null) {
       I.complain("\nCANNOT ASSIGN NULL STAGE/BASE TO UI!");
       return;
@@ -118,7 +118,7 @@ public class PlayUI extends HUD implements UIConstants {
   
   
   public void loadState(Session s) throws Exception {
-    stage = (AreaMap) s.loadObject();
+    stage = (Area) s.loadObject();
     base  = (Base   ) s.loadObject();
     home  = (Element) s.loadObject();
     selection.loadState(s);

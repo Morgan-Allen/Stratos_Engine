@@ -4,12 +4,12 @@ package game;
 import graphics.common.*;
 import graphics.terrain.*;
 import util.*;
-import static game.AreaMap.*;
+import static game.Area.*;
 import static game.GameConstants.*;
 
 
 
-public class CityMapTerrain implements TileConstants {
+public class AreaTerrain implements TileConstants {
   
   
   /**  Data fields, construction and save/load methods-
@@ -19,7 +19,7 @@ public class CityMapTerrain implements TileConstants {
     int densities[][];
   }
   
-  final AreaMap map;
+  final Area map;
 
   private byte
     heightVals[][],
@@ -34,7 +34,7 @@ public class CityMapTerrain implements TileConstants {
   private TerrainSet meshSet;
   
   
-  CityMapTerrain(AreaMap map) {
+  AreaTerrain(Area map) {
     this.map = map;
   }
   
@@ -95,12 +95,12 @@ public class CityMapTerrain implements TileConstants {
   }
   
   
-  void updateFrom(Tile t) {
+  void updateFrom(AreaTile t) {
     typeIndex[t.x][t.y] = (byte) t.terrain.layerID;
   }
   
   
-  void setVariant(Tile t, byte var) {
+  void setVariant(AreaTile t, byte var) {
     varsIndex[t.x][t.y] = var;
   }
   
@@ -150,7 +150,7 @@ public class CityMapTerrain implements TileConstants {
   }
   
   
-  void scanHabitat(Tile tile) {
+  void scanHabitat(AreaTile tile) {
     Terrain t = tile.terrain;
     if (t == null || t == EMPTY) return;
     
@@ -168,32 +168,32 @@ public class CityMapTerrain implements TileConstants {
   
   /**  Initial terrain setup-
     */
-  public static AreaMap generateTerrain(
+  public static Area generateTerrain(
     World world, World.Locale locale, int size, int maxHigh, Terrain... gradient
   ) {
-    AreaMap map = new AreaMap(world, locale);
+    Area map = new Area(world, locale);
     map.performSetup(size, gradient);
     populateTerrain(map, maxHigh, gradient);
     return map;
   }
   
   
-  public static AreaMap generateTerrain(
+  public static Area generateTerrain(
     Base city, int size, int maxHigh, Terrain... gradient
   ) {
-    AreaMap map = generateTerrain(city.world, city.locale, size, maxHigh, gradient);
+    Area map = generateTerrain(city.world, city.locale, size, maxHigh, gradient);
     map.addCity(city);
     return map;
   }
   
   
   public static void populateTerrain(
-    AreaMap map, int maxHigh, Terrain... gradient
+    Area map, int maxHigh, Terrain... gradient
   ) {
     HeightMap mapH = new HeightMap(map.size, 1, 0.5f);
     int numG = gradient.length;
     
-    for (Tile tile : map.allTiles()) {
+    for (AreaTile tile : map.allTiles()) {
       float   high = mapH.value()[tile.x][tile.y];
       byte    var  = (byte) Rand.index(8);
       Terrain terr = gradient[Nums.clamp((int) (high * numG), numG)];
@@ -205,9 +205,9 @@ public class CityMapTerrain implements TileConstants {
   
   /**  Adding fixtures-
     */
-  public static void populateFixtures(AreaMap map) {
+  public static void populateFixtures(Area map) {
     for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
-      Tile    tile = map.tileAt(c.x, c.y);
+      AreaTile    tile = map.tileAt(c.x, c.y);
       Terrain terr = tile.terrain;
       
       //  TODO:  You also need to mark these tiles for regeneration
@@ -228,16 +228,16 @@ public class CityMapTerrain implements TileConstants {
   }
   
   
-  public static void populateFixture(Type t, int x, int y, AreaMap map) {
+  public static void populateFixture(Type t, int x, int y, Area map) {
     Element f = (Element) t.generate();
     f.enterMap(map, x, y, 1, map.locals);
   }
   
   
-  static boolean checkPlacingOkay(Tile at, Type t, AreaMap map) {
+  static boolean checkPlacingOkay(AreaTile at, Type t, Area map) {
     
     for (Coord c : Visit.grid(at.x, at.y, t.wide, t.high, 1)) {
-      Tile u = map.tileAt(c.x, c.y);
+      AreaTile u = map.tileAt(c.x, c.y);
       if (u == null || u.above != null) return false;
     }
     
@@ -246,7 +246,7 @@ public class CityMapTerrain implements TileConstants {
     
     for (Coord c : Visit.perimeter(at.x, at.y, t.wide, t.high)) {
       
-      Tile tile = map.tileAt(c.x, c.y);
+      AreaTile tile = map.tileAt(c.x, c.y);
       boolean blocked = map.blocked(c.x, c.y) || tile.above != null;
       if (firstTile == -1) firstTile = blocked ? 0 : 1;
       //I.say("  B: "+blocked);
@@ -274,7 +274,7 @@ public class CityMapTerrain implements TileConstants {
   
   /**  Adding predators and prey:
     */
-  public static void populateAnimals(AreaMap map, ActorType... species) {
+  public static void populateAnimals(Area map, ActorType... species) {
     
     for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
       map.terrain.scanHabitat(map.grid[c.x][c.y]);
@@ -284,7 +284,7 @@ public class CityMapTerrain implements TileConstants {
     for (ActorType s : species) {
       float idealPop = idealPopulation(s, map);
       while (idealPop-- > 0) {
-        Tile point = findGrazePoint(s, map);
+        AreaTile point = findGrazePoint(s, map);
         if (point == null) continue;
         
         ActorAsAnimal a = (ActorAsAnimal) s.generate();
@@ -295,7 +295,7 @@ public class CityMapTerrain implements TileConstants {
   }
   
   
-  public static float habitatDensity(Tile tile, Terrain t, AreaMap map) {
+  public static float habitatDensity(AreaTile tile, Terrain t, Area map) {
     HabitatScan scan = map.terrain.scanFor(t);
     if (scan == null) return 0;
     float d = scan.densities[tile.x / SCAN_RES][tile.y / SCAN_RES];
@@ -303,7 +303,7 @@ public class CityMapTerrain implements TileConstants {
   }
   
   
-  public static float idealPopulation(ActorType species, AreaMap map) {
+  public static float idealPopulation(ActorType species, Area map) {
     float numTiles = 0;
     for (Terrain h : species.habitats) {
       HabitatScan scan = map.terrain.scanFor(h);
@@ -318,14 +318,14 @@ public class CityMapTerrain implements TileConstants {
   }
   
   
-  public static Tile findGrazePoint(ActorType species, AreaMap map) {
+  public static AreaTile findGrazePoint(ActorType species, Area map) {
     int x = SCAN_RES / 2, y = SCAN_RES / 2, QR = SCAN_RES / 4;
     
-    Batch <Tile > points  = new Batch();
+    Batch <AreaTile > points  = new Batch();
     Batch <Float> ratings = new Batch();
     
     for (Coord c : Visit.grid(x, y, map.size, map.size, SCAN_RES)) {
-      Tile t = map.tileAt(c.x, c.y);
+      AreaTile t = map.tileAt(c.x, c.y);
       if (t == null) continue;
       float rating = 0;
       for (Terrain h : species.habitats) rating += habitatDensity(t, h, map);
@@ -333,7 +333,7 @@ public class CityMapTerrain implements TileConstants {
       ratings.add(rating);
     }
     
-    Tile point = (Tile) Rand.pickFrom(points, ratings);
+    AreaTile point = (AreaTile) Rand.pickFrom(points, ratings);
     if (point == null) return null;
     
     point = map.tileAt(
@@ -341,7 +341,7 @@ public class CityMapTerrain implements TileConstants {
       Nums.clamp(point.y + Rand.index(QR * 2) - QR, map.size)
     );
     
-    point = Tile.nearestOpenTile(point, map);
+    point = AreaTile.nearestOpenTile(point, map);
     return point;
   }
   

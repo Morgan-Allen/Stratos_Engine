@@ -4,7 +4,7 @@
 package content;
 import game.*;
 import static game.GameConstants.*;
-import static game.Technique.*;
+import static game.ActorTechnique.*;
 import graphics.common.*;
 import util.*;
 
@@ -18,7 +18,7 @@ public class StockExGoods {
   ;
   
   
-  final public static Technique MEDIKIT_HEAL = new Technique(
+  final public static ActorTechnique MEDIKIT_HEAL = new ActorTechnique(
     "tech_medikit_heal", "Medikit"
   ) {
     

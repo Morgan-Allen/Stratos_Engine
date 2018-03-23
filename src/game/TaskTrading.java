@@ -65,7 +65,7 @@ public class TaskTrading extends Task {
     */
   void configTravel(Trader from, Trader trader, Task.JOB jobType, Employer e) {
     Actor actor = (Actor) active;
-    AreaMap fromA = from.base().activeMap(), goesA = trader.base().activeMap();
+    Area fromA = from.base().activeMap(), goesA = trader.base().activeMap();
     //
     //  If your're headed to a building on the same map, either proceed to the
     //  entrance or head to the corner tile.
@@ -83,7 +83,7 @@ public class TaskTrading extends Task {
     //  point or begin your journey directly.
     else {
       if (actor.onMap()) {
-        Tile exits = findTransitPoint(actor.map(), from.base(), trader.base());
+        AreaTile exits = findTransitPoint(actor.map(), from.base(), trader.base());
         configTask(origin, null, exits, Task.JOB.TRADING, 0);
       }
       else {
@@ -328,7 +328,7 @@ public class TaskTrading extends Task {
       goes instanceof Building &&
       fromB == goesB
     ) {
-      float mapDist = AreaMap.distance(
+      float mapDist = Area.distance(
         ((Building) from).mainEntrance(),
         ((Building) goes).mainEntrance()
       );

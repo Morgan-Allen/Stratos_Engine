@@ -20,7 +20,7 @@ public class TestExploring extends LogicTest {
     LogicTest test = new TestExploring();
     
     Base base = setupTestBase(32, ALL_GOODS, true, JUNGLE, MEADOW);
-    AreaMap map = base.activeMap();
+    Area map = base.activeMap();
     World world = map.world;
     
     world.settings.toggleFatigue   = false;
@@ -29,12 +29,12 @@ public class TestExploring extends LogicTest {
     world.settings.toggleAutoBuild = false;
     
     
-    CityMapPlanning.markDemolish(map, true, 3, 3, 6, 6);
+    AreaPlanning.markDemolish(map, true, 3, 3, 6, 6);
     Building lodge = (Building) KOMMANDO_REDOUBT.generate();
     lodge.enterMap(map, 4, 4, 1, base);
     ActorUtils.fillWorkVacancies(lodge);
     
-    CityMapTerrain.populateAnimals(map, QUDU);
+    AreaTerrain.populateAnimals(map, QUDU);
     
     int tilesSeen = 0, tilesOpen = 0;
     boolean exploreOkay = false;
@@ -48,7 +48,7 @@ public class TestExploring extends LogicTest {
         tilesSeen = 0;
         tilesOpen = 0;
         
-        for (Tile t : map.allTiles()) {
+        for (AreaTile t : map.allTiles()) {
           if (map.blocked(t)) continue;
           tilesOpen += 1;
           if (map.fog.maxSightLevel(t) > 0) tilesSeen += 1;

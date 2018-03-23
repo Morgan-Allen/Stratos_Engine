@@ -24,7 +24,7 @@ public class TestPathing extends LogicTest {
     boolean testOkay = true;
     
     Base base = setupTestBase(32, ALL_GOODS, false);
-    AreaMap map = base.activeMap();
+    Area map = base.activeMap();
     World world = map.world;
     world.settings.toggleFog     = false;
     world.settings.toggleHunger  = false;
@@ -36,8 +36,8 @@ public class TestPathing extends LogicTest {
     //  ensure that pathing-checks function correctly between various
     //  points on the ground, walls, between gates, et cetera:
     
-    CityMapPlanning.placeStructure(SHIELD_WALL, base, true, 4, 4, 20, 20);
-    CityMapPlanning.markDemolish(map, true, 6, 6, 16, 16);
+    AreaPlanning.placeStructure(SHIELD_WALL, base, true, 4, 4, 20, 20);
+    AreaPlanning.markDemolish(map, true, 6, 6, 16, 16);
     
     Building gate = (Building) BLAST_DOOR.generate();
     gate.setFacing(TileConstants.N);
@@ -54,26 +54,26 @@ public class TestPathing extends LogicTest {
     Building home = (Building) HOLDING.generate();
     home.enterMap(map, 10, 10, 1, base);
     
-    Tile cornerWall   = map.tileAt(4 , 4 );
-    Tile endWall      = map.tileAt(20, 4 );
-    Tile cornerGround = map.tileAt(6 , 6 );
-    Tile innerGround  = map.tileAt(9 , 12);
-    Tile outerGround  = map.tileAt(16, 31);
-    Tile oppGround    = map.tileAt(20, 14);
+    AreaTile cornerWall   = map.tileAt(4 , 4 );
+    AreaTile endWall      = map.tileAt(20, 4 );
+    AreaTile cornerGround = map.tileAt(6 , 6 );
+    AreaTile innerGround  = map.tileAt(9 , 12);
+    AreaTile outerGround  = map.tileAt(16, 31);
+    AreaTile oppGround    = map.tileAt(20, 14);
     
     Pathing p1[], p2[];
     p1 = cornerWall  .adjacent(null, map);
     p2 = cornerGround.adjacent(null, map);
     
     for (Pathing n : p1) {
-      if (n != null && map.above(((Tile) n)) == null) {
+      if (n != null && map.above(((AreaTile) n)) == null) {
         I.say("\nWALL TILES SHOULD ONLY BORDER OTHER WALL TILES!");
         testOkay = false;
         if (! graphics) return false;
       }
     }
     for (Pathing n : p2) {
-      if (n != null && map.above(((Tile) n)) != null) {
+      if (n != null && map.above(((AreaTile) n)) != null) {
         I.say("\nGROUND TILES SHOULD ONLY BORDER OTHER GROUND TILES!");
         testOkay = false;
         if (! graphics) return false;
@@ -130,11 +130,11 @@ public class TestPathing extends LogicTest {
     Table <Actor, Pathing> destinations = new Table();
     Tally <Actor> numInside = new Tally();
     
-    Tile initPoints[] = { cornerWall, innerGround, outerGround };
+    AreaTile initPoints[] = { cornerWall, innerGround, outerGround };
     
     for (int n = 3; n-- > 0;) {
       Actor a = (Actor) Vassals.PYON.generate();
-      Tile point = initPoints[n];
+      AreaTile point = initPoints[n];
       a.enterMap(map, point.x, point.y, 1, base);
       actors.add(a);
       destinations.put(a, a.at());
@@ -148,7 +148,7 @@ public class TestPathing extends LogicTest {
     while (map.time() < 1000 || graphics) {
       numInside.clear();
       
-      for (Tile t : map.allTiles()) {
+      for (AreaTile t : map.allTiles()) {
         for (Actor i : t.inside()) {
           numInside.add(1, i);
           if (t != i.at()) {
@@ -228,7 +228,7 @@ public class TestPathing extends LogicTest {
   
   
   private static Pathing[] checkPathingOkay(
-    Pathing from, Pathing goes, AreaMap map
+    Pathing from, Pathing goes, Area map
   ) {
     ActorPathSearch search = new ActorPathSearch(map, from, goes, -1);
     search.doSearch();

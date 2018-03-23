@@ -2,7 +2,7 @@
 
 package game;
 import util.*;
-import static game.AreaMap.*;
+import static game.Area.*;
 import static game.GameConstants.*;
 
 

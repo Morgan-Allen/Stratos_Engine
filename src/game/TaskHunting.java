@@ -2,7 +2,7 @@
 
 package game;
 import util.*;
-import static game.AreaMap.*;
+import static game.Area.*;
 import static game.GameConstants.*;
 
 
@@ -55,12 +55,12 @@ public class TaskHunting extends Task {
       if (! Visit.arrayIncludes(meatTypes, meat)) continue;
       if (store.inventory(meat) >= store.type().maxStock) continue;
       
-      float dist = AreaMap.distance(actor.at(), a.at());
+      float dist = Area.distance(actor.at(), a.at());
       if (dist > MAX_EXPLORE_DIST) continue;
       
       //  TODO:  Check to make sure there's pathing access!
       
-      forHunt.compare(a, AreaMap.distancePenalty(dist));
+      forHunt.compare(a, Area.distancePenalty(dist));
     }
     if (forHunt.empty()) return null;
     
@@ -75,7 +75,7 @@ public class TaskHunting extends Task {
   protected void onTarget(Target target) {
     Actor actor = (Actor) this.active;
     if (target == prey) {
-      Tile site = prey.at();
+      AreaTile site = prey.at();
       
       boolean melee = actor.meleeDamage() > actor.rangeDamage();
       actor.performAttack(prey, melee);

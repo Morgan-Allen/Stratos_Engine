@@ -57,7 +57,7 @@ public class OptionList extends UIGroup implements UIConstants {
   }
   
   
-  protected void setupFrom(AreaMap stage, Base base) {
+  protected void setupFrom(Area stage, Base base) {
     
     for (UINode option : options) {
       option.detach();
@@ -84,7 +84,7 @@ public class OptionList extends UIGroup implements UIConstants {
       }
     });
     
-    for (Technique t : base.rulerPowers()) {
+    for (ActorTechnique t : base.rulerPowers()) {
       options.add(new PowerButton(BUI, t, base));
     }
     
@@ -153,10 +153,10 @@ public class OptionList extends UIGroup implements UIConstants {
   
   private class PowerButton extends Button {
     
-    final Technique power;
+    final ActorTechnique power;
     final Base base;
     
-    PowerButton(PlayUI UI, Technique power, Base base) {
+    PowerButton(PlayUI UI, ActorTechnique power, Base base) {
       super(
         UI, power.uniqueID()+"_button",
         power.icon, Button.CIRCLE_LIT, power.info

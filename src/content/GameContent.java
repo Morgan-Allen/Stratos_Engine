@@ -6,7 +6,7 @@ import graphics.common.*;
 import graphics.cutout.*;
 import graphics.solids.*;
 import util.*;
-import static game.AreaMap.*;
+import static game.Area.*;
 import static game.GameConstants.*;
 import static game.Type.*;
 
@@ -703,7 +703,7 @@ public class GameContent {
     SCHOOL_COL.foundationModel = FOUNDATIONS[4];
     
     SCHOOL_COL.workerTypes.setWith(Collective.COLLECTIVE, 2);
-    SCHOOL_COL.rulerPowers = new Technique[] { Collective.PSY_HEAL };
+    SCHOOL_COL.rulerPowers = new ActorTechnique[] { Collective.PSY_HEAL };
     
     SCHOOL_LEN.name = "LENSR School";
     SCHOOL_LEN.model = CutoutModel.fromImage(

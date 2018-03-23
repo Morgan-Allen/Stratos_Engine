@@ -6,8 +6,8 @@ import static content.GameContent.*;
 import game.*;
 import static game.ActorAsPerson.*;
 import static game.GameConstants.*;
-import static game.CityCouncil.*;
-import static game.CityMapPlanning.*;
+import static game.BaseCouncil.*;
+import static game.AreaPlanning.*;
 import util.*;
 
 
@@ -25,7 +25,7 @@ public class TestLifeCycle extends LogicTest {
     LogicTest test = new TestLifeCycle();
     
     Base base = setupTestBase(16, ALL_GOODS, false);
-    AreaMap map = base.activeMap();
+    Area map = base.activeMap();
     World world = map.world;
     
     world.settings.toggleFog    = false;
@@ -60,7 +60,7 @@ public class TestLifeCycle extends LogicTest {
     placeStructure(WALKWAY, base, true, 0, 9, 16, 1);
     
     Building palace = (Building) BASTION.generate();
-    CityCouncil council = base.council;
+    BaseCouncil council = base.council;
     
     ActorAsPerson oldKing = (ActorAsPerson) Nobles.NOBLE  .generate();
     ActorAsPerson consort = (ActorAsPerson) Nobles.CONSORT.generate();

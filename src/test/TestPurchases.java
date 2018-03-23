@@ -21,7 +21,7 @@ public class TestPurchases extends LogicTest {
     TestPurchases test = new TestPurchases();
     
     Base base = LogicTest.setupTestBase(16, ALL_GOODS, false);
-    AreaMap map = base.activeMap();
+    Area map = base.activeMap();
     World world = map.world;
     
     world.settings.toggleFog     = false;

@@ -33,7 +33,7 @@ public class Ephemera {
   }
   
   
-  final AreaMap map;
+  final Area map;
   
   private boolean active = false;
   private Colour fadeColour = null;
@@ -41,7 +41,7 @@ public class Ephemera {
   //final Table <AreaMpPatch, List <Ghost>> ghosts = new Table(100);
   
   
-  protected Ephemera(AreaMap world) {
+  protected Ephemera(Area world) {
     this.map = world;
   }
   
@@ -216,10 +216,10 @@ public class Ephemera {
   
   public static void applyCombatFX(
     Good type, Active uses, Target applied,
-    boolean ranged, boolean hits, AreaMap map
+    boolean ranged, boolean hits, Area map
   ) {
     if (type == null || uses == null || applied == null) return;
-    final float distance = AreaMap.distance(uses, applied);
+    final float distance = Area.distance(uses, applied);
     if (ranged) {
       applyShotFX(
         type.shotModel, type.burstModel,
@@ -233,7 +233,7 @@ public class Ephemera {
   
   
   public static void applyMeleeFX(
-    ModelAsset model, Active uses, Target applied, AreaMap map
+    ModelAsset model, Active uses, Target applied, Area map
   ) {
     //
     //  Put in a little 'splash' FX, in the direction of the arc.
@@ -249,7 +249,7 @@ public class Ephemera {
   public static void applyShotFX(
     ShotFX.Model model, PlaneFX.Model burstModel,
     Active uses, Target applied,
-    boolean hits, float duration, AreaMap map
+    boolean hits, float duration, Area map
   ) {
     final ShotFX shot = applyShotFX(
       model, uses, applied, hits, duration, map
@@ -261,7 +261,7 @@ public class Ephemera {
   
   public static ShotFX applyShotFX(
     ShotFX.Model model, Active uses, Target applied,
-    boolean hits, float duration, AreaMap map
+    boolean hits, float duration, Area map
   ) {
     final ShotFX shot = (ShotFX) model.makeSprite();
     //  TODO:  Consider setting the fire point manually if the animation state
@@ -282,7 +282,7 @@ public class Ephemera {
   
   public static void applyBurstFX(
     PlaneFX.Model model, Vec3D point,
-    float duration, float scale, float alpha, AreaMap map
+    float duration, float scale, float alpha, Area map
   ) {
     if (model == null) return;
     final Sprite s = model.makeSprite();
@@ -293,14 +293,14 @@ public class Ephemera {
   
   
   public static void applyBurstFX(
-    PlaneFX.Model model, Vec3D point, float duration, AreaMap map
+    PlaneFX.Model model, Vec3D point, float duration, Area map
   ) {
     applyBurstFX(model, point, duration, 1, 1, map);
   }
   
   
   public static void applyBurstFX(
-    PlaneFX.Model model, Target point, AreaMap map,
+    PlaneFX.Model model, Target point, Area map,
     float heightFraction, float duration
   ) {
     applyBurstFX(model, point, map, heightFraction, 1, 1, duration);
@@ -308,7 +308,7 @@ public class Ephemera {
   
   
   public static void applyBurstFX(
-    PlaneFX.Model model, Target point, AreaMap map,
+    PlaneFX.Model model, Target point, Area map,
     float heightFraction, float scale, float alpha, float duration
   ) {
     final Vec3D pos = point.renderedPosition(null);
@@ -323,7 +323,7 @@ public class Ephemera {
   
   public static void applyShieldFX(
     Good type, Active uses, Target attackedBy,
-    boolean hits, boolean ranged, AreaMap map
+    boolean hits, boolean ranged, Area map
   ) {
     if (uses == null || map == null) return;
     if (type == null || type.shieldModel == null) return;

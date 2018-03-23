@@ -6,7 +6,7 @@ import content.*;
 import util.*;
 import static game.ActorAsPerson.*;
 import static game.Base.*;
-import static game.CityCouncil.*;
+import static game.BaseCouncil.*;
 import static game.GameConstants.*;
 import static content.GameContent.*;
 
@@ -27,7 +27,7 @@ public class TestDiplomacy extends LogicTest {
     Base    baseC = new Base(world, world.addLocale(2, 2));
     Base    awayC = new Base(world, world.addLocale(2, 3));
     Base    neutC = new Base(world, world.addLocale(3, 2));
-    AreaMap map   = CityMapTerrain.generateTerrain(
+    Area map   = AreaTerrain.generateTerrain(
       baseC, 32, 0, MEADOW, JUNGLE
     );
     world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES());
@@ -41,17 +41,17 @@ public class TestDiplomacy extends LogicTest {
     world.settings.toggleMigrate = false;
     
     
-    CityMapPlanning.placeStructure(SHIELD_WALL, baseC, true, 7, 7, 12, 12);
-    CityMapPlanning.markDemolish(map, true, 8, 8, 10, 10);
+    AreaPlanning.placeStructure(SHIELD_WALL, baseC, true, 7, 7, 12, 12);
+    AreaPlanning.markDemolish(map, true, 8, 8, 10, 10);
     
     Building gate = (Building) BLAST_DOOR.generate();
     gate.setFacing(TileConstants.N);
     gate.enterMap(map, 12, 17, 1, baseC);
     
     Building palace = (Building) BASTION.generate();
-    CityCouncil council = baseC.council;
+    BaseCouncil council = baseC.council;
     palace.enterMap(map, 10, 10, 1, baseC);
-    CityMapPlanning.placeStructure(WALKWAY, baseC, true, 12, 19, 1, 13);
+    AreaPlanning.placeStructure(WALKWAY, baseC, true, 12, 19, 1, 13);
     
     ActorAsPerson monarch = (ActorAsPerson) Nobles.NOBLE.generate();
     council.toggleMember(monarch, Role.MONARCH, true);

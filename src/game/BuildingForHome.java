@@ -2,7 +2,7 @@
 
 package game;
 import util.*;
-import static game.AreaMap.*;
+import static game.Area.*;
 import static game.Task.*;
 import static game.GameConstants.*;
 import static game.TaskDelivery.*;
@@ -38,7 +38,7 @@ public class BuildingForHome extends Building {
     //  This methods checks for the presence of all required amenities within
     //  a given wander-range.
     Tally <Type> access = new Tally();
-    Tile entrance = mainEntrance();
+    AreaTile entrance = mainEntrance();
     if (entrance == null) return access;
     int maxRange = MAX_WANDER_RANGE;
     
@@ -52,7 +52,7 @@ public class BuildingForHome extends Building {
       for (Building b : map.buildings) {
         if (! Visit.arrayIncludes(b.type().features, service)) continue;
         
-        float dist = AreaMap.distance(b.mainEntrance(), entrance);
+        float dist = Area.distance(b.mainEntrance(), entrance);
         if (dist > maxRange) continue;
         
         if (! map.pathCache.pathConnects(entrance, b.mainEntrance())) {
@@ -109,10 +109,10 @@ public class BuildingForHome extends Building {
     final int AMB_DIRS[] = { N, E, S, W, CENTRE };
     
     for (Pathing p : costs.keys()) if (p.isTile()) {
-      Tile tile = (Tile) p;
+      AreaTile tile = (AreaTile) p;
       float cost = costs.valueFor(tile);
       for (int dir : AMB_DIRS) {
-        Tile n = map.tileAt(tile.x + T_X[dir], tile.y + T_Y[dir]);
+        AreaTile n = map.tileAt(tile.x + T_X[dir], tile.y + T_Y[dir]);
         if (n == null || n.above == null) continue;
         sumAmb     += n.above.ambience() / (1 + cost);
         sumWeights += 1f / (1 + cost);

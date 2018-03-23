@@ -2,14 +2,14 @@
 
 package game;
 import util.*;
-import static game.AreaMap.*;
+import static game.Area.*;
 import static game.GameConstants.*;
 
 
 
 public class ActorPathSearch extends Search <Pathing> {
   
-  AreaMap map;
+  Area map;
   Pathing dest;
   Pathing temp[] = new Pathing[9];
   Actor   client   = null;
@@ -24,7 +24,7 @@ public class ActorPathSearch extends Search <Pathing> {
   
   
   public ActorPathSearch(
-    AreaMap map, Pathing init, Pathing dest, int maxDist
+    Area map, Pathing init, Pathing dest, int maxDist
   ) {
     super(init, -1);
     this.map     = map;
@@ -60,7 +60,7 @@ public class ActorPathSearch extends Search <Pathing> {
   
   
   protected boolean canEnter(Pathing spot) {
-    if (spot.isTile() && map.blocked((Tile) spot)) {
+    if (spot.isTile() && map.blocked((AreaTile) spot)) {
       return false;
     }
     if (client != null && ! spot.allowsEntry(client)) {

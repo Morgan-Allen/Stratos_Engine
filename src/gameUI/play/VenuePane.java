@@ -189,7 +189,7 @@ public class VenuePane extends DetailPane {
       d.append("\n\n");
       d.append(new Description.Link("DEMOLISH") {
         public void whenClicked(Object context) {
-          AreaMap map = venue.map();
+          Area map = venue.map();
           if (map == null) return;
           map.planning.unplaceObject(venue);
           venue.exitMap(venue.map());

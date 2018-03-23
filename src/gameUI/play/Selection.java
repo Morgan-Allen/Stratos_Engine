@@ -19,7 +19,7 @@ public class Selection {
   
   final PlayUI UI;
   private Focus    hovered;
-  private Tile     hoverSpot;
+  private AreaTile     hoverSpot;
   private Actor    hoverActor;
   private Building hoverVenue;
   private Mission  hoverMission;
@@ -43,7 +43,7 @@ public class Selection {
   }
   
   
-  void updateSelection(AreaMap stage, Base base) {
+  void updateSelection(Area stage, Base base) {
     if (UI.selected() != null) {
       hovered    = null;
       hoverSpot  = null;
@@ -133,7 +133,7 @@ public class Selection {
   }
   
   
-  public Tile     hoverSpot () { return hoverSpot ; }
+  public AreaTile     hoverSpot () { return hoverSpot ; }
   public Actor    hoverActor() { return hoverActor; }
   public Building hoverVenue() { return hoverVenue; }
   public Focus    hovered   () { return hovered   ; }

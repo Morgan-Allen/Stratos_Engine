@@ -8,7 +8,7 @@ import static game.GameConstants.*;
 
 
 
-public class CityCouncil {
+public class BaseCouncil {
   
   
   /**  Data fields, construction and save/load methods-
@@ -44,7 +44,7 @@ public class CityCouncil {
   private List <Mission> petitions = new List();
   
   
-  CityCouncil(Base city) {
+  BaseCouncil(Base city) {
     this.city = city;
   }
   
@@ -273,7 +273,7 @@ public class CityCouncil {
     MissionAssessment IA = pickI.result();
     if (IA != null) {
       Mission force = spawnFormation(IA);
-      CityEvents.handleDeparture(force, IA.fromC, IA.goesC);
+      BaseEvents.handleDeparture(force, IA.fromC, IA.goesC);
     }
   }
   
@@ -498,10 +498,10 @@ public class CityCouncil {
     
     //  See if it's possible to arrange a marriage as well.
     
-    Actor monarch = goes.council.memberWithRole(CityCouncil.Role.MONARCH);
+    Actor monarch = goes.council.memberWithRole(BaseCouncil.Role.MONARCH);
     Pick <Actor> pickM = new Pick();
     
-    for (Actor a : from.council.allMembersWithRole(CityCouncil.Role.HEIR)) {
+    for (Actor a : from.council.allMembersWithRole(BaseCouncil.Role.HEIR)) {
       Actor spouse = a.allBondedWith(BOND_MARRIED).first();
       if (spouse != null) continue;
       if (monarch.sexData == a.sexData) continue;

@@ -30,7 +30,7 @@ public class TaskResting extends Task {
   
   /**  Factory methods for outside access and other helper functions-
     */
-  public static Building findRestVenue(Actor actor, AreaMap map) {
+  public static Building findRestVenue(Actor actor, Area map) {
     Pick <Building> pick = new Pick();
     for (Building b : map.buildings()) {
       
@@ -38,7 +38,7 @@ public class TaskResting extends Task {
       if (b != actor.home() && ! b.type().hasFeature(IS_REFUGE)) continue;
       
       float rating = 1f;
-      rating *= AreaMap.distancePenalty(actor, b);
+      rating *= Area.distancePenalty(actor, b);
       rating *= restUrgency(actor, b);
       
       if (b == actor.home()) rating *= 3;

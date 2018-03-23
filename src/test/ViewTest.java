@@ -26,11 +26,11 @@ public abstract class ViewTest extends CityMapScenario {
     return initBase.world;
   }
   
-  protected AreaMap createStage(World world) {
+  protected Area createStage(World world) {
     return initBase.activeMap();
   }
   
-  protected Base createBase(AreaMap map, World world) {
+  protected Base createBase(Area map, World world) {
     return initBase;
   }
   

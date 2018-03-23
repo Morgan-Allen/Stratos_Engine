@@ -51,12 +51,12 @@ public class TaskGathering extends Task {
     
     if (! canPlant(store)) return null;
     
-    Pick <Tile> pick = new Pick();
-    AreaMap map = store.map();
+    Pick <AreaTile> pick = new Pick();
+    Area map = store.map();
     Pathing from = Task.pathOrigin(actor);
     
     for (Plot p : store.plots()) {
-      for (Tile t : map.tilesUnder(p)) {
+      for (AreaTile t : map.tilesUnder(p)) {
         if (t == null || t.hasFocus()) continue;
         if (! map.pathCache.pathConnects(from, t, true, false)) continue;
         
@@ -66,14 +66,14 @@ public class TaskGathering extends Task {
         Element e = map.above(t);
         if (e != null && e.type() == g && e.growLevel() >= 0) continue;
         
-        float rating = AreaMap.distancePenalty(actor, t);
+        float rating = Area.distancePenalty(actor, t);
         pick.compare(t, rating);
       }
     }
     
     if (pick.empty()) return null;
     
-    Tile goes = pick.result();
+    AreaTile goes = pick.result();
     TaskGathering task = new TaskGathering(actor, store);
     
     if (task.configTask(store, null, goes, JOB.PLANTING, 2) != null) {
@@ -90,7 +90,7 @@ public class TaskGathering extends Task {
   ) {
     if (Visit.empty(cropTypes)) return null;
 
-    AreaMap map = store.map();
+    Area map = store.map();
     int spaceTaken = 0;
     Pathing from = Task.pathOrigin(actor);
     
@@ -100,10 +100,10 @@ public class TaskGathering extends Task {
     if (spaceTaken >= store.type().maxStock) return null;
     
     if (store.plots().size() > 0) {
-      Pick <Tile> pick = new Pick(0);
+      Pick <AreaTile> pick = new Pick(0);
 
       for (Plot p : store.plots()) {
-        for (Tile t : map.tilesUnder(p)) {
+        for (AreaTile t : map.tilesUnder(p)) {
           if (t == null || t.hasFocus()) continue;
           if (! map.pathCache.pathConnects(from, t, true, false)) continue;
           
@@ -111,7 +111,7 @@ public class TaskGathering extends Task {
           if (above == null || above.growLevel() <= 0) continue;
           if (! Visit.arrayIncludes(cropTypes, above.type().yields)) continue;
           
-          float rating = AreaMap.distancePenalty(actor, t);
+          float rating = Area.distancePenalty(actor, t);
           rating *= above.growLevel();
           pick.compare(t, rating);
         }
@@ -119,7 +119,7 @@ public class TaskGathering extends Task {
       
       if (pick.empty()) return null;
       
-      Tile goes = pick.result();
+      AreaTile goes = pick.result();
       TaskGathering task = new TaskGathering(actor, store);
       
       if (task.configTask(store, null, goes, JOB.HARVEST, 2) != null) {
@@ -128,10 +128,10 @@ public class TaskGathering extends Task {
     }
     
     else {
-      CityMapFlagging flagging = store.map.flagging.get(store.type().gatherFlag);
+      AreaFlagging flagging = store.map.flagging.get(store.type().gatherFlag);
       if (flagging == null) return null;
       
-      Tile goes = null;
+      AreaTile goes = null;
       if (close) goes = flagging.findNearbyPoint(actor, AVG_GATHER_RANGE);
       else goes = flagging.pickRandomPoint(store, store.type().maxDeliverRange);
       Element above = goes == null ? null : goes.above;
@@ -160,8 +160,8 @@ public class TaskGathering extends Task {
   protected void onTarget(Target other) {
     if (other == null) return;
     Actor   actor = (Actor) this.active;
-    Tile    at    = other.at();
-    AreaMap map   = actor.map();
+    AreaTile    at    = other.at();
+    Area map   = actor.map();
     
     if (actor.jobType() == JOB.RETURNING && store.actorIsHere(actor)) {
       onVisit(store);

@@ -225,7 +225,7 @@ public class GameConstants {
     public int maxQuality = -1;
     public int maxCarried = -1;
     public int priceLevels[] = {};
-    public Technique allows[] = {};
+    public ActorTechnique allows[] = {};
     
     public String groupName, animName;
     public PlaneFX.Model  slashModel ;
@@ -268,7 +268,7 @@ public class GameConstants {
       return this;
     }
     
-    public Good setUsable(Technique... allows) {
+    public Good setUsable(ActorTechnique... allows) {
       this.isUsable = true;
       this.allows = allows;
       return this;
@@ -440,7 +440,7 @@ public class GameConstants {
     */
   public static interface Active extends Target {
     
-    AreaMap map();
+    Area map();
     boolean isActor();
     
     Task.JOB jobType();
@@ -456,7 +456,7 @@ public class GameConstants {
   
   public static interface Target extends Flood.Fill {
     
-    Tile at();
+    AreaTile at();
     float radius();
     float height();
     boolean onMap();
@@ -478,7 +478,7 @@ public class GameConstants {
   public static interface Pathing extends Target {
     
     int pathType();
-    Pathing[] adjacent(Pathing temp[], AreaMap map);
+    Pathing[] adjacent(Pathing temp[], Area map);
     boolean allowsEntryFrom(Pathing p);
 
     boolean allowsEntry(Actor a);

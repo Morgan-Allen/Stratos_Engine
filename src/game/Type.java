@@ -184,13 +184,13 @@ public class Type extends Index.Entry implements Session.Saveable {
   }
   
   
-  public int footprint(Tile at, Element e) {
+  public int footprint(AreaTile at, Element e) {
     if (at == null || e == null) return -1;
     
     int m = this.clearMargin;
     int spanW = wide + (m * 2), spanH = high + (m * 2);
     
-    Tile o = e.at();
+    AreaTile o = e.at();
     int x = at.x + m - o.x, y = at.y + m - o.y;
     if (x < 0 || x >= spanW || y < 0 || y >= spanH) return -1;
     return footprint[x][y];
@@ -222,7 +222,7 @@ public class Type extends Index.Entry implements Session.Saveable {
   
   /**  Building-specific data fields and setup methods-
     */
-  public boolean rulerCanBuild(Base ruler, AreaMap map) {
+  public boolean rulerCanBuild(Base ruler, Area map) {
     if (! rulerBuilt) return false;
     if (uniqueBuilding) {
       for (Building b : map.buildings()) if (b.type() == this) return false;

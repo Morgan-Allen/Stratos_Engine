@@ -48,7 +48,7 @@ public class Readout extends UIGroup {
     super.updateState();
     
     final Base played = UI.base;
-    final AreaMap map = UI.stage;
+    final Area map = UI.stage;
     
     read.setText("");
     //

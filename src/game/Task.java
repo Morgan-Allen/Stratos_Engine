@@ -3,7 +3,7 @@
 package game;
 import graphics.common.*;
 import util.*;
-import static game.AreaMap.*;
+import static game.Area.*;
 import static game.GameConstants.*;
 
 
@@ -136,7 +136,7 @@ public class Task implements Session.Saveable {
       for (Pathing t : path) {
         if (t.isTile()) {
           s.saveBool(true);
-          saveTile((Tile) t, active.map(), s);
+          saveTile((AreaTile) t, active.map(), s);
         }
         else {
           s.saveBool(false);
@@ -272,7 +272,7 @@ public class Task implements Session.Saveable {
       }
     }
     
-    AreaMap  map      = active.map();
+    Area  map      = active.map();
     boolean  isActor  = active.isActor();
     Actor    asActor  = isActor ? (Actor) active : null;
     Pathing  inside   = isActor ? asActor.inside() : null;
@@ -472,12 +472,12 @@ public class Task implements Session.Saveable {
   
   boolean checkContact(Pathing path[]) {
     Pathing from = (Pathing) Visit.last(path);
-    return AreaMap.distance(active, from) < actionRange();
+    return Area.distance(active, from) < actionRange();
   }
   
   
   int checkActionProgress() {
-    AreaMap map = active.map();
+    Area map = active.map();
     int maxTicks = map.ticksPS * Nums.max(1, maxTime);
     boolean exactInterval = ticksSpent % map.ticksPS == 0;
 
@@ -532,8 +532,8 @@ public class Task implements Session.Saveable {
     
     Pathing last = (Pathing) Visit.last(path);
     Actor actor = (Actor) this.active;
-    AreaMap map = actor.map();
-    if (AreaMap.distance(last, target) > 1.5f) return false;
+    Area map = actor.map();
+    if (Area.distance(last, target) > 1.5f) return false;
     
     int index = Nums.clamp(pathIndex, path.length);
     Pathing current = pathOrigin(actor), step = path[index];
@@ -542,7 +542,7 @@ public class Task implements Session.Saveable {
     for (int i = 0; i < actor.type().sightRange; i++, index++) {
       if (index >= path.length) break;
       Pathing t = path[index];
-      if (t.isTile() && map.blocked((Tile) t)) return false;
+      if (t.isTile() && map.blocked((AreaTile) t)) return false;
       if (! (t.onMap() && t.allowsEntry(actor))) return false;
     }
     
@@ -554,7 +554,7 @@ public class Task implements Session.Saveable {
     boolean report  = reports();
     boolean verbose = false;
     
-    AreaMap map      = active.map();
+    Area map      = active.map();
     boolean visiting = visits != null;
     Pathing from     = pathOrigin(active);
     Pathing heads    = pathTarget();
@@ -584,7 +584,7 @@ public class Task implements Session.Saveable {
       if (report) I.say("  Could not find path for "+this);
       return false;
     }
-    else if (path.length < (AreaMap.distance(from, heads) / 2) - 1) {
+    else if (path.length < (Area.distance(from, heads) / 2) - 1) {
       if (report) I.say("  Path is impossible!");
       this.path = null;
       return false;
@@ -596,7 +596,7 @@ public class Task implements Session.Saveable {
   
   
   public static boolean verifyPath(
-    Pathing path[], Pathing start, Pathing end, AreaMap map
+    Pathing path[], Pathing start, Pathing end, Area map
   ) {
     if (Visit.empty(path) || path[0] != start) {
       return false;
@@ -604,7 +604,7 @@ public class Task implements Session.Saveable {
     
     Pathing temp[] = new Pathing[9];
     Pathing last = (Pathing) Visit.last(path);
-    if (last != end && AreaMap.distance(last, end) > 1.5f) {
+    if (last != end && Area.distance(last, end) > 1.5f) {
       return false;
     }
     

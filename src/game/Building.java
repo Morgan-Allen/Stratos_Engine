@@ -1,7 +1,7 @@
 
 
 package game;
-import static game.AreaMap.*;
+import static game.Area.*;
 import static game.GameConstants.*;
 import gameUI.play.*;
 import graphics.common.*;
@@ -31,7 +31,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   
   protected String ID;
   
-  private Tile entrances[] = new Tile[0];
+  private AreaTile entrances[] = new AreaTile[0];
   
   private int lastUpdateTime = -1;
   List <Actor> workers   = new List();
@@ -57,7 +57,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
     ID = s.loadString();
 
     int numE = s.loadInt();
-    entrances = new Tile[numE];
+    entrances = new AreaTile[numE];
     for (int i = 0; i < numE; i++) entrances[i] = loadTile(map, s);
     
     lastUpdateTime = s.loadInt();
@@ -79,7 +79,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
     s.saveString(ID);
     
     s.saveInt(entrances.length);
-    for (Tile e : entrances) saveTile(e, map, s);
+    for (AreaTile e : entrances) saveTile(e, map, s);
     
     s.saveInt(lastUpdateTime);
     s.saveObjects(workers  );
@@ -108,7 +108,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   }
   
   
-  public boolean canPlace(AreaMap map) {
+  public boolean canPlace(Area map) {
     if (! super.canPlace(map)) return false;
     //
     //  TODO:  The efficiency of this might be improved on larger maps.
@@ -126,7 +126,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   
   public Box2D claimArea() {
     if (at() == null) return null;
-    Tile at = at();
+    AreaTile at = at();
     BuildType t = type();
     Box2D area = new Box2D(at.x, at.y, t.wide, t.high);
     if (t.claimMargin > 0) area.expandBy(t.claimMargin);
@@ -134,19 +134,19 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   }
   
   
-  public void enterMap(AreaMap map, int x, int y, float buildLevel, Base owns) {
+  public void enterMap(Area map, int x, int y, float buildLevel, Base owns) {
     super.enterMap(map, x, y, buildLevel, owns);
     if (isClaimant()) map.claimants.add(this);
     map.buildings.add(this);
   }
   
   
-  public void exitMap(AreaMap map) {
+  public void exitMap(Area map) {
     
     //I.say("EXITING MAP: "+this);
     //I.reportStackTrace();
     
-    refreshEntrances(new Tile[0]);
+    refreshEntrances(new AreaTile[0]);
     super.exitMap(map);
     
     if (isClaimant()) map.claimants.remove(this);
@@ -172,7 +172,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   
   /**  Auxiliary pathing-assist methods:
     */
-  public Pathing[] adjacent(Pathing[] temp, AreaMap map) {
+  public Pathing[] adjacent(Pathing[] temp, Area map) {
     if (temp == null) temp = new Pathing[1];
     for (int i = temp.length; i-- > 0;) temp[i] = null;
     if (entrances == null) return temp;
@@ -263,7 +263,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
     }
     
     for (int i = 0; i < entrances.length; i++) {
-      Tile e = entrances[i];
+      AreaTile e = entrances[i];
       if (! checkEntranceOkay(e, i)) {
         refreshEntrances(selectEntrances());
         break;
@@ -293,7 +293,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   
   /**  Dealing with entrances and facing:
     */
-  protected Tile tileAt(int initX, int initY, int facing) {
+  protected AreaTile tileAt(int initX, int initY, int facing) {
     int wide = type().wide - 1, high = type().high - 1;
     int x = 0, y = 0;
     
@@ -308,37 +308,37 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   }
   
   
-  public Tile[] entrances() {
+  public AreaTile[] entrances() {
     return entrances;
   }
   
   
-  public Tile mainEntrance() {
+  public AreaTile mainEntrance() {
     if (Visit.empty(entrances)) return null;
     return entrances[0];
   }
   
   
-  void refreshEntrances(Tile newE[]) {
-    Tile oldE[] = this.entrances;
+  void refreshEntrances(AreaTile newE[]) {
+    AreaTile oldE[] = this.entrances;
     
     boolean flagUpdate = true;
     flagUpdate &= Nums.max(oldE.length, newE.length) > 1;
     flagUpdate &= ! Visit.arrayEquals(oldE, newE);
     
-    if (flagUpdate) for (Tile e : oldE) {
+    if (flagUpdate) for (AreaTile e : oldE) {
       map.pathCache.checkPathingChanged(e);
     }
     
     this.entrances = newE;
     
-    if (flagUpdate) for (Tile e : newE) {
+    if (flagUpdate) for (AreaTile e : newE) {
       map.pathCache.checkPathingChanged(e);
     }
   }
   
   
-  boolean checkEntranceOkay(Tile e, int index) {
+  boolean checkEntranceOkay(AreaTile e, int index) {
     if (e.above == this) return true;
     int pathT = e.pathType();
     if (pathT == Type.PATH_FREE || pathT == Type.PATH_PAVE) return true;
@@ -346,11 +346,11 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   }
   
   
-  Tile[] selectEntrances() {
-    Tile at = at();
+  AreaTile[] selectEntrances() {
+    AreaTile at = at();
     
-    Pick <Tile> pick = new Pick <Tile> () {
-      public void compare(Tile t, float rating) {
+    Pick <AreaTile> pick = new Pick <AreaTile> () {
+      public void compare(AreaTile t, float rating) {
         if (t == null) return;
         int pathT = t.pathType();
         if (pathT != Type.PATH_FREE && pathT != Type.PATH_PAVE) return;
@@ -362,13 +362,13 @@ public class Building extends Element implements Pathing, Employer, Carrier {
     
     int faceCoords[] = entranceCoords(type().wide, type().high, type().entranceDir);
     {
-      Tile e = map.tileAt(at.x + faceCoords[0], at.y + faceCoords[1]);
+      AreaTile e = map.tileAt(at.x + faceCoords[0], at.y + faceCoords[1]);
       pick.compare(e, 1);
-      if (! pick.empty()) return new Tile[] { pick.result() };
+      if (! pick.empty()) return new AreaTile[] { pick.result() };
     }
     
     for (Coord c : Visit.perimeter(at.x, at.y, type().wide, type().high)) {
-      Tile t = map.tileAt(c);
+      AreaTile t = map.tileAt(c);
       if (t == null) continue;
       boolean outx = t.x == at.x - 1 || t.x == at.x + type().wide;
       boolean outy = t.y == at.y - 1 || t.y == at.y + type().high;
@@ -376,8 +376,8 @@ public class Building extends Element implements Pathing, Employer, Carrier {
       pick.compare(t, 1);
     }
     
-    if (pick.empty()) return new Tile[0];
-    return new Tile[] { pick.result() };
+    if (pick.empty()) return new AreaTile[0];
+    return new AreaTile[] { pick.result() };
   }
   
   
@@ -710,7 +710,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
       return actor.inside() == this;
     }
     else {
-      return AreaMap.adjacent(this, actor);
+      return Area.adjacent(this, actor);
     }
   }
   
@@ -754,10 +754,10 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   
   
   private float sightLevel(boolean max) {
-    Tile at = at();
+    AreaTile at = at();
     float avg = 0;
     for (int x = 2; x-- > 0;) for (int y = 2; y-- > 0;) {
-      Tile t = map.tileAt(at.x + (x * type().wide), at.y + (y * type().high));
+      AreaTile t = map.tileAt(at.x + (x * type().wide), at.y + (y * type().high));
       avg += max ? map.fog.maxSightLevel(t) : map.fog.sightLevel(t);
     }
     return avg / 4;
@@ -767,13 +767,13 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   
   /**  Last-but-not-least, returning available Powers and compiled services:
     */
-  public Series <Technique> rulerPowers() {
-    Batch <Technique> all = new Batch();
-    if (complete()) for (Technique t : type().rulerPowers) {
+  public Series <ActorTechnique> rulerPowers() {
+    Batch <ActorTechnique> all = new Batch();
+    if (complete()) for (ActorTechnique t : type().rulerPowers) {
       all.include(t);
     }
     for (BuildType u : upgrades) if (u != currentUpgrade()) {
-      for (Technique t : u.rulerPowers) {
+      for (ActorTechnique t : u.rulerPowers) {
         all.include(t);
       }
     }

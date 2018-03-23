@@ -2,7 +2,7 @@
 
 package game;
 import util.*;
-import static game.AreaMap.*;
+import static game.Area.*;
 import static game.GameConstants.*;
 
 
@@ -18,7 +18,7 @@ public class BuildingForGather extends Building {
   };
   
   List <Plot> plots = new List();
-  private Tile temp[] = new Tile[9];
+  private AreaTile temp[] = new AreaTile[9];
   
   
   public BuildingForGather(BuildType type) {
@@ -50,7 +50,7 @@ public class BuildingForGather extends Building {
   
   /**  Utility methods for filling up crop areas:
     */
-  public void enterMap(AreaMap map, int x, int y, float buildLevel, Base owns) {
+  public void enterMap(Area map, int x, int y, float buildLevel, Base owns) {
     super.enterMap(map, x, y, buildLevel, owns);
     
     if (isClaimant() && TaskGathering.canPlant(this)) {
@@ -65,12 +65,12 @@ public class BuildingForGather extends Building {
   }
   
   
-  boolean canPlant(Tile at) {
+  boolean canPlant(AreaTile at) {
     if (at == null) return false;
     if (at.terrain.pathing != Type.PATH_FREE) return false;
     if (at.above != null && ! at.above.type().isClearable()) return false;
     
-    for (Tile t : AreaMap.adjacent(at, temp, map())) {
+    for (AreaTile t : Area.adjacent(at, temp, map())) {
       if (t == null || t.above == null) continue;
       if (t.above.type().isClearable()) continue;
       if (t.above.type().pathing <= Type.PATH_FREE) continue;
@@ -81,7 +81,7 @@ public class BuildingForGather extends Building {
   }
   
   
-  Good seedType(Tile t) {
+  Good seedType(AreaTile t) {
     Good crops[] = this.type().produced;
     float index = t.x % 5;
     index += (t.y % 5) / 5f;

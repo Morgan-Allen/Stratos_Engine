@@ -2,25 +2,25 @@
 
 package game;
 import util.*;
-import static game.AreaMap.*;
+import static game.Area.*;
 import static game.GameConstants.*;
 
 
 
 
-public class CityMapFlagging {
+public class AreaFlagging {
   
   
   /**  Data fields, construction and save/load methods-
     */
-  AreaMap map;
+  Area map;
   Object  key;
   int range;
   
   Object flagLevels[];
   
   
-  CityMapFlagging(AreaMap map, Object key, int range) {
+  AreaFlagging(Area map, Object key, int range) {
     this.map = map;
     this.key = key;
     this.range = range;
@@ -108,12 +108,12 @@ public class CityMapFlagging {
   
   /**  More complex queries-
     */
-  public Tile pickDistantPoint(Target near, int maxRange, float randomness) {
+  public AreaTile pickDistantPoint(Target near, int maxRange, float randomness) {
     
     boolean report = I.talkAbout == near;
     if (report) I.say("\nGETTING TILE TO LOOK AT...");
     
-    Tile from = near.at();
+    AreaTile from = near.at();
     int res = (int) Nums.pow(FLAG_RES, flagLevels.length - 1);
     Coord mip = new Coord(0, 0);
     
@@ -142,7 +142,7 @@ public class CityMapFlagging {
         if (maxRange > 0 && dist > maxRange + res) continue;
         
         if (base) {
-          Tile t = map.tileAt(c);
+          AreaTile t = map.tileAt(c);
           if (t.hasFocus()) continue;
           
           //  TODO:  This might not work.  Flagged tiles will typically
@@ -182,23 +182,23 @@ public class CityMapFlagging {
   }
   
   
-  public Tile pickRandomPoint(Target near, int range) {
+  public AreaTile pickRandomPoint(Target near, int range) {
     return pickDistantPoint(near, range, 1);
   }
   
   
-  public Tile findNearbyPoint(Target near, int range) {
+  public AreaTile findNearbyPoint(Target near, int range) {
     
-    Tile from = near.at();
+    AreaTile from = near.at();
     int minX = from.x - range, minY = from.y - range;
-    Pick <Tile> pick = new Pick();
+    Pick <AreaTile> pick = new Pick();
     byte vals[][] = (byte[][]) flagLevels[0];
     
     for (Coord c : Visit.grid(minX, minY, range * 2, range * 2, 1)) {
-      Tile t = map.tileAt(c.x, c.y);
+      AreaTile t = map.tileAt(c.x, c.y);
       if (t == null || t.hasFocus()) continue;
       
-      float dist = AreaMap.distance(from, t);
+      float dist = Area.distance(from, t);
       if (dist > range || vals[t.x][t.y] == 0) continue;
       
       pick.compare(t, 0 - dist);
