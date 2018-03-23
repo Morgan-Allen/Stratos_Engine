@@ -2,16 +2,18 @@
 
 package game;
 import static game.GameConstants.*;
-
+import game.BaseCouncil.Role;
 import game.GameConstants.Target;
+import game.World.Journey;
+import util.*;
 
 
 
 public class MissionContact extends Mission {
   
   
-  public MissionContact(Base belongs, boolean activeAI) {
-    super(OBJECTIVE_RECON, belongs, activeAI);
+  public MissionContact(Base belongs) {
+    super(OBJECTIVE_CONTACT, belongs);
   }
   
   
@@ -20,41 +22,67 @@ public class MissionContact extends Mission {
   }
   
   
-  public Task selectActorBehaviour(Actor actor) {
+  public void saveState(Session s) throws Exception {
+    super.saveState(s);
+  }
+  
+  
+  void update() {
+    super.update();
+    //
+    //  Update current victory-conditions...
+    if (terms.accepted()) {
+      setMissionComplete(true);
+    }
+    if (terms.rejected()) {
+      setMissionComplete(false);
+    }
+  }
+  
+  
+  void beginJourney(Base from, Base goes) {
+    super.beginJourney(from, goes);
+    for (Actor a : recruits) a.assignGuestBase(null);
+  }
+  
+
+  public void onArrival(Base goes, World.Journey journey) {
+    if (goes != homeBase()) for (Actor a : recruits) a.assignGuestBase(goes);
+    super.onArrival(goes, journey);
+  }
+  
+  
+  void handleOffmapArrival(Base goes, World.Journey journey) {
+    BaseEvents.handleDialog(this, goes, journey);
+  }
+  
+  
+  void handleOffmapDeparture(Base from, Journey journey) {
+    return;
+  }
+
+
+  public Task nextLocalMapBehaviour(Actor actor) {
     
-    boolean haveTerms  = hasTerms();
-    boolean onAwayMap  = onAwayMap();
-    boolean isEnvoy    = escorted.includes(actor);
+    boolean  haveTerms = terms.hasTerms();
+    boolean  onAwayMap = ! onHomeMap();
+    boolean  isEnvoy   = envoys.includes(actor);
+    Pathing  camp      = transitPoint(actor);
+    AreaTile stands    = MissionSecure.standingPointRanks(actor, this, camp);
     
-    if (onAwayMap && haveTerms && isEnvoy && timeTermsSent == -1) {
-      Actor offersTerms = MissionUtils.findOfferRecipient(this);
+    if (onAwayMap && haveTerms && isEnvoy && ! terms.sent()) {
+      Actor offersTerms = findOfferRecipient(this);
       Task t = actor.targetTask(offersTerms, 1, Task.JOB.DIALOG, this);
       if (t != null) return t;
     }
     
-    /*
-    //  TODO:  Merge with 'shouldLeave' criteria above?
-    if (complete || termsAccepted || termsRefused) {
-      AreaTile exits = standLocation(actor);
-      if (exits != null) {
-        return actor.targetTask(exits, 10, Task.JOB.RETURNING, this);
-      }
-    }
-    //*/
-    
-    AreaTile stands = standLocation(actor);
-    
     TaskCombat taskC = (Task.inCombat(actor) || isEnvoy) ? null :
       TaskCombat.nextReaction(actor, stands, this, AVG_FILE)
     ;
-    if (taskC != null) {
-      return taskC;
-    }
+    if (taskC != null) return taskC;
     
     Task standT = actor.targetTask(stands, 1, Task.JOB.MILITARY, this);
-    if (standT != null) {
-      return standT;
-    }
+    if (standT != null) return standT;
     
     return null;
   }
@@ -62,8 +90,10 @@ public class MissionContact extends Mission {
   
   public void actorTargets(Actor actor, Target other) {
     if (actor.jobType() == Task.JOB.DIALOG) {
-      dispatchTerms(awayCity());
+      Base focus = ((Element) other).base();
+      terms.sendTerms(focus);
     }
+    super.actorTargets(actor, other);
   }
   
 
@@ -73,17 +103,32 @@ public class MissionContact extends Mission {
   }
   
   
-  boolean objectiveComplete() {
-    return termsAccepted || termsRefused;
-  }
-  
-  
-  
-  void handleArrival(Base goes, World.Journey journey) {
-    BaseEvents.handleDialog(this, goes, journey);
+  static Actor findOfferRecipient(Mission parent) {
+    
+    Base focus = parent.worldFocus();
+    if (focus == null) focus = ((Element) parent.localFocus()).base();
+    if (focus == null) return null;
+    
+    BaseCouncil council = focus.council;
+    
+    Actor monarch = council.memberWithRole(Role.MONARCH);
+    if (monarch != null && monarch.onMap()) return monarch;
+    
+    Actor minister = council.memberWithRole(Role.PRIME_MINISTER);
+    if (minister != null && monarch.onMap()) return monarch;
+    
+    Actor consort = council.memberWithRole(Role.CONSORT);
+    if (consort != null && consort.onMap()) return consort;
+    
+    return null;
   }
   
 }
+
+
+
+
+
 
 
 

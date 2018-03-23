@@ -247,9 +247,9 @@ public class ActorAsPerson extends Actor {
     if (idle() && mission() == null && type().socialClass == CLASS_SOLDIER) {
       Pick <Mission> pick = new Pick(Task.ROUTINE * Rand.num());
       
-      //  TODO:  Use a Choice for this.
+      //  TODO:  Use a Choice for this?
       for (Mission f : base().missions) {
-        if (! f.isBounty()) continue;
+        if (! f.rewards.isBounty()) continue;
         Task t = f.selectActorBehaviour(this);
         float priority = t == null ? 0 : t.priority();
         pick.compare(f, priority * (0.5f + Rand.num()));

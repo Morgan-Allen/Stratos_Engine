@@ -2,6 +2,7 @@
 
 package test;
 import game.*;
+import game.Task.JOB;
 import util.*;
 import static content.GameContent.*;
 import static game.GameConstants.*;
@@ -12,9 +13,10 @@ public class TestBounties extends LogicTest {
   
   
   public static void main(String args[]) {
-    testAttackBuildingMission(false);
-    testAttackActorMission   (false);
-    testExploreAreaMission   (false);
+    //testAttackBuildingMission(false);
+    //testAttackActorMission   (false);
+    //testExploreAreaMission   (false);
+    testDefendBuildingMission(false);
   }
   
   
@@ -22,10 +24,13 @@ public class TestBounties extends LogicTest {
   //  What are the cases I need to cover here?
   
   //  Defend bounty on building.
-  //  Defend bounty on actor.
+  
+  //  Defend  bounty on actor.
   //  Explore bounty on actor.
   //  Contact bounty on actor.
   //  Contact bounty on building.
+  
+  
   
   
   static boolean testAttackBuildingMission(boolean graphics) {
@@ -36,8 +41,8 @@ public class TestBounties extends LogicTest {
         nest.enterMap(map, 20, 20, 1, map.locals);
         
         Mission mission;
-        mission = new MissionStrike(base, false);
-        mission.setFocus(nest, 0, map);
+        mission = new MissionStrike(base);
+        mission.setLocalFocus(nest);
         return mission;
       }
       
@@ -58,9 +63,8 @@ public class TestBounties extends LogicTest {
         creature.enterMap(map, 20, 20, 1, map.locals);
         creature.takeDamage(creature.maxHealth() * 0.7f);
         
-        Mission mission;
-        mission = new MissionStrike(base, false);
-        mission.setFocus(creature, 0, map);
+        MissionStrike mission = new MissionStrike(base);
+        mission.setLocalFocus(creature);
         return mission;
       }
       
@@ -75,15 +79,13 @@ public class TestBounties extends LogicTest {
   
   static boolean testExploreAreaMission(boolean graphics) {
     TestBounties test = new TestBounties() {
-      
       int RANGE = 8;
       
       Mission setupMission(Area map, Base base) {
         AreaTile looks = map.tileAt(20, 20);
         
-        Mission mission;
-        mission = new MissionRecon(base, false);
-        mission.setFocus(looks, 0, map);
+        MissionRecon mission = new MissionRecon(base);
+        mission.setLocalFocus(looks);
         mission.setExploreRange(RANGE);
         return mission;
       }
@@ -105,13 +107,70 @@ public class TestBounties extends LogicTest {
   }
   
   
+  static boolean testDefendBuildingMission(boolean graphics) {
+    TestBounties test = new TestBounties() {
+      
+      Building guarded;
+      MissionSecure mission;
+      
+      Actor threat;
+      boolean triedAttack;
+      boolean didRespond;
+      
+      
+      Mission setupMission(Area map, Base base) {
+        guarded = (Building) STOCK_EXCHANGE.generate();
+        guarded.enterMap(map, 2, 10, 1, base);
+        
+        threat = (Actor) TRIPOD.generate();
+        threat.enterMap(map, 30, 30, 1, map.locals);
+        
+        mission = new MissionSecure(base);
+        mission.setLocalFocus(guarded);
+        return mission;
+      }
+      
+      void onMapUpdate(Area map, Base base) {
+        if (threat.jobType() != JOB.COMBAT) {
+          TaskCombat siege = TaskCombat.configCombat(threat, guarded);
+          threat.assignTask(siege);
+        }
+      }
+      
+      boolean checkVictory(Area map, Base base, Object focus) {
+        if (guarded.destroyed()) return false;
+        
+        if (! triedAttack) {
+          if (threat.jobType() == JOB.COMBAT) {
+            TaskCombat task = (TaskCombat) threat.task();
+            if (task.primary == guarded) triedAttack = true;
+          }
+        }
+        
+        if (! didRespond) for (Actor a : mission.recruits()) {
+          if (a.jobType() == JOB.COMBAT) {
+            TaskCombat task = (TaskCombat) threat.task();
+            if (task.primary == threat) didRespond = true;
+          }
+        }
+        
+        //  TODO:  Ensure that the reward expires after a while as well- (either
+        //  that or it dispenses payment regularly until cancelled- which means
+        //  a different check for funding...)
+        
+        return triedAttack && didRespond;
+      }
+    };
+    return test.bountyTest(graphics, "DEFEND BUILDING MISSION");
+  }
+  
+  
   
   boolean bountyTest(boolean graphics, String title) {
     
     Base base = LogicTest.setupTestBase(32, ALL_GOODS, false);
     base.setName("Client Base");
     Area map = base.activeMap();
-    //World world = base.world;
     
     int initFunds = 1000, reward = 500;
     base.initFunds(initFunds);
@@ -126,9 +185,10 @@ public class TestBounties extends LogicTest {
     map.update(1);
     
     Mission mission = setupMission(map, base);
-    mission.setAsBounty(reward);
-    Object focus = mission.focus();
+    mission.rewards.setAsBounty(reward);
+    mission.beginMission(base);
     
+    Target focus = mission.localFocus();
     Actor sample = fort.workers().first();
     Task given = mission.selectActorBehaviour(sample);
     
@@ -145,7 +205,7 @@ public class TestBounties extends LogicTest {
       Area loaded = (Area) session.loaded()[0];
       
       Mission m = loaded.world.baseNamed("Client Base").missions().first();
-      if (m.focus() == null) I.say("LOADED MISSION HAS NO FOCUS!");
+      if (m.localFocus() == null) I.say("LOADED MISSION HAS NO FOCUS!");
       
       I.say("\nSuccessfully loaded map: "+loaded);
     }
@@ -162,14 +222,16 @@ public class TestBounties extends LogicTest {
     boolean testOkay       = false;
     
     while (map.time() < 1000 || graphics) {
-      runLoop(base, 10, graphics, "saves/test_bounties.tlt");
+      runLoop(base, 1, graphics, "saves/test_bounties.tlt");
+      
+      onMapUpdate(map, base);
       
       for (Actor a : fort.workers()) {
         if (a.injury() > 0) a.liftDamage(a.injury());
       }
       
       if (! fundsTaken) {
-        fundsTaken = mission.cashReward() == initFunds - base.funds();
+        fundsTaken = mission.rewards.cashReward() == initFunds - base.funds();
       }
       
       if (fundsTaken && ! missionTaken) {
@@ -210,6 +272,11 @@ public class TestBounties extends LogicTest {
   
   Mission setupMission(Area map, Base base) {
     return null;
+  }
+  
+  
+  void onMapUpdate(Area map, Base base) {
+    return;
   }
   
 

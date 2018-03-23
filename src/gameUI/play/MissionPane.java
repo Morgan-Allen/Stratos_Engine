@@ -32,14 +32,14 @@ public class MissionPane extends DetailPane {
     Base declares = mission.base();
     d.append("\nDeclared by: "+declares);
     
-    int credits = mission.cashReward();
+    int credits = mission.rewards.cashReward();
     d.append("\nReward: "+credits+" credits");
     
     d.append(" ");
     if (base.funds() >= 100) {
       d.append(new Description.Link("MORE") {
         public void whenClicked(Object context) {
-          mission.incReward(100);
+          mission.rewards.incReward(100);
         }
       });
     }
@@ -56,7 +56,7 @@ public class MissionPane extends DetailPane {
       d.append("\n\n");
       d.append(new Description.Link("CANCEL") {
         public void whenClicked(Object context) {
-          mission.disbandFormation();
+          mission.disbandMission();
           PlayUI.pushSelection(null);
         }
       });

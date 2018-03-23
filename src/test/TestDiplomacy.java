@@ -16,7 +16,7 @@ public class TestDiplomacy extends LogicTest {
   
   
   public static void main(String args[]) {
-    testDiplomacy(true);
+    testDiplomacy(false);
   }
   
   
@@ -70,22 +70,25 @@ public class TestDiplomacy extends LogicTest {
     
     
     Mission escort;
-    escort = new MissionContact(awayC, true);
+    escort = new MissionContact(awayC);
+    
     for (int n = 4; n-- > 0;) {
       Actor s = (Actor) Trooper.TROOPER.generate();
-      s.assignBase(awayC);
       escort.toggleRecruit(s, true);
     }
-    
     Actor envoy = (Actor) Nobles.NOBLE.generate();
-    escort.toggleEscorted(envoy, true);
+    escort.toggleEnvoy(envoy, true);
     Actor bride = (Actor) Nobles.CONSORT.generate();
-    escort.toggleEscorted(bride, true);
+    escort.toggleEnvoy(bride, true);
     
-    for (Actor e : escort.escorted()) e.assignBase(awayC);
+    for (Actor e : escort.recruits()) {
+      e.assignBase(awayC);
+    }
     
-    escort.assignTerms(Base.POSTURE.ALLY, null, bride, null);
-    escort.setFocus(baseC);
+    
+    escort.terms.assignTerms(Base.POSTURE.ALLY, null, bride, null);
+    escort.setWorldFocus(baseC);
+    escort.beginMission(awayC);
     
     boolean escortArrived  = false;
     boolean offerGiven     = false;
@@ -102,7 +105,7 @@ public class TestDiplomacy extends LogicTest {
       test.runLoop(baseC, 1, graphics, "saves/test_diplomacy.tlt");
       
       if (! escortArrived) {
-        escortArrived = escort.onMap(map);
+        escortArrived = escort.localMap() == map;
       }
       
       if (escortArrived && ! offerGiven) {
@@ -122,15 +125,16 @@ public class TestDiplomacy extends LogicTest {
       }
       
       if (termsOkay && ! escortDeparted) {
-        escortDeparted = ! escort.onMap();
+        escortDeparted = escort.localMap() != map;
       }
       
       if (escortDeparted && ! escortSent) {
-        escort = new MissionContact(baseC, true);
-        escort.assignTerms(POSTURE.TRADING, null, null, null);
+        escort = new MissionContact(baseC);
+        escort.terms.assignTerms(POSTURE.TRADING, null, null, null);
         for (Actor w : garrison.workers()) escort.toggleRecruit(w, true);
-        escort.toggleEscorted(minister, true);
-        escort.setFocus(neutC);
+        escort.toggleEnvoy(minister, true);
+        escort.setWorldFocus(neutC);
+        escort.beginMission(baseC);
         escortSent = true;
       }
       
@@ -146,7 +150,7 @@ public class TestDiplomacy extends LogicTest {
       if (termsAwayOkay && ! escortReturned) {
         boolean allBack = true;
         for (Actor a : escort.recruits()) if (a.map() != map) allBack = false;
-        for (Actor a : escort.escorted()) if (a.map() != map) allBack = false;
+        for (Actor a : escort.envoys  ()) if (a.map() != map) allBack = false;
         escortReturned = allBack;
       }
       

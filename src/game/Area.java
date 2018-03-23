@@ -507,9 +507,11 @@ public class Area implements Session.Saveable {
     this.ticksPS = ticksPS;
     numUpdates += 1;
     time = numUpdates / ticksPS;
+    boolean exactTick = numUpdates % ticksPS == 0;
     
-    world.updateWithTime(time);
-    
+    if (exactTick) {
+      world.updateWithTime(time);
+    }
     for (Building b : buildings) {
       if (b.map == null) {
         I.complain("\n"+b+" has no map but still registered on map!");
@@ -524,8 +526,7 @@ public class Area implements Session.Saveable {
       }
       a.update();
     }
-    
-    if (time % SCAN_PERIOD == 0) {
+    if (time % SCAN_PERIOD == 0 && exactTick) {
       transitPoints.clear();
     }
     

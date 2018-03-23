@@ -172,7 +172,7 @@ public class VenuePane extends DetailPane {
     }
     
     d.append("\n\nVisitors:");
-    for (Element i : venue.inside()) {
+    for (Element i : venue.allInside()) {
       d.appendAll("\n  ", i);
     }
     

@@ -197,7 +197,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   }
   
   
-  public Series <Actor> inside() {
+  public Series <Actor> allInside() {
     return visitors;
   }
   

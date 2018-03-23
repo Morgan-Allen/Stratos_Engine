@@ -26,9 +26,7 @@ public class BaseEvents {
     Mission mission, Base from, Base goes
   ) {
     Base belongs = mission.base();
-    belongs.incArmyPower(0 - mission.powerSum());
-    belongs.missions.include(mission);
-    mission.setFocus(goes);
+    belongs.incArmyPower(0 - MissionStrike.powerSum(mission.recruits(), null));
   }
   
   
@@ -49,7 +47,7 @@ public class BaseEvents {
     BaseCouncil.MissionAssessment IA = new BaseCouncil.MissionAssessment();
     IA.fromC     = from;
     IA.goesC     = goes;
-    IA.fromPower = mission.powerSum() / POP_PER_CITIZEN;
+    IA.fromPower = MissionStrike.powerSum(mission.recruits(), null) / POP_PER_CITIZEN;
     IA.goesPower = goes.armyPower() / POP_PER_CITIZEN;
     from.council.calculateChances(IA, true);
     
@@ -136,16 +134,15 @@ public class BaseEvents {
   static void handleDialog(
     Mission mission, Base goes, World.Journey journey
   ) {
-    mission.dispatchTerms(goes);
+    mission.terms.sendTerms(goes);
   }
   
   
   static void handleReturn(
-    Mission mission, Base from, World.Journey journey
+    Mission mission, Base goes, World.Journey journey
   ) {
-    Base belongs = mission.base();
-    belongs.incArmyPower(mission.powerSum());
-    mission.disbandFormation();
+    goes.incArmyPower(MissionStrike.powerSum(mission.recruits(), null));
+    mission.disbandMission();
   }
   
   
@@ -157,9 +154,9 @@ public class BaseEvents {
     Base upon, Base from, Mission mission
   ) {
     if (upon == null || from == null || mission == null) return;
-    setPosture(from, upon, mission.postureDemand, true);
-    setSuppliesDue (upon, from, mission.tributeDemand );
-    arrangeMarriage(upon, from, mission.marriageDemand);
+    setPosture(from, upon, mission.terms.postureDemand, true);
+    setSuppliesDue (upon, from, mission.terms.tributeDemand );
+    arrangeMarriage(upon, from, mission.terms.marriageDemand);
   }
   
   
@@ -173,8 +170,8 @@ public class BaseEvents {
     
     Mission party = marries.mission();
     if (party != null) {
-      party.toggleRecruit (marries, false);
-      party.toggleEscorted(marries, false);
+      party.toggleRecruit(marries, false);
+      party.toggleEnvoy(marries, false);
     }
   }
   
@@ -183,9 +180,20 @@ public class BaseEvents {
     Base victor, Base losing, Mission mission
   ) {
     if (victor == null || losing == null || mission == null) return;
+    
+    boolean report = false;
+    float initVP = victor.prestige(), initLP = losing.prestige();
+    
     losing.toggleRebellion(victor, false);
     incPrestige(victor, PRES_VICTORY_GAIN);
     incPrestige(losing, PRES_DEFEAT_LOSS );
+    
+    if (report) {
+      I.say(victor+" prevailed over "+losing+"!!!");
+      I.say(victor+" Prestige: "+initVP+" -> "+victor.prestige());
+      I.say(losing+" Prestige: "+initLP+" -> "+losing.prestige());
+    }
+    
     mission.setMissionComplete(mission.base() == victor);
   }
   

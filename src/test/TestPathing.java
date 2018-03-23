@@ -149,7 +149,7 @@ public class TestPathing extends LogicTest {
       numInside.clear();
       
       for (AreaTile t : map.allTiles()) {
-        for (Actor i : t.inside()) {
+        for (Actor i : t.allInside()) {
           numInside.add(1, i);
           if (t != i.at()) {
             I.say("\n"+i+" REGISTERED IN WRONG TILE!");

@@ -14,6 +14,7 @@ public class ActorUtils {
   /**  General migration utilities-
     */
   static AreaTile findTransitPoint(Area map, Base base, Base with) {
+    if (map == null || base == null || with == null) return null;
     
     //  TODO:  Make sure there's a pathing connection to the main settlement
     //  here!

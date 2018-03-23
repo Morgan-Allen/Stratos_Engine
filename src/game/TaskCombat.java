@@ -131,12 +131,12 @@ public class TaskCombat extends Task {
   
   /**  Factory methods for actual combat behaviours-
     */
-  static TaskCombat nextSieging(Actor actor, Mission formation) {
-    if (formation.focus() instanceof Element) {
-      Element e = (Element) formation.focus();
+  static TaskCombat nextSieging(Actor actor, Mission mission, Object focus) {
+    if (focus instanceof Element) {
+      Element e = (Element) focus;
       if (e.destroyed() || ! e.onMap()) return null;
-      if (e.base() == formation.base()) return null;
-      return configCombat(actor, e, formation, null, JOB.COMBAT);
+      if (e.base() == mission.base()) return null;
+      return configCombat(actor, e, mission, null, JOB.COMBAT);
     }
     else return null;
   }
@@ -148,13 +148,12 @@ public class TaskCombat extends Task {
   }
   
   
+  //  TODO:  Pass in a series of noticed actives here, rather than relying on
+  //  proximity.
+  
   static TaskCombat nextReaction(
-    Active actor, AreaTile anchor, Employer employer, float noticeBonus
+    Active actor, Target anchor, Employer employer, float noticeBonus
   ) {
-    //  TODO:  Allow for iteration over members of a target formation, or
-    //  whatever your comrades are currently fighting...
-    //  TODO:  Grant a vision bonus for higher ground?
-    
     AreaTile from = actor.at();
     Area map = actor.map();
     float noticeRange = ((Element) actor).sightRange() + noticeBonus;

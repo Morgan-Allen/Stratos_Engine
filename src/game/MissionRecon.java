@@ -2,34 +2,73 @@
 
 package game;
 import static game.GameConstants.*;
+import game.World.Journey;
 
 
 
 public class MissionRecon extends Mission {
   
   
-  public MissionRecon(Base belongs, boolean activeAI) {
-    super(OBJECTIVE_RECON, belongs, activeAI);
+  int exploreRange = AVG_EXPLORE_DIST;
+  
+  
+  public MissionRecon(Base belongs) {
+    super(OBJECTIVE_RECON, belongs);
   }
   
   
   public MissionRecon(Session s) throws Exception {
     super(s);
+    exploreRange = s.loadInt();
   }
   
   
-  public Task selectActorBehaviour(Actor actor) {
+  public void saveState(Session s) throws Exception {
+    super.saveState(s);
+    s.saveInt(exploreRange);
+  }
+  
+  
+  public void setExploreRange(int range) {
+    this.exploreRange = range;
+  }
+  
+  
+  
+  void update() {
+    super.update();
     
-    //  TODO:  What about leaving the map?
-    //  You'll need to use the stand-point for that, once the objective is
-    //  complete.
-    
-    TaskExplore recon = TaskExplore.configExploration(
-      actor, (Target) focus(), (int) exploreRange
-    );
-    if (recon != null) {
-      return recon;
+    if (! complete()) {
+      //
+      //  In the case of exploring an entire foreign base...
+      if (worldFocus() != null && ! onWrongMap()) {
+        //  TODO:  ...Fill this in.
+      }
+      //
+      //  In the case of local exploration, check for fulfillment:
+      else if (localFocus() instanceof AreaTile) {
+        Area map = localBase.activeMap();
+        AreaTile looks = (AreaTile) localFocus();
+        int r = (int) exploreRange;
+        boolean allSeen = true;
+        
+        for (AreaTile t : map.tilesUnder(looks.x - r, looks.y - r, r * 2, r * 2)) {
+          float dist = Area.distance(looks, t);
+          if (dist > r) continue;
+          if (map.fog.maxSightLevel(t) == 0) allSeen = false;
+        }
+        
+        if (allSeen) setMissionComplete(true);
+      }
     }
+  }
+  
+  
+  public Task nextLocalMapBehaviour(Actor actor) {
+    TaskExplore recon = TaskExplore.configExploration(
+      actor, localFocus(), exploreRange
+    );
+    if (recon != null) return recon;
     return null;
   }
   
@@ -41,15 +80,16 @@ public class MissionRecon extends Mission {
   
   
   boolean objectiveComplete() {
-    if (focus() instanceof AreaTile) {
-      AreaTile looks = (AreaTile) focus();
+    if (localFocus() instanceof AreaTile) {
+      Area map = localBase.activeMap();
+      AreaTile looks = (AreaTile) localFocus();
       int r = (int) exploreRange;
       boolean allSeen = true;
       
-      for (AreaTile t : map().tilesUnder(looks.x - r, looks.y - r, r * 2, r * 2)) {
+      for (AreaTile t : map.tilesUnder(looks.x - r, looks.y - r, r * 2, r * 2)) {
         float dist = Area.distance(looks, t);
         if (dist > r) continue;
-        if (map().fog.maxSightLevel(t) == 0) allSeen = false;
+        if (map.fog.maxSightLevel(t) == 0) allSeen = false;
       }
       
       return allSeen;
@@ -59,11 +99,22 @@ public class MissionRecon extends Mission {
   
   
   
-  void handleArrival(Base goes, World.Journey journey) {
+  void handleOffmapArrival(Base goes, World.Journey journey) {
     //  TODO:  Fill this in...
+    return;
+  }
+  
+  
+  void handleOffmapDeparture(Base from, Journey journey) {
+    //  TODO:  Fill this in...
+    return;
   }
   
 }
+
+
+
+
 
 
 

@@ -65,14 +65,8 @@ public class TestSpawning extends LogicTest {
       }
       
       if (spawnDone && ! missionInit) {
-        boolean missionMatch = false;
-        for (Mission m : map.locals.missions()) {
-          if (m.focus() == toRaze && m.objective == Mission.OBJECTIVE_CONQUER) {
-            nestMission = m;
-            missionMatch = true;
-          }
-        }
-        missionInit = missionMatch;
+        nestMission = map.locals.matchingMission(Mission.OBJECTIVE_STRIKE, toRaze);
+        missionInit = nestMission != null;
       }
       
       if (missionInit && ! razingDone) {

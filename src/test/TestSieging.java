@@ -84,10 +84,10 @@ public class TestSieging extends LogicTest {
       home.enterMap(map, 17, 10 + (n * 3), 1, baseC);
     }
     
-    Mission guarding;
-    guarding = new MissionSecurity(baseC, false);
+    MissionSecure guarding = new MissionSecure(baseC);
     for (Actor w : fort.workers()) guarding.toggleRecruit(w, true);
-    guarding.setFocus(tower, TileConstants.E, map);
+    guarding.setLocalFocus(tower);
+    guarding.beginMission(baseC);
     
     Building store = (Building) SUPPLY_DEPOT.generate();
     store.enterMap(map, 12, 14, 1, baseC);
@@ -159,7 +159,7 @@ public class TestSieging extends LogicTest {
         for (World.Journey j : map.world.journeys()) {
           for (Journeys g : j.going()) if (g instanceof Mission) {
             enemy = (Mission) g;
-            tribute = enemy.tributeDemand();
+            tribute = enemy.terms.tributeDemand();
             siegeComing = true;
             
             //  TODO:  Add explicit test for this...
@@ -170,13 +170,13 @@ public class TestSieging extends LogicTest {
             //*/
           }
         }
-        if (siegeComing && enemy.objective != Mission.OBJECTIVE_CONQUER) {
+        if (siegeComing && enemy.objective != Mission.OBJECTIVE_STRIKE) {
           I.say("\nEnemies should be here to conquer!");
           break;
         }
       }
       
-      if (siegeComing && enemy.onMap() && ! siegeBegun) {
+      if (siegeComing && enemy.localMap() == map && ! siegeBegun) {
         
         Table <AreaTile, Actor> standing = new Table();
         boolean standWrong = false;

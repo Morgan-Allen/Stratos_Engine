@@ -10,7 +10,7 @@ import util.*;
 //  sectors of the same world...
 
 
-public class ActorAsVessel extends Actor implements Trader, Employer {
+public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   
   
   
@@ -81,6 +81,33 @@ public class ActorAsVessel extends Actor implements Trader, Employer {
   
   
   
+  /**  Implementing Pathing interface-
+    */
+  public Pathing[] adjacent(Pathing[] temp, Area map) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+  
+  
+  public boolean allowsEntry(Actor a) {
+    // TODO Auto-generated method stub
+    return false;
+  }
+  
+  
+  public void setInside(Actor a, boolean is) {
+    // TODO Auto-generated method stub
+    
+  }
+  
+  
+  public Series<Actor> allInside() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+  
+  
+
   /**  Implementing Trader interface-
     */
   //  TODO:  Sew these up properly.
@@ -88,8 +115,8 @@ public class ActorAsVessel extends Actor implements Trader, Employer {
   public Tally <Good> needLevels() {
     return null;
   }
-  
-  
+
+
   public Tally <Good> prodLevels() {
     return null;
   }
@@ -103,8 +130,6 @@ public class ActorAsVessel extends Actor implements Trader, Employer {
   public float exportPrice(Good g, Base buys) {
     return 0;
   }
-  
-  
   
 }
 

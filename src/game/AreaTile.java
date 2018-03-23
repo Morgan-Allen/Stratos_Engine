@@ -195,7 +195,7 @@ public class AreaTile implements Pathing, Selection.Focus {
   }
   
   
-  public Series <Actor> inside() {
+  public Series <Actor> allInside() {
     return inside == null ? NO_ACTORS : inside;
   }
   

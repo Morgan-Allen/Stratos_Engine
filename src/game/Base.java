@@ -255,7 +255,9 @@ public class Base implements Session.Saveable, Trader {
   
   public Mission matchingMission(int objective, Object focus) {
     for (Mission m : missions) {
-      if (m.objective == objective && m.focus() == focus) return m;
+      if (m.objective != objective) continue;
+      if (m.localFocus() == focus) return m;
+      if (m.worldFocus() == focus) return m;
     }
     return null;
   }
@@ -604,12 +606,12 @@ public class Base implements Session.Saveable, Trader {
   
   
   public void incPopulation(float inc) {
-    this.population += inc;
+    this.population = Nums.max(0, population + inc);
   }
   
   
   public void incArmyPower(float inc) {
-    this.armyPower += inc;
+    this.armyPower = Nums.max(0, armyPower + inc);
   }
   
   
@@ -647,7 +649,7 @@ public class Base implements Session.Saveable, Trader {
       float armyPower = 0;
       for (Building b : map.buildings) {
         if (b.type().category == Type.IS_ARMY_BLD) {
-          armyPower += Mission.powerSum(b.workers(), map);
+          armyPower += MissionStrike.powerSum(b.workers(), map);
         }
       }
       this.armyPower = armyPower;
@@ -683,19 +685,20 @@ public class Base implements Session.Saveable, Trader {
     if (updateStats && ! activeMap) {
       council.updateCouncil(false);
       
-      float popRegen  = DAY_LENGTH * 1f / LIFESPAN_LENGTH;
+      float popRegen  = DAY_LENGTH * 1f / (LIFESPAN_LENGTH / 2);
       float usageInc  = DAY_LENGTH * 1f / YEAR_LENGTH;
       float idealPop  = idealPopulation();
       float idealArmy = idealArmyPower();
       
       if (population < idealPop) {
-        population = Nums.min(idealPop , population + popRegen);
+        population = Nums.min(idealPop, population + popRegen);
       }
       for (Mission f : missions) {
-        idealArmy -= f.powerSum();
+        idealArmy -= MissionStrike.powerSum(f.recruits(), null);
       }
-      if (idealArmy < 0) idealArmy = 0;
-      
+      if (idealArmy < 0) {
+        idealArmy = 0;
+      }
       if (armyPower < idealArmy) {
         armyPower = Nums.min(idealArmy, armyPower + popRegen);
       }

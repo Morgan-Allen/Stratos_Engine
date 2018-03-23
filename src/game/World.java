@@ -311,6 +311,11 @@ public class World implements Session.Saveable {
   }
   
   
+  public boolean onJourney(Journeys on) {
+    return journeyFor(on) != null;
+  }
+  
+  
   public Series <Journey> journeys() {
     return journeys;
   }

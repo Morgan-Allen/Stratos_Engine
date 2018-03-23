@@ -63,7 +63,7 @@ public class OptionList extends UIGroup implements UIConstants {
       "Destroy or raze subject"
     ) {
       Mission initMission() {
-        Mission m = new MissionStrike(base, false);
+        Mission m = new MissionStrike(base);
         return m;
       }
     });
@@ -73,7 +73,7 @@ public class OptionList extends UIGroup implements UIConstants {
       "Explore area"
     ) {
       Mission initMission() {
-        Mission m = new MissionRecon(base, false);
+        Mission m = new MissionRecon(base);
         return m;
       }
     });
@@ -119,8 +119,8 @@ public class OptionList extends UIGroup implements UIConstants {
           }
           else if (mission.allowsFocus(hovered)) {
             if (UI.mouseClicked()) {
-              mission.setFocus(hovered, 0, base.activeMap());
-              mission.setAsBounty(0);
+              mission.setLocalFocus((Target) hovered);
+              mission.rewards.setAsBounty(0);
               PlayUI.pushSelection(mission);
               mission = null;
               UI.assignTask(null);

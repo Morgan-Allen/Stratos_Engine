@@ -2,9 +2,10 @@
 
 package game;
 import util.*;
+import static game.GameConstants.*;
+import static game.Mission.*;
 import static game.ActorAsPerson.*;
 import static game.Base.*;
-import static game.GameConstants.*;
 
 
 
@@ -148,13 +149,13 @@ public class BaseCouncil {
   
   
   public void acceptTerms(Mission petition) {
-    petition.setTermsAccepted(true);
+    petition.terms.setAccepted(true);
     petitions.remove(petition);
   }
   
   
   public void rejectTerms(Mission petition) {
-    petition.setTermsAccepted(false);
+    petition.terms.setAccepted(false);
     petitions.remove(petition);
   }
   
@@ -249,16 +250,16 @@ public class BaseCouncil {
     for (Mission petition : petitions) {
       float appeal = appealOfTerms(
         petition.base(), base,
-        petition.postureDemand,
-        petition.actionDemand,
-        petition.marriageDemand,
-        petition.tributeDemand
+        petition.terms.postureDemand,
+        petition.terms.actionDemand,
+        petition.terms.marriageDemand,
+        petition.terms.tributeDemand
       );
       if (Rand.num() < appeal) {
-        petition.setTermsAccepted(true);
+        petition.terms.setAccepted(true);
       }
       else {
-        petition.setTermsAccepted(false);
+        petition.terms.setAccepted(false);
       }
       petitions.remove(petition);
     }
@@ -273,7 +274,7 @@ public class BaseCouncil {
     MissionAssessment IA = pickI.result();
     if (IA != null) {
       Mission force = spawnFormation(IA);
-      BaseEvents.handleDeparture(force, IA.fromC, IA.goesC);
+      force.beginMission(base);
     }
   }
   
@@ -403,7 +404,7 @@ public class BaseCouncil {
   ) {
     MissionAssessment MA = new MissionAssessment();
     
-    MA.objective = Mission.OBJECTIVE_CONQUER;
+    MA.objective = Mission.OBJECTIVE_STRIKE;
     MA.fromC     = attack;
     MA.goesC     = defend;
     MA.fromPower = attack.armyPower() * commitLevel / POP_PER_CITIZEN;
@@ -487,7 +488,7 @@ public class BaseCouncil {
   ) {
     MissionAssessment MA = new MissionAssessment();
     
-    MA.objective = Mission.OBJECTIVE_DIALOG;
+    MA.objective = Mission.OBJECTIVE_CONTACT;
     MA.fromC = from;
     MA.goesC = goes;
     
@@ -613,13 +614,18 @@ public class BaseCouncil {
   
   
   public Mission spawnFormation(MissionAssessment IA) {
-    Mission force = new Mission(IA.objective, base, true);
     
-    Type citizen = (Type) Visit.first(base.world.citizenTypes);
+    Mission force = null;
+    if (IA.objective == OBJECTIVE_STRIKE ) force = new MissionStrike (base);
+    if (IA.objective == OBJECTIVE_SECURE ) force = new MissionSecure (base);
+    if (IA.objective == OBJECTIVE_RECON  ) force = new MissionRecon  (base);
+    if (IA.objective == OBJECTIVE_CONTACT) force = new MissionContact(base);
+    if (force == null) return null;
+    
     Type soldier = (Type) Visit.first(base.world.soldierTypes);
     Type noble   = (Type) Visit.first(base.world.nobleTypes  );
     
-    while (force.powerSum() < base.armyPower() / 2) {
+    while (MissionStrike.powerSum(force.recruits(), null) < base.armyPower() / 2) {
       Actor fights = (Actor) soldier.generate();
       fights.assignBase(IA.fromC);
       force.toggleRecruit(fights, true);
@@ -630,7 +636,7 @@ public class BaseCouncil {
       //  attempt diplomacy...
     }
     else {
-      force.assignTerms(
+      force.terms.assignTerms(
         IA.postureDemand,
         IA.actionDemand,
         IA.marriageDemand,
@@ -639,16 +645,18 @@ public class BaseCouncil {
       if (IA.marriageDemand != null) {
         Actor marries = IA.marriageDemand;
         marries.assignBase(base);
-        force.toggleEscorted(marries, true);
+        force.toggleEnvoy(marries, true);
       }
-      if (IA.objective == Mission.OBJECTIVE_DIALOG) {
-        while (force.escorted.size() < 2) {
+      if (IA.objective == Mission.OBJECTIVE_CONTACT) {
+        while (force.envoys.size() < 2) {
           Actor talks = (Actor) noble.generate();
           talks.assignBase(base);
-          force.toggleEscorted(talks, true);
+          force.toggleEnvoy(talks, true);
         }
       }
     }
+    
+    force.setWorldFocus(IA.goesC);
     
     return force;
   }

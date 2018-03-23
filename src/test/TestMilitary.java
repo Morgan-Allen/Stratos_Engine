@@ -56,8 +56,9 @@ public class TestMilitary extends LogicTest {
     float initLoyalty  = awayC.loyalty(baseC);
     
     
-    Mission troops  = null;
-    Mission enemies = new MissionStrike(awayC, true);
+    MissionSecure defence = null;
+    MissionStrike offence = null;
+    Mission enemies = new MissionStrike(awayC);
     for (int n = 3; n-- > 0;) {
       Actor fights = (Actor) Trooper.TROOPER.generate();
       fights.assignBase(awayC);
@@ -79,21 +80,25 @@ public class TestMilitary extends LogicTest {
       test.runLoop(baseC, 10, graphics, "saves/test_military.tlt");
       
       if (! recruited) {
-        troops = new MissionSecurity(baseC, false);
-        for (Actor w : fort1.workers()) troops.toggleRecruit(w, true);
-        for (Actor w : fort2.workers()) troops.toggleRecruit(w, true);
-        troops.setFocus(map.tileAt(25, 25), TileConstants.E, map);
+        defence = new MissionSecure(baseC);
+        for (Actor w : fort1.workers()) defence.toggleRecruit(w, true);
+        for (Actor w : fort2.workers()) defence.toggleRecruit(w, true);
+        defence.setLocalFocus(map.tileAt(25, 25));
+        defence.beginMission(baseC);
         
-        Visit.appendTo(fromTroops, troops.recruits());
+        Visit.appendTo(fromTroops, defence.recruits());
         initSkills = recordSkills(fromTroops, COMBAT_SKILLS);
         recruited = true;
       }
       
-      if (troops != null && troops.formationReady() && ! invaded) {
-        enemies.setFocus(baseC);
+      if (defence != null && defence.assembled() && ! invaded) {
+        enemies.setWorldFocus(baseC);
+        enemies.beginMission(awayC);
+        map.update(1);
+        
         World.Journey j = world.journeyFor(enemies);
         world.completeJourney(j);
-        enemies.setFocus(troops, TileConstants.W, map);
+        enemies.setLocalFocus((Actor) Rand.pickFrom(defence.recruits()));
         invaded = true;
       }
       
@@ -104,22 +109,23 @@ public class TestMilitary extends LogicTest {
         }
         homeWin = ! survivors;
         if (homeWin) {
-          troops.disbandFormation();
+          defence.disbandMission();
           ActorUtils.fillAllWorkVacancies(map);
         }
       }
       
       if (homeWin && ! invading) {
-        troops = new MissionStrike(baseC, false);
-        for (Actor w : fort1.workers()) troops.toggleRecruit(w, true);
-        for (Actor w : fort2.workers()) troops.toggleRecruit(w, true);
-        troops.setFocus(awayC);
-        troops.assignTerms(Base.POSTURE.VASSAL, null, null, null);
+        offence = new MissionStrike(baseC);
+        for (Actor w : fort1.workers()) offence.toggleRecruit(w, true);
+        for (Actor w : fort2.workers()) offence.toggleRecruit(w, true);
+        offence.setWorldFocus(awayC);
+        offence.terms.assignTerms(Base.POSTURE.VASSAL, null, null, null);
+        offence.beginMission(baseC);
         invading = true;
       }
       
-      if (invading && baseC.isLordOf(awayC)) {
-        awayWin = true;
+      if (invading && ! awayWin) {
+        awayWin = baseC.isLordOf(awayC);
       }
       
       if (awayWin && ! backHome) {
@@ -132,6 +138,7 @@ public class TestMilitary extends LogicTest {
         
         if (baseC.prestige() <= initPrestige) {
           I.say("\nPrestige should be boosted by conquest!");
+          I.say("  "+baseC+" From "+initPrestige+" -> "+baseC.prestige());
           break;
         }
         

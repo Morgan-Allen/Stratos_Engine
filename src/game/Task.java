@@ -218,7 +218,7 @@ public class Task implements Session.Saveable {
     if (origin instanceof Mission) {
       Mission mission = (Mission) origin;
       float reward = 0;
-      reward += mission.cashReward();
+      reward += mission.rewards.cashReward();
       return PRIORITY_PER_100_CASH * reward / 100f;
     }
     return 0;

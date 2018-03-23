@@ -321,8 +321,6 @@ public class LogicTest {
         
         if (! world.settings.worldView) {
           above = map.above(hover.x, hover.y);
-          
-          //  TODO:  Have actors register within nearby tiles themselves.
           for (Actor a : map.actors()) {
             AreaTile at = a.at();
             if (at.x == hover.x && at.y == hover.y) above = a;
@@ -521,9 +519,9 @@ public class LogicTest {
       }
     }
     
-    if (b.inside().size() > 0) {
+    if (b.allInside().size() > 0) {
       report.append("\nVisitors:");
-      for (Actor w : b.inside()) {
+      for (Actor w : b.allInside()) {
         report.append("\n  "+w+" ("+w.jobType()+")");
       }
     }

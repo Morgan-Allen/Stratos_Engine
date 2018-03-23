@@ -417,6 +417,7 @@ public class TestWorld extends LogicTest {
         TROOPER_LODGE, 2f + Rand.index(3),
         HOLDING      , 6f + Rand.index(10)
       );
+      if (Rand.yes()) city.council.setTypeAI(BaseCouncil.AI_WARLIKE);
       world.addBases(city);
     }
     world.setMapSize(5, 5);
@@ -452,9 +453,10 @@ public class TestWorld extends LogicTest {
           Base home = force.base();
           if (j.goes() == home) continue;
           
-          if (force.powerSum() < home.idealArmyPower() / 6) {
+          float power = MissionStrike.powerSum(force.recruits(), null);
+          if (power < home.idealArmyPower() / 6) {
             I.say("\n"+home+" is fighting with inadequate forces:");
-            I.say("  Formation power: "+force.powerSum());
+            I.say("  Formation power: "+power);
             I.say("  Average power:   "+AVG_ARMY_POWER);
             I.say("  Time: "+world.time()+", going to: "+j.goes());
             return false;
@@ -499,11 +501,13 @@ public class TestWorld extends LogicTest {
     
     //
     //  Finally, check to see whether total battles fall within reasonable
-    //  bounds for the world in question:
+    //  bounds for the world in question.
     timeWithEmpire /= YEAR_LENGTH;
     timeWithAllies /= YEAR_LENGTH * NUM_CITIES * (NUM_CITIES - 1);
-    int minBattles  = (NUM_YEARS - (timeWithEmpire + timeWithAllies)) / 2;
-    int maxBattles  = NUM_YEARS * world.bases().size() * 2;
+    int timeFree    = NUM_YEARS - Nums.max(timeWithEmpire, timeWithAllies);
+    float popMult   = world.bases().size() * 1f / (AVG_RETIREMENT / 2);
+    int minBattles  = (int) (timeFree  * popMult * 0.50f);
+    int maxBattles  = (int) (NUM_YEARS * popMult * 2.00f);
     boolean testOkay = true;
     
     if (totalBattles < minBattles) {
@@ -557,11 +561,10 @@ public class TestWorld extends LogicTest {
       from, goes, 0.5f, false
     );
     Mission force = from.council.spawnFormation(IA);
-    BaseEvents.handleDeparture(force, from, goes);
+    force.beginMission(from);
     
     int time = 0;
-    World.Journey j = world.journeyFor(force);
-    while (! world.isComplete(j)) {
+    while (time < YEAR_LENGTH && force.active() && ! force.complete()) {
       world.updateWithTime(time++);
     }
   }
@@ -574,15 +577,10 @@ public class TestWorld extends LogicTest {
       from, goes, false
     );
     Mission force = from.council.spawnFormation(DA);
-    BaseEvents.handleDeparture(force, from, goes);
+    force.beginMission(from);
     
     int time = 0;
-    World.Journey j = world.journeyFor(force);
-    while (! world.isComplete(j)) {
-      world.updateWithTime(time++);
-    }
-    
-    while (! (force.termsAnswered() || force.complete())) {
+    while (time < YEAR_LENGTH && force.active() && ! force.complete()) {
       world.updateWithTime(time++);
     }
   }
@@ -611,13 +609,13 @@ public class TestWorld extends LogicTest {
     I.say("\nReporting world state:");
     for (Base c : world.bases()) {
       I.say("  "+c+":");
-      I.say("    Pop:    "+c.population  ());
-      I.say("    Arm:    "+c.armyPower   ());
-      I.say("    Prs:    "+c.prestige    ());
-      I.say("    Need:   "+c.needLevels  ());
+      I.say("    Pop:    "+c.population()+" / "+c.idealPopulation());
+      I.say("    Arm:    "+c.armyPower ()+" / "+c.idealArmyPower ());
+      I.say("    Prs:    "+c.prestige());
+      I.say("    Need:   "+c.needLevels());
       I.say("    Accept: "+c.prodLevels());
-      I.say("    Bld:    "+c.buildLevel  ());
-      I.say("    Inv:    "+c.inventory   ());
+      I.say("    Bld:    "+c.buildLevel());
+      I.say("    Inv:    "+c.inventory());
       I.say("    Relations-");
       for (Base o : world.bases()) if (o != c) {
         I.add(" "+o+": "+c.posture(o)+" "+c.loyalty(o));

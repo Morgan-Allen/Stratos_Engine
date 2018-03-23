@@ -106,6 +106,7 @@ public class GameConstants {
     AVG_CHILD_MORT   = 75  ,  //  child mortality percent
     AVG_SENIOR_MORT  = 10  ,  //  senior mortality percent
     LIFESPAN_LENGTH  = AVG_RETIREMENT * YEAR_LENGTH,
+    GROW_UP_LENGTH   = AVG_MARRIED    * YEAR_LENGTH,
     //
     //  Skills and XP-
     SKILL_XP_MULTS[] = { 1 , 2 , 3 , 4 , 5 , 6 , 7 , 8 , 9 , 10, -1 },
@@ -480,10 +481,10 @@ public class GameConstants {
     int pathType();
     Pathing[] adjacent(Pathing temp[], Area map);
     boolean allowsEntryFrom(Pathing p);
-
+    
     boolean allowsEntry(Actor a);
     void setInside(Actor a, boolean is);
-    Series <Actor> inside();
+    Series <Actor> allInside();
   }
   
   
