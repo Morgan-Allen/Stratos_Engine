@@ -22,7 +22,7 @@ public class MainGame implements Playable {
   static MainGame current;
   int nextOp = DO_PLAY;
   
-  AreaMapScenario scenario;
+  AreaScenario scenario;
   
   
   
@@ -35,14 +35,14 @@ public class MainGame implements Playable {
   }
   
   
-  public static void playScenario(AreaMapScenario s) {
+  public static void playScenario(AreaScenario s) {
     mainGame();
     current.scenario = s;
     current.nextOp   = DO_LOAD;
   }
   
   
-  public static AreaMapScenario currentScenario() {
+  public static AreaScenario currentScenario() {
     if (current == null || current.scenario == null) return null;
     return current.scenario;
   }
@@ -76,7 +76,7 @@ public class MainGame implements Playable {
   protected boolean loadScenario(String savePath) {
     if (Assets.exists(savePath)) try {
       Session s = Session.loadSession(savePath, true);
-      AreaMapScenario loaded = (AreaMapScenario) s.loaded()[0];
+      AreaScenario loaded = (AreaScenario) s.loaded()[0];
       scenario = loaded;
       scenario.afterLoading(this);
       

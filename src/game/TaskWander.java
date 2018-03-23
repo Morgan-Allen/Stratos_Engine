@@ -1,12 +1,10 @@
 
 
 package game;
-import util.*;
 import static game.Area.*;
 import static game.GameConstants.*;
-
-import game.Task.JOB;
 import graphics.common.*;
+import util.*;
 
 
 

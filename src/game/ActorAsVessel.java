@@ -115,22 +115,22 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   public Tally <Good> needLevels() {
     return null;
   }
-
-
+  
   public Tally <Good> prodLevels() {
     return null;
   }
-  
   
   public float importPrice(Good g, Base sells) {
     return 0;
   }
   
-  
   public float exportPrice(Good g, Base buys) {
     return 0;
   }
   
+  public boolean allowExport(Good g, Trader buys) {
+    return true;
+  }
 }
 
 

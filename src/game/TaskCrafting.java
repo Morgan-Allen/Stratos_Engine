@@ -118,6 +118,7 @@ public class TaskCrafting extends Task {
     float progInc = 1f + (1f * skillMult);
     progInc *= 1f / recipe.craftTime;
     progInc = Nums.clamp(progInc, 0, maxAmount - progress);
+    boolean didUnit = ((int) progress) < (int) (progress + progInc);
     
     totalCraftTime += 1;
     totalProgInc += progInc;
@@ -136,7 +137,7 @@ public class TaskCrafting extends Task {
     }
     venue.base().makeTotals.add(progInc, recipe.made);
     
-    if (++timeSpent < (AVG_CRAFT_TIME / 2)) {
+    if (++timeSpent < DAY_LENGTH && ! didUnit) {
       Task next = TaskCrafting.nextCraftingTask(actor, venue);
       if (next != null) actor.assignTask(next);
     }

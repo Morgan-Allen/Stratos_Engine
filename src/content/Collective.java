@@ -32,12 +32,20 @@ public class Collective {
   ) {
     
     public boolean canTarget(Target subject) {
-      return subject.type().isActor();
+      if (! subject.type().isActor()) return false;
+      final Actor a = (Actor) subject;
+      
+      if (a.type().isVessel() || ! a.type().organic) return false;
+      if (a.injury() <= 0 && a.fatigue() <= 0 && a.hunger() <= 0) return false;
+      
+      return true;
     }
     
     public void applyCommonEffects(Target subject, Base ruler, Actor actor) {
       final Actor healed = (Actor) subject;
-      healed.liftDamage(PSY_HEAL_AMOUNT);
+      healed.liftDamage (PSY_HEAL_AMOUNT);
+      healed.liftFatigue(PSY_HEAL_AMOUNT);
+      healed.liftHunger (PSY_HEAL_AMOUNT);
     }
   };
   static {

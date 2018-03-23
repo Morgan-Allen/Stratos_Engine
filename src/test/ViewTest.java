@@ -7,7 +7,7 @@ import start.*;
 
 
 
-public abstract class ViewTest extends AreaMapScenario {
+public abstract class ViewTest extends AreaScenario {
   
   
   int mapSize;

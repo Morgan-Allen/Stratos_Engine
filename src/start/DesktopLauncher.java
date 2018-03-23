@@ -24,7 +24,7 @@ public class DesktopLauncher {
   }
   
   
-  public static void launchScenario(AreaMapScenario s) {
+  public static void launchScenario(AreaScenario s) {
     
     //Assets.callsVerbose = true;
     //Assets.extraVerbose = true;

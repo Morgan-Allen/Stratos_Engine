@@ -10,7 +10,7 @@ import static content.GameContent.*;
 
 
 
-public class ScenarioBlankMap extends AreaMapScenario {
+public class ScenarioBlankMap extends AreaScenario {
   
   
   List <BuildingForNest> nests = new List();

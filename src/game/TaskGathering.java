@@ -1,10 +1,11 @@
 
 
 package game;
-import util.*;
-import static game.Area.*;
 import static game.GameConstants.*;
+import static game.Area.*;
 import static game.BuildingForGather.*;
+import graphics.common.*;
+import util.*;
 
 
 
@@ -47,9 +48,9 @@ public class TaskGathering extends Task {
   static Task pickPlantPoint(
     BuildingForGather store, Actor actor, boolean close, boolean start
   ) {
-    if (start && actor.inside() != store) return null;
-    if (! canPlant(store)) return null;
+    //  TODO:  Add an extra step for seed collection...
     
+    if (! canPlant(store)) return null;
     
     Pick <AreaTile> pick = new Pick();
     Area map = store.map();
@@ -176,8 +177,11 @@ public class TaskGathering extends Task {
       float  multXP     = plants.isCrop ? FARM_XP_PERCENT : GATHR_XP_PERCENT;
       //
       //  First, initialise the crop:
-      Element crop = new Element(plants);
-      crop.enterMap(map, at.x, at.y, 1, store.base());
+      Element crop = at.above;
+      if (crop == null || crop.type() != plants) {
+        crop = new Element(plants);
+        crop.enterMap(map, at.x, at.y, 1, store.base());
+      }
       crop.setGrowLevel(0 + skillBonus / 4);
       actor.gainXP(skill, 1 * multXP / 100);
       //
@@ -247,7 +251,21 @@ public class TaskGathering extends Task {
     }
   }
   
+  
+  
+  /**  Graphical, interface and debug methods-
+    */
+  String animName() {
+    return AnimNames.BUILD;
+  }
+  
+  
+  Target faceTarget() {
+    return super.faceTarget();
+  }
 }
+
+
 
 
 

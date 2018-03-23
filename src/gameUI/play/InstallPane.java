@@ -63,8 +63,8 @@ public class InstallPane extends DetailPane {
   
   private void beginInstallTask(Type type) {
     placed = (Element) type.generate();
-    final Area stage  = UI.area;
-    final Base    base   = UI.base;
+    final Area area = UI.area;
+    final Base base = UI.base;
     
     final PlayTask task = new PlayTask() {
       public void doTask(PlayUI UI) {
@@ -73,15 +73,15 @@ public class InstallPane extends DetailPane {
         boolean canPlace = false;
         
         if (puts != null) {
-          placed.setLocation(puts, stage);
-          if (placed.canPlace(stage)) canPlace = true;
+          placed.setLocation(puts, area);
+          if (placed.canPlace(area)) canPlace = true;
           placed.renderPreview(UI.rendering, canPlace, puts);
         }
         
         if (UI.mouseClicked()) {
           if (canPlace) {
-            placed.enterMap(stage, puts.x, puts.y, 0.0f, base);
-            stage.planning.placeObject(placed);
+            placed.enterMap(area, puts.x, puts.y, 0.0f, base);
+            area.planning.placeObject(placed);
             placed = null;
             //UI.base.incCredits(0 - placed.blueprint().buildCost);
           }

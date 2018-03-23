@@ -13,10 +13,10 @@ public class BuildingForTrade extends Building implements Trader {
   
   /**  Data fields, setup and save/load methods-
     */
-  Tally <Good> prodLevel = new Tally();
-  Tally <Good> needLevel = new Tally();
-  List <Good> tradeFixed = new List();
+  Tally <Good> prodLevel  = new Tally();
+  Tally <Good> needLevel  = new Tally();
   Base tradePartner = null;
+  boolean exports  = true ;
   boolean tradeOff = false;
   Good needed[] = NO_GOODS, produced[] = NO_GOODS;
   
@@ -30,8 +30,8 @@ public class BuildingForTrade extends Building implements Trader {
     super(s);
     s.loadTally(prodLevel);
     s.loadTally(needLevel);
-    s.loadObjects(tradeFixed);
     tradePartner = (Base) s.loadObject();
+    exports = s.loadBool();
     tradeOff = s.loadBool();
   }
   
@@ -40,8 +40,8 @@ public class BuildingForTrade extends Building implements Trader {
     super.saveState(s);
     s.saveTally(prodLevel);
     s.saveTally(needLevel);
-    s.saveObjects(tradeFixed);
     s.saveObject(tradePartner);
+    s.saveBool(exports);
     s.saveBool(tradeOff);
   }
 
@@ -69,9 +69,12 @@ public class BuildingForTrade extends Building implements Trader {
     this.tradePartner = partner;
   }
   
-  
   public void toggleTrading(boolean allowed) {
     this.tradeOff = ! allowed;
+  }
+  
+  public void toggleExports(boolean allowed) {
+    this.exports = allowed;
   }
   
 
@@ -116,6 +119,15 @@ public class BuildingForTrade extends Building implements Trader {
   
   public float shopPrice(Good g, TaskDelivery s) {
     return super.shopPrice(g, s);
+  }
+  
+  public boolean allowExport(Good g, Trader buys) {
+    if (tradePartner != null && buys.base() != tradePartner) return false;
+    return exports && prodLevel.valueFor(g) > 0;
+  }
+  
+  public boolean allowExports() {
+    return exports;
   }
   
   

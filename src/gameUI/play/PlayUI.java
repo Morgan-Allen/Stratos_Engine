@@ -118,9 +118,9 @@ public class PlayUI extends HUD implements UIConstants {
   
   
   public void loadState(Session s) throws Exception {
-    area = (Area) s.loadObject();
-    base  = (Base   ) s.loadObject();
-    home  = (Element) s.loadObject();
+    area = (Area   ) s.loadObject();
+    base = (Base   ) s.loadObject();
+    home = (Element) s.loadObject();
     selection.loadState(s);
     tracking .loadState(s);
     optionList.setupFrom(area, base);

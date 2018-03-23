@@ -10,7 +10,7 @@ import util.*;
 
 
 
-public abstract class AreaMapScenario implements Session.Saveable {
+public abstract class AreaScenario implements Session.Saveable {
   
   
   MainGame game;
@@ -23,12 +23,12 @@ public abstract class AreaMapScenario implements Session.Saveable {
   PlayUI UI;
   
   
-  protected AreaMapScenario() {
+  protected AreaScenario() {
     return;
   }
   
   
-  public AreaMapScenario(Session s) throws Exception {
+  public AreaScenario(Session s) throws Exception {
     s.cacheInstance(this);
     world = (World) s.loadObject();
     area  = (Area ) s.loadObject();

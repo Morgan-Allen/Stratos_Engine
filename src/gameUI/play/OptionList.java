@@ -29,11 +29,16 @@ public class OptionList extends UIGroup implements UIConstants {
     RECON_BUTTON_IMG = ImageAsset.fromImage(
       OptionList.class, "recon_btn_img",
       "media/GUI/Missions/button_recon.png"
+    ),
+    ILLEGAL_ACTION_IMG = ImageAsset.fromImage(
+      OptionList.class, "illegal_btn_img",
+      "media/GUI/illegal_action.png"
     );
   
   
   final PlayUI BUI;
   List <UINode> options = new List();
+  private float lastRefresh = -1;
   
   
   //  TODO:  Just have this auto-renew automagically, rather than being
@@ -57,6 +62,7 @@ public class OptionList extends UIGroup implements UIConstants {
     for (UINode option : options) {
       option.detach();
     }
+    options.clear();
     
     options.add(new MissionButton(
       BUI, STRIKE_BUTTON_ID, STRIKE_BUTTON_IMG,
@@ -108,16 +114,20 @@ public class OptionList extends UIGroup implements UIConstants {
     
     protected void whenClicked() {
       final PlayTask task = new PlayTask() {
+        boolean canUse = false;
+        
         public void doTask(PlayUI UI) {
           if (mission == null) mission = initMission();
           
           Selection.Focus hovered = UI.selection.hovered();
           Mission match = base.matchingMission(mission.objective, hovered);
+          canUse = false;
           
           if (match != null && UI.mouseClicked()) {
+            canUse = true;
             PlayUI.pushSelection(match);
           }
-          else if (mission.allowsFocus(hovered)) {
+          else if (canUse = mission.allowsFocus(hovered)) {
             if (UI.mouseClicked()) {
               mission.setLocalFocus((Target) hovered);
               mission.rewards.setAsBounty(0);
@@ -125,18 +135,15 @@ public class OptionList extends UIGroup implements UIConstants {
               mission = null;
               UI.assignTask(null);
             }
-            else {
-              //mission.renderFlag(rendering);
-            }
           }
           
           if (KeyInput.wasTyped(Keys.ESCAPE)) {
             UI.assignTask(null);
           }
         }
-
+        
         public Texture cursor() {
-          return texture;
+          return canUse ? texture : ILLEGAL_ACTION_IMG.asTexture();
         }
       };
       BUI.assignTask(task);
@@ -149,7 +156,6 @@ public class OptionList extends UIGroup implements UIConstants {
     final ActorTechnique power;
     final Base base;
     
-    
     PowerButton(PlayUI UI, ActorTechnique power, Base base) {
       super(
         UI, power.uniqueID()+"_button",
@@ -159,29 +165,30 @@ public class OptionList extends UIGroup implements UIConstants {
       this.base  = base ;
     }
     
-    
     protected void updateState() {
       this.enabled = base.funds() >= power.costCash;
       super.updateState();
     }
     
-    
     protected void whenClicked() {
       final PlayTask task = new PlayTask() {
+        boolean canUse = false;
+        
         public void doTask(PlayUI UI) {
           Target hovered = (Target) UI.selection.hovered();
-          if (power.canUsePower(base, hovered)) {
-            if (UI.mouseClicked()) {
-              power.applyFromRuler(base, hovered);
-            }
+          canUse = power.canUsePower(base, hovered);
+          
+          if (canUse && UI.mouseClicked()) {
+            power.applyFromRuler(base, hovered);
           }
-          else {
-            //  TODO:  Render a disabled icon!
+          
+          if (KeyInput.wasTyped(Keys.ESCAPE)) {
+            BUI.assignTask(null);
           }
         }
         
         public Texture cursor() {
-          return texture;
+          return canUse ? texture : ILLEGAL_ACTION_IMG.asTexture();
         }
       };
       BUI.assignTask(task);
@@ -192,6 +199,11 @@ public class OptionList extends UIGroup implements UIConstants {
   protected void updateState() {
     this.alignBottom(0, 0);
     this.alignHorizontal(0.5f, 0, 0);
+    
+    if (Rendering.activeTime() > lastRefresh + 1) {
+      this.setupFrom(BUI.area, BUI.base);
+      lastRefresh = Rendering.activeTime();
+    }
     
     final float fadeInc = 1f / (DEFAULT_FADE_TIME * UI.rendering.frameRate());
     if (fadeout) {

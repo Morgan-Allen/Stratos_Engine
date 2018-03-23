@@ -263,24 +263,25 @@ public class TaskTrading extends Task {
   ) {
     
     //  TODO:  You need to cap the total sum of goods transported based on
-    //  cargo limits.
+    //  cargo limits!
     
     Tally <Good> cargo = new Tally();
-    boolean fromCity = from.base() == from;
-    boolean goesCity = goes.base() == goes;
-    boolean fromFlex = from == goes.base().homeland();
-    boolean goesFlex = goes == from.base().homeland();
+    if (from == null || goes == null) return cargo;
     
     boolean report = false;
     if (report) I.say("\nDoing cargo config for "+from+" -> "+goes);
     
-    if (from == null || goes == null        ) return cargo;
+    boolean fromCity = from.base() == from;
+    boolean goesCity = goes.base() == goes;
+    boolean fromFlex = from == goes.base().homeland();
+    boolean goesFlex = goes == from.base().homeland();
     if (cityOnly && ! (fromCity || goesCity)) return cargo;
+    
     Base.Relation fromR = goes.base().relationWith(from.base());
     Base.Relation goesR = from.base().relationWith(goes.base());
     
     for (Good good : world.goodTypes) {
-      if (good == CASH) continue;
+      if (good == CASH || ! from.allowExport(good, goes)) continue;
       
       float amountFrom = from.inventory ().valueFor(good);
       float amountGoes = goes.inventory ().valueFor(good);

@@ -1,14 +1,13 @@
 
 
 package game;
+import static game.Task.*;
+import static game.GameConstants.*;
 import gameUI.play.*;
 import graphics.common.*;
 import graphics.sfx.*;
 import test.LogicTest;
 import util.*;
-import static game.Task.*;
-import static game.Area.*;
-import static game.GameConstants.*;
 
 
 
@@ -47,8 +46,8 @@ public class Actor extends Element implements
   
   private Pathing inside;
   private boolean wasIndoors = true;
-  Vec3D lastPosition  = new Vec3D();
-  Vec3D exactPosition = new Vec3D();
+  private Vec3D lastPosition  = new Vec3D();
+  private Vec3D exactPosition = new Vec3D();
   
   Tally <Good> carried = new Tally();
   
@@ -214,6 +213,31 @@ public class Actor extends Element implements
   /**  Regular updates-
     */
   void update() {
+    //
+    //  Obtain some basic settings first-
+    WorldSettings settings = map.world.settings;
+    boolean organic = type().organic && ! type().isVessel();
+    float tick = 1f / map().ticksPS;
+    //
+    //  Adjust health-parameters accordingly-
+    if (organic) {
+      hunger += settings.toggleHunger ? (tick / STARVE_INTERVAL) : 0;
+      if (jobType() == JOB.RESTING && task().inContact()) {
+        float rests = tick / FATIGUE_REGEN;
+        float heals = tick / HEALTH_REGEN ;
+        fatigue = Nums.max(0, fatigue - rests);
+        injury  = Nums.max(0, injury  - heals);
+      }
+      else {
+        fatigue += settings.toggleFatigue ? (tick / FATIGUE_INTERVAL) : 0;
+        float heals = tick * 0.5f / HEALTH_REGEN;
+        injury = Nums.max(0, injury - heals);
+      }
+    }
+    else {
+      float rests = tick / FATIGUE_REGEN;
+      fatigue = Nums.max(0, fatigue - rests);
+    }
     //
     //  Some checks to assist in case of blockage, and refreshing position-
     lastPosition.setTo(exactPosition);
@@ -527,6 +551,16 @@ public class Actor extends Element implements
   }
   
   
+  public void liftDamage(float damage) {
+    takeDamage(0 - damage);
+  }
+  
+  
+  public void liftFatigue(float tire) {
+    takeFatigue(0 - tire);
+  }
+  
+  
   public void takeDamage(float damage) {
     if (map == null || ! map.world.settings.toggleInjury) return;
     injury += damage;
@@ -535,21 +569,11 @@ public class Actor extends Element implements
   }
   
   
-  public void liftDamage(float damage) {
-    takeDamage(0 - damage);
-  }
-  
-  
   public void takeFatigue(float tire) {
     if (map == null || ! map.world.settings.toggleFatigue) return;
     fatigue += tire;
     fatigue = Nums.clamp(tire, 0, maxHealth() + 1);
     checkHealthState();
-  }
-  
-  
-  public void liftFatigue(float tire) {
-    takeFatigue(0 - tire);
   }
   
   
@@ -562,6 +586,11 @@ public class Actor extends Element implements
   
   public void setCooldown(float cool) {
     this.cooldown = cool;
+  }
+  
+  
+  public void liftHunger(float inc) {
+    this.hunger = Nums.clamp(hunger - inc, 0, maxHealth());
   }
   
   
@@ -604,6 +633,11 @@ public class Actor extends Element implements
     if (mode == MOVE_RUN  ) speed *= RUN_MOVE_SPEED  / 100f;
     if (mode == MOVE_SNEAK) speed *= HIDE_MOVE_SPEED / 100f;
     return speed;
+  }
+  
+  
+  public float hungerLevel() {
+    return hunger / maxHealth();
   }
   
   
@@ -781,21 +815,24 @@ public class Actor extends Element implements
       0
     );
     
-    boolean contact = task != null && task.checkContact(task.path);
-    if (contact) task.faceTarget().exactPosition(goes);
+    boolean contact = task != null && task.inContact();
+    if (contact) goes = task.faceTarget().exactPosition(null);
     Vec2D angleVec = new Vec2D(goes.x - from.x, goes.y - from.y);
     if (angleVec.length() > 0) s.rotation = angleVec.toAngle();
     
+    final float ANIM_MULT = 1.66f;
+    float animProg = Rendering.activeTime() * ANIM_MULT;
+    
     if (contact) {
-      float animProg = Rendering.activeTime() % 1;
-      s.setAnimation(task.animName(), animProg, true);
+      s.setAnimation(task.animName(), animProg % 1, true);
     }
     else {
+      animProg *= moveSpeed();
       int mode = task == null ? MOVE_NORMAL : task.motionMode();
       String animName = AnimNames.MOVE;
       if (mode == MOVE_RUN  ) animName = AnimNames.MOVE_FAST;
       if (mode == MOVE_SNEAK) animName = AnimNames.MOVE_SNEAK;
-      s.setAnimation(animName, Rendering.activeTime() % 1, true);
+      s.setAnimation(animName, animProg % 1, true);
     }
     super.renderElement(rendering, base);
     
@@ -805,8 +842,8 @@ public class Actor extends Element implements
     h.fog = s.fog;
     h.colour = Colour.BLUE;
     h.size = 30;
-    h.hurtLevel = injury () / type().maxHealth;
-    h.tireLevel = fatigue() / type().maxHealth;
+    h.hurtLevel = (injury() + hunger()) / maxHealth();
+    h.tireLevel = fatigue() / maxHealth();
     h.position.setTo(s.position);
     h.position.z += type().deep + 0.1f;
     h.readyFor(rendering);
