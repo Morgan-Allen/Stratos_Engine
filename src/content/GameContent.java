@@ -23,6 +23,7 @@ public class GameContent {
     //  Military in red.
     TINT_LITE_MILITARY    = colour(8, 1, 1),
     TINT_MILITARY         = colour(7, 0, 0),
+    TINT_HEAVY_MILITARY   = colour(6, 0, 2),
     //  Economic in blue.
     TINT_LITE_COMMERCIAL  = colour(3, 1, 8),
     TINT_COMMERCIAL       = colour(2, 0, 7),
@@ -550,7 +551,7 @@ public class GameContent {
     
     
     TROOPER_LODGE.name = "Trooper Lodge";
-    TROOPER_LODGE.tint = TINT_MILITARY;
+    TROOPER_LODGE.tint = TINT_HEAVY_MILITARY;
     TROOPER_LODGE.model = CutoutModel.fromImage(
       GameContent.class, "trooper_lodge_model",
       "media/Buildings/mil_trooper_lodge.png", 3, 2

@@ -272,75 +272,79 @@ public class Task implements Session.Saveable {
       }
     }
     
-    Area  map      = active.map();
-    boolean  isActor  = active.isActor();
-    Actor    asActor  = isActor ? (Actor) active : null;
-    Pathing  inside   = isActor ? asActor.inside() : null;
-    Pathing  path[]   = this.path;
-    boolean  contacts = checkContact(path);
-    Building visits   = this.visits;
-    Target   target   = this.target;
+    Area    map     = active.map();
+    boolean isActor = active.isActor();
+    Actor   asActor = isActor ? (Actor) active : null;
     
-    priorityEval = NO_PRIORITY;
-    inContact = false;
+    final float BASE_TILES_PER_SECOND = 1.5f;
+    float motion = BASE_TILES_PER_SECOND / map.ticksPS;
+    motion *= isActor ? asActor.moveSpeed() : 0;
     
-    if (visits != null && inside == visits) {
-      ticksSpent += 1;
-      int progress = checkActionProgress();
+    
+    while (motion > 0 || ! isActor) {
       
-      if (progress == PROG_COMPLETE) {
-        return false;
-      }
-      else if (progress == PROG_CONTACT) {
-        inContact = true;
-        return true;
-      }
-      else {
-        if (isActor) {
-          onVisit(visits);
-          asActor.onVisit(visits);
-          visits.visitedBy(asActor);
-          if (origin != null) origin.actorVisits(asActor, visits);
-        }
-        if (progress == PROG_FINISHING) {
-          onVisitEnds(visits);
-        }
-        inContact = true;
-        return true;
-      }
-    }
-    else if (contacts) {
-      ticksSpent += 1;
-      int progress = checkActionProgress();
+      Pathing  path[]   = this.path;
+      boolean  contacts = checkContact(path);
+      Building visits   = this.visits;
+      Target   target   = this.target;
       
-      if (progress == PROG_COMPLETE) {
-        return false;
-      }
-      else if (progress == PROG_CONTACT) {
-        inContact = true;
-        return true;
-      }
-      else {
-        onTarget(target);
-        target.targetedBy(active);
-        if (isActor) {
-          asActor.onTarget(target);
-          if (origin != null) origin.actorTargets(asActor, target);
-        }
-        if (progress == PROG_FINISHING) {
-          onTargetEnds(target);
-        }
-        inContact = true;
-        return true;
-      }
-    }
-    else if (isActor) {
-      final float BASE_TILES_PER_SECOND = 1.5f;
-      float motion = BASE_TILES_PER_SECOND / map.ticksPS;
-      motion *= asActor.moveSpeed();
+      priorityEval = NO_PRIORITY;
+      inContact = false;
       
-      while (motion > 0) {
+      if (visits != null && asActor.inside() == visits) {
+        ticksSpent += 1;
+        int progress = checkActionProgress();
+        
+        if (progress == PROG_COMPLETE) {
+          return false;
+        }
+        else if (progress == PROG_CONTACT) {
+          inContact = true;
+          return true;
+        }
+        else {
+          if (isActor) {
+            onVisit(visits);
+            asActor.onVisit(visits);
+            visits.visitedBy(asActor);
+            if (origin != null) origin.actorVisits(asActor, visits);
+          }
+          if (progress == PROG_FINISHING) {
+            onVisitEnds(visits);
+          }
+          inContact = true;
+          return true;
+        }
+      }
+      else if (contacts) {
+        ticksSpent += 1;
+        int progress = checkActionProgress();
+        
+        if (progress == PROG_COMPLETE) {
+          return false;
+        }
+        else if (progress == PROG_CONTACT) {
+          inContact = true;
+          return true;
+        }
+        else {
+          onTarget(target);
+          target.targetedBy(active);
+          if (isActor) {
+            asActor.onTarget(target);
+            if (origin != null) origin.actorTargets(asActor, target);
+          }
+          if (progress == PROG_FINISHING) {
+            onTargetEnds(target);
+          }
+          inContact = true;
+          return true;
+        }
+      }
+      else if (isActor) {
+
         Pathing from     = Task.pathOrigin(asActor);
+        Pathing inside   = asActor.inside();
         Pathing ahead    = nextOnPath();
         Vec3D   actorPos = asActor .exactPosition(null);
         Vec3D   aheadPos = ahead   .exactPosition(null);
@@ -359,6 +363,7 @@ public class Task implements Session.Saveable {
           float distMoved = Nums.min(dist, motion);
           actorPos.x += distMoved * diff.x;
           actorPos.y += distMoved * diff.y;
+          
           motion -= distMoved;
           asActor.setExactLocation(actorPos, map);
         }
@@ -367,14 +372,15 @@ public class Task implements Session.Saveable {
           pathIndex = Nums.clamp(pathIndex + 1, path.length);
         }
         
-        if (dist == 0) break;
+        if (dist == 0 || motion == 0) return true;
+        continue;
       }
-      
-      return true;
+      else {
+        return false;
+      }
     }
-    else {
-      return false;
-    }
+    
+    return false;
   }
   
   

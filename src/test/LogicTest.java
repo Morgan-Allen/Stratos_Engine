@@ -18,10 +18,10 @@ public class LogicTest {
   protected static Base setupTestBase(
     int size, Good goods[], boolean genTerrain, Terrain... gradient
   ) {
-    World   world  = new World(goods);
-    Locale  locale = world.addLocale(5, 5);
-    Base    base   = new Base(world, locale, "Test City");
-    Area map    = null;
+    World  world  = new World(goods);
+    Locale locale = world.addLocale(5, 5);
+    Base   base   = new Base(world, locale, "Test City");
+    Area   map    = null;
     
     if (! genTerrain) {
       map = new Area(world, locale, base);
@@ -121,7 +121,7 @@ public class LogicTest {
   }
   
   
-  void updateCityMapView(Area map) {
+  void updateAreaView(Area map) {
     configGraphic(map.size(), map.size());
     
     for (AreaTile at : map.allTiles()) {
@@ -142,7 +142,6 @@ public class LogicTest {
     
     if (! viewPlanMap) for (Actor a : map.actors()) {
       AreaTile at = a.at();
-      //I.say("At: "+at);
       if (at == null || a.indoors()) continue;
       int fill = WALKER_COLOR;
       if      (a.work() != null) fill = a.work().type().tint;
@@ -307,7 +306,7 @@ public class LogicTest {
             updateCityPathingView(map);
           }
           else {
-            updateCityMapView(map);
+            updateAreaView(map);
           }
           updateCityFogLayer(map);
           I.present(VIEW_NAME, 400, 400, graphic, fogLayer);

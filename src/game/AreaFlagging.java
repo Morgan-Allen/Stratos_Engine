@@ -14,7 +14,7 @@ public class AreaFlagging {
   /**  Data fields, construction and save/load methods-
     */
   Area map;
-  Object  key;
+  Object key;
   int range;
   
   Object flagLevels[];

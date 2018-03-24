@@ -3,10 +3,9 @@
 package game;
 import static game.Area.*;
 import static game.GameConstants.*;
-
-import game.Task.JOB;
 import game.World.Journey;
 import util.*;
+
 
 
 
@@ -14,15 +13,16 @@ public class MissionSecure extends Mission {
   
   
   final static int
-    GUARD_PERIOD = DAY_LENGTH * 1,
-    SHIFT_LENGTH = DAY_LENGTH / 3,
-    NUM_SHIFTS   = 3
+    DEFAULT_GUARD_PERIOD = DAY_LENGTH * 1
   ;
+  
+  int guardPeriod = DEFAULT_GUARD_PERIOD;
+  boolean autoRenew = false;
+  int beginTime = -1;
   
   List <AreaTile> guardPoints = new List();
   int lastUpdateTime = -1;
-  int beginTime = -1;
-  boolean autoRenew;
+  
   
   
   
@@ -34,34 +34,44 @@ public class MissionSecure extends Mission {
   public MissionSecure(Session s) throws Exception {
     super(s);
     
+    guardPeriod = s.loadInt();
+    autoRenew   = s.loadBool();
+    beginTime   = s.loadInt();
+    
     Area map = (Area) s.loadObject();
     for (int n = s.loadInt(); n-- > 0;) {
       AreaTile point = Area.loadTile(map, s);
       guardPoints.add(point);
     }
     lastUpdateTime = s.loadInt();
-    beginTime = s.loadInt();
-    autoRenew = s.loadBool();
   }
   
   
   public void saveState(Session s) throws Exception {
     super.saveState(s);
     
+    s.saveInt(guardPeriod);
+    s.saveBool(autoRenew);
+    s.saveInt(beginTime);
+    
     Area map = localMap();
     s.saveObject(map);
     s.saveInt(guardPoints.size());
     for (AreaTile t : guardPoints) Area.saveTile(t, map, s);
     s.saveInt(lastUpdateTime);
-    s.saveInt(beginTime);
-    s.saveBool(autoRenew);
   }
   
 
   public boolean allowsFocus(Object newFocus) {
-    //  TODO:  Fill this in...
     if (newFocus instanceof Building) return true;
+    if (newFocus instanceof AreaTile) return true;
     return false;
+  }
+  
+  
+  public void setGuardPeriod(int period, boolean autoRenew) {
+    this.guardPeriod = period;
+    this.autoRenew   = autoRenew;
   }
   
   
@@ -80,12 +90,14 @@ public class MissionSecure extends Mission {
       if (worldFocus() != null && ! onWrongMap()) {
         //  TODO:  Renew your target here, and check for completion-criteria...
       }
-      else {
+      else if (localFocus() != null) {
         int time = localMap().time();
-        if (((Element) localFocus()).destroyed()) {
+        boolean isElement = localFocus() instanceof Element;
+        
+        if (isElement && ((Element) localFocus()).destroyed()) {
           setMissionComplete(false);
         }
-        else if (time - beginTime >= GUARD_PERIOD) {
+        else if (time - beginTime >= guardPeriod) {
           int periodCash = rewards.cashReward();
           if (autoRenew && homeBase().funds() >= periodCash) {
             beginTime = time;
@@ -116,9 +128,10 @@ public class MissionSecure extends Mission {
   public Task nextLocalMapBehaviour(Actor actor) {
     
     //  TODO:  Don't stray too far from the original guard-point!
+    //  TODO:  Restore actual shifts-taking behaviour...
     
     int timeSpent  = localMap().time() - beginTime;
-    int offShift   = (timeSpent / SHIFT_LENGTH) % NUM_SHIFTS;
+    int offShift   = 1000;// (timeSpent / SHIFT_LENGTH) % NUM_SHIFTS;
     int actorShift = recruits.indexOf(actor) % NUM_SHIFTS;
     AreaTile stands = standLocation(actor);
     
@@ -127,8 +140,13 @@ public class MissionSecure extends Mission {
     ;
     if (taskC != null) return taskC;
     
-    Task standT = actor.targetTask(stands, 1, Task.JOB.MILITARY, this);
-    if (standT != null && actorShift != offShift) return standT;
+    Task taskS = actor.targetTask(stands, 1, Task.JOB.MILITARY, this);
+    
+    if (taskS == null) {
+      I.say(actor+" stands at "+stands+", no path!");
+    }
+    
+    if (taskS != null && actorShift != offShift) return taskS;
     
     return null;
   }
@@ -147,6 +165,38 @@ public class MissionSecure extends Mission {
   
   /**  Other utility methods-
     */
+  public AreaTile standLocation(Actor actor) {
+    boolean doPatrol = localFocus().type().isWall;
+    if (doPatrol) {
+      return standingPointPatrol(actor, this);
+    }
+    else {
+      return standingPointRanks(actor, this, localFocus());
+    }
+  }
+  
+  
+  public boolean assembled() {
+    for (Actor a : recruits) if (a.at() != standLocation(a)) return false;
+    return true;
+  }
+  
+  
+  static AreaTile standingPointPatrol(Actor member, MissionSecure parent) {
+    
+    int span = SHIFT_LENGTH;
+    int numRecruits = Nums.max(1, parent.recruits.size());
+    int epoch = (parent.homeBase.world.time / span) % numRecruits;
+    
+    int index = parent.recruits.indexOf(member);
+    if (index == -1) return null;
+    
+    updateGuardPoints(parent);
+    index = (index + epoch) % numRecruits;
+    return parent.guardPoints.atIndex(index);
+  }
+  
+  
   static float rateCampingPoint(AreaTile t, Mission parent) {
     if (t == null || parent == null) return -1;
     
@@ -269,38 +319,6 @@ public class MissionSecure extends Mission {
       
       for (AreaTile t : touched) t.flagWith(null);
     }
-  }
-
-  
-  public AreaTile standLocation(Actor actor) {
-    boolean doPatrol = localFocus().type().isWall;
-    if (doPatrol) {
-      return standingPointPatrol(actor, this);
-    }
-    else {
-      return standingPointRanks(actor, this, localFocus());
-    }
-  }
-  
-  
-  public boolean assembled() {
-    for (Actor a : recruits) if (a.at() != standLocation(a)) return false;
-    return true;
-  }
-  
-  
-  static AreaTile standingPointPatrol(Actor member, MissionSecure parent) {
-    
-    int span = DAY_LENGTH;
-    int numRecruits = Nums.max(1, parent.recruits.size());
-    int epoch = (parent.homeBase.world.time / span) % numRecruits;
-    
-    int index = parent.recruits.indexOf(member);
-    if (index == -1) return null;
-    
-    updateGuardPoints(parent);
-    index = (index + epoch) % numRecruits;
-    return parent.guardPoints.atIndex(index);
   }
   
   

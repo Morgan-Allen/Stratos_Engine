@@ -44,6 +44,8 @@ public class GameConstants {
     //
     //  Time constants-
     DAY_LENGTH       = 120,
+    NUM_SHIFTS       = 3,
+    SHIFT_LENGTH     = DAY_LENGTH / NUM_SHIFTS,
     DAYS_PER_YEAR    = 18,
     YEAR_LENGTH      = DAY_LENGTH * DAYS_PER_YEAR,
     //
