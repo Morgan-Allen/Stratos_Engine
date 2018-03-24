@@ -14,7 +14,7 @@ public class TestPathing extends LogicTest {
   
   
   public static void main(String args[]) {
-    testPathing(true);
+    testPathing(false);
   }
   
   
@@ -154,6 +154,25 @@ public class TestPathing extends LogicTest {
           if (t != i.at()) {
             I.say("\n"+i+" REGISTERED IN WRONG TILE!");
             I.say("  At: "+i.at()+", found in: "+t);
+            insideWrong = true;
+          }
+          Series <Active> inBigGrid = map.gridActive(t);
+          if (! inBigGrid.includes(i)) {
+            I.say("\n"+i+" REGISTERED IN WRONG GRID-AREA!");
+            insideWrong = true;
+          }
+        }
+      }
+      
+      int gridS = map.size() / Area.FLAG_RES;
+      for (Coord c : Visit.grid(0, 0, gridS, gridS, 1)) {
+        AreaTile t = map.tileAt(c.x * Area.FLAG_RES, c.y * Area.FLAG_RES);
+        Series <Active> inBigGrid = map.gridActive(t);
+        for (Active a : inBigGrid) {
+          AreaTile at = a.at();
+          Series <Active> s = map.gridActive(at);
+          if (inBigGrid != s) {
+            I.say("\n"+a+" REGISTERED IN WRONG GRID-AREA!");
             insideWrong = true;
           }
         }

@@ -269,7 +269,7 @@ public class AreaTile implements Pathing, Selection.Focus {
   
   
   public void whenClicked(Object context) {
-    // TODO Auto-generated method stub
+    return;
   }
   
   

@@ -182,7 +182,7 @@ public class AreaTerrain implements TileConstants {
     Base city, int size, int maxHigh, Terrain... gradient
   ) {
     Area map = generateTerrain(city.world, city.locale, size, maxHigh, gradient);
-    map.addCity(city);
+    map.addBase(city);
     return map;
   }
   

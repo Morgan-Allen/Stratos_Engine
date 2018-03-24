@@ -445,6 +445,7 @@ public class GameConstants {
     
     Area map();
     boolean isActor();
+    Base base();
     
     Task.JOB jobType();
     Task task();

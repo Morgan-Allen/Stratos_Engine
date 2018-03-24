@@ -82,7 +82,7 @@ public class ScenarioBlankMap extends AreaScenario {
     landing.setHomeland(patron);
     landing.assignBuildTypes(RULER_BUILT);
     
-    stage.addCity(landing);
+    stage.addBase(landing);
     world.addBases(patron, landing);
     
     return landing;

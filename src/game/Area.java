@@ -37,7 +37,9 @@ public class Area implements Session.Saveable {
   final public AreaFog      fog      = new AreaFog     (this);
   final public AreaTerrain  terrain  = new AreaTerrain (this);
   
+  Table <Base, AreaDanger> dangerMaps  = new Table();
   Table <Base, AreaTile> transitPoints = new Table();
+  
   Table <Type, AreaFlagging> flagging = new Table();
   Table <String, AreaDemands> demands = new Table();
   
@@ -58,9 +60,9 @@ public class Area implements Session.Saveable {
     
     locals.setGovernment(Base.GOVERNMENT.BARBARIAN);
     locals.council.setTypeAI(BaseCouncil.AI_OFF);
-    addCity(locals);
+    addBase(locals);
     
-    for (Base c : cities) addCity(c);
+    for (Base c : cities) addBase(c);
   }
   
   
@@ -90,6 +92,14 @@ public class Area implements Session.Saveable {
     planning.loadState(s);
     fog     .loadState(s);
     terrain .loadState(s);
+    
+    for (int n = s.loadInt(); n-- > 0;) {
+      Base with = (Base) s.loadObject();
+      AreaDanger danger = new AreaDanger(with, this);
+      danger.performSetup(flagSize);
+      danger.loadState(s);
+      dangerMaps.put(with, danger);
+    }
     
     for (int n = s.loadInt(); n-- > 0;) {
       Base with = (Base) s.loadObject();
@@ -142,11 +152,17 @@ public class Area implements Session.Saveable {
     
     s.saveInt(time);
     s.saveInt(numUpdates);
-    s.saveInt(ticksPS   );
+    s.saveInt(ticksPS);
     
     planning.saveState(s);
     fog     .saveState(s);
     terrain .saveState(s);
+    
+    s.saveInt(dangerMaps.size());
+    for (Base b : dangerMaps.keySet()) {
+      AreaDanger danger = dangerMaps.get(b);
+      danger.saveState(s);
+    }
     
     s.saveInt(transitPoints.size());
     for (Base c : transitPoints.keySet()) {
@@ -176,6 +192,12 @@ public class Area implements Session.Saveable {
   }
   
   
+  public void addBase(Base base) {
+    bases.include(base);
+    base.attachMap(this);
+  }
+  
+  
   public void performSetup(int size, Terrain terrainTypes[]) {
     
     this.terrainTypes = terrainTypes;
@@ -202,6 +224,8 @@ public class Area implements Session.Saveable {
     planning .performSetup(size);
     fog      .performSetup(size);
     pathCache.performSetup(size);
+    
+    for (Base b : bases) dangerMap(b);
   }
   
   
@@ -220,12 +244,6 @@ public class Area implements Session.Saveable {
   
   public Series <Actor> actors() {
     return actors;
-  }
-  
-  
-  public void addCity(Base city) {
-    bases.include(city);
-    city.attachMap(this);
   }
   
   
@@ -531,10 +549,13 @@ public class Area implements Session.Saveable {
       }
       a.update();
     }
+    
+    if (exactTick) for (AreaDanger danger : dangerMaps.values()) {
+      danger.updateDanger();
+    }
     if (time % SCAN_PERIOD == 0 && exactTick) {
       transitPoints.clear();
     }
-    
     fog.updateFog();
     terrain.updateTerrain();
     planning.updatePlanning();
@@ -588,6 +609,22 @@ public class Area implements Session.Saveable {
     catch (ArrayIndexOutOfBoundsException e) {}
     
     return all;
+  }
+  
+  
+  public Series <Active> gridActive(AreaTile at) {
+    return actorGrid[at.x / FLAG_RES][at.y / FLAG_RES];
+  }
+  
+  
+  public AreaDanger dangerMap(Base base) {
+    AreaDanger danger = dangerMaps.get(base);
+    if (danger == null) {
+      danger = new AreaDanger(base, this);
+      danger.performSetup(flagSize);
+      dangerMaps.put(base, danger);
+    }
+    return danger;
   }
   
   

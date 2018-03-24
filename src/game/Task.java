@@ -358,6 +358,7 @@ public class Task implements Session.Saveable {
           if (! from .isTile()) asActor.setInside(inside, false);
           if (! ahead.isTile()) asActor.setInside(ahead , true );
         }
+        
         else if (dist > 0) {
           diff.normalise();
           float distMoved = Nums.min(dist, motion);

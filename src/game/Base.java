@@ -211,6 +211,20 @@ public class Base implements Session.Saveable, Trader {
   }
   
   
+  public float distance(Base other) {
+    if (other.locale == this.locale) return 0;
+    Integer dist = locale.distances.get(other.locale);
+    if (dist != null) return (float) dist;
+    
+    float dx = locale.mapX - other.locale.mapX;
+    float dy = locale.mapY - other.locale.mapY;
+    return (int) Nums.sqrt((dx * dx) + (dy * dy));
+  }
+  
+  
+  
+  /**  Assigning build-levels:
+    */
   public void assignBuildTypes(BuildType... types) {
     buildTypes.clear();
     Visit.appendTo(buildTypes, types);
@@ -231,17 +245,6 @@ public class Base implements Session.Saveable, Trader {
   
   public Tally <BuildType> buildLevel() {
     return buildLevel;
-  }
-  
-  
-  public float distance(Base other) {
-    if (other.locale == this.locale) return 0;
-    Integer dist = locale.distances.get(other.locale);
-    if (dist != null) return (float) dist;
-    
-    float dx = locale.mapX - other.locale.mapX;
-    float dy = locale.mapY - other.locale.mapY;
-    return (int) Nums.sqrt((dx * dx) + (dy * dy));
   }
   
   
@@ -641,7 +644,6 @@ public class Base implements Session.Saveable, Trader {
     boolean updateStats = world.time % DAY_LENGTH == 0;
     boolean activeMap   = map != null;
     Base    lord        = currentLord();
-    
     //
     //  Local player-owned cities (i.e, with their own map), must derive their
     //  vitual statistics from that small-scale city map:
