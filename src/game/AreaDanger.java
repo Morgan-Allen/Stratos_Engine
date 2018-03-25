@@ -14,6 +14,7 @@ public class AreaDanger {
   final Area map;
   float baseValues[][];
   float fuzzValues[][];
+  float maxValue;
   
   
   
@@ -32,6 +33,7 @@ public class AreaDanger {
       baseValues[c.x][c.y] = s.loadFloat();
       fuzzValues[c.x][c.y] = s.loadFloat();
     }
+    maxValue = s.loadFloat();
   }
   
   void saveState(Session s) throws Exception {
@@ -39,12 +41,14 @@ public class AreaDanger {
       s.saveFloat(baseValues[c.x][c.y]);
       s.saveFloat(fuzzValues[c.x][c.y]);
     }
+    s.saveFloat(maxValue);
   }
   
   
   void updateDanger() {
     
     final float FUZZ_RANGE = AVG_SIGHT * 2;
+    maxValue = 0.1f;
     
     for (Coord c : Visit.grid(0, 0, map.size(), map.size(), Area.FLAG_RES)) {
       Series <Active> at = map.gridActive(map.tileAt(c));
@@ -61,28 +65,22 @@ public class AreaDanger {
     
     for (Coord c : Visit.grid(0, 0, map.flagSize, map.flagSize, 1)) {
       
-      final float
-        gx  = c.x + 0.5f,
-        gy  = c.y + 0.5f,
-        r   = FUZZ_RANGE / Area.FLAG_RES
-      ;
-      Vec2D pos = new Vec2D(gx * Area.FLAG_RES, gy * Area.FLAG_RES);
-      
       final int
         lim  = map.flagSize - 1,
-        minX = Nums.max(0  , Nums.round(gx - r, 1, false)),
-        maxX = Nums.min(lim, Nums.round(gx + r, 1, true )),
-        minY = Nums.max(0  , Nums.round(gy - r, 1, false)),
-        maxY = Nums.min(lim, Nums.round(gy + r, 1, true ))
+        off  = Nums.round(FUZZ_RANGE * 1f / Area.FLAG_RES, 1, true),
+        minX = Nums.max(0  , c.x - off),
+        maxX = Nums.min(lim, c.x + off),
+        minY = Nums.max(0  , c.y - off),
+        maxY = Nums.min(lim, c.y + off)
       ;
       
+      Vec2D diff = new Vec2D();
       float sum = 0, sumWeights = 0;
       
-      for (int x = minX; x < maxX; x++) {
-        for (int y = minY; y < maxY; y++) {
-          float midX = (x + 0.5f) * Area.FLAG_RES;
-          float midY = (y + 0.5f) * Area.FLAG_RES;
-          float dist = pos.lineDist(midX, midY);
+      for (int x = minX; x <= maxX; x++) {
+        for (int y = minY; y <= maxY; y++) {
+          diff.set(x - c.x, y - c.y);
+          float dist = diff.length() * Area.FLAG_RES;
           
           float weight = 1 - (dist / FUZZ_RANGE);
           if (weight <= 0) continue;
@@ -93,6 +91,7 @@ public class AreaDanger {
       }
       
       fuzzValues[c.x][c.y] = sum / sumWeights;
+      maxValue = Nums.max(maxValue, sum / sumWeights);
     }
   }
   
@@ -104,6 +103,11 @@ public class AreaDanger {
   
   public float fuzzyLevel(int tileX, int tileY) {
     return fuzzValues[tileX / Area.FLAG_RES][tileY / Area.FLAG_RES];
+  }
+  
+  
+  public float maxValue() {
+    return maxValue;
   }
   
   

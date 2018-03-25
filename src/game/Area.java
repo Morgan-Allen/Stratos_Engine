@@ -15,8 +15,9 @@ public class Area implements Session.Saveable {
   /**  Data fields and initialisation-
     */
   final public static int
-    SCAN_RES = 16,
-    FLAG_RES =  4
+    SCAN_RES  = 16,
+    FLAG_RES  = 4,
+    FLAG_AREA = 4 * 4
   ;
   
   Terrain terrainTypes[] = { EMPTY };

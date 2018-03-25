@@ -13,12 +13,13 @@ public class TestDangerMap extends LogicTest {
   
   
   public static void main(String args[]) {
-    testDangerMap(false);
+    testDangerMap(true);
   }
   
   
   static boolean testDangerMap(boolean graphics) {
     LogicTest test = new TestDangerMap();
+    test.viewDangerMap = true;
     
     final int RUN_TIME = YEAR_LENGTH / 2;
     final int NUM_THREATS = 5;

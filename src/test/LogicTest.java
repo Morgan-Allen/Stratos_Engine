@@ -135,7 +135,8 @@ public class LogicTest {
       int fill = BLANK_COLOR;
       
       if (viewDangerMap && dangerMap != null) {
-        float danger = dangerMap.baseLevel(at.x, at.y);
+        float danger = dangerMap.fuzzyLevel(at.x, at.y) * 2;
+        danger *= 10 / dangerMap.maxValue();
         fill = DANGER_SCALE[Nums.clamp((int) danger, 10)];
       }
       else {
