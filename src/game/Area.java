@@ -160,6 +160,7 @@ public class Area implements Session.Saveable {
     
     s.saveInt(dangerMaps.size());
     for (Base b : dangerMaps.keySet()) {
+      s.saveObject(b);
       AreaDanger danger = dangerMaps.get(b);
       danger.saveState(s);
     }

@@ -124,6 +124,7 @@ public class TestBounties extends LogicTest {
         
         threat = (Actor) TRIPOD.generate();
         threat.enterMap(map, 30, 30, 1, map.locals);
+        threat.takeDamage(threat.maxHealth() * 0.7f);
         
         mission = new MissionSecure(base);
         mission.setLocalFocus(guarded);
@@ -153,10 +154,6 @@ public class TestBounties extends LogicTest {
             if (task.primary == threat) didRespond = true;
           }
         }
-        
-        //  TODO:  Ensure that the reward expires after a while as well- (either
-        //  that or it dispenses payment regularly until cancelled- which means
-        //  a different check for funding...)
         
         return triedAttack && didRespond;
       }

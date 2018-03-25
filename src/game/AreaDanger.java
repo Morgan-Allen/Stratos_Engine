@@ -69,7 +69,7 @@ public class AreaDanger {
       Vec2D pos = new Vec2D(gx * Area.FLAG_RES, gy * Area.FLAG_RES);
       
       final int
-        lim  = area.size() - 1,
+        lim  = area.flagSize - 1,
         minX = Nums.max(0  , Nums.round(gx - r, 1, false)),
         maxX = Nums.min(lim, Nums.round(gx + r, 1, true )),
         minY = Nums.max(0  , Nums.round(gy - r, 1, false)),

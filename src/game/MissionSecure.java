@@ -127,26 +127,23 @@ public class MissionSecure extends Mission {
   
   public Task nextLocalMapBehaviour(Actor actor) {
     
-    //  TODO:  Don't stray too far from the original guard-point!
-    //  TODO:  Restore actual shifts-taking behaviour...
-    
-    int timeSpent  = localMap().time() - beginTime;
-    int offShift   = 1000;// (timeSpent / SHIFT_LENGTH) % NUM_SHIFTS;
-    int actorShift = recruits.indexOf(actor) % NUM_SHIFTS;
-    AreaTile stands = standLocation(actor);
-    
+    Target stands = standLocation(actor);
+    Target anchor = stands == null ? localFocus() : stands;
+
+    //  TODO:  Don't stray too far from the original guard-point.
     TaskCombat taskC = Task.inCombat(actor) ? null :
-      TaskCombat.nextReaction(actor, stands, this, AVG_FILE)
+      TaskCombat.nextReaction(actor, anchor, this, AVG_FILE)
     ;
     if (taskC != null) return taskC;
     
-    Task taskS = actor.targetTask(stands, 1, Task.JOB.MILITARY, this);
-    
-    if (taskS == null) {
-      I.say(actor+" stands at "+stands+", no path!");
+    if (stands == null) {
+      Task patrol = TaskPatrol.protectionFor(actor, localFocus(), Task.ROUTINE);
+      if (patrol != null) return patrol;
     }
-    
-    if (taskS != null && actorShift != offShift) return taskS;
+    else {
+      Task taskS = actor.targetTask(stands, 1, Task.JOB.MILITARY, this);
+      if (taskS != null) return taskS;
+    }
     
     return null;
   }
@@ -171,7 +168,7 @@ public class MissionSecure extends Mission {
       return standingPointPatrol(actor, this);
     }
     else {
-      return standingPointRanks(actor, this, localFocus());
+      return null;
     }
   }
   

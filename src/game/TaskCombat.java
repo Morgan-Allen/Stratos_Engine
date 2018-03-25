@@ -464,6 +464,11 @@ public class TaskCombat extends Task {
     super.toggleFocus(activeNow);
     primary.setFocused(active, activeNow);
   }
+  
+  
+  public Target mainFocus() {
+    return primary;
+  }
 
 
   float actionRange() {
@@ -490,8 +495,6 @@ public class TaskCombat extends Task {
   }
   
   
-  //  TODO:  You should also update the risk-assessment methods- win priority
-  //  and success-chance, plus the motive-bonus for any reward attached.
   
   protected void onTarget(Target other) {
     active.performAttack(primary, attackMode == ATTACK_MELEE);
@@ -507,11 +510,6 @@ public class TaskCombat extends Task {
       Task next = TaskCombat.configCombat(active, primary, origin, null, type);
       if (next != null) active.assignTask(next);
     }
-  }
-  
-  
-  protected void onTargetEnds(Target target) {
-    super.onTargetEnds(target);
   }
 
 

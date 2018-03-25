@@ -110,7 +110,7 @@ public class TaskRetreat extends Task {
   
   protected float successChance() {
     //  TODO:  Rate your chance of escape based on speed relative to other
-    //  actors!
+    //  actors?
     return 1.0f;
   }
   
@@ -118,6 +118,11 @@ public class TaskRetreat extends Task {
   protected float successPriority() {
     Actor actor = (Actor) this.active;
     return actor.fearLevel() * PARAMOUNT;
+  }
+  
+  
+  int motionMode() {
+    return Actor.MOVE_RUN;
   }
 
 

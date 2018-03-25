@@ -29,7 +29,7 @@ public class TaskPatrol extends Task implements TileConstants {
     stepsVerbose = false;
   
   final int type;
-  final Element guarded;
+  final Target guarded;
   
   private int numStops = 0;
   private Target onPoint;
@@ -38,7 +38,7 @@ public class TaskPatrol extends Task implements TileConstants {
   
   
   private TaskPatrol(
-    Actor actor, Element guarded, List <Target> patrolled, int type
+    Actor actor, Target guarded, List <Target> patrolled, int type
   ) {
     super(actor);
     this.type      = type;
@@ -53,7 +53,7 @@ public class TaskPatrol extends Task implements TileConstants {
     Area map = active.map();
     
     type     = s.loadInt();
-    guarded  = (Element) s.loadObject();
+    guarded  = Area.loadTarget(map, s);
     numStops = s.loadInt();
     onPoint  = Area.loadTarget(map, s);
     
@@ -68,9 +68,9 @@ public class TaskPatrol extends Task implements TileConstants {
     super.saveState(s);
     Area map = active.map();
     
-    s.saveInt   (type    );
-    s.saveObject(guarded );
-    s.saveInt   (numStops);
+    s.saveInt(type);
+    Area.saveTarget(guarded, map, s);
+    s.saveInt(numStops);
     Area.saveTarget(onPoint, map, s);
     
     s.saveInt(patrolled.size());
@@ -84,7 +84,7 @@ public class TaskPatrol extends Task implements TileConstants {
   /**  External factory methods and supplemental evaluation calls-
     */
   public static TaskPatrol protectionFor(
-    Actor actor, Element guarded, float priority
+    Actor actor, Target guarded, float priority
   ) {
     final boolean report = evalVerbose && I.talkAbout == actor;
     if (report) I.say("\nGetting next perimeter patrol for "+actor);
@@ -92,15 +92,17 @@ public class TaskPatrol extends Task implements TileConstants {
     final Area map = actor.map();
     final List <Target> patrolled = new List();
     
-    if (guarded.type().mobile) {
+    if (! guarded.type().isBuilding()) {
       patrolled.add(guarded);
     }
     else {
+      Building building = (Building) guarded;
+      
       AreaTile from = actor.at();
       if (actor.indoors()) from = ((Building) actor.inside()).mainEntrance();
       Batch <AreaTile> around = new Batch();
       
-      for (AreaTile t : guarded.perimeter(map)) {
+      for (AreaTile t : building.perimeter(map)) {
         if (t == null || ! map.pathCache.pathConnects(from, t)) continue;
         around.include(t);
       }
