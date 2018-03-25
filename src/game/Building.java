@@ -279,8 +279,9 @@ public class Building extends Element implements Pathing, Employer, Carrier {
     }
     
     if (base() != map.locals) {
+      AreaFog fog = map.fogMap(base(), true);
       float fogLift = sightRange() + (radius() / 2);
-      map.fog.liftFog(centre(), fogLift);
+      fog.liftFog(centre(), fogLift);
     }
   }
   
@@ -743,22 +744,25 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   
   /**  Handling fog and visibility-
     */
-  public float sightLevel() {
-    return sightLevel(false);
+  public float sightLevel(Base views) {
+    return sightLevel(false, views);
   }
   
   
-  public float maxSightLevel() {
-    return sightLevel(true);
+  public float maxSightLevel(Base views) {
+    return sightLevel(true, views);
   }
   
   
-  private float sightLevel(boolean max) {
+  private float sightLevel(boolean max, Base views) {
+    AreaFog fog = map.fogMap(views, false);
+    if (fog == null) return 1;
+    
     AreaTile at = at();
     float avg = 0;
     for (int x = 2; x-- > 0;) for (int y = 2; y-- > 0;) {
       AreaTile t = map.tileAt(at.x + (x * type().wide), at.y + (y * type().high));
-      avg += max ? map.fog.maxSightLevel(t) : map.fog.sightLevel(t);
+      avg += max ? fog.maxSightLevel(t) : fog.sightLevel(t);
     }
     return avg / 4;
   }

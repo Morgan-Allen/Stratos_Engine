@@ -44,6 +44,7 @@ public class TestAll {
     record(TestBounties.testAttackBuildingMission(false));
     record(TestBounties.testAttackActorMission   (false));
     record(TestBounties.testExploreAreaMission   (false));
+    record(TestBounties.testDefendBuildingMission(false));
     
     long taken = System.currentTimeMillis() - init;
     

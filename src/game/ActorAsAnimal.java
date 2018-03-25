@@ -3,9 +3,6 @@
 package game;
 import util.*;
 import static game.Task.*;
-
-import game.Task.JOB;
-
 import static game.GameConstants.*;
 
 

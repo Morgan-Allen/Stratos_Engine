@@ -34,11 +34,12 @@ public class Area implements Session.Saveable {
   int numUpdates = 0, ticksPS = 1;
   
   final public AreaPlanning planning = new AreaPlanning(this);
-  final public AreaFog      fog      = new AreaFog     (this);
   final public AreaTerrain  terrain  = new AreaTerrain (this);
+  float lightLevel;
   
-  Table <Base, AreaDanger> dangerMaps  = new Table();
-  Table <Base, AreaTile> transitPoints = new Table();
+  Table <Base, AreaFog   > fogMaps       = new Table();
+  Table <Base, AreaDanger> dangerMaps    = new Table();
+  Table <Base, AreaTile  > transitPoints = new Table();
   
   Table <Type, AreaFlagging> flagging = new Table();
   Table <String, AreaDemands> demands = new Table();
@@ -90,8 +91,16 @@ public class Area implements Session.Saveable {
     ticksPS    = s.loadInt();
     
     planning.loadState(s);
-    fog     .loadState(s);
     terrain .loadState(s);
+    lightLevel = s.loadFloat();
+    
+    for (int n = s.loadInt(); n-- > 0;) {
+      Base with = (Base) s.loadObject();
+      AreaFog fog = new AreaFog(with, this);
+      fog.performSetup(size);
+      fog.loadState(s);
+      fogMaps.put(with, fog);
+    }
     
     for (int n = s.loadInt(); n-- > 0;) {
       Base with = (Base) s.loadObject();
@@ -155,8 +164,15 @@ public class Area implements Session.Saveable {
     s.saveInt(ticksPS);
     
     planning.saveState(s);
-    fog     .saveState(s);
     terrain .saveState(s);
+    s.saveFloat(lightLevel);
+    
+    s.saveInt(fogMaps.size());
+    for (Base b : fogMaps.keySet()) {
+      s.saveObject(b);
+      AreaFog fog = fogMaps.get(b);
+      fog.saveState(s);
+    }
     
     s.saveInt(dangerMaps.size());
     for (Base b : dangerMaps.keySet()) {
@@ -223,10 +239,12 @@ public class Area implements Session.Saveable {
     
     terrain  .performSetup(size);
     planning .performSetup(size);
-    fog      .performSetup(size);
     pathCache.performSetup(size);
     
-    for (Base b : bases) dangerMap(b);
+    for (Base b : bases) {
+      fogMap(b, true);
+      dangerMap(b, true);
+    }
   }
   
   
@@ -533,6 +551,9 @@ public class Area implements Session.Saveable {
     time = numUpdates / ticksPS;
     boolean exactTick = numUpdates % ticksPS == 0;
     
+    float dayProg = world.calendar.dayProgress();
+    lightLevel = (dayProg * (1 - dayProg)) / 4;
+    
     if (exactTick) {
       world.updateWithTime(time);
     }
@@ -550,14 +571,16 @@ public class Area implements Session.Saveable {
       }
       a.update();
     }
-    
-    if (exactTick) for (AreaDanger danger : dangerMaps.values()) {
-      danger.updateDanger();
-    }
+
     if (time % SCAN_PERIOD == 0 && exactTick) {
       transitPoints.clear();
     }
-    fog.updateFog();
+    if (exactTick) for (AreaDanger danger : dangerMaps.values()) {
+      danger.updateDanger();
+    }
+    for (AreaFog fog : fogMaps.values()) {
+      fog.updateFog();
+    }
     terrain.updateTerrain();
     planning.updatePlanning();
     pathCache.updatePathCache();
@@ -618,9 +641,25 @@ public class Area implements Session.Saveable {
   }
   
   
-  public AreaDanger dangerMap(Base base) {
+  public float lightLevel() {
+    return lightLevel;
+  }
+  
+  
+  public AreaFog fogMap(Base base, boolean init) {
+    AreaFog fog = fogMaps.get(base);
+    if (fog == null && init) {
+      fog = new AreaFog(base, this);
+      fog.performSetup(size);
+      fogMaps.put(base, fog);
+    }
+    return fog;
+  }
+  
+  
+  public AreaDanger dangerMap(Base base, boolean init) {
     AreaDanger danger = dangerMaps.get(base);
-    if (danger == null) {
+    if (danger == null && init) {
       danger = new AreaDanger(base, this);
       danger.performSetup(flagSize);
       dangerMaps.put(base, danger);
@@ -689,7 +728,8 @@ public class Area implements Session.Saveable {
       I.say("Displayed "+chunksShown+" chunks out of "+totalChunks);
     }
     
-    fog.renderFor(renderTime, rendering);
+    AreaFog fog = fogMap(playing, false);
+    if (fog != null) fog.renderFor(renderTime, rendering);
     
     for (Ephemera.Ghost ghost : ephemera.visibleFor(rendering, playing, renderTime)) {
       ephemera.renderGhost(ghost, rendering, playing);

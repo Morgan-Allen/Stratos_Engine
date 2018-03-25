@@ -10,6 +10,7 @@ import static game.GameConstants.*;
 public class ActorPathSearch extends Search <Pathing> {
   
   Area map;
+  AreaFog fog;
   Pathing dest;
   Pathing temp[] = new Pathing[9];
   Actor   client   = null;
@@ -40,6 +41,8 @@ public class ActorPathSearch extends Search <Pathing> {
   
   public void setStealthy(boolean yes) {
     stealthy = yes;
+    if (yes && client != null) fog = map.fogMap(client.base(), false);
+    else fog = null;
   }
   
   
@@ -75,7 +78,7 @@ public class ActorPathSearch extends Search <Pathing> {
     int type = spot.pathType();
     if (type == Type.PATH_PAVE  ) dist *= 0.75f;
     if (type == Type.PATH_HINDER) dist *= 2.50f;
-    if (stealthy) dist += map.fog.sightLevel(spot.at());
+    if (stealthy && fog != null) dist += fog.sightLevel(spot.at());
     return dist;
   }
   

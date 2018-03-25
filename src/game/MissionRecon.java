@@ -47,7 +47,8 @@ public class MissionRecon extends Mission {
       //
       //  In the case of local exploration, check for fulfillment:
       else if (localFocus() instanceof AreaTile) {
-        Area map = localBase.activeMap();
+        Area     map   = localBase.activeMap();
+        AreaFog  fog   = map.fogMap(homeBase(), true);
         AreaTile looks = (AreaTile) localFocus();
         int r = (int) exploreRange;
         boolean allSeen = true;
@@ -55,7 +56,7 @@ public class MissionRecon extends Mission {
         for (AreaTile t : map.tilesUnder(looks.x - r, looks.y - r, r * 2, r * 2)) {
           float dist = Area.distance(looks, t);
           if (dist > r) continue;
-          if (map.fog.maxSightLevel(t) == 0) allSeen = false;
+          if (fog.maxSightLevel(t) == 0) allSeen = false;
         }
         
         if (allSeen) setMissionComplete(true);
@@ -75,25 +76,6 @@ public class MissionRecon extends Mission {
   
   public boolean allowsFocus(Object newFocus) {
     if (newFocus instanceof AreaTile) return true;
-    return false;
-  }
-  
-  
-  boolean objectiveComplete() {
-    if (localFocus() instanceof AreaTile) {
-      Area map = localBase.activeMap();
-      AreaTile looks = (AreaTile) localFocus();
-      int r = (int) exploreRange;
-      boolean allSeen = true;
-      
-      for (AreaTile t : map.tilesUnder(looks.x - r, looks.y - r, r * 2, r * 2)) {
-        float dist = Area.distance(looks, t);
-        if (dist > r) continue;
-        if (map.fog.maxSightLevel(t) == 0) allSeen = false;
-      }
-      
-      return allSeen;
-    }
     return false;
   }
   

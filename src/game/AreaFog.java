@@ -16,8 +16,8 @@ public class AreaFog {
     */
   final static int MAX_FOG = 100;
   
-  Area map;
-  float lightLevel;
+  final Base base;
+  final Area map;
   
   byte fogVals[][];
   byte oldVals[][];
@@ -29,26 +29,9 @@ public class AreaFog {
   
   
   
-  AreaFog(Area map) {
-    this.map = map;
-  }
-  
-  
-  void loadState(Session s) throws Exception {
-    lightLevel = s.loadFloat();
-    s.loadByteArray(fogVals);
-    s.loadByteArray(oldVals);
-    s.loadByteArray(maxVals);
-    flagMap.loadState(s);
-  }
-  
-  
-  void saveState(Session s) throws Exception {
-    s.saveFloat(lightLevel);
-    s.saveByteArray(fogVals);
-    s.saveByteArray(oldVals);
-    s.saveByteArray(maxVals);
-    flagMap.saveState(s);
+  AreaFog(Base base, Area map) {
+    this.base = base;
+    this.map  = map;
   }
   
   
@@ -64,6 +47,22 @@ public class AreaFog {
     }
     
     this.viewVals = new float[size][size];
+  }
+  
+  
+  void loadState(Session s) throws Exception {
+    s.loadByteArray(fogVals);
+    s.loadByteArray(oldVals);
+    s.loadByteArray(maxVals);
+    flagMap.loadState(s);
+  }
+  
+  
+  void saveState(Session s) throws Exception {
+    s.saveByteArray(fogVals);
+    s.saveByteArray(oldVals);
+    s.saveByteArray(maxVals);
+    flagMap.saveState(s);
   }
   
   
@@ -92,9 +91,6 @@ public class AreaFog {
     if (! isToggled()) {
       return;
     }
-    
-    float dayProg = map.world.calendar.dayProgress();
-    lightLevel = (dayProg * (1 - dayProg)) / 4;
     
     for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
       byte oldMax = maxVals[c.x][c.y];
@@ -146,11 +142,6 @@ public class AreaFog {
     if (! isToggled()) return 1;
     if (t == null) return 0;
     return maxVals[t.x][t.y] * 1f / MAX_FOG;
-  }
-  
-  
-  public float lightLevel() {
-    return lightLevel;
   }
   
   

@@ -30,7 +30,6 @@ public class TestBounties extends LogicTest {
   
   
   
-  
   static boolean testAttackBuildingMission(boolean graphics) {
     TestBounties test = new TestBounties() {
       
@@ -90,13 +89,14 @@ public class TestBounties extends LogicTest {
       
       boolean checkVictory(Area map, Base base, Object focus) {
         AreaTile looks = (AreaTile) focus;
+        AreaFog fog = map.fogMap(base, true);
         int r = RANGE;
         boolean allSeen = true;
         
         for (AreaTile t : map.tilesUnder(looks.x - r, looks.y - r, r * 2, r * 2)) {
           float dist = Area.distance(looks, t);
           if (dist > r) continue;
-          if (map.fog.maxSightLevel(t) == 0) allSeen = false;
+          if (fog.maxSightLevel(t) == 0) allSeen = false;
         }
         return allSeen;
       }

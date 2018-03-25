@@ -11,15 +11,15 @@ public class AreaDanger {
   
   
   final Base base;
-  final Area area;
+  final Area map;
   float baseValues[][];
   float fuzzValues[][];
   
   
   
-  AreaDanger(Base base, Area area) {
+  AreaDanger(Base base, Area map) {
     this.base = base;
-    this.area = area;
+    this.map  = map;
   }
   
   void performSetup(int baseSize) {
@@ -28,14 +28,14 @@ public class AreaDanger {
   }
   
   void loadState(Session s) throws Exception {
-    for (Coord c : Visit.grid(0, 0, area.flagSize, area.flagSize, 1)) {
+    for (Coord c : Visit.grid(0, 0, map.flagSize, map.flagSize, 1)) {
       baseValues[c.x][c.y] = s.loadFloat();
       fuzzValues[c.x][c.y] = s.loadFloat();
     }
   }
   
   void saveState(Session s) throws Exception {
-    for (Coord c : Visit.grid(0, 0, area.flagSize, area.flagSize, 1)) {
+    for (Coord c : Visit.grid(0, 0, map.flagSize, map.flagSize, 1)) {
       s.saveFloat(baseValues[c.x][c.y]);
       s.saveFloat(fuzzValues[c.x][c.y]);
     }
@@ -46,8 +46,8 @@ public class AreaDanger {
     
     final float FUZZ_RANGE = AVG_SIGHT * 2;
     
-    for (Coord c : Visit.grid(0, 0, area.size(), area.size(), Area.FLAG_RES)) {
-      Series <Active> at = area.gridActive(area.tileAt(c));
+    for (Coord c : Visit.grid(0, 0, map.size(), map.size(), Area.FLAG_RES)) {
+      Series <Active> at = map.gridActive(map.tileAt(c));
       float danger = 0;
       
       if (at.size() > 0) for (Active a : at) {
@@ -59,7 +59,7 @@ public class AreaDanger {
       baseValues[c.x / Area.FLAG_RES][c.y / Area.FLAG_RES] = danger;
     }
     
-    for (Coord c : Visit.grid(0, 0, area.flagSize, area.flagSize, 1)) {
+    for (Coord c : Visit.grid(0, 0, map.flagSize, map.flagSize, 1)) {
       
       final float
         gx  = c.x + 0.5f,
@@ -69,7 +69,7 @@ public class AreaDanger {
       Vec2D pos = new Vec2D(gx * Area.FLAG_RES, gy * Area.FLAG_RES);
       
       final int
-        lim  = area.flagSize - 1,
+        lim  = map.flagSize - 1,
         minX = Nums.max(0  , Nums.round(gx - r, 1, false)),
         maxX = Nums.min(lim, Nums.round(gx + r, 1, true )),
         minY = Nums.max(0  , Nums.round(gy - r, 1, false)),

@@ -129,12 +129,12 @@ public class LogicTest {
   void updateAreaView(Area map, Base base) {
     configGraphic(map.size(), map.size());
     
-    AreaDanger dangerMap = map.dangerMap(base);
+    AreaDanger dangerMap = map.dangerMap(base, false);
     
     for (AreaTile at : map.allTiles()) {
       int fill = BLANK_COLOR;
       
-      if (viewDangerMap) {
+      if (viewDangerMap && dangerMap != null) {
         float danger = dangerMap.baseLevel(at.x, at.y);
         fill = DANGER_SCALE[Nums.clamp((int) danger, 10)];
       }
@@ -242,11 +242,14 @@ public class LogicTest {
   
   
   
-  private void updateCityFogLayer(Area map) {
+  private void updateCityFogLayer(Area map, Base base) {
+    AreaFog fogMap = map.fogMap(base, false);
+    if (fogMap == null) return;
+    
     for (AreaTile t : map.allTiles()) {
       float sight = 0;
-      sight += map.fog.sightLevel(t);
-      sight += map.fog.maxSightLevel(t);
+      sight += fogMap.sightLevel(t);
+      sight += fogMap.maxSightLevel(t);
       
       int fog  = Nums.clamp((int) ((1 - (sight / 2)) * 10), 10);
       int high = Nums.clamp(t.elevation(), 10);
@@ -323,7 +326,7 @@ public class LogicTest {
           else {
             updateAreaView(map, base);
           }
-          updateCityFogLayer(map);
+          updateCityFogLayer(map, base);
           I.present(VIEW_NAME, 400, 400, graphic, fogLayer);
         }
         else {

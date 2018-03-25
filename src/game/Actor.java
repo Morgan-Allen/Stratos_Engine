@@ -632,8 +632,9 @@ public class Actor extends Element implements
     if (indoors()) return;
     
     if (base() != map.locals) {
+      AreaFog fog = map.fogMap(base(), true);
       float range = sightRange();
-      map.fog.liftFog(at(), range);
+      if (fog != null) fog.liftFog(at(), range);
     }
   }
   
@@ -644,9 +645,9 @@ public class Actor extends Element implements
     }
   }
   
-
+  
   public float sightRange() {
-    float light = map == null ? 0.5f : map.fog.lightLevel();
+    float light = map == null ? 0.5f : map.lightLevel();
     return type().sightRange * (0.75f + (light * 0.5f));
   }
   

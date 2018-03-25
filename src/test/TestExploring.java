@@ -36,6 +36,7 @@ public class TestExploring extends LogicTest {
     
     AreaTerrain.populateAnimals(map, QUDU);
     
+    AreaFog fog = map.fogMap(base, true);
     int tilesSeen = 0, tilesOpen = 0;
     boolean exploreOkay = false;
     boolean huntingOkay = false;
@@ -51,7 +52,7 @@ public class TestExploring extends LogicTest {
         for (AreaTile t : map.allTiles()) {
           if (map.blocked(t)) continue;
           tilesOpen += 1;
-          if (map.fog.maxSightLevel(t) > 0) tilesSeen += 1;
+          if (fog.maxSightLevel(t) > 0) tilesSeen += 1;
         }
         
         exploreOkay = tilesSeen == tilesOpen;

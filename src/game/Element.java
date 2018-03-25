@@ -515,15 +515,19 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   
   /**  Support methods for sight and fog-levels:
     */
-  public float sightLevel() {
+  public float sightLevel(Base views) {
+    AreaFog fog = map.fogMap(views, false);
+    if (fog == null) return 1;
     AreaTile from = (type.wide == 1 && type.high == 1) ? at : centre();
-    return map.fog.sightLevel(from);
+    return fog.sightLevel(from);
   }
   
   
-  public float maxSightLevel() {
+  public float maxSightLevel(Base views) {
+    AreaFog fog = map.fogMap(views, false);
+    if (fog == null) return 1;
     AreaTile from = (type.wide == 1 && type.high == 1) ? at : centre();
-    return map.fog.maxSightLevel(from);
+    return fog.maxSightLevel(from);
   }
   
   
@@ -709,10 +713,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   
   
   protected float renderedFog(Base base) {
-    //return 1;//sightLevel();
-    return ((sightLevel() * 2) + maxSightLevel()) / 3;
-    //final Vec3D p = trackPosition();
-    //return base.fogMap().renderedFog(p.x, p.y, this);
+    return ((sightLevel(base) * 2) + maxSightLevel(base)) / 3;
   }
   
   

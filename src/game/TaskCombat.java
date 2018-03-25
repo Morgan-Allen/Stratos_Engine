@@ -429,7 +429,7 @@ public class TaskCombat extends Task {
     if (! active.isActor()) return 1;
     Actor actor = (Actor) active;
     
-    AreaDanger dangerMap = actor.map().dangerMap(active.base());
+    AreaDanger dangerMap = actor.map().dangerMap(active.base(), true);
     AreaTile around = actor.at();
     float danger = dangerMap.fuzzyLevel(around.x, around.y);
     danger = Nums.max(danger, attackPower(primary));
