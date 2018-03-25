@@ -60,11 +60,15 @@ public class LogicTest {
   /**  Graphical display and loop-execution:
     */
   final static int FOG_SCALE[][] = new int[10][10];
+  final static int DANGER_SCALE[] = new int[10];
   static {
     for (int f = 10; f-- > 0;) {
       for (int e = 10; e-- > 0;) {
         FOG_SCALE[f][e] = colour(e, e, 0, Nums.min(10, e + f));
       }
+    }
+    for (int d = 10; d-- > 0;) {
+      DANGER_SCALE[d] = colour(d, 0, 0, 10);
     }
   }
   
@@ -98,8 +102,9 @@ public class LogicTest {
   Series <Character> pressed = new Batch();
   
   protected AreaTile keyTiles[];
-  protected boolean viewPathMap = false;
-  protected boolean viewPlanMap = false;
+  protected boolean viewPathMap   = false;
+  protected boolean viewPlanMap   = false;
+  protected boolean viewDangerMap = false;
   
   
   void configGraphic(int w, int h) {
@@ -121,22 +126,32 @@ public class LogicTest {
   }
   
   
-  void updateAreaView(Area map) {
+  void updateAreaView(Area map, Base base) {
     configGraphic(map.size(), map.size());
+    
+    AreaDanger dangerMap = map.dangerMap(base);
     
     for (AreaTile at : map.allTiles()) {
       int fill = BLANK_COLOR;
-      Element above;
-      if (viewPlanMap) above = map.planning.objectAt(at);
-      else above = map.above(at);
       
-      if (above != null) {
-        if (above.growLevel() == -1) fill = MISSED_COLOR;
-        else fill = above.debugTint();
+      if (viewDangerMap) {
+        float danger = dangerMap.baseLevel(at.x, at.y);
+        fill = DANGER_SCALE[Nums.clamp((int) danger, 10)];
       }
-      else if (at.terrain() != null && ! viewPlanMap) {
-        fill = at.terrain().tint;
+      else {
+        Element above;
+        if (viewPlanMap) above = map.planning.objectAt(at);
+        else above = map.above(at);
+        
+        if (above != null) {
+          if (above.growLevel() == -1) fill = MISSED_COLOR;
+          else fill = above.debugTint();
+        }
+        else if (at.terrain() != null && ! viewPlanMap) {
+          fill = at.terrain().tint;
+        }
       }
+      
       graphic[at.x][at.y] = fill;
     }
     
@@ -183,7 +198,7 @@ public class LogicTest {
   }
   
   
-  void updateCityPathingView(Area map) {
+  void updatePathingView(Area map, Base base) {
     configGraphic(map.size(), map.size());
     
     AreaTile hovered = map.tileAt(hover.x, hover.y);
@@ -275,21 +290,21 @@ public class LogicTest {
 
   
   private static LogicTest currentTest = null;
-  private static Base currentCity = null;
+  private static Base currentBase = null;
   
   public static LogicTest currentTest() {
     return currentTest;
   }
   
   public static Base currentCity() {
-    return currentCity;
+    return currentBase;
   }
   
   
   public Base runLoop(
-    Base city, int numUpdates, boolean graphics, String filename
+    Base base, int numUpdates, boolean graphics, String filename
   ) {
-    Area map = city.activeMap();
+    Area map = base.activeMap();
     int skipUpdate = 0;
     boolean doQuit = false;
     this.filename = filename;
@@ -297,16 +312,16 @@ public class LogicTest {
     while (! doQuit) {
       
       LogicTest.currentTest = this;
-      LogicTest.currentCity = city;
+      LogicTest.currentBase = base;
       
       if (graphics) {
         World world = map.world;
         if (! world.settings.worldView) {
           if (viewPathMap) {
-            updateCityPathingView(map);
+            updatePathingView(map, base);
           }
           else {
-            updateAreaView(map);
+            updateAreaView(map, base);
           }
           updateCityFogLayer(map);
           I.present(VIEW_NAME, 400, 400, graphic, fogLayer);
@@ -332,7 +347,7 @@ public class LogicTest {
         I.used60Frames = (frames++ % 60) == 0;
         
         if (doBuild) {
-          I.presentInfo(reportForBuildMenu(map, city), VIEW_NAME);
+          I.presentInfo(reportForBuildMenu(map, base), VIEW_NAME);
         }
         else if (above instanceof Base) {
           I.presentInfo(reportFor((Base) above), VIEW_NAME);
@@ -344,16 +359,16 @@ public class LogicTest {
           I.presentInfo(reportFor((Element) above), VIEW_NAME);
         }
         else {
-          I.presentInfo(baseReport(map, city), VIEW_NAME);
+          I.presentInfo(baseReport(map, base), VIEW_NAME);
         }
         
         if (pressed.includes('p')) {
           world.settings.paused = ! world.settings.paused;
         }
         if (doLoad) {
-          city = loadCity(city, filename);
+          base = loadCity(base, filename);
           doLoad = false;
-          return city;
+          return base;
         }
       }
       
@@ -372,7 +387,7 @@ public class LogicTest {
       }
       skipUpdate -= 1;
     }
-    return city;
+    return base;
   }
   
   
@@ -690,11 +705,11 @@ public class LogicTest {
   }
   
   
-  private String baseReport(Area map, Base city) {
-    StringBuffer report = new StringBuffer("Home City: "+city);
+  private String baseReport(Area map, Base base) {
+    StringBuffer report = new StringBuffer("Home Base: "+base);
     WorldSettings settings = map.world.settings;
     
-    report.append("\n\nFunds: "+city.funds());
+    report.append("\n\nFunds: "+base.funds());
     report.append("\n\nTime: "+map.time());
     report.append("\nPaused: "+settings.paused);
     report.append("\n");
@@ -722,6 +737,14 @@ public class LogicTest {
     if (pressed.includes('n')) {
       viewPlanMap = ! viewPlanMap;
     }
+    report.append("\n(D) toggle danger view");
+    if (pressed.includes('d')) {
+      viewDangerMap = ! viewDangerMap;
+    }
+    report.append("\n(F) toggle fog map");
+    if (pressed.includes('f')) {
+      map.world.settings.toggleFog = ! map.world.settings.toggleFog;
+    }
     report.append("\n(B) build menu");
     if (pressed.includes('b')) {
       doBuild = true;
@@ -730,7 +753,7 @@ public class LogicTest {
     report.append("\n(P) un/pause");
     report.append("\n(S) save");
     if (pressed.includes('s')) {
-      saveCity(city, filename);
+      saveCity(base, filename);
     }
     report.append("\n(L) load");
     if (pressed.includes('l')) {

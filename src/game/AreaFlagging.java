@@ -105,6 +105,14 @@ public class AreaFlagging {
   }
   
   
+  public int levelVal(int x, int y, int l) {
+    if (l == 0) return baseLevel()[x][y];
+    int level[][] = upperLevel(l);
+    while (l-- > 0) { x /= FLAG_RES; y /= FLAG_RES; }
+    return level[x][y];
+  }
+  
+  
   
   /**  More complex queries-
     */

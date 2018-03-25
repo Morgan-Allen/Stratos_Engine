@@ -24,6 +24,7 @@ public class TestAll {
     record(TestDemands  .testDemands  (false));
     record(TestPathing  .testPathing  (false));
     record(TestPathCache.testPathCache(false));
+    record(TestDangerMap.testDangerMap(false));
     record(TestMilitary .testMilitary (false));
     record(TestSieging  .testSieging  (false));
     record(TestDiplomacy.testDiplomacy(false));

@@ -43,6 +43,8 @@ public class Actor extends Element implements
   
   private Task task;
   private Task reaction;
+  private float fearLevel;
+  private List <Actor> backup = new List();
   
   private Pathing inside;
   private boolean wasIndoors = true;
@@ -80,8 +82,10 @@ public class Actor extends Element implements
     guestBase = (Base    ) s.loadObject();
     mission   = (Mission ) s.loadObject();
     
-    task     = (Task) s.loadObject();
-    reaction = (Task) s.loadObject();
+    task      = (Task) s.loadObject();
+    reaction  = (Task) s.loadObject();
+    fearLevel = s.loadFloat();
+    s.loadObjects(backup);
     
     inside = (Pathing) s.loadObject();
     wasIndoors = s.loadBool();
@@ -113,8 +117,10 @@ public class Actor extends Element implements
     s.saveObject(guestBase);
     s.saveObject(mission  );
     
-    s.saveObject(task    );
-    s.saveObject(reaction);
+    s.saveObject(task     );
+    s.saveObject(reaction );
+    s.saveFloat (fearLevel);
+    s.saveObjects(backup);
     
     s.saveObject(inside);
     s.saveBool(wasIndoors);
@@ -254,6 +260,9 @@ public class Actor extends Element implements
       }
     }
     //
+    //  Update fear-level:
+    fearLevel = updateFearLevel();
+    //
     //  Task updates-
     if (home    != null && onMap()) home   .actorUpdates(this);
     if (work    != null && onMap()) work   .actorUpdates(this);
@@ -287,6 +296,11 @@ public class Actor extends Element implements
   
   void updateReactions() {
     return;
+  }
+  
+  
+  float updateFearLevel() {
+    return 0;
   }
   
   
@@ -397,6 +411,16 @@ public class Actor extends Element implements
   }
   
   
+  public float fearLevel() {
+    return fearLevel;
+  }
+  
+  
+  public List <Actor> backup() {
+    return backup;
+  }
+  
+  
   void setMission(Mission m) {
     //  NOTE:  This method should only be called by the Mission class, so I'm
     //  not making it public...
@@ -450,7 +474,7 @@ public class Actor extends Element implements
   
   
   public Target jobFocus() {
-    return Task.focusTarget(task);
+    return Task.mainTaskFocus(this);
   }
   
   

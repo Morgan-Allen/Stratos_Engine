@@ -339,6 +339,12 @@ public class ActorAsPerson extends Actor {
   }
   
   
+  float updateFearLevel() {
+    backup().clear();
+    return TaskRetreat.fearLevel(this, backup());
+  }
+  
+  
   
   /**  Handling hunger, injury, healing and eating, etc:
     */

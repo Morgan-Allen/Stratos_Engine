@@ -72,7 +72,7 @@ public class TestFarming extends LogicTest {
         Active a = t.focused().first();
         if (a == null) continue;
         
-        Target mainFocus = Task.focusTarget(a.task());
+        Target mainFocus = Task.mainTaskFocus((Element) a);
         if (mainFocus != t) {
           I.say("\nFARMING TEST FAILED- ACTOR-FOCUS WAS NOT REMOVED FROM:");
           I.say("  "+t+", focused by "+a+", now focused on "+mainFocus);

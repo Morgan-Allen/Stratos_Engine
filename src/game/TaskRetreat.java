@@ -34,6 +34,53 @@ public class TaskRetreat extends Task {
   
   
   
+  static float fearLevel(Actor actor, List <Actor> storeBackup) {
+    float dangerSum = 0, allySum = 0;
+    float range = actor.sightRange();
+    Batch <Active> aware = new Batch();
+    
+    for (Active other : actor.map.activeInRange(actor.at(), range)) {
+      aware.add(other);
+    }
+    for (Active other : actor.focused()) {
+      if (Task.inCombat(other) && other.task().inContact()) {
+        aware.include(other);
+      }
+    }
+    
+    for (Active other : aware) {
+      if (other.indoors() || other.jobType() == JOB.RETREAT) continue;
+      
+      boolean hostile      = TaskCombat.hostile(other, actor);
+      boolean allied       = TaskCombat.allied (other, actor);
+      Target  otherFocus   = mainTaskFocus((Element) other);
+      float   harmLevel    = otherFocus == null ? 0 : other.task().harmLevel();
+      boolean focusHostile = TaskCombat.hostile(actor, otherFocus);
+      boolean focusAllied  = TaskCombat.allied (actor, otherFocus);
+      
+      float hostility = Nums.max(hostile ? 0.5f : 0, focusAllied  ? harmLevel : 0);
+      float alliance  = Nums.max(allied  ? 0.5f : 0, focusHostile ? harmLevel : 0);
+      
+      float power = TaskCombat.attackPower((Element) other);
+      if (hostility > 0) dangerSum += power * hostility;
+      if (alliance  > 0) allySum   += power * alliance ;
+      
+      if (power > 0 && allied && other.isActor()) {
+        storeBackup.add((Actor) other);
+      }
+    }
+    
+    if (dangerSum <= 0) return 0;
+    
+    float lossChance = 0, sumFactors = dangerSum + allySum;
+    if (sumFactors > 0) lossChance = dangerSum / sumFactors;
+    lossChance += actor.injury () * 1.0f / actor.maxHealth();
+    lossChance += actor.fatigue() * 0.5f / actor.maxHealth();
+    
+    return lossChance;
+  }
+  
+  
   static TaskRetreat configRetreat(Actor actor) {
     
     Building home = actor.home();
@@ -61,57 +108,16 @@ public class TaskRetreat extends Task {
   }
   
   
-  
   protected float successChance() {
     //  TODO:  Rate your chance of escape based on speed relative to other
     //  actors!
-    
     return 1.0f;
   }
   
   
   protected float successPriority() {
     Actor actor = (Actor) this.active;
-    
-    float dangerSum = 0, allySum = 0;
-    float range = actor.sightRange();
-    Batch <Active> aware = new Batch();
-    
-    for (Active other : actor.map.activeInRange(actor.at(), range)) {
-      aware.add(other);
-    }
-    for (Active other : actor.focused()) {
-      if (Task.inCombat(other) && other.task().inContact()) {
-        aware.include(other);
-      }
-    }
-    
-    for (Active other : aware) {
-      if (other.indoors()) continue;
-      
-      boolean hostile      = TaskCombat.hostile(other, actor);
-      boolean allied       = TaskCombat.allied (other, actor);
-      Target  otherFocus   = Task.focusTarget(other.task());
-      float   harmLevel    = otherFocus == null ? 0 : other.task().harmLevel();
-      boolean focusHostile = TaskCombat.hostile(actor, otherFocus);
-      boolean focusAllied  = TaskCombat.allied (actor, otherFocus);
-      
-      float hostility = Nums.max(hostile ? 0.5f : 0, focusAllied  ? harmLevel : 0);
-      float alliance  = Nums.max(allied  ? 0.5f : 0, focusHostile ? harmLevel : 0);
-      
-      float power = TaskCombat.attackPower(other);
-      if (hostility > 0) dangerSum += power * hostility;
-      if (alliance  > 0) allySum   += power * alliance ;
-    }
-    
-    if (dangerSum <= 0) return 0;
-    
-    float lossChance = 0, sumFactors = dangerSum + allySum;
-    if (sumFactors > 0) lossChance = dangerSum / sumFactors;
-    lossChance += actor.injury () * 1.0f / actor.maxHealth();
-    lossChance += actor.fatigue() * 0.5f / actor.maxHealth();
-    
-    return lossChance * PARAMOUNT;
+    return actor.fearLevel() * PARAMOUNT;
   }
 
 

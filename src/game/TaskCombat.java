@@ -101,8 +101,8 @@ public class TaskCombat extends Task {
   }
   
   
-  public static float attackPower(Active f) {
-    if (f.isActor()) {
+  public static float attackPower(Element f) {
+    if (f.type().isActor()) {
       Actor a = (Actor) f;
       if (a.state >= Actor.STATE_SLEEP) return 0;
       float power = attackPower(a.type());
@@ -166,7 +166,7 @@ public class TaskCombat extends Task {
     
     for (Active other : others) if (hostile(other, actor)) {
       if (other.indoors()) continue;
-      if (attackPower(other) == 0) continue;
+      if (attackPower((Element) other) == 0) continue;
       
       AreaTile goes = other.at();
       float distF = distance(goes, from);
@@ -381,13 +381,70 @@ public class TaskCombat extends Task {
   /**  Priority-evaluation:
     */
   protected float successPriority() {
-    //  TODO:  This needs adjustment, particularly for long-range mission-tasks
-    //  vs. local-assessment (which could prompt retreat.)
+    if (! active.isActor()) return ROUTINE;
+    Actor actor = (Actor) active;
     
-    return ROUTINE;
+    float priority = 0;
+    float othersWinChance = 0;
+    float targetPower = attackPower(primary);
+    float empathy = (actor.levelOf(TRAIT_EMPATHY) + 1) / 2;
+    float cruelty = 1 - empathy;
+    
+    for (Active a : primary.focused()) if (a != active) {
+      if (a.jobType() == JOB.COMBAT && allied(a, active)) {
+        float power = attackPower((Element) a);
+        othersWinChance += power / (power + targetPower);
+      }
+    }
+    if (othersWinChance > 0 && othersWinChance < 1) {
+      priority += (1 - othersWinChance) * PARAMOUNT * empathy;
+    }
+    
+    Target victim = Task.mainTaskFocus(primary);
+    if (hostile(actor, victim)) priority -= PARAMOUNT * cruelty;
+    if (allied (actor, victim)) priority += PARAMOUNT * empathy;
+    
+    if (hostile(actor, primary)) priority += ROUTINE * cruelty;
+    if (allied (actor, primary)) priority -= ROUTINE * empathy;
+    priority += ROUTINE * cruelty;
+    
+    return priority;
   }
   
   
+  protected float successChance() {
+    if (! active.isActor()) return 1;
+    Actor actor = (Actor) active;
+    
+    AreaDanger dangerMap = actor.map().dangerMap(active.base());
+    AreaTile around = actor.at();
+    float danger = dangerMap.fuzzyLevel(around.x, around.y);
+    danger = Nums.max(danger, attackPower(primary));
+    
+    float power = attackPower((Element) active);
+    Series <Actor> backup = actor.backup();
+    for (Actor a : backup) {
+      float backPower = attackPower(a);
+      if (a.jobType() == JOB.COMBAT) {
+        backPower *= Area.distance(mainTaskFocus(a), primary);
+      }
+      else {
+        backPower /= 2;
+      }
+      backPower *= Area.distancePenalty(actor, a);
+      power += backPower;
+    }
+    
+    float chance = power / (danger + power);
+    return chance;
+  }
+  
+  
+  protected float failCostPriority() {
+    return PARAMOUNT;
+  }
+
+
   public float harmLevel() {
     return FULL_HARM;
   }

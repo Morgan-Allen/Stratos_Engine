@@ -197,7 +197,7 @@ public class Task implements Session.Saveable {
   
   
   void toggleFocus(boolean activeNow) {
-    Target t = Task.focusTarget(this);
+    Target t = mainFocus();
     if (t == null) return;
     t.setFocused(active, activeNow);
   }
@@ -256,7 +256,7 @@ public class Task implements Session.Saveable {
     */
   boolean checkAndUpdateTask() {
     
-    Target focusT = focusTarget(this);
+    Target focusT = mainFocus();
     if (focusT == null || ! focusT.onMap()) {
       return false;
     }
@@ -421,15 +421,6 @@ public class Task implements Session.Saveable {
   
   /**  Pathing and focus-related methods:
     */
-  public static Target focusTarget(Task t) {
-    if (t        == null) return null;
-    if (t.target != null) return t.target;
-    if (t.visits != null) return t.visits;
-    if (t.path   != null) return (Pathing) Visit.last(t.path);
-    return null;
-  }
-  
-  
   public static boolean hasTaskFocus(Target t, JOB type, Active except) {
     if (t.focused().empty()) return false;
     for (Active a : t.focused()) {
@@ -448,6 +439,21 @@ public class Task implements Session.Saveable {
     if (f == null) return false;
     JOB type = f.jobType();
     return type == JOB.COMBAT || type == JOB.HUNTING;
+  }
+  
+  
+  public static Target mainTaskFocus(Element other) {
+    if (! (other instanceof Active)) return null;
+    Task t = ((Active) other).task();
+    return t == null ? null : t.mainFocus();
+  }
+  
+  
+  public Target mainFocus() {
+    if (target != null) return target;
+    if (visits != null) return visits;
+    if (path   != null) return (Pathing) Visit.last(path);
+    return null;
   }
   
   

@@ -451,6 +451,7 @@ public class GameConstants {
     Task task();
     Mission mission();
     
+    float sightRange();
     void assignTask(Task task);
     void performAttack(Element other, boolean melee);
   }
