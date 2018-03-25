@@ -60,6 +60,8 @@ public class ActorType extends Type {
     for (Trait t : ALL_PERSONALITY) {
       a.setLevel(t, Rand.range(-1, 1));
     }
+    
+    ///I.say("INITIAL LEVELS: "+a.levels);
   }
   
   

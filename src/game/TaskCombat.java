@@ -164,21 +164,21 @@ public class TaskCombat extends Task {
       protected float queuePriority(Option o) { return o.rating; }
     };
     
-    for (Active other : others) if (hostile(other, actor)) {
-      if (other.indoors()) continue;
-      if (attackPower((Element) other) == 0) continue;
+    for (Active other : others) {
+      float priority = attackPriority(actor, (Element) other, true);
+      if (priority <= 0) continue;
       
       AreaTile goes = other.at();
       float distF = distance(goes, from);
       float distA = anchor == null ? 0 : distance(goes, anchor);
       if (distA > noticeRange) continue;
       
-      float rating = 1f * distancePenalty(distF + distA);
-      rating /= 1 + other.focused().size();
+      priority *= distancePenalty(distF + distA);
+      priority /= 1 + other.focused().size();
       
       Option o = new Option();
       o.other  = (Element) other;
-      o.rating = rating;
+      o.rating = priority;
       options.add(o);
     }
     
@@ -380,35 +380,48 @@ public class TaskCombat extends Task {
   
   /**  Priority-evaluation:
     */
-  protected float successPriority() {
-    if (! active.isActor()) return ROUTINE;
-    Actor actor = (Actor) active;
+  static float attackPriority(Active actor, Element primary, boolean quick) {
     
-    float priority = 0;
-    float othersWinChance = 0;
     float targetPower = attackPower(primary);
-    float empathy = (actor.levelOf(TRAIT_EMPATHY) + 1) / 2;
-    float cruelty = 1 - empathy;
+    if (targetPower == 0) return -1;
     
-    for (Active a : primary.focused()) if (a != active) {
-      if (a.jobType() == JOB.COMBAT && allied(a, active)) {
+    float priority = 0, empathy = 1, cruelty = 1;
+    if (actor.isActor()) {
+      empathy = (((Actor) actor).levelOf(TRAIT_EMPATHY) + 2) / 2;
+      cruelty = 2 - empathy;
+    }
+    
+    if (hostile(actor, primary)) priority += ROUTINE * cruelty;
+    if (allied (actor, primary)) priority -= ROUTINE * empathy;
+    
+    if (Task.inCombat(primary)) {
+      Target victim = Task.mainTaskFocus(primary);
+      if (hostile(actor, victim)) priority -= PARAMOUNT * cruelty;
+      if (allied (actor, victim)) priority += PARAMOUNT * empathy;
+    }
+    
+    if (priority <= 0) return -1;
+    if (quick) return priority;
+    
+    float othersWinChance = 0;
+    for (Active a : primary.focused()) if (a != actor) {
+      if (a.jobType() == JOB.COMBAT && allied(a, actor)) {
         float power = attackPower((Element) a);
-        othersWinChance += power / (power + targetPower);
+        othersWinChance += power * 0.5f / Nums.max(1, targetPower);
       }
     }
     if (othersWinChance > 0 && othersWinChance < 1) {
       priority += (1 - othersWinChance) * PARAMOUNT * empathy;
     }
-    
-    Target victim = Task.mainTaskFocus(primary);
-    if (hostile(actor, victim)) priority -= PARAMOUNT * cruelty;
-    if (allied (actor, victim)) priority += PARAMOUNT * empathy;
-    
-    if (hostile(actor, primary)) priority += ROUTINE * cruelty;
-    if (allied (actor, primary)) priority -= ROUTINE * empathy;
     priority += ROUTINE * cruelty;
     
+    if (priority <= 0) return -1;
     return priority;
+  }
+  
+  
+  protected float successPriority() {
+    return attackPriority(active, primary, false);
   }
   
   

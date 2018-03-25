@@ -25,12 +25,16 @@ public class ActorAsPerson extends Actor {
     Trait trait;
     float XP;
     float level;
+    
+    public String toString() { return trait+": "+level; }
   }
   
   static class Bond {
     Actor with;
     float level;
     int properties;
+    
+    public String toString() { return with+": "+level; }
   }
   
   List <Level> levels = new List();

@@ -435,9 +435,9 @@ public class Task implements Session.Saveable {
   }
   
   
-  public static boolean inCombat(Active f) {
-    if (f == null) return false;
-    JOB type = f.jobType();
+  public static boolean inCombat(Element f) {
+    if (f == null || ! (f instanceof Active)) return false;
+    JOB type = ((Active) f).jobType();
     return type == JOB.COMBAT || type == JOB.HUNTING;
   }
   

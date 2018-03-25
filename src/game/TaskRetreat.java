@@ -43,7 +43,7 @@ public class TaskRetreat extends Task {
       aware.add(other);
     }
     for (Active other : actor.focused()) {
-      if (Task.inCombat(other) && other.task().inContact()) {
+      if (Task.inCombat((Element) other) && other.task().inContact()) {
         aware.include(other);
       }
     }

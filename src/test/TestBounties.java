@@ -13,17 +13,15 @@ public class TestBounties extends LogicTest {
   
   
   public static void main(String args[]) {
-    //testAttackBuildingMission(false);
-    //testAttackActorMission   (false);
-    //testExploreAreaMission   (false);
+    testAttackBuildingMission(false);
+    testAttackActorMission   (false);
+    testExploreAreaMission   (false);
     testDefendBuildingMission(false);
   }
   
   
   //  TODO:
   //  What are the cases I need to cover here?
-  
-  //  Defend bounty on building.
   
   //  Defend  bounty on actor.
   //  Explore bounty on actor.
@@ -119,6 +117,9 @@ public class TestBounties extends LogicTest {
       
       
       Mission setupMission(Area map, Base base) {
+        
+        map.world.settings.toggleFog = false;
+        
         guarded = (Building) STOCK_EXCHANGE.generate();
         guarded.enterMap(map, 2, 10, 1, base);
         
@@ -150,7 +151,7 @@ public class TestBounties extends LogicTest {
         
         if (! didRespond) for (Actor a : mission.recruits()) {
           if (a.jobType() == JOB.COMBAT) {
-            TaskCombat task = (TaskCombat) threat.task();
+            TaskCombat task = (TaskCombat) a.task();
             if (task.primary == threat) didRespond = true;
           }
         }
