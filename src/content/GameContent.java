@@ -667,8 +667,9 @@ public class GameContent {
     STOCK_EXCHANGE.needed    = MARKET_GOODS;
     STOCK_EXCHANGE.features  = new Good[] { IS_VENDOR };
     STOCK_EXCHANGE.maxHealth = 100;
-    STOCK_EXCHANGE.shopItems = new Good[] {
-      StockExGoods.MEDIKIT//, StockExGoods.SHIELD_BAND, StockExGoods.COMM_RELAY
+    STOCK_EXCHANGE.shopItems = StockExGoods.ALL_SOLD;
+    STOCK_EXCHANGE.recipes = new Recipe[] {
+      new Recipe(StockExGoods.MEDIKIT, SKILL_CRAFT, AVG_CRAFT_TIME, MEDICINE)
     };
     
     SUPPLY_DEPOT.name = "Supply Depot";

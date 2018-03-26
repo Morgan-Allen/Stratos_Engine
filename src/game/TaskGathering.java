@@ -150,14 +150,6 @@ public class TaskGathering extends Task {
   }
   
   
-  Recipe recipeFor(Type cropType) {
-    for (Recipe r : store.type().recipes) {
-      if (r.made == cropType.yields) return r;
-    }
-    return null;
-  }
-  
-  
   protected void onTarget(Target other) {
     if (other == null) return;
     
@@ -171,7 +163,7 @@ public class TaskGathering extends Task {
     }
     
     if (actor.jobType() == JOB.PLANTING) {
-      Recipe recipe     = recipeFor(plants);
+      Recipe recipe     = TaskCrafting.recipeFor(plants.yields, store);
       Trait  skill      = recipe.craftSkill;
       float  skillBonus = actor.levelOf(skill) / MAX_SKILL_LEVEL;
       float  multXP     = plants.isCrop ? FARM_XP_PERCENT : GATHR_XP_PERCENT;
@@ -200,7 +192,7 @@ public class TaskGathering extends Task {
       if (above == null || above.type().yields == null) return;
       
       Type   plants     = above.type();
-      Recipe recipe     = recipeFor(plants);
+      Recipe recipe     = TaskCrafting.recipeFor(plants.yields, store);
       Trait  skill      = recipe.craftSkill;
       float  skillBonus = actor.levelOf(skill) / MAX_SKILL_LEVEL;
       float  multXP     = plants.isCrop ? FARM_XP_PERCENT : GATHR_XP_PERCENT;

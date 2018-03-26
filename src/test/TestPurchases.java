@@ -5,6 +5,7 @@ package test;
 import game.*;
 import util.*;
 import static game.GameConstants.*;
+import content.*;
 import static content.GameContent.*;
 
 
@@ -13,7 +14,7 @@ public class TestPurchases extends LogicTest {
   
   
   public static void main(String args[]) {
-    testPurchases(true);
+    testPurchases(false);
   }
   
 
@@ -37,40 +38,76 @@ public class TestPurchases extends LogicTest {
     forge.enterMap(map, 10, 2, 1, base);
     ActorUtils.fillWorkVacancies(forge);
     
+    BuildingForCrafts shop = (BuildingForCrafts) STOCK_EXCHANGE.generate();
+    shop.enterMap(map, 2, 10, 1, base);
+    ActorUtils.fillWorkVacancies(shop);
+    
+    
     Actor buys = fort.workers().first();
-    Good itemType = buys.type().weaponType;
-    int initQuality = (int) buys.carried(itemType);
+    Good weaponType = buys.type().weaponType;
+    Good potionType = StockExGoods.MEDIKIT;
+    int initQuality = (int) buys.carried(weaponType);
     buys.incCarried(CASH, 10000);
     
     forge.addInventory(20, ORES);
     forge.addInventory(20, CARBONS);
+    shop.addInventory(20, MEDICINE);
     
+    if (! forge.shopItems().includes(weaponType)) {
+      I.say("\nForge did not allow shopping for "+weaponType);
+      I.say("\nPURCHASES TEST FAILED!");
+    }
+    
+    if (! shop.shopItems().includes(potionType)) {
+      I.say("\nShop did not allow shopping for "+potionType);
+      I.say("\nPURCHASES TEST FAILED!");
+    }
     
     boolean orderPlaced = false;
     boolean itemMade    = false;
     boolean collectOkay = false;
+    boolean potionOkay  = false;
+    boolean usageOkay   = false;
     boolean testOkay    = false;
+    int injureTime = -1;
+    float initInjury = -1;
     
-    //  TODO:  You should also test expiration dates for orders, and purchases
-    //  of usable items like potions.
+    //  TODO:  You should also test expiration dates for orders.
     
     
     while (map.time() < 1000 || graphics) {
       test.runLoop(base, 1, graphics, "saves/test_purchases.tlt");
       
       if (! orderPlaced) {
-        orderPlaced = forge.hasItemOrder(itemType, buys);
+        orderPlaced = forge.hasItemOrder(weaponType, buys);
       }
       
       if (orderPlaced && ! itemMade) {
-        itemMade = forge.orderComplete(itemType, buys);
+        itemMade = forge.orderComplete(weaponType, buys);
       }
       
       if (itemMade && ! collectOkay) {
-        collectOkay = buys.carried(itemType) >= initQuality + 1;
+        collectOkay = buys.carried(weaponType) >= initQuality + 1;
       }
       
-      if (collectOkay && ! testOkay) {
+      if (! potionOkay) {
+        potionOkay = buys.carried(potionType) > 0;
+        if (potionOkay) {
+          injureTime = map.time();
+          buys.takeDamage(buys.maxHealth() * 0.9f);
+          initInjury = buys.injury();
+        }
+      }
+      
+      if (
+        potionOkay && (! usageOkay) &&
+        Area.timeSince(map.time(), injureTime) < 10
+      ) {
+        float healAmount = StockExGoods.MEDIKIT_HEAL_AMOUNT;
+        usageOkay = buys.injury() <= initInjury + 1 - healAmount;
+      }
+      
+      if (collectOkay && usageOkay && ! testOkay) {
         I.say("\nPURCHASES TEST CONCLUDED SUCCESSFULLY!");
         testOkay = true;
         if (! graphics) return true;
@@ -81,6 +118,8 @@ public class TestPurchases extends LogicTest {
     I.say("  Order placed: "+orderPlaced);
     I.say("  Item made:    "+itemMade   );
     I.say("  Collect okay: "+collectOkay);
+    I.say("  Potion okay:  "+potionOkay );
+    I.say("  Usage okay:   "+usageOkay  );
     
     return false;
   }

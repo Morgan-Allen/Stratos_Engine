@@ -271,9 +271,10 @@ public class GameConstants {
       return this;
     }
     
-    public Good setUsable(ActorTechnique... allows) {
-      this.isUsable = true;
-      this.allows = allows;
+    public Good setUsable(int maxCarried, ActorTechnique... allows) {
+      this.isUsable   = true;
+      this.maxCarried = maxCarried;
+      this.allows     = allows;
       return this;
     }
   }

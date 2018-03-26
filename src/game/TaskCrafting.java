@@ -97,6 +97,14 @@ public class TaskCrafting extends Task {
   }
   
   
+  static Recipe recipeFor(Good good, Building store) {
+    for (Recipe r : store.type().recipes) {
+      if (r.made == good) return r;
+    }
+    return null;
+  }
+  
+  
   
   //  NOTE:  Used purely for debug purposes, possibly remove later.
   public static int totalCraftTime = 0;
@@ -105,6 +113,7 @@ public class TaskCrafting extends Task {
   
 
   protected void onVisit(Building visits) {
+    boolean report = recipe.made.isUsable && false;
     
     ItemOrder order = venue.orderWithID(orderID);
     Actor actor     = (Actor) this.active;
@@ -113,7 +122,10 @@ public class TaskCrafting extends Task {
     Trait skill     = recipe.craftSkill;
     float skillMult = actor.levelOf(skill) / MAX_SKILL_LEVEL;
     
-    ///I.say("Progress on "+recipe.made+": "+progress+"/"+maxAmount);
+    if (report) {
+      I.say("Progress on "+recipe.made+": "+progress+"/"+maxAmount);
+      I.add("  #"+order.hashCode());
+    }
     
     float progInc = 1f + (1f * skillMult);
     progInc *= 1f / recipe.craftTime;

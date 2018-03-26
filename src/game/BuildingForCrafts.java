@@ -20,7 +20,7 @@ public class BuildingForCrafts extends Building {
     int orderID = -1;
   }
   
-  List <ItemOrder> orders = new List();
+  private List <ItemOrder> orders = new List();
   private int nextOrderID = 0;
   
   
@@ -67,10 +67,17 @@ public class BuildingForCrafts extends Building {
     */
   void updateOnPeriod(int period) {
     super.updateOnPeriod(period);
+    
+    //  TODO:  Restore this later.
+    /*
     for (ItemOrder order : orders) {
       int spent = Area.timeSince(order.timePlaced, map.time());
-      if (spent > DAY_LENGTH * 2) orders.remove(order);
+      Recipe recipe = TaskCrafting.recipeFor(order.itemType, this);
+      if (spent > recipe.craftTime * 2) {
+        removeOrder(order.itemType, order.client);
+      }
     }
+    //*/
   }
   
   

@@ -92,8 +92,6 @@ public class HumanType extends ActorType {
   }
   
   
-  
-  
   protected static String generateName(
     String forenames[], String surnames[], String nicknames[]
   ) {

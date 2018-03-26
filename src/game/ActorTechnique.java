@@ -129,9 +129,21 @@ public abstract class ActorTechnique extends Trait {
   
   
   public boolean canUseActive(Actor using, Target subject) {
-    if (using.cooldown() > 0) return false;
-    if (using.maxHealth() - using.fatigue() < costTire) return false;
-    if (Area.distance(using, subject) > maxRange) return false;
+    if (using == subject && ! targetSelf()) {
+      return false;
+    }
+    if (using != subject && ! targetOthers()) {
+      return false;
+    }
+    if (costAP > 0 && using.cooldown() > 0) {
+      return false;
+    }
+    if (costTire > 0 && using.maxHealth() - using.fatigue() < costTire) {
+      return false;
+    }
+    if (maxRange > 0 && Area.distance(using, subject) > maxRange) {
+      return false;
+    }
     return canTarget(subject);
   }
   
@@ -249,8 +261,8 @@ public abstract class ActorTechnique extends Trait {
   
   
   public void applyFromActor(Actor actor, Target subject) {
-    actor.setCooldown(costAP  );
-    actor.takeFatigue(costTire);
+    if (costAP   > 0) actor.setCooldown(costAP  );
+    if (costTire > 0) actor.takeFatigue(costTire);
     applyCommonEffects(subject, null, actor);
   }
   

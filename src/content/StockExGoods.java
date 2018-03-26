@@ -24,7 +24,7 @@ public class StockExGoods {
     
     public boolean canUseActive(Actor using, Target subject) {
       if (! super.canUseActive(using, subject)) return false;
-      return using == subject && using.injury() > (using.maxHealth() / 2);
+      return using.injury() > (using.maxHealth() / 2);
     }
     
     public void applyCommonEffects(Target subject, Base ruler, Actor actor) {
@@ -47,12 +47,17 @@ public class StockExGoods {
   
   final public static Good MEDIKIT = new Good("Medikit", 25);
   static {
-    MEDIKIT.setUsable(MEDIKIT_HEAL);
+    MEDIKIT.setUsable(2, MEDIKIT_HEAL);
+    //  TODO:  Assign default recipes for each Good!  Buildings can have
+    //  variants as and when required...
   }
   
   final public static Good SHIELD_BAND = new Good("Shield Band", 125);
   
   final public static Good COMM_RELAY = new Good("Comm Relay", 350);
+  
+  
+  final static Good ALL_SOLD[] = { MEDIKIT };
   
   
 }

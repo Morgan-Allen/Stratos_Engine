@@ -309,7 +309,7 @@ public class ActorAsPerson extends Actor {
     //
     //  TODO:  This might be a little intensive, computationally, as well?
     
-    if (cooldown() == 0 && map.world.settings.toggleReacts) {
+    if (cooldown() == 0) {
       
       class Reaction { ActorTechnique used; Target subject; float rating; }
       Pick <Reaction> pick = new Pick(0);

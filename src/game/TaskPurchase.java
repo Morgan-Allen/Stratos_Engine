@@ -120,7 +120,7 @@ public class TaskPurchase extends Task {
       int level = oldLevel + bonus;
       if (level > levelCap) continue;
       
-      int price = good.isUsable ? good.price : good.priceLevels[level - 1];
+      int price = good.isUsable ? (good.price * bonus) : good.priceLevels[level - 1];
       if (price > cash) continue;
       
       TaskPurchase task = new TaskPurchase(actor, shop, good, level, price);
@@ -138,7 +138,7 @@ public class TaskPurchase extends Task {
   
   
   
-  protected float successChance() {
+  protected float successPriority() {
     Actor actor = (Actor) this.active;
     float priority = ROUTINE;
     
