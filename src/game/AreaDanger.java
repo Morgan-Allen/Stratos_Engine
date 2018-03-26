@@ -75,23 +75,22 @@ public class AreaDanger {
       ;
       
       Vec2D diff = new Vec2D();
-      float sum = 0, sumWeights = 0;
+      float sum = 0;
       
       for (int x = minX; x <= maxX; x++) {
         for (int y = minY; y <= maxY; y++) {
+          
           diff.set(x - c.x, y - c.y);
           float dist = diff.length() * Area.FLAG_RES;
-          
           float weight = 1 - (dist / FUZZ_RANGE);
           if (weight <= 0) continue;
           
           sum += baseValues[x][y] * weight;
-          sumWeights += weight;
         }
       }
       
-      fuzzValues[c.x][c.y] = sum / sumWeights;
-      maxValue = Nums.max(maxValue, sum / sumWeights);
+      fuzzValues[c.x][c.y] = sum;
+      maxValue = Nums.max(maxValue, sum);
     }
   }
   

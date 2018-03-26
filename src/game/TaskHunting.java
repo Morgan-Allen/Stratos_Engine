@@ -46,10 +46,10 @@ public class TaskHunting extends Task {
   ) {
     Pick <Actor> forHunt = new Pick();
     for (Actor a : actor.map().actors) {
-      if (a.maxSightLevel(a.base()) == 0         ) continue;
-      if (a.type().category != Type.IS_ANIMAL_ACT) continue;
-      if (a.type().predator || a.growLevel() < 1 ) continue;
-      if (hasTaskFocus(a, JOB.HUNTING)           ) continue;
+      if (! a.type().isAnimal()                 ) continue;
+      if (a.type().predator || a.growLevel() < 1) continue;
+      if (a.maxSightLevel(actor.base()) == 0    ) continue;
+      if (hasTaskFocus(a, JOB.HUNTING)          ) continue;
       
       Good meat = a.type().meatType;
       if (! Visit.arrayIncludes(meatTypes, meat)) continue;

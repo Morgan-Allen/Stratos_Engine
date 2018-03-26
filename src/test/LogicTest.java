@@ -488,7 +488,8 @@ public class LogicTest {
         "\n  Sight/attack rng: "+t.sightRange+"/"+t.rangeDist+
         "\n  Injury:           "+I.shorten(a.injury() , 1)+"/"+t.maxHealth+
         "\n  Fatigue:          "+I.shorten(a.fatigue(), 1)+"/"+t.maxHealth+
-        "\n  Hunger:           "+I.shorten(a.hunger() , 1)+"/"+t.maxHealth
+        "\n  Hunger:           "+I.shorten(a.hunger() , 1)+"/"+t.maxHealth+
+        "\n  Fear Level:       "+I.percent(a.fearLevel())
       );
       report.append("\n  Task: "+a.jobDesc());
       report.append("\n  Home: "+a.home());

@@ -103,7 +103,7 @@ public class TestSieging extends LogicTest {
     boolean patrolInit  = false;
     boolean patrolDone  = false;
     boolean siegeComing = false;
-    boolean siegeBegun  = false;
+    boolean standsOkay  = false;
     boolean invadeFight = false;
     boolean towerFight  = false;
     boolean defendFight = false;
@@ -177,7 +177,7 @@ public class TestSieging extends LogicTest {
         }
       }
       
-      if (siegeComing && enemy.localMap() == map && ! siegeBegun) {
+      if (siegeComing && enemy.localMap() == map && ! standsOkay) {
         
         Table <AreaTile, Actor> standing = new Table();
         boolean standWrong = false;
@@ -202,14 +202,16 @@ public class TestSieging extends LogicTest {
             }
             
             AreaTile stands = (AreaTile) task.target();
-            if (standing.get(stands) != null) standWrong = true;
+            if (standing.get(stands) != null) {
+              standWrong = true;
+            }
             else standing.put(stands, a);
             testPathing = a;
           }
         }
         
         if (standing.size() > MIN_INVADERS && ! standWrong) {
-          siegeBegun = true;
+          standsOkay = true;
         }
         
         if (testPathing != null) {
@@ -248,7 +250,7 @@ public class TestSieging extends LogicTest {
         towerFight = Task.inCombat(tower);
       }
       
-      if (siegeBegun && ! victorious) {
+      if (standsOkay && ! victorious) {
         if (baseC.isVassalOf(awayC)) {
           victorious = true;
           store.addInventory(tribute);
@@ -297,7 +299,7 @@ public class TestSieging extends LogicTest {
     I.say("  Patrol init:  "+patrolInit );
     I.say("  Patrol done:  "+patrolDone );
     I.say("  Siege coming: "+siegeComing);
-    I.say("  Siege begun:  "+siegeBegun );
+    I.say("  Stands okay:  "+standsOkay );
     I.say("  Invade fight: "+invadeFight);
     I.say("  Defend fight: "+defendFight);
     I.say("  Tower fight:  "+towerFight );

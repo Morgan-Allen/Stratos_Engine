@@ -70,7 +70,7 @@ public class TestRetreat extends LogicTest {
     boolean testOkay    = false;
     
     while (map.time() < 100 || graphics) {
-      test.runLoop(base, 1, graphics, "saves/test_bounties.tlt");
+      test.runLoop(base, 1, graphics, "saves/test_retreat.str");
       
       if (! braveOkay) {
         braveOkay = subject.jobType() != JOB.RETREAT;

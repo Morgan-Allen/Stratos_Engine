@@ -42,7 +42,7 @@ public class Task implements Session.Saveable {
     CASTING   ,
   };
   final public static float
-    NO_PRIORITY = -1.0f,
+    NO_PRIORITY = -100f,
     IDLE        =  1.0f,
     CASUAL      =  2.5f,
     ROUTINE     =  5.0f,
@@ -167,7 +167,6 @@ public class Task implements Session.Saveable {
     //  TODO:  This should probably *not* be done this way, now that multiple
     //  tasks can be configured for assessment at the same time.
     if (activeNow) {
-      //active.assignTask(null);
       this.toggleFocus(false);
     }
     
@@ -189,7 +188,6 @@ public class Task implements Session.Saveable {
       return null;
     }
     if (activeNow) {
-      //active.assignTask(this);
       this.toggleFocus(true);
     }
     return this;
@@ -198,8 +196,7 @@ public class Task implements Session.Saveable {
   
   void toggleFocus(boolean activeNow) {
     Target t = mainFocus();
-    if (t == null) return;
-    t.setFocused(active, activeNow);
+    if (t != null) t.setFocused(active, activeNow);
   }
   
   
@@ -224,9 +221,14 @@ public class Task implements Session.Saveable {
   protected float rewardPriority() {
     if (origin instanceof Mission) {
       Mission mission = (Mission) origin;
-      float reward = 0;
-      reward += mission.rewards.cashReward();
-      return PRIORITY_PER_100_CASH * reward / 100f;
+      if (mission.rewards.isBounty()) {
+        float reward = 0;
+        reward += mission.rewards.cashReward();
+        return PRIORITY_PER_100_CASH * reward / 100f;
+      }
+      else {
+        return ROUTINE;
+      }
     }
     return 0;
   }
@@ -240,9 +242,9 @@ public class Task implements Session.Saveable {
         failure = failCostPriority(),
         reward  = rewardPriority()
       ;
-      priorityEval = (chance * (success + reward)) + ((1 - chance) * failure);
+      priorityEval = (chance * (success + reward)) - ((1 - chance) * failure);
     }
-    return priorityEval;
+    return Nums.max(0, priorityEval);
   }
   
   

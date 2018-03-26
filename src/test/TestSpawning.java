@@ -12,7 +12,7 @@ public class TestSpawning extends LogicTest {
   
   
   public static void main(String args[]) {
-    testSpawning(false);
+    testSpawning(true);
   }
   
   

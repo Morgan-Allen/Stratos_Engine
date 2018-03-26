@@ -316,7 +316,6 @@ public class TaskCombat extends Task {
     float maxRange     = Nums.max(rangeMelee, rangeMissile);
     
     Pick <AreaTile> pick = new Pick();
-    //Box2D area = target.area();
     
     //  TODO:  It would be helpful if tiles were in strictly ascending order
     //  by distance.
@@ -382,8 +381,8 @@ public class TaskCombat extends Task {
     */
   static float attackPriority(Active actor, Element primary, boolean quick) {
     
+    if (primary.destroyed() || primary.indoors()) return -1;
     float targetPower = attackPower(primary);
-    if (targetPower == 0) return -1;
     
     float priority = 0, empathy = 1, cruelty = 1;
     if (actor.isActor()) {
@@ -413,7 +412,7 @@ public class TaskCombat extends Task {
     if (othersWinChance > 0 && othersWinChance < 1) {
       priority += (1 - othersWinChance) * PARAMOUNT * empathy;
     }
-    priority += ROUTINE * cruelty;
+    priority += CASUAL * cruelty;
     
     if (priority <= 0) return -1;
     return priority;
@@ -427,16 +426,19 @@ public class TaskCombat extends Task {
   
   protected float successChance() {
     if (! active.isActor()) return 1;
+    
     Actor actor = (Actor) active;
+    float power = attackPower((Element) active);
+    float fear  = actor.fearLevel();
     
     AreaDanger dangerMap = actor.map().dangerMap(active.base(), true);
     AreaTile around = actor.at();
+    
     float danger = dangerMap.fuzzyLevel(around.x, around.y);
     danger = Nums.max(danger, attackPower(primary));
     
-    float power = attackPower((Element) active);
     Series <Actor> backup = actor.backup();
-    for (Actor a : backup) {
+    for (Actor a : backup) if (a != actor) {
       float backPower = attackPower(a);
       if (a.jobType() == JOB.COMBAT) {
         backPower *= Area.distance(mainTaskFocus(a), primary);
@@ -449,6 +451,8 @@ public class TaskCombat extends Task {
     }
     
     float chance = power / (danger + power);
+    chance = (chance + 1 - fear) / 2;
+    
     return chance;
   }
   
@@ -474,7 +478,7 @@ public class TaskCombat extends Task {
   
   
   void toggleFocus(boolean activeNow) {
-    super.toggleFocus(activeNow);
+    target .setFocused(active, activeNow);
     primary.setFocused(active, activeNow);
   }
   
@@ -500,10 +504,6 @@ public class TaskCombat extends Task {
   boolean checkContact(Pathing[] path) {
     float range = Area.distance(active, primary);
     float maxRange = actionRange();
-    
-    ///I.say("Distance to "+primary+": "+range+"/"+maxRange);
-    ///if (range < maxRange) I.say("SHOULD FIRE");
-    
     return range < maxRange;
   }
   
