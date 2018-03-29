@@ -30,9 +30,8 @@ public class PlayUI extends HUD implements UIConstants {
       32, Colour.HIDE, PlayUI.class
     );
   
-  Area    area;
-  Base    base;
-  Element home;
+  Area area;
+  Base base;
   
   Button     installTab ;
   DetailPane installPane;
@@ -107,20 +106,14 @@ public class PlayUI extends HUD implements UIConstants {
   }
   
   
-  public void assignHomePoint(Element home) {
-    if (home == null) {
-      I.complain("\nCANNOT ASSIGN NULL HOME TO UI!");
-      return;
-    }
-    this.home = home;
-    rendering.view.lookedAt.setTo(home.trackPosition());
+  public void setLookPoint(GameConstants.Target point) {
+    rendering.view.lookedAt.setTo(point.exactPosition(null));
   }
   
   
   public void loadState(Session s) throws Exception {
     area = (Area   ) s.loadObject();
     base = (Base   ) s.loadObject();
-    home = (Element) s.loadObject();
     selection.loadState(s);
     tracking .loadState(s);
     optionList.setupFrom(area, base);
@@ -130,7 +123,6 @@ public class PlayUI extends HUD implements UIConstants {
   public void saveState(Session s) throws Exception {
     s.saveObject(area);
     s.saveObject(base );
-    s.saveObject(home );
     selection.saveState(s);
     tracking .saveState(s);
   }

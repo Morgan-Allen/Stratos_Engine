@@ -17,12 +17,17 @@ public class ActorPathSearch extends Search <Pathing> {
   Actor   client   = null;
   boolean getNear  = false;
   boolean stealthy = false;
+  boolean oneTile  = true;
   
   
   public ActorPathSearch(Actor w, Pathing dest) {
     this(w.map, w.at(), dest, -1);
+    
     this.client = w;
     this.danger = map.dangerMap(client.base(), false);
+    
+    ActorType type = w.type();
+    this.oneTile = type.wide == 1 && type.high == 1;
   }
   
   
@@ -65,12 +70,27 @@ public class ActorPathSearch extends Search <Pathing> {
   
   
   protected boolean canEnter(Pathing spot) {
-    if (spot.isTile() && map.blocked((AreaTile) spot)) {
-      return false;
+    if (oneTile) {
+      if (spot.isTile() && map.blocked((AreaTile) spot)) {
+        return false;
+      }
+      if (client != null && ! spot.allowsEntry(client)) {
+        return false;
+      }
     }
-    if (client != null && ! spot.allowsEntry(client)) {
-      return false;
+    else {
+      if (spot.isTile()) {
+        AreaTile at = (AreaTile) spot;
+        Type type = client.type();
+        for (AreaTile t : map.tilesUnder(at.x, at.y, type.wide, type.high)) {
+          if (map.blocked(t)) return false;
+        }
+      }
+      if (client != null && ! spot.allowsEntry(client)) {
+        return false;
+      }
     }
+    
     return true;
   }
   

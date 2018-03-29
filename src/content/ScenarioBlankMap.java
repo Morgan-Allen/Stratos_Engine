@@ -127,7 +127,8 @@ public class ScenarioBlankMap extends AreaScenario {
       
       ActorUtils.fillWorkVacancies(bastion);
       ActorUtils.fillWorkVacancies(depot);
-      playUI().assignHomePoint(bastion);
+      base.setHeadquarters(bastion);
+      playUI().setLookPoint(bastion);
       
       base.initFunds(4000);
       bastion.addInventory(35, PLASTICS);

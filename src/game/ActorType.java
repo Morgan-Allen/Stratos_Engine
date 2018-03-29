@@ -7,6 +7,8 @@ import util.*;
 
 
 public class ActorType extends Type {
+  
+  
 
   String nameValues[][] = new String[0][0];
   
@@ -16,14 +18,17 @@ public class ActorType extends Type {
   public Type patronGods[] = null;
   public boolean isPorter  = false;
   
+  public int moveSpeed = AVG_MOVE_SPEED;
+  public int moveMode  = MOVE_LAND;
+  
   public Tally <Trait> initTraits = new Tally();
   
-  public Terrain habitats[]   = NO_HABITAT;
-  public boolean predator     = false;
-  public boolean organic      = true;
-  public int     lifespan     = LIFESPAN_LENGTH;
-  public Good    meatType     = null;
-  public Type    nestType     = null;
+  public Terrain habitats[] = NO_HABITAT;
+  public boolean predator   = false;
+  public boolean organic    = true;
+  public int     lifespan   = LIFESPAN_LENGTH;
+  public Good    meatType   = null;
+  public Type    nestType   = null;
   
   
   public ActorTechnique[] classTechniques = {};

@@ -262,27 +262,29 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
     assignBase(owns);
     
     if (! type.mobile) {
-      
-      for (AreaTile t : footprint(map, true)) if (t != null) {
-        int footMask = type.footprint(t, this);
-        int check = canPlaceOver(t.above, footMask);
-        
-        if (t.above != null && check != IS_OKAY) {
-          t.above.exitMap(map);
-        }
-        if (footMask == 1) {
-          map.setAbove(t, this);
-          map.pathCache.checkPathingChanged(t);
-        }
-      }
-      
+      imposeFootprint();
       map.planning.placeObject(this);
       
       for (Good g : materials()) {
         float need = materialNeed(g);
         setMaterialLevel(g, need * buildLevel);
       }
+    }
+  }
+  
+  
+  protected void imposeFootprint() {
+    for (AreaTile t : footprint(map, true)) if (t != null) {
+      int footMask = type.footprint(t, this);
+      int check = canPlaceOver(t.above, footMask);
       
+      if (t.above != null && check != IS_OKAY) {
+        t.above.exitMap(map);
+      }
+      if (footMask == 1) {
+        map.setAbove(t, this);
+        map.pathCache.checkPathingChanged(t);
+      }
     }
   }
   
@@ -296,13 +298,18 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
       if (true       ) setFlagging(false, type.flagKey);
       if (type.isCrop) setFlagging(false, NEED_PLANT  );
       
-      for (AreaTile t : footprint(map, false)) {
-        if (t.above == this) map.setAbove(t, null);
-        map.pathCache.checkPathingChanged(t);
-      }
+      removeFootprint();
       
       map.planning.unplaceObject(this);
       setDestroyed();
+    }
+  }
+  
+  
+  protected void removeFootprint() {
+    for (AreaTile t : footprint(map, false)) {
+      if (t.above == this) map.setAbove(t, null);
+      map.pathCache.checkPathingChanged(t);
     }
   }
   

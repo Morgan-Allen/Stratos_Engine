@@ -157,17 +157,18 @@ public class Actor extends Element implements
     */
   public void enterMap(Area map, int x, int y, float buildLevel, Base owns) {
     super.enterMap(map, x, y, buildLevel, owns);
+    
     map.actors.add(this);
+    if (type().isVessel()) map.vessels.add(this);
   }
   
   
   public void exitMap(Area map) {
     if (inside != null) setInside(inside, false);
-    map.actors.remove(this);
     
-    if (map.actors.includes(this)) {
-      I.complain("\nMap still contains "+this);
-    }
+    map.actors.remove(this);
+    if (type().isVessel()) map.vessels.remove(this);
+    
     super.exitMap(map);
   }
   
@@ -175,12 +176,9 @@ public class Actor extends Element implements
   public void setDestroyed() {
     super.setDestroyed();
     if (mission != null) mission.toggleRecruit(this, false);
-    if (home      != null) home.setResident(this, false);
-    if (work      != null) work.setWorker  (this, false);
-    if (task      != null) task.onCancel();
-    home    = null;
-    work    = null;
-    mission = null;
+    if (home    != null) home.setResident(this, false);
+    if (work    != null) work.setWorker(this, false);
+    if (task    != null) task.onCancel();
     assignTask(null);
   }
   
@@ -554,6 +552,11 @@ public class Actor extends Element implements
     if (task != null) {
       task.onArrival(goes, journey);
     }
+  }
+  
+  
+  public boolean isElement() {
+    return true;
   }
   
   

@@ -70,9 +70,11 @@ public class Base implements Session.Saveable, Trader {
   
   GOVERNMENT government = GOVERNMENT.FEUDAL;
   float prestige = PRESTIGE_AVG;
-  Base homeland = null;
   final public BaseCouncil council = new BaseCouncil(this);
   final Table <Base, Relation> relations = new Table();
+  
+  Base homeland = null;
+  Building headquarters = null;
   
   private int   currentFunds = 0;
   private float population   = 0;
@@ -80,11 +82,12 @@ public class Base implements Session.Saveable, Trader {
   Tally <Good> needLevel = new Tally();
   Tally <Good> prodLevel = new Tally();
   Tally <Good> inventory = new Tally();
+  
   Tally <BuildType> buildLevel = new Tally();
+  List <Mission> missions = new List();
+  List <ActorAsVessel> traders = new List();
   
   List <BuildType> buildTypes = new List();
-  
-  List <Mission> missions = new List();
   
   private boolean active;
   private Area map;
@@ -119,9 +122,7 @@ public class Base implements Session.Saveable, Trader {
     
     government = GOVERNMENT.values()[s.loadInt()];
     prestige = s.loadFloat();
-    homeland = (Base) s.loadObject();
     council.loadState(s);
-    
     for (int n = s.loadInt(); n-- > 0;) {
       Relation r = new Relation();
       r.with    = (Base) s.loadObject();
@@ -134,6 +135,9 @@ public class Base implements Session.Saveable, Trader {
       relations.put(r.with, r);
     }
     
+    homeland = (Base) s.loadObject();
+    headquarters = (Building) s.loadObject();
+    
     currentFunds = s.loadInt();
     population   = s.loadFloat();
     armyPower    = s.loadFloat();
@@ -142,9 +146,10 @@ public class Base implements Session.Saveable, Trader {
     s.loadTally(inventory );
     s.loadTally(buildLevel);
     
-    s.loadObjects(buildTypes);
-    
     s.loadObjects(missions);
+    s.loadObjects(traders );
+    
+    s.loadObjects(buildTypes);
     
     active = s.loadBool();
     map    = (Area) s.loadObject();
@@ -163,9 +168,7 @@ public class Base implements Session.Saveable, Trader {
     
     s.saveInt(government.ordinal());
     s.saveFloat(prestige);
-    s.saveObject(homeland);
     council.saveState(s);
-    
     s.saveInt(relations.size());
     for (Relation r : relations.values()) {
       s.saveObject(r.with);
@@ -177,6 +180,9 @@ public class Base implements Session.Saveable, Trader {
       s.saveTally(r.suppliesSent);
     }
     
+    s.saveObject(homeland);
+    s.saveObject(headquarters);
+    
     s.saveInt(currentFunds);
     s.saveFloat(population);
     s.saveFloat(armyPower );
@@ -185,9 +191,10 @@ public class Base implements Session.Saveable, Trader {
     s.saveTally(inventory );
     s.saveTally(buildLevel);
     
-    s.saveObjects(buildTypes);
-    
     s.saveObjects(missions);
+    s.saveObjects(traders );
+    
+    s.saveObjects(buildTypes);
     
     s.saveBool(active);
     s.saveObject(map);
@@ -276,6 +283,16 @@ public class Base implements Session.Saveable, Trader {
   
   public GOVERNMENT government() {
     return government;
+  }
+  
+  
+  public void setHeadquarters(Building headquarters) {
+    this.headquarters = headquarters;
+  }
+  
+  
+  public Building headquarters() {
+    return headquarters;
   }
   
   

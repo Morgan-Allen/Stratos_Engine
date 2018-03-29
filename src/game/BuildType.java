@@ -15,6 +15,7 @@ public class BuildType extends Type {
   
   public boolean isUpgrade = false;
   public int entranceDir = Building.FACE_EAST;
+  public Coord[] dockPoints = {};
   
   public ActorTechnique rulerPowers[] = {};
   public ActorTechnique actorPowers[] = {};

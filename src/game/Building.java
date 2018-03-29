@@ -173,9 +173,13 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   /**  Auxiliary pathing-assist methods:
     */
   public Pathing[] adjacent(Pathing[] temp, Area map) {
-    if (temp == null) temp = new Pathing[1];
+    
+    int numE = entrances == null ? 0 : entrances.length;
+    if (temp == null || temp.length < numE) temp = new Pathing[numE];
+    
     for (int i = temp.length; i-- > 0;) temp[i] = null;
     if (entrances == null) return temp;
+    
     for (int i = entrances.length; i-- > 0;) temp[i] = entrances[i];
     return temp;
   }

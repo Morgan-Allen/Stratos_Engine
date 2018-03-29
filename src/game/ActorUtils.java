@@ -208,7 +208,7 @@ public class ActorUtils {
   
   
   static AreaTile findEntryPoint(
-    final Building enters, final Area map, Target from, int maxRange
+    final Element enters, final Area map, Target from, int maxRange
   ) {
     final Vars.Ref <AreaTile> result = new Vars.Ref();
     final AreaTile temp[] = new AreaTile[9];

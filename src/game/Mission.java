@@ -228,6 +228,11 @@ public abstract class Mission implements
   }
   
   
+  public boolean isElement() {
+    return false;
+  }
+  
+  
   public Task selectActorBehaviour(Actor actor) {
     Pathing exits = transitPoint(actor);
     

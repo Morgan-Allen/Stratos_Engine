@@ -166,7 +166,8 @@ public class GameConstants {
     //
     //  Trade and migration-
     TRADE_DIST_TIME  = 50  ,
-    MIGRANTS_PER_1KM = 10     //  per month per 1000 foreign citizens
+    MIGRANTS_PER_1KM = 10  ,  //  per month per 1000 foreign citizens
+    SHIP_WAIT_TIME   = DAY_LENGTH
   ;
   final public static int
     //
@@ -360,6 +361,7 @@ public class GameConstants {
     IS_ADMIN   = new Good("Is Admin"    , -1 ),
     IS_VENDOR  = new Good("Is Vendor"   , -1 ),
     IS_TRADER  = new Good("Is Trader"   , -1 ),
+    IS_DOCK    = new Good("Is Dock"     , -1 ),
     IS_HOUSING = new Good("Is Housing"  , -1 ),
     IS_TOWER   = new Good("Is Tower"    , -1 ),
     IS_TURRET  = new Good("Is Turret"   , -1 ),
@@ -511,6 +513,7 @@ public class GameConstants {
   public static interface Journeys {
     void onArrival(Base goes, World.Journey journey);
     Base base();
+    boolean isElement();
   }
   
   

@@ -18,6 +18,8 @@ public class TaskTrading extends Task {
   Trader  tradeGoes;
   boolean didExport;
   boolean didImport;
+  int waitInitTime = -1;
+  boolean takeoff = false;
   
   
   public TaskTrading(Actor actor) {
@@ -33,6 +35,8 @@ public class TaskTrading extends Task {
     tradeGoes = (Trader) s.loadObject();
     didExport = s.loadBool();
     didImport = s.loadBool();
+    waitInitTime = s.loadInt();
+    takeoff      = s.loadBool();
   }
   
   
@@ -44,38 +48,45 @@ public class TaskTrading extends Task {
     s.saveObject(tradeGoes);
     s.saveBool(didExport);
     s.saveBool(didImport);
+    s.saveInt(waitInitTime);
+    s.saveBool(takeoff);
   }
   
   
-  TaskTrading configTrading(
-    BuildingForTrade from, Trader goes, Tally <Good> taken
+  static TaskTrading configTrading(
+    Trader from, Trader goes, Actor trading, Tally <Good> taken
   ) {
-    this.taken     = taken;
-    this.tradeFrom = from ;
-    this.tradeGoes = goes ;
-    this.homeCity  = from.base();
+    TaskTrading task = new TaskTrading(trading);
     
-    configTravel(from, from, JOB.TRADING, from);
-    return this;
+    task.taken     = taken;
+    task.tradeFrom = from ;
+    task.tradeGoes = goes ;
+    task.homeCity  = from.base();
+    
+    Employer origin = null;
+    if (from instanceof Employer) origin = (Employer) from;
+    
+    task.configTravel(from, from, JOB.TRADING, origin);
+    return task;
   }
   
   
   
   /**  Handling actor events-
     */
-  void configTravel(Trader from, Trader trader, Task.JOB jobType, Employer e) {
+  void configTravel(Trader from, Trader goes, Task.JOB jobType, Employer e) {
     Actor actor = (Actor) active;
-    Area fromA = from.base().activeMap(), goesA = trader.base().activeMap();
+    Area fromA = from.base().activeMap(), goesA = goes.base().activeMap();
     //
     //  If your're headed to a building on the same map, either proceed to the
     //  entrance or head to the corner tile.
     if (fromA != null && fromA == goesA) {
-      Building goes = (Building) trader;
-      if (goes.complete()) {
-        configTask(e, goes, null, jobType, 0);
+      Building goesB = (Building) goes;
+      if (goesB.complete()) {
+        configTask(e, goesB, null, jobType, 0);
       }
       else {
-        configTask(e, null, goes.at(), jobType, 0);
+        configTask(e, null, goesB.at(), jobType, 0);
       }
     }
     //
@@ -83,12 +94,12 @@ public class TaskTrading extends Task {
     //  point or begin your journey directly.
     else {
       if (actor.onMap()) {
-        AreaTile exits = findTransitPoint(actor.map(), from.base(), trader.base());
+        AreaTile exits = findTransitPoint(actor.map(), from.base(), goes.base());
         configTask(origin, null, exits, Task.JOB.TRADING, 0);
       }
       else {
         World world = homeCity.world;
-        world.beginJourney(from.base(), trader.base(), actor);
+        world.beginJourney(from.base(), goes.base(), actor);
       }
     }
   }
@@ -107,9 +118,27 @@ public class TaskTrading extends Task {
       return;
     }
     //
+    //  If this is a place you're waiting, stay there for a while.
+    if (type == JOB.DOCKING && actor.type().isVessel()) {
+      ActorAsVessel ship = (ActorAsVessel) actor;
+      Area map = ship.map();
+      if (! ship.landed) {
+        ship.doLanding(target);
+        waitInitTime = map.time();
+      }
+      if (map.time() - waitInitTime < SHIP_WAIT_TIME) {
+        configTask(origin, null, target, JOB.DOCKING, 10);
+      }
+      else {
+        ship.doTakeoff(target);
+        configTravel(tradeGoes, tradeFrom, JOB.DEPARTING, origin);
+      }
+      return;
+    }
+    //
     //  If you've arrived at the edge of the map, begin your journey to a
     //  foreign city-
-    if (tradeGoes.base() == tradeGoes) {
+    else if (tradeGoes.base() == tradeGoes) {
       Base city = tradeFrom.base();
       city.world.beginJourney(city, (Base) tradeGoes, actor);
       actor.exitMap(actor.map);
@@ -125,6 +154,27 @@ public class TaskTrading extends Task {
   
   
   protected void onArrival(Base goes, World.Journey journey) {
+    Area activeMap = goes.activeMap();
+    boolean mapVisitor = goes != homeCity && activeMap != null;
+    
+    //  TODO:  You also need to handle the case of cargo-barges arriving from
+    //  off-map.  It could happen!
+    
+    //  TODO:  You may need to do something very similar when a ship returns
+    //  to it's home-map.  Hmm.  That's another case.
+    
+    //  And you may want to cover the case of mission-support as well.  In fact,
+    //  maybe that deserves a separate task altogether.
+    
+    //
+    //  
+    if (mapVisitor && active.type().isAirship()) {
+      ActorAsVessel ship = (ActorAsVessel) active;
+      AreaTile docks = ship.findLandingPoint(activeMap, this);
+      configTask(origin, null, docks, JOB.DOCKING, 10);
+      return;
+    }
+    
     //
     //  If you've arrived at your destination city, offload your cargo, take on
     //  fresh goods, and record any profits in the process:
@@ -134,7 +184,7 @@ public class TaskTrading extends Task {
     //
     //  If you've arrived back on your home map, return to your post-
     else if (goes == homeCity) {
-      configTravel(tradeFrom, tradeFrom, Task.JOB.TRADING, origin);
+      configTravel(tradeFrom, tradeFrom, JOB.TRADING, origin);
     }
     //
     //  ...Fwaaah?

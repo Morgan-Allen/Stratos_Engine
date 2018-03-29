@@ -34,8 +34,9 @@ public class Area implements Session.Saveable {
   int time = 0;
   int numUpdates = 0, ticksPS = 1;
   
-  final public AreaPlanning planning = new AreaPlanning(this);
-  final public AreaTerrain  terrain  = new AreaTerrain (this);
+  final public AreaPlanning  planning  = new AreaPlanning (this);
+  final public AreaTerrain   terrain   = new AreaTerrain  (this);
+  final public AreaPathCache pathCache = new AreaPathCache(this);
   float lightLevel;
   
   Table <Base, AreaFog   > fogMaps       = new Table();
@@ -48,11 +49,12 @@ public class Area implements Session.Saveable {
   List <Building> claimants = new List();
   List <Building> buildings = new List();
   List <Actor   > actors    = new List();
-  final public AreaPathCache pathCache = new AreaPathCache(this);
+  List <Actor   > vessels   = new List();
   
   
   String saveName;
   final public Ephemera ephemera = new Ephemera(this);
+  
   
   
   public Area(World world, World.Locale locale, Base... cities) {
@@ -91,8 +93,9 @@ public class Area implements Session.Saveable {
     numUpdates = s.loadInt();
     ticksPS    = s.loadInt();
     
-    planning.loadState(s);
-    terrain .loadState(s);
+    planning .loadState(s);
+    terrain  .loadState(s);
+    pathCache.loadState(s);
     lightLevel = s.loadFloat();
     
     for (int n = s.loadInt(); n-- > 0;) {
@@ -135,7 +138,7 @@ public class Area implements Session.Saveable {
     s.loadObjects(claimants);
     s.loadObjects(buildings);
     s.loadObjects(actors   );
-    pathCache.loadState(s);
+    s.loadObjects(vessels  );
     
     saveName = s.loadString();
     ephemera.loadState(s);
@@ -164,8 +167,9 @@ public class Area implements Session.Saveable {
     s.saveInt(numUpdates);
     s.saveInt(ticksPS);
     
-    planning.saveState(s);
-    terrain .saveState(s);
+    planning .saveState(s);
+    terrain  .saveState(s);
+    pathCache.saveState(s);
     s.saveFloat(lightLevel);
     
     s.saveInt(fogMaps.size());
@@ -203,7 +207,7 @@ public class Area implements Session.Saveable {
     s.saveObjects(claimants);
     s.saveObjects(buildings);
     s.saveObjects(actors   );
-    pathCache.saveState(s);
+    s.saveObjects(vessels  );
     
     s.saveString(saveName);
     ephemera.saveState(s);
@@ -264,6 +268,11 @@ public class Area implements Session.Saveable {
   
   public Series <Actor> actors() {
     return actors;
+  }
+  
+  
+  public Series <Actor> vessels() {
+    return vessels;
   }
   
   
