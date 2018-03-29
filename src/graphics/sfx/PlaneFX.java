@@ -5,9 +5,7 @@
   */
 package graphics.sfx;
 import util.*;
-
 import com.badlogic.gdx.graphics.*;
-
 import graphics.common.*;
 
 

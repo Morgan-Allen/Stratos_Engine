@@ -76,20 +76,36 @@ public class Ephemera {
   
   /**  Adding ghost FX to the register-
     */
+  public Ghost addGhostFromModel(
+    Target e, ModelAsset model, float size, float duration, float alpha
+  ) {
+    if (model == null || e == null) return null;
+    Sprite s = model.makeSprite();
+    e.renderedPosition(s.position);
+    s.position.z += e.height() / 2;
+    return addGhost(e, s, size, duration, alpha);
+  }
+  
+  
+  public Ghost addGhost(
+    Sprite s, float size, float duration, float alpha
+  ) {
+    return addGhost(null, s, size, duration, alpha);
+  }
+  
 
   public Ghost addGhost(
-    Target e, float size, Sprite s, float duration, float alpha
+    Target e, Sprite s, float size, float duration, float alpha
   ) {
     if (s == null) return null;
     final Ghost ghost = new Ghost();
     
     ghost.size       = (int) Nums.ceil(size);
-    ghost.inceptTime = map.time();
+    ghost.inceptTime = map.time() + map.timeInUpdate();
     ghost.sprite     = s;
     ghost.duration   = duration;
     ghost.tracked    = e;
     
-    //final Vec3D p = s.position;
     if (e != null && e.type().mobile) {
       final Element tracked = (Element) e;
       tracked.renderedPosition(ghost.offset);
@@ -103,7 +119,6 @@ public class Ephemera {
     ///I.say("Adding ghost, duration: "+duration+", sprite: "+s.model());
     
     ghosts.add(ghost);
-    
     return ghost;
   }
   
@@ -129,7 +144,7 @@ public class Ephemera {
     //  element and using the same sprite-model.  If so, turn back the incept
     //  time.  Otherwise, initialise (and do the same.)
     Ghost match = matchGhost(e, m);
-    if (match == null) match = addGhost(e, size, m.makeSprite(), duration, 1);
+    if (match == null) match = addGhost(e, m.makeSprite(), size, duration, 1);
     match.inceptTime = map.time() + duration;
   }
   
@@ -143,14 +158,6 @@ public class Ephemera {
     
     m.renderedPosition(p);
     p.add(ghost.offset);
-    
-    /*
-    if (section == oldSection) return true;
-    SG.remove(ghost);
-    SG = ghosts.get(section);
-    if (SG == null) ghosts.put(section, SG = new List <Ghost> ());
-    SG.add(ghost);
-    //*/
     
     return true;
   }
@@ -242,7 +249,7 @@ public class Ephemera {
     uses.renderedPosition(slashFX.position);
     slashFX.scale = r * 2;
     slashFX.position.z += uses.height() / 2;
-    map.ephemera.addGhost(uses, r, slashFX, 0.33f, 1);
+    map.ephemera.addGhost(uses, slashFX, r, 0.33f, 1);
   }
   
   
@@ -275,7 +282,7 @@ public class Ephemera {
     shot.position.setTo(shot.origin).add(shot.target).scale(0.5f);
     final float size = shot.origin.sub(shot.target, null).length() / 2;
     
-    map.ephemera.addGhost(null, size + 1, shot, duration, 1);
+    map.ephemera.addGhost(null, shot, size + 1, duration, 1);
     return shot;
   }
   
@@ -288,7 +295,7 @@ public class Ephemera {
     final Sprite s = model.makeSprite();
     s.position.setTo(point);
     s.scale = scale;
-    map.ephemera.addGhost(null, 1, s, duration, alpha);
+    map.ephemera.addGhost(null, s, 1, duration, alpha);
   }
   
   
@@ -317,7 +324,7 @@ public class Ephemera {
     final Sprite s = model.makeSprite();
     s.position.setTo(pos);
     s.scale = scale * 2 * point.radius();
-    map.ephemera.addGhost(point, 1, s, duration, alpha);
+    map.ephemera.addGhost(point, s, 1, duration, alpha);
   }
   
   
@@ -342,7 +349,7 @@ public class Ephemera {
       shieldFX.scale = 0.5f * uses.height();
       uses.renderedPosition(shieldFX.position);
       shieldFX.position.z += uses.height() / 2;
-      map.ephemera.addGhost(uses, 1, shieldFX, 2, 1);
+      map.ephemera.addGhost(uses, shieldFX, 1, 2, 1);
     }
     if (attackedBy != null) {
       shieldFX.attachBurstFromPoint(attackedBy.renderedPosition(null), hits);

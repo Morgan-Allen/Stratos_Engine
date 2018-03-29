@@ -2,9 +2,10 @@
 
 package content;
 import game.*;
-import graphics.common.*;
 import static game.GameConstants.*;
 import static game.ActorTechnique.*;
+import graphics.common.*;
+import graphics.sfx.*;
 
 
 
@@ -30,6 +31,10 @@ public class Collective {
   final public static ActorTechnique PSY_HEAL = new ActorTechnique(
     "power_psy_heal", "Psy Heal"
   ) {
+    final PlaneFX.Model FX_MODEL = PlaneFX.imageModel(
+      "heal_fx_model", Collective.class,
+      "media/SFX/collective_psy.png", 0.5f, 0, 0.25f, true, true
+    );
     
     public boolean canTarget(Target subject) {
       if (! subject.type().isActor()) return false;
@@ -42,10 +47,21 @@ public class Collective {
     }
     
     public void applyCommonEffects(Target subject, Base ruler, Actor actor) {
-      final Actor healed = (Actor) subject;
-      healed.liftDamage (PSY_HEAL_AMOUNT);
-      healed.liftFatigue(PSY_HEAL_AMOUNT);
-      healed.liftHunger (PSY_HEAL_AMOUNT);
+      if (ruler != null) {
+        Area map = ruler.activeMap();
+        final Actor healed = (Actor) subject;
+        
+        healed.liftDamage (PSY_HEAL_AMOUNT);
+        healed.liftFatigue(PSY_HEAL_AMOUNT);
+        healed.liftHunger (PSY_HEAL_AMOUNT);
+        
+        if (map.ephemera.active()) {
+          map.ephemera.addGhostFromModel(healed, FX_MODEL, 1, 0.5f, 1);
+        }
+      }
+      if (actor != null) {
+        //  TODO:  Implement this...
+      }
     }
   };
   static {
@@ -73,11 +89,11 @@ public class Collective {
   static {
     COLLECTIVE.name = "Collective";
     COLLECTIVE.attachCostume(Collective.class, "collective_skin.gif");
+    COLLECTIVE.maxHealth   = 12;
     COLLECTIVE.meleeDamage = 0;
     COLLECTIVE.rangeDamage = 0;
     COLLECTIVE.rangeDist   = 0;
     COLLECTIVE.armourClass = 0;
-    COLLECTIVE.maxHealth   = 3;
     COLLECTIVE.initTraits.setWith(SKILL_SPEAK, 3, SKILL_PRAY, 4, SKILL_WRITE, 1);
     COLLECTIVE.classTechniques = new ActorTechnique[] { PSY_HEAL };
   }

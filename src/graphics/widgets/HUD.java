@@ -72,8 +72,6 @@ public class HUD extends UIGroup {
     }
     mousePos.set(nextMP);
     mouseB = nextMB;
-    
-    //  TODO:  Perform the selection mechanics here?
   }
   
   

@@ -91,7 +91,9 @@ public class Selection {
         //I.say("\nHovering over: "+hovered);
       }
       
-      if (UI.mouseClicked()) presentSelectionPane(hovered);
+      if (UI.mouseClicked() && UI.currentTask() == null) {
+        presentSelectionPane(hovered);
+      }
     }
     
     I.talkAbout = PlayUI.selectionFocus();

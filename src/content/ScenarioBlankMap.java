@@ -99,15 +99,8 @@ public class ScenarioBlankMap extends AreaScenario {
     //
     //  Look for a suitable entry-point within the world...
     for (AreaTile t : stage.allTiles()) {
-      boolean canPlace = true;
-      
-      for (AreaTile f : stage.tilesUnder(t.x - 1, t.y - 1, w + 2, h + 2)) {
-        if (f == null || f.terrain().pathing != Type.PATH_FREE) {
-          canPlace = false;
-          break;
-        }
-      }
-      if (! canPlace) continue;
+      bastion.setLocation(t, stage);
+      if (! bastion.canPlace(stage)) continue;
       
       AreaTile sited = stage.tileAt(t.x + (w / 2), t.y + (h / 2));
       float dist = Area.distance(sited, ideal);
@@ -117,13 +110,16 @@ public class ScenarioBlankMap extends AreaScenario {
     //
     //  And insert the Bastion at the appropriate site:
     if (! pickLanding.empty()) {
-      BuildingForTrade depot = (BuildingForTrade) SUPPLY_DEPOT.generate();
-      
       AreaTile at = pickLanding.result();
-      AreaPlanning.markDemolish(stage, true, at.x - 1, at.y - 1, w + 2, h + 2);
-      AreaPlanning.markDemolish(stage, true, at.x - 6, at.y - 1, 5, 5);
       bastion.enterMap(stage, at.x, at.y, 1, base);
+
+      BuildingForTrade depot = (BuildingForTrade) SUPPLY_DEPOT.generate();
+      //at = ActorUtils.findEntryPoint(depot, stage, bastion, -1);
       depot.enterMap(stage, at.x, at.y - 5, 1, base);
+      
+      BuildingForFaith school = (BuildingForFaith) SCHOOL_COL.generate();
+      at = ActorUtils.findEntryPoint(school, stage, bastion, -1);
+      school.enterMap(stage, at.x, at.y, 1, base);
       
       ActorUtils.fillWorkVacancies(bastion);
       ActorUtils.fillWorkVacancies(depot);
@@ -139,7 +135,6 @@ public class ScenarioBlankMap extends AreaScenario {
     //  TODO:
     //  Ideally, you want to place the lairs in sectors where you don't find
     //  the main settlement.
-    
     
     final int MIN_LAIR_DIST = 32;
     final int NUM_LAIRS = 1;

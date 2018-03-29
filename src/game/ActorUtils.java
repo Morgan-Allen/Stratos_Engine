@@ -207,8 +207,9 @@ public class ActorUtils {
   }
   
   
-  static AreaTile findEntryPoint(
-    final Building enters, final Area map, Target from, int maxRange
+  public static AreaTile findEntryPoint(
+    final Building enters, final Area map,
+    final Target from, final int maxRange
   ) {
     final Vars.Ref <AreaTile> result = new Vars.Ref();
     final AreaTile temp[] = new AreaTile[9];
@@ -219,6 +220,7 @@ public class ActorUtils {
         
         for (AreaTile n : Area.adjacent(front, temp, map)) {
           if (n == null || n.flaggedWith() != null) continue;
+          if (maxRange > 0 && Area.distance(from, n) > maxRange) continue;
           
           enters.setLocation(n, map);
           if (enters.canPlace(map)) {
