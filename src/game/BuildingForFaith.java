@@ -26,4 +26,41 @@ public class BuildingForFaith extends Building {
   }
   
   
+  
+  boolean supervised(boolean now) {
+    boolean supervised = false;
+    for (Actor a : workers()) {
+      if (now) {
+        if (a.inside() == this && a.jobType() == Task.JOB.WAITING) {
+          supervised = true;
+        }
+      }
+      else {
+        if (Task.hasTaskFocus(this, Task.JOB.WAITING)) {
+          supervised = true;
+        }
+      }
+    }
+    return supervised;
+  }
+  
+  
+  public Task selectActorBehaviour(Actor actor) {
+    
+    if (! supervised(false)) {
+      Task sup = TaskWaiting.configWaiting(actor, this, TaskWaiting.TYPE_OVERSIGHT);
+      if (sup != null) return sup;
+    }
+    
+    return null;
+  }
+  
 }
+
+
+
+
+
+
+
+

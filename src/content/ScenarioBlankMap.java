@@ -117,9 +117,9 @@ public class ScenarioBlankMap extends AreaScenario {
       //at = ActorUtils.findEntryPoint(depot, stage, bastion, -1);
       depot.enterMap(stage, at.x, at.y - 5, 1, base);
       
-      BuildingForFaith school = (BuildingForFaith) SCHOOL_COL.generate();
-      at = ActorUtils.findEntryPoint(school, stage, bastion, -1);
-      school.enterMap(stage, at.x, at.y, 1, base);
+      //BuildingForFaith school = (BuildingForFaith) SCHOOL_COL.generate();
+      //at = ActorUtils.findEntryPoint(school, stage, bastion, -1);
+      //school.enterMap(stage, at.x, at.y, 1, base);
       
       ActorUtils.fillWorkVacancies(bastion);
       ActorUtils.fillWorkVacancies(depot);

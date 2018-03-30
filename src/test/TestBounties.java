@@ -220,7 +220,7 @@ public class TestBounties extends LogicTest {
     boolean testOkay       = false;
     
     while (map.time() < 1000 || graphics) {
-      runLoop(base, 1, graphics, "saves/test_bounties.tlt");
+      runLoop(base, 1, graphics, "saves/test_bounties.str");
       
       onMapUpdate(map, base);
       

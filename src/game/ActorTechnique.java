@@ -141,20 +141,17 @@ public abstract class ActorTechnique extends Trait {
     if (costTire > 0 && using.maxHealth() - using.fatigue() < costTire) {
       return false;
     }
-    if (maxRange > 0 && Area.distance(using, subject) > maxRange) {
-      return false;
-    }
-    return canTarget(subject);
+    return canTarget(subject, false);
   }
   
   
   public boolean canUsePower(Base ruler, Target subject) {
     if (ruler.funds() < costCash) return false;
-    return subject != null && canTarget(subject);
+    return subject != null && canTarget(subject, true);
   }
   
   
-  public boolean canTarget(Target subject) {
+  public boolean canTarget(Target subject, boolean asRuler) {
     return true;
   }
   
@@ -182,10 +179,9 @@ public abstract class ActorTechnique extends Trait {
     float success;
     
     
-    Use(ActorTechnique used, Actor using, Target subject, int properties) {
+    Use(ActorTechnique used, Actor using) {
       super(using);
-      this.used   = used;
-      this.rating = used.rateUse(using, subject);
+      this.used = used;
     }
     
     
@@ -206,7 +202,7 @@ public abstract class ActorTechnique extends Trait {
     
     
     public float priority() {
-      return rating;
+      return rating * PARAMOUNT * 1f / ROUTINE;
     }
     
     
@@ -221,8 +217,24 @@ public abstract class ActorTechnique extends Trait {
     }
     
     
+    float actionRange() {
+      if (used.maxRange <= 0) return super.actionRange();
+      return used.maxRange;
+    }
+    
+    
+    int motionMode() {
+      return Actor.MOVE_RUN;
+    }
+
+
     public String animName() {
       return used.animName;
+    }
+    
+    
+    public String toString() {
+      return used.name+": "+target;
     }
     
     
@@ -251,6 +263,16 @@ public abstract class ActorTechnique extends Trait {
     rating *= 1 - fatCost;
     rating = powerLevel * rating / 10f;
     return rating;
+  }
+  
+  
+  public Use useFor(Actor actor, Target subject) {
+    Use use = new Use(this, actor);
+    if (use.configTask(null, null, subject, Task.JOB.CASTING, 1) == null) {
+      return null;
+    }
+    use.rating = rateUse(actor, subject);
+    return use;
   }
   
   

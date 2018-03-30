@@ -26,31 +26,44 @@ public class Collective {
   final public static int
     PSY_HEAL_AMOUNT = 10
   ;
+  final static PlaneFX.Model FX_MODEL = PlaneFX.imageModel(
+    "heal_fx_model", Collective.class,
+    "media/SFX/collective_psy.png", 0.5f, 0, 0.25f, true, true
+  );
   
   
   final public static ActorTechnique PSY_HEAL = new ActorTechnique(
     "power_psy_heal", "Psy Heal"
   ) {
-    final PlaneFX.Model FX_MODEL = PlaneFX.imageModel(
-      "heal_fx_model", Collective.class,
-      "media/SFX/collective_psy.png", 0.5f, 0, 0.25f, true, true
-    );
     
-    public boolean canTarget(Target subject) {
+    public boolean canTarget(Target subject, boolean asRuler) {
       if (! subject.type().isActor()) return false;
       final Actor a = (Actor) subject;
-      
-      if (a.type().isVessel() || ! a.type().organic) return false;
-      if (a.injury() <= 0 && a.fatigue() <= 0 && a.hunger() <= 0) return false;
-      
+      if (a.type().isVessel() || ! a.type().organic) {
+        return false;
+      }
+      if (asRuler) {
+        float hurtLevel = a.injury() + a.fatigue() + a.hunger();
+        if (hurtLevel < 1) return false;
+      }
       return true;
     }
     
+    public float rateUse(Actor using, Target subject) {
+      float rating = super.rateUse(using, subject);
+      if (rating <= 0) return 0;
+      
+      final Actor a = (Actor) subject;
+      float hurtLevel = a.injury() / a.maxHealth();
+      rating *= hurtLevel;
+      return rating;
+    }
+    
     public void applyCommonEffects(Target subject, Base ruler, Actor actor) {
+      final Actor healed = (Actor) subject;
+      Area map = healed.map();
+      
       if (ruler != null) {
-        Area map = ruler.activeMap();
-        final Actor healed = (Actor) subject;
-        
         healed.liftDamage (PSY_HEAL_AMOUNT);
         healed.liftFatigue(PSY_HEAL_AMOUNT);
         healed.liftHunger (PSY_HEAL_AMOUNT);
@@ -60,7 +73,11 @@ public class Collective {
         }
       }
       if (actor != null) {
-        //  TODO:  Implement this...
+        healed.liftDamage(PSY_HEAL_AMOUNT);
+        
+        if (map.ephemera.active()) {
+          map.ephemera.addGhostFromModel(healed, FX_MODEL, 1, 0.5f, 1);
+        }
       }
     }
   };

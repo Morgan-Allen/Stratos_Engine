@@ -272,6 +272,7 @@ public class ActorAsPerson extends Actor {
       
       choice.add(TaskPurchase.nextPurchase(this));
       choice.add(TaskWander.configWandering(this));
+      choice.add(selectTechniqueUse(false));
       
       if (work() != null && work().complete()) {
         choice.add(work().selectActorBehaviour(this));
@@ -282,6 +283,7 @@ public class ActorAsPerson extends Actor {
       if (rests != null) {
         choice.add(TaskResting.configResting(this, rests));
       }
+      
       assignTask(choice.weightedPick());
     }
   }
@@ -304,42 +306,44 @@ public class ActorAsPerson extends Actor {
       }
     }
     
-    //
-    //  TODO:  You might consider using actual task/reactions for this.
-    //
-    //  TODO:  This might be a little intensive, computationally, as well?
-    
     if (cooldown() == 0) {
-      
-      class Reaction { ActorTechnique used; Target subject; float rating; }
-      Pick <Reaction> pick = new Pick(0);
-      
-      for (Active other : map.activeInRange(at(), sightRange())) {
-        for (ActorTechnique used : known) {
-          if (used.canUseActive(this, other)) {
-            Reaction r = new Reaction();
-            r.rating  = used.rateUse(this, other);
-            r.subject = other;
-            r.used    = used;
-            pick.compare(r, r.rating);
-          }
-        }
-        for (Good g : carried.keys()) for (ActorTechnique used : g.allows) {
-          if (used.canUseActive(this, other)) {
-            Reaction r = new Reaction();
-            r.rating  = used.rateUse(this, other);
-            r.subject = other;
-            r.used    = used;
-            pick.compare(r, r.rating);
-          }
+      Task reaction = selectTechniqueUse(true);
+      if (reaction != null) assignReaction(reaction);
+    }
+  }
+  
+  
+  Task selectTechniqueUse(boolean reaction) {
+    class Reaction { ActorTechnique used; Target subject; float rating; }
+    Pick <Reaction> pick = new Pick(0);
+    
+    Series <Active> assessed = (Series) map().actors();
+    if (reaction) assessed = map.activeInRange(at(), sightRange());
+    
+    for (Active other : assessed) {
+      for (ActorTechnique used : known) {
+        if (used.canUseActive(this, other)) {
+          Reaction r = new Reaction();
+          r.rating  = used.rateUse(this, other);
+          r.subject = other;
+          r.used    = used;
+          pick.compare(r, r.rating);
         }
       }
-
-      if (! pick.empty()) {
-        Reaction r = pick.result();
-        r.used.applyFromActor(this, r.subject);
+      for (Good g : carried.keys()) for (ActorTechnique used : g.allows) {
+        if (used.canUseActive(this, other)) {
+          Reaction r = new Reaction();
+          r.rating  = used.rateUse(this, other);
+          r.subject = other;
+          r.used    = used;
+          pick.compare(r, r.rating);
+        }
       }
     }
+    if (pick.empty()) return null;
+    
+    Reaction r = pick.result();
+    return r.used.useFor(this, r.subject);
   }
   
   
