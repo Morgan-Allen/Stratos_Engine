@@ -66,10 +66,10 @@ public class TestLifeCycle extends LogicTest {
     ActorAsPerson consort = (ActorAsPerson) Nobles.CONSORT.generate();
     oldKing.type().initAsMigrant(oldKing);
     consort.type().initAsMigrant(consort);
-    oldKing.setAgeYears(AVG_RETIREMENT / 3);
-    consort.setAgeYears(AVG_RETIREMENT / 3);
-    oldKing.setSexData(SEX_MALE  );
-    consort.setSexData(SEX_FEMALE);
+    oldKing.health.setAgeYears(AVG_RETIREMENT / 3);
+    consort.health.setAgeYears(AVG_RETIREMENT / 3);
+    oldKing.health.setSexData(SEX_MALE  );
+    consort.health.setSexData(SEX_FEMALE);
     ActorAsPerson.setBond(oldKing, consort, BOND_MARRIED, BOND_MARRIED, 0.5f);
     council.toggleMember(oldKing, Role.MONARCH, true);
     
@@ -96,7 +96,7 @@ public class TestLifeCycle extends LogicTest {
     boolean testOkay   = false;
     
     ActorUtils.fillAllWorkVacancies(map);
-    for (Actor a : map.actors()) a.setHungerLevel(0.75f);
+    for (Actor a : map.actors()) a.health.setHungerLevel(0.75f);
     
     
     I.say("\nTOTAL LIFE CYCLE RUN TIME: "+RUN_TIME);
@@ -122,7 +122,7 @@ public class TestLifeCycle extends LogicTest {
           int i = 0;
           for (Actor a : originalPop) {
             if (a.type().socialClass == CLASS_NOBLE) continue;
-            a.setSexData(((i++ % 2) == 0) ? SEX_FEMALE : SEX_MALE);
+            a.health.setSexData(((i++ % 2) == 0) ? SEX_FEMALE : SEX_MALE);
           }
         }
       }
@@ -156,7 +156,7 @@ public class TestLifeCycle extends LogicTest {
         }
         
         for (Actor a : map.actors()) {
-          if (a.child() && a.alive() && ! originalPop.includes(a)) {
+          if (a.health.child() && a.health.alive() && ! originalPop.includes(a)) {
             if (! births.includes(a)) {
               Series <Actor> parents = a.allBondedWith(BOND_PARENT);
               I.say("  Born: "+a+", parents: "+parents);
@@ -173,7 +173,7 @@ public class TestLifeCycle extends LogicTest {
           }
         }
         for (Actor w : originalPop) {
-          if (w.dead() && ! map.actors().includes(w)) {
+          if (w.health.dead() && ! map.actors().includes(w)) {
             if (! deaths.includes(w)) I.say("  Died: "+w);
             deaths.include(w);
           }
@@ -187,19 +187,19 @@ public class TestLifeCycle extends LogicTest {
       //
       //  We need to speed things up a little to avoid infant mortality and
       //  variable lifespans, if succession is going to be checked-
-      if (map.time() > MAX_DELAY && (! consort.pregnant()) && ! heirBorn) {
-        consort.beginPregnancy();
+      if (map.time() > MAX_DELAY && (! consort.health.pregnant()) && ! heirBorn) {
+        consort.health.beginPregnancy();
       }
-      if (consort.pregnant() && consort.inside() == palace && ! heirBorn) {
-        consort.completePregnancy(palace, true);
+      if (consort.health.pregnant() && consort.inside() == palace && ! heirBorn) {
+        consort.health.completePregnancy(palace, true);
       }
       if (! recognised) {
         recognised = council.memberWithRole(Role.HEIR) != null;
       }
-      if (map.time() > MAX_REIGN && recognised && ! oldKing.dead()) {
-        oldKing.setAsKilled("Died to allow heir to succeed");
+      if (map.time() > MAX_REIGN && recognised && ! oldKing.health.dead()) {
+        oldKing.health.setAsKilled("Died to allow heir to succeed");
       }
-      if (oldKing.dead() && ! kingDied) {
+      if (oldKing.health.dead() && ! kingDied) {
         kingDied = true;
       }
       if (kingDied && ! succession) {
@@ -233,7 +233,7 @@ public class TestLifeCycle extends LogicTest {
     I.say("  Bad jobs?     "+(! noBadJobs));
     I.say("  Old king:     "+oldKing);
     I.say("  Heir born:    "+heirBorn);
-    I.say("  Alive:        "+oldKing.alive());
+    I.say("  Alive:        "+oldKing.health.alive());
     I.say("  Children:     "+oldKing.allBondedWith(BOND_CHILD));
     I.say("  Current king: "+council.memberWithRole(Role.MONARCH));
     

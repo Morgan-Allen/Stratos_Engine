@@ -64,7 +64,7 @@ public class HumanType extends ActorType {
   
   public Sprite makeSpriteFor(Element e) {
     final ActorAsPerson a = (ActorAsPerson) e;
-    ModelAsset model = a.man() ? HUMAN_MODEL_MALE : HUMAN_MODEL_FEMALE;
+    ModelAsset model = a.health.man() ? HUMAN_MODEL_MALE : HUMAN_MODEL_FEMALE;
     ImageAsset skin = HUMAN_BLOOD_SKINS[a.varID() % 4];
     
     SolidSprite s = (SolidSprite) model.makeSprite();

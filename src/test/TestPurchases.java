@@ -94,8 +94,8 @@ public class TestPurchases extends LogicTest {
         potionOkay = buys.carried(potionType) > 0;
         if (potionOkay) {
           injureTime = map.time();
-          buys.takeDamage(buys.maxHealth() * 0.9f);
-          initInjury = buys.injury();
+          buys.takeDamage(buys.health.maxHealth() * 0.9f);
+          initInjury = buys.health.injury();
         }
       }
       
@@ -104,7 +104,7 @@ public class TestPurchases extends LogicTest {
         Area.timeSince(map.time(), injureTime) < 10
       ) {
         float healAmount = StockExGoods.MEDIKIT_HEAL_AMOUNT;
-        usageOkay = buys.injury() <= initInjury + 1 - healAmount;
+        usageOkay = buys.health.injury() <= initInjury + 1 - healAmount;
       }
       
       if (collectOkay && usageOkay && ! testOkay) {

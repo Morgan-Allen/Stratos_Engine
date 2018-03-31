@@ -105,7 +105,7 @@ public class TestMilitary extends LogicTest {
       if (! homeWin) {
         boolean survivors = false;
         for (Actor w : enemies.recruits()) {
-          if (w.alive()) survivors = true;
+          if (w.health.alive()) survivors = true;
         }
         homeWin = ! survivors;
         if (homeWin) {

@@ -70,8 +70,8 @@ public class Readout extends UIGroup {
     final ActorHealth RH = ruled ? played.ruler().health : null;
     int psyPoints = 0, maxPsy = 0;
     if (played.ruler() != null) {
-      maxPsy    += RH.maxHealth();
-      psyPoints += maxPsy - RH.fatigue();
+      maxPsy    += RH.health.maxHealth();
+      psyPoints += maxPsy - RH.health.fatigue();
       read.append("   Psy Points: ");
       read.append(    I.lengthen(psyPoints, 2, true));
       read.append("/"+I.lengthen(maxPsy   , 2, true));

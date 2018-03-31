@@ -34,13 +34,13 @@ public class TestPowersCollective {
       Target createSubject(Area map, Building guild) {
         Actor subject = (Actor) ECOLOGIST.generate();
         subject.enterMap(map, 20, 20, 1, guild.base());
-        subject.takeDamage(subject.maxHealth() * 0.75f);
+        subject.takeDamage(subject.health.maxHealth() * 0.75f);
         return subject;
       }
       
       boolean verifyEffect(Target subject) {
         Actor healed = (Actor) subject;
-        return healed.injury() < (healed.maxHealth() * 0.25f);
+        return healed.health.injury() < (healed.health.maxHealth() * 0.25f);
       }
       
     };

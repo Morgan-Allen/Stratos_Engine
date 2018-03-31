@@ -196,11 +196,11 @@ public class BaseCouncil {
     Actor monarch = memberWithRole(Role.MONARCH);
     if (monarch != null) {
       for (Actor consort : monarch.allBondedWith(BOND_MARRIED)) {
-        if (! consort.alive()) continue;
+        if (! consort.health.alive()) continue;
         toggleMember(consort, Role.CONSORT, true);
       }
       for (Actor heir : monarch.allBondedWith(BOND_CHILD)) {
-        if (! heir.alive()) continue;
+        if (! heir.health.alive()) continue;
         toggleMember(heir, Role.HEIR, true);
       }
     }
@@ -208,15 +208,15 @@ public class BaseCouncil {
     //  For now, we'll assume succession is determined by quasi-hereditary-
     //  male-line-primogeniture with a dash of popularity contest.  Might allow
     //  for customisation later.
-    if (monarch == null || monarch.dead()) {
+    if (monarch == null || monarch.health.dead()) {
       toggleMember(monarch, Role.MONARCH, false);
       Pick <Actor> pick = new Pick();
       for (Actor a : members) {
         Role r = roles.get(a);
         float rating = 1 + membersBondAvg(a);
-        if (r == Role.HEIR) rating *= 3;
-        if (a.woman()     ) rating /= 2;
-        rating *= 1 + (a.ageYears() / AVG_RETIREMENT);
+        if (r == Role.HEIR  ) rating *= 3;
+        if (a.health.woman()) rating /= 2;
+        rating *= 1 + (a.health.ageYears() / AVG_RETIREMENT);
         pick.compare(a, rating);
       }
       //
@@ -230,7 +230,7 @@ public class BaseCouncil {
     //  And remove any other dead council-members:
     for (Actor a : members) {
       Role r = roles.get(a);
-      if (a.dead()) {
+      if (a.health.dead()) {
         toggleMember(a, r, false);
       }
     }
@@ -506,7 +506,7 @@ public class BaseCouncil {
     for (Actor a : from.council.allMembersWithRole(BaseCouncil.Role.HEIR)) {
       Actor spouse = a.allBondedWith(BOND_MARRIED).first();
       if (spouse != null) continue;
-      if (monarch.sexData == a.sexData) continue;
+      if (monarch.health.man() == a.health.man()) continue;
       
       float rating = 1.0f;
       if (random) rating += Rand.num() - 0.5f;

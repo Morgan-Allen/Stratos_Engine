@@ -107,7 +107,7 @@ public class BaseEvents {
     
     for (float i = Nums.min(numFought, casualties); i-- > 0;) {
       Actor lost = (Actor) Rand.pickFrom(mission.recruits);
-      lost.setAsKilled("casualty of war");
+      lost.health.setAsKilled("casualty of war");
       mission.toggleRecruit(lost, false);
       numLost += 1;
     }
@@ -162,7 +162,7 @@ public class BaseEvents {
   
   static void arrangeMarriage(Base city, Base other, Actor marries) {
     Actor monarch = city.council.memberWithRole(Role.MONARCH);
-    if (monarch == null || monarch.dead()) return;
+    if (monarch == null || monarch.health.dead()) return;
     
     setBond(monarch, marries, BOND_MARRIED, BOND_MARRIED, 0);
     marries.assignBase(monarch.base());

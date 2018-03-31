@@ -137,10 +137,10 @@ public class TestWorld extends LogicTest {
       Base mainC = pair[1];
       Actor monarch = (Actor) Nobles.NOBLE  .generate();
       Actor queen   = (Actor) Nobles.CONSORT.generate();
-      monarch.setSexData(SEX_MALE  );
-      queen  .setSexData(SEX_FEMALE);
-      monarch.setAgeYears(AVG_RETIREMENT / 4);
-      queen  .setAgeYears(AVG_RETIREMENT / 4);
+      monarch.health.setSexData(SEX_MALE  );
+      queen  .health.setSexData(SEX_FEMALE);
+      monarch.health.setAgeYears(AVG_RETIREMENT / 4);
+      queen  .health.setAgeYears(AVG_RETIREMENT / 4);
       
       ActorAsPerson.setBond(monarch, queen, BOND_MARRIED, BOND_MARRIED, 1);
       mainC.council.toggleMember(monarch, Role.MONARCH, true);
@@ -158,7 +158,7 @@ public class TestWorld extends LogicTest {
         I.say("\nNo heirs produced!");
         return false;
       }
-      if (monarch.alive() || queen.alive()) {
+      if (monarch.health.alive() || queen.health.alive()) {
         I.say("\nParents still alive!");
         return false;
       }

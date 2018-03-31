@@ -166,7 +166,7 @@ public class TaskDelivery extends Task {
     Actor actor = (Actor) active;
     float base = super.successPriority();
     if (carried.isEdible && goes == actor.home()) {
-      float max = actor.hungerLevel();
+      float max = actor.health.hungerLevel();
       return base + ((Task.PARAMOUNT - base) * max);
     }
     else return base;

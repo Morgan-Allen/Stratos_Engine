@@ -58,7 +58,7 @@ public class TestBounties extends LogicTest {
       Mission setupMission(Area map, Base base) {
         Actor creature = (Actor) MICOVORE.generate();
         creature.enterMap(map, 20, 20, 1, map.locals);
-        creature.takeDamage(creature.maxHealth() * 0.7f);
+        creature.takeDamage(creature.health.maxHealth() * 0.7f);
         
         MissionStrike mission = new MissionStrike(base);
         mission.setLocalFocus(creature);
@@ -125,7 +125,7 @@ public class TestBounties extends LogicTest {
         
         threat = (Actor) TRIPOD.generate();
         threat.enterMap(map, 30, 30, 1, map.locals);
-        threat.takeDamage(threat.maxHealth() * 0.7f);
+        threat.takeDamage(threat.health.maxHealth() * 0.7f);
         
         mission = new MissionSecure(base);
         mission.setLocalFocus(guarded);
@@ -225,7 +225,7 @@ public class TestBounties extends LogicTest {
       onMapUpdate(map, base);
       
       for (Actor a : fort.workers()) {
-        if (a.injury() > 0) a.liftDamage(a.injury());
+        if (a.health.injury() > 0) a.health.liftDamage(a.health.injury());
       }
       
       if (! fundsTaken) {

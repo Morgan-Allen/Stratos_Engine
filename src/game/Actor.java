@@ -18,25 +18,14 @@ public class Actor extends Element implements
   
   /**  Data fields and setup/initialisation-
     */
-  final static float
-    PAIN_PERCENT       = 50,
-    KNOCKOUT_PERCENT   = 100,
-    DECOMP_PERCENT     = 150,
-    BLEED_HURT_PERCENT = 50,
-    BLEED_PER_SECOND   = 0.25f,
-    DECOMP_TIME        = DAY_LENGTH
-  ;
   final public static int
-    STATE_OKAY   = 1,
-    STATE_KO     = 2,
-    STATE_DEAD   = 3,
-    STATE_DECOMP = 4,
     MOVE_NORMAL  = 1,
     MOVE_RUN     = 2,
     MOVE_CLIMB   = 3,
     MOVE_SNEAK   = 4,
     MOVE_SWIM    = 5
   ;
+  
   static int nextID = 0;
   int dirs[] = new int[4];
   
@@ -61,16 +50,9 @@ public class Actor extends Element implements
   Tally <Good> carried = new Tally();
   Actor attached = null, attachTo = null;
   
-  int sexData    = -1;
-  int ageSeconds =  0;
-  int pregnancy  =  0;
-  float injury  ;
-  float bleed   ;
-  float hunger  ;
-  float fatigue ;
-  float stress  ;
-  float cooldown;
-  int   state = STATE_OKAY;
+  final public ActorHealth health = initHealth();
+  
+  ActorHealth initHealth() { return new ActorHealth(this); }
   
   
   
@@ -105,17 +87,7 @@ public class Actor extends Element implements
     attached = (Actor) s.loadObject();
     attachTo = (Actor) s.loadObject();
     
-    sexData    = s.loadInt();
-    ageSeconds = s.loadInt();
-    pregnancy  = s.loadInt();
-    
-    injury   = s.loadFloat();
-    bleed    = s.loadFloat();
-    hunger   = s.loadFloat();
-    fatigue  = s.loadFloat();
-    stress   = s.loadFloat();
-    cooldown = s.loadFloat();
-    state    = s.loadInt();
+    health.loadState(s);
   }
   
   
@@ -143,17 +115,7 @@ public class Actor extends Element implements
     s.saveObject(attached);
     s.saveObject(attachTo);
     
-    s.saveInt(sexData   );
-    s.saveInt(ageSeconds);
-    s.saveInt(pregnancy );
-    
-    s.saveFloat(injury  );
-    s.saveFloat(bleed   );
-    s.saveFloat(hunger  );
-    s.saveFloat(fatigue );
-    s.saveFloat(stress  );
-    s.saveFloat(cooldown);
-    s.saveInt  (state   );
+    health.saveState(s);
   }
   
   
@@ -235,49 +197,6 @@ public class Actor extends Element implements
     */
   void update() {
     //
-    //  Obtain some basic settings first-
-    WorldSettings settings = map.world.settings;
-    boolean organic = type().organic && ! type().isVessel();
-    float tick = 1f / map().ticksPS;
-    //
-    //  Adjust health-parameters accordingly-
-    if (! alive()) {
-      float decay = tick * 1f * maxHealth();
-      decay *= (DECOMP_PERCENT - KNOCKOUT_PERCENT) / 100f;
-      bleed = 0;
-      injury += decay;
-    }
-    else if (organic) {
-      hunger += settings.toggleHunger ? (tick / STARVE_INTERVAL) : 0;
-      
-      if (bleed > 0) {
-        float bleedInc = tick * BLEED_PER_SECOND;
-        injury += bleedInc;
-        bleed -= bleedInc;
-      }
-      else bleed = 0;
-      
-      boolean resting = jobType() == JOB.RESTING && task().inContact();
-      resting |= state == STATE_KO;
-      
-      if (resting) {
-        float rests = tick / FATIGUE_REGEN;
-        float heals = tick / HEALTH_REGEN ;
-        fatigue = Nums.max(0, fatigue - rests);
-        injury  = Nums.max(0, injury  - heals);
-      }
-      else {
-        fatigue += settings.toggleFatigue ? (tick / FATIGUE_INTERVAL) : 0;
-        float heals = tick * 0.5f / HEALTH_REGEN;
-        injury = Nums.max(0, injury - heals);
-      }
-    }
-    else {
-      float rests = tick / FATIGUE_REGEN;
-      bleed = 0;
-      fatigue = Nums.max(0, fatigue - rests);
-    }
-    //
     //  Some checks to assist in case of blockage, and refreshing position-
     lastPosition.setTo(exactPosition);
     wasIndoors = indoors();
@@ -292,7 +211,7 @@ public class Actor extends Element implements
         setLocation(free, map);
       }
     }
-    if (active()) {
+    if (health.active()) {
       //
       //  Update fear-level:
       fearLevel = updateFearLevel();
@@ -307,28 +226,25 @@ public class Actor extends Element implements
       else if (onMap() && (task == null || ! task.checkAndUpdateTask())) {
         beginNextBehaviour();
       }
+      //
+      //  Update vision and reactions-
+      if (onMap()) updateVision();
       if (onMap()) updateReactions();
       //
       //  Update anything you're carrying-
       if (attached != null && onMap()) {
         attached.setExactLocation(exactPosition, map);
       }
-      //
-      //  And update your current vision and health-
-      if (onMap()) updateCooldown();
-      if (onMap()) updateVision();
-      if (onMap()) checkHealthState();
-      if (onMap()) updateLifeCycle(base(), true);
     }
-    else {
-      if (onMap()) checkHealthState();
-      if (onMap() && alive()) updateLifeCycle(base(), true);
-    }
+    //
+    //  And update health-state and life-cycle-
+    if (onMap()) health.checkHealthState();
+    if (onMap() && health.alive()) health.updateLifeCycle(base(), true);
   }
   
   
   void updateOffMap(Base city) {
-    updateLifeCycle(city, false);
+    health.updateLifeCycle(city, false);
   }
   
   
@@ -640,60 +556,13 @@ public class Actor extends Element implements
   }
   
   
-  public boolean armed() {
-    return Nums.max(type().meleeDamage, type().rangeDamage) > 0;
-  }
-  
-  
-  public void liftDamage(float damage) {
-    takeDamage(0 - damage);
-  }
-  
-  
-  public void liftFatigue(float tire) {
-    takeFatigue(0 - tire);
-  }
-  
-  
   public void takeDamage(float damage) {
-    if (map == null || ! map.world.settings.toggleInjury) return;
-    injury += damage;
-    injury = Nums.clamp(injury, 0, maxHealth() + 1);
-    bleed += injury * BLEED_HURT_PERCENT / 100f;
-    checkHealthState();
+    health.takeDamage(damage);
   }
   
   
-  public void setBleed(float bleed) {
-    this.bleed = bleed;
-  }
-  
-  
-  public void takeFatigue(float tire) {
-    if (map == null || ! map.world.settings.toggleFatigue) return;
-    fatigue += tire;
-    fatigue = Nums.clamp(tire, 0, maxHealth() + 1);
-    checkHealthState();
-  }
-  
-  
-  public void setCooldown(float cool) {
-    this.cooldown = cool;
-  }
-  
-  
-  public void liftHunger(float inc) {
-    this.hunger = Nums.clamp(hunger - inc, 0, maxHealth());
-  }
-  
-  
-  public void setHungerLevel(float level) {
-    this.hunger = maxHealth() * level;
-  }
-  
-  
-  void updateCooldown() {
-    this.cooldown = Nums.max(0, cooldown - 1);
+  public boolean armed() {
+    return Nums.max(meleeDamage(), rangeDamage()) > 0;
   }
   
   
@@ -705,33 +574,6 @@ public class Actor extends Element implements
       float range = sightRange();
       if (fog != null) fog.liftFog(at(), range);
     }
-  }
-  
-  
-  void checkHealthState() {
-    float maxHealth = maxHealth() * KNOCKOUT_PERCENT / 100f;
-    float maxIntact = maxHealth() * DECOMP_PERCENT   / 100f;
-    
-    if (injury + hunger > maxIntact) {
-      this.state = STATE_DECOMP;
-      if (map != null) exitMap(map);
-      setDestroyed();
-    }
-    if (injury + hunger > maxHealth) {
-      setAsKilled("Injury: "+injury+" Hunger "+hunger);
-    }
-    else if (injury + hunger + fatigue > maxHealth) {
-      this.state = STATE_KO;
-    }
-    else if (alive()) {
-      this.state = STATE_OKAY;
-    }
-  }
-  
-  
-  public void setAsKilled(String cause) {
-    if (reports()) I.say(this+" DIED: "+cause);
-    state = STATE_DEAD;
   }
   
   
@@ -750,21 +592,9 @@ public class Actor extends Element implements
   }
   
   
-  public float hungerLevel() {
-    return hunger / maxHealth();
+  public float growLevel() {
+    return health.growLevel();
   }
-  
-  
-  public float maxHealth () { return type().maxHealth ; }
-  public float injury  () { return injury  ; }
-  public float bleed   () { return bleed   ; }
-  public float fatigue () { return fatigue ; }
-  public float cooldown() { return cooldown; }
-  public float hunger  () { return hunger  ; }
-  
-  public boolean active() { return state == STATE_OKAY; }
-  public boolean alive () { return state <= STATE_KO  ; }
-  public boolean dead  () { return state >= STATE_DEAD; }
   
   
   
@@ -797,55 +627,6 @@ public class Actor extends Element implements
   
   public Series <Actor> allBondedWith(int type) {
     return new Batch();
-  }
-  
-  
-  
-  /**  Aging, reproduction and life-cycle:
-    */
-  public void setSexData(int sexData) {
-    this.sexData    = sexData;
-  }
-  
-  
-  public void setAgeYears(float ageYears) {
-    this.ageSeconds = (int) (ageYears * YEAR_LENGTH);
-  }
-  
-  
-  public float ageYears() {
-    float years = ageSeconds / (YEAR_LENGTH * 1f);
-    return years;
-  }
-  
-  
-  public float growLevel() {
-    return Nums.min(1, ageYears() / AVG_MARRIED);
-  }
-  
-  
-  public boolean adult() {
-    return true;
-  }
-  
-  
-  public boolean child() {
-    return false;
-  }
-  
-  
-  public boolean man() {
-    return false;
-  }
-  
-  
-  public boolean woman() {
-    return false;
-  }
-  
-  
-  void updateLifeCycle(Base city, boolean onMap) {
-    ageSeconds += 1;
   }
   
   
@@ -959,8 +740,8 @@ public class Actor extends Element implements
     h.fog = s.fog;
     h.colour = Colour.BLUE;
     h.size = 30;
-    h.hurtLevel = (injury() + hunger()) / maxHealth();
-    h.tireLevel = fatigue() / maxHealth();
+    h.hurtLevel = (health.injury() + health.hunger()) / health.maxHealth();
+    h.tireLevel = health.fatigue() / health.maxHealth();
     h.position.setTo(s.position);
     h.position.z += type().deep + 0.1f;
     h.readyFor(rendering);

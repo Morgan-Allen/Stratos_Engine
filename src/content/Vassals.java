@@ -56,7 +56,7 @@ public class Vassals {
   ) {
     public void initAsMigrant(ActorAsPerson p) {
       super.initAsMigrant(p);
-      String forenames[] = p.man() ? CITIZEN_MN : CITIZEN_FN;
+      String forenames[] = p.health.man() ? CITIZEN_MN : CITIZEN_FN;
       final String name = generateName(forenames, CITIZEN_LN, null);
       p.setCustomName(name);
     }
@@ -73,7 +73,7 @@ public class Vassals {
   ) {
     public void initAsMigrant(ActorAsPerson p) {
       super.initAsMigrant(p);
-      String forenames[] = p.man() ? CITIZEN_MN : CITIZEN_FN;
+      String forenames[] = p.health.man() ? CITIZEN_MN : CITIZEN_FN;
       final String name = generateName(forenames, CITIZEN_LN, null);
       p.setCustomName(name);
     }
@@ -90,7 +90,7 @@ public class Vassals {
   ) {
     public void initAsMigrant(ActorAsPerson p) {
       super.initAsMigrant(p);
-      String forenames[] = p.man() ? PYON_MN : PYON_FN;
+      String forenames[] = p.health.man() ? PYON_MN : PYON_FN;
       final String name = generateName(forenames, PYON_LN, null);
       p.setCustomName(name);
     }

@@ -47,8 +47,8 @@ public class TestFirstAid extends LogicTest {
     ActorAsPerson patient = (ActorAsPerson) ECOLOGIST.generate();
     ECOLOGIST.initAsMigrant(patient);
     patient.enterMap(map, 11, 11, 1, base);
-    patient.takeDamage (patient.maxHealth() * 0.66f);
-    patient.takeFatigue(patient.maxHealth() * 0.66f);
+    patient.health.takeDamage (patient.health.maxHealth() * 0.66f);
+    patient.health.takeFatigue(patient.health.maxHealth() * 0.66f);
     
     
     final int RUN_TIME = DAY_LENGTH * 2;
@@ -63,7 +63,7 @@ public class TestFirstAid extends LogicTest {
       }
       
       if (aidBegun && ! stabilised) {
-        stabilised = patient.bleed() <= 0;
+        stabilised = patient.health.bleed() <= 0;
       }
       
       if (stabilised && ! carryBegun) {
@@ -75,7 +75,7 @@ public class TestFirstAid extends LogicTest {
       }
       
       if (atSickbay && ! healFinish) {
-        healFinish = patient.injury() < patient.maxHealth() * 0.33f;
+        healFinish = patient.health.injury() < patient.health.maxHealth() * 0.33f;
       }
       
       if (healFinish && ! testOkay) {

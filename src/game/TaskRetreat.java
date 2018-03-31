@@ -74,8 +74,8 @@ public class TaskRetreat extends Task {
     
     float lossChance = 0, sumFactors = dangerSum + allySum;
     if (sumFactors > 0) lossChance = dangerSum / sumFactors;
-    lossChance += actor.injury () * 1.0f / actor.maxHealth();
-    lossChance += actor.fatigue() * 0.5f / actor.maxHealth();
+    lossChance += actor.health.injury () * 1.0f / actor.health.maxHealth();
+    lossChance += actor.health.fatigue() * 0.5f / actor.health.maxHealth();
     
     return lossChance;
   }

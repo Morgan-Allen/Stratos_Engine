@@ -103,8 +103,8 @@ public class TaskFirstAid extends Task {
   /**  Assessing priority-
     */
   static float rateAid(Actor actor, Actor other, boolean midTask) {
-    if (other.active() || other == actor     ) return -1;
-    if (other.indoors() && other.bleed() <= 0) return -1;
+    if (other.health.active() || other == actor     ) return -1;
+    if (other.indoors() && other.health.bleed() <= 0) return -1;
     
     //  TODO:  Also allow treatment if the actor is seeking aid for their
     //  injuries/disease at a sickbay...
@@ -112,7 +112,7 @@ public class TaskFirstAid extends Task {
     float bandageLevel = other.carried(BANDAGES);
     if (bandageLevel >= (midTask ? 1 : 0.5f)) return -1;
     
-    float injury   = other.injury() / other.maxHealth();
+    float injury   = other.health.injury() / other.health.maxHealth();
     float relation = 0.5f + (actor.levelOf(TRAIT_EMPATHY) / 2);
     float distMult = Area.distancePenalty(actor, other);
     
@@ -167,7 +167,7 @@ public class TaskFirstAid extends Task {
     
     public void applyPassive(Actor using, Target subject) {
       float healInc = 1f / AVG_BANDAGE_TIME;
-      using.liftDamage(healInc);
+      using.health.liftDamage(healInc);
       using.incCarried(BANDAGES, 0 - healInc);
     }
   };
@@ -181,22 +181,22 @@ public class TaskFirstAid extends Task {
     
     Actor   actor    = (Actor) active;
     float   bandages = patient.carried(BANDAGES);
-    boolean bleeds   = patient.bleed() > 0;
+    boolean bleeds   = patient.health.bleed() > 0;
     
     if (skillTest == -1) {
       float skill = actor.levelOf(SKILL_HEAL) / MAX_SKILL_LEVEL;
       float obstacle = 0.5f;
       float chance = Nums.clamp(skill + 1 - obstacle, 0, 2) / 2;
       
-      skillTest = 0;
-      skillTest += Rand.num() < chance ? 0.5f : 0;
-      skillTest += Rand.num() < chance ? 0.5f : 0;
+      skillTest = 0.33f;
+      skillTest += Rand.num() < chance ? 0.33f : 0;
+      skillTest += Rand.num() < chance ? 0.33f : 0;
     }
     
     if (bleeds) {
       float healInc = skillTest * 2f / AVG_TREATMENT_TIME;
       patient.setCarried(BANDAGES, bandages + healInc);
-      patient.setBleed(patient.bleed() - BLEED_ACTION_HEAL);
+      patient.health.incBleed(0 - BLEED_ACTION_HEAL * skillTest);
       configTask(origin, null, patient, JOB.HEALING, 1);
     }
     

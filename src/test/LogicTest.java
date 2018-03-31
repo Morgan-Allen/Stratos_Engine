@@ -486,9 +486,9 @@ public class LogicTest {
         "\n  Melee/Range dmg:  "+t.meleeDamage+"/"+t.rangeDamage+
         "\n  Armour class:     "+t.armourClass+
         "\n  Sight/attack rng: "+t.sightRange+"/"+t.rangeDist+
-        "\n  Injury:           "+I.shorten(a.injury() , 1)+"/"+t.maxHealth+
-        "\n  Fatigue:          "+I.shorten(a.fatigue(), 1)+"/"+t.maxHealth+
-        "\n  Hunger:           "+I.shorten(a.hunger() , 1)+"/"+t.maxHealth+
+        "\n  Injury:           "+I.shorten(a.health.injury() , 1)+"/"+t.maxHealth+
+        "\n  Fatigue:          "+I.shorten(a.health.fatigue(), 1)+"/"+t.maxHealth+
+        "\n  Hunger:           "+I.shorten(a.health.hunger() , 1)+"/"+t.maxHealth+
         "\n  Fear Level:       "+I.percent(a.fearLevel())
       );
       report.append("\n  Task: "+a.jobDesc());
@@ -720,7 +720,7 @@ public class LogicTest {
     report.append("\n");
     
     float avgHunger = 0;
-    for (Actor a : map.actors()) avgHunger += a.hunger() / a.type().maxHealth;
+    for (Actor a : map.actors()) avgHunger += a.health.hunger() / a.type().maxHealth;
     avgHunger /= map.actors().size();
     
     report.append("\nTOTAL POPULATION: "+map.actors().size());

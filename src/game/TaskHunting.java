@@ -80,7 +80,7 @@ public class TaskHunting extends Task {
       boolean melee = actor.meleeDamage() > actor.rangeDamage();
       actor.performAttack(prey, melee);
       
-      if (! prey.dead()) {
+      if (! prey.health.dead()) {
         configTask(store, null, prey, JOB.HUNTING, 0);
       }
       else {

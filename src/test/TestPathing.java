@@ -180,7 +180,7 @@ public class TestPathing extends LogicTest {
       
       for (Actor a : actors) {
         
-        if (! a.alive()) {
+        if (! a.health.alive()) {
           I.say("\n"+a+" IS DEAD, SOMEHOW?");
           pathWrong = true;
         }
@@ -240,7 +240,7 @@ public class TestPathing extends LogicTest {
     I.say("\nPATHING TEST FAILED!");
     I.say("  Current time: "+map.time());
     I.say("  Reached destination: "+numReachedDest+"/"+shouldReach);
-    for (Actor a : actors) if (a.dead()) I.say("  "+a+" is dead!");
+    for (Actor a : actors) if (a.health.dead()) I.say("  "+a+" is dead!");
     
     return false;
   }

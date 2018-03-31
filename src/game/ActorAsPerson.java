@@ -228,7 +228,7 @@ public class ActorAsPerson extends Actor {
     //  present on the same map to derive related bahaviours!
     //
     //  Establish some facts about the citizen first:
-    boolean adult = adult();
+    boolean adult = health.adult();
     assignTask(null);
     //
     //  Adults will search for work and a place to live:
@@ -306,7 +306,7 @@ public class ActorAsPerson extends Actor {
       }
     }
     
-    if (cooldown() == 0) {
+    if (health.cooldown() == 0) {
       Task reaction = selectTechniqueUse(true);
       if (reaction != null) assignReaction(reaction);
     }
@@ -409,118 +409,121 @@ public class ActorAsPerson extends Actor {
   
   /**  Aging, reproduction and life-cycle methods-
     */
-  void updateLifeCycle(Base city, boolean onMap) {
-    super.updateLifeCycle(city, onMap);
-    
-    WorldSettings settings = city.world.settings;
-    
-    if (pregnancy > 0) {
-      boolean canBirth = (home() != null && inside() == home()) || ! onMap;
-      pregnancy += 1;
-      if (pregnancy > PREGNANCY_LENGTH && canBirth) {
-        float dieChance = AVG_CHILD_MORT / 100f;
-        if (! settings.toggleChildMort) dieChance = 0;
+  ActorHealth initHealth() {
+    return new ActorHealth(this) {
+      void updateLifeCycle(Base city, boolean onMap) {
+        super.updateLifeCycle(city, onMap);
         
-        //I.say(this+" FINISHED TERM...");
+        WorldSettings settings = city.world.settings;
         
-        if (Rand.num() >= dieChance) {
-          completePregnancy(home(), onMap);
+        if (pregnancy > 0) {
+          boolean canBirth = (home() != null && inside() == home()) || ! onMap;
+          pregnancy += 1;
+          if (pregnancy > PREGNANCY_LENGTH && canBirth) {
+            float dieChance = AVG_CHILD_MORT / 100f;
+            if (! settings.toggleChildMort) dieChance = 0;
+            
+            //I.say(this+" FINISHED TERM...");
+            
+            if (Rand.num() >= dieChance) {
+              completePregnancy(home(), onMap);
+            }
+            else {
+              pregnancy = 0;
+              //I.say(this+" LOST THEIR CHILD.");
+            }
+          }
+          if (pregnancy > PREGNANCY_LENGTH + DAY_LENGTH) {
+            pregnancy = 0;
+            //I.say(this+" CANCELLED PREGNANCY!");
+          }
         }
-        else {
-          pregnancy = 0;
-          //I.say(this+" LOST THEIR CHILD.");
+        
+        if (ageSeconds % YEAR_LENGTH == 0) {
+          
+          boolean canDie = settings.toggleAging;
+          if (senior() && canDie && Rand.index(100) < AVG_SENIOR_MORT) {
+            setAsKilled("Old age");
+          }
+          
+          boolean canConceive = home() != null || ! onMap;
+          if (woman() && fertile() && pregnancy == 0 && canConceive) {
+            float
+              ageYears   = ageSeconds / (YEAR_LENGTH * 1f),
+              fertSpan   = AVG_MENOPAUSE - AVG_MARRIED,
+              fertility  = (AVG_MENOPAUSE - ageYears) / fertSpan,
+              wealth     = BuildingForHome.wealthLevel(actor),
+              chanceRng  = MAX_PREG_CHANCE - MIN_PREG_CHANCE,
+              chanceW    = MAX_PREG_CHANCE - (wealth * chanceRng),
+              pregChance = fertility * chanceW / 100
+            ;
+            if (Rand.num() < pregChance) {
+              beginPregnancy();
+              //I.say(this+" BECAME PREGNANT!  TIME TO TERM: "+(PREGNANCY_LENGTH+map.time()));
+            }
+          }
         }
       }
-      if (pregnancy > PREGNANCY_LENGTH + DAY_LENGTH) {
+      
+      
+      public void completePregnancy(Building venue, boolean onMap) {
+        
+        ActorAsPerson child  = (ActorAsPerson) type().childType().generate();
+        ActorAsPerson father = (ActorAsPerson) bondedWith(BOND_MARRIED);
+        setBond(actor , child, BOND_CHILD, BOND_PARENT, 0.5f);
+        setBond(father, child, BOND_CHILD, BOND_PARENT, 0.5f);
         pregnancy = 0;
-        //I.say(this+" CANCELLED PREGNANCY!");
-      }
-    }
-    
-    if (ageSeconds % YEAR_LENGTH == 0) {
-      
-      boolean canDie = settings.toggleAging;
-      if (senior() && canDie && Rand.index(100) < AVG_SENIOR_MORT) {
-        setAsKilled("Old age");
-      }
-      
-      boolean canConceive = home() != null || ! onMap;
-      if (woman() && fertile() && pregnancy == 0 && canConceive) {
-        float
-          ageYears   = ageSeconds / (YEAR_LENGTH * 1f),
-          fertSpan   = AVG_MENOPAUSE - AVG_MARRIED,
-          fertility  = (AVG_MENOPAUSE - ageYears) / fertSpan,
-          wealth     = BuildingForHome.wealthLevel(this),
-          chanceRng  = MAX_PREG_CHANCE - MIN_PREG_CHANCE,
-          chanceW    = MAX_PREG_CHANCE - (wealth * chanceRng),
-          pregChance = fertility * chanceW / 100
-        ;
-        if (Rand.num() < pregChance) {
-          beginPregnancy();
-          //I.say(this+" BECAME PREGNANT!  TIME TO TERM: "+(PREGNANCY_LENGTH+map.time()));
+        
+        if (onMap) {
+          AreaTile at = venue.at();
+          child.enterMap(map, at.x, at.y, 1, base());
+          child.setInside(venue, true);
+          venue.setResident(child, true);
         }
+        
+        //I.say(this+" GAVE BIRTH TO "+child);
       }
-    }
-  }
-  
-  
-  public boolean pregnant() {
-    return pregnancy > 0;
-  }
-  
-  
-  public void beginPregnancy() {
-    pregnancy = 1;
-  }
-  
-  
-  public void completePregnancy(Building venue, boolean onMap) {
+      
+      
+      public float growLevel() {
+        return Nums.min(1, ageYears() / AVG_MARRIED);
+      }
+      
+      
+      public boolean child() {
+        return ageYears() < AVG_PUBERTY;
+      }
+      
+      
+      public boolean senior() {
+        return ageYears() > AVG_RETIREMENT;
+      }
+      
+      
+      public boolean fertile() {
+        return ageYears() > AVG_MARRIED && ageYears() < AVG_MENOPAUSE;
+      }
+      
+      
+      public boolean adult() {
+        return ! (child() || senior());
+      }
+      
+      
+      public boolean man() {
+        return (sexData & SEX_MALE) != 0;
+      }
+      
+      
+      public boolean woman() {
+        return (sexData & SEX_FEMALE) != 0;
+      }
+      
+    };
     
-    ActorAsPerson child  = (ActorAsPerson) type().childType().generate();
-    ActorAsPerson father = (ActorAsPerson) bondedWith(BOND_MARRIED);
-    setBond(this  , child, BOND_CHILD, BOND_PARENT, 0.5f);
-    setBond(father, child, BOND_CHILD, BOND_PARENT, 0.5f);
-    pregnancy = 0;
-    
-    if (onMap) {
-      AreaTile at = venue.at();
-      child.enterMap(map, at.x, at.y, 1, base());
-      child.setInside(venue, true);
-      venue.setResident(child, true);
-    }
-    
-    //I.say(this+" GAVE BIRTH TO "+child);
   }
   
   
-  public boolean child() {
-    return ageYears() < AVG_PUBERTY;
-  }
-  
-  
-  public boolean senior() {
-    return ageYears() > AVG_RETIREMENT;
-  }
-  
-  
-  public boolean fertile() {
-    return ageYears() > AVG_MARRIED && ageYears() < AVG_MENOPAUSE;
-  }
-  
-  
-  public boolean adult() {
-    return ! (child() || senior());
-  }
-  
-  
-  public boolean man() {
-    return (sexData & SEX_MALE) != 0;
-  }
-  
-  
-  public boolean woman() {
-    return (sexData & SEX_FEMALE) != 0;
-  }
   
   
   

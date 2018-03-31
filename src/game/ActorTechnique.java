@@ -133,10 +133,10 @@ public abstract class ActorTechnique extends Trait {
     if (using != subject && ! targetOthers()) {
       return false;
     }
-    if (costAP > 0 && using.cooldown() > 0) {
+    if (costAP > 0 && using.health.cooldown() > 0) {
       return false;
     }
-    if (costTire > 0 && using.maxHealth() - using.fatigue() < costTire) {
+    if (costTire > 0 && using.health.maxHealth() - using.health.fatigue() < costTire) {
       return false;
     }
     return canTarget(subject, false);
@@ -255,7 +255,7 @@ public abstract class ActorTechnique extends Trait {
       rating /= 1 + Nums.abs(harmLevel - hostility);
     }
     
-    float fatCost = costTire / (using.maxHealth() - using.fatigue());
+    float fatCost = costTire / (using.health.maxHealth() - using.health.fatigue());
     if (fatCost > 1) return 0;
     
     rating *= 1 - fatCost;
@@ -281,8 +281,8 @@ public abstract class ActorTechnique extends Trait {
   
   
   public void applyFromActor(Actor actor, Target subject) {
-    if (costAP   > 0) actor.setCooldown(costAP  );
-    if (costTire > 0) actor.takeFatigue(costTire);
+    if (costAP   > 0) actor.health.setCooldown(costAP  );
+    if (costTire > 0) actor.health.takeFatigue(costTire);
     applyCommonEffects(subject, null, actor);
   }
   

@@ -71,9 +71,9 @@ public class TaskResting extends Task {
     if (actor == null || rests == null || ! rests.complete()) return -1;
     
     Batch <Good> menu = menuAt(rests, actor);
-    float hurtRating = actor.fatigue() + actor.injury();
-    hurtRating += menu.size() > 0 ? actor.hunger() : 0;
-    return hurtRating / actor.maxHealth();
+    float hurtRating = actor.health.fatigue() + actor.health.injury();
+    hurtRating += menu.size() > 0 ? actor.health.hunger() : 0;
+    return hurtRating / actor.health.maxHealth();
   }
   
   
@@ -88,16 +88,16 @@ public class TaskResting extends Task {
   
   protected void onVisit(Building visits) {
     Actor actor = (Actor) active;
-    if (actor.hunger() >= 1f / HUNGER_REGEN) {
+    if (actor.health.hunger() >= 1f / HUNGER_REGEN) {
       Batch <Good> menu = menuAt(visits, actor);
-      boolean adult = actor.adult();
+      boolean adult = actor.health.adult();
       
       if (menu.size() > 0) for (Good g : menu) {
         float eats = 1f / (menu.size() * HUNGER_REGEN);
         if (! adult) eats /= 2;
         eats = Nums.min(eats, visits.inventory(g));
         visits.addInventory(0 - eats, g);
-        actor.hunger -= eats / FOOD_UNIT_PER_HP;
+        actor.health.liftHunger(eats / FOOD_UNIT_PER_HP);
       }
     }
   }

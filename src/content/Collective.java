@@ -43,7 +43,7 @@ public class Collective {
         return false;
       }
       if (asRuler) {
-        float hurtLevel = a.injury() + a.fatigue() + a.hunger();
+        float hurtLevel = a.health.injury() + a.health.fatigue() + a.health.hunger();
         if (hurtLevel < 1) return false;
       }
       return true;
@@ -54,7 +54,7 @@ public class Collective {
       if (rating <= 0) return 0;
       
       final Actor a = (Actor) subject;
-      float hurtLevel = a.injury() / a.maxHealth();
+      float hurtLevel = a.health.injury() / a.health.maxHealth();
       rating *= hurtLevel;
       return rating;
     }
@@ -64,18 +64,18 @@ public class Collective {
       Area map = healed.map();
       
       if (ruler != null) {
-        healed.liftDamage (PSY_HEAL_AMOUNT    );
-        healed.liftFatigue(PSY_HEAL_AMOUNT / 2);
-        healed.liftHunger (PSY_HEAL_AMOUNT / 2);
-        healed.setBleed(0);
+        healed.health.liftDamage (PSY_HEAL_AMOUNT    );
+        healed.health.liftFatigue(PSY_HEAL_AMOUNT / 2);
+        healed.health.liftHunger (PSY_HEAL_AMOUNT / 2);
+        healed.health.incBleed(-1000);
         
         if (map.ephemera.active()) {
           map.ephemera.addGhostFromModel(healed, FX_MODEL, 1, 0.5f, 1);
         }
       }
       if (actor != null) {
-        healed.liftDamage(PSY_HEAL_AMOUNT);
-        healed.setBleed(0);
+        healed.health.liftDamage(PSY_HEAL_AMOUNT);
+        healed.health.incBleed(-1000);
         
         if (map.ephemera.active()) {
           map.ephemera.addGhostFromModel(healed, FX_MODEL, 1, 0.5f, 1);

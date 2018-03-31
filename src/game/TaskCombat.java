@@ -104,9 +104,9 @@ public class TaskCombat extends Task {
   public static float attackPower(Element f) {
     if (f.type().isActor()) {
       Actor a = (Actor) f;
-      if (a.state >= Actor.STATE_KO) return 0;
+      if (! a.health.active()) return 0;
       float power = attackPower(a.type());
-      power *= 1 - ((a.injury + a.hunger) / a.type().maxHealth);
+      power *= 1 - ((a.health.injury() + a.health.hunger()) / a.type().maxHealth);
       return power;
     }
     else {
@@ -129,7 +129,7 @@ public class TaskCombat extends Task {
   
   public static boolean beaten(Element focus) {
     if (focus.type().isActor()) {
-      return ! ((Actor) focus).active();
+      return ! ((Actor) focus).health.active();
     }
     else {
       return focus.destroyed();
@@ -139,7 +139,7 @@ public class TaskCombat extends Task {
   
   public static boolean killed(Element focus) {
     if (focus.type().isActor()) {
-      return ((Actor) focus).dead();
+      return ((Actor) focus).health.dead();
     }
     else {
       return focus.destroyed();

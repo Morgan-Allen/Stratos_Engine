@@ -49,9 +49,9 @@ public class ActorType extends Type {
       sex = Rand.yes() ? SEX_FEMALE : SEX_MALE;
     }
     
-    a.ageSeconds = (int) (age * YEAR_LENGTH);
-    a.sexData    = sex;
-    a.hunger     = Rand.num() - 0.5f;
+    a.health.setAgeYears(age);
+    a.health.setSexData(sex);
+    a.health.setHunger(Rand.num() - 0.5f);
     
     for (Trait t : initTraits.keys()) {
       a.setLevel(t, initTraits.valueFor(t));
@@ -67,8 +67,8 @@ public class ActorType extends Type {
   
   public void initAsAnimal(ActorAsAnimal a) {
     float age = Rand.num() * a.type().lifespan;
-    a.ageSeconds = (int) age;
-    a.hunger     = Rand.num() - 0.5f;
+    a.health.setAgeYears(age / YEAR_LENGTH);
+    a.health.setHunger(Rand.num() - 0.5f);
     return;
   }
   

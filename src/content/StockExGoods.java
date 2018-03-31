@@ -24,12 +24,12 @@ public class StockExGoods {
     
     public boolean canUseActive(Actor using, Target subject) {
       if (! super.canUseActive(using, subject)) return false;
-      return using.injury() > (using.maxHealth() / 2);
+      return using.health.injury() > (using.health.maxHealth() / 2);
     }
     
     public void applyCommonEffects(Target subject, Base ruler, Actor actor) {
       final Actor healed = (Actor) subject;
-      healed.liftDamage(MEDIKIT_HEAL_AMOUNT);
+      healed.health.liftDamage(MEDIKIT_HEAL_AMOUNT);
       healed.incCarried(MEDIKIT, -1);
     }
   };

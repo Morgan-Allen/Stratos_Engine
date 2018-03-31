@@ -41,7 +41,7 @@ public class Nobles {
   ) {
     public void initAsMigrant(ActorAsPerson p) {
       super.initAsMigrant(p);
-      String forenames[] = p.man() ? HIGHBORN_MN : HIGHBORN_FN;
+      String forenames[] = p.health.man() ? HIGHBORN_MN : HIGHBORN_FN;
       final String name = generateName(forenames, HIGHBORN_HN, HIGHBORN_TN);
       p.setCustomName(name);
     }
@@ -58,7 +58,7 @@ public class Nobles {
   ) {
     public void initAsMigrant(ActorAsPerson p) {
       super.initAsMigrant(p);
-      String forenames[] = p.man() ? HIGHBORN_MN : HIGHBORN_FN;
+      String forenames[] = p.health.man() ? HIGHBORN_MN : HIGHBORN_FN;
       final String name = generateName(forenames, HIGHBORN_TN, null);
       p.setCustomName(name);
     }

@@ -29,9 +29,9 @@ public class ActorPane extends DetailPane {
     d.append("\n");
     
     int maxHP = actor.type().maxHealth;
-    float hurt = actor.injury ();
-    float tire = actor.fatigue();
-    float hung = actor.hunger();
+    float hurt = actor.health.injury();
+    float tire = actor.health.fatigue();
+    float hung = actor.health.hunger();
     int HP = (int) (maxHP - (hurt + tire + hung));
     
     Type type = actor.type();
@@ -73,8 +73,8 @@ public class ActorPane extends DetailPane {
       remXP  = actor.traits.remainderXP(),
       needXP = actor.traits.requiredXP(),
       maxHP  = actor.traits.maxHP(),
-      HP     = (int) (maxHP - actor.traits.injury()),
-      tired  = (int) actor.traits.fatigue()
+      HP     = (int) (maxHP - actor.traits.health.injury()),
+      tired  = (int) actor.traits.health.fatigue()
     ;
 
     d.append(""+actor.toString());

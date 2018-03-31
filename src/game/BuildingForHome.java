@@ -283,7 +283,7 @@ public class BuildingForHome extends Building {
   public Task selectActorBehaviour(Actor actor) {
     //
     //  Non-adults don't do much-
-    if (! actor.adult()) {
+    if (! actor.health.adult()) {
       return TaskWaiting.configWaiting(actor, this, TaskWaiting.TYPE_DOMESTIC);
     }
     //
