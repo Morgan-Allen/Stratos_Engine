@@ -298,11 +298,11 @@ public class TaskBuilding extends Task {
     //  to build, and adjust progress/stocks accordingly-
     Trait skill      = SKILL_BUILD;
     float oldM       = b.materialLevel(material);
-    float skillBonus = actor.levelOf(skill) / MAX_SKILL_LEVEL;
+    float skillBonus = actor.traits.levelOf(skill) / MAX_SKILL_LEVEL;
     float putLimit   = 0.1f * (1 + skillBonus);
     float puts       = Nums.clamp(amountGap, -putLimit, putLimit);
     
-    actor.gainXP(skill, 1 * BUILD_XP_PERCENT / 100f);
+    actor.traits.gainXP(skill, 1 * BUILD_XP_PERCENT / 100f);
     
     puts = Nums.min(puts, amountGot);
     puts = b.incMaterialLevel(material, puts) - oldM;

@@ -155,11 +155,11 @@ public abstract class ActorTechnique extends Trait {
   
   
   public boolean canLearn(Actor actor) {
-    if (actor.classLevel() < minLevel) {
+    if (actor.traits.classLevel() < minLevel) {
       return false;
     }
     for (Trait t : skillNeeds.keys()) {
-      if (actor.levelOf(t) < skillNeeds.valueFor(t)) {
+      if (actor.traits.levelOf(t) < skillNeeds.valueFor(t)) {
         return false;
       }
     }

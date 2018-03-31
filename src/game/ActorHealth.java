@@ -9,7 +9,7 @@ import util.*;
 
 public class ActorHealth {
   
-
+  
   final static float
     PAIN_PERCENT       = 50,
     KNOCKOUT_PERCENT   = 100,

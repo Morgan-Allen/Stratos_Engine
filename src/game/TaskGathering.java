@@ -165,7 +165,7 @@ public class TaskGathering extends Task {
     if (actor.jobType() == JOB.PLANTING) {
       Recipe recipe     = TaskCrafting.recipeFor(plants.yields, store);
       Trait  skill      = recipe.craftSkill;
-      float  skillBonus = actor.levelOf(skill) / MAX_SKILL_LEVEL;
+      float  skillBonus = actor.traits.levelOf(skill) / MAX_SKILL_LEVEL;
       float  multXP     = plants.isCrop ? FARM_XP_PERCENT : GATHR_XP_PERCENT;
       //
       //  First, initialise the crop:
@@ -175,7 +175,7 @@ public class TaskGathering extends Task {
         crop.enterMap(map, at.x, at.y, 1, store.base());
       }
       crop.setGrowLevel(0 + skillBonus / 4);
-      actor.gainXP(skill, 1 * multXP / 100);
+      actor.traits.gainXP(skill, 1 * multXP / 100);
       //
       //  Then pick another point to sow:
       Task plant = pickPlantPoint(store, actor, true, false);
@@ -194,7 +194,7 @@ public class TaskGathering extends Task {
       Type   plants     = above.type();
       Recipe recipe     = TaskCrafting.recipeFor(plants.yields, store);
       Trait  skill      = recipe.craftSkill;
-      float  skillBonus = actor.levelOf(skill) / MAX_SKILL_LEVEL;
+      float  skillBonus = actor.traits.levelOf(skill) / MAX_SKILL_LEVEL;
       float  multXP     = plants.isCrop ? FARM_XP_PERCENT : GATHR_XP_PERCENT;
       
       Good gathers = plants.yields;
@@ -203,7 +203,7 @@ public class TaskGathering extends Task {
       yield *= 1 + (skillBonus * 0.5f);
       
       actor.incCarried(gathers, yield);
-      actor.gainXP(skill, 1 * multXP / 100);
+      actor.traits.gainXP(skill, 1 * multXP / 100);
       
       if      (plants.isCrop      ) above.setGrowLevel(-1);
       else if (plants.growRate > 0) above.setGrowLevel( 0);

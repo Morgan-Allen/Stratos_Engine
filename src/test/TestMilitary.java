@@ -173,7 +173,7 @@ public class TestMilitary extends LogicTest {
     for (Actor a : actors) {
       for (Trait skill : skills) {
         String keyL = a.ID()+"_"+skill+"_L";
-        record.put(keyL, a.levelOf(skill));
+        record.put(keyL, a.traits.levelOf(skill));
       }
     }
     return record;

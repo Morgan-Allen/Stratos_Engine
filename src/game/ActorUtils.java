@@ -95,7 +95,7 @@ public class ActorUtils {
         float fitness = 0, sumWeights = 0;
         for (Trait skill : t.initTraits.keys()) {
           float level = t.initTraits.valueFor(skill);
-          fitness += migrant.levelOf(skill) / level;
+          fitness += migrant.traits.levelOf(skill) / level;
           sumWeights += level;
         }
         fitness /= Nums.max(1, sumWeights);

@@ -54,11 +54,11 @@ public class ActorType extends Type {
     a.health.setHunger(Rand.num() - 0.5f);
     
     for (Trait t : initTraits.keys()) {
-      a.setLevel(t, initTraits.valueFor(t));
+      a.traits.setLevel(t, initTraits.valueFor(t));
     }
     
     for (Trait t : ALL_PERSONALITY) {
-      a.setLevel(t, Rand.range(-1, 1));
+      a.traits.setLevel(t, Rand.range(-1, 1));
     }
     
     ///I.say("INITIAL LEVELS: "+a.levels);

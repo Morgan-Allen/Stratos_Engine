@@ -113,7 +113,7 @@ public class TaskFirstAid extends Task {
     if (bandageLevel >= (midTask ? 1 : 0.5f)) return -1;
     
     float injury   = other.health.injury() / other.health.maxHealth();
-    float relation = 0.5f + (actor.levelOf(TRAIT_EMPATHY) / 2);
+    float relation = 0.5f + (actor.traits.levelOf(TRAIT_EMPATHY) / 2);
     float distMult = Area.distancePenalty(actor, other);
     
     if (TaskCombat.allied (actor, other)) relation += 0.5f;
@@ -138,7 +138,7 @@ public class TaskFirstAid extends Task {
   
   protected float successChance() {
     Actor actor = (Actor) active;
-    return (1 + (actor.levelOf(SKILL_HEAL) / MAX_SKILL_LEVEL)) / 2f;
+    return (1 + (actor.traits.levelOf(SKILL_HEAL) / MAX_SKILL_LEVEL)) / 2f;
   }
   
   
@@ -184,7 +184,7 @@ public class TaskFirstAid extends Task {
     boolean bleeds   = patient.health.bleed() > 0;
     
     if (skillTest == -1) {
-      float skill = actor.levelOf(SKILL_HEAL) / MAX_SKILL_LEVEL;
+      float skill = actor.traits.levelOf(SKILL_HEAL) / MAX_SKILL_LEVEL;
       float obstacle = 0.5f;
       float chance = Nums.clamp(skill + 1 - obstacle, 0, 2) / 2;
       

@@ -6,7 +6,7 @@ import util.*;
 import content.*;
 import game.*;
 import static game.Actor.*;
-import static game.ActorAsPerson.*;
+import static game.ActorTraits.*;
 import static game.Base.*;
 import static game.BaseCouncil.*;
 import static game.GameConstants.*;
@@ -142,7 +142,7 @@ public class TestWorld extends LogicTest {
       monarch.health.setAgeYears(AVG_RETIREMENT / 4);
       queen  .health.setAgeYears(AVG_RETIREMENT / 4);
       
-      ActorAsPerson.setBond(monarch, queen, BOND_MARRIED, BOND_MARRIED, 1);
+      ActorTraits.setBond(monarch, queen, BOND_MARRIED, BOND_MARRIED, 1);
       mainC.council.toggleMember(monarch, Role.MONARCH, true);
       mainC.council.toggleMember(queen  , Role.CONSORT, true);
       

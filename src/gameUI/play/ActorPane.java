@@ -59,11 +59,11 @@ public class ActorPane extends DetailPane {
     
     //d.appendAll("\n  Carrying:  ", actor.carried());
     
-    Series <Trait> traits = actor.allTraits();
+    Series <Trait> traits = actor.traits.allTraits();
     if (traits.size() > 0) {
       d.append("\n\nTraits:");
-      for (Trait t : actor.allTraits()) {
-        d.appendAll("\n  ", t, ":"+I.shorten(actor.levelOf(t), 1));
+      for (Trait t : actor.traits.allTraits()) {
+        d.appendAll("\n  ", t, ":"+I.shorten(actor.traits.levelOf(t), 1));
       }
     }
     
@@ -118,7 +118,7 @@ public class ActorPane extends DetailPane {
     
     d.append("\n\nSkills:");
     for (Trait t : actor.traits.allTraits(Trait.TYPE_SKILL)) {
-      int skillL = (int) actor.traits.levelOf(t);
+      int skillL = (int) actor.traits.traits.levelOf(t);
       d.append("\n  "+t+": "+skillL);
     }
     //*/

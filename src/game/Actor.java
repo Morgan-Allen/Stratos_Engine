@@ -51,8 +51,10 @@ public class Actor extends Element implements
   Actor attached = null, attachTo = null;
   
   final public ActorHealth health = initHealth();
+  final public ActorTraits traits = initTraits();
   
   ActorHealth initHealth() { return new ActorHealth(this); }
+  ActorTraits initTraits() { return new ActorTraits(this); }
   
   
   
@@ -88,6 +90,7 @@ public class Actor extends Element implements
     attachTo = (Actor) s.loadObject();
     
     health.loadState(s);
+    traits.loadState(s);
   }
   
   
@@ -116,6 +119,7 @@ public class Actor extends Element implements
     s.saveObject(attachTo);
     
     health.saveState(s);
+    traits.saveState(s);
   }
   
   
@@ -238,6 +242,7 @@ public class Actor extends Element implements
     }
     //
     //  And update health-state and life-cycle-
+    if (onMap()) traits.updateTraits();
     if (onMap()) health.checkHealthState();
     if (onMap() && health.alive()) health.updateLifeCycle(base(), true);
   }
@@ -597,37 +602,6 @@ public class Actor extends Element implements
   }
   
   
-  
-  /**  Stub methods related to skills, XP and bonding:
-    */
-  public int classLevel() {
-    return 1;
-  }
-  
-  
-  public void gainXP(Trait trait, float XP) {
-    return;
-  }
-  
-  
-  public Series <Trait> allTraits() {
-    return new List();
-  }
-  
-  
-  public float levelOf(Trait trait) {
-    return 0;
-  }
-  
-  
-  public float bondLevel(Actor with) {
-    return 0;
-  }
-  
-  
-  public Series <Actor> allBondedWith(int type) {
-    return new Batch();
-  }
   
   
   

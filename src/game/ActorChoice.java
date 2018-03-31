@@ -83,7 +83,7 @@ public class ActorChoice {
       thresh *= 1 + extra;
     }
     
-    final float stubborn = actor.levelOf(TRAIT_DILIGENCE) / 2f;
+    final float stubborn = actor.traits.levelOf(TRAIT_DILIGENCE) / 2f;
     thresh *= 1 + stubborn;
     if (fromCurrent) thresh += 1;
     
@@ -193,7 +193,7 @@ public class ActorChoice {
     if (report) {
       I.say("  Min. priority for last is: "+minPriority);
       I.say("  Threshold: "+(nextPriority - minPriority));
-      I.say("  Stubbornness: "+actor.levelOf(TRAIT_DILIGENCE));
+      I.say("  Stubbornness: "+actor.traits.levelOf(TRAIT_DILIGENCE));
       I.say("  Would switch from last to next? "+(lastPriority < minPriority));
     }
     return lastPriority < minPriority;

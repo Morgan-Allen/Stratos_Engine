@@ -1,13 +1,13 @@
 
 
 package test;
-import content.*;
-import static content.GameContent.*;
 import game.*;
-import static game.ActorAsPerson.*;
+import static game.ActorTraits.*;
 import static game.GameConstants.*;
 import static game.BaseCouncil.*;
 import static game.AreaPlanning.*;
+import content.*;
+import static content.GameContent.*;
 import util.*;
 
 
@@ -35,11 +35,11 @@ public class TestLifeCycle extends LogicTest {
     I.say("\nTesting XP gain...");
     ActorAsPerson single = (ActorAsPerson) Vassals.PYON.generate();
     for (int n = MAX_TRAIN_TIME; n-- > 0;) {
-      single.gainXP(SKILL_BUILD, 1);
-      if (n % DAY_LENGTH == 0) I.say("  "+single.levelOf(SKILL_BUILD));
+      single.traits.gainXP(SKILL_BUILD, 1);
+      if (n % DAY_LENGTH == 0) I.say("  "+single.traits.levelOf(SKILL_BUILD));
     }
     
-    if (single.levelOf(SKILL_BUILD) < MAX_SKILL_LEVEL) {
+    if (single.traits.levelOf(SKILL_BUILD) < MAX_SKILL_LEVEL) {
       I.say("\nXP gain did not function correctly!");
       return false;
     }
@@ -70,7 +70,7 @@ public class TestLifeCycle extends LogicTest {
     consort.health.setAgeYears(AVG_RETIREMENT / 3);
     oldKing.health.setSexData(SEX_MALE  );
     consort.health.setSexData(SEX_FEMALE);
-    ActorAsPerson.setBond(oldKing, consort, BOND_MARRIED, BOND_MARRIED, 0.5f);
+    ActorTraits.setBond(oldKing, consort, BOND_MARRIED, BOND_MARRIED, 0.5f);
     council.toggleMember(oldKing, Role.MONARCH, true);
     
     palace.setResident(oldKing, true);
@@ -158,7 +158,7 @@ public class TestLifeCycle extends LogicTest {
         for (Actor a : map.actors()) {
           if (a.health.child() && a.health.alive() && ! originalPop.includes(a)) {
             if (! births.includes(a)) {
-              Series <Actor> parents = a.allBondedWith(BOND_PARENT);
+              Series <Actor> parents = a.traits.allBondedWith(BOND_PARENT);
               I.say("  Born: "+a+", parents: "+parents);
               
               if (parents.includes(oldKing)) {
@@ -207,7 +207,7 @@ public class TestLifeCycle extends LogicTest {
         boolean isHeir = true;
         isHeir &= newKing != null;
         isHeir &= newKing != oldKing;
-        isHeir &= oldKing.hasBondType(newKing, BOND_CHILD);
+        isHeir &= oldKing.traits.hasBondType(newKing, BOND_CHILD);
         succession = isHeir;
       }
       
@@ -234,7 +234,7 @@ public class TestLifeCycle extends LogicTest {
     I.say("  Old king:     "+oldKing);
     I.say("  Heir born:    "+heirBorn);
     I.say("  Alive:        "+oldKing.health.alive());
-    I.say("  Children:     "+oldKing.allBondedWith(BOND_CHILD));
+    I.say("  Children:     "+oldKing.traits.allBondedWith(BOND_CHILD));
     I.say("  Current king: "+council.memberWithRole(Role.MONARCH));
     
     return testOkay;

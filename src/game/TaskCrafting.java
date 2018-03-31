@@ -120,7 +120,7 @@ public class TaskCrafting extends Task {
     float maxAmount = order == null ? venue.stockLimit(recipe.made) : 1;
     float progress  = order == null ? venue.inventory(recipe.made) : order.progress;
     Trait skill     = recipe.craftSkill;
-    float skillMult = actor.levelOf(skill) / MAX_SKILL_LEVEL;
+    float skillMult = actor.traits.levelOf(skill) / MAX_SKILL_LEVEL;
     
     if (report) {
       I.say("Progress on "+recipe.made+": "+progress+"/"+maxAmount);
@@ -135,7 +135,7 @@ public class TaskCrafting extends Task {
     totalCraftTime += 1;
     totalProgInc += progInc;
     
-    actor.gainXP(skill, 1 * CRAFT_XP_PERCENT / 100f);
+    actor.traits.gainXP(skill, 1 * CRAFT_XP_PERCENT / 100f);
     
     for (Good need : recipe.inputs) {
       venue.addInventory(0 - progInc, need);

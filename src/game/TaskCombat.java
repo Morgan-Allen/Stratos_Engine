@@ -406,7 +406,7 @@ public class TaskCombat extends Task {
     
     float priority = 0, empathy = 1, cruelty = 1;
     if (actor.isActor()) {
-      empathy = (((Actor) actor).levelOf(TRAIT_EMPATHY) + 2) / 2;
+      empathy = (((Actor) actor).traits.levelOf(TRAIT_EMPATHY) + 2) / 2;
       cruelty = 2 - empathy;
     }
     
@@ -561,11 +561,11 @@ public class TaskCombat extends Task {
     
     if (attacks.type().isActor()) {
       Actor attackA = (Actor) attacks;
-      attackBonus = attackA.levelOf(attackSkill) * 2f / MAX_SKILL_LEVEL;
+      attackBonus = attackA.traits.levelOf(attackSkill) * 2f / MAX_SKILL_LEVEL;
     }
     if (other.type().isActor()) {
       Actor otherA = (Actor) other;
-      defendBonus = otherA.levelOf(defendSkill) * 2f / MAX_SKILL_LEVEL;
+      defendBonus = otherA.traits.levelOf(defendSkill) * 2f / MAX_SKILL_LEVEL;
     }
     
     if (wallBonus  ) attackBonus += WALL_HIT_BONUS / 100f;
@@ -586,11 +586,11 @@ public class TaskCombat extends Task {
     
     if (attacks.type().isActor()) {
       Actor attackA = (Actor) attacks;
-      attackA.gainXP(attackSkill, XP);
+      attackA.traits.gainXP(attackSkill, XP);
     }
     if (other.type().isActor()) {
       Actor otherA = (Actor) other;
-      otherA.gainXP(defendSkill, otherXP);
+      otherA.traits.gainXP(defendSkill, otherXP);
     }
     
     

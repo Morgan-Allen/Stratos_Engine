@@ -4,7 +4,7 @@ package game;
 import util.*;
 import static game.GameConstants.*;
 import static game.Mission.*;
-import static game.ActorAsPerson.*;
+import static game.ActorTraits.*;
 import static game.Base.*;
 
 
@@ -119,7 +119,7 @@ public class BaseCouncil {
   public float membersTraitAvg(Trait trait) {
     float avg = 0, count = 0;
     for (Actor m : members) {
-      avg += m.levelOf(trait);
+      avg += m.traits.levelOf(trait);
       count += 1;
     }
     return avg / Nums.max(1, count);
@@ -129,7 +129,7 @@ public class BaseCouncil {
   public float membersBondAvg(Actor with) {
     float avg = 0, count = 0;
     for (Actor m : members) {
-      avg += m.bondLevel(with);
+      avg += m.traits.bondLevel(with);
       count += 1;
     }
     return avg / Nums.max(1, count);
@@ -195,11 +195,11 @@ public class BaseCouncil {
     //  Check on any current heirs and/or marriage status-
     Actor monarch = memberWithRole(Role.MONARCH);
     if (monarch != null) {
-      for (Actor consort : monarch.allBondedWith(BOND_MARRIED)) {
+      for (Actor consort : monarch.traits.allBondedWith(BOND_MARRIED)) {
         if (! consort.health.alive()) continue;
         toggleMember(consort, Role.CONSORT, true);
       }
-      for (Actor heir : monarch.allBondedWith(BOND_CHILD)) {
+      for (Actor heir : monarch.traits.allBondedWith(BOND_CHILD)) {
         if (! heir.health.alive()) continue;
         toggleMember(heir, Role.HEIR, true);
       }
@@ -504,7 +504,7 @@ public class BaseCouncil {
     Pick <Actor> pickM = new Pick();
     
     for (Actor a : from.council.allMembersWithRole(BaseCouncil.Role.HEIR)) {
-      Actor spouse = a.allBondedWith(BOND_MARRIED).first();
+      Actor spouse = a.traits.allBondedWith(BOND_MARRIED).first();
       if (spouse != null) continue;
       if (monarch.health.man() == a.health.man()) continue;
       

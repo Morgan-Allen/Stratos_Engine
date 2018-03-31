@@ -45,7 +45,7 @@ public class BuildingForGovern extends Building {
     
     if (actor.type().isCommoner()) {
       //  TODO:  THIS IS AN UGLY HACK AND SHOULD BE FIXED ASAP!
-      if (actor.levelOf(SKILL_WRITE) > 0) {
+      if (actor.traits.levelOf(SKILL_WRITE) > 0) {
         Task taxing = TaskAssessTax.nextAssessment(actor, this, 100);
         if (taxing != null) return taxing;
         

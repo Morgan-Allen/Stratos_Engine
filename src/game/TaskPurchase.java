@@ -143,7 +143,7 @@ public class TaskPurchase extends Task {
     float priority = ROUTINE;
     
     if (type == JOB.SHOPPING) {
-      //priority *= 1 + (actor.levelOf(TRAIT_INTELLECT) / MAX_SKILL_LEVEL);
+      //priority *= 1 + (actor.traits.levelOf(TRAIT_INTELLECT) / MAX_SKILL_LEVEL);
       priority = URGENT;
     }
     if (type == JOB.COLLECTING) {
