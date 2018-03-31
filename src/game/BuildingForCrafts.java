@@ -146,6 +146,10 @@ public class BuildingForCrafts extends Building {
     */
   public Task selectActorBehaviour(Actor actor) {
     //
+    //  In the case of a sickbay, see if there are medical tasks to perform-
+    Task aiding = TaskFirstAid.nextSickbayTask(actor, this);
+    if (aiding != null) return aiding;
+    //
     //  See if construction is possible-
     Task building = TaskBuilding.nextBuildingTask(this, actor);
     if (building != null) return building;

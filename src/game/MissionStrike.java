@@ -70,7 +70,7 @@ public class MissionStrike extends Mission {
       
       else if (localFocus() instanceof Element) {
         Element e = (Element) localFocus();
-        if (e.destroyed()) setMissionComplete(true);
+        if (TaskCombat.beaten(e)) setMissionComplete(true);
         else if (! e.onMap()) setMissionComplete(false);
       }
     }
@@ -188,7 +188,7 @@ public class MissionStrike extends Mission {
     
     if (focus instanceof Element) {
       Element e = (Element) focus;
-      if (e.destroyed() || ! homeBase().isEnemyOf(e.base())) return null;
+      if (TaskCombat.beaten(e) || ! homeBase().isEnemyOf(e.base())) return null;
       
       if (e.type().isActor()) {
         if (TaskCombat.attackPower((Actor) e) <= 0) return null;

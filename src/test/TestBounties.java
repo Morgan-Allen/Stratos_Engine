@@ -45,7 +45,7 @@ public class TestBounties extends LogicTest {
       
       boolean checkVictory(Area map, Base base, Object focus) {
         Building nest = (Building) focus;
-        return nest.destroyed();
+        return TaskCombat.beaten(nest);
       }
     };
     return test.bountyTest(graphics, "ATTACK BUILDING MISSION");
@@ -67,7 +67,7 @@ public class TestBounties extends LogicTest {
       
       boolean checkVictory(Area map, Base base, Object focus) {
         Actor creature = (Actor) focus;
-        return creature.destroyed();
+        return TaskCombat.beaten(creature);
       }
     };
     return test.bountyTest(graphics, "ATTACK ACTOR MISSION");
@@ -140,7 +140,7 @@ public class TestBounties extends LogicTest {
       }
       
       boolean checkVictory(Area map, Base base, Object focus) {
-        if (guarded.destroyed()) return false;
+        if (TaskCombat.killed((Building) focus)) return false;
         
         if (! triedAttack) {
           if (threat.jobType() == JOB.COMBAT) {

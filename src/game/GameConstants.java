@@ -316,12 +316,29 @@ public class GameConstants {
   
   public static class Trait extends Type {
     
+    boolean isBasic;
+    boolean isSkill;
+    boolean isPersonality;
+    
+    
     public Trait(String ID, String... names) {
       super(null, ID, IS_TRAIT);
       this.name = names[0];
       this.traitRangeNames = names;
     }
+    
+    float passiveBonus(Trait t) {
+      return 0;
+    }
+    
+    void passiveEffect(Actor actor) {
+      return;
+    }
+    
   }
+  
+  //public static class Condition extends Type {
+  //}
   
   public static class Recipe {
     
@@ -348,6 +365,7 @@ public class GameConstants {
     
     //  Note- 'void' is used to mark foundations for clearing during
     //  construction, and as a default build-material.
+  
     VOID       = new Good("Void"        ,  0 ),
     NEED_BUILD = new Good("Need Build"  , -1 ),
     NEED_PLANT = new Good("Need Plant"  , -1 ),
@@ -365,6 +383,7 @@ public class GameConstants {
     IS_TURRET  = new Good("Is Turret"   , -1 ),
     IS_GATE    = new Good("Is Gate"     , -1 ),
     IS_REFUGE  = new Good("Is Refuge"   , -1 ),
+    IS_SICKBAY = new Good("Is Sickbay"  , -1 ),
     
     DIVERSION  = new Good("Diversion"   , -1 ),
     EDUCATION  = new Good("Education"   , -1 ),
@@ -399,6 +418,8 @@ public class GameConstants {
     SKILL_SPEAK = new Trait("skill_speak", "Speak"),
     SKILL_WRITE = new Trait("skill_write", "Write"),
     SKILL_PRAY  = new Trait("skill_pray" , "Pray" ),
+    SKILL_HEAL  = new Trait("skill_heal" , "Heal" ),
+    
     ALL_SKILLS[] = {
       SKILL_MELEE, SKILL_RANGE, SKILL_EVADE,
       SKILL_FARM , SKILL_BUILD, SKILL_CRAFT,

@@ -8,8 +8,6 @@ import static game.GameConstants.*;
 
 
 
-
-
 public abstract class ActorTechnique extends Trait {
   
   

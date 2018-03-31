@@ -70,7 +70,7 @@ public class TestSpawning extends LogicTest {
       }
       
       if (missionInit && ! razingDone) {
-        razingDone = toRaze.destroyed();
+        razingDone = TaskCombat.beaten(toRaze);
       }
       
       if (razingDone && ! missionDone) {

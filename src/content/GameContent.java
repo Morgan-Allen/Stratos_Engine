@@ -648,7 +648,7 @@ public class GameContent {
     PHYSICIAN_STATION.recipes = new Recipe[] {
       new Recipe(MEDICINE, SKILL_CRAFT, AVG_CRAFT_TIME, GREENS)
     };
-    PHYSICIAN_STATION.setFeatures(HEALTHCARE);
+    PHYSICIAN_STATION.setFeatures(HEALTHCARE, IS_SICKBAY);
     PHYSICIAN_STATION.featureAmount = 20;
     
     //

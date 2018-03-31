@@ -38,6 +38,7 @@ public class Task implements Session.Saveable {
     EXPLORING ,
     COMBAT    ,
     RETREAT   ,
+    HEALING   ,
     DIALOG    ,
     CASTING   ,
   };
@@ -49,7 +50,7 @@ public class Task implements Session.Saveable {
     URGENT      =  7.5f,
     PARAMOUNT   =  10.0f,
     SWITCH_DIFF =  5.0f,
-    PRIORITY_PER_100_CASH = 0.5f
+    PRIORITY_PER_100_CASH = 1.0f
   ;
   final public static float
     HARM_NULL   = -1.0f,

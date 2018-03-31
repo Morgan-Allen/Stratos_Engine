@@ -18,12 +18,19 @@ public class Actor extends Element implements
   
   /**  Data fields and setup/initialisation-
     */
+  final static float
+    PAIN_PERCENT       = 50,
+    KNOCKOUT_PERCENT   = 100,
+    DECOMP_PERCENT     = 150,
+    BLEED_HURT_PERCENT = 50,
+    BLEED_PER_SECOND   = 0.25f,
+    DECOMP_TIME        = DAY_LENGTH
+  ;
   final public static int
     STATE_OKAY   = 1,
-    STATE_SLEEP  = 2,
+    STATE_KO     = 2,
     STATE_DEAD   = 3,
     STATE_DECOMP = 4,
-    
     MOVE_NORMAL  = 1,
     MOVE_RUN     = 2,
     MOVE_CLIMB   = 3,
@@ -52,11 +59,13 @@ public class Actor extends Element implements
   private Vec3D exactPosition = new Vec3D();
   
   Tally <Good> carried = new Tally();
+  Actor attached = null, attachTo = null;
   
   int sexData    = -1;
   int ageSeconds =  0;
   int pregnancy  =  0;
   float injury  ;
+  float bleed   ;
   float hunger  ;
   float fatigue ;
   float stress  ;
@@ -93,12 +102,15 @@ public class Actor extends Element implements
     exactPosition.loadFrom(s.input());
     
     s.loadTally(carried);
+    attached = (Actor) s.loadObject();
+    attachTo = (Actor) s.loadObject();
     
     sexData    = s.loadInt();
     ageSeconds = s.loadInt();
     pregnancy  = s.loadInt();
     
     injury   = s.loadFloat();
+    bleed    = s.loadFloat();
     hunger   = s.loadFloat();
     fatigue  = s.loadFloat();
     stress   = s.loadFloat();
@@ -128,12 +140,15 @@ public class Actor extends Element implements
     exactPosition.saveTo(s.output());
     
     s.saveTally(carried);
+    s.saveObject(attached);
+    s.saveObject(attachTo);
     
     s.saveInt(sexData   );
     s.saveInt(ageSeconds);
     s.saveInt(pregnancy );
     
     s.saveFloat(injury  );
+    s.saveFloat(bleed   );
     s.saveFloat(hunger  );
     s.saveFloat(fatigue );
     s.saveFloat(stress  );
@@ -226,9 +241,26 @@ public class Actor extends Element implements
     float tick = 1f / map().ticksPS;
     //
     //  Adjust health-parameters accordingly-
-    if (organic) {
+    if (! alive()) {
+      float decay = tick * 1f * maxHealth();
+      decay *= (DECOMP_PERCENT - KNOCKOUT_PERCENT) / 100f;
+      bleed = 0;
+      injury += decay;
+    }
+    else if (organic) {
       hunger += settings.toggleHunger ? (tick / STARVE_INTERVAL) : 0;
-      if (jobType() == JOB.RESTING && task().inContact()) {
+      
+      if (bleed > 0) {
+        float bleedInc = tick * BLEED_PER_SECOND;
+        injury += bleedInc;
+        bleed -= bleedInc;
+      }
+      else bleed = 0;
+      
+      boolean resting = jobType() == JOB.RESTING && task().inContact();
+      resting |= state == STATE_KO;
+      
+      if (resting) {
         float rests = tick / FATIGUE_REGEN;
         float heals = tick / HEALTH_REGEN ;
         fatigue = Nums.max(0, fatigue - rests);
@@ -242,6 +274,7 @@ public class Actor extends Element implements
     }
     else {
       float rests = tick / FATIGUE_REGEN;
+      bleed = 0;
       fatigue = Nums.max(0, fatigue - rests);
     }
     //
@@ -259,27 +292,38 @@ public class Actor extends Element implements
         setLocation(free, map);
       }
     }
-    //
-    //  Update fear-level:
-    fearLevel = updateFearLevel();
-    //
-    //  Task updates-
-    if (home    != null && onMap()) home   .actorUpdates(this);
-    if (work    != null && onMap()) work   .actorUpdates(this);
-    if (mission != null && onMap()) mission.actorUpdates(this);
-    if (onMap() && reaction != null && reaction.checkAndUpdateTask()) {
-      assignReaction(null);
+    if (active()) {
+      //
+      //  Update fear-level:
+      fearLevel = updateFearLevel();
+      //
+      //  Task updates-
+      if (home    != null && onMap()) home   .actorUpdates(this);
+      if (work    != null && onMap()) work   .actorUpdates(this);
+      if (mission != null && onMap()) mission.actorUpdates(this);
+      if (onMap() && reaction != null && reaction.checkAndUpdateTask()) {
+        assignReaction(null);
+      }
+      else if (onMap() && (task == null || ! task.checkAndUpdateTask())) {
+        beginNextBehaviour();
+      }
+      if (onMap()) updateReactions();
+      //
+      //  Update anything you're carrying-
+      if (attached != null && onMap()) {
+        attached.setExactLocation(exactPosition, map);
+      }
+      //
+      //  And update your current vision and health-
+      if (onMap()) updateCooldown();
+      if (onMap()) updateVision();
+      if (onMap()) checkHealthState();
+      if (onMap()) updateLifeCycle(base(), true);
     }
-    else if (onMap() && (task == null || ! task.checkAndUpdateTask())) {
-      beginNextBehaviour();
+    else {
+      if (onMap()) checkHealthState();
+      if (onMap() && alive()) updateLifeCycle(base(), true);
     }
-    if (onMap()) updateReactions();
-    //
-    //  And update your current vision and health-
-    if (onMap()) updateCooldown();
-    if (onMap()) updateVision();
-    if (onMap()) checkHealthState();
-    if (onMap()) updateLifeCycle(base(), true);
   }
   
   
@@ -484,7 +528,7 @@ public class Actor extends Element implements
   
   
   
-  /**  Methods to assist trade and migration-
+  /**  Methods to assist trade and deliveries-
     */
   public void pickupGood(Good carried, float amount, Building store) {
     if (store == null || carried == null || amount <= 0) return;
@@ -522,7 +566,7 @@ public class Actor extends Element implements
   }
   
   
-  public void assignCargo(Tally <Good> cargo) {
+  public void setCarried(Tally <Good> cargo) {
     if (cargo == null || cargo == this.carried) return;
     clearCarried();
     carried.add(cargo);
@@ -544,6 +588,32 @@ public class Actor extends Element implements
   }
   
   
+  public void setPassenger(Actor p, boolean is) {
+    if (is && attached == null) {
+      p.attachTo = this;
+      attached = p;
+    }
+    else if (p == attached && ! is) {
+      p.attachTo = null;
+      attached = null;
+    }
+    else I.complain("\nIncorrect passenger parameters!");
+  }
+  
+  
+  public Actor passenger() {
+    return attached;
+  }
+  
+  
+  public boolean isPassenger() {
+    return attachTo != null;
+  }
+  
+  
+  
+  /**  Handling migration and off-map tasks-
+    */
   public void onArrival(Base goes, World.Journey journey) {
     if (goes.activeMap() != null) {
       AreaTile entry = ActorUtils.findTransitPoint(
@@ -589,7 +659,13 @@ public class Actor extends Element implements
     if (map == null || ! map.world.settings.toggleInjury) return;
     injury += damage;
     injury = Nums.clamp(injury, 0, maxHealth() + 1);
+    bleed += injury * BLEED_HURT_PERCENT / 100f;
     checkHealthState();
+  }
+  
+  
+  public void setBleed(float bleed) {
+    this.bleed = bleed;
   }
   
   
@@ -598,13 +674,6 @@ public class Actor extends Element implements
     fatigue += tire;
     fatigue = Nums.clamp(tire, 0, maxHealth() + 1);
     checkHealthState();
-  }
-  
-  
-  public void setAsKilled(String cause) {
-    state = STATE_DEAD;
-    if (map != null) exitMap(map);
-    setDestroyed();
   }
   
   
@@ -640,9 +709,29 @@ public class Actor extends Element implements
   
   
   void checkHealthState() {
-    if (injury + hunger > type().maxHealth && state != STATE_DEAD) {
+    float maxHealth = maxHealth() * KNOCKOUT_PERCENT / 100f;
+    float maxIntact = maxHealth() * DECOMP_PERCENT   / 100f;
+    
+    if (injury + hunger > maxIntact) {
+      this.state = STATE_DECOMP;
+      if (map != null) exitMap(map);
+      setDestroyed();
+    }
+    if (injury + hunger > maxHealth) {
       setAsKilled("Injury: "+injury+" Hunger "+hunger);
     }
+    else if (injury + hunger + fatigue > maxHealth) {
+      this.state = STATE_KO;
+    }
+    else if (alive()) {
+      this.state = STATE_OKAY;
+    }
+  }
+  
+  
+  public void setAsKilled(String cause) {
+    if (reports()) I.say(this+" DIED: "+cause);
+    state = STATE_DEAD;
   }
   
   
@@ -668,11 +757,14 @@ public class Actor extends Element implements
   
   public float maxHealth () { return type().maxHealth ; }
   public float injury  () { return injury  ; }
+  public float bleed   () { return bleed   ; }
   public float fatigue () { return fatigue ; }
   public float cooldown() { return cooldown; }
   public float hunger  () { return hunger  ; }
-  public boolean alive() { return state != STATE_DEAD; }
-  public boolean dead () { return state == STATE_DEAD; }
+  
+  public boolean active() { return state == STATE_OKAY; }
+  public boolean alive () { return state <= STATE_KO  ; }
+  public boolean dead  () { return state >= STATE_DEAD; }
   
   
   

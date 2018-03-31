@@ -64,9 +64,10 @@ public class Collective {
       Area map = healed.map();
       
       if (ruler != null) {
-        healed.liftDamage (PSY_HEAL_AMOUNT);
-        healed.liftFatigue(PSY_HEAL_AMOUNT);
-        healed.liftHunger (PSY_HEAL_AMOUNT);
+        healed.liftDamage (PSY_HEAL_AMOUNT    );
+        healed.liftFatigue(PSY_HEAL_AMOUNT / 2);
+        healed.liftHunger (PSY_HEAL_AMOUNT / 2);
+        healed.setBleed(0);
         
         if (map.ephemera.active()) {
           map.ephemera.addGhostFromModel(healed, FX_MODEL, 1, 0.5f, 1);
@@ -74,6 +75,7 @@ public class Collective {
       }
       if (actor != null) {
         healed.liftDamage(PSY_HEAL_AMOUNT);
+        healed.setBleed(0);
         
         if (map.ephemera.active()) {
           map.ephemera.addGhostFromModel(healed, FX_MODEL, 1, 0.5f, 1);

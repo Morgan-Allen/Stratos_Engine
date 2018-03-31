@@ -94,7 +94,7 @@ public class MissionSecure extends Mission {
         int time = localMap().time();
         boolean isElement = localFocus() instanceof Element;
         
-        if (isElement && ((Element) localFocus()).destroyed()) {
+        if (isElement && TaskCombat.killed((Element) localFocus())) {
           setMissionComplete(false);
         }
         else if (time - beginTime >= guardPeriod) {

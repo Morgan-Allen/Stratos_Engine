@@ -104,7 +104,7 @@ public class TaskCombat extends Task {
   public static float attackPower(Element f) {
     if (f.type().isActor()) {
       Actor a = (Actor) f;
-      if (a.state >= Actor.STATE_SLEEP) return 0;
+      if (a.state >= Actor.STATE_KO) return 0;
       float power = attackPower(a.type());
       power *= 1 - ((a.injury + a.hunger) / a.type().maxHealth);
       return power;
@@ -127,6 +127,26 @@ public class TaskCombat extends Task {
   }
   
   
+  public static boolean beaten(Element focus) {
+    if (focus.type().isActor()) {
+      return ! ((Actor) focus).active();
+    }
+    else {
+      return focus.destroyed();
+    }
+  }
+  
+  
+  public static boolean killed(Element focus) {
+    if (focus.type().isActor()) {
+      return ((Actor) focus).dead();
+    }
+    else {
+      return focus.destroyed();
+    }
+  }
+  
+  
   
   
   /**  Factory methods for actual combat behaviours-
@@ -134,7 +154,7 @@ public class TaskCombat extends Task {
   static TaskCombat nextSieging(Actor actor, Mission mission, Object focus) {
     if (focus instanceof Element) {
       Element e = (Element) focus;
-      if (e.destroyed() || ! e.onMap()) return null;
+      if (beaten(e) || ! e.onMap()) return null;
       if (e.base() == mission.base()) return null;
       return configCombat(actor, e, mission, null, JOB.COMBAT);
     }
@@ -381,7 +401,7 @@ public class TaskCombat extends Task {
     */
   static float attackPriority(Active actor, Element primary, boolean quick) {
     
-    if (primary.destroyed() || primary.indoors()) return -1;
+    if (beaten(primary) || primary.indoors()) return -1;
     float targetPower = attackPower(primary);
     
     float priority = 0, empathy = 1, cruelty = 1;
@@ -514,12 +534,12 @@ public class TaskCombat extends Task {
     
     ///I.say("PERFORMING ATTACK VS. "+primary);
     
-    if (primary.type().isActor() && attackPower((Actor) primary) > 0) {
+    if (primary.type().isActor() && ! beaten(primary)) {
       Task next = TaskCombat.configCombat(active, primary, origin, null, type);
       if (next != null) active.assignTask(next);
     }
     
-    if (primary.type().isBuilding() && ! ((Building) primary).destroyed()) {
+    if (primary.type().isBuilding() && ! beaten(primary)) {
       Task next = TaskCombat.configCombat(active, primary, origin, null, type);
       if (next != null) active.assignTask(next);
     }

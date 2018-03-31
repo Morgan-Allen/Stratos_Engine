@@ -68,7 +68,7 @@ public class TestAutoBuild extends LogicTest {
     final int RUN_TIME = YEAR_LENGTH;
     
     while (map.time() < RUN_TIME || graphics) {
-      test.runLoop(base, 1, graphics, "saves/test_building.tlt");
+      test.runLoop(base, 1, graphics, "saves/test_auto_build.str");
       
       if (! builtOkay) {
         for (Building b : map.buildings()) {

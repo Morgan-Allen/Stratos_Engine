@@ -46,6 +46,8 @@ public class TestAll {
     record(TestBounties.testExploreAreaMission   (false));
     record(TestBounties.testDefendBuildingMission(false));
     
+    record(TestPowersCollective.testHeal(false));
+    
     long taken = System.currentTimeMillis() - init;
     
     I.say("\nTOTAL TIME TO RUN TESTS: "+taken);
