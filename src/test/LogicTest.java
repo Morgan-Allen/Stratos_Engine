@@ -495,10 +495,10 @@ public class LogicTest {
       report.append("\n  Home: "+a.home());
       report.append("\n  Work: "+a.work());
       
-      if (! a.carried().empty()) {
+      if (! a.outfit.carried().empty()) {
         report.append("\n  Carried:");
-        for (Good g : a.carried().keys()) {
-          report.append("\n    "+g+": "+a.carried(g));
+        for (Good g : a.outfit.carried().keys()) {
+          report.append("\n    "+g+": "+a.outfit.carried(g));
         }
       }
     }

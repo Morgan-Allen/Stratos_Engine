@@ -69,7 +69,7 @@ public class MissionRewards {
       int rem   = this.cashReward % recruits.size();
       int index = 0;
       for (Actor r : recruits) {
-        r.incCarried(CASH, split + (index++ < rem ? 1 : 0));
+        r.outfit.incCarried(CASH, split + (index++ < rem ? 1 : 0));
       }
     }
   }

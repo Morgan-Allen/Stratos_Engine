@@ -15,7 +15,6 @@ public class Actor extends Element implements
   Session.Saveable, Journeys, Active, Carrier
 {
   
-  
   /**  Data fields and setup/initialisation-
     */
   final public static int
@@ -46,15 +45,15 @@ public class Actor extends Element implements
   private boolean wasIndoors = true;
   private Vec3D lastPosition  = new Vec3D();
   private Vec3D exactPosition = new Vec3D();
-  
-  Tally <Good> carried = new Tally();
   Actor attached = null, attachTo = null;
   
   final public ActorHealth health = initHealth();
   final public ActorTraits traits = initTraits();
+  final public ActorOutfit outfit = initOutfit();
   
   ActorHealth initHealth() { return new ActorHealth(this); }
   ActorTraits initTraits() { return new ActorTraits(this); }
+  ActorOutfit initOutfit() { return new ActorOutfit(this); }
   
   
   
@@ -85,12 +84,12 @@ public class Actor extends Element implements
     lastPosition .loadFrom(s.input());
     exactPosition.loadFrom(s.input());
     
-    s.loadTally(carried);
     attached = (Actor) s.loadObject();
     attachTo = (Actor) s.loadObject();
     
     health.loadState(s);
     traits.loadState(s);
+    outfit.loadState(s);
   }
   
   
@@ -114,12 +113,12 @@ public class Actor extends Element implements
     lastPosition .saveTo(s.output());
     exactPosition.saveTo(s.output());
     
-    s.saveTally(carried);
     s.saveObject(attached);
     s.saveObject(attachTo);
     
     health.saveState(s);
     traits.saveState(s);
+    outfit.saveState(s);
   }
   
   
@@ -449,66 +448,8 @@ public class Actor extends Element implements
   
   
   
-  /**  Methods to assist trade and deliveries-
+  /**  Methods to assist with riding and passengers...
     */
-  public void pickupGood(Good carried, float amount, Building store) {
-    if (store == null || carried == null || amount <= 0) return;
-    
-    store.addInventory(0 - amount, carried);
-    incCarried(carried, amount);
-  }
-  
-  
-  public void offloadGood(Good good, Building store) {
-    float amount = carried.valueFor(good);
-    if (store == null || amount == 0) return;
-    
-    if (reports()) I.say(this+" Depositing "+carried+" at "+store);
-    
-    store.addInventory(amount, good);
-    carried.set(good, 0);
-  }
-  
-  
-  public void incCarried(Good good, float amount) {
-    float newAmount = carried.valueFor(good) + amount;
-    if (newAmount < 0) newAmount = 0;
-    carried.set(good, newAmount);
-  }
-  
-  
-  public void setCarried(Good good, float amount) {
-    carried.set(good, amount);
-  }
-  
-  
-  public void clearCarried() {
-    carried.clear();
-  }
-  
-  
-  public void setCarried(Tally <Good> cargo) {
-    if (cargo == null || cargo == this.carried) return;
-    clearCarried();
-    carried.add(cargo);
-  }
-  
-  
-  public Tally <Good> carried() {
-    return carried;
-  }
-  
-  
-  public float carried(Good g) {
-    return carried.valueFor(g);
-  }
-  
-  
-  public Tally <Good> inventory() {
-    return carried;
-  }
-  
-  
   public void setPassenger(Actor p, boolean is) {
     if (is && attached == null) {
       p.attachTo = this;
@@ -529,6 +470,11 @@ public class Actor extends Element implements
   
   public boolean isPassenger() {
     return attachTo != null;
+  }
+  
+  
+  public Tally <Good> inventory() {
+    return outfit.carried();
   }
   
   

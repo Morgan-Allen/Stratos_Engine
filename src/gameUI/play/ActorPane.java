@@ -50,14 +50,14 @@ public class ActorPane extends DetailPane {
     d.appendAll("\n  Currently: ", actor.task());
     d.appendAll("\n  Urgency:   ", I.percent(priority));
     
-    Tally <Good> carried = actor.carried();
+    Tally <Good> carried = actor.outfit.carried();
     d.append("\n  Carrying: ");
     if (carried.empty()) d.append("None");
     else for (Good g : carried.keys()) {
       d.appendAll("\n    ", I.shorten(carried.valueFor(g), 1), " ", g);
     }
     
-    //d.appendAll("\n  Carrying:  ", actor.carried());
+    //d.appendAll("\n  Carrying:  ", actor.outfit.carried());
     
     Series <Trait> traits = actor.traits.allTraits();
     if (traits.size() > 0) {

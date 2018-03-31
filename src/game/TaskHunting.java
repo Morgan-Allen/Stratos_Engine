@@ -89,7 +89,7 @@ public class TaskHunting extends Task {
     }
     else {
       float yield = ActorAsAnimal.meatYield(prey);
-      actor.incCarried(prey.type().meatType, yield);
+      actor.outfit.incCarried(prey.type().meatType, yield);
       configTask(store, store, null, JOB.DELIVER, 0);
     }
   }
@@ -98,7 +98,7 @@ public class TaskHunting extends Task {
   protected void onVisit(Building visits) {
     Actor actor = (Actor) this.active;
     if (visits != store) return;
-    actor.offloadGood(prey.type().meatType, visits);
+    actor.outfit.offloadGood(prey.type().meatType, visits);
   }
   
 }

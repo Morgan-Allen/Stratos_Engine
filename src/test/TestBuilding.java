@@ -237,7 +237,7 @@ public class TestBuilding extends LogicTest {
       if (report) I.say("  "+a);
       
       for (Good g : compared) {
-        float amount = a.carried(g);
+        float amount = a.outfit.carried(g);
         if (amount == 0) continue;
         if (report) I.say("    "+g+" (C): "+amount);
         total.add(amount, g);

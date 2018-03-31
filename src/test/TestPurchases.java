@@ -46,8 +46,8 @@ public class TestPurchases extends LogicTest {
     Actor buys = fort.workers().first();
     Good weaponType = buys.type().weaponType;
     Good potionType = StockExGoods.MEDIKIT;
-    int initQuality = (int) buys.carried(weaponType);
-    buys.incCarried(CASH, 10000);
+    int initQuality = (int) buys.outfit.carried(weaponType);
+    buys.outfit.incCarried(CASH, 10000);
     
     forge.addInventory(20, ORES);
     forge.addInventory(20, CARBONS);
@@ -87,11 +87,11 @@ public class TestPurchases extends LogicTest {
       }
       
       if (itemMade && ! collectOkay) {
-        collectOkay = buys.carried(weaponType) >= initQuality + 1;
+        collectOkay = buys.outfit.carried(weaponType) >= initQuality + 1;
       }
       
       if (! potionOkay) {
-        potionOkay = buys.carried(potionType) > 0;
+        potionOkay = buys.outfit.carried(potionType) > 0;
         if (potionOkay) {
           injureTime = map.time();
           buys.takeDamage(buys.health.maxHealth() * 0.9f);

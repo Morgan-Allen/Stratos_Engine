@@ -154,7 +154,7 @@ public class ActorAsPerson extends Actor {
           pick.compare(r, r.rating);
         }
       }
-      for (Good g : carried.keys()) for (ActorTechnique used : g.allows) {
+      for (Good g : outfit.carried.keys()) for (ActorTechnique used : g.allows) {
         if (used.canUseActive(this, other)) {
           Reaction r = new Reaction();
           r.rating  = used.rateUse(this, other);
@@ -184,7 +184,7 @@ public class ActorAsPerson extends Actor {
     Good weapon = type().weaponType;
     if (weapon != null) {
       int damage = weapon.meleeDamage;
-      damage += carried(weapon);
+      damage += outfit.carried(weapon);
       return damage;
     }
     else return super.meleeDamage();
@@ -195,7 +195,7 @@ public class ActorAsPerson extends Actor {
     Good weapon = type().weaponType;
     if (weapon != null) {
       int damage = weapon.rangeDamage;
-      damage += carried(weapon);
+      damage += outfit.carried(weapon);
       return damage;
     }
     else return super.rangeDamage();
@@ -206,7 +206,7 @@ public class ActorAsPerson extends Actor {
     Good armour = type().weaponType;
     if (armour != null) {
       int amount = armour.armourClass;
-      amount += carried(armour);
+      amount += outfit.carried(armour);
       return amount;
     }
     else return super.armourClass();

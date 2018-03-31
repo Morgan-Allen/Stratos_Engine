@@ -109,7 +109,7 @@ public class TaskFirstAid extends Task {
     //  TODO:  Also allow treatment if the actor is seeking aid for their
     //  injuries/disease at a sickbay...
     
-    float bandageLevel = other.carried(BANDAGES);
+    float bandageLevel = other.outfit.carried(BANDAGES);
     if (bandageLevel >= (midTask ? 1 : 0.5f)) return -1;
     
     float injury   = other.health.injury() / other.health.maxHealth();
@@ -162,13 +162,13 @@ public class TaskFirstAid extends Task {
   ) {
     
     public boolean canUsePassive(Actor using, Target subject) {
-      return using.carried(BANDAGES) > 0 && using == subject;
+      return using.outfit.carried(BANDAGES) > 0 && using == subject;
     }
     
     public void applyPassive(Actor using, Target subject) {
       float healInc = 1f / AVG_BANDAGE_TIME;
       using.health.liftDamage(healInc);
-      using.incCarried(BANDAGES, 0 - healInc);
+      using.outfit.incCarried(BANDAGES, 0 - healInc);
     }
   };
   final static Good BANDAGES = new Good("Bandages", -1);
@@ -180,7 +180,7 @@ public class TaskFirstAid extends Task {
   protected void onTarget(Target target) {
     
     Actor   actor    = (Actor) active;
-    float   bandages = patient.carried(BANDAGES);
+    float   bandages = patient.outfit.carried(BANDAGES);
     boolean bleeds   = patient.health.bleed() > 0;
     
     if (skillTest == -1) {
@@ -195,7 +195,7 @@ public class TaskFirstAid extends Task {
     
     if (bleeds) {
       float healInc = skillTest * 2f / AVG_TREATMENT_TIME;
-      patient.setCarried(BANDAGES, bandages + healInc);
+      patient.outfit.setCarried(BANDAGES, bandages + healInc);
       patient.health.incBleed(0 - BLEED_ACTION_HEAL * skillTest);
       configTask(origin, null, patient, JOB.HEALING, 1);
     }

@@ -174,8 +174,8 @@ public class TaskTrading extends Task {
     //
     else if (visits == tradeFrom) {
       transferGoods(actor, tradeFrom, taken);
-      int profit = (int) actor.carried(CASH);
-      actor.setCarried(CASH, 0);
+      int profit = (int) actor.outfit.carried(CASH);
+      actor.outfit.setCarried(CASH, 0);
       incFunds(tradeFrom, profit);
       if (reports() && profit != 0) {
         I.say("\n"+actor+" returned profit: "+profit);

@@ -146,7 +146,7 @@ public class TaskBuilding extends Task {
     //
     //  If there's no target to attend to, but you have surplus material left
     //  over, return it to your store:
-    if (actor.carried(material) > 0) {
+    if (actor.outfit.carried(material) > 0) {
       TaskBuilding task = new TaskBuilding(actor, store, material, null);
       if (task.configTravel(store, JOB.RETURNING, store)) return task;
     }
@@ -254,7 +254,7 @@ public class TaskBuilding extends Task {
     //  Pick up some of the material initially-
     if (type == JOB.COLLECTING && adjacent(target, store)) {
       float amount = Nums.min(5, store.inventory(material));
-      actor.pickupGood(material, amount, store);
+      actor.outfit.pickupGood(material, amount, store);
     }
     //
     //  Then go on to the site and advance actual construction-
@@ -264,7 +264,7 @@ public class TaskBuilding extends Task {
     //
     //  And drop off any surplus material at the end-
     if (type == JOB.RETURNING && adjacent(target, store)) {
-      actor.offloadGood(material, store);
+      actor.outfit.offloadGood(material, store);
     }
     //
     //  But if you're not done yet, find the next step to take...
@@ -336,17 +336,17 @@ public class TaskBuilding extends Task {
     //  If we're recovering material, the actor keeps it:
     float total = 0;
     if (inc > 0) {
-      actor.incCarried(material, inc);
+      actor.outfit.incCarried(material, inc);
       inc = 0;
     }
     //
     //  If we're depleting the material, take it from the actor first:
-    if (actor.carried(m) > 0 && inc < 0 && ! siteOnly) {
-      float sub = Nums.min(actor.carried(m), 0 - inc);
-      actor.incCarried(material, 0 - sub);
+    if (actor.outfit.carried(m) > 0 && inc < 0 && ! siteOnly) {
+      float sub = Nums.min(actor.outfit.carried(m), 0 - inc);
+      actor.outfit.incCarried(material, 0 - sub);
       inc += sub;
     }
-    total += actor.carried(m);
+    total += actor.outfit.carried(m);
     //
     //  And take from the building's stock as necessary:
     if (b.type().isBuilding()) {
@@ -381,7 +381,7 @@ public class TaskBuilding extends Task {
     Actor actor = (Actor) this.active;
     float total[] = new float[5];
     total[0] += total[1] = site == null ? 0 : site.materialLevel(material);
-    total[0] += total[2] = actor.carried(material);
+    total[0] += total[2] = actor.outfit.carried(material);
     total[0] += total[3] = store.inventory(material);
     if (site != null && site.type().isBuilding() && site != store) {
       total[0] += total[4] = ((Building) site).inventory(material);

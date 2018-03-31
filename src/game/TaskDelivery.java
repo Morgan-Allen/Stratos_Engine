@@ -218,12 +218,12 @@ public class TaskDelivery extends Task {
       }
       
       if (amount > 0.1f) {
-        actor.pickupGood(carried, amount, from);
+        actor.outfit.pickupGood(carried, amount, from);
         configTravel(goes, type, origin);
       }
     }
     if (visits == goes) {
-      actor.offloadGood(carried, goes);
+      actor.outfit.offloadGood(carried, goes);
     }
   }
   
@@ -246,7 +246,7 @@ public class TaskDelivery extends Task {
     Actor actor = (Actor) this.active;
     float total[] = new float[4];
     total[0] += total[1] = from.inventory(carried);
-    total[0] += total[2] = actor.carried(carried);
+    total[0] += total[2] = actor.outfit.carried(carried);
     total[0] += total[3] = goes.inventory(carried);
     return total;
   }

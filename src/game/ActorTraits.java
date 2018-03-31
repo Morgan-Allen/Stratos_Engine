@@ -2,15 +2,15 @@
 
 package game;
 import static game.GameConstants.*;
-
-import game.GameConstants.Trait;
 import util.*;
 
 
 
 public class ActorTraits {
   
-
+  
+  /**  Data fields, constructors and save/load methods-
+    */
   final public static int
     BOND_CHILD   = 1 << 1,
     BOND_PARENT  = 1 << 3,
@@ -41,6 +41,7 @@ public class ActorTraits {
   List <Level> levels = new List();
   List <Bond > bonds  = new List();
   List <ActorTechnique> known = new List();
+  
   
   
   ActorTraits(Actor actor) {
@@ -87,6 +88,9 @@ public class ActorTraits {
   
   
   
+  
+  /**  Regular updates-
+    */
   void updateTraits() {
     for (ActorTechnique t : actor.type().classTechniques) {
       if (known.includes(t)) continue;

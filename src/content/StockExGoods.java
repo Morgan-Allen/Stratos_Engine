@@ -30,7 +30,7 @@ public class StockExGoods {
     public void applyCommonEffects(Target subject, Base ruler, Actor actor) {
       final Actor healed = (Actor) subject;
       healed.health.liftDamage(MEDIKIT_HEAL_AMOUNT);
-      healed.incCarried(MEDIKIT, -1);
+      healed.outfit.incCarried(MEDIKIT, -1);
     }
   };
   static {

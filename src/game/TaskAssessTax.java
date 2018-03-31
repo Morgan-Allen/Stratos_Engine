@@ -38,7 +38,7 @@ public class TaskAssessTax extends Task {
   static TaskAssessTax nextAssessment(
     Actor actor, Building from, int maxCollect
   ) {
-    float cashCarried = actor.carried(CASH);
+    float cashCarried = actor.outfit.carried(CASH);
     Pick <Building> pick = new Pick();
     AreaTile entrance = from.mainEntrance();
     
@@ -86,8 +86,8 @@ public class TaskAssessTax extends Task {
     }
     
     if (actor.jobType() == JOB.RETURNING && visits == store) {
-      float cash = actor.carried(CASH);
-      actor.setCarried(CASH, 0);
+      float cash = actor.outfit.carried(CASH);
+      actor.outfit.setCarried(CASH, 0);
       store.base().incFunds((int) cash);
     }
   }

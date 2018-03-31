@@ -112,8 +112,8 @@ public class TaskPurchase extends Task {
       return null;
     }
     
-    int cash     = (int) actor.carried(CASH);
-    int oldLevel = (int) actor.carried(good);
+    int cash     = (int) actor.outfit.carried(CASH);
+    int oldLevel = (int) actor.outfit.carried(good);
     int levelCap = good.isWeapon || good.isArmour ? good.maxQuality : good.maxCarried;
     
     for (int bonus = levelCap; bonus > 0; bonus--) {
@@ -161,7 +161,7 @@ public class TaskPurchase extends Task {
       shop.addItemOrder(itemType, quality, actor);
       ((ActorAsPerson) actor).todo.add(this);
       
-      actor.incCarried(CASH, 0 - pricePays);
+      actor.outfit.incCarried(CASH, 0 - pricePays);
       shop.addInventory(pricePays, CASH);
     }
     
@@ -169,8 +169,8 @@ public class TaskPurchase extends Task {
       shop.removeOrder(itemType, actor);
       ((ActorAsPerson) actor).todo.remove(this);
       
-      if (itemType.isUsable) actor.incCarried(itemType, 1);
-      else actor.setCarried(itemType, quality);
+      if (itemType.isUsable) actor.outfit.incCarried(itemType, 1);
+      else actor.outfit.setCarried(itemType, quality);
     }
   }
   

@@ -202,13 +202,13 @@ public class TaskGathering extends Task {
       yield *= plants.isCrop ? above.growLevel() : 1;
       yield *= 1 + (skillBonus * 0.5f);
       
-      actor.incCarried(gathers, yield);
+      actor.outfit.incCarried(gathers, yield);
       actor.traits.gainXP(skill, 1 * multXP / 100);
       
       if      (plants.isCrop      ) above.setGrowLevel(-1);
       else if (plants.growRate > 0) above.setGrowLevel( 0);
       
-      if (actor.carried(gathers) >= 2) {
+      if (actor.outfit.carried(gathers) >= 2) {
         returnToStore();
       }
       else {
@@ -238,7 +238,7 @@ public class TaskGathering extends Task {
     Actor actor = (Actor) this.active;
     if (visits == store) {
       for (Good made : store.type().produced) {
-        actor.offloadGood(made, store);
+        actor.outfit.offloadGood(made, store);
       }
     }
   }

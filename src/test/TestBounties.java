@@ -178,7 +178,7 @@ public class TestBounties extends LogicTest {
     ActorUtils.fillWorkVacancies(fort);
     
     float initActorFunds = 0;
-    for (Actor a : fort.workers()) initActorFunds += a.carried(CASH);
+    for (Actor a : fort.workers()) initActorFunds += a.outfit.carried(CASH);
 
     map.update(1);
     
@@ -246,7 +246,7 @@ public class TestBounties extends LogicTest {
       
       if (targetFinished && ! rewardSplit) {
         float actorFunds = 0;
-        for (Actor a : fort.workers()) actorFunds += a.carried(CASH);
+        for (Actor a : fort.workers()) actorFunds += a.outfit.carried(CASH);
         float diff = Nums.abs(initActorFunds + reward - actorFunds);
         if (diff <= 1) rewardSplit = true;
       }
