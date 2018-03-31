@@ -9,10 +9,11 @@ import util.*;
 public class ActorOutfit {
   
   
+  /**  Data-fields, constructors and save/load methods-
+    */
   final Actor actor;
   
   Tally <Good> carried = new Tally();
-  
   
   
   ActorOutfit(Actor actor) {
@@ -31,6 +32,8 @@ public class ActorOutfit {
   
   
   
+  /**  State-modifiers-
+    */
   public void pickupGood(Good carried, float amount, Building store) {
     if (store == null || carried == null || amount <= 0) return;
     
@@ -72,6 +75,9 @@ public class ActorOutfit {
   }
   
   
+  
+  /**  Public access methods-
+    */
   public Tally <Good> carried() {
     return carried;
   }

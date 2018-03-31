@@ -10,6 +10,8 @@ import util.*;
 public class ActorHealth {
   
   
+  /**  Data-fields, construction and save/load methods-
+    */
   final static float
     PAIN_PERCENT       = 50,
     KNOCKOUT_PERCENT   = 100,
@@ -25,6 +27,12 @@ public class ActorHealth {
     STATE_DECOMP = 4
   ;
   
+  static class Condition {
+    Active source;
+    Trait basis;
+    float expireTime;
+  }
+  
   
   final Actor actor;
   
@@ -38,6 +46,8 @@ public class ActorHealth {
   float stress  ;
   float cooldown;
   int   state = STATE_OKAY;
+  
+  List <Condition> conditions = new List();
   
   
   ActorHealth(Actor actor) {
@@ -58,6 +68,14 @@ public class ActorHealth {
     stress   = s.loadFloat();
     cooldown = s.loadFloat();
     state    = s.loadInt();
+    
+    for (int n = s.loadInt(); n-- > 0;) {
+      Condition c = new Condition();
+      c.source     = (Active) s.loadObject();
+      c.basis      = (Trait ) s.loadObject();
+      c.expireTime = s.loadFloat();
+      conditions.add(c);
+    }
   }
   
   
@@ -74,9 +92,19 @@ public class ActorHealth {
     s.saveFloat(stress  );
     s.saveFloat(cooldown);
     s.saveInt  (state   );
+    
+    s.saveInt(conditions.size());
+    for (Condition c : conditions) {
+      s.saveObject(c.source);
+      s.saveObject(c.basis);
+      s.saveFloat(c.expireTime);
+    }
   }
   
-
+  
+  
+  /**  Supplemental setup methods-
+    */
   public void setSexData(int sexData) {
     this.sexData = sexData;
   }
@@ -94,13 +122,16 @@ public class ActorHealth {
   
   
   
-  
+  /**  Regular state updates-
+    */
   void updateHealth() {
     //
     //  Obtain some basic settings first-
-    WorldSettings settings = actor.map().world.settings;
+    Area map = actor.map();
+    WorldSettings settings = map.world.settings;
     boolean organic = actor.type().organic && ! actor.type().isVessel();
-    float tick = 1f / actor.map().ticksPS;
+    float tick = 1f / map.ticksPS;
+    float time = map.time() + map.timeInUpdate();
     //
     //  Adjust health-parameters accordingly-
     if (! alive()) {
@@ -140,6 +171,11 @@ public class ActorHealth {
       bleed = 0;
       fatigue = Nums.max(0, fatigue - rests);
       cooldown = Nums.max(0, cooldown - tick);
+    }
+    //
+    //  And update conditions-
+    for (Condition c : conditions) {
+      if (c.expireTime <= time) conditions.remove(c);
     }
   }
   
@@ -203,7 +239,32 @@ public class ActorHealth {
   
   
   
-
+  /**  Handling conditions-
+    */
+  Condition conditionFor(Trait trait) {
+    for (Condition c : conditions) if (c.basis == trait) return c;
+    return null;
+  }
+  
+  
+  public void addCondition(Active source, Trait trait, float duration) {
+    Area map = actor.map();
+    float time = map.time() + map.timeInUpdate();
+    
+    Condition c = conditionFor(trait);
+    if (c == null) conditions.add(c = new Condition());
+    
+    c.source = source;
+    c.basis = trait;
+    c.expireTime = time + duration;
+  }
+  
+  
+  public Series <Condition> conditions() {
+    return conditions;
+  }
+  
+  
   
   /**  Handling state-changes after injury, hunger, fatigue, etc-
     */
@@ -288,6 +349,9 @@ public class ActorHealth {
   }
   
   
+  
+  /**  General public access-methods-
+    */
   public float hungerLevel() {
     return hunger / maxHealth();
   }

@@ -2,6 +2,7 @@
 
 package game;
 import static game.GameConstants.*;
+import static game.ActorHealth.*;
 import util.*;
 
 
@@ -23,6 +24,7 @@ public class ActorTraits {
     Trait trait;
     float XP;
     float level;
+    float bonus;
     
     public String toString() { return trait+": "+level; }
   }
@@ -41,6 +43,7 @@ public class ActorTraits {
   List <Level> levels = new List();
   List <Bond > bonds  = new List();
   List <ActorTechnique> known = new List();
+  List <Trait> affecting = new List();
   
   
   
@@ -56,6 +59,7 @@ public class ActorTraits {
       l.trait = (Trait) s.loadObject();
       l.XP    = s.loadFloat();
       l.level = s.loadFloat();
+      l.bonus = s.loadFloat();
       levels.add(l);
     }
     for (int n = s.loadInt(); n-- > 0;) {
@@ -66,6 +70,7 @@ public class ActorTraits {
       bonds.add(b);
     }
     s.loadObjects(known);
+    s.loadObjects(affecting);
   }
   
   
@@ -76,6 +81,7 @@ public class ActorTraits {
       s.saveObject(l.trait);
       s.saveFloat(l.XP);
       s.saveFloat(l.level);
+      s.saveFloat(l.bonus);
     }
     s.saveInt(bonds.size());
     for (Bond b : bonds) {
@@ -84,6 +90,7 @@ public class ActorTraits {
       s.saveInt(b.properties);
     }
     s.saveObjects(known);
+    s.saveObjects(affecting);
   }
   
   
@@ -92,9 +99,36 @@ public class ActorTraits {
   /**  Regular updates-
     */
   void updateTraits() {
+    //
+    //  Check to see if a new technique can be learned spontaneously-
     for (ActorTechnique t : actor.type().classTechniques) {
       if (known.includes(t)) continue;
       if (t.canLearn(actor)) known.add(t);
+    }
+    //
+    //  Then compile a list of all traits affecting this actor-
+    affecting.clear();
+    for (ActorTechnique t : known) {
+      affecting.add(t);
+    }
+    for (Condition c : actor.health.conditions()) {
+      affecting.include(c.basis);
+    }
+    for (Good g : actor.outfit.carried().keys()) {
+      for (ActorTechnique t : g.allows) {
+        affecting.include(t);
+      }
+    }
+    //
+    //  And then apply any passive effects those may have-
+    for (Level l : levels) {
+      l.bonus = 0;
+      for (Trait t : affecting) {
+        l.bonus += t.passiveBonus(l.trait);
+      }
+    }
+    for (Trait t : affecting) {
+      t.passiveEffect(actor);
     }
   }
 
@@ -154,7 +188,7 @@ public class ActorTraits {
   
   public float levelOf(Trait trait) {
     Level l = levelFor(trait, false);
-    return l == null ? 0 : l.level;
+    return l == null ? 0 : (l.level + l.bonus);
   }
   
   
