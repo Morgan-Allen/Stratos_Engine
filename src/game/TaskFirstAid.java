@@ -150,38 +150,36 @@ public class TaskFirstAid extends Task {
   
   //  TODO:  You need to make sure these effects are applied now.
   
-  final static int
+  final public static int
     AVG_TREATMENT_TIME = SHIFT_LENGTH / 2,
     BLEED_ACTION_HEAL  = 5,
     AVG_BANDAGE_TIME   = DAY_LENGTH,
     INJURY_HEAL_AMOUNT = 5
   ;
   
+  public static float totalHealed = 0;
+  
   final static ActorTechnique BANDAGE_EFFECT = new ActorTechnique(
     "bandage_heal_effect", "Bandage Heal Effect"
   ) {
-    
-    public boolean canUsePassive(Actor using, Target subject) {
-      return using.outfit.carried(BANDAGES) > 0 && using == subject;
-    }
-    
-    public void applyPassive(Actor using, Target subject) {
+    void passiveEffect(Actor actor) {
       float healInc = 1f / AVG_BANDAGE_TIME;
-      using.health.liftDamage(healInc);
-      using.outfit.incCarried(BANDAGES, 0 - healInc);
+      actor.health.liftDamage(healInc * INJURY_HEAL_AMOUNT);
+      actor.outfit.incCarried(BANDAGES, 0 - healInc);
+      
+      totalHealed += healInc * INJURY_HEAL_AMOUNT;
     }
   };
+  
   final static Good BANDAGES = new Good("Bandages", -1);
-  static {
-    BANDAGES.allows = new ActorTechnique[] { BANDAGE_EFFECT };
-  }
+  static { BANDAGES.allows = new ActorTechnique[] { BANDAGE_EFFECT }; }
   
   
   protected void onTarget(Target target) {
     
     Actor   actor    = (Actor) active;
     float   bandages = patient.outfit.carried(BANDAGES);
-    boolean bleeds   = patient.health.bleed() > 0;
+    boolean injured  = patient.health.injury() > 0;
     
     if (skillTest == -1) {
       float skill = actor.traits.levelOf(SKILL_HEAL) / MAX_SKILL_LEVEL;
@@ -193,14 +191,14 @@ public class TaskFirstAid extends Task {
       skillTest += Rand.num() < chance ? 0.33f : 0;
     }
     
-    if (bleeds) {
+    if (injured && bandages < 1) {
       float healInc = skillTest * 2f / AVG_TREATMENT_TIME;
       patient.outfit.setCarried(BANDAGES, bandages + healInc);
       patient.health.incBleed(0 - BLEED_ACTION_HEAL * skillTest);
       configTask(origin, null, patient, JOB.HEALING, 1);
     }
     
-    if (bandages >= 1 || ! bleeds) {
+    if (bandages >= 1 || ! injured) {
       if (
         (refuge != null && ! actor.isPassenger()) &&
         ! TaskCombat.hostile(actor, patient)

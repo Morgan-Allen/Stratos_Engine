@@ -131,7 +131,7 @@ public class ActorTraits {
       t.passiveEffect(actor);
     }
   }
-
+  
   
   
   /**  Handling skills and traits-

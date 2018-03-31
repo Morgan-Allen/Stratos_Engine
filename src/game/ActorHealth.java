@@ -149,10 +149,9 @@ public class ActorHealth {
         injury += bleedInc;
         bleed -= bleedInc;
       }
-      else bleed = 0;
       
-      boolean resting = actor.jobType() == JOB.RESTING && actor.task().inContact();
-      resting |= state == STATE_KO;
+      boolean resting = state == STATE_KO;
+      resting |= actor.jobType() == JOB.RESTING && actor.task().inContact();
       
       if (resting) {
         float rests = tick / FATIGUE_REGEN;
@@ -304,13 +303,14 @@ public class ActorHealth {
     if (map == null || ! map.world.settings.toggleInjury) return;
     injury += damage;
     injury = Nums.clamp(injury, 0, maxHealth() + 1);
-    bleed += injury * BLEED_HURT_PERCENT / 100f;
+    if (damage > 0) incBleed(damage * BLEED_HURT_PERCENT / 100f);
     checkHealthState();
   }
   
   
   public void incBleed(float bleed) {
     this.bleed += bleed;
+    if (this.bleed < 0) this.bleed = 0;
   }
   
   

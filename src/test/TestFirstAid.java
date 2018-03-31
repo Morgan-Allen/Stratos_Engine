@@ -2,10 +2,8 @@
 
 package test;
 import game.*;
-import util.I;
-
-import static game.GameConstants.*;
 import static content.GameContent.*;
+import util.*;
 
 
 
@@ -26,16 +24,17 @@ public class TestFirstAid extends LogicTest {
     world.settings.toggleFog    = false;
     world.settings.toggleHunger = false;
     
-    
-    //  TODO:  Ensure that random actors will perform a similar service...
-    
-    //  TODO:  You also need to ensure that the bandage actually speeds the
-    //  healing process.
+    //  TODO:  Ensure that random actors will perform a similar service!
     
     Building sickbay = (Building) PHYSICIAN_STATION.generate();
     sickbay.enterMap(map, 2, 2, 1, base);
     ActorUtils.spawnActor(sickbay, PHYSICIAN, false);
-    //ActorUtils.fillWorkVacancies(sickbay);
+    
+    ActorAsPerson patient = (ActorAsPerson) ECOLOGIST.generate();
+    ECOLOGIST.initAsMigrant(patient);
+    patient.enterMap(map, 11, 11, 1, base);
+    patient.health.takeDamage (patient.health.maxHealth() * 0.66f);
+    patient.health.takeFatigue(patient.health.maxHealth() * 0.66f);
     
     boolean aidBegun   = false;
     boolean stabilised = false;
@@ -44,14 +43,8 @@ public class TestFirstAid extends LogicTest {
     boolean healFinish = false;
     boolean testOkay   = false;
     
-    ActorAsPerson patient = (ActorAsPerson) ECOLOGIST.generate();
-    ECOLOGIST.initAsMigrant(patient);
-    patient.enterMap(map, 11, 11, 1, base);
-    patient.health.takeDamage (patient.health.maxHealth() * 0.66f);
-    patient.health.takeFatigue(patient.health.maxHealth() * 0.66f);
-    
-    
-    final int RUN_TIME = DAY_LENGTH * 2;
+    float initHurt = -1, targetHurt = -1;
+    final int RUN_TIME = TaskFirstAid.AVG_BANDAGE_TIME * 2;
     
     while (map.time() < RUN_TIME || graphics) {
       test.runLoop(base, 1, graphics, "saves/test_first_aid.str");
@@ -64,6 +57,8 @@ public class TestFirstAid extends LogicTest {
       
       if (aidBegun && ! stabilised) {
         stabilised = patient.health.bleed() <= 0;
+        initHurt   = patient.health.injury();
+        targetHurt = initHurt - TaskFirstAid.INJURY_HEAL_AMOUNT;
       }
       
       if (stabilised && ! carryBegun) {
@@ -75,7 +70,9 @@ public class TestFirstAid extends LogicTest {
       }
       
       if (atSickbay && ! healFinish) {
-        healFinish = patient.health.injury() < patient.health.maxHealth() * 0.33f;
+        //I.say("\nPatient injury: "+patient.health.injury()+"/"+targetHurt);
+        //I.say("  Total healed: "+TaskFirstAid.totalHealed);
+        healFinish = patient.health.injury() < targetHurt;
       }
       
       if (healFinish && ! testOkay) {

@@ -242,6 +242,7 @@ public class Actor extends Element implements
     //
     //  And update health-state and life-cycle-
     if (onMap()) traits.updateTraits();
+    if (onMap()) health.updateHealth();
     if (onMap()) health.checkHealthState();
     if (onMap() && health.alive()) health.updateLifeCycle(base(), true);
   }

@@ -121,11 +121,6 @@ public abstract class ActorTechnique extends Trait {
   }
   
   
-  public boolean canUsePassive(Actor using, Target subject) {
-    return false;
-  }
-  
-  
   public boolean canUseActive(Actor using, Target subject) {
     if (using == subject && ! targetSelf()) {
       return false;
