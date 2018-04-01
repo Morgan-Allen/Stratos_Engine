@@ -15,16 +15,15 @@ public class TestFirstAid extends LogicTest {
     testFirstAid(true);
   }
   
+  
   static boolean testFirstAid(boolean graphics) {
-    LogicTest test = new TestAutoBuild();
+    LogicTest test = new TestFirstAid();
     
     Base base = setupTestBase(16, ALL_GOODS, false);
     Area map = base.activeMap();
     World world = map.world;
     world.settings.toggleFog    = false;
     world.settings.toggleHunger = false;
-    
-    //  TODO:  Ensure that random actors will perform a similar service!
     
     Building sickbay = (Building) PHYSICIAN_STATION.generate();
     sickbay.enterMap(map, 2, 2, 1, base);
@@ -81,7 +80,7 @@ public class TestFirstAid extends LogicTest {
         if (! graphics) return true;
       }
     }
-
+    
     I.say("\n FIRST AID TEST FAILED!");
     I.say("  Aid begun:   "+aidBegun  );
     I.say("  Stabilised:  "+stabilised);

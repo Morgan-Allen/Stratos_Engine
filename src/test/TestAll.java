@@ -16,7 +16,6 @@ public class TestAll {
     numFail  += result ? 0 : 1;
   }
   
-  
   public static void main(String args[]) {
     
     long init = System.currentTimeMillis();
@@ -39,6 +38,8 @@ public class TestAll {
     record(TestAutoBuild.testAutoBuild(false));
     record(TestExploring.testExploring(false));
     record(TestRetreat  .testRetreat  (false));
+    record(TestFirstAid .testFirstAid (false));
+    record(TestDialog   .testDialog   (false));
     record(TestWorld    .testWorld    (false));
     
     record(TestBounties.testAttackBuildingMission(false));
@@ -54,6 +55,7 @@ public class TestAll {
     I.say("  Pass/Fail: "+numPass+"/"+numFail);
     I.say("  Pass rate: "+I.percent(numPass * 1f / numTests));
   }
+  
 }
 
 

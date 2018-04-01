@@ -129,10 +129,10 @@ public class MissionSecure extends Mission {
     
     Target stands = standLocation(actor);
     Target anchor = stands == null ? localFocus() : stands;
-
+    
     //  TODO:  Don't stray too far from the original guard-point.
     TaskCombat taskC = Task.inCombat(actor) ? null :
-      TaskCombat.nextReaction(actor, anchor, this, AVG_FILE)
+      TaskCombat.nextReaction(actor, anchor, this, actor.seen())
     ;
     if (taskC != null) return taskC;
     

@@ -115,7 +115,8 @@ public class BuildingForWalls extends Building implements Active {
     if (! turret) return;
     
     if (! Task.inCombat(this)) {
-      TaskCombat c = TaskCombat.nextReaction(this);
+      Series <Active> others = map.activeInRange(at(), sightRange());
+      TaskCombat c = TaskCombat.nextReaction(this, others);
       if (c != null) assignTask(c);
     }
   }

@@ -1,9 +1,9 @@
 
 
 package game;
-import util.*;
 import static game.Task.*;
 import static game.GameConstants.*;
+import util.*;
 
 
 
@@ -96,9 +96,11 @@ public class ActorAsAnimal extends Actor {
   void updateReactions() {
     if (! map.world.settings.toggleReacts) return;
     
+    Series <Active> assessed = map.activeInRange(at(), sightRange());
+    
     if (jobType() != Task.JOB.RETREAT) {
       if (! Task.inCombat(this)) {
-        TaskCombat combat = TaskCombat.nextReaction(this);
+        TaskCombat combat = TaskCombat.nextReaction(this, assessed);
         if (combat != null) assignTask(combat);
       }
       

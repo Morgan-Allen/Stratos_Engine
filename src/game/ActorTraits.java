@@ -14,10 +14,10 @@ public class ActorTraits {
     */
   final public static int
     BOND_CHILD   = 1 << 1,
-    BOND_PARENT  = 1 << 3,
-    BOND_MARRIED = 1 << 4,
-    BOND_MASTER  = 1 << 5,
-    BOND_SERVANT = 1 << 6
+    BOND_PARENT  = 1 << 2,
+    BOND_MARRIED = 1 << 3,
+    BOND_MASTER  = 1 << 4,
+    BOND_SERVANT = 1 << 5
   ;
   
   static class Level {
@@ -32,6 +32,7 @@ public class ActorTraits {
   static class Bond {
     Actor with;
     float level;
+    float novelty;
     int properties;
     
     public String toString() { return with+": "+level; }
@@ -66,6 +67,7 @@ public class ActorTraits {
       Bond b = new Bond();
       b.with       = (Actor) s.loadObject();
       b.level      = s.loadFloat();
+      b.novelty    = s.loadFloat();
       b.properties = s.loadInt();
       bonds.add(b);
     }
@@ -87,6 +89,7 @@ public class ActorTraits {
     for (Bond b : bonds) {
       s.saveObject(b.with);
       s.saveFloat(b.level);
+      s.saveFloat(b.novelty);
       s.saveInt(b.properties);
     }
     s.saveObjects(known);
@@ -104,6 +107,13 @@ public class ActorTraits {
     for (ActorTechnique t : actor.type().classTechniques) {
       if (known.includes(t)) continue;
       if (t.canLearn(actor)) known.add(t);
+    }
+    //
+    //  Update all relations-
+    float tick = 1f / actor.map().ticksPS;
+    for (Bond b : bonds) {
+      b.novelty += tick / BOND_NOVEL_TIME;
+      b.novelty = Nums.clamp(b.novelty, 0, 1);
     }
     //
     //  Then compile a list of all traits affecting this actor-
@@ -230,6 +240,19 @@ public class ActorTraits {
   }
   
   
+  public void incBond(Actor with, float inc, float maxRange) {
+    Bond b = bondWith(with, true);
+    if (b.level > maxRange || b.level < -maxRange) return;
+    b.level = Nums.clamp(b.level + inc, -maxRange, maxRange);
+  }
+  
+  
+  public void incNovelty(Actor with, float inc) {
+    Bond b = bondWith(with, true);
+    b.novelty  = Nums.clamp(b.novelty + inc, 0, 1);
+  }
+  
+  
   public void deleteBond(Actor with) {
     Bond b = bondWith(with, false);
     if (b != null) bonds.remove(b);
@@ -248,6 +271,12 @@ public class ActorTraits {
   }
   
   
+  public float bondNovelty(Actor with) {
+    Bond b = bondWith(with, false);
+    return b == null ? 1 : b.novelty;
+  }
+  
+  
   public Actor bondedWith(int type) {
     for (Bond b : bonds) if ((b.properties & type) != 0) return b.with;
     return null;
@@ -261,6 +290,16 @@ public class ActorTraits {
   }
   
 }
+
+
+
+
+
+
+
+
+
+
 
 
 

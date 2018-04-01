@@ -96,7 +96,7 @@ public class ActorAsPerson extends Actor {
       
       choice.add(TaskPurchase.nextPurchase(this));
       choice.add(TaskWander.configWandering(this));
-      choice.add(selectTechniqueUse(false));
+      choice.add(selectTechniqueUse(false, (Series) map.actors()));
       
       if (work() != null && work().complete()) {
         choice.add(work().selectActorBehaviour(this));
@@ -116,9 +116,12 @@ public class ActorAsPerson extends Actor {
   void updateReactions() {
     if (! map.world.settings.toggleReacts) return;
     
+    //  TODO:  You need to use the wouldSwitch method here, to account for
+    //  any and all emergency activities...
+    
     if (jobType() != Task.JOB.RETREAT) {
       if (armed() && ! Task.inCombat(this)) {
-        TaskCombat combat = TaskCombat.nextReaction(this);
+        TaskCombat combat = TaskCombat.nextReaction(this, seen());
         if (combat != null) assignTask(combat);
       }
       
@@ -130,19 +133,19 @@ public class ActorAsPerson extends Actor {
       }
     }
     
+    TaskDialog dialog = TaskDialog.nextCasualDialog(this, seen());
+    if (dialog != null) assignTask(dialog);
+    
     if (health.cooldown() == 0) {
-      Task reaction = selectTechniqueUse(true);
+      Task reaction = selectTechniqueUse(true, seen());
       if (reaction != null) assignReaction(reaction);
     }
   }
   
   
-  Task selectTechniqueUse(boolean reaction) {
+  Task selectTechniqueUse(boolean reaction, Series <Active> assessed) {
     class Reaction { ActorTechnique used; Target subject; float rating; }
     Pick <Reaction> pick = new Pick(0);
-    
-    Series <Active> assessed = (Series) map().actors();
-    if (reaction) assessed = map.activeInRange(at(), sightRange());
     
     for (Active other : assessed) {
       for (ActorTechnique used : traits.known()) {

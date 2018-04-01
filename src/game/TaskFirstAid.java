@@ -142,13 +142,15 @@ public class TaskFirstAid extends Task {
   }
   
   
+  public boolean emergency() {
+    return true;
+  }
+  
+  
   
   /**  Behaviour execution-
     */
-  
   //  TODO:  Move these to the GameConstants class...?
-  
-  //  TODO:  You need to make sure these effects are applied now.
   
   final public static int
     AVG_TREATMENT_TIME = SHIFT_LENGTH / 2,

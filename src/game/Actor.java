@@ -38,8 +38,10 @@ public class Actor extends Element implements
   
   private Task task;
   private Task reaction;
+  
+  private Series <Active> seen = new List();
   private float fearLevel;
-  private List <Actor> backup = new List();
+  private List <Active> backup = new List();
   
   private Pathing inside;
   private boolean wasIndoors = true;
@@ -76,6 +78,8 @@ public class Actor extends Element implements
     
     task      = (Task) s.loadObject();
     reaction  = (Task) s.loadObject();
+    
+    s.loadObjects(seen);
     fearLevel = s.loadFloat();
     s.loadObjects(backup);
     
@@ -103,9 +107,11 @@ public class Actor extends Element implements
     s.saveObject(guestBase);
     s.saveObject(mission  );
     
-    s.saveObject(task     );
-    s.saveObject(reaction );
-    s.saveFloat (fearLevel);
+    s.saveObject(task    );
+    s.saveObject(reaction);
+    
+    s.saveObjects(seen);
+    s.saveFloat(fearLevel);
     s.saveObjects(backup);
     
     s.saveObject(inside);
@@ -381,7 +387,7 @@ public class Actor extends Element implements
   }
   
   
-  public List <Actor> backup() {
+  public List <Active> backup() {
     return backup;
   }
   
@@ -435,6 +441,12 @@ public class Actor extends Element implements
   public float jobPriority() {
     if (task == null) return Task.NO_PRIORITY;
     return task.priority();
+  }
+  
+  
+  public boolean inEmergency() {
+    if (task == null) return false;
+    return task.emergency();
   }
   
   
@@ -526,12 +538,21 @@ public class Actor extends Element implements
       float range = sightRange();
       if (fog != null) fog.liftFog(at(), range);
     }
+    
+    float noticeRange = sightRange();
+    if (mission != null && mission.active()) noticeRange += AVG_FILE;
+    seen = map.activeInRange(at(), noticeRange);
   }
   
   
   public float sightRange() {
     float light = map == null ? 0.5f : map.lightLevel();
     return type().sightRange * (0.75f + (light * 0.5f));
+  }
+  
+  
+  public Series <Active> seen() {
+    return seen;
   }
   
   

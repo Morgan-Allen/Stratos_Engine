@@ -162,9 +162,8 @@ public class TaskCombat extends Task {
   }
   
   
-  
-  static TaskCombat nextReaction(Active actor) {
-    return nextReaction(actor, null, null, 0);
+  static TaskCombat nextReaction(Active actor, Series <Active> others) {
+    return nextReaction(actor, null, null, others);
   }
   
   
@@ -172,12 +171,12 @@ public class TaskCombat extends Task {
   //  proximity.
   
   static TaskCombat nextReaction(
-    Active actor, Target anchor, Employer employer, float noticeBonus
+    Active actor, Target anchor, Employer employer, Series <Active> others
   ) {
     AreaTile from = actor.at();
-    Area map = actor.map();
-    float noticeRange = ((Element) actor).sightRange() + noticeBonus;
-    Series <Active> others = map.activeInRange(from, noticeRange);
+    //Area map = actor.map();
+    //float noticeRange = ((Element) actor).sightRange() + noticeBonus;
+    //Series <Active> others = map.activeInRange(from, noticeRange);
     
     class Option { Element other; float rating; };
     List <Option> options = new List <Option> () {
@@ -191,7 +190,7 @@ public class TaskCombat extends Task {
       AreaTile goes = other.at();
       float distF = distance(goes, from);
       float distA = anchor == null ? 0 : distance(goes, anchor);
-      if (distA > noticeRange) continue;
+      //if (distA > noticeRange) continue;
       
       priority *= distancePenalty(distF + distA);
       priority /= 1 + other.focused().size();
@@ -457,11 +456,11 @@ public class TaskCombat extends Task {
     float danger = dangerMap.fuzzyLevel(around.x, around.y);
     danger = Nums.max(danger, attackPower(primary));
     
-    Series <Actor> backup = actor.backup();
-    for (Actor a : backup) if (a != actor) {
-      float backPower = attackPower(a);
+    Series <Active> backup = actor.backup();
+    for (Active a : backup) if (a != actor) {
+      float backPower = attackPower((Element) a);
       if (a.jobType() == JOB.COMBAT) {
-        backPower *= Area.distance(mainTaskFocus(a), primary);
+        backPower *= Area.distance(mainTaskFocus((Element) a), primary);
       }
       else {
         backPower /= 2;
@@ -484,6 +483,11 @@ public class TaskCombat extends Task {
 
   public float harmLevel() {
     return FULL_HARM;
+  }
+  
+  
+  public boolean emergency() {
+    return true;
   }
   
   

@@ -77,7 +77,7 @@ public class MissionContact extends Mission {
     }
     
     TaskCombat taskC = (Task.inCombat(actor) || isEnvoy) ? null :
-      TaskCombat.nextReaction(actor, stands, this, AVG_FILE)
+      TaskCombat.nextReaction(actor, stands, this, actor.seen())
     ;
     if (taskC != null) return taskC;
     

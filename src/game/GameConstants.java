@@ -148,6 +148,15 @@ public class GameConstants {
     AVG_EXPLORE_DIST = 8   ,
     MAX_EXPLORE_DIST = 200 ,
     //
+    //  Dialog and relationships-
+    DIALOG_LENGTH    = SHIFT_LENGTH / 2,
+    CHAT_BOND        = 10,
+    MAX_CHAT_BOND    = 35,  //  bonding over conversation
+    SAVE_BOND        = 45, 
+    MAX_SAVE_BOND    = 100, //  bonding over life/death situations
+    BOND_NOVEL_TIME  = DAY_LENGTH * 2,
+    AVG_NUM_BONDS    = 10,
+    //
     //  Military, and combat-
     AVG_ARMY_SIZE    = 9   ,
     AVG_RANKS        = 3   ,

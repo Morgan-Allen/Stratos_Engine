@@ -195,6 +195,11 @@ public class Task implements Session.Saveable {
   }
   
   
+  boolean pathValid() {
+    return path != null;
+  }
+  
+  
   void toggleFocus(boolean activeNow) {
     Target t = mainFocus();
     if (t != null) t.setFocused(active, activeNow);
@@ -251,6 +256,11 @@ public class Task implements Session.Saveable {
   
   public float harmLevel() {
     return NO_HARM;
+  }
+  
+  
+  public boolean emergency() {
+    return false;
   }
   
   

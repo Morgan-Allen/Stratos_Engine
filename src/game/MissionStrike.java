@@ -103,7 +103,7 @@ public class MissionStrike extends Mission {
     
     if (terms.rejected() || terms.expired() || ! haveTerms) {
       TaskCombat taskC = (Task.inCombat(actor) || isEnvoy) ? null :
-        TaskCombat.nextReaction(actor, stands, this, AVG_FILE)
+        TaskCombat.nextReaction(actor, stands, this, actor.seen())
       ;
       if (taskC != null) return taskC;
       

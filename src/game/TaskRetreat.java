@@ -34,7 +34,7 @@ public class TaskRetreat extends Task {
   
   
   
-  static float fearLevel(Actor actor, List <Actor> storeBackup) {
+  static float fearLevel(Actor actor, List <Active> storeBackup) {
     float dangerSum = 0, allySum = 0;
     float range = actor.sightRange();
     Batch <Active> aware = new Batch();
@@ -121,6 +121,11 @@ public class TaskRetreat extends Task {
   }
   
   
+  public boolean emergency() {
+    return true;
+  }
+
+
   int motionMode() {
     return Actor.MOVE_RUN;
   }
