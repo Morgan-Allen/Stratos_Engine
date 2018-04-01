@@ -43,6 +43,8 @@ public class TaskDialog extends Task {
     */
   static TaskDialog nextCasualDialog(Actor actor, Series <Active> assessed) {
     
+    if (true) return null;
+    
     Pick <Active> pick = new Pick(0);
     for (Active a : assessed) {
       if (! a.isActor()) continue;

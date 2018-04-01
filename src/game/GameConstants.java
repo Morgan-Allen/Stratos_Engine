@@ -157,7 +157,7 @@ public class GameConstants {
     BOND_NOVEL_TIME  = DAY_LENGTH * 2,
     AVG_NUM_BONDS    = 10,
     //
-    //  Military, and combat-
+    //  Military and combat-
     AVG_ARMY_SIZE    = 9   ,
     AVG_RANKS        = 3   ,
     AVG_FILE         = 3   ,
@@ -172,6 +172,12 @@ public class GameConstants {
     WALL_ARM_BONUS   = 2   ,
     WALL_DMG_BONUS   = 1   ,
     BUILD_TILE_HP    = 2   ,
+    //
+    //  Treatment and first aid-
+    AVG_TREATMENT_TIME = SHIFT_LENGTH / 2,
+    BLEED_ACTION_HEAL  = 5,
+    AVG_BANDAGE_TIME   = DAY_LENGTH,
+    INJURY_HEAL_AMOUNT = 5,
     //
     //  Trade and migration-
     TRADE_DIST_TIME  = 50  ,
@@ -405,6 +411,20 @@ public class GameConstants {
     NO_GOODS      [] = new Good[0],
     COMMERCE_TYPES[] = { IS_ADMIN, IS_TRADER, IS_VENDOR, IS_HOUSING },
     SERVICE_TYPES [] = { DIVERSION, EDUCATION, HEALTHCARE, RELIGION };
+  
+  final static ActorTechnique BANDAGE_EFFECT = new ActorTechnique(
+    "bandage_heal_effect", "Bandage Heal Effect"
+  ) {
+    void passiveEffect(Actor actor) {
+      float healInc = 1f / AVG_BANDAGE_TIME;
+      actor.health.liftDamage(healInc * INJURY_HEAL_AMOUNT);
+      actor.outfit.incCarried(BANDAGES, 0 - healInc);
+    }
+  };
+  
+  final static Good BANDAGES = new Good("Bandages", -1);
+  static { BANDAGES.allows = new ActorTechnique[] { BANDAGE_EFFECT }; }
+  
   
   final public static Terrain
     NO_HABITAT[] = {},

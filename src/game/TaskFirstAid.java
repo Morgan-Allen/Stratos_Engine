@@ -150,33 +150,6 @@ public class TaskFirstAid extends Task {
   
   /**  Behaviour execution-
     */
-  //  TODO:  Move these to the GameConstants class...?
-  
-  final public static int
-    AVG_TREATMENT_TIME = SHIFT_LENGTH / 2,
-    BLEED_ACTION_HEAL  = 5,
-    AVG_BANDAGE_TIME   = DAY_LENGTH,
-    INJURY_HEAL_AMOUNT = 5
-  ;
-  
-  public static float totalHealed = 0;
-  
-  final static ActorTechnique BANDAGE_EFFECT = new ActorTechnique(
-    "bandage_heal_effect", "Bandage Heal Effect"
-  ) {
-    void passiveEffect(Actor actor) {
-      float healInc = 1f / AVG_BANDAGE_TIME;
-      actor.health.liftDamage(healInc * INJURY_HEAL_AMOUNT);
-      actor.outfit.incCarried(BANDAGES, 0 - healInc);
-      
-      totalHealed += healInc * INJURY_HEAL_AMOUNT;
-    }
-  };
-  
-  final static Good BANDAGES = new Good("Bandages", -1);
-  static { BANDAGES.allows = new ActorTechnique[] { BANDAGE_EFFECT }; }
-  
-  
   protected void onTarget(Target target) {
     
     Actor   actor    = (Actor) active;

@@ -2,6 +2,7 @@
 
 package test;
 import game.*;
+import static game.GameConstants.*;
 import static content.GameContent.*;
 import util.*;
 
@@ -43,7 +44,7 @@ public class TestFirstAid extends LogicTest {
     boolean testOkay   = false;
     
     float initHurt = -1, targetHurt = -1;
-    final int RUN_TIME = TaskFirstAid.AVG_BANDAGE_TIME * 2;
+    final int RUN_TIME = AVG_BANDAGE_TIME * 2;
     
     while (map.time() < RUN_TIME || graphics) {
       test.runLoop(base, 1, graphics, "saves/test_first_aid.str");
@@ -57,7 +58,7 @@ public class TestFirstAid extends LogicTest {
       if (aidBegun && ! stabilised) {
         stabilised = patient.health.bleed() <= 0;
         initHurt   = patient.health.injury();
-        targetHurt = initHurt - TaskFirstAid.INJURY_HEAL_AMOUNT;
+        targetHurt = initHurt - INJURY_HEAL_AMOUNT;
       }
       
       if (stabilised && ! carryBegun) {
