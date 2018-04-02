@@ -72,8 +72,8 @@ public class MissionContact extends Mission {
     
     if (onAwayMap && haveTerms && isEnvoy && ! terms.sent()) {
       Actor offersTerms = findOfferRecipient(this);
-      Task t = actor.targetTask(offersTerms, 1, Task.JOB.DIALOG, this);
-      if (t != null) return t;
+      Task dialog = TaskDialog.contactDialogFor(actor, offersTerms, this);
+      if (dialog != null) return dialog;
     }
     
     TaskCombat taskC = (Task.inCombat(actor) || isEnvoy) ? null :
@@ -85,15 +85,6 @@ public class MissionContact extends Mission {
     if (standT != null) return standT;
     
     return null;
-  }
-  
-  
-  public void actorTargets(Actor actor, Target other) {
-    if (actor.jobType() == Task.JOB.DIALOG) {
-      Base focus = ((Element) other).base();
-      terms.sendTerms(focus);
-    }
-    super.actorTargets(actor, other);
   }
   
 
