@@ -627,6 +627,7 @@ public class Area implements Session.Saveable {
       List <Active> inBigGrid = actorGrid[c.x][c.y];
       
       for (Active a : inBigGrid) {
+        if (! a.onMap()) I.complain("\nACTIVE ON GRID BUT NOT ON MAP!");
         if (distance(a.at(), point) > range) continue;
         all.add(a);
       }

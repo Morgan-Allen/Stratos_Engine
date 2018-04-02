@@ -102,6 +102,12 @@ public class TaskDialog extends Task {
     else {
       busyRating = with.jobPriority();
     }
+    
+    
+    if (with.base().activeMap() == null) {
+      ///I.say("???");
+    }
+    
     //
     //  If that check passes, assess the novelty of these actors relative to
     //  eachother, tweak for a few other factors, and return if that seems more
@@ -159,7 +165,7 @@ public class TaskDialog extends Task {
     }
     
     if (priority() > 0 && talksWith(with) == actor) {
-      configTask(null, null, with, JOB.DIALOG, 1);
+      configTask(origin, null, with, JOB.DIALOG, 1);
     }
     else {
       actor.traits.incNovelty(with, -1);

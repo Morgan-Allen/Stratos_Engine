@@ -291,6 +291,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
     
     stateBits |=  FLAG_EXIT;
     stateBits &= ~FLAG_ON_MAP;
+    setLocation(null, map);
     
     if (! type.mobile) {
       if (true       ) setFlagging(false, type.flagKey);

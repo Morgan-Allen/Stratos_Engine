@@ -118,6 +118,7 @@ public class ActorAsPerson extends Actor {
     
     //  TODO:  You need to use the wouldSwitch method here, to account for
     //  any and all emergency activities...
+    float oldPriority = Nums.max(jobPriority(), 0);
     
     if (jobType() != Task.JOB.RETREAT) {
       if (armed() && ! Task.inCombat(this)) {
@@ -125,7 +126,6 @@ public class ActorAsPerson extends Actor {
         if (combat != null) assignTask(combat);
       }
       
-      float oldPriority = Nums.max(jobPriority(), 0);
       TaskRetreat retreat = TaskRetreat.configRetreat(this);
       if (retreat != null && retreat.priority() > oldPriority) {
         assignTask(retreat);
@@ -134,7 +134,9 @@ public class ActorAsPerson extends Actor {
     }
     
     TaskDialog dialog = TaskDialog.nextCasualDialog(this, seen());
-    if (dialog != null) assignTask(dialog);
+    if (dialog != null && dialog.priority() > oldPriority) {
+      assignTask(dialog);
+    }
     
     if (health.cooldown() == 0) {
       Task reaction = selectTechniqueUse(true, seen());
