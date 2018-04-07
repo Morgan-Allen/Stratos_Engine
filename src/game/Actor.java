@@ -148,6 +148,7 @@ public class Actor extends Element implements
   
   
   public void exitMap(Area map) {
+    
     if (inside != null) setInside(inside, false);
     map.actors.remove(this);
     
@@ -164,7 +165,7 @@ public class Actor extends Element implements
     if (home    != null) home.setResident(this, false);
     if (work    != null) work.setWorker(this, false);
     if (task    != null) task.onCancel();
-    assignTask(null);
+    assignTask(null, this);
   }
   
   
@@ -217,12 +218,18 @@ public class Actor extends Element implements
         setLocation(free, map);
       }
     }
-    if (health.active()) {
+    
+    if (health.active() && attachTo == null) {
       //
-      //  Update fear-level:
-      fearLevel = updateFearLevel();
+      //  NOTE:  The order of subroutine calls here is somewhat delicate, so
+      //  do not tamper without cause...
       //
-      //  Task updates-
+      //  Update vision, fear-level and reactions:
+      if (onMap()) updateVision();
+      if (onMap()) fearLevel = updateFearLevel();
+      if (onMap()) updateReactions();
+      //
+      //  Update any ongoing tasks-
       if (home    != null && onMap()) home   .actorUpdates(this);
       if (work    != null && onMap()) work   .actorUpdates(this);
       if (mission != null && onMap()) mission.actorUpdates(this);
@@ -233,11 +240,7 @@ public class Actor extends Element implements
         beginNextBehaviour();
       }
       //
-      //  Update vision and reactions-
-      if (onMap()) updateVision();
-      if (onMap()) updateReactions();
-      //
-      //  Update anything you're carrying-
+      //  And update anything you're carrying-
       if (attached != null && onMap()) {
         attached.setExactLocation(exactPosition, map);
       }
@@ -257,8 +260,8 @@ public class Actor extends Element implements
   
   
   void beginNextBehaviour() {
-    assignTask(null);
-    assignTask(TaskWander.configWandering(this));
+    assignTask(null, this);
+    assignTask(TaskWander.configWandering(this), this);
   }
   
   
@@ -355,7 +358,7 @@ public class Actor extends Element implements
   
   /**  Miscellaneous behaviour triggers:
     */
-  public void assignTask(Task task) {
+  public void assignTask(Task task, Object source) {
     if (this.task != null) this.task.toggleFocus(false);
     this.task = task;
     if (this.task != null) this.task.toggleFocus(true);
@@ -498,8 +501,8 @@ public class Actor extends Element implements
       );
       enterMap(goes.activeMap(), entry.x, entry.y, 1, base());
     }
-    if (task != null) {
-      task.onArrival(goes, journey);
+    if (task != null && ! task.updateOnArrival(goes, journey)) {
+      assignTask(null, this);
     }
   }
   
@@ -512,6 +515,53 @@ public class Actor extends Element implements
   
   /**  Combat and survival-related code:
     */
+  public int meleeDamage() {
+    //  TODO:  Add buffs from conditions!
+    Good weapon = type().weaponType;
+    if (weapon != null) {
+      int damage = weapon.meleeDamage;
+      damage += outfit.carried(weapon);
+      return damage;
+    }
+    else return super.meleeDamage();
+  }
+  
+  
+  public int rangeDamage() {
+    //  TODO:  Add buffs from conditions!
+    Good weapon = type().weaponType;
+    if (weapon != null) {
+      int damage = weapon.rangeDamage;
+      damage += outfit.carried(weapon);
+      return damage;
+    }
+    else return super.rangeDamage();
+  }
+  
+  
+  public int attackRange() {
+    //  TODO:  Add buffs from conditions!
+    Good weapon = type().weaponType;
+    if (weapon != null) {
+      int range = weapon.rangeDist;
+      return range;
+    }
+    else return super.attackRange();
+  }
+  
+  
+  public int armourClass() {
+    //  TODO:  Add buffs from conditions!
+    Good armour = type().weaponType;
+    if (armour != null) {
+      int amount = armour.armourClass;
+      amount += outfit.carried(armour);
+      return amount;
+    }
+    else return super.armourClass();
+  }
+  
+  
   public void performAttack(Element other, boolean melee) {
     TaskCombat.performAttack(this, other, melee);
   }
@@ -519,6 +569,12 @@ public class Actor extends Element implements
   
   public void takeDamage(float damage) {
     health.takeDamage(damage);
+  }
+  
+  
+  public float sightRange() {
+    float light = map == null ? 0.5f : map.lightLevel();
+    return type().sightRange * (0.75f + (light * 0.5f));
   }
   
   
@@ -539,12 +595,6 @@ public class Actor extends Element implements
     float noticeRange = sightRange();
     if (mission != null && mission.active()) noticeRange += AVG_FILE;
     seen = map.activeInRange(at(), noticeRange);
-  }
-  
-  
-  public float sightRange() {
-    float light = map == null ? 0.5f : map.lightLevel();
-    return type().sightRange * (0.75f + (light * 0.5f));
   }
   
   

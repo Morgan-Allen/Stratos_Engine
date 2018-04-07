@@ -36,10 +36,9 @@ public class TaskRetreat extends Task {
   
   static float fearLevel(Actor actor, List <Active> storeBackup) {
     float dangerSum = 0, allySum = 0;
-    float range = actor.sightRange();
     Batch <Active> aware = new Batch();
     
-    for (Active other : actor.map.activeInRange(actor.at(), range)) {
+    for (Active other : actor.seen()) {
       aware.add(other);
     }
     for (Active other : actor.focused()) {
@@ -104,6 +103,9 @@ public class TaskRetreat extends Task {
     
     Building hides = pickHide.result();
     TaskRetreat hiding = new TaskRetreat(actor, hides);
+    
+    if (hiding.priority() <= 0) return null;
+    
     return (TaskRetreat) hiding.configTask(null, hides, null, JOB.RETREAT, 10);
   }
   
@@ -129,6 +131,16 @@ public class TaskRetreat extends Task {
   int motionMode() {
     return Actor.MOVE_RUN;
   }
+  
+  
+  boolean checkAndUpdateTask() {
+    if (! super.checkAndUpdateTask()) return false;
+    
+    Mission mission = active.mission();
+    if (mission != null) mission.toggleRecruit((Actor) active, false);
+    
+    return true;
+  }
 
 
   protected void onVisit(Building visits) {
@@ -141,5 +153,9 @@ public class TaskRetreat extends Task {
   }
   
 }
+
+
+
+
 
 

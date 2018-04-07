@@ -99,10 +99,13 @@ public class MissionSecure extends Mission {
         }
         else if (time - beginTime >= guardPeriod) {
           int periodCash = rewards.cashReward();
-          if (autoRenew && homeBase().funds() >= periodCash) {
+          int funds = homeBase().funds();
+          boolean canRenew = periodCash == 0 || funds >= periodCash;
+          
+          if (autoRenew && canRenew) {
             beginTime = time;
             rewards.dispenseRewards();
-            rewards.setAsBounty(periodCash);
+            if (periodCash > 0) rewards.setAsBounty(periodCash);
           }
           else setMissionComplete(true);
         }
@@ -127,22 +130,22 @@ public class MissionSecure extends Mission {
   
   public Task nextLocalMapBehaviour(Actor actor) {
     
-    Target stands = standLocation(actor);
+    AreaTile stands = standLocation(actor);
     Target anchor = stands == null ? localFocus() : stands;
     
-    //  TODO:  Don't stray too far from the original guard-point.
+    //  TODO:  Don't stray too far from the original guard-point...
     TaskCombat taskC = Task.inCombat(actor) ? null :
       TaskCombat.nextReaction(actor, anchor, this, actor.seen())
     ;
     if (taskC != null) return taskC;
     
     if (stands == null) {
-      Task patrol = TaskPatrol.protectionFor(actor, localFocus(), Task.ROUTINE);
+      Task patrol = TaskPatrol.protectionFor(actor, localFocus(), this);
       if (patrol != null) return patrol;
     }
     else {
-      Task taskS = actor.targetTask(stands, 1, Task.JOB.MILITARY, this);
-      if (taskS != null) return taskS;
+      Task sentry = TaskPatrol.sentryDutyFor(actor, stands, this);
+      if (sentry != null) return sentry;
     }
     
     return null;
@@ -163,9 +166,11 @@ public class MissionSecure extends Mission {
   /**  Other utility methods-
     */
   public AreaTile standLocation(Actor actor) {
-    boolean doPatrol = localFocus().type().isWall;
-    if (doPatrol) {
+    if (localFocus().type().isWall) {
       return standingPointPatrol(actor, this);
+    }
+    else if (localFocus().isTile()) {
+      return standingPointRanks(actor, this, localFocus());
     }
     else {
       return null;

@@ -67,12 +67,12 @@ public class TestDialog extends LogicTest {
       
       if (talkOkay && talkEnds && noveltyOkay && ! testOkay) {
         testOkay = true;
-        I.say("\n DIALOG TEST CONCLUDED SUCCESSFULLY!");
+        I.say("\nDIALOG TEST CONCLUDED SUCCESSFULLY!");
         if (! graphics) return true;
       }
     }
     
-    I.say("\n DIALOG TEST FAILED!");
+    I.say("\nDIALOG TEST FAILED!");
     I.say("  Talk okay:    "+talkOkay   );
     I.say("  Talk ends:    "+talkEnds   );
     I.say("  Novelty okay: "+noveltyOkay);

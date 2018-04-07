@@ -88,6 +88,7 @@ public class TestSieging extends LogicTest {
     for (Actor w : fort.workers()) guarding.toggleRecruit(w, true);
     guarding.setLocalFocus(tower);
     guarding.setGuardPeriod(DAY_LENGTH, true);
+    guarding.rewards.setBasePriority(Task.PARAMOUNT * 1000);
     guarding.beginMission(baseC);
     
     BuildingForTrade store = (BuildingForTrade) SUPPLY_DEPOT.generate();

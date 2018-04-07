@@ -270,7 +270,7 @@ public class TaskBuilding extends Task {
     //  But if you're not done yet, find the next step to take...
     else if (! decideNextAction(site, actor.map)) {
       Task next = nextBuildingTask(store, actor, material, true);
-      actor.assignTask(next);
+      actor.assignTask(next, this);
     }
   }
   

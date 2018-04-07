@@ -47,13 +47,13 @@ public class ActorAsAnimal extends Actor {
     float hurtRating = health.fatigue() + health.injury();
     float hunger = health.hunger();
     AreaTile rests = type().organic ? findGrazePoint() : null;
-    assignTask(null);
+    assignTask(null, this);
     
     if (type().organic) {
       //
       //  If you're seriously tired or hurt, but not hungry, find a place to rest:
       if (hurtRating > type().maxHealth / 2 && hunger < 1 && rests != null) {
-        assignTask(targetTask(rests, 10, JOB.RESTING, null));
+        assignTask(targetTask(rests, 10, JOB.RESTING, null), this);
       }
       //
       //  If you're hungry, look for food, either by grazing within your habitat
@@ -62,33 +62,33 @@ public class ActorAsAnimal extends Actor {
         if (type().predator) {
           Actor prey = findPrey();
           TaskCombat hunt = TaskCombat.configHunting(this, prey);
-          if (hunt != null) assignTask(hunt);
+          if (hunt != null) assignTask(hunt, this);
         }
         else if (rests != null) {
-          assignTask(targetTask(rests, 1, JOB.FORAGING, null));
+          assignTask(targetTask(rests, 1, JOB.FORAGING, null), this);
         }
       }
       //
       //  If you're still in pain, rest up-
       if (idle() && hurtRating >= 0.5 && rests != null) {
-        assignTask(targetTask(at(), 10, JOB.RESTING, null));
+        assignTask(targetTask(at(), 10, JOB.RESTING, null), this);
       }
     }
     
     //
     //  If you're assigned a mission, take it on:
     if (idle() && mission() != null && mission().active()) {
-      assignTask(mission().selectActorBehaviour(this));
+      assignTask(mission().selectActorBehaviour(this), this);
     }
     //
     //  If you have a home, see what that has for you:
     if (idle() && home() != null && home().complete()) {
-      assignTask(home().selectActorBehaviour(this));
+      assignTask(home().selectActorBehaviour(this), this);
     }
     //
     //  If that all fails, wander about a little-
     if (idle()) {
-      assignTask(TaskWander.configWandering(this));
+      assignTask(TaskWander.configWandering(this), this);
     }
   }
   
@@ -101,13 +101,13 @@ public class ActorAsAnimal extends Actor {
     if (jobType() != Task.JOB.RETREAT) {
       if (! Task.inCombat(this)) {
         TaskCombat combat = TaskCombat.nextReaction(this, assessed);
-        if (combat != null) assignTask(combat);
+        if (combat != null) assignTask(combat, this);
       }
       
       float oldPriority = jobPriority();
       TaskRetreat retreat = TaskRetreat.configRetreat(this);
       if (retreat != null && retreat.priority() > oldPriority) {
-        assignTask(retreat);
+        assignTask(retreat, this);
         if (mission() != null) mission().toggleRecruit(this, false);
       }
     }
@@ -182,7 +182,7 @@ public class ActorAsAnimal extends Actor {
       
       if (prey.health.alive()) {
         TaskCombat hunt = TaskCombat.configHunting(this, prey);
-        if (hunt != null) assignTask(hunt);
+        if (hunt != null) assignTask(hunt, this);
       }
       else {
         float oldH = health.hunger(), yield = meatYield(prey);

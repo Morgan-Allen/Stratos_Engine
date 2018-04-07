@@ -41,13 +41,13 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   /**  Regular updates and behaviour methods-
     */
   void beginNextBehaviour() {
-    assignTask(null);
+    assignTask(null, this);
     
     if (idle() && work() != null && work().complete()) {
-      assignTask(work().selectActorBehaviour(this));
+      assignTask(work().selectActorBehaviour(this), this);
     }
     if (idle()) {
-      assignTask(TaskResting.configResting(this, home()));
+      assignTask(TaskResting.configResting(this, home()), this);
     }
   }
   

@@ -82,7 +82,7 @@ public class TestFirstAid extends LogicTest {
       }
     }
     
-    I.say("\n FIRST AID TEST FAILED!");
+    I.say("\nFIRST AID TEST FAILED!");
     I.say("  Aid begun:   "+aidBegun  );
     I.say("  Stabilised:  "+stabilised);
     I.say("  Carry begun: "+carryBegun);

@@ -151,6 +151,11 @@ public class MissionStrike extends Mission {
   }
   
   
+  public static int powerSum(Mission mission) {
+    return powerSum(mission.recruits(), mission.localMap());
+  }
+  
+  
   
   static class SiegeSearch extends ActorPathSearch {
     

@@ -30,6 +30,7 @@ public class TestPathing extends LogicTest {
     world.settings.toggleHunger  = false;
     world.settings.toggleHunger  = false;
     world.settings.toggleMigrate = false;
+    world.settings.toggleReacts  = false;
     
     //
     //  First, place a variety of structures on the map and test to
@@ -199,11 +200,11 @@ public class TestPathing extends LogicTest {
           Pathing goes;
           if (a.inside() != home && ! home.hasFocus()) {
             goes = home;
-            a.assignTask(a.visitTask(home, 0, Task.JOB.RETURNING, null));
+            a.assignTask(a.visitTask(home, 0, Task.JOB.RETURNING, null), a);
           }
           else {
             goes = map.tileAt(Rand.index(map.size()), Rand.index(map.size()));
-            a.assignTask(a.targetTask(goes, 0, Task.JOB.EXPLORING, null));
+            a.assignTask(a.targetTask(goes, 0, Task.JOB.EXPLORING, null), a);
           }
           destinations.put(a, goes);
           

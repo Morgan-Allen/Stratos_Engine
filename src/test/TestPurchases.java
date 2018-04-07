@@ -14,7 +14,7 @@ public class TestPurchases extends LogicTest {
   
   
   public static void main(String args[]) {
-    testPurchases(false);
+    testPurchases(true);
   }
   
 
@@ -72,7 +72,7 @@ public class TestPurchases extends LogicTest {
     int injureTime = -1;
     float initInjury = -1;
     
-    //  TODO:  You should also test expiration dates for orders.
+    //  TODO:  You should also test expiration dates for orders...
     
     
     while (map.time() < 1000 || graphics) {

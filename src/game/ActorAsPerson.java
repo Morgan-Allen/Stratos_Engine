@@ -3,7 +3,6 @@
 package game;
 import util.*;
 import static game.Task.*;
-import static game.Area.*;
 import static game.ActorTraits.*;
 import static game.GameConstants.*;
 
@@ -14,9 +13,9 @@ public class ActorAsPerson extends Actor {
   
   /**  Data fields, construction and save/load methods-
     */
-  List <Task> todo = new List();
+  private List <Task> todo = new List();
   
-  String customName = "";
+  private String customName = "";
   
   
   public ActorAsPerson(ActorType type) {
@@ -49,11 +48,11 @@ public class ActorAsPerson extends Actor {
   void beginNextBehaviour() {
     //
     //  TODO:  You will need to ensure that work/home/formation venues are
-    //  present on the same map to derive related bahaviours!
+    //  present on the same map to derive related behaviours!
     //
     //  Establish some facts about the citizen first:
     boolean adult = health.adult();
-    assignTask(null);
+    assignTask(null, this);
     //
     //  Adults will search for work and a place to live:
     //  Children and retirees don't work:
@@ -65,8 +64,8 @@ public class ActorAsPerson extends Actor {
     //  TODO:  Work this in as an emergency reaction...
     Building rests = TaskResting.findRestVenue(this, map);
     float needRest = TaskResting.restUrgency(this, rests);
-    if (needRest > Rand.num() + 0.5f) {
-      assignTask(TaskResting.configResting(this, rests));
+    if (idle() && needRest > Rand.num() + 0.5f) {
+      assignTask(TaskResting.configResting(this, rests), this);
     }
     //
     //  See if there's a missions worth joining.  Or, if you have an active
@@ -86,7 +85,22 @@ public class ActorAsPerson extends Actor {
       if (joins != null) joins.toggleRecruit(this, true);
     }
     if (idle() && mission() != null && mission().active()) {
-      assignTask(mission().selectActorBehaviour(this));
+      assignTask(mission().selectActorBehaviour(this), this);
+    }
+    //
+    //  Then check to see if your todo items include something pertinent-
+    if (idle()) {
+      for (Task task : todo) {
+        int check = task.checkResume();
+        if (check == RESUME_NO) {
+          todo.remove(task);
+        }
+        if (check == RESUME_YES) {
+          todo.remove(task);
+          assignTask(task, this);
+          break;
+        }
+      }
     }
     //
     //  Failing that, see if your home, place of work, purchases or other idle
@@ -108,7 +122,7 @@ public class ActorAsPerson extends Actor {
         choice.add(TaskResting.configResting(this, rests));
       }
       
-      assignTask(choice.weightedPick());
+      assignTask(choice.weightedPick(), this);
     }
   }
   
@@ -116,31 +130,31 @@ public class ActorAsPerson extends Actor {
   void updateReactions() {
     if (! map.world.settings.toggleReacts) return;
     
-    //  TODO:  You need to use the wouldSwitch method here, to account for
-    //  any and all emergency activities...
-    float oldPriority = Nums.max(jobPriority(), 0);
+    //  TODO:  Missions should be given a chance to provide reactions as well.
     
-    if (jobType() != Task.JOB.RETREAT) {
-      if (armed() && ! Task.inCombat(this)) {
-        TaskCombat combat = TaskCombat.nextReaction(this, seen());
-        if (combat != null) assignTask(combat);
-      }
-      
-      TaskRetreat retreat = TaskRetreat.configRetreat(this);
-      if (retreat != null && retreat.priority() > oldPriority) {
-        assignTask(retreat);
-        if (mission() != null) mission().toggleRecruit(this, false);
-      }
+    Task reaction = task() == null ? null : task().reaction();
+    if (ActorChoice.wouldSwitch(this, task(), reaction, false, false)) {
+      assignTask(reaction, this);
+    }
+    
+    TaskCombat combat = TaskCombat.nextReaction(this, seen());
+    if (ActorChoice.wouldSwitch(this, task(), combat, false, false)) {
+      assignTask(combat, this);
+    }
+    
+    TaskRetreat retreat = TaskRetreat.configRetreat(this);
+    if (ActorChoice.wouldSwitch(this, task(), retreat, false, false)) {
+      assignTask(retreat, this);
     }
     
     TaskDialog dialog = TaskDialog.nextCasualDialog(this, seen());
-    if (dialog != null && dialog.priority() > oldPriority) {
-      assignTask(dialog);
+    if (ActorChoice.wouldSwitch(this, task(), dialog, false, false)) {
+      assignTask(dialog, this);
     }
     
     if (health.cooldown() == 0) {
-      Task reaction = selectTechniqueUse(true, seen());
-      if (reaction != null) assignReaction(reaction);
+      Task use = selectTechniqueUse(true, seen());
+      if (use != null) assignReaction(use);
     }
   }
   
@@ -182,44 +196,29 @@ public class ActorAsPerson extends Actor {
   }
   
   
-  
-  /**  Handling sight-range and combat-stats:
-    */
-  public int meleeDamage() {
-    Good weapon = type().weaponType;
-    if (weapon != null) {
-      int damage = weapon.meleeDamage;
-      damage += outfit.carried(weapon);
-      return damage;
-    }
-    else return super.meleeDamage();
+  public void addTodo(Task task) {
+    todo.addFirst(task);
   }
   
   
-  public int rangeDamage() {
-    Good weapon = type().weaponType;
-    if (weapon != null) {
-      int damage = weapon.rangeDamage;
-      damage += outfit.carried(weapon);
-      return damage;
-    }
-    else return super.rangeDamage();
+  public void assignTask(Task task, Object source) {
+    
+    //  If the new task is an emergency, don't keep the old task.
+    //  If the new task is assigned by the old task, don't keep the old task.
+    //  If the old task is complete, or the new task is null, don't keep the old task.
+    
+    final Task old = task();
+    boolean keepOld = true;
+    if (task == null || old == null || old.complete()) keepOld = false;
+    else if (task.emergency() || source == old) keepOld = false;
+    if (keepOld) addTodo(old);
+    
+    super.assignTask(task, source);
   }
   
   
-  public int armourClass() {
-    Good armour = type().weaponType;
-    if (armour != null) {
-      int amount = armour.armourClass;
-      amount += outfit.carried(armour);
-      return amount;
-    }
-    else return super.armourClass();
-  }
-  
-  
-  public boolean armed() {
-    return Nums.max(meleeDamage(), rangeDamage()) > 0;
+  public Series <Task> todo() {
+    return todo;
   }
   
   
@@ -335,12 +334,8 @@ public class ActorAsPerson extends Actor {
       public boolean woman() {
         return (sexData & SEX_FEMALE) != 0;
       }
-      
     };
-    
   }
-  
-  
   
   
   

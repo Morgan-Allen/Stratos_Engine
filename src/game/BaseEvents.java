@@ -47,7 +47,7 @@ public class BaseEvents {
     BaseCouncil.MissionAssessment IA = new BaseCouncil.MissionAssessment();
     IA.fromC     = from;
     IA.goesC     = goes;
-    IA.fromPower = MissionStrike.powerSum(mission.recruits(), null) / POP_PER_CITIZEN;
+    IA.fromPower = MissionStrike.powerSum(mission) / POP_PER_CITIZEN;
     IA.goesPower = goes.armyPower() / POP_PER_CITIZEN;
     from.council.calculateChances(IA, true);
     
@@ -102,15 +102,28 @@ public class BaseEvents {
   
   
   static int inflictCasualties(Mission mission, float casualties) {
-    int numFought = mission.recruits.size(), numLost = 0;
-    if (numFought == 0) return 0;
     
-    for (float i = Nums.min(numFought, casualties); i-- > 0;) {
+    int numLost = 0;
+    float casualtiesLeft = casualties;
+    
+    while (casualtiesLeft > 0 && mission.recruits.size() > 0) {
       Actor lost = (Actor) Rand.pickFrom(mission.recruits);
-      lost.health.setAsKilled("casualty of war");
-      mission.toggleRecruit(lost, false);
-      numLost += 1;
+      float lostPower = TaskCombat.attackPower(lost);
+      
+      if (lostPower < casualtiesLeft) {
+        lost.health.setAsKilled("casualty of war");
+        mission.toggleRecruit(lost, false);
+        numLost += 1;
+      }
+      else {
+        float damage = casualtiesLeft / lostPower;
+        damage *= lost.health.maxHealth();
+        lost.health.takeDamage(damage);
+      }
+      
+      casualtiesLeft -= lostPower;
     }
+    
     return numLost;
   }
   
@@ -126,7 +139,7 @@ public class BaseEvents {
   static void handleGarrison(
     Mission mission, Base goes, World.Journey journey
   ) {
-    //  TODO:  Implement this?
+    //  TODO:  Implement this
     return;
   }
   

@@ -47,18 +47,21 @@ public class TaskDialog extends Task {
   /**  External factory methods-
     */
   static TaskDialog nextCasualDialog(Actor actor, Series <Active> assessed) {
-    
-    ///if (true) return null;
-    
+    if (! actor.map().world.settings.toggleDialog) return null;
+    //
+    //  Don't generate a new dialog if one is in progress...
+    if (actor.jobType() == JOB.DIALOG) return null;
+    //
+    //  Find a promising new target-
     Pick <Active> pick = new Pick(0);
     for (Active a : assessed) {
       if (! a.isActor()) continue;
       pick.compare(a, dialogRating(actor, (Actor) a));
     }
-    
     if (pick.empty()) return null;
     Actor with = (Actor) pick.result();
-    
+    //
+    //  Then configure and return...
     TaskDialog dialog = new TaskDialog(actor, with, true);
     dialog.configTask(null, null, with, JOB.DIALOG, 1);
     dialog.casual = true;
@@ -67,6 +70,8 @@ public class TaskDialog extends Task {
   
   
   static TaskDialog contactDialogFor(Actor actor, Actor with, Mission mission) {
+    if (! actor.map().world.settings.toggleDialog) return null;
+    
     TaskDialog dialog = new TaskDialog(actor, with, true);
     dialog.configTask(mission, null, with, JOB.DIALOG, 1);
     dialog.contact = true;
@@ -84,6 +89,7 @@ public class TaskDialog extends Task {
     //
     //  Basic sanity-checks first-
     if (with == actor || with.indoors()) return 0;
+    if (! with.health.active()         ) return 0;
     if (! with.type().isPerson()       ) return 0;
     if (TaskCombat.hostile(actor, with)) return 0;
     float busyRating = 0;
@@ -102,12 +108,6 @@ public class TaskDialog extends Task {
     else {
       busyRating = with.jobPriority();
     }
-    
-    
-    if (with.base().activeMap() == null) {
-      ///I.say("???");
-    }
-    
     //
     //  If that check passes, assess the novelty of these actors relative to
     //  eachother, tweak for a few other factors, and return if that seems more
@@ -126,12 +126,20 @@ public class TaskDialog extends Task {
   protected float successPriority() {
     Actor actor = (Actor) active;
     
-    float rating = dialogRating(actor, with);
+    float rating = dialogRating(actor, with) / ROUTINE;
     if (rating <= 0) return -1;
     
     float empathy = actor.traits.levelOf(TRAIT_EMPATHY);
     float priority = contact ? ROUTINE : CASUAL;
-    return rating + ((1 + empathy) * priority);
+    
+    if (actor.traits.hasBond(with)) {
+      priority *= 1 + (actor.traits.bondLevel(with) / 2);
+    }
+    else if (! contact) {
+      priority *= actor.traits.solitude();
+    }
+    
+    return (1 + (empathy / 2)) * priority;
   }
   
   
@@ -148,11 +156,12 @@ public class TaskDialog extends Task {
     
     Actor actor = (Actor) active;
     Mission mission = contact ? (Mission) origin : null;
+    float rating = dialogRating(actor, with);
     
-    if (began && priority() > 0 && talksWith(with) != actor) {
+    if (began && rating > 0 && talksWith(with) != actor) {
       TaskDialog response = new TaskDialog(with, actor, false);
       response.configTask(null, visits, actor, JOB.DIALOG, 1);
-      if (response.pathValid()) with.assignTask(response);
+      if (response.pathValid()) with.assignTask(response, this);
     }
     
     float talkInc = 1f / DIALOG_LENGTH;
@@ -164,7 +173,7 @@ public class TaskDialog extends Task {
       mission.terms.sendTerms(with.base());
     }
     
-    if (priority() > 0 && talksWith(with) == actor) {
+    if (rating > 0 && talksWith(with) == actor) {
       configTask(origin, null, with, JOB.DIALOG, 1);
     }
     else {

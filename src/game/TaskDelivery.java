@@ -1,8 +1,9 @@
 
 
 package game;
-import util.*;
 import static game.GameConstants.*;
+import static game.Area.*;
+import util.*;
 
 
 
@@ -44,6 +45,80 @@ public class TaskDelivery extends Task {
   /**  Other config utilities:
     */
   //  TODO:  Move the shopping code over here from BuildingForHome!
+  
+  
+  static TaskDelivery pickNextShopping(
+    Actor actor, Building home, Tally <Good> homeUsed
+  ) {
+    class Order { Building b; Good g; float amount; }
+    Pick <Order> pickS = new Pick();
+    
+    for (Good cons : homeUsed.keys()) {
+      float need = 1 + homeUsed.valueFor(cons);
+      need -= home.inventory(cons);
+      need -= totalFetchedFor(home, cons);
+      if (need <= 0) continue;
+      
+      for (Building b : home.map().buildings) {
+        if (! b.type().hasFeature(IS_VENDOR)) continue;
+        
+        float dist = distance(home, b);
+        if (dist > 50) continue;
+        
+        float amount = b.inventory(cons);
+        amount -= totalFetchedFrom(b, cons);
+        if (amount < 1) continue;
+        
+        float rating = need * amount * distancePenalty(dist);
+        Order o  = new Order();
+        o.b      = b;
+        o.g      = cons;
+        o.amount = Nums.min(need, amount);
+        pickS.compare(o, rating);
+      }
+    }
+    if (! pickS.empty()) {
+      Order o = pickS.result();
+      TaskDelivery d = new TaskDelivery(actor);
+      d = d.configDelivery(o.b, home, JOB.SHOPPING, o.g, o.amount, home);
+      if (d != null) return d;
+    }
+    
+    return null;
+  }
+  
+  
+  static float totalFetchedFor(Building home, Good good) {
+    float total = 0;
+    
+    List <Actor> all = home.residents.copy();
+    for (Actor a : home.workers) all.include(a);
+    
+    for (Actor a : all) {
+      if (a.task() instanceof TaskDelivery) {
+        TaskDelivery fetch = (TaskDelivery) a.task();
+        if (fetch.carried == good && fetch.goes == home) total += fetch.amount;
+      }
+      for (Task t : ((ActorAsPerson) a).todo()) if (t instanceof TaskDelivery) {
+        TaskDelivery fetch = (TaskDelivery) t;
+        if (fetch.carried == good && fetch.goes == home) total += fetch.amount;
+      }
+    }
+    return total;
+  }
+  
+  
+  static float totalFetchedFrom(Building store, Good good) {
+    float total = 0;
+    for (Active a : store.focused()) {
+      if (! (a.task() instanceof TaskDelivery)) continue;
+      TaskDelivery fetch = (TaskDelivery) a.task();
+      if (fetch.from    != store) continue;
+      if (fetch.carried == good ) total += fetch.amount;
+    }
+    return total;
+  }
+  
   
   
   static TaskDelivery pickNextDelivery(

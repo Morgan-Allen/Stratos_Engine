@@ -12,14 +12,6 @@ public class ActorHealth {
   
   /**  Data-fields, construction and save/load methods-
     */
-  final static float
-    PAIN_PERCENT       = 50,
-    KNOCKOUT_PERCENT   = 100,
-    DECOMP_PERCENT     = 150,
-    BLEED_HURT_PERCENT = 50,
-    BLEED_PER_SECOND   = 0.25f,
-    DECOMP_TIME        = DAY_LENGTH
-  ;
   final public static int
     STATE_OKAY   = 1,
     STATE_KO     = 2,
@@ -129,7 +121,6 @@ public class ActorHealth {
     //  Obtain some basic settings first-
     Area map = actor.map();
     WorldSettings settings = map.world.settings;
-    boolean organic = actor.type().organic && ! actor.type().isVessel();
     float tick = 1f / map.ticksPS;
     float time = map.time() + map.timeInUpdate();
     //
@@ -140,12 +131,12 @@ public class ActorHealth {
       bleed = 0;
       injury += decay;
     }
-    else if (organic) {
+    else if (organic()) {
       hunger += settings.toggleHunger ? (tick / STARVE_INTERVAL) : 0;
       cooldown = Nums.max(0, cooldown - tick);
       
       if (bleed > 0) {
-        float bleedInc = tick * BLEED_PER_SECOND;
+        float bleedInc = tick * 1f / BLEED_UNIT_TIME;
         injury += bleedInc;
         bleed -= bleedInc;
       }
@@ -268,22 +259,30 @@ public class ActorHealth {
   /**  Handling state-changes after injury, hunger, fatigue, etc-
     */
   void checkHealthState() {
-    float maxHealth = maxHealth() * KNOCKOUT_PERCENT / 100f;
-    float maxIntact = maxHealth() * DECOMP_PERCENT   / 100f;
-    
-    if (injury + hunger > maxIntact) {
+    final float
+      max         = maxHealth(),
+      maxKnockout = max * KNOCKOUT_PERCENT / 100f,
+      maxIntact   = max * DECOMP_PERCENT   / 100f,
+      minWakeup   = active() ? max : (max * WAKEUP_PERCENT / 100f)
+    ;
+    if (alive()) {
+      if (injury + hunger > maxKnockout) {
+        setAsKilled("Injury: "+injury+" Hunger "+hunger);
+        injury = maxKnockout;
+        hunger = fatigue = 0;
+      }
+      else if (injury + hunger + fatigue > maxKnockout) {
+        this.state = STATE_KO;
+        actor.assignTask(null, actor);
+      }
+      else if (injury + fatigue < minWakeup) {
+        this.state = STATE_OKAY;
+      }
+    }
+    else if (injury > maxIntact) {
       this.state = STATE_DECOMP;
       if (actor.map() != null) actor.exitMap(actor.map());
       actor.setDestroyed();
-    }
-    if (injury + hunger > maxHealth) {
-      setAsKilled("Injury: "+injury+" Hunger "+hunger);
-    }
-    else if (injury + hunger + fatigue > maxHealth) {
-      this.state = STATE_KO;
-    }
-    else if (alive()) {
-      this.state = STATE_OKAY;
     }
   }
   
@@ -303,12 +302,13 @@ public class ActorHealth {
     if (map == null || ! map.world.settings.toggleInjury) return;
     injury += damage;
     injury = Nums.clamp(injury, 0, maxHealth() + 1);
-    if (damage > 0) incBleed(damage * BLEED_HURT_PERCENT / 100f);
+    if (damage > 0) incBleed(damage * BLEEDING_PERCENT / 100f);
     checkHealthState();
   }
   
   
   public void incBleed(float bleed) {
+    if (! (alive() && organic())) return;
     this.bleed += bleed;
     if (this.bleed < 0) this.bleed = 0;
   }
@@ -346,6 +346,7 @@ public class ActorHealth {
   public void setAsKilled(String cause) {
     if (actor.reports()) I.say(this+" DIED: "+cause);
     state = STATE_DEAD;
+    actor.assignTask(null, actor);
   }
   
   
@@ -358,6 +359,10 @@ public class ActorHealth {
   
   public float maxHealth() {
     return actor.type().maxHealth;
+  }
+  
+  public boolean organic() {
+    return actor.type().organic && ! actor.type().isVessel();
   }
   
   public float injury  () { return injury  ; }

@@ -14,7 +14,7 @@ public class TestCity extends LogicTest {
   
   
   public static void main(String args[]) {
-    testCity(true);
+    testCity(false);
   }
   
   
@@ -93,12 +93,15 @@ public class TestCity extends LogicTest {
     }
     
     int timeCrafting = 0, timeIdle = 0;
+    final int maxCash = (TAX_VALUES[1] * HOLDING.maxResidents) / 2;
     
-    final int RUN_TIME = YEAR_LENGTH;
+    final int RUN_TIME = YEAR_LENGTH * 2;
     boolean housesOkay = false;
+    boolean taxesOkay  = true ;
     boolean goodsOkay  = true ;
     boolean testOkay   = false;
     float   goodExcess = -1;
+    float   taxExcess  = -1;
     Good    excessGood = null;
     
     while (map.time() < RUN_TIME || graphics) {
@@ -115,7 +118,6 @@ public class TestCity extends LogicTest {
           }
         }
       }
-      
       //
       //  Check to ensure stocks are under control:
       if (goodsOkay) {
@@ -135,7 +137,22 @@ public class TestCity extends LogicTest {
           }
         }
       }
-      
+      //
+      //  And do the same for taxes-
+      if (taxesOkay) {
+        boolean allTaxed = true;
+        for (Building b : map.buildings()) {
+          if (b.type() == HOLDING) {
+            if (b.inventory(CASH) > maxCash) {
+              allTaxed = false;
+              taxExcess = b.inventory(CASH);
+            }
+          }
+        }
+        taxesOkay = allTaxed;
+      }
+      //
+      //  And check for housing evolution-
       if (! housesOkay) {
         boolean allNeeds = true;
         for (Building b : map.buildings()) {
@@ -149,11 +166,11 @@ public class TestCity extends LogicTest {
               b.setInventory(g, 15);
             }
             b.setInventory(PLASTICS, 10);
+            b.setInventory(CARBS   , 10);
           }
           if (b.type() == HOLDING) {
             BuildingForHome home = (BuildingForHome) b;
             if (home.currentBuildingTier() != HOUSE_T2) allNeeds = false;
-            if (home.inventory(CASH) > 5.0f           ) allNeeds = false;
           }
           if (b.type() == ENGINEER_STATION) {
             boolean isCrafting = false;
@@ -173,21 +190,24 @@ public class TestCity extends LogicTest {
         }
         housesOkay = allNeeds;
       }
-      
-      if (housesOkay && goodsOkay && ! testOkay) {
-        I.say("\nCITY SERVICES TEST CONCLUDED SUCCESSFULLY!");
+      //
+      //  Then check for successful conclusion-
+      if (housesOkay && goodsOkay && taxesOkay && ! testOkay) {
+        I.say("\nCITY TEST CONCLUDED SUCCESSFULLY!");
         testOkay = true;
         reportOnMap(map, base, true, PARTS, MEDICINE);
         if (! graphics) return true;
       }
     }
     
-    I.say("\nCITY SERVICES TEST FAILED!");
+    I.say("\nCITY TEST FAILED!");
     I.say("  Houses okay: "+housesOkay);
     I.say("  Goods okay:  "+goodsOkay );
+    I.say("  Taxes okay:  "+taxesOkay );
     I.say("  Good excess: "+goodExcess+" "+excessGood);
-    I.say("  Time idle/crafting: "+timeIdle+" / "+timeCrafting);
+    I.say("  Tax excess:  "+taxExcess+"/"+maxCash);
     
+    I.say("\n  Time idle/crafting: "+timeIdle+" / "+timeCrafting);
     I.say("  RUN TIME: "+RUN_TIME+", YEAR LENGTH: "+YEAR_LENGTH);
     I.say("  TOTAL CRAFT TIME: "+TaskCrafting.totalCraftTime);
     I.say("  TOTAL PROGRESS:   "+TaskCrafting.totalProgInc  );

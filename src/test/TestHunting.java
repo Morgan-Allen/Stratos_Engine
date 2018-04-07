@@ -9,16 +9,16 @@ import util.*;
 
 
 
-public class TestExploring extends LogicTest {
+public class TestHunting extends LogicTest {
   
   
   public static void main(String args[]) {
-    testExploring(true);
+    testHunting(true);
   }
   
   
-  static boolean testExploring(boolean graphics) {
-    LogicTest test = new TestExploring();
+  static boolean testHunting(boolean graphics) {
+    LogicTest test = new TestHunting();
     
     Base base = setupTestBase(32, ALL_GOODS, true, JUNGLE, MEADOW);
     Area map = base.activeMap();
@@ -28,44 +28,37 @@ public class TestExploring extends LogicTest {
     world.settings.toggleHunger    = false;
     world.settings.toggleMigrate   = false;
     world.settings.toggleAutoBuild = false;
+    world.settings.toggleFog       = false;
     
     Building lodge = (Building) KOMMANDO_REDOUBT.generate();
     lodge.enterMap(map, 4, 4, 1, base);
     ActorUtils.fillWorkVacancies(lodge);
     
-    AreaFog fog = map.fogMap(base, true);
-    int tilesSeen = 0, tilesOpen = 0;
-    boolean exploreOkay = false;
+    AreaTerrain.populateAnimals(map, QUDU);
+    for (Actor a : map.actors()) if (a.type().isAnimal()) {
+      a.health.setAgeYears(ANIMAL_MATURES * (1 + Rand.num()) / YEAR_LENGTH);
+    }
+    
+    boolean huntingOkay = false;
     boolean testOkay    = false;
     
     while (map.time() < 1000 || graphics) {
       test.runLoop(base, 10, graphics, "saves/test_gathering.tlt");
       
-      if (! exploreOkay) {
-        tilesSeen = 0;
-        tilesOpen = 0;
-        
-        for (AreaTile t : map.allTiles()) {
-          if (map.blocked(t)) continue;
-          tilesOpen += 1;
-          if (fog.maxSightLevel(t) > 0) tilesSeen += 1;
-        }
-        
-        exploreOkay = tilesSeen == tilesOpen;
+      if (! huntingOkay) {
+        huntingOkay = lodge.inventory(PROTEIN) > lodge.type().maxStock;
       }
       
-      if (exploreOkay && ! testOkay) {
-        I.say("\nEXPLORING TEST CONCLUDED SUCCESSFULLY!");
+      if (huntingOkay && ! testOkay) {
+        I.say("\nHUNTING TEST CONCLUDED SUCCESSFULLY!");
         testOkay = true;
         if (! graphics) return true;
       }
     }
     
-    I.say("\nEXPLORING TEST FAILED!");
-    I.say("  Total tiles seen: "+tilesSeen+"/"+tilesOpen);
+    I.say("\nHUNTING TEST FAILED!");
     return false;
   }
-  
 }
 
 

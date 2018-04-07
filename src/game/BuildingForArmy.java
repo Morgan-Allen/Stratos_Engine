@@ -32,7 +32,7 @@ public class BuildingForArmy extends Building {
     */
   public Task selectActorBehaviour(Actor actor) {
     
-    TaskPatrol patrol = TaskPatrol.nextGuardPatrol(actor, this, Task.ROUTINE);
+    TaskPatrol patrol = TaskPatrol.nextGuardPatrol(actor, this);
     if (patrol != null) return patrol;
     
     return null;

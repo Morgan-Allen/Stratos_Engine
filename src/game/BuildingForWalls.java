@@ -105,7 +105,7 @@ public class BuildingForWalls extends Building implements Active {
     updateReactions();
     
     if (task != null && ! task.checkAndUpdateTask()) {
-      assignTask(null);
+      assignTask(null, this);
     }
   }
   
@@ -117,7 +117,7 @@ public class BuildingForWalls extends Building implements Active {
     if (! Task.inCombat(this)) {
       Series <Active> others = map.activeInRange(at(), sightRange());
       TaskCombat c = TaskCombat.nextReaction(this, others);
-      if (c != null) assignTask(c);
+      if (c != null) assignTask(c, this);
     }
   }
   
@@ -146,7 +146,7 @@ public class BuildingForWalls extends Building implements Active {
   }
   
   
-  public void assignTask(Task task) {
+  public void assignTask(Task task, Object source) {
     if (this.task != null) this.task.toggleFocus(false);
     this.task = task;
     if (this.task != null) this.task.toggleFocus(true);

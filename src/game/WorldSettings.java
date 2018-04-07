@@ -22,6 +22,7 @@ public class WorldSettings {
     toggleReacts      = true,
     toggleCombat      = true,
     togglePurchases   = true,
+    toggleDialog      = true,
     
     toggleMigrate     = true,
     toggleAging       = true,

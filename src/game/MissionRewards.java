@@ -12,6 +12,7 @@ public class MissionRewards {
   final Mission mission;
   boolean isBounty = false;
   int cashReward = -1;
+  float basePriority = Task.ROUTINE;
   
   
   MissionRewards(Mission mission) {
@@ -22,15 +23,21 @@ public class MissionRewards {
   void loadState(Session s) throws Exception {
     isBounty = s.loadBool();
     cashReward = s.loadInt();
+    basePriority = s.loadFloat();
   }
   
   
   void saveState(Session s) throws Exception {
     s.saveBool(isBounty);
     s.saveInt(cashReward);
+    s.saveFloat(basePriority);
   }
   
   
+  
+  public void setBasePriority(float priority) {
+    this.basePriority = priority;
+  }
   
 
   public void setAsBounty(int cashReward) {
@@ -58,7 +65,12 @@ public class MissionRewards {
   
   
   public int cashReward() {
-    return this.cashReward;
+    return cashReward;
+  }
+  
+  
+  public float basePriority() {
+    return basePriority;
   }
   
   

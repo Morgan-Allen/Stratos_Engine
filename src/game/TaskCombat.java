@@ -1,11 +1,11 @@
 
 
 package game;
-import util.*;
+import static game.GameConstants.*;
 import static game.Base.*;
 import static game.Area.*;
-import static game.GameConstants.*;
 import graphics.common.*;
+import util.*;
 
 
 
@@ -173,10 +173,8 @@ public class TaskCombat extends Task {
   static TaskCombat nextReaction(
     Active actor, Target anchor, Employer employer, Series <Active> others
   ) {
+    if (! actor.map().world.settings.toggleCombat) return null;
     AreaTile from = actor.at();
-    //Area map = actor.map();
-    //float noticeRange = ((Element) actor).sightRange() + noticeBonus;
-    //Series <Active> others = map.activeInRange(from, noticeRange);
     
     class Option { Element other; float rating; };
     List <Option> options = new List <Option> () {
@@ -190,7 +188,6 @@ public class TaskCombat extends Task {
       AreaTile goes = other.at();
       float distF = distance(goes, from);
       float distA = anchor == null ? 0 : distance(goes, anchor);
-      //if (distA > noticeRange) continue;
       
       priority *= distancePenalty(distF + distA);
       priority /= 1 + other.focused().size();
@@ -236,6 +233,8 @@ public class TaskCombat extends Task {
     TaskCombat currentTask, JOB jobType
   ) {
     if (active == null || target == null || ! target.onMap()) return null;
+    final Area map = active.map();
+    if (map == null || ! map.world.settings.toggleCombat) return null;
     //
     //  In the case of immobile actives, such as turrets, you don't bother with
     //  the fancy pathing-connection tests.  You just check if the target is in
@@ -268,7 +267,6 @@ public class TaskCombat extends Task {
       inRange = new AreaTile[] { active.at(), (AreaTile) currentTask.target };
     }
     else {
-      final Area     map    = active.map();
       final AreaTile at     = target.at();
       final Box2D    area   = target.area();
       final int      range  = MAX_RANGE;
@@ -443,20 +441,17 @@ public class TaskCombat extends Task {
   }
   
   
-  protected float successChance() {
-    if (! active.isActor()) return 1;
-    
-    Actor actor = (Actor) active;
-    float power = attackPower((Element) active);
+  static float attackChance(Actor actor, Element primary) {
+    float power = attackPower(actor);
     float fear  = actor.fearLevel();
+    Series <Active> backup = actor.backup();
     
-    AreaDanger dangerMap = actor.map().dangerMap(active.base(), true);
+    AreaDanger dangerMap = actor.map().dangerMap(actor.base(), true);
     AreaTile around = actor.at();
     
     float danger = dangerMap.fuzzyLevel(around.x, around.y);
     danger = Nums.max(danger, attackPower(primary));
     
-    Series <Active> backup = actor.backup();
     for (Active a : backup) if (a != actor) {
       float backPower = attackPower((Element) a);
       if (a.jobType() == JOB.COMBAT) {
@@ -473,6 +468,12 @@ public class TaskCombat extends Task {
     chance = (chance + 1 - fear) / 2;
     
     return chance;
+  }
+  
+  
+  protected float successChance() {
+    if (! active.isActor()) return 1;
+    return attackChance((Actor) active, primary);
   }
   
   
@@ -495,9 +496,15 @@ public class TaskCombat extends Task {
   /**  Behaviour-execution-
     */
   boolean checkAndUpdateTask() {
-    Task self = configCombat(active, primary, origin, this, type);
-    if (self == null) return false;
+    if (! updateStanding()) return false;
     return super.checkAndUpdateTask();
+  }
+  
+  
+  boolean updateStanding() {
+    //  NOTE:  This method is intended for override by certain subclasses.
+    Task self = configCombat(active, primary, origin, this, type);
+    return self != null;
   }
   
   
@@ -514,13 +521,12 @@ public class TaskCombat extends Task {
 
   float actionRange() {
     if (attackMode == ATTACK_MELEE) return 1.5f;
-    if (attackMode == ATTACK_RANGE) return active.type().rangeDist + 1;
-    if (attackMode == ATTACK_FIRE ) return active.type().rangeDist + 1;
-    return -1;
+    else return Nums.max(1.5f, ((Element) active).attackRange());
   }
   
   
   int motionMode() {
+    //  TODO:  This might not always be the case.  Check again...
     return Actor.MOVE_RUN;
   }
 
@@ -540,12 +546,12 @@ public class TaskCombat extends Task {
     
     if (primary.type().isActor() && ! beaten(primary)) {
       Task next = TaskCombat.configCombat(active, primary, origin, null, type);
-      if (next != null) active.assignTask(next);
+      if (next != null) active.assignTask(next, this);
     }
     
     if (primary.type().isBuilding() && ! beaten(primary)) {
       Task next = TaskCombat.configCombat(active, primary, origin, null, type);
-      if (next != null) active.assignTask(next);
+      if (next != null) active.assignTask(next, this);
     }
   }
 
@@ -596,7 +602,6 @@ public class TaskCombat extends Task {
       Actor otherA = (Actor) other;
       otherA.traits.gainXP(defendSkill, otherXP);
     }
-    
     
     Area map = attacks.map();
     if (map.ephemera.active()) {

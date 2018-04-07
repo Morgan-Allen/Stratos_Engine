@@ -151,7 +151,7 @@ public class TaskCrafting extends Task {
     
     if (++timeSpent < DAY_LENGTH && ! didUnit) {
       Task next = TaskCrafting.nextCraftingTask(actor, venue);
-      if (next != null) actor.assignTask(next);
+      if (next != null) actor.assignTask(next, this);
     }
   }
   

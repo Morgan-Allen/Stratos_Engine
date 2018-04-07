@@ -160,7 +160,7 @@ public abstract class Mission implements
     for (Actor a : recruits) {
       if (! readyForTransit(a, JOB.DEPARTING)) allDeparting = false;
       if (! readyForTransit(a, JOB.RETURNING)) allReturning = false;
-      if (a.map() != homeBase.activeMap()) allHome = false;
+      if (a.map() != homeBase.activeMap()    ) allHome      = false;
       if (world.onJourney(a)) allHome = false;
     }
     
@@ -197,7 +197,7 @@ public abstract class Mission implements
     //I.say("  ETA: "+world.arriveTime(this));
     
     if (from.activeMap() == null) {
-      if (goes == homeBase) {
+      if (from == homeBase) {
         BaseEvents.handleDeparture(this, from, goes);
       }
       else {
@@ -240,12 +240,12 @@ public abstract class Mission implements
     
     if (complete()) {
       if (exits != null && ! onHomeMap()) {
-        return actor.targetTask(exits, 5, Task.JOB.RETURNING, this);
+        return actor.targetTask(exits, 0, Task.JOB.RETURNING, this);
       }
     }
     else {
       if (onWrongMap() && exits != null) {
-        return actor.targetTask(exits, 5, Task.JOB.DEPARTING, this);
+        return actor.targetTask(exits, 0, Task.JOB.DEPARTING, this);
       }
       else {
         return nextLocalMapBehaviour(actor);

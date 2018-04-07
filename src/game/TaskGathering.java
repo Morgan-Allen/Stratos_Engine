@@ -180,7 +180,7 @@ public class TaskGathering extends Task {
       //  Then pick another point to sow:
       Task plant = pickPlantPoint(store, actor, true, false);
       if (plant != null) {
-        actor.assignTask(plant);
+        actor.assignTask(plant, this);
       }
       else {
         returnToStore();
@@ -214,7 +214,7 @@ public class TaskGathering extends Task {
       else {
         Task pick = pickNextCrop(store, actor, true, plants.yields);
         if (pick != null) {
-          actor.assignTask(pick);
+          actor.assignTask(pick, this);
         }
         else {
           returnToStore();

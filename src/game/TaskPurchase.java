@@ -10,6 +10,8 @@ import static game.GameConstants.*;
 public class TaskPurchase extends Task {
   
   
+  /**  Data fields, construction and save/load methods-
+    */
   BuildingForCrafts shop;
   Good itemType;
   int quality;
@@ -46,28 +48,23 @@ public class TaskPurchase extends Task {
   }
   
   
+  
+  /**  External factory methods-
+    */
   static TaskPurchase nextPurchase(ActorAsPerson actor) {
-    //  TODO:  Base the chance of this on intelligence, etc.?
-    
     Pick <TaskPurchase> pick = new Pick(0);
     boolean hasPurchase = false;
     
-    for (Task t : actor.todo) if (t instanceof TaskPurchase) {
-      TaskPurchase p = (TaskPurchase) t;
-      if (! p.shop.hasItemOrder(p.itemType, actor)) {
-        actor.todo.remove(t);
-      }
-      else {
-        hasPurchase = true;
-        p = resumePurchase(p);
-        if (p != null) pick.compare(p, p.priority() * Rand.num());
-      }
+    for (Task t : actor.todo()) if (t instanceof TaskPurchase) {
+      hasPurchase = true;
     }
     
     if (! hasPurchase) for (Building b : actor.map().buildings()) {
+      
       if (b.base() != actor.base()) continue;
       if (! (b instanceof BuildingForCrafts)) continue;
       BuildingForCrafts shop = (BuildingForCrafts) b;
+      
       for (TaskPurchase p : configPurchases(actor, shop)) {
         if (p == null) continue;
         pick.compare(p, p.priority() * Rand.num());
@@ -131,15 +128,13 @@ public class TaskPurchase extends Task {
   }
   
   
-  static TaskPurchase resumePurchase(TaskPurchase p) {
-    if (! p.shop.orderComplete(p.itemType, (Actor) p.active)) return null;
-    return (TaskPurchase) p.configTask(null, p.shop, null, JOB.COLLECTING, 0);
-  }
   
-  
-  
+  /**  Priority-evaluation-
+    */
   protected float successPriority() {
-    Actor actor = (Actor) this.active;
+    //  TODO:  Base the chance of this on intelligence, etc.?
+    
+    //Actor actor = (Actor) active;
     float priority = ROUTINE;
     
     if (type == JOB.SHOPPING) {
@@ -152,14 +147,30 @@ public class TaskPurchase extends Task {
     
     return priority;
   }
+  
+  
+  
+  /**  Actual behaviour-execution-
+    */
+  protected int checkResume() {
+    Actor client = (Actor) active;
+    
+    if (! shop.hasItemOrder (itemType, client)) return RESUME_NO;
+    if (! shop.orderComplete(itemType, client)) return RESUME_WAIT;
+    
+    configTask(null, shop, null, JOB.COLLECTING, 0);
+    if (! pathValid()) return RESUME_NO;
+    
+    return RESUME_YES;
+  }
 
 
   protected void onVisit(Building visits) {
-    Actor actor = (Actor) this.active;
+    ActorAsPerson actor = (ActorAsPerson) this.active;
     
     if (type == JOB.SHOPPING && visits == shop) {
       shop.addItemOrder(itemType, quality, actor);
-      ((ActorAsPerson) actor).todo.add(this);
+      actor.addTodo(this);
       
       actor.outfit.incCarried(CASH, 0 - pricePays);
       shop.addInventory(pricePays, CASH);
@@ -167,7 +178,6 @@ public class TaskPurchase extends Task {
     
     if (type == JOB.COLLECTING) {
       shop.removeOrder(itemType, actor);
-      ((ActorAsPerson) actor).todo.remove(this);
       
       if (itemType.isUsable) actor.outfit.incCarried(itemType, 1);
       else actor.outfit.setCarried(itemType, quality);

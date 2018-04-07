@@ -289,10 +289,6 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   
   public void exitMap(Area map) {
     
-    stateBits |=  FLAG_EXIT;
-    stateBits &= ~FLAG_ON_MAP;
-    setLocation(null, map);
-    
     if (! type.mobile) {
       if (true       ) setFlagging(false, type.flagKey);
       if (type.isCrop) setFlagging(false, NEED_PLANT  );
@@ -305,6 +301,11 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
       map.planning.unplaceObject(this);
       setDestroyed();
     }
+    
+    setLocation(null, map);
+    this.map = null;
+    stateBits |=  FLAG_EXIT;
+    stateBits &= ~FLAG_ON_MAP;
   }
   
   
@@ -552,6 +553,11 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   
   public int rangeDamage() {
     return type.rangeDamage;
+  }
+  
+  
+  public int attackRange() {
+    return type.rangeDist;
   }
   
   

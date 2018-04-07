@@ -69,8 +69,8 @@ public class GameConstants {
     AVG_GATHER_RANGE = 4   ,
     //
     //  Okay.  this means that an 10x10 area of crops will produce:
-    //    100 x 0.5 = 50 units of food every 6 months (120 days.)
-    //    That gives you ~8 units of food per month.
+    //    100 x 0.5 = 50 units of food every 6 days.
+    //    That gives you ~8 units of food per day.
     //    Every citizen consumes 2 units of food per 2 months.  So that's just
     //    enough for 8 citizens.
     //
@@ -84,14 +84,23 @@ public class GameConstants {
     AVG_BUTCHER_TIME = DAY_LENGTH / (AVG_ANIMAL_YIELD * 2),
     //
     //  If 1 animal is worth 8 food, and 1 of them fit within 10x10 tiles, then
-    //  if they 'ripen' within 1 month, that would be 8 units of food.
+    //  if they 'ripen' within 1 day, that would be 8 units of food.
     //
     //  Slash that by a factor of 4, so it's 1/4 as land-efficient as farming.
-    //  That gives a maturation period of 4 months (double that for lifespan),
+    //  That gives a maturation period of 4 days (double that for lifespan),
     //  yielding 2 food per month.
     //
     //  That's enough to support 1 predator eating half of available prey (1
-    //  food/month, just like humans.)
+    //  food/day, just like humans.)
+    //
+    //  Health-state constants-
+    PAIN_PERCENT     = 50,
+    WAKEUP_PERCENT   = 50,
+    KNOCKOUT_PERCENT = 100,
+    DECOMP_PERCENT   = 150,
+    BLEEDING_PERCENT = 50,
+    BLEED_UNIT_TIME  = 4,
+    DECOMP_TIME      = DAY_LENGTH,
     //
     //  Life cycle constants-
     SEX_EITHER       = -1,
@@ -133,6 +142,8 @@ public class GameConstants {
     //  Building-update, commerce and manufacture-
     AVG_UPDATE_GAP   = 60  ,  //  seconds between updates
     AVG_CRAFT_TIME   = YEAR_LENGTH / 6,
+    FAST_CRAFT_TIME  = AVG_CRAFT_TIME / 2,
+    LONG_CRAFT_TIME  = (int) (AVG_CRAFT_TIME * 1.5f),
     AVG_MAX_STOCK    = 10  ,
     MAX_TRADER_RANGE = 100 ,
     MAX_SHOP_RANGE   = 50  ,
@@ -149,13 +160,15 @@ public class GameConstants {
     MAX_EXPLORE_DIST = 200 ,
     //
     //  Dialog and relationships-
+    INIT_BONDING     = 0,
+    INIT_NOVELTY     = 50,
     DIALOG_LENGTH    = SHIFT_LENGTH / 2,
     CHAT_BOND        = 10,
     MAX_CHAT_BOND    = 35,  //  bonding over conversation
-    SAVE_BOND        = 45, 
+    SAVE_BOND        = 45,
     MAX_SAVE_BOND    = 100, //  bonding over life/death situations
-    BOND_NOVEL_TIME  = DAY_LENGTH * 2,
-    AVG_NUM_BONDS    = 10,
+    AVG_NUM_BONDS    = 5,
+    BOND_NOVEL_TIME  = DAY_LENGTH * 2 * AVG_NUM_BONDS,
     //
     //  Military and combat-
     AVG_ARMY_SIZE    = 9   ,
@@ -190,7 +203,8 @@ public class GameConstants {
     CLASS_SOLDIER  = 1,
     CLASS_NOBLE    = 2,
     ALL_CLASSES[]  = { 0, 1, 2 },
-    TAX_VALUES []  = { 0, 25, 100 },
+    TAX_VALUES []  = { 10, 25, 100 },
+    TIER_VALUES[]  = { 50, 100, 150 },
     AVG_HIRE_COST  = 400,
     AVG_TAX_VALUE  = 25,
     AVG_GOOD_VALUE = 25,
@@ -260,13 +274,16 @@ public class GameConstants {
     }
     
     public Good setAsWeapon(
-      int damage, boolean ranged, int prices[],
+      int damage, int attackRange, int prices[],
       String groupName, String animName,
       ShotFX.Model shotModel, PlaneFX.Model burstModel
     ) {
+      boolean ranged = attackRange > 0;
+      
       this.isWeapon    = true;
       this.meleeDamage = ranged ? 0 : damage;
       this.rangeDamage = ranged ? damage : 0;
+      this.rangeDist   = attackRange;
       this.priceLevels = prices;
       this.maxQuality  = prices.length;
       
@@ -503,7 +520,7 @@ public class GameConstants {
     Mission mission();
     
     float sightRange();
-    void assignTask(Task task);
+    void assignTask(Task task, Object source);
     void performAttack(Element other, boolean melee);
   }
   final static Series <Active> NONE_ACTIVE = new Batch();

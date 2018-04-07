@@ -28,7 +28,6 @@ public class TestAll {
     record(TestSieging  .testSieging  (false));
     record(TestDiplomacy.testDiplomacy(false));
     record(TestSpawning .testSpawning (false));
-    record(TestCity     .testCity     (false));
     record(TestPurchases.testPurchases(false));
     record(TestFarming  .testFarming  (false));
     record(TestForests  .testForests  (false));
@@ -37,10 +36,12 @@ public class TestAll {
     record(TestBridging .testBridging (false));
     record(TestAutoBuild.testAutoBuild(false));
     record(TestExploring.testExploring(false));
+    record(TestHunting  .testHunting  (false));
     record(TestRetreat  .testRetreat  (false));
     record(TestFirstAid .testFirstAid (false));
     record(TestDialog   .testDialog   (false));
     record(TestWorld    .testWorld    (false));
+    record(TestCity     .testCity     (false));
     
     record(TestBounties.testAttackBuildingMission(false));
     record(TestBounties.testAttackActorMission   (false));

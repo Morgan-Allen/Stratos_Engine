@@ -123,22 +123,28 @@ public class TaskTrading extends Task {
     onVisit((Trader) visits);
   }
   
-  
-  protected void onArrival(Base goes, World.Journey journey) {
+
+  protected boolean updateOnArrival(Base goes, World.Journey journey) {
+  //protected void onArrival(Base goes, World.Journey journey) {
     //
     //  If you've arrived at your destination city, offload your cargo, take on
     //  fresh goods, and record any profits in the process:
     if (goes != homeCity && ! didImport) {
       onVisit(goes);
+      return true;
     }
     //
     //  If you've arrived back on your home map, return to your post-
     else if (goes == homeCity) {
       configTravel(tradeFrom, tradeFrom, Task.JOB.TRADING, origin);
+      return true;
     }
     //
     //  ...Fwaaah?
-    else I.complain("THIS SHOULDN'T HAPPEN");
+    else {
+      I.complain("THIS SHOULDN'T HAPPEN");
+      return false;
+    }
   }
   
     

@@ -491,7 +491,12 @@ public class LogicTest {
         "\n  Hunger:           "+I.shorten(a.health.hunger() , 1)+"/"+t.maxHealth+
         "\n  Fear Level:       "+I.percent(a.fearLevel())
       );
+      
+      float priority = a.jobPriority() / Task.PARAMOUNT;
+      boolean urgent = a.inEmergency();
+      
       report.append("\n  Task: "+a.jobDesc());
+      report.append(" ("+I.percent(priority)+(urgent ? " E" : "")+")");
       report.append("\n  Home: "+a.home());
       report.append("\n  Work: "+a.work());
       

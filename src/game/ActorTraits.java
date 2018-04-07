@@ -216,7 +216,9 @@ public class ActorTraits {
     }
     if (init) {
       Bond b = new Bond();
-      b.with = with;
+      b.with    = with;
+      b.novelty = INIT_NOVELTY / 100f;
+      b.level   = INIT_BONDING;
       bonds.add(b);
       return b;
     }
@@ -267,13 +269,18 @@ public class ActorTraits {
   
   public float bondLevel(Actor with) {
     Bond b = bondWith(with, false);
-    return b == null ? 0 : b.level;
+    return b == null ? INIT_BONDING : b.level;
   }
   
   
   public float bondNovelty(Actor with) {
     Bond b = bondWith(with, false);
-    return b == null ? 1 : b.novelty;
+    return b == null ? (INIT_NOVELTY / 100f) : b.novelty;
+  }
+  
+  
+  public boolean hasBond(Actor with) {
+    return bondWith(with, false) != null;
   }
   
   
@@ -287,6 +294,16 @@ public class ActorTraits {
     Batch <Actor> all = new Batch();
     for (Bond b : bonds) if ((b.properties & type) != 0) all.add(b.with);
     return all;
+  }
+  
+  
+  public float solitude() {
+    float bondTotal = 0;
+    for (Bond b : bonds) {
+      bondTotal += Nums.max(0, b.level);
+    }
+    bondTotal = Nums.clamp(bondTotal / AVG_NUM_BONDS, 0, 1);
+    return 1 - bondTotal;
   }
   
 }

@@ -176,15 +176,22 @@ public class ActorChoice {
     report &= verboseSwitch;
     if (report) I.say("\nConsidering switch from "+last+" to "+next);
     
+    final boolean
+      lastEmergency = last == null ? false : last.emergency(),
+      nextEmergency = next == null ? false : next.emergency();
     final float
-      lastPriority = last.priority(),
-      nextPriority = next.priority();
+      lastPriority = last == null ? 0 : last.priority(),
+      nextPriority = next == null ? 0 : next.priority();
     if (report) {
-      I.say("  Last priority: "+lastPriority);
-      I.say("  Next priority: "+nextPriority);
+      I.say("  Last priority: "+lastPriority+", emergency: "+lastEmergency);
+      I.say("  Next priority: "+nextPriority+", emergency: "+nextEmergency);
     }
+    
     if (nextPriority <= 0) return false;
-    if (lastPriority <= 0) return true ;
+    if (lastPriority <= 0) return true;
+    
+    if (lastEmergency && ! nextEmergency) return false;
+    if (nextEmergency && ! lastEmergency) return true;
     
     final float minPriority = stubborn ?
       competeThreshold(actor, nextPriority, true) :

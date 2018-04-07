@@ -2,10 +2,9 @@
 
 package content;
 import game.*;
-import game.GameConstants.Good;
+import static game.GameConstants.*;
 import graphics.common.*;
 import util.*;
-import static game.GameConstants.*;
 
 
 
@@ -31,7 +30,7 @@ public class Trooper {
   ;
   static {
     BLASTER.setAsWeapon(
-      8, true, new int[] { 150, 250, 350 },
+      8, 4, new int[] { 150, 250, 350 },
       "pistol", AnimNames.FIRE,
       Devices.LASER_FX_MODEL, Devices.LASER_BURST_MODEL
     );

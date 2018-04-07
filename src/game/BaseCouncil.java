@@ -347,6 +347,7 @@ public class BaseCouncil {
     chance   = Nums.clamp((chance * 2) - 0.5f, 0, 1);
     lossA    = ((random ? Rand.num() : 0.5f) + 1 - chance) / 2;
     lossD    = ((random ? Rand.num() : 0.5f) +     chance) / 2;
+    //
     //  And then calculate probable casualties for both sides in each case:
     a.winChance   = chance;
     a.angerChance = 1;

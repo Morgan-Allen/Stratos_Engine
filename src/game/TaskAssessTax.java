@@ -69,6 +69,18 @@ public class TaskAssessTax extends Task {
   }
   
   
+  protected float successPriority() {
+    Actor actor = (Actor) active;
+    float cash = actor.outfit.carried(CASH);
+    if (visits != store) cash = Nums.max(cash, visits.inventory(CASH));
+    
+    //  TODO:  This needs to be reconsidered.  Seems a bit extreme?
+    
+    float urgency = Nums.clamp(cash / maxCollect, 0, 1);
+    return PARAMOUNT + (PARAMOUNT * urgency);
+  }
+  
+  
   protected void onVisit(Building visits) {
     Actor actor = (Actor) this.active;
     
@@ -82,7 +94,7 @@ public class TaskAssessTax extends Task {
       visits.setInventory(CASH, 0);
       
       TaskAssessTax next = nextAssessment(actor, store, maxCollect);
-      if (next != null) actor.assignTask(next);
+      if (next != null) actor.assignTask(next, this);
     }
     
     if (actor.jobType() == JOB.RETURNING && visits == store) {

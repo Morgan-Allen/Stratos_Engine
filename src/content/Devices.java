@@ -75,7 +75,7 @@ public final class Devices {
   ;
   static {
     INTRINSIC_BEAM.setAsWeapon(
-      8, true, new int[0],
+      8, 8, new int[0],
       null, AnimNames.FIRE,
       Devices.LASER_FX_MODEL, Devices.LASER_BURST_MODEL
     );

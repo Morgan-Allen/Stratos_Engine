@@ -48,7 +48,7 @@ public class Task implements Session.Saveable {
     CASUAL      =  2.5f,
     ROUTINE     =  5.0f,
     URGENT      =  7.5f,
-    PARAMOUNT   =  10.0f,
+    PARAMOUNT   = 10.0f,
     SWITCH_DIFF =  5.0f,
     PRIORITY_PER_100_CASH = 1.0f
   ;
@@ -67,7 +67,10 @@ public class Task implements Session.Saveable {
     PROG_CONTACT   =  0,
     PROG_ACTION    =  1,
     PROG_FINISHING =  2,
-    PROG_COMPLETE  =  3
+    PROG_COMPLETE  =  3,
+    RESUME_NO      = -1,
+    RESUME_WAIT    =  0,
+    RESUME_YES     =  1
   ;
   
   final Active active;
@@ -233,7 +236,7 @@ public class Task implements Session.Saveable {
         return PRIORITY_PER_100_CASH * reward / 100f;
       }
       else {
-        return ROUTINE;
+        return mission.rewards.basePriority();
       }
     }
     return 0;
@@ -421,8 +424,19 @@ public class Task implements Session.Saveable {
   }
   
   
-  protected void onArrival(Base goes, World.Journey journey) {
-    return;
+  protected Task reaction() {
+    return null;
+  }
+  
+  
+  protected int checkResume() {
+    if (complete() || priority() <= 0) return RESUME_NO;
+    return RESUME_YES;
+  }
+  
+  
+  protected boolean updateOnArrival(Base goes, World.Journey journey) {
+    return false;
   }
   
   
@@ -451,7 +465,7 @@ public class Task implements Session.Saveable {
   public static boolean inCombat(Element f) {
     if (f == null || ! (f instanceof Active)) return false;
     JOB type = ((Active) f).jobType();
-    return type == JOB.COMBAT || type == JOB.HUNTING;
+    return type == JOB.COMBAT;
   }
   
   
@@ -504,6 +518,8 @@ public class Task implements Session.Saveable {
   
   int checkActionProgress() {
     Area map = active.map();
+    if (map == null) return PROG_CLOSING;
+    
     int maxTicks = map.ticksPS * Nums.max(1, maxTime);
     boolean exactInterval = ticksSpent % map.ticksPS == 0;
 
@@ -523,6 +539,11 @@ public class Task implements Session.Saveable {
   boolean inContact() {
     int progress = checkActionProgress();
     return progress != PROG_CLOSING && progress != PROG_COMPLETE;
+  }
+  
+  
+  boolean complete() {
+    return checkActionProgress() >= PROG_FINISHING;
   }
   
   

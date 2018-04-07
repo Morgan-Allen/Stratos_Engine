@@ -135,7 +135,7 @@ public class TestBounties extends LogicTest {
       void onMapUpdate(Area map, Base base) {
         if (threat.jobType() != JOB.COMBAT) {
           TaskCombat siege = TaskCombat.configCombat(threat, guarded);
-          threat.assignTask(siege);
+          threat.assignTask(siege, threat);
         }
       }
       

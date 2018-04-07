@@ -249,10 +249,10 @@ public class BuildingForHome extends Building {
   
   void generateOutputs(BuildType tier) {
     float taxLevel = 0;
+    int tierID = Visit.indexOf(tier, type().upgradeTiers);
     for (Actor a : residents) taxLevel += TAX_VALUES[a.type().socialClass];
-    taxLevel *= (1 + Visit.indexOf(tier, type().upgradeTiers));
-    taxLevel *= type().updateTime;
-    taxLevel /= TAX_INTERVAL;
+    taxLevel *= TIER_VALUES[tierID] / 100f;
+    taxLevel *= type().updateTime * 1f / TAX_INTERVAL;
     addInventory(taxLevel, CASH);
     base().makeTotals.add(taxLevel, CASH);
   }
@@ -289,47 +289,15 @@ public class BuildingForHome extends Building {
     //
     //  Non-nobles have work to do-
     if (actor.type().socialClass != CLASS_NOBLE) {
-      //
-      //  Failing that, see if you can go shopping:
-      BuildType tier = tierOffset(1);
-      class Order { Building b; Good g; float amount; }
-      Pick <Order> pickS = new Pick();
-      
-      for (Good cons : usedBy(tier)) {
-        float need = 1 + maxTierStock(cons, tier);
-        need -= inventory(cons);
-        need -= totalFetchedFor(this, cons);
-        if (need <= 0) continue;
-        
-        for (Building b : map.buildings) {
-          if (! b.type().hasFeature(IS_VENDOR)) continue;
-          
-          float dist = distance(this, b);
-          if (dist > 50) continue;
-          
-          float amount = b.inventory(cons);
-          amount -= totalFetchedFrom(b, cons);
-          if (amount < 1) continue;
-          
-          float rating = need * amount * distancePenalty(dist);
-          Order o  = new Order();
-          o.b      = b;
-          o.g      = cons;
-          o.amount = Nums.min(need, amount);
-          pickS.compare(o, rating);
-        }
-      }
-      if (! pickS.empty()) {
-        Order o = pickS.result();
-        TaskDelivery d = new TaskDelivery(actor);
-        d = d.configDelivery(o.b, this, JOB.SHOPPING, o.g, o.amount, this);
-        if (d != null) return d;
-      }
+      TaskDelivery shopping = TaskDelivery.pickNextShopping(actor, this, homeUsed());
+      if (shopping != null) return shopping;
     }
+    
+    
+    //  TODO:  Move this out to the basic AI for citizens!
     //
     //  Failing that, select a leisure behaviour to perform:
     
-    //  TODO:  Move this out to the basic AI for citizens!
     //  TODO:  Compare all nearby amenities!
     Pick <Building> pickV = new Pick();
     
@@ -355,34 +323,6 @@ public class BuildingForHome extends Building {
       return super.selectActorBehaviour(actor);
     }
   }
-  
-  
-  float totalFetchedFor(Building home, Good good) {
-    float total = 0;
-    
-    List <Actor> all = home.residents.copy();
-    for (Actor a : home.workers) all.include(a);
-    
-    for (Actor a : all) {
-      if (! (a.task() instanceof TaskDelivery)) continue;
-      TaskDelivery fetch = (TaskDelivery) a.task();
-      if (fetch.carried == good) total += fetch.amount;
-    }
-    return total;
-  }
-  
-  
-  float totalFetchedFrom(Building store, Good good) {
-    float total = 0;
-    for (Active a : store.focused()) {
-      if (! (a.task() instanceof TaskDelivery)) continue;
-      TaskDelivery fetch = (TaskDelivery) a.task();
-      if (fetch.from    != store) continue;
-      if (fetch.carried == good ) total += fetch.amount;
-    }
-    return total;
-  }
-  
   
   
   

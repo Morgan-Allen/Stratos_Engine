@@ -104,9 +104,8 @@ public class TaskResting extends Task {
   
   
   protected void onVisitEnds(Building visits) {
-    Actor actor = (Actor) active;
     if (priority() >= IDLE) {
-      actor.assignTask(configResting(actor, visits));
+      configTask(visits, visits, null, JOB.RESTING, 10);
     }
   }
 }

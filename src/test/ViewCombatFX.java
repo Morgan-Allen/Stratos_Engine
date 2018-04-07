@@ -44,10 +44,10 @@ public class ViewCombatFX extends ViewTest {
     enemy.enterMap(map, 9, 9, 1, map.locals);
     
     TaskCombat combatF = TaskCombat.configCombat(fights, enemy);
-    fights.assignTask(combatF);
+    fights.assignTask(combatF, fights);
     
     TaskCombat combatE = TaskCombat.configCombat(enemy, fights);
-    enemy.assignTask(combatE);
+    enemy.assignTask(combatE, fights);
     
     
     PlayUI.pushSelection(fights);

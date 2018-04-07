@@ -54,7 +54,7 @@ public class TestMilitary extends LogicTest {
     
     float initPrestige = baseC.prestige();
     float initLoyalty  = awayC.loyalty(baseC);
-    
+    int numHome = 0, numTroops = 0;
     
     MissionSecure defence = null;
     MissionStrike offence = null;
@@ -130,11 +130,11 @@ public class TestMilitary extends LogicTest {
       
       if (awayWin && ! backHome) {
         
-        boolean someAway = false;
-        for (Actor w : fort1.workers()) if (w.map() != map) someAway = true;
-        for (Actor w : fort2.workers()) if (w.map() != map) someAway = true;
-        int numW = fort1.workers().size() + fort2.workers().size();
-        backHome = numW > 0 && ! someAway;
+        numHome = 0;
+        for (Actor w : fort1.workers()) if (w.map() == map) numHome += 1;
+        for (Actor w : fort2.workers()) if (w.map() == map) numHome += 1;
+        numTroops = fort1.workers().size() + fort2.workers().size();
+        backHome = numTroops > 0 && numHome > (numTroops / 2);
         
         if (baseC.prestige() <= initPrestige) {
           I.say("\nPrestige should be boosted by conquest!");
@@ -150,6 +150,7 @@ public class TestMilitary extends LogicTest {
         if (backHome) {
           I.say("\nMILITARY TEST CONCLUDED SUCCESSFULLY!");
           reportSkills(fromTroops, COMBAT_SKILLS, initSkills);
+          I.say("  Troops home: "+numHome+"/"+numTroops);
           if (! graphics) return true;
         }
       }
@@ -163,6 +164,7 @@ public class TestMilitary extends LogicTest {
     I.say("  Away win:  "+awayWin  );
     I.say("  Back home: "+backHome );
     reportSkills(fromTroops, COMBAT_SKILLS, initSkills);
+    I.say("  Troops home: "+numHome+"/"+numTroops);
     
     return false;
   }

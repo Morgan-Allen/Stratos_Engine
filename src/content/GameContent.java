@@ -276,7 +276,7 @@ public class GameContent {
     
     
     for (ActorType s : ALL_ANIMALS) {
-      s.rangeDamage = -1;
+      s.rangeDamage = 0;
       s.lifespan = s.predator ? HUNTER_LIFESPAN : GRAZER_LIFESPAN;
       s.meatType = PROTEIN;
     }
@@ -669,7 +669,7 @@ public class GameContent {
     STOCK_EXCHANGE.maxHealth = 100;
     STOCK_EXCHANGE.shopItems = StockExGoods.ALL_SOLD;
     STOCK_EXCHANGE.recipes = new Recipe[] {
-      new Recipe(StockExGoods.MEDIKIT, SKILL_CRAFT, AVG_CRAFT_TIME, MEDICINE)
+      new Recipe(StockExGoods.MEDIKIT, SKILL_CRAFT, FAST_CRAFT_TIME, MEDICINE)
     };
     
     SUPPLY_DEPOT.name = "Supply Depot";

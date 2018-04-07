@@ -14,7 +14,7 @@ public class TestTrading extends LogicTest {
   
   
   public static void main(String args[]) {
-    testTrading(true);
+    testTrading(false);
   }
   
   
@@ -55,6 +55,7 @@ public class TestTrading extends LogicTest {
     world.settings.toggleFatigue   = false;
     world.settings.toggleBuilding  = false;
     world.settings.togglePurchases = false;
+    world.settings.toggleReacts    = false;
     
     BuildingForTrade post1 = (BuildingForTrade) SUPPLY_DEPOT.generate();
     post1.enterMap(map, 1, 6, 1, baseC);

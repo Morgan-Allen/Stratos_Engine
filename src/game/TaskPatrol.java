@@ -84,7 +84,7 @@ public class TaskPatrol extends Task implements TileConstants {
   /**  External factory methods and supplemental evaluation calls-
     */
   public static TaskPatrol protectionFor(
-    Actor actor, Target guarded, float priority
+    Actor actor, Target guarded, Employer origin
   ) {
     final boolean report = evalVerbose && I.talkAbout == actor;
     if (report) I.say("\nGetting next perimeter patrol for "+actor);
@@ -118,31 +118,22 @@ public class TaskPatrol extends Task implements TileConstants {
     if (patrolled.empty()) return null;
     
     TaskPatrol p = new TaskPatrol(actor, guarded, patrolled, TYPE_PROTECTION);
-    return (TaskPatrol) p.configTask(null, null, guarded, JOB.PATROLLING, 1);
+    return (TaskPatrol) p.configTask(origin, null, guarded, JOB.PATROLLING, 1);
   }
   
   
-  public static TaskPatrol streetPatrol(
-    Actor actor, Element init, Element dest, float priority
+  public static TaskPatrol sentryDutyFor(
+    Actor actor, AreaTile point, Employer origin
   ) {
-    final Area map = actor.map();
-    final AreaTile
-      initT = AreaTile.nearestOpenTile(init.at(), map, 4),
-      destT = AreaTile.nearestOpenTile(dest.at(), map, 4);
-    
-    if (! map.pathCache.pathConnects(initT, destT)) return null;
-    
-    final List <Target> patrolled = new List();
-    patrolled.include(initT);
-    patrolled.include(destT);
-    
-    TaskPatrol p = new TaskPatrol(actor, init, patrolled, TYPE_STREET_PATROL);
-    return (TaskPatrol) p.configTask(null, null, initT, JOB.PATROLLING, 1);
+    List <Target> points = new List();
+    points.add(point);
+    TaskPatrol p = new TaskPatrol(actor, point, points, TYPE_SENTRY_DUTY);
+    return (TaskPatrol) p.configTask(origin, null, point, JOB.PATROLLING, 5);
   }
   
   
   public static TaskPatrol nextGuardPatrol(
-    Actor actor, Building origin, float priority
+    Actor actor, Building origin
   ) {
     final boolean report = evalVerbose && I.talkAbout == actor;
     if (report) {
@@ -167,8 +158,7 @@ public class TaskPatrol extends Task implements TileConstants {
     if (report) I.say("  Venue picked: "+goes);
     
     if (goes == null) return null;
-    return protectionFor(actor, goes, priority);
-    //else return streetPatrol(actor, origin, goes, priority);
+    return protectionFor(actor, goes, origin);
   }
   
   
@@ -181,6 +171,14 @@ public class TaskPatrol extends Task implements TileConstants {
   }
   
   
+  protected Task reaction() {
+    final Actor actor = (Actor) active;
+    return Task.inCombat(actor) ? null :
+      TaskCombat.nextReaction(actor, guarded, origin, actor.seen())
+    ;
+  }
+
+
   protected void onTarget(Target target) {
     final Actor actor = (Actor) active;
     if (onPoint == null) return;
@@ -221,7 +219,7 @@ public class TaskPatrol extends Task implements TileConstants {
     }
     
     if (stop != null) {
-      configTask(null, null, stop, JOB.PATROLLING, 1);
+      configTask(origin, null, stop, JOB.PATROLLING, 1);
     }
   }
 

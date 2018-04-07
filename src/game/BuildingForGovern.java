@@ -42,7 +42,6 @@ public class BuildingForGovern extends Building {
     */
   public Task selectActorBehaviour(Actor actor) {
     
-    
     if (actor.type().isCommoner()) {
       //  TODO:  THIS IS AN UGLY HACK AND SHOULD BE FIXED ASAP!
       if (actor.traits.levelOf(SKILL_WRITE) > 0) {
@@ -63,7 +62,7 @@ public class BuildingForGovern extends Building {
     }
     
     if (actor.type().isSoldier()) {
-      Task patrol = TaskPatrol.nextGuardPatrol(actor, this, Task.ROUTINE);
+      Task patrol = TaskPatrol.nextGuardPatrol(actor, this);
       if (patrol != null) return patrol;
     }
     
