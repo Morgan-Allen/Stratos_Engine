@@ -9,14 +9,19 @@ import util.*;
 public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   
   
+  /**  Data fields, construction and save/load methods-
+    */
+  Tally <Good> prodLevel = new Tally();
+  Tally <Good> needLevel = new Tally();
+  
   Actor pilot = null;
   List <Actor> passengers = new List();
+  List <Actor> inside     = new List();
   
   boolean flying = false;
   boolean landed = false;
   float flyHeight = 0;
-  
-  BuildingForDock dockedAt;
+  BuildingForDock boundTo, dockedAt;
   AreaTile entrance;
   
   
@@ -28,11 +33,25 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   
   public ActorAsVessel(Session s) throws Exception {
     super(s);
+    
+    s.loadTally(prodLevel);
+    s.loadTally(needLevel);
+    
+    /*
+    proxy.near = Area.loadTarget(map, s);
+    s.loadTally(proxy.nearDemand);
+    s.loadTally(proxy.nearSupply);
+    s.loadTally(proxy.inventory );
+    //*/
+    
     pilot = (Actor) s.loadObject();
     s.loadObjects(passengers);
+    s.loadObjects(inside);
+    
     flying    = s.loadBool();
     landed    = s.loadBool();
     flyHeight = s.loadFloat();
+    boundTo  = (BuildingForDock) s.loadObject();
     dockedAt = (BuildingForDock) s.loadObject();
     entrance = Area.loadTile(map, s);
   }
@@ -40,11 +59,25 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   
   public void saveState(Session s) throws Exception {
     super.saveState(s);
+    
+    s.saveTally(prodLevel);
+    s.saveTally(needLevel);
+    
+    /*
+    Area.saveTarget(proxy.near, map, s);
+    s.saveTally(proxy.nearDemand);
+    s.saveTally(proxy.nearSupply);
+    s.saveTally(proxy.inventory );
+    //*/
+    
     s.saveObject(pilot);
     s.saveObjects(passengers);
+    s.saveObjects(inside);
+    
     s.saveBool  (flying  );
     s.saveBool  (landed  );
     s.saveFloat(flyHeight);
+    s.saveObject(boundTo );
     s.saveObject(dockedAt);
     Area.saveTile(entrance, map, s);
   }
@@ -56,7 +89,7 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   void beginNextBehaviour() {
     assignTask(null);
     
-    if (idle() && work() != null && work().complete()) {
+    if (idle() && work() != null && ((Element) work()).complete()) {
       assignTask(work().selectActorBehaviour(this));
     }
     if (idle()) {
@@ -64,21 +97,29 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
     }
   }
   
-
-
-  /**  Implementing Employer interface-
+  
+  
+  /**  Implementing the Employer interface-
     */
+  public void setWorker(Actor actor, boolean is) {
+    passengers.toggleMember(actor, is);
+    actor.setWork(is ? this : null);
+  }
+  
+  
   public Task selectActorBehaviour(Actor actor) {
-    return null;
+    if (landed) {
+      return TaskDelivery.pickNextDelivery(
+        actor, this, this, MAX_TRADER_RANGE, 1, map().world.goodTypes()
+      );
+    }
+    else {
+      return null;
+    }
   }
   
   
   public void actorUpdates(Actor actor) {
-    return;
-  }
-  
-  
-  public void actorPasses(Actor actor, Building other) {
     return;
   }
   
@@ -88,7 +129,7 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   }
   
   
-  public void actorVisits(Actor actor, Building visits) {
+  public void actorVisits(Actor actor, Pathing visits) {
     return;
   }
   
@@ -120,23 +161,39 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   
   
   public void setInside(Actor a, boolean is) {
-    passengers.toggleMember(a, is);
+    inside.toggleMember(a, is);
   }
   
   
   public Series <Actor> allInside() {
-    return passengers;
+    return inside;
+  }
+  
+  
+  public AreaTile mainEntrance() {
+    return entrance;
   }
   
   
   
   /**  Methods related to docking and landing-
     */
-  AreaTile findLandingPoint(Area map, TaskTrading task) {
+  public AreaTile findLandingPoint(Area map) {
+    return findLandingPoint(map, null);
+  }
+  
+  
+  public AreaTile findLandingPoint(Area map, TaskTrading task) {
     //
     //  First, see where we're supposed to be getting close to:
+    
+    //  TODO:  Use the cargo-profile for the trading-task to rate the viability
+    //  of different landing-sites...
+    
     Target from = task.tradeGoes.base().headquarters();
-    if (task.tradeGoes instanceof Building) from = (Building) task.tradeGoes;
+    if (task != null && task.tradeGoes instanceof Building) {
+      from = (Building) task.tradeGoes;
+    }
     //
     //  Then see if you can find a convenient building to dock at-
     Pick <AreaTile> pick = new Pick();
@@ -165,6 +222,11 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   }
   
   
+  void setBound(BuildingForDock boundTo) {
+    this.boundTo = boundTo;
+  }
+  
+  
   public void enterMap(Area map, int x, int y, float buildLevel, Base owns) {
     super.enterMap(map, x, y, buildLevel, owns);
     if (type().moveMode == Type.MOVE_AIR) this.flying = true;
@@ -172,7 +234,8 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   
   
   void doLanding(AreaTile landing) {
-    
+    //
+    //  Dock with your location-
     if (landing.above != null && landing.above.type().isDockBuilding()) {
       dockedAt = (BuildingForDock) landing.above;
       dockedAt.toggleDocking(this, landing, true);
@@ -180,21 +243,27 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
     else {
       imposeFootprint();
     }
-    
     this.flying = false;
     this.landed = true;
   }
   
   
   void doTakeoff(AreaTile landing) {
-    
+    //
+    //  Eject any unathorised visitors...
+    for (Actor actor : inside) {
+      if (actor == pilot || passengers.includes(actor)) continue;
+      actor.setInside(this, false);
+      actor.setLocation(entrance, map);
+    }
+    //
+    //  And undock from your location-
     if (dockedAt != null) {
       dockedAt.toggleDocking(this, landing, false);
     }
     else {
       removeFootprint();
     }
-    
     this.dockedAt = null;
     this.landed = false;
     this.flying = true;
@@ -209,28 +278,32 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   
   /**  Implementing Trader interface-
     */
-  //  TODO:  Sew these up properly.
-  
   public Tally <Good> needLevels() {
-    return null;
+    return needLevel;
   }
   
   public Tally <Good> prodLevels() {
-    return null;
+    return prodLevel;
   }
   
   public float importPrice(Good g, Base sells) {
-    return 0;
+    return base().importPrice(g, sells);
   }
   
   public float exportPrice(Good g, Base buys) {
-    return 0;
+    return base().exportPrice(g, buys);
   }
   
   public boolean allowExport(Good g, Trader buys) {
     return true;
   }
 }
+
+
+
+
+
+
 
 
 

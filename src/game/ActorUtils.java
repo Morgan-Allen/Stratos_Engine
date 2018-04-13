@@ -136,7 +136,7 @@ public class ActorUtils {
     class SumPos extends Vec2D {
       float sumWeights;
       
-      void addPos(Building b, float weight) {
+      void addPos(Pathing b, float weight) {
         if (b == null) return;
         x += b.at().x * weight;
         y += b.at().y * weight;
@@ -146,7 +146,7 @@ public class ActorUtils {
     SumPos sumPos = new SumPos();
     int maxRange = MAX_WANDER_RANGE * 2;
     
-    Building work = migrant.work();
+    Pathing work = (Pathing) migrant.work();
     sumPos.addPos(work, 1);
     
     Building market = findNearestWithFeature(IS_VENDOR, maxRange, work);

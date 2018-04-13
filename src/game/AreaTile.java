@@ -200,6 +200,16 @@ public class AreaTile implements Pathing, Selection.Focus {
   }
   
   
+  public AreaTile mainEntrance() {
+    return this;
+  }
+  
+  
+  public boolean complete() {
+    return true;
+  }
+  
+  
   
   /**  Terrain and elevation methods-
     */

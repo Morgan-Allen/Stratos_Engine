@@ -273,7 +273,7 @@ public class ActorAsPerson extends Actor {
       choice.add(TaskPurchase.nextPurchase(this));
       choice.add(TaskWander.configWandering(this));
       
-      if (work() != null && work().complete()) {
+      if (idle() && work() != null && ((Element) work()).complete()) {
         choice.add(work().selectActorBehaviour(this));
       }
       if (home() != null && home().complete()) {

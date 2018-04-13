@@ -36,7 +36,7 @@ public class Actor extends Element implements
   
   private String ID;
   
-  private Building work;
+  private Employer work;
   private Building home;
   private Base     guestBase;
   private Mission  mission;
@@ -198,7 +198,7 @@ public class Actor extends Element implements
   }
   
   
-  public Building work() {
+  public Employer work() {
     return work;
   }
   
@@ -208,7 +208,7 @@ public class Actor extends Element implements
   }
   
   
-  void setWork(Building work) {
+  void setWork(Employer work) {
     this.work = work;
   }
   
@@ -362,7 +362,7 @@ public class Actor extends Element implements
   }
   
   
-  protected void onVisit(Building visits) {
+  protected void onVisit(Pathing visits) {
     return;
   }
   
@@ -484,21 +484,21 @@ public class Actor extends Element implements
   
   /**  Methods to assist trade and migration-
     */
-  public void pickupGood(Good carried, float amount, Building store) {
+  public void pickupGood(Good carried, float amount, Carrier store) {
     if (store == null || carried == null || amount <= 0) return;
     
-    store.addInventory(0 - amount, carried);
+    store.inventory().add(0 - amount, carried);
     incCarried(carried, amount);
   }
   
   
-  public void offloadGood(Good good, Building store) {
+  public void offloadGood(Good good, Carrier store) {
     float amount = carried.valueFor(good);
     if (store == null || amount == 0) return;
     
     if (reports()) I.say(this+" Depositing "+carried+" at "+store);
     
-    store.addInventory(amount, good);
+    store.inventory().add(amount, good);
     carried.set(good, 0);
   }
   
@@ -539,6 +539,11 @@ public class Actor extends Element implements
   
   public Tally <Good> inventory() {
     return carried;
+  }
+  
+  
+  public float shopPrice(Good good, Task purchase) {
+    return good.price;
   }
   
   

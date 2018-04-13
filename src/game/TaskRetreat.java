@@ -5,6 +5,8 @@ package game;
 import util.*;
 import static game.GameConstants.*;
 
+import game.GameConstants.Pathing;
+
 
 
 
@@ -83,8 +85,8 @@ public class TaskRetreat extends Task {
   
   static TaskRetreat configRetreat(Actor actor) {
     
-    Building home = actor.home();
-    if (home == null) home = actor.work();
+    Pathing home = actor.home();
+    if (home == null) home = (Pathing) actor.work();
     Area map = actor.map;
     Pick <Building> pickHide = new Pick();
     
@@ -126,7 +128,7 @@ public class TaskRetreat extends Task {
   }
 
 
-  protected void onVisit(Building visits) {
+  protected void onVisit(Pathing visits) {
     super.onVisit(visits);
   }
   

@@ -3,6 +3,8 @@
 package game;
 import static game.ActorUtils.*;
 import static game.GameConstants.*;
+
+import game.GameConstants.Pathing;
 import game.Task.JOB;
 import gameUI.play.*;
 import graphics.common.*;
@@ -124,6 +126,11 @@ public abstract class Mission implements
   
   public void toggleEnvoy(Actor a, boolean is) {
     this.envoys.toggleMember(a, is);
+    toggleRecruit(a, is);
+  }
+  
+  
+  public void setWorker(Actor a, boolean is) {
     toggleRecruit(a, is);
   }
   
@@ -391,7 +398,7 @@ public abstract class Mission implements
   }
   
   
-  public void actorVisits(Actor actor, Building visits) {
+  public void actorVisits(Actor actor, Pathing visits) {
     return;
   }
   

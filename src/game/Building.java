@@ -248,7 +248,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   }
   
   
-  public float shopPrice(Good g, TaskDelivery s) {
+  public float shopPrice(Good g, Task s) {
     if (type().hasFeature(IS_VENDOR)) {
       return g.price * (1 + (MARKET_MARGIN / 100f));
     }
@@ -740,7 +740,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   }
   
   
-  public void actorVisits(Actor actor, Building visits) {
+  public void actorVisits(Actor actor, Pathing visits) {
     return;
   }
   

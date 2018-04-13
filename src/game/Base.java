@@ -4,6 +4,8 @@ package game;
 import util.*;
 import static game.GameConstants.*;
 
+import game.GameConstants.Good;
+
 
 
 public class Base implements Session.Saveable, Trader {
@@ -548,6 +550,16 @@ public class Base implements Session.Saveable, Trader {
     if (buys.base().homeland() == this) return true;
     if (Base.suppliesDue(this, buys.base(), g) > 0) return true;
     return prodLevel.valueFor(g) > 0;
+  }
+  
+  
+  public float shopPrice(Good good, Task purchase) {
+    return good.price;
+  }
+
+
+  public Series <ActorAsVessel> traders() {
+    return traders;
   }
   
   

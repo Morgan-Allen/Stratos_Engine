@@ -5,6 +5,8 @@ import util.*;
 import static game.ActorUtils.*;
 import static game.GameConstants.*;
 
+import game.GameConstants.Pathing;
+
 
 
 public class TaskTrading extends Task {
@@ -119,18 +121,18 @@ public class TaskTrading extends Task {
     }
     //
     //  If this is a place you're waiting, stay there for a while.
-    if (type == JOB.DOCKING && actor.type().isVessel()) {
+    if (type == JOB.DOCKING && actor.type().isVessel() && target.isTile()) {
       ActorAsVessel ship = (ActorAsVessel) actor;
       Area map = ship.map();
       if (! ship.landed) {
-        ship.doLanding(target);
+        ship.doLanding((AreaTile) target);
         waitInitTime = map.time();
       }
       if (map.time() - waitInitTime < SHIP_WAIT_TIME) {
         configTask(origin, null, target, JOB.DOCKING, 10);
       }
       else {
-        ship.doTakeoff(target);
+        ship.doTakeoff((AreaTile) target);
         configTravel(tradeGoes, tradeFrom, JOB.DEPARTING, origin);
       }
       return;
@@ -146,7 +148,7 @@ public class TaskTrading extends Task {
   }
   
   
-  protected void onVisit(Building visits) {
+  protected void onVisit(Pathing visits) {
     //
     //  Any visited building is assumed to be one of the depots-
     onVisit((Trader) visits);

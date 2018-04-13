@@ -20,7 +20,6 @@ public class BuildType extends Type {
   public ActorTechnique rulerPowers[] = {};
   public ActorTechnique actorPowers[] = {};
   
-  public Good features[]   = NO_GOODS;
   public int featureAmount = AVG_SERVICE_GIVE;
   public int updateTime    = AVG_UPDATE_GAP;
   public int maxVisitors   = AVG_MAX_VISITORS;
@@ -48,7 +47,7 @@ public class BuildType extends Type {
   
   public Type gatherFlag = null;
   public int claimMargin = -1;
-  public int gatherRange     = AVG_GATHER_RANGE;
+  public int gatherRange = AVG_GATHER_RANGE;
   public int maxDeliverRange = MAX_TRADER_RANGE;
   
   
@@ -69,10 +68,6 @@ public class BuildType extends Type {
     this.features = features;
   }
   
-  
-  public boolean hasFeature(Good feature) {
-    return Visit.arrayIncludes(features, feature);
-  }
   
   public BuildType(Class baseClass, String ID, int category) {
     super(baseClass, ID, category);

@@ -395,6 +395,7 @@ public class GameConstants {
     SKILL_MELEE = new Trait("skill_melee", "Melee"),
     SKILL_RANGE = new Trait("skill_range", "Range"),
     SKILL_EVADE = new Trait("skill_evade", "Evade"),
+    SKILL_PILOT = new Trait("skill_pilot", "Pilot"),
     SKILL_FARM  = new Trait("skill_farm" , "Farm" ),
     SKILL_BUILD = new Trait("skill_build", "Build"),
     SKILL_CRAFT = new Trait("skill_craft", "Craft"),
@@ -489,6 +490,9 @@ public class GameConstants {
     Pathing[] adjacent(Pathing temp[], Area map);
     boolean allowsEntryFrom(Pathing p);
     
+    boolean complete();
+    AreaTile mainEntrance();
+    
     boolean allowsEntry(Actor a);
     void setInside(Actor a, boolean is);
     Series <Actor> allInside();
@@ -497,6 +501,7 @@ public class GameConstants {
   
   public static interface Carrier {
     Tally <Good> inventory();
+    float shopPrice(Good good, Task purchase);
     Base base();
   }
   
@@ -518,17 +523,20 @@ public class GameConstants {
   
   
   public static interface Employer {
+    
+    void setWorker(Actor actor, boolean is);
     Task selectActorBehaviour(Actor actor);
+    
     void actorUpdates(Actor actor);
-    void actorPasses (Actor actor, Building other );
-    void actorTargets(Actor actor, Target   other );
-    void actorVisits (Actor actor, Building visits);
+    void actorTargets(Actor actor, Target  other );
+    void actorVisits (Actor actor, Pathing visits);
+  }
+  
+  
+  public static interface Workplace extends Pathing, Carrier, Employer {
   }
   
 }
-
-
-
 
 
 

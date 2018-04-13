@@ -6,6 +6,8 @@ import util.*;
 import static game.Area.*;
 import static game.GameConstants.*;
 
+import game.GameConstants.Pathing;
+
 
 
 public class Task implements Session.Saveable {
@@ -79,9 +81,9 @@ public class Task implements Session.Saveable {
   
   Pathing path[] = null;
   int pathIndex = -1;
-  boolean  offMap;
-  Target   target;
-  Building visits;
+  boolean offMap;
+  Target  target;
+  Pathing visits;
   
   private float priorityEval = NO_PRIORITY;
   private boolean inContact = false;
@@ -159,7 +161,7 @@ public class Task implements Session.Saveable {
   /**  Supplemental setup methods-
     */
   Task configTask(
-    Employer origin, Building visits, Target target, JOB jobType, int maxTime
+    Employer origin, Pathing visits, Target target, JOB jobType, int maxTime
   ) {
     //  Note- the un/assign task calls are needed to ensure that current focus
     //  for the actor is updated correctly.
@@ -286,10 +288,10 @@ public class Task implements Session.Saveable {
     
     while (motion > 0 || ! isActor) {
       
-      Pathing  path[]   = this.path;
-      boolean  contacts = checkContact(path);
-      Building visits   = this.visits;
-      Target   target   = this.target;
+      Pathing path[]   = this.path;
+      boolean contacts = checkContact(path);
+      Pathing visits   = this.visits;
+      Target  target   = this.target;
       
       priorityEval = NO_PRIORITY;
       inContact = false;
@@ -309,7 +311,6 @@ public class Task implements Session.Saveable {
           if (isActor) {
             onVisit(visits);
             asActor.onVisit(visits);
-            visits.visitedBy(asActor);
             if (origin != null) origin.actorVisits(asActor, visits);
           }
           if (progress == PROG_FINISHING) {
@@ -391,12 +392,12 @@ public class Task implements Session.Saveable {
   
   /**  Activity calls-
     */
-  protected void onVisit(Building visits) {
+  protected void onVisit(Pathing visits) {
     return;
   }
   
   
-  protected void onVisitEnds(Building visits) {
+  protected void onVisitEnds(Pathing visits) {
     return;
   }
   
@@ -465,7 +466,7 @@ public class Task implements Session.Saveable {
   }
   
   
-  public Building visits() {
+  public Pathing visits() {
     return visits;
   }
   

@@ -4,6 +4,8 @@ package game;
 import util.*;
 import static game.Area.*;
 import static game.GameConstants.*;
+
+import game.GameConstants.Pathing;
 import graphics.common.*;
 
 
@@ -243,7 +245,7 @@ public class TaskBuilding extends Task {
   }
   
   
-  protected void onVisit(Building visits) {
+  protected void onVisit(Pathing visits) {
     onTarget(visits);
   }
   

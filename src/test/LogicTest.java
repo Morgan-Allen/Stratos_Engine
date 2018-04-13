@@ -160,7 +160,7 @@ public class LogicTest {
       AreaTile at = a.at();
       if (at == null || a.indoors()) continue;
       int fill = WALKER_COLOR;
-      if      (a.work() != null) fill = a.work().type().tint;
+      if      (a.work() != null) fill = ((Element) a.work()).type().tint;
       else if (a.home() != null) fill = a.home().type().tint;
       graphic[at.x][at.y] = fill;
     }

@@ -4,6 +4,8 @@ package game;
 import util.*;
 import static game.GameConstants.*;
 
+import game.GameConstants.Pathing;
+
 
 
 
@@ -154,7 +156,7 @@ public class TaskPurchase extends Task {
   }
 
 
-  protected void onVisit(Building visits) {
+  protected void onVisit(Pathing visits) {
     Actor actor = (Actor) this.active;
     
     if (type == JOB.SHOPPING && visits == shop) {

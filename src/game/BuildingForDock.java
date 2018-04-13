@@ -6,16 +6,17 @@ import util.*;
 
 
 
+
 public class BuildingForDock extends Building {
 
   
   /**  Data-fields, construction, and save/load methods-
     */
+  List <ActorAsVessel> boundVessels = new List();
+  Table <Base, TradeProxy> profiles = new Table();
+  
   ActorAsVessel docking[];
   AreaTile dockPoints[] = null;
-  
-  Tally <Good> nearDemand = new Tally();
-  Tally <Good> nearSupply = new Tally();
   
   
   
@@ -27,12 +28,14 @@ public class BuildingForDock extends Building {
   
   public BuildingForDock(Session s) throws Exception {
     super(s);
+    s.loadObjects(boundVessels);
     docking = (ActorAsVessel[]) s.loadObjectArray(ActorAsVessel.class);
   }
   
   
   public void saveState(Session s) throws Exception {
     super.saveState(s);
+    s.saveObjects(boundVessels);
     s.saveObjectArray(docking);
   }
   
@@ -42,37 +45,18 @@ public class BuildingForDock extends Building {
     */
   void updateOnPeriod(int period) {
     super.updateOnPeriod(period);
-    
-    nearDemand.clear();
-    nearSupply.clear();
-    
-    for (Building b : map.buildings) {
-      if (b.base() != base() || ! b.type().isTradeBuilding()) continue;
-      
-      float dist = Area.distance(b, this);
-      if (dist > MAX_TRADER_RANGE - radius()) continue;
-      
-      float weight = Area.distancePenalty(dist);
-      Trader trader = (Trader) b;
-      
-      for (Good g : trader.prodLevels().keys()) {
-        if (! trader.allowExport(g, buys)) continue;
-        
-        float supply = trader.prodLevels().valueFor(g);
-        nearSupply.add(supply * weight, g);
-      }
-      
-      for (Good g : trader.needLevels().keys()) {
-        float demand = trader.needLevels().valueFor(g);
-        nearDemand.add(demand * weight, g);
-      }
-    }
   }
   
   
   
   /**  Finding points to dock at:
     */
+  public void bindVessel(ActorAsVessel vessel, boolean bind) {
+    boundVessels.toggleMember(vessel, bind);
+    vessel.setBound(bind ? this : null);
+  }
+  
+  
   AreaTile[] dockPoints() {
     if (! onMap()) return null;
     if (dockPoints != null) return dockPoints;
@@ -137,5 +121,92 @@ public class BuildingForDock extends Building {
   
   
   
+  /**  Estimating local supply and demand...
+    */
+  public static class TradeProxy implements Trader {
+    
+    final Base base;
+    
+    Target near;
+    Tally <Good> nearDemand = new Tally();
+    Tally <Good> nearSupply = new Tally();
+    Tally <Good> inventory  = new Tally();
+    
+    TradeProxy(Base base) {
+      this.base = base;
+    }
+    
+    public Tally <Good> inventory() {
+      return inventory;
+    }
+    
+    public Base base() {
+      return base;
+    }
+    
+    public Tally <Good> needLevels() {
+      return nearDemand;
+    }
+    
+    public Tally <Good> prodLevels() {
+      return nearSupply;
+    }
+    
+    public float importPrice(Good g, Base sells) {
+      return base().importPrice(g, sells);
+    }
+    
+    public float exportPrice(Good g, Base buys) {
+      return base().exportPrice(g, buys);
+    }
+    
+    public float shopPrice(Good g, Task task) {
+      return -1;
+    }
+    
+    public boolean allowExport(Good g, Trader buys) {
+      return true;
+    }
+  }
+  
+  
+  /*
+  public void calibrateTrading(Area map, Base base, Target fromPoint) {
+    
+    TradeProxy proxy = profiles.get(base);
+    
+    proxy.nearDemand.clear();
+    proxy.nearSupply.clear();
+    proxy.inventory .clear();
+    proxy.near = fromPoint;
+    
+    for (Building b : map.buildings) {
+      if (b.base() != visits || ! b.type().isTradeBuilding()) continue;
+      
+      float dist = Area.distance(b, this);
+      if (dist > MAX_TRADER_RANGE - radius()) continue;
+      
+      float weight = Area.distancePenalty(dist);
+      Trader trader = (Trader) b;
+      
+      for (Good g : trader.prodLevels().keys()) {
+        if (! trader.allowExport(g, this)) continue;
+        
+        float supply = trader.prodLevels().valueFor(g);
+        float amount = trader.inventory ().valueFor(g);
+        proxy.nearSupply.add(supply * weight, g);
+        proxy.inventory .add(amount * weight, g);
+      }
+      
+      for (Good g : trader.needLevels().keys()) {
+        float demand = trader.needLevels().valueFor(g);
+        demand = Nums.max(0, demand - trader.inventory().valueFor(g));
+        proxy.nearDemand.add(demand * weight, g);
+      }
+    }
+    
+    //  TODO:  Scale this down to the limit of your cargo capacity!
+  }
+  //*/
   
 }

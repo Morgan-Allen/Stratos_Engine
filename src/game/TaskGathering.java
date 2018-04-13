@@ -2,6 +2,9 @@
 
 package game;
 import static game.GameConstants.*;
+
+import game.GameConstants.Pathing;
+
 import static game.Area.*;
 import static game.BuildingForGather.*;
 import graphics.common.*;
@@ -234,7 +237,7 @@ public class TaskGathering extends Task {
   }
   
   
-  protected void onVisit(Building visits) {
+  protected void onVisit(Pathing visits) {
     Actor actor = (Actor) this.active;
     if (visits == store) {
       for (Good made : store.type().produced) {

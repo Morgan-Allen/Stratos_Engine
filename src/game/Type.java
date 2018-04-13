@@ -6,6 +6,8 @@ import util.*;
 import static game.GameConstants.*;
 import java.lang.reflect.*;
 
+import game.GameConstants.Good;
+
 
 
 
@@ -136,8 +138,9 @@ public class Type extends Index.Entry implements Session.Saveable {
   public Class baseClass;
   public int category;
   public Type flagKey = null;
-  public int wide = 1, high = 1, deep = 1;
+  public Good features[] = NO_GOODS;
   
+  public int wide = 1, high = 1, deep = 1;
   private byte[][] footprint = {{ 1 }};
   int clearMargin;
   
@@ -318,6 +321,11 @@ public class Type extends Index.Entry implements Session.Saveable {
   
   public boolean isArmyOrWallsBuilding() {
     return category == IS_ARMY_BLD || category == IS_WALLS_BLD;
+  }
+  
+  
+  public boolean hasFeature(Good feature) {
+    return Visit.arrayIncludes(features, feature);
   }
   
   

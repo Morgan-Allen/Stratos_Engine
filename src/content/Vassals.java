@@ -102,6 +102,23 @@ public class Vassals {
   }
   
   
+  final public static HumanType SUPPLY_CORPS = new HumanType(
+    "actor_supply_corps", CLASS_COMMON
+  ) {
+    public void initAsMigrant(ActorAsPerson p) {
+      super.initAsMigrant(p);
+      String forenames[] = p.man() ? PYON_MN : PYON_FN;
+      final String name = generateName(forenames, PYON_LN, null);
+      p.setCustomName(name);
+    }
+  };
+  static {
+    SUPPLY_CORPS.name = "Supply Corps";
+    SUPPLY_CORPS.attachCostume(Vassals.class, "pyon_skin.gif");
+    SUPPLY_CORPS.initTraits.setWith(SKILL_CRAFT, 1, SKILL_PILOT, 2);
+  }
+  
+  
   final public static ActorType CARGO_BARGE = new ActorType(
     ActorAsVessel.class, "vessel_cargo_barge", Type.IS_VESSEL_ACT
   );
@@ -109,14 +126,30 @@ public class Vassals {
     CARGO_BARGE.name = "Cargo Barge";
     CARGO_BARGE.model = MS3DModel.loadFrom(
       "media/Actors/vehicles/", "loader_2.ms3d",
-      HumanType.class, "VehicleModels.xml", "CargoBarge"
+      Vassals.class, "VehicleModels.xml", "CargoBarge"
     );
     CARGO_BARGE.organic = false;
     CARGO_BARGE.maxHealth = 35;
   }
   
   
+  final public static ActorType DROPSHIP = new ActorType(
+    ActorAsVessel.class, "vessel_dropship", Type.IS_VESSEL_ACT
+  );
+  static {
+    DROPSHIP.name = "Dropship";
+    DROPSHIP.model = MS3DModel.loadFrom(
+      "media/Actors/vehicles/", "dropship.ms3d",
+      Vassals.class, "VehiclesModels.xml", "Dropship"
+    );
+    DROPSHIP.organic = false;
+    DROPSHIP.maxHealth = 150;
+    DROPSHIP.setDimensions(4, 4, 2);
+  }
+  
+  
 }
+
 
 
 

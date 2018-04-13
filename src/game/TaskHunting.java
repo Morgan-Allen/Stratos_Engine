@@ -5,6 +5,8 @@ import util.*;
 import static game.Area.*;
 import static game.GameConstants.*;
 
+import game.GameConstants.Pathing;
+
 
 
 //  TODO:  Extend TaskCombat?
@@ -95,10 +97,10 @@ public class TaskHunting extends Task {
   }
   
   
-  protected void onVisit(Building visits) {
+  protected void onVisit(Pathing visits) {
     Actor actor = (Actor) this.active;
     if (visits != store) return;
-    actor.offloadGood(prey.type().meatType, visits);
+    actor.offloadGood(prey.type().meatType, (Carrier) visits);
   }
   
 }

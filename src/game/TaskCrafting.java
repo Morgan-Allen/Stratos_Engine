@@ -3,6 +3,9 @@
 package game;
 import util.*;
 import static game.GameConstants.*;
+
+import game.GameConstants.Pathing;
+
 import static game.BuildingForCrafts.*;
 import graphics.common.*;
 
@@ -112,7 +115,7 @@ public class TaskCrafting extends Task {
   
   
 
-  protected void onVisit(Building visits) {
+  protected void onVisit(Pathing visits) {
     boolean report = recipe.made.isUsable && false;
     
     ItemOrder order = venue.orderWithID(orderID);

@@ -2,6 +2,8 @@
 
 package game;
 import static game.GameConstants.*;
+
+import game.GameConstants.Pathing;
 import util.*;
 
 
@@ -50,24 +52,27 @@ public class TaskResting extends Task {
   }
   
   
-  public static TaskResting configResting(Actor actor, Building rests) {
+  public static TaskResting configResting(Actor actor, Pathing rests) {
     if (actor == null || rests == null) return null;
     
     TaskResting t = new TaskResting(actor);
-    return (TaskResting) t.configTask(rests, rests, null, JOB.RESTING, 10);
+    return (TaskResting) t.configTask(null, rests, null, JOB.RESTING, 10);
   }
   
   
-  public static Batch <Good> menuAt(Building visits, Actor actor) {
+  public static Batch <Good> menuAt(Pathing visits, Actor actor) {
     Batch <Good> menu = new Batch();
-    for (Good g : visits.inventory().keys()) {
+    if (! (visits.type().isBuilding() || visits.type().isVessel())) {
+      return menu;
+    }
+    for (Good g : ((Carrier) visits).inventory().keys()) {
       if (g.isEdible) menu.add(g);
     }
     return menu;
   }
   
   
-  static float restUrgency(Actor actor, Building rests) {
+  static float restUrgency(Actor actor, Pathing rests) {
     if (actor == null || rests == null || ! rests.complete()) return -1;
     
     Batch <Good> menu = menuAt(rests, actor);
@@ -86,8 +91,9 @@ public class TaskResting extends Task {
   }
   
   
-  protected void onVisit(Building visits) {
+  protected void onVisit(Pathing visits) {
     Actor actor = (Actor) active;
+    
     if (actor.hunger() >= 1f / HUNGER_REGEN) {
       Batch <Good> menu = menuAt(visits, actor);
       boolean adult = actor.adult();
@@ -95,15 +101,16 @@ public class TaskResting extends Task {
       if (menu.size() > 0) for (Good g : menu) {
         float eats = 1f / (menu.size() * HUNGER_REGEN);
         if (! adult) eats /= 2;
-        eats = Nums.min(eats, visits.inventory(g));
-        visits.addInventory(0 - eats, g);
+        Carrier haven = (Carrier) visits;
+        eats = Nums.min(eats, haven.inventory().valueFor(g));
+        haven.inventory().add(0 - eats, g);
         actor.hunger -= eats / FOOD_UNIT_PER_HP;
       }
     }
   }
   
   
-  protected void onVisitEnds(Building visits) {
+  protected void onVisitEnds(Pathing visits) {
     Actor actor = (Actor) active;
     if (priority() >= IDLE) {
       actor.assignTask(configResting(actor, visits));

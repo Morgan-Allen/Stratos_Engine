@@ -163,11 +163,13 @@ public class BuildingForTrade extends Building implements Trader {
   }
   
   
-  static Task selectTraderBehaviour(
+  public static TaskTrading selectTraderBehaviour(
     Trader from, Actor trading,
     Base tradePartner, Area map
   ) {
     boolean reports = trading.reports();
+    
+    I.say("?");
     
     class Order { Tally <Good> cargo; Trader goes; float rating; }
     List <Trader> targets = new List();

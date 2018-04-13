@@ -24,6 +24,7 @@ public class WorldSettings {
     togglePurchases   = true,
     
     toggleMigrate     = true,
+    toggleShipping    = true,
     toggleAging       = true,
     toggleChildMort   = true,
     
