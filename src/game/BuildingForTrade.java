@@ -169,8 +169,6 @@ public class BuildingForTrade extends Building implements Trader {
   ) {
     boolean reports = trading.reports();
     
-    I.say("?");
-    
     class Order { Tally <Good> cargo; Trader goes; float rating; }
     List <Trader> targets = new List();
     List <Order> orders = new List();

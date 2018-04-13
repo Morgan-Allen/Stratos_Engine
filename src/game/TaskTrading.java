@@ -107,6 +107,43 @@ public class TaskTrading extends Task {
   }
   
   
+  protected boolean doingLanding(Base local) {
+    boolean mapVisitor = local != homeCity && local.activeMap() != null;
+    return mapVisitor && active.type().isAirship();
+  }
+  
+  
+  protected boolean shouldTakeoff(Area map) {
+    return map.time() - waitInitTime > SHIP_WAIT_TIME;
+  }
+  
+  
+  protected void onArrival(Base goes, World.Journey journey) {
+    //
+    //  
+    if (doingLanding(goes)) {
+      ActorAsVessel ship = (ActorAsVessel) active;
+      AreaTile docks = ship.findLandingPoint(goes.activeMap(), this);
+      configTask(origin, null, docks, JOB.DOCKING, 10);
+      return;
+    }
+    //
+    //  If you've arrived at your destination city, offload your cargo, take on
+    //  fresh goods, and record any profits in the process:
+    if (goes != homeCity && ! didImport) {
+      onVisit(goes);
+    }
+    //
+    //  If you've arrived back on your home map, return to your post-
+    else if (goes == homeCity) {
+      configTravel(tradeFrom, tradeFrom, JOB.TRADING, origin);
+    }
+    //
+    //  ...Fwaaah?
+    else I.complain("THIS SHOULDN'T HAPPEN");
+  }
+  
+  
   protected void onTarget(Target target) {
     Actor actor = (Actor) this.active;
     //
@@ -124,16 +161,17 @@ public class TaskTrading extends Task {
     if (type == JOB.DOCKING && actor.type().isVessel() && target.isTile()) {
       ActorAsVessel ship = (ActorAsVessel) actor;
       Area map = ship.map();
-      if (! ship.landed) {
+      
+      if (! ship.landed()) {
         ship.doLanding((AreaTile) target);
         waitInitTime = map.time();
       }
-      if (map.time() - waitInitTime < SHIP_WAIT_TIME) {
-        configTask(origin, null, target, JOB.DOCKING, 10);
-      }
-      else {
+      if (shouldTakeoff(map) && ship.readyForTakeoff()) {
         ship.doTakeoff((AreaTile) target);
         configTravel(tradeGoes, tradeFrom, JOB.DEPARTING, origin);
+      }
+      else {
+        configTask(origin, null, target, JOB.DOCKING, 10);
       }
       return;
     }
@@ -152,45 +190,6 @@ public class TaskTrading extends Task {
     //
     //  Any visited building is assumed to be one of the depots-
     onVisit((Trader) visits);
-  }
-  
-  
-  protected void onArrival(Base goes, World.Journey journey) {
-    Area activeMap = goes.activeMap();
-    boolean mapVisitor = goes != homeCity && activeMap != null;
-    
-    //  TODO:  You also need to handle the case of cargo-barges arriving from
-    //  off-map.  It could happen!
-    
-    //  TODO:  You may need to do something very similar when a ship returns
-    //  to it's home-map.  Hmm.  That's another case.
-    
-    //  And you may want to cover the case of mission-support as well.  In fact,
-    //  maybe that deserves a separate task altogether.
-    
-    //
-    //  
-    if (mapVisitor && active.type().isAirship()) {
-      ActorAsVessel ship = (ActorAsVessel) active;
-      AreaTile docks = ship.findLandingPoint(activeMap, this);
-      configTask(origin, null, docks, JOB.DOCKING, 10);
-      return;
-    }
-    
-    //
-    //  If you've arrived at your destination city, offload your cargo, take on
-    //  fresh goods, and record any profits in the process:
-    if (goes != homeCity && ! didImport) {
-      onVisit(goes);
-    }
-    //
-    //  If you've arrived back on your home map, return to your post-
-    else if (goes == homeCity) {
-      configTravel(tradeFrom, tradeFrom, JOB.TRADING, origin);
-    }
-    //
-    //  ...Fwaaah?
-    else I.complain("THIS SHOULDN'T HAPPEN");
   }
   
     
@@ -313,7 +312,6 @@ public class TaskTrading extends Task {
   static Tally <Good> configureCargo(
     Trader from, Trader goes, boolean cityOnly, World world
   ) {
-    
     //  TODO:  You need to cap the total sum of goods transported based on
     //  cargo limits!
     

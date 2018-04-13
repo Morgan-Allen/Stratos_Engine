@@ -438,7 +438,7 @@ public class Actor extends Element implements
   
   
   public Task visitTask(
-    Building goes, int maxTime, JOB jobType, Employer e
+    Pathing goes, int maxTime, JOB jobType, Employer e
   ) {
     if (goes == null) return null;
     if (reports()) I.say(this+" will visit "+goes+" for time "+maxTime);

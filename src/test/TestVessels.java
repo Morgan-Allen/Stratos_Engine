@@ -59,6 +59,8 @@ public class TestVessels extends LogicTest {
     
     
     
+    //  TODO:  Firstly, see if the most basic delivery-tasks work...
+    
     ActorAsVessel testShip = (ActorAsVessel) Vassals.DROPSHIP.generate();
     testShip.assignBase(awayC);
     
@@ -72,41 +74,17 @@ public class TestVessels extends LogicTest {
     TaskTrading trading = BuildingForTrade.selectTraderBehaviour(
       awayC, testShip, homeC, map
     );
+    testShip.assignTask(trading);
     
     if (trading == null) {
       I.say("\nCould not generate trade-task for ship!");
       return false;
     }
     
-    AreaTile lands = testShip.findLandingPoint(map, trading);
     
-    I.say("Lands at: "+lands);
-    //testShip.assignTask(trading);
-    
-    
-    
-    //  TODO:  You can simply calibrate the supply/demand profiles of bound vessels
-    //  *as if* they were already present.  No need for proxy-profiles or local
-    //  inventory, just plumb the map/base like you were already there.
-    
-    /*
-    testShip.calibrateTrading(map, homeC, lands);
-    I.say("\nUpdated trade proxy:");
-    I.say("  Supply: "+testShip.proxy.prodLevels());
-    I.say("  Demand: "+testShip.proxy.needLevels());
-    //*/
-    
-    
-    /*
-    for (int n = DAY_LENGTH; n-- > 0;) map.update(1);
-    
-    if (awayC.traders().size() != 1) {
-      I.say("\nWrong number of trade vessels!...");
-      return false;
-    }
-    //*/
-    
-    
+    //AreaTile lands = testShip.findLandingPoint(map, trading);
+    //testShip.doLanding(lands);
+    //I.say("Landed at: "+lands);
     
     
     final int RUN_TIME = YEAR_LENGTH;

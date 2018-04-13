@@ -2,10 +2,8 @@
 
 
 package game;
-import util.*;
 import static game.GameConstants.*;
-
-import game.GameConstants.Pathing;
+import util.*;
 
 
 
@@ -13,10 +11,11 @@ import game.GameConstants.Pathing;
 public class TaskRetreat extends Task {
   
   
-  Building hides;
+  Pathing hides;
+  float priorityBonus = 0;
   
   
-  public TaskRetreat(Actor actor, Building hides) {
+  public TaskRetreat(Actor actor, Pathing hides) {
     super(actor);
     this.hides = hides;
   }
@@ -24,13 +23,15 @@ public class TaskRetreat extends Task {
   
   public TaskRetreat(Session s) throws Exception {
     super(s);
-    this.hides = (Building) s.loadObject();
+    this.hides = (Pathing) s.loadObject();
+    this.priorityBonus = s.loadFloat();
   }
   
   
   public void saveState(Session s) throws Exception {
     super.saveState(s);
     s.saveObject(hides);
+    s.saveFloat(priorityBonus);
   }
   
   
@@ -83,6 +84,13 @@ public class TaskRetreat extends Task {
   }
   
   
+  static TaskRetreat configRetreat(Actor actor, Pathing hides, float priority) {
+    TaskRetreat hiding = new TaskRetreat(actor, hides);
+    hiding.priorityBonus = priority;
+    return (TaskRetreat) hiding.configTask(null, hides, null, JOB.RETREAT, 10);
+  }
+  
+  
   static TaskRetreat configRetreat(Actor actor) {
     
     Pathing home = actor.home();
@@ -119,7 +127,7 @@ public class TaskRetreat extends Task {
   
   protected float successPriority() {
     Actor actor = (Actor) this.active;
-    return actor.fearLevel() * PARAMOUNT;
+    return (actor.fearLevel() * PARAMOUNT) + priorityBonus;
   }
   
   

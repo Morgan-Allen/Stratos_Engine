@@ -2,6 +2,8 @@
 
 package game;
 import static game.GameConstants.*;
+
+import game.Task.JOB;
 import util.*;
 
 
@@ -15,8 +17,8 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   Tally <Good> needLevel = new Tally();
   
   Actor pilot = null;
-  List <Actor> passengers = new List();
-  List <Actor> inside     = new List();
+  List <Actor> crew   = new List();
+  List <Actor> inside = new List();
   
   boolean flying = false;
   boolean landed = false;
@@ -45,7 +47,7 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
     //*/
     
     pilot = (Actor) s.loadObject();
-    s.loadObjects(passengers);
+    s.loadObjects(crew);
     s.loadObjects(inside);
     
     flying    = s.loadBool();
@@ -71,7 +73,7 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
     //*/
     
     s.saveObject(pilot);
-    s.saveObjects(passengers);
+    s.saveObjects(crew);
     s.saveObjects(inside);
     
     s.saveBool  (flying  );
@@ -102,16 +104,37 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   /**  Implementing the Employer interface-
     */
   public void setWorker(Actor actor, boolean is) {
-    passengers.toggleMember(actor, is);
+    crew.toggleMember(actor, is);
     actor.setWork(is ? this : null);
   }
   
   
+  public void setPilot(Actor actor, boolean is) {
+    this.pilot = is ? actor : null;
+    setWorker(actor, is);
+  }
+  
+  
+  public Actor pilot() {
+    return pilot;
+  }
+  
+  
   public Task selectActorBehaviour(Actor actor) {
+    
     if (landed) {
+      if (task() instanceof TaskTrading) {
+        boolean shouldGo = ((TaskTrading) task()).shouldTakeoff(map());
+        if (shouldGo) {
+          return TaskRetreat.configRetreat(actor, this, Task.PARAMOUNT);
+        }
+      }
+      /*
       return TaskDelivery.pickNextDelivery(
         actor, this, this, MAX_TRADER_RANGE, 1, map().world.goodTypes()
       );
+      //*/
+      return BuildingForTrade.selectTraderBehaviour(this, actor, guestBase(), map());
     }
     else {
       return null;
@@ -233,7 +256,7 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   }
   
   
-  void doLanding(AreaTile landing) {
+  public void doLanding(AreaTile landing) {
     //
     //  Dock with your location-
     if (landing.above != null && landing.above.type().isDockBuilding()) {
@@ -248,11 +271,17 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   }
   
   
-  void doTakeoff(AreaTile landing) {
+  public boolean readyForTakeoff() {
+    for (Actor a : crew) if (a.inside() != this) return false;
+    return true;
+  }
+  
+  
+  public void doTakeoff(AreaTile landing) {
     //
     //  Eject any unathorised visitors...
     for (Actor actor : inside) {
-      if (actor == pilot || passengers.includes(actor)) continue;
+      if (actor == pilot || crew.includes(actor)) continue;
       actor.setInside(this, false);
       actor.setLocation(entrance, map);
     }

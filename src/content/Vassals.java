@@ -143,6 +143,7 @@ public class Vassals {
       Vassals.class, "VehiclesModels.xml", "Dropship"
     );
     DROPSHIP.organic = false;
+    DROPSHIP.moveMode = Type.MOVE_AIR;
     DROPSHIP.maxHealth = 150;
     DROPSHIP.setDimensions(4, 4, 2);
   }
