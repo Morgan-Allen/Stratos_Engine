@@ -75,6 +75,7 @@ public class TestVessels extends LogicTest {
       awayC, testShip, homeC, map
     );
     testShip.assignTask(trading);
+    world.beginJourney(awayC, homeC, testShip);
     
     if (trading == null) {
       I.say("\nCould not generate trade-task for ship!");
@@ -86,18 +87,19 @@ public class TestVessels extends LogicTest {
     //testShip.doLanding(lands);
     //I.say("Landed at: "+lands);
     
-    
     final int RUN_TIME = YEAR_LENGTH;
     
     boolean shipComing = false;
     boolean shipArrive = false;
     boolean shipTraded = false;
     boolean shipDone   = false;
+    boolean testOkay   = false;
     
     
     while (map.time() < RUN_TIME || graphics) {
       test.runLoop(homeC, 1, graphics, "saves/test_vessels.str");
       
+      /*
       if (! shipComing) {
         for (Journey j : world.journeys()) {
           for (Journeys g : j.going()) {
@@ -110,19 +112,37 @@ public class TestVessels extends LogicTest {
           }
         }
       }
+      //*/
       
+      if (! shipTraded) {
+        boolean goodsMoved = true;
+        goodsMoved &= post.inventory(GREENS  ) >= 30;
+        goodsMoved &= post.inventory(MEDICINE) >= 10;
+        shipTraded = goodsMoved;
+      }
+      
+      if (shipTraded && ! shipDone) {
+        shipDone = ! testShip.onMap();
+      }
+      
+      if (shipDone && ! testOkay) {
+        testOkay = true;
+        I.say("\nVESSELS TEST CONCLUDED SUCCESSFULLY!");
+        if (! graphics) return true;
+      }
     }
     
     I.say("\nVESSELS TEST FAILED!");
+    I.say("  Ship coming: "+shipComing);
+    I.say("  Ship arrive: "+shipArrive);
+    I.say("  Ship traded: "+shipTraded);
+    I.say("  Ship done:   "+shipDone  );
     
     return false;
   }
   
 
 }
-
-
-
 
 
 
