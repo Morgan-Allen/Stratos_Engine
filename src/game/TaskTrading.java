@@ -101,7 +101,8 @@ public class TaskTrading extends Task {
       }
       else {
         World world = homeCity.world;
-        world.beginJourney(from.base(), goes.base(), actor);
+        int moveMode = actor.type().moveMode;
+        world.beginJourney(from.base(), goes.base(), moveMode, actor);
       }
     }
   }
@@ -180,7 +181,8 @@ public class TaskTrading extends Task {
     //  foreign city-
     else if (tradeGoes.base() == tradeGoes) {
       Base city = tradeFrom.base();
-      city.world.beginJourney(city, (Base) tradeGoes, actor);
+      int moveMode = actor.type().moveMode;
+      city.world.beginJourney(city, (Base) tradeGoes, moveMode, actor);
       actor.exitMap(actor.map);
     }
   }

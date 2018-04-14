@@ -41,7 +41,7 @@ public class TestSieging extends LogicTest {
     awayC.initBuildLevels(TROOPER_LODGE, 9, HOLDING, 1);
     awayC.council.setTypeAI(BaseCouncil.AI_OFF);
     
-    World.setupRoute(baseC.locale, awayC.locale, 1);
+    World.setupRoute(baseC.locale, awayC.locale, 1, Type.MOVE_LAND);
     Base.setPosture(baseC, awayC, Base.POSTURE.ENEMY, true);
     
     

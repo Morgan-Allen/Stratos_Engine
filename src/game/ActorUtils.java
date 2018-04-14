@@ -46,7 +46,7 @@ public class ActorUtils {
   
   
   static float distanceRating(Base from, Base goes) {
-    return AVG_CITY_DIST / (AVG_CITY_DIST + from.distance(goes));
+    return AVG_CITY_DIST / (AVG_CITY_DIST + from.distance(goes, Type.MOVE_AIR));
   }
   
   
@@ -70,9 +70,11 @@ public class ActorUtils {
       jobType.initAsMigrant((ActorAsPerson) migrant);
     }
     
+    //  TODO:  Most migrants should be arriving by ship instead.
+    
     migrant.assignBase(goes);
     employs.setWorker(migrant, true);
-    map.world.beginJourney(from, goes, migrant);
+    map.world.beginJourney(from, goes, Type.MOVE_AIR, migrant);
     
     return migrant;
   }

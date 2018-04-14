@@ -72,7 +72,7 @@ public class ScenarioBlankMap extends AreaScenario {
   
   protected Base createBase(Area stage, World world) {
     World.Locale homeworld = world.addLocale(1, 1, "Homeworld");
-    World.setupRoute(homeworld, stage.locale, 1);
+    World.setupRoute(homeworld, stage.locale, 1, Type.MOVE_AIR);
     
     Base patron = new Base(world, homeworld);
     patron.setName("Homeworld Base");

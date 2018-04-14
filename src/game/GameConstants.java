@@ -165,9 +165,11 @@ public class GameConstants {
     BUILD_TILE_HP    = 2   ,
     //
     //  Trade and migration-
-    TRADE_DIST_TIME  = 50  ,
-    MIGRANTS_PER_1KM = 10  ,  //  per month per 1000 foreign citizens
-    SHIP_WAIT_TIME   = DAY_LENGTH
+    LAND_TRAVEL_TIME  = 50 ,
+    WATER_TRAVEL_TIME = 25 ,
+    AIR_TRAVEL_TIME   = 10 ,
+    MIGRANTS_PER_1KM  = 10 ,  //  per month per 1000 foreign citizens
+    SHIP_WAIT_TIME    = DAY_LENGTH
   ;
   final public static int
     //

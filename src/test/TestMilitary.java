@@ -34,7 +34,7 @@ public class TestMilitary extends LogicTest {
     
     world.settings.toggleFog = false;
     
-    World.setupRoute(baseC.locale, awayC.locale, 1);
+    World.setupRoute(baseC.locale, awayC.locale, 1, Type.MOVE_LAND);
     Base.setPosture(baseC, awayC, Base.POSTURE.ENEMY, true);
     awayC.setArmyPower(0);
     

@@ -1,10 +1,9 @@
 
 
 package game;
-import util.*;
 import static game.GameConstants.*;
-
-import game.GameConstants.Good;
+import static game.World.*;
+import util.*;
 
 
 
@@ -220,14 +219,19 @@ public class Base implements Session.Saveable, Trader {
   }
   
   
-  public float distance(Base other) {
+  public float distance(Base other, int moveMode) {
     if (other.locale == this.locale) return 0;
-    Integer dist = locale.distances.get(other.locale);
-    if (dist != null) return (float) dist;
     
+    Route route = locale.routes.get(other.locale);
+    if (route == null) return -100;
+    if (moveMode != Type.MOVE_AIR && moveMode != route.moveMode) return -100;
+    
+    return route.distance;
+    /*
     float dx = locale.mapX - other.locale.mapX;
     float dy = locale.mapY - other.locale.mapY;
     return (int) Nums.sqrt((dx * dx) + (dy * dy));
+    //*/
   }
   
   

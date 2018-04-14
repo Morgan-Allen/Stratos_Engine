@@ -11,10 +11,16 @@ public class World implements Session.Saveable {
   
   /**  Public interfaces-
     */
+  public static class Route {
+    int distance;
+    int moveMode;
+  }
+  
+  
   public static class Locale {
     
     float mapX, mapY;
-    Table <Locale, Integer> distances = new Table();
+    Table <Locale, Route> routes = new Table();
     
     String label;
     
@@ -113,7 +119,11 @@ public class World implements Session.Saveable {
       locales.add(l);
     }
     for (Locale l : locales) for (int d = s.loadInt(); d-- > 0;) {
-      l.distances.put(locales.atIndex(s.loadInt()), s.loadInt());
+      Locale with = locales.atIndex(s.loadInt());
+      Route route = new Route();
+      route.distance = s.loadInt();
+      route.moveMode = s.loadInt();
+      l.routes.put(with, route);
     }
     
     s.loadObjects(bases);
@@ -164,10 +174,12 @@ public class World implements Session.Saveable {
       s.saveFloat(l.mapY);
     }
     for (Locale l : locales) {
-      s.saveInt(l.distances.size());
-      for (Locale d : l.distances.keySet()) {
+      s.saveInt(l.routes.size());
+      for (Locale d : l.routes.keySet()) {
         s.saveInt(locales.indexOf(d));
-        s.saveInt(l.distances.get(d));
+        Route route = l.routes.get(d);
+        s.saveInt(route.distance);
+        s.saveInt(route.moveMode);
       }
     }
     
@@ -210,9 +222,12 @@ public class World implements Session.Saveable {
   
   /**  Managing Cities and Locales:
     */
-  public static void setupRoute(Locale a, Locale b, int distance) {
-    a.distances.put(b, distance);
-    b.distances.put(a, distance);
+  public static void setupRoute(Locale a, Locale b, int distance, int moveMode) {
+    Route route = new Route();
+    route.distance = distance;
+    route.moveMode = moveMode;
+    a.routes.put(b, route);
+    b.routes.put(a, route);
   }
   
   
@@ -261,16 +276,25 @@ public class World implements Session.Saveable {
   
   /**  Registering and updating journeys:
     */
-  public Journey beginJourney(Base from, Base goes, Journeys... going) {
+  public Journey beginJourney(
+    Base from, Base goes, int moveMode, Journeys... going
+  ) {
     if (from == null || goes == null) return null;
     
-    float distance = Nums.max(1, from.distance(goes));
+    float distance = from.distance(goes, moveMode);
+    if (distance < 0) return null;
+    
+    distance = Nums.max(1, distance);
+    float travelTime = distance;
+    if (moveMode == Type.MOVE_LAND ) travelTime *= LAND_TRAVEL_TIME ;
+    if (moveMode == Type.MOVE_WATER) travelTime *= WATER_TRAVEL_TIME;
+    if (moveMode == Type.MOVE_AIR  ) travelTime *= AIR_TRAVEL_TIME  ;
     
     Journey j = new Journey();
     j.from       = from;
     j.goes       = goes;
     j.startTime  = time;
-    j.arriveTime = (int) (j.startTime + (distance * TRADE_DIST_TIME));
+    j.arriveTime = (int) (j.startTime + travelTime);
     for (Journeys g : going) j.going.add(g);
     journeys.add(j);
     
@@ -284,8 +308,10 @@ public class World implements Session.Saveable {
   }
 
   
-  public Journey beginJourney(Base from, Base goes, Series <Journeys> going) {
-    return beginJourney(from, goes, going.toArray(Journeys.class));
+  public Journey beginJourney(
+    Base from, Base goes, int moveMode, Series <Journeys> going
+  ) {
+    return beginJourney(from, goes, moveMode, going.toArray(Journeys.class));
   }
   
   

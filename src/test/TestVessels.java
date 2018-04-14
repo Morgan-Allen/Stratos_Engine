@@ -30,7 +30,7 @@ public class TestVessels extends LogicTest {
     homeC.setName("(Home City)");
     awayC.setName("(Away City)");
     
-    World.setupRoute(homeC.locale, awayC.locale, 1);
+    World.setupRoute(homeC.locale, awayC.locale, 1, Type.MOVE_AIR);
     Base.setPosture(homeC, awayC, Base.POSTURE.TRADING, true);
     
     
@@ -75,7 +75,7 @@ public class TestVessels extends LogicTest {
       awayC, testShip, homeC, map
     );
     testShip.assignTask(trading);
-    world.beginJourney(awayC, homeC, testShip);
+    world.beginJourney(awayC, homeC, testShip.type().moveMode, testShip);
     
     if (trading == null) {
       I.say("\nCould not generate trade-task for ship!");

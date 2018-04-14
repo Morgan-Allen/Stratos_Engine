@@ -29,7 +29,7 @@ public class TestTrading extends LogicTest {
     baseC.setName("(Home City)");
     awayC.setName("(Away City)");
     
-    World.setupRoute(baseC.locale, awayC.locale, 1);
+    World.setupRoute(baseC.locale, awayC.locale, 1, Type.MOVE_LAND);
     Base.setPosture(baseC, awayC, Base.POSTURE.VASSAL, true);
     
     Tally <Good> supplies = new Tally().setWith(GREENS, 10, SPYCE, 5);

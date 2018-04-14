@@ -3,9 +3,7 @@
 package game;
 import static game.ActorUtils.*;
 import static game.GameConstants.*;
-
-import game.GameConstants.Pathing;
-import game.Task.JOB;
+import static game.Task.*;
 import gameUI.play.*;
 import graphics.common.*;
 import util.*;
@@ -198,7 +196,9 @@ public abstract class Mission implements
     going.add(this);
     
     World.Journey journey;
-    journey = world.beginJourney(from, goes, going.toArray(Journeys.class));
+    int moveMode = Type.MOVE_LAND;
+    if (transitShip != null) moveMode = transitShip.type().moveMode;
+    journey = world.beginJourney(from, goes, moveMode, going);
     
     //I.say(this+" beginning journey from "+from+" to "+goes);
     //I.say("  ETA: "+world.arriveTime(this));

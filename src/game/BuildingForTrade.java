@@ -174,6 +174,7 @@ public class BuildingForTrade extends Building implements Trader {
     List <Order> orders = new List();
     Base homeCity = from.base();
     World world = homeCity.world;
+    int moveMode = trading.type().moveMode;
     
     for (Building b : map.buildings()) {
       if (b == from || ! (b instanceof Trader)) continue;
@@ -200,10 +201,10 @@ public class BuildingForTrade extends Building implements Trader {
       targets.add(tradePartner);
     }
     else for (Base c : world.bases) {
-      if (c.activeMap() == map       ) continue;
-      if (c == homeCity              ) continue;
-      if (c.isEnemyOf(homeCity)      ) continue;
-      if (c.distance (homeCity) == -1) continue;
+      if (c.activeMap() == map ) continue;
+      if (c == homeCity        ) continue;
+      if (c.isEnemyOf(homeCity)) continue;
+      if (c.distance(homeCity, moveMode) < 0) continue;
       targets.add(c);
     }
     

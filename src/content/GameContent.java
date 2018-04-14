@@ -1002,7 +1002,7 @@ public class GameContent {
     );
     world.addBases(cityB);
     
-    World.setupRoute(cityA.locale, cityB.locale, AVG_CITY_DIST / 2);
+    World.setupRoute(cityA.locale, cityB.locale, AVG_CITY_DIST / 2, MOVE_LAND);
     world.setMapSize(10, 10);
     
     return world;

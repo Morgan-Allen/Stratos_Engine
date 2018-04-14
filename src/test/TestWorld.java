@@ -330,7 +330,7 @@ public class TestWorld extends LogicTest {
       for (Base c : world.bases()) {
         c.initBuildLevels(HOLDING, 2f, TROOPER_LODGE, 2f);
         for (Base o : world.bases()) if (c != o) {
-          World.setupRoute(c.locale, o.locale, 1);
+          World.setupRoute(c.locale, o.locale, 1, Type.MOVE_LAND);
         }
       }
       
@@ -425,7 +425,7 @@ public class TestWorld extends LogicTest {
     for (Base c : world.bases()) for (Base o : world.bases()) {
       if (c == o) continue;
       float dist = World.mapCoords(c).lineDist(World.mapCoords(o));
-      World.setupRoute(c.locale, o.locale, (int) dist);
+      World.setupRoute(c.locale, o.locale, (int) dist, Type.MOVE_LAND);
     }
     
     //
@@ -545,7 +545,7 @@ public class TestWorld extends LogicTest {
     a.setName("Victim City" );
     b.setName("Invader City");
     world.addBases(a, b);
-    setupRoute(a.locale, b.locale, 1);
+    setupRoute(a.locale, b.locale, 1, Type.MOVE_LAND);
     a.initBuildLevels(HOLDING, 1f, TROOPER_LODGE, 1f);
     b.initBuildLevels(HOLDING, 9f, TROOPER_LODGE, 6f);
     a.council.setTypeAI(BaseCouncil.AI_OFF);
