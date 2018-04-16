@@ -106,6 +106,13 @@ public class BuildingForDock extends Building {
   }
   
   
+  public Series <ActorAsVessel> docking() {
+    Batch <ActorAsVessel> all = new Batch();
+    for (ActorAsVessel a : docking) if (a != null) all.add(a);
+    return all;
+  }
+  
+  
   public Pathing[] adjacent(Pathing[] temp, Area map) {
     
     int numE = entrances() == null ? 0 : entrances().length;
