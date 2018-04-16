@@ -63,6 +63,7 @@ public class Base implements Session.Saveable, Trader {
     Tally <Good> suppliesSent = new Tally();
   }
   
+  
   String name = "City";
   int tint = CITY_COLOR;
   
@@ -86,7 +87,12 @@ public class Base implements Session.Saveable, Trader {
   
   Tally <BuildType> buildLevel = new Tally();
   List <Mission> missions = new List();
+  
+  //
+  //  These are specific to off-map bases...
   List <ActorAsVessel> traders = new List();
+  List <Actor> visitors = new List();
+  List <Actor> migrants = new List();
   
   List <BuildType> buildTypes = new List();
   
@@ -149,6 +155,8 @@ public class Base implements Session.Saveable, Trader {
     
     s.loadObjects(missions);
     s.loadObjects(traders );
+    s.loadObjects(visitors);
+    s.loadObjects(migrants);
     
     s.loadObjects(buildTypes);
     
@@ -194,6 +202,8 @@ public class Base implements Session.Saveable, Trader {
     
     s.saveObjects(missions);
     s.saveObjects(traders );
+    s.saveObjects(visitors);
+    s.saveObjects(migrants);
     
     s.saveObjects(buildTypes);
     
@@ -483,7 +493,7 @@ public class Base implements Session.Saveable, Trader {
   
   
   public void setTradeLevel(Good g, float need, float accept) {
-    needLevel  .set(g, need  );
+    needLevel.set(g, need  );
     prodLevel.set(g, accept);
   }
   
@@ -564,6 +574,16 @@ public class Base implements Session.Saveable, Trader {
 
   public Series <ActorAsVessel> traders() {
     return traders;
+  }
+  
+  
+  public void addMigrant(Actor migrant) {
+    this.migrants.add(migrant);
+  }
+  
+  
+  public Series <Actor> migrants() {
+    return migrants;
   }
   
   

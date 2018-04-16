@@ -253,6 +253,16 @@ public class TaskTrading extends Task {
     Actor actor = (Actor) active;
     World world = homeCity.world;
     //
+    //  If migrants are waiting at a foreign base, take them aboard-
+    if (visits == visits.base() && actor.type().isVessel()) {
+      Base goes = visits.base();
+      //  TODO:  Screen migrants based on base of destination?  To be safe?...
+      ActorAsVessel ship = (ActorAsVessel) active;
+      for (Actor a : goes.migrants) {
+        a.setInside(ship, true);
+      }
+    }
+    //
     //  If you haven't done your export, and this is your 'from' point, take on
     //  goods, then head to your 'goes' point.
     //

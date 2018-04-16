@@ -20,17 +20,20 @@ public class TestVessels extends LogicTest {
     testDockToForeign(false);
   }
   
+  //  TODO:  You need to auto-generate traders at bases that have 'Trader'
+  //  posture or better.
+  
+  //  TODO:  You need to ensure that airships are constructed/spawned at local
+  //  docks.
+  
+  //  TODO:  Ideally, traders should use 'fuzzy' calibration of supply/demand
+  //  when selecting a dock-point and cargo.
+  
+  //  TODO:  Finally, you should ideally create a separate Task for ship-
+  //  visits.
   
   //  TODO:  Limit the cargo that can be delivered by the supply corps
   //  workers- 40 or 50 units in one go is a little too much!
-  
-  //  TODO:  You also need to test to ensure that traders will be auto-
-  //  generated correctly by off-map bases, and configure their cargo based
-  //  on 'fuzzy' supply/demand nearby.
-  
-  //  TODO:  Finally, you should ideally create a separate Task for ship-
-  //  visits, rather than piggyback off task-trading.  And you can re-use
-  //  that for missions later.
   
   
   static boolean testForeignToLand(boolean graphics) {
@@ -96,6 +99,15 @@ public class TestVessels extends LogicTest {
       dock.enterMap(map, 6, 2, 1, homeC);
     }
     
+    Batch <Actor> migrants = new Batch();
+    for (int n = 2; n-- > 0;) {
+      Actor migrant = (Actor) ECOLOGIST.generate();
+      migrant.type().initAsMigrant((ActorAsPerson) migrant);
+      migrant.assignBase(homeC);
+      awayC.addMigrant(migrant);
+      migrants.add(migrant);
+    }
+    
     {
       ActorAsVessel ship = (ActorAsVessel) Vassals.DROPSHIP.generate();
       ship.assignBase(fromLocal ? homeC : awayC);
@@ -132,28 +144,16 @@ public class TestVessels extends LogicTest {
         ship.assignTask(trading);
         trading.beginAsVessel(awayC);
       }
-      
-      /*
-      I.say("\n\nShip's crew is: "+ship.crew());
-      for (Actor a : ship.crew()) {
-        I.say(a+" is inside: "+a.inside());
-      }
-      
-      if (ship.task() == null) {
-        I.say("\nCOULD NOT CONFIGURE TRADE FOR VESSEL");
-        return false;
-      }
-      //*/
     }
     
     
     final int RUN_TIME = YEAR_LENGTH;
-    
-    boolean shipComing = false;
-    boolean shipArrive = false;
-    boolean shipLanded = false;
-    boolean shipTraded = false;
-    boolean testOkay   = false;
+    boolean shipComing  = false;
+    boolean shipArrive  = false;
+    boolean shipLanded  = false;
+    boolean shipTraded  = false;
+    boolean migrateDone = false;
+    boolean testOkay    = false;
     ActorAsVessel ship = null;
     
     while (map.time() < RUN_TIME || graphics) {
@@ -218,7 +218,16 @@ public class TestVessels extends LogicTest {
         shipTraded = goodsMoved;
       }
       
-      if (shipTraded && ! testOkay) {
+      if (! migrateDone) {
+        boolean allHere = true;
+        for (Actor a : migrants) {
+          if (! a.onMap()) allHere = false;
+          if (a.inside() == ship) allHere = false;
+        }
+        migrateDone = allHere;
+      }
+      
+      if (shipTraded && migrateDone && ! testOkay) {
         testOkay = true;
         I.say("\n"+title+" TEST CONCLUDED SUCCESSFULLY!");
         if (! graphics) return true;
@@ -226,23 +235,17 @@ public class TestVessels extends LogicTest {
     }
     
     I.say("\n"+title+" TEST FAILED!");
-    I.say("  Ship coming: "+shipComing);
-    I.say("  Ship arrive: "+shipArrive);
-    I.say("  Ship landed: "+shipLanded);
-    I.say("  Ship traded: "+shipTraded);
+    I.say("  Ship coming:  "+shipComing );
+    I.say("  Ship arrive:  "+shipArrive );
+    I.say("  Ship landed:  "+shipLanded );
+    I.say("  Ship traded:  "+shipTraded );
+    I.say("  Migrate done: "+migrateDone);
     
     return false;
   }
   
 
 }
-
-
-
-
-
-
-
 
 
 
