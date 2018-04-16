@@ -13,14 +13,35 @@ public class ActorUtils {
   
   /**  General migration utilities-
     */
-  static AreaTile findTransitPoint(Area map, Base base, Base with) {
+  static AreaTile findTransitPoint(
+    Area map, Base base, Base with, Actor client
+  ) {
+    ActorType type = client.type();
+    int moveMode = type.moveMode;
+    int size = Nums.max(type.wide, type.high);
+    return findTransitPoint(map, base, with, moveMode, size);
+  }
+  
+  
+  static AreaTile findTransitPoint(
+    Area map, Base base, Base with, int moveMode, int clientSize
+  ) {
     if (map == null || base == null || with == null) return null;
     
     //  TODO:  Make sure there's a pathing connection to the main settlement
     //  here!
     
-    AreaTile current = map.transitPoints.get(with);
-    if (current != null && ! map.blocked(current.x, current.y)) return current;
+    //  TODO:  You will need a different transit point for actors that are
+    //  bigger than 1x1, or that have different motion-modes (sea, air, etc.)
+    
+    //  ...It's a similar problem to using the path-cache for such actors...
+    
+    boolean land = moveMode == Type.MOVE_LAND;
+    
+    if (land) {
+      AreaTile current = map.transitPoints.get(with);
+      if (current != null && ! map.blocked(current.x, current.y)) return current;
+    }
     
     Pick <AreaTile> pick = new Pick();
     Vec2D cityDir = new Vec2D(
@@ -28,12 +49,15 @@ public class ActorUtils {
       with.locale.mapY - base.locale.mapY
     ).normalise(), temp = new Vec2D();
     
-    for (Coord c : Visit.perimeter(1, 1, map.size - 2, map.size - 2)) {
-      if (map.blocked(c.x, c.y)) continue;
+    //  Larger actors will need to start out further from the map edge...
+    int maxPerim = map.size - (1 + clientSize);
+    
+    for (Coord c : Visit.perimeter(1, 1, maxPerim, maxPerim)) {
+      if (land && map.blocked(c.x, c.y)) continue;
       
       temp.set(c.x - (map.size / 2), c.y - (map.size / 2)).normalise();
       float rating = 1 + temp.dot(cityDir);
-      if (map.pathType(c) == Type.PATH_PAVE) rating *= 2;
+      if (land && map.pathType(c) == Type.PATH_PAVE) rating *= 2;
       
       AreaTile u = map.tileAt(c.x, c.y);
       pick.compare(u, rating);
@@ -59,9 +83,9 @@ public class ActorUtils {
     //  TODO:  Consider a wider variety of cities to source from!
     
     Area map  = employs.map();
-    Base    from = map.locals;
-    Base    goes = employs.base();
-    int     cost = employs.hireCost(jobType);
+    Base from = map.locals;
+    Base goes = employs.base();
+    int  cost = employs.hireCost(jobType);
     
     if (payHireCost) goes.incFunds(0 - cost);
     

@@ -101,6 +101,11 @@ public class BuildingForDock extends Building {
   }
   
   
+  public boolean isDocked(ActorAsVessel docks) {
+    return Visit.arrayIncludes(docking, docks);
+  }
+  
+  
   public Pathing[] adjacent(Pathing[] temp, Area map) {
     
     int numE = entrances() == null ? 0 : entrances().length;

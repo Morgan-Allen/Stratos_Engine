@@ -190,6 +190,11 @@ public class AreaTile implements Pathing, Selection.Focus {
   }
   
   
+  public boolean allowsExit(Actor a) {
+    return true;
+  }
+  
+  
   public void setInside(Actor a, boolean is) {
     inside = Element.setMember(a, is, inside);
   }

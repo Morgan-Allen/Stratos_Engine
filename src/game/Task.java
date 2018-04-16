@@ -270,7 +270,7 @@ public class Task implements Session.Saveable {
       return false;
     }
     
-    if (active.isActor() && ! checkPathing(pathTarget())) {
+    if (active.mobile() && ! checkPathing(pathTarget())) {
       updatePathing();
       if (! checkPathing(pathTarget())) {
         return false;
@@ -278,18 +278,17 @@ public class Task implements Session.Saveable {
     }
     
     Area    map     = active.map();
-    boolean isActor = active.isActor();
-    Actor   asActor = isActor ? (Actor) active : null;
+    boolean mobile  = active.mobile();
+    Actor   asActor = mobile ? (Actor) active : null;
     
     final float BASE_TILES_PER_SECOND = 1.5f;
     float motion = BASE_TILES_PER_SECOND / map.ticksPS;
-    motion *= isActor ? asActor.moveSpeed() : 0;
+    motion *= mobile ? asActor.moveSpeed() : 0;
     
     
-    while (motion > 0 || ! isActor) {
+    while (motion > 0 || ! mobile) {
       
       Pathing path[]   = this.path;
-      boolean contacts = checkContact(path);
       Pathing visits   = this.visits;
       Target  target   = this.target;
       
@@ -308,7 +307,7 @@ public class Task implements Session.Saveable {
           return true;
         }
         else {
-          if (isActor) {
+          if (mobile) {
             onVisit(visits);
             asActor.onVisit(visits);
             if (origin != null) origin.actorVisits(asActor, visits);
@@ -320,7 +319,7 @@ public class Task implements Session.Saveable {
           return true;
         }
       }
-      else if (contacts) {
+      else if (target != null && checkTargetContact(target)) {
         ticksSpent += 1;
         int progress = checkActionProgress();
         
@@ -334,7 +333,7 @@ public class Task implements Session.Saveable {
         else {
           onTarget(target);
           target.targetedBy(active);
-          if (isActor) {
+          if (mobile) {
             asActor.onTarget(target);
             if (origin != null) origin.actorTargets(asActor, target);
           }
@@ -345,8 +344,7 @@ public class Task implements Session.Saveable {
           return true;
         }
       }
-      else if (isActor) {
-
+      else if (mobile) {
         Pathing from     = Task.pathOrigin(asActor);
         Pathing inside   = asActor.inside();
         Pathing ahead    = nextOnPath();
@@ -487,12 +485,6 @@ public class Task implements Session.Saveable {
   }
   
   
-  boolean checkContact(Pathing path[]) {
-    Pathing from = (Pathing) Visit.last(path);
-    return Area.distance(active, from) < actionRange();
-  }
-  
-  
   int checkActionProgress() {
     Area map = active.map();
     int maxTicks = map.ticksPS * Nums.max(1, maxTime);
@@ -503,6 +495,14 @@ public class Task implements Session.Saveable {
     if (ticksSpent == maxTicks) return PROG_FINISHING;
     if (exactInterval         ) return PROG_ACTION;
     return PROG_CONTACT;
+  }
+  
+  
+  boolean checkTargetContact(Target from) {
+    Pathing last = (Pathing) Visit.last(path);
+    if (from != last && active.at() == last) return true;
+    if (Area.distance(active, from) < actionRange()) return true;
+    return false;
   }
   
   
@@ -559,8 +559,16 @@ public class Task implements Session.Saveable {
     for (int i = 0; i < actor.type().sightRange; i++, index++) {
       if (index >= path.length) break;
       Pathing t = path[index];
-      if (t.isTile() && map.blocked((AreaTile) t)) return false;
-      if (! (t.onMap() && t.allowsEntry(actor))) return false;
+      if (
+        t.isTile() &&
+        map.blocked((AreaTile) t) &&
+        map.above((AreaTile) t) != actor
+      ) {
+        return false;
+      }
+      if (! (t.onMap() && t.allowsEntry(actor))) {
+        return false;
+      }
     }
     
     return true;
@@ -571,7 +579,7 @@ public class Task implements Session.Saveable {
     boolean report  = reports();
     boolean verbose = false;
     
-    Area map      = active.map();
+    Area    map      = active.map();
     boolean visiting = visits != null;
     Pathing from     = pathOrigin(active);
     Pathing heads    = pathTarget();

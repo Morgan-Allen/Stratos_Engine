@@ -49,6 +49,9 @@ public class Vassals {
       "Obar", "Tiev", "Hanem", "Tsolo", "Matson", "Prestein", "Valter"
     }
   ;
+  final static int
+    TINT_VEHICLE = colour(6, 3, 3)
+  ;
   
   
   final public static HumanType AUDITOR = new HumanType(
@@ -128,6 +131,8 @@ public class Vassals {
       "media/Actors/vehicles/", "loader_2.ms3d",
       Vassals.class, "VehicleModels.xml", "CargoBarge"
     );
+    CARGO_BARGE.tint = TINT_VEHICLE;
+    
     CARGO_BARGE.organic = false;
     CARGO_BARGE.maxHealth = 35;
   }
@@ -142,10 +147,12 @@ public class Vassals {
       "media/Actors/vehicles/", "dropship.ms3d",
       Vassals.class, "VehiclesModels.xml", "Dropship"
     );
+    DROPSHIP.tint = TINT_VEHICLE;
+    
     DROPSHIP.organic = false;
     DROPSHIP.moveMode = Type.MOVE_AIR;
     DROPSHIP.maxHealth = 150;
-    DROPSHIP.setDimensions(4, 4, 2);
+    DROPSHIP.setDimensions(4, 4, 2, Type.WIDE_MARGIN);
   }
   
   

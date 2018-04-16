@@ -15,12 +15,54 @@ public class TestVessels extends LogicTest {
   
   
   public static void main(String args[]) {
-    testVessels(false);
+    testForeignToLand(false);
+    testForeignToDock(false);
   }
   
   
-  static boolean testVessels(boolean graphics) {
-    LogicTest test = new TestTrading();
+  //  TODO:  Test to ensure that goods are picked up as well as deposited.
+  
+  //  TODO:  Limit the cargo that can be delivered by the supply corps
+  //  workers- 40 or 50 units in one go is a little too much!
+  
+  //  TODO:  You also need to test to ensure that traders will be auto-
+  //  generated correctly by off-map bases, and configure their cargo based
+  //  on 'fuzzy' supply/demand nearby...
+  
+  //  TODO:  Finally, you should ideally create a separate Task for ship-
+  //  visits, rather than piggyback off task-trading.  And you can re-use
+  //  that for missions later.
+  
+  
+  static boolean testForeignToLand(boolean graphics) {
+    TestVessels test = new TestVessels();
+    return test.vesselTest(false, false, true, "FOREIGN TO LAND VESSEL", graphics);
+  }
+  
+  
+  static boolean testForeignToDock(boolean graphics) {
+    TestVessels test = new TestVessels();
+    return test.vesselTest(false, true, true, "FOREIGN TO DOCK VESSEL", graphics);
+  }
+  
+  
+  static boolean testDockToForeign(boolean graphics) {
+    TestVessels test = new TestVessels();
+    return test.vesselTest(true, false, true, "DOCK TO FOREIGN VESSEL", graphics);
+  }
+  
+  
+  static boolean testDockToDock(boolean graphics) {
+    TestVessels test = new TestVessels();
+    return test.vesselTest(true, true, true, "DOCK TO DOCK VESSEL", graphics);
+  }
+  
+  
+  
+  boolean vesselTest(
+    boolean fromLocal, boolean goesDock, boolean createShip,
+    String title, boolean graphics
+  ) {
     
     World world = new World(ALL_GOODS);
     Base  homeC = new Base(world, world.addLocale(2, 2));
@@ -39,7 +81,7 @@ public class TestVessels extends LogicTest {
     
     awayC.setTradeLevel(GREENS  , 0, 50);
     awayC.setTradeLevel(MEDICINE, 0, 20);
-    awayC.initInventory(GREENS, 100);
+    awayC.initInventory(GREENS, 100, MEDICINE, 40);
     
     Area map = new Area(world, homeC.locale, homeC);
     map.performSetup(10, new Terrain[0]);
@@ -54,67 +96,101 @@ public class TestVessels extends LogicTest {
     post.enterMap(map, 1, 6, 1, homeC);
     post.setNeedLevels(false, GREENS, 30, MEDICINE, 10);
     
-    //while (homeC.needLevels().empty()) map.update(1);
-    
-    
-    
-    
-    //  TODO:  Firstly, see if the most basic delivery-tasks work...
-    
-    ActorAsVessel testShip = (ActorAsVessel) Vassals.DROPSHIP.generate();
-    testShip.assignBase(awayC);
-    
-    for (int n = 2; n-- > 0;) {
-      Actor porter = (Actor) Vassals.SUPPLY_CORPS.generate();
-      porter.assignBase(awayC);
-      testShip.setInside(porter, true);
-      testShip.setWorker(porter, true);
+    BuildingForDock dock = null; if (goesDock) {
+      dock = (BuildingForDock) AIRFIELD.generate();
+      dock.enterMap(map, 6, 2, 1, homeC);
     }
     
-    TaskTrading trading = BuildingForTrade.selectTraderBehaviour(
-      awayC, testShip, homeC, map
-    );
-    testShip.assignTask(trading);
-    world.beginJourney(awayC, homeC, testShip.type().moveMode, testShip);
-    
-    if (trading == null) {
-      I.say("\nCould not generate trade-task for ship!");
-      return false;
+    if (fromLocal) {
+      //  TODO:  Fill this in...!
+      /*
+      ActorAsVessel ship = (ActorAsVessel) Vassals.DROPSHIP.generate();
+      ship.assignBase(homeC);
+      AreaTile point = dock.nextFreeDockPoint();
+      ship.enterMap(map, point.x, point.y, 1, homeC);
+      dock.setWorker(ship, true);
+      //*/
+    }
+    else if (createShip) {
+      ActorAsVessel ship = (ActorAsVessel) Vassals.DROPSHIP.generate();
+      ship.assignBase(awayC);
+      
+      for (int n = 2; n-- > 0;) {
+        Actor porter = (Actor) Vassals.SUPPLY_CORPS.generate();
+        porter.type().initAsMigrant((ActorAsPerson) porter);
+        porter.assignBase(awayC);
+        porter.setInside(ship, true);
+        ship.setWorker(porter, true);
+      }
+      
+      I.say("\n\nShip's crew is: "+ship.crew());
+      for (Actor a : ship.crew()) {
+        I.say(a+" is inside: "+a.inside());
+      }
+      
+      TaskTrading trading = BuildingForTrade.selectTraderBehaviour(
+        awayC, ship, homeC, map
+      );
+      if (trading == null) {
+        I.say("\nCould not generate trade-task for ship!");
+        return false;
+      }
+      
+      ship.assignTask(trading);
+      trading.beginFromOffmap(awayC);
     }
     
-    
-    //AreaTile lands = testShip.findLandingPoint(map, trading);
-    //testShip.doLanding(lands);
-    //I.say("Landed at: "+lands);
     
     final int RUN_TIME = YEAR_LENGTH;
     
     boolean shipComing = false;
     boolean shipArrive = false;
+    boolean shipLanded = false;
     boolean shipTraded = false;
     boolean shipDone   = false;
     boolean testOkay   = false;
+    ActorAsVessel ship = null;
     
     
     while (map.time() < RUN_TIME || graphics) {
-      test.runLoop(homeC, 1, graphics, "saves/test_vessels.str");
+      runLoop(homeC, 1, graphics, "saves/test_vessels.str");
       
-      /*
       if (! shipComing) {
         for (Journey j : world.journeys()) {
           for (Journeys g : j.going()) {
             if (! g.isElement()) continue;
             if (j.goes() != homeC) continue;
             Element e = (Element) g;
-            if (e.type().isVessel()) {
+            if (e.type().isAirship()) {
+              ship = (ActorAsVessel) e;
               shipComing = true;
             }
           }
         }
       }
-      //*/
       
-      if (! shipTraded) {
+      if (shipComing && ! shipArrive) {
+        shipArrive = ship.onMap();
+      }
+      
+      if (shipArrive && ! shipLanded) {
+        shipLanded = ship.landed();
+        Type t = ship.type();
+        AreaTile o = ship.at();
+        
+        if (goesDock) {
+          if (! dock.isDocked(ship)) shipLanded = false;
+          if (ship.dockedAt() != dock) shipLanded = false;
+        }
+        else if (o != null) {
+          for (Coord c : Visit.grid(0, 0, t.wide, t.high, 1)) {
+            AreaTile u = map.tileAt(o.x + c.x, o.y + c.y);
+            if (map.above(u) != ship) shipLanded = false;
+          }
+        }
+      }
+      
+      if (shipLanded && ! shipTraded) {
         boolean goodsMoved = true;
         goodsMoved &= post.inventory(GREENS  ) >= 30;
         goodsMoved &= post.inventory(MEDICINE) >= 10;
@@ -122,19 +198,20 @@ public class TestVessels extends LogicTest {
       }
       
       if (shipTraded && ! shipDone) {
-        shipDone = ! testShip.onMap();
+        shipDone = ! ship.onMap();
       }
       
       if (shipDone && ! testOkay) {
         testOkay = true;
-        I.say("\nVESSELS TEST CONCLUDED SUCCESSFULLY!");
+        I.say("\n"+title+" TEST CONCLUDED SUCCESSFULLY!");
         if (! graphics) return true;
       }
     }
     
-    I.say("\nVESSELS TEST FAILED!");
+    I.say("\n"+title+" TEST FAILED!");
     I.say("  Ship coming: "+shipComing);
     I.say("  Ship arrive: "+shipArrive);
+    I.say("  Ship landed: "+shipLanded);
     I.say("  Ship traded: "+shipTraded);
     I.say("  Ship done:   "+shipDone  );
     
@@ -143,6 +220,11 @@ public class TestVessels extends LogicTest {
   
 
 }
+
+
+
+
+
 
 
 

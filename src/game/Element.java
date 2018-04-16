@@ -270,6 +270,9 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
         setMaterialLevel(g, need * buildLevel);
       }
     }
+    else if (buildLevel >= 1) {
+      stateBits |= FLAG_BUILT;
+    }
   }
   
   

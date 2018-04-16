@@ -622,7 +622,7 @@ public class Area implements Session.Saveable {
     if (at == null || a == null) return;
     List <Active> inBigGrid = actorGrid[at.x / FLAG_RES][at.y / FLAG_RES];
     inBigGrid.toggleMember(a, is);
-    if (a.isActor()) at.setInside((Actor) a, is);
+    if (a.mobile()) at.setInside((Actor) a, is);
   }
   
   

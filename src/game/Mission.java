@@ -170,7 +170,7 @@ public abstract class Mission implements
     }
     
     if (transitTile == null && map != null && offmap != null) {
-      transitTile = findTransitPoint(map, localBase, offmap);
+      transitTile = findTransitPoint(map, localBase, offmap, Type.MOVE_LAND, 1);
     }
     if (allDeparting && ! complete()) {
       beginJourney(localBase, worldFocus());
@@ -215,6 +215,11 @@ public abstract class Mission implements
     this.localBase   = null;
     this.localFocus  = null;
     this.transitTile = null;
+  }
+  
+  
+  public void onDeparture(Base goes, World.Journey journey) {
+    return;
   }
   
   

@@ -221,8 +221,8 @@ public class Base implements Session.Saveable, Trader {
   
   public float distance(Base other, int moveMode) {
     if (other.locale == this.locale) return 0;
-    
     Route route = locale.routes.get(other.locale);
+    
     if (route == null) return -100;
     if (moveMode != Type.MOVE_AIR && moveMode != route.moveMode) return -100;
     

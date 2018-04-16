@@ -196,6 +196,11 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   }
   
   
+  public boolean allowsExit(Actor a) {
+    return true;
+  }
+  
+  
   public void setInside(Actor a, boolean is) {
     visitors.toggleMember(a, is);
   }

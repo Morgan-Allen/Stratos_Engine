@@ -159,10 +159,20 @@ public class LogicTest {
     if (! viewPlanMap) for (Actor a : map.actors()) {
       AreaTile at = a.at();
       if (at == null || a.indoors()) continue;
-      int fill = WALKER_COLOR;
+      
+      Type type = a.type();
+      int fill = type.tint;
       if      (a.work() != null) fill = ((Element) a.work()).type().tint;
       else if (a.home() != null) fill = a.home().type().tint;
-      graphic[at.x][at.y] = fill;
+      
+      if (type.wide == 1 && type.high == 1) {
+        graphic[at.x][at.y] = fill;
+      }
+      else {
+        for (Coord c : Visit.grid(0, 0, type.wide, type.high, 1)) {
+          graphic[at.x + c.x][at.y + c.y] = fill;
+        }
+      }
     }
     
     /*

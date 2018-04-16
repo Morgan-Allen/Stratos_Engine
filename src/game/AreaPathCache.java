@@ -1,10 +1,9 @@
 
 
 package game;
+import static game.GameConstants.*;
 import util.*;
-import static game.Area.*;
-import static game.GameConstants.Pathing;
-import static game.GameConstants.Target;
+
 
 
 
@@ -206,6 +205,11 @@ public class AreaPathCache {
       if (b.complete()) return b.entrances();
     }
     
+    if (t.isVessel()) {
+      ActorAsVessel v = (ActorAsVessel) e;
+      if (v.complete()) return v.entrances();
+    }
+    
     if (checkAdjacent) {
       AreaTile at = e.at();
       if (t.wide > 1 || t.high > 1) {
@@ -283,10 +287,16 @@ public class AreaPathCache {
       //  'border' to another zone:
       AreaTile n;
       if (p == null) n = null;
-      else if (p.isTile()) n = (AreaTile) p;
+      else if (p.isTile()) {
+        n = (AreaTile) p;
+      }
+      else if (p.type().isBuilding()) {
+        Building b = ((Building) p);
+        n = null;
+        if (b.entrances().length > 1) multiArea = true;
+      }
       else {
         n = null;
-        if (((Building) p).entrances().length > 1) multiArea = true;
       }
       
       tail = n == null ? null : zoneLookup[n.x][n.y];
@@ -476,11 +486,11 @@ public class AreaPathCache {
           if (p == null || p.flaggedWith() != null) continue;
           
           if (! p.isTile()) {
-            Building b = (Building) p;
-            for (AreaTile n : b.entrances()) if (n != p) {
-              gated.add(n);
-              //edging.add(n);
-              //n.flagWith(edging);
+            if (p.type().isBuilding()) {
+              Building b = (Building) p;
+              for (AreaTile n : b.entrances()) if (n != p) {
+                gated.add(n);
+              }
             }
             continue;
           }

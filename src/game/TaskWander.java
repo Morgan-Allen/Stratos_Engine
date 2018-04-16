@@ -28,20 +28,14 @@ public class TaskWander extends Task {
   
   
   static TaskWander configWandering(Actor actor) {
-    Task t = new TaskWander(actor);
-    t.updatePathing();
-    if (t.path == null) return null;
-    t = t.configTask(null, null, (Pathing) Visit.last(t.path), JOB.WANDERING, 0);
+    TaskWander t = new TaskWander(actor);
+    AreaTile goes = t.wanderTarget();
+    t = (TaskWander) t.configTask(null, null, goes, JOB.WANDERING, 0);
     return (TaskWander) t;
   }
   
   
-  protected float successPriority() {
-    return Task.IDLE;
-  }
-  
-  
-  boolean updatePathing() {
+  AreaTile wanderTarget() {
     Actor actor = (Actor) this.active;
     Batch <Pathing> walk = new Batch();
     
@@ -72,9 +66,17 @@ public class TaskWander extends Task {
       walk.add(next);
     }
     
-    for (Pathing t : walk) t.flagWith(null);
-    this.path = walk.toArray(Pathing.class);
-    return true;
+    AreaTile goes = null;
+    for (Pathing t : walk) {
+      t.flagWith(null);
+      if (t.isTile()) goes = (AreaTile) t;
+    }
+    return goes;
+  }
+  
+  
+  protected float successPriority() {
+    return Task.IDLE;
   }
   
   

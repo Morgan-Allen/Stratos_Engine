@@ -295,8 +295,11 @@ public class World implements Session.Saveable {
     j.goes       = goes;
     j.startTime  = time;
     j.arriveTime = (int) (j.startTime + travelTime);
+    
     for (Journeys g : going) j.going.add(g);
     journeys.add(j);
+    
+    for (Journeys g : going) g.onDeparture(goes, j);
     
     if (reports(j)) {
       I.say("\nBeginning journey: "+j.from+" to "+j.goes);

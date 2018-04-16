@@ -147,7 +147,7 @@ public class Actor extends Element implements
   }
   
   
-  public boolean isActor() {
+  public boolean mobile() {
     return true;
   }
   
@@ -246,10 +246,8 @@ public class Actor extends Element implements
     //  Some checks to assist in case of blockage, and refreshing position-
     lastPosition.setTo(exactPosition);
     wasIndoors = indoors();
-    boolean trapped = false;
-    trapped |= inside == null && ! map.pathCache.hasGroundAccess(at());
-    trapped |= inside != null && Visit.empty(((Building) inside).entrances());
-    if (trapped) {
+    boolean escape = checkPathingEscape();
+    if (escape) {
       AreaTile free = map.pathCache.mostOpenNeighbour(at());
       if (free == null) free = AreaTile.nearestOpenTile(at(), map, 6);
       if (free != null) {
@@ -281,6 +279,25 @@ public class Actor extends Element implements
   }
   
   
+  boolean checkPathingEscape() {
+    //
+    //  TODO:  Use proper collision-checks for this!
+    
+    boolean trapped = false;
+    trapped |=
+      inside == null &&
+      type().moveMode != Type.MOVE_AIR &&
+      ! map.pathCache.hasGroundAccess(at())
+    ;
+    trapped |=
+      inside != null && 
+      inside.mainEntrance() == null &&
+      inside.allowsExit(this)
+    ;
+    return trapped;
+  }
+  
+  
   void updateOffMap(Base city) {
     updateLifeCycle(city, false);
   }
@@ -306,11 +323,13 @@ public class Actor extends Element implements
   /**  Pathing and visitation utilities:
     */
   public void setInside(Pathing b, boolean yes) {
-    if (b == null || ! b.onMap()) {
+    if (b == null || ((Element) b).destroyed()) {
       if (b == inside) inside = null;
       return;
     }
+    
     final Pathing old = inside;
+    
     if (yes && b != old) {
       if (old != null) {
         setInside(old, false);
@@ -330,6 +349,7 @@ public class Actor extends Element implements
       super.setLocation(at, map);
       return;
     }
+    
     AreaTile old = this.at();
     super.setLocation(at, map);
     
@@ -550,13 +570,18 @@ public class Actor extends Element implements
   public void onArrival(Base goes, World.Journey journey) {
     if (goes.activeMap() != null) {
       AreaTile entry = ActorUtils.findTransitPoint(
-        goes.activeMap(), goes, journey.from
+        goes.activeMap(), goes, journey.from, this
       );
       enterMap(goes.activeMap(), entry.x, entry.y, 1, base());
     }
     if (task != null) {
       task.onArrival(goes, journey);
     }
+  }
+  
+  
+  public void onDeparture(Base goes, World.Journey journey) {
+    return;
   }
   
   

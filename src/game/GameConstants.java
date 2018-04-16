@@ -450,7 +450,7 @@ public class GameConstants {
   public static interface Active extends Target {
     
     Area map();
-    boolean isActor();
+    boolean mobile();
     Base base();
     
     Task.JOB jobType();
@@ -496,6 +496,7 @@ public class GameConstants {
     AreaTile mainEntrance();
     
     boolean allowsEntry(Actor a);
+    boolean allowsExit(Actor a);
     void setInside(Actor a, boolean is);
     Series <Actor> allInside();
   }
@@ -518,7 +519,8 @@ public class GameConstants {
   
   
   public static interface Journeys {
-    void onArrival(Base goes, World.Journey journey);
+    void onArrival  (Base goes, World.Journey journey);
+    void onDeparture(Base goes, World.Journey journey);
     Base base();
     boolean isElement();
   }

@@ -480,6 +480,7 @@ public class GameContent {
     CANTINA           = new BuildType(BuildingForAmenity.class, "venue_cantina"  , IS_AMENITY_BLD),
     STOCK_EXCHANGE    = new BuildType(BuildingForCrafts.class , "venue_stock_ex" , IS_CRAFTS_BLD ),
     SUPPLY_DEPOT      = new BuildType(BuildingForTrade.class  , "venue_supply_d" , IS_TRADE_BLD  ),
+    AIRFIELD          = new BuildType(BuildingForDock.class   , "venue_airfield" , IS_DOCK_BLD   ),
     //RUNNER_MARKET
     
     WALKWAY           = new BuildType(Element.class           , "type_walkway"   , IS_STRUCTURAL ),
@@ -490,7 +491,7 @@ public class GameContent {
     //HOUSE_T3
     COMMERCE_BUILDINGS[] =
     {
-      CANTINA, STOCK_EXCHANGE, SUPPLY_DEPOT,  // RUNNER_MARKET,
+      CANTINA, STOCK_EXCHANGE, SUPPLY_DEPOT, AIRFIELD,  // RUNNER_MARKET,
       WALKWAY, HOLDING,  //SERVICE_HATCH
     },
     
@@ -686,6 +687,21 @@ public class GameContent {
     SUPPLY_DEPOT.features   = new Good[] { IS_TRADER };
     SUPPLY_DEPOT.buildsWith = new Good[] { PLASTICS, PARTS };
     SUPPLY_DEPOT.maxHealth  = 55;
+    
+    AIRFIELD.name = "Airfield";
+    AIRFIELD.tint = TINT_LITE_COMMERCIAL;
+    AIRFIELD.model = CutoutModel.fromImage(
+      GameContent.class, "airfield_model",
+      "media/Buildings/airfield.png", 6, 1
+    );
+    AIRFIELD.foundationModel = FOUNDATIONS[6];
+    
+    AIRFIELD.setDimensions(6, 6, 1, WIDE_MARGIN);
+    AIRFIELD.setBuildMaterials(PLASTICS, 3, PARTS, 5);
+    AIRFIELD.dockPoints = new Coord[] { new Coord(2, 0) };
+    AIRFIELD.features   = new Good[] { IS_DOCK };
+    AIRFIELD.maxHealth  = 155;
+    
     
     //
     //  Religious structures:

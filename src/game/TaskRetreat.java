@@ -68,7 +68,7 @@ public class TaskRetreat extends Task {
       if (hostility > 0) dangerSum += power * hostility;
       if (alliance  > 0) allySum   += power * alliance ;
       
-      if (power > 0 && allied && other.isActor()) {
+      if (power > 0 && allied && other.mobile()) {
         storeBackup.add((Actor) other);
       }
     }
