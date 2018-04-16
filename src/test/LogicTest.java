@@ -147,6 +147,10 @@ public class LogicTest {
         if (above != null) {
           if (above.growLevel() == -1) fill = MISSED_COLOR;
           else fill = above.debugTint();
+          
+          if (hover.x == at.x && hover.y == at.y) {
+            this.above = above;
+          }
         }
         else if (at.terrain() != null && ! viewPlanMap) {
           fill = at.terrain().tint;
@@ -167,11 +171,20 @@ public class LogicTest {
       
       if (type.wide == 1 && type.high == 1) {
         graphic[at.x][at.y] = fill;
+
+        if (hover.x == at.x && hover.y == at.y) {
+          this.above = a;
+        }
       }
       else {
-        for (Coord c : Visit.grid(0, 0, type.wide, type.high, 1)) {
+        for (Coord c : Visit.grid(0, 0, type.wide, type.high, 1)) try {
           graphic[at.x + c.x][at.y + c.y] = fill;
+          
+          if (hover.x == at.x + c.x && hover.y == at.y + c.y) {
+            this.above = a;
+          }
         }
+        catch (Exception e) {}
       }
     }
     
@@ -252,7 +265,6 @@ public class LogicTest {
   }
   
   
-  
   private void updateCityFogLayer(Area map, Base base) {
     AreaFog fogMap = map.fogMap(base, false);
     if (fogMap == null) return;
@@ -330,6 +342,10 @@ public class LogicTest {
       
       if (graphics) {
         World world = map.world;
+        above = null;
+        hover   = I.getDataCursor(VIEW_NAME, false);
+        pressed = I.getKeysPressed(VIEW_NAME);
+        
         if (! world.settings.worldView) {
           if (viewPathMap) {
             updatePathingView(map, base);
@@ -344,19 +360,7 @@ public class LogicTest {
           updateWorldMapView(map);
           I.present(VIEW_NAME, 400, 400, graphic);
         }
-        hover   = I.getDataCursor(VIEW_NAME, false);
-        pressed = I.getKeysPressed(VIEW_NAME);
         
-        if (! world.settings.worldView) {
-          above = map.above(hover.x, hover.y);
-          for (Actor a : map.actors()) {
-            AreaTile at = a.at();
-            if (at.x == hover.x && at.y == hover.y) above = a;
-          }
-        }
-        else {
-          above = map.world.onMap(hover.x / 2, hover.y / 2);
-        }
         I.talkAbout = above;
         I.used60Frames = (frames++ % 60) == 0;
         

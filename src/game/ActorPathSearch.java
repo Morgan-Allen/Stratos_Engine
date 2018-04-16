@@ -23,8 +23,8 @@ public class ActorPathSearch extends Search <Pathing> {
   static AreaTile tempT[] = new AreaTile[9];
   
   
-  public ActorPathSearch(Actor w, Pathing dest) {
-    this(w.map, w.at(), dest, -1);
+  public ActorPathSearch(Actor w, Pathing init, Pathing dest) {
+    this(w.map, init, dest, -1);
     
     this.client = w;
     this.danger = map.dangerMap(client.base(), false);

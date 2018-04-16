@@ -92,6 +92,8 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   public void assignTask(Task task) {
     if (type().isAirship() && task == null) {
       I.say("?");
+      Task old = task();
+      old.checkAndUpdateTask();
     }
     super.assignTask(task);
   }
@@ -190,8 +192,15 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   }
   
   
+  public AreaTile mainEntrance() {
+    if (dockedAt != null) return null;
+    return entrance;
+  }
+  
+  
   public boolean allowsEntryFrom(Pathing p) {
-    return p == dockedAt || p == entrance;
+    if (dockedAt != null) return p == dockedAt;
+    else return p == entrance;
   }
   
   
@@ -212,11 +221,6 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   
   public Series <Actor> allInside() {
     return inside;
-  }
-  
-  
-  public AreaTile mainEntrance() {
-    return entrance;
   }
   
   
@@ -315,12 +319,18 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
     
     Vec3D pos = exactPosition(null);
     for (Actor a : inside) {
-      a.setExactLocation(pos, map);
+      a.setExactLocation(pos, map, false);
     }
   }
   
   
   public void doLanding(AreaTile landing) {
+    
+    if (landing != this.at()) {
+      I.say("\nWARNING: "+this+" LANDING AT INCORRECT LOCATION: "+at());
+      I.say("  Should be: "+landing);
+      setExactLocation(landing.exactPosition(null), map, false);
+    }
     
     if (type().isAirship()) {
       I.say("LANDING AT TIME: "+map.time()+", AT: "+landing);
@@ -331,6 +341,7 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
     if (landing.above != null && landing.above.type().isDockBuilding()) {
       dockedAt = (BuildingForDock) landing.above;
       dockedAt.toggleDocking(this, landing, true);
+      entrance = null;
     }
     else {
       imposeFootprint();
@@ -341,7 +352,7 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
     }
     this.flying = false;
     this.landed = true;
-    this.mainEntrance();
+    this.landsAt = landing;
   }
   
   

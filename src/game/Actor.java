@@ -290,8 +290,9 @@ public class Actor extends Element implements
       ! map.pathCache.hasGroundAccess(at())
     ;
     trapped |=
-      inside != null && 
+      inside != null &&
       inside.mainEntrance() == null &&
+      Visit.empty(inside.adjacent(null, map)) &&
       inside.allowsExit(this)
     ;
     return trapped;
@@ -367,12 +368,17 @@ public class Actor extends Element implements
   }
   
   
-  public void setExactLocation(Vec3D location, Area map) {
+  public void setExactLocation(Vec3D location, Area map, boolean jump) {
     AreaTile goes = map.tileAt(location.x, location.y);
     setLocation(goes, map);
     
     float height = exactPosition.z;
     exactPosition.set(location.x, location.y, height);
+    
+    if (jump) {
+      lastPosition.setTo(exactPosition);
+      wasIndoors = indoors();
+    }
   }
   
   

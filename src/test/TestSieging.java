@@ -215,7 +215,9 @@ public class TestSieging extends LogicTest {
         }
         
         if (testPathing != null) {
-          ActorPathSearch search = new ActorPathSearch(testPathing, fort);
+          ActorPathSearch search = new ActorPathSearch(
+            testPathing, Task.pathOrigin(testPathing), fort
+          );
           search.doSearch();
           if (search.success()) {
             I.say("\nGatehouse should not allow entry to invaders!");

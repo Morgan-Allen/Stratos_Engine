@@ -27,7 +27,7 @@ public class TestVessels extends LogicTest {
   
   //  TODO:  You also need to test to ensure that traders will be auto-
   //  generated correctly by off-map bases, and configure their cargo based
-  //  on 'fuzzy' supply/demand nearby...
+  //  on 'fuzzy' supply/demand nearby.
   
   //  TODO:  Finally, you should ideally create a separate Task for ship-
   //  visits, rather than piggyback off task-trading.  And you can re-use
@@ -178,7 +178,11 @@ public class TestVessels extends LogicTest {
         Type t = ship.type();
         AreaTile o = ship.at();
         
-        if (goesDock) {
+        if (goesDock && o != null) {
+          for (Coord c : Visit.grid(0, 0, t.wide, t.high, 1)) {
+            AreaTile u = map.tileAt(o.x + c.x, o.y + c.y);
+            if (map.above(u) != dock) shipLanded = false;
+          }
           if (! dock.isDocked(ship)) shipLanded = false;
           if (ship.dockedAt() != dock) shipLanded = false;
         }
@@ -186,6 +190,18 @@ public class TestVessels extends LogicTest {
           for (Coord c : Visit.grid(0, 0, t.wide, t.high, 1)) {
             AreaTile u = map.tileAt(o.x + c.x, o.y + c.y);
             if (map.above(u) != ship) shipLanded = false;
+          }
+        }
+        if (o != null && shipLanded) {
+          ActorPathSearch forward = new ActorPathSearch(map, ship, post, -1);
+          forward.doSearch();
+          if (! forward.success()) {
+            shipLanded = false;
+          }
+          ActorPathSearch reverse = new ActorPathSearch(map, post, ship, -1);
+          reverse.doSearch();
+          if (! reverse.success()) {
+            shipLanded = false;
           }
         }
       }
