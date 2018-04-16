@@ -133,6 +133,7 @@ public class TestVessels extends LogicTest {
         trading.beginAsVessel(awayC);
       }
       
+      /*
       I.say("\n\nShip's crew is: "+ship.crew());
       for (Actor a : ship.crew()) {
         I.say(a+" is inside: "+a.inside());
@@ -142,159 +143,93 @@ public class TestVessels extends LogicTest {
         I.say("\nCOULD NOT CONFIGURE TRADE FOR VESSEL");
         return false;
       }
+      //*/
     }
     
     
-    //
-    //  TODO:  See if you can unify these...
+    final int RUN_TIME = YEAR_LENGTH;
     
-    if (fromLocal) {
-      final int RUN_TIME = YEAR_LENGTH;
+    boolean shipComing = false;
+    boolean shipArrive = false;
+    boolean shipLanded = false;
+    boolean shipTraded = false;
+    boolean testOkay   = false;
+    ActorAsVessel ship = null;
+    
+    while (map.time() < RUN_TIME || graphics) {
+      runLoop(homeC, 1, graphics, "saves/test_vessels.str");
       
-      boolean shipGoing  = false;
-      boolean shipTraded = false;
-      boolean shipReturn = false;
-      boolean shipLanded = false;
-      boolean shipImport = false;
-      boolean testOkay   = false;
-      ActorAsVessel ship = dock.docking().first();
-      
-      while (map.time() < RUN_TIME || graphics) {
-        runLoop(homeC, 1, graphics, "saves/test_vessels.str");
-        
-        if (! shipGoing) {
-          shipGoing = ! ship.landed();
-        }
-        
-        if (shipGoing && ! shipTraded) {
-          boolean goodsMoved = true;
-          goodsMoved &= ship.carried(ORES) == 0;
-          shipTraded = goodsMoved;
-        }
-        
-        if (shipTraded && ! shipReturn) {
-          World.Journey j = world.journeyFor(ship);
-          if (j != null && j.goes() == homeC) shipReturn = true;
-        }
-        
-        if (shipReturn && ! shipLanded) {
-          shipLanded = ship.landed();
-        }
-        
-        if (shipLanded && ! shipImport) {
-          boolean goodsMoved = true;
-          goodsMoved &= post.inventory(GREENS  ) >= 30;
-          goodsMoved &= post.inventory(MEDICINE) >= 10;
-          goodsMoved &= post.inventory(ORES    ) ==  0;
-          shipImport = goodsMoved;
-        }
-        
-        if (shipImport && ! testOkay) {
-          testOkay = true;
-          I.say("\n"+title+" TEST CONCLUDED SUCCESSFULLY!");
-          if (! graphics) return true;
+      if (! shipComing) {
+        for (Journey j : world.journeys()) {
+          for (Journeys g : j.going()) {
+            if (! g.isElement()) continue;
+            if (j.goes() != homeC) continue;
+            Element e = (Element) g;
+            if (e.type().isAirship()) {
+              ship = (ActorAsVessel) e;
+              shipComing = true;
+            }
+          }
         }
       }
       
-      I.say("\n"+title+" TEST FAILED!");
-      I.say("  Ship going:  "+shipGoing );
-      I.say("  Ship traded: "+shipTraded);
-      I.say("  Ship return: "+shipReturn);
-      I.say("  Ship landed: "+shipLanded);
-      I.say("  Ship import: "+shipImport);
-    }
-    
-    else {
-      final int RUN_TIME = YEAR_LENGTH;
+      if (shipComing && ! shipArrive) {
+        shipArrive = ship.onMap();
+      }
       
-      boolean shipComing = false;
-      boolean shipArrive = false;
-      boolean shipLanded = false;
-      boolean shipTraded = false;
-      boolean shipDone   = false;
-      boolean testOkay   = false;
-      ActorAsVessel ship = null;
-      
-      while (map.time() < RUN_TIME || graphics) {
-        runLoop(homeC, 1, graphics, "saves/test_vessels.str");
+      if (shipArrive && ! shipLanded) {
+        shipLanded = ship.landed();
+        Type     t = ship.type();
+        AreaTile o = ship.at();
         
-        if (! shipComing) {
-          for (Journey j : world.journeys()) {
-            for (Journeys g : j.going()) {
-              if (! g.isElement()) continue;
-              if (j.goes() != homeC) continue;
-              Element e = (Element) g;
-              if (e.type().isAirship()) {
-                ship = (ActorAsVessel) e;
-                shipComing = true;
-              }
-            }
+        if (ship.dockedAt() != null && o != null) {
+          for (Coord c : Visit.grid(0, 0, t.wide, t.high, 1)) {
+            AreaTile u = map.tileAt(o.x + c.x, o.y + c.y);
+            if (map.above(u) != dock) shipLanded = false;
+          }
+          if (! dock.isDocked(ship)) shipLanded = false;
+          if (ship.dockedAt() != dock) shipLanded = false;
+        }
+        else if (o != null) {
+          for (Coord c : Visit.grid(0, 0, t.wide, t.high, 1)) {
+            AreaTile u = map.tileAt(o.x + c.x, o.y + c.y);
+            if (map.above(u) != ship) shipLanded = false;
           }
         }
-        
-        if (shipComing && ! shipArrive) {
-          shipArrive = ship.onMap();
-        }
-        
-        if (shipArrive && ! shipLanded) {
-          shipLanded = ship.landed();
-          Type t = ship.type();
-          AreaTile o = ship.at();
-          
-          if (goesDock && o != null) {
-            for (Coord c : Visit.grid(0, 0, t.wide, t.high, 1)) {
-              AreaTile u = map.tileAt(o.x + c.x, o.y + c.y);
-              if (map.above(u) != dock) shipLanded = false;
-            }
-            if (! dock.isDocked(ship)) shipLanded = false;
-            if (ship.dockedAt() != dock) shipLanded = false;
+        if (o != null && shipLanded) {
+          ActorPathSearch forward = new ActorPathSearch(map, ship, post, -1);
+          forward.doSearch();
+          if (! forward.success()) {
+            shipLanded = false;
           }
-          else if (o != null) {
-            for (Coord c : Visit.grid(0, 0, t.wide, t.high, 1)) {
-              AreaTile u = map.tileAt(o.x + c.x, o.y + c.y);
-              if (map.above(u) != ship) shipLanded = false;
-            }
+          ActorPathSearch reverse = new ActorPathSearch(map, post, ship, -1);
+          reverse.doSearch();
+          if (! reverse.success()) {
+            shipLanded = false;
           }
-          if (o != null && shipLanded) {
-            ActorPathSearch forward = new ActorPathSearch(map, ship, post, -1);
-            forward.doSearch();
-            if (! forward.success()) {
-              shipLanded = false;
-            }
-            ActorPathSearch reverse = new ActorPathSearch(map, post, ship, -1);
-            reverse.doSearch();
-            if (! reverse.success()) {
-              shipLanded = false;
-            }
-          }
-        }
-        
-        if (shipLanded && ! shipTraded) {
-          boolean goodsMoved = true;
-          goodsMoved &= post.inventory(GREENS  ) >= 30;
-          goodsMoved &= post.inventory(MEDICINE) >= 10;
-          goodsMoved &= post.inventory(ORES    ) ==  0;
-          shipTraded = goodsMoved;
-        }
-        
-        if (shipTraded && ! shipDone) {
-          shipDone = ! ship.onMap();
-        }
-        
-        if (shipDone && ! testOkay) {
-          testOkay = true;
-          I.say("\n"+title+" TEST CONCLUDED SUCCESSFULLY!");
-          if (! graphics) return true;
         }
       }
       
-      I.say("\n"+title+" TEST FAILED!");
-      I.say("  Ship coming: "+shipComing);
-      I.say("  Ship arrive: "+shipArrive);
-      I.say("  Ship landed: "+shipLanded);
-      I.say("  Ship traded: "+shipTraded);
-      I.say("  Ship done:   "+shipDone  );
+      if (shipLanded && ! shipTraded) {
+        boolean goodsMoved = true;
+        goodsMoved &= post.inventory(GREENS  ) >= 30;
+        goodsMoved &= post.inventory(MEDICINE) >= 10;
+        goodsMoved &= post.inventory(ORES    ) ==  0;
+        shipTraded = goodsMoved;
+      }
+      
+      if (shipTraded && ! testOkay) {
+        testOkay = true;
+        I.say("\n"+title+" TEST CONCLUDED SUCCESSFULLY!");
+        if (! graphics) return true;
+      }
     }
+    
+    I.say("\n"+title+" TEST FAILED!");
+    I.say("  Ship coming: "+shipComing);
+    I.say("  Ship arrive: "+shipArrive);
+    I.say("  Ship landed: "+shipLanded);
+    I.say("  Ship traded: "+shipTraded);
     
     return false;
   }
