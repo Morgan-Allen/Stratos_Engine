@@ -142,7 +142,9 @@ public class BuildingForTrade extends Building implements Trader {
     
     if (actor.type().isVessel()) {
       if (! tradeOff) {
-        Task trading = selectTraderBehaviour(this, actor, tradePartner, map());
+        Task trading = selectTraderBehaviour(
+          this, actor, tradePartner, true, map()
+        );
         if (trading != null) return trading;
       }
       Task coming = returnActorHere(actor);
@@ -165,7 +167,7 @@ public class BuildingForTrade extends Building implements Trader {
   
   public static TaskTrading selectTraderBehaviour(
     Trader from, Actor trading,
-    Base tradePartner, Area map
+    Base tradePartner, boolean cityBackOnly, Area map
   ) {
     boolean reports = trading.reports();
     
@@ -178,18 +180,6 @@ public class BuildingForTrade extends Building implements Trader {
     
     for (Building b : map.buildings()) {
       if (b == from || ! (b instanceof Trader)) continue;
-      if (b.base() != homeCity) {
-        if      (tradePartner == null    ) continue;
-        else if (b.base() != tradePartner) continue;
-      }
-      targets.add((Trader) b);
-    }
-    
-    for (Actor b : map.vessels()) {
-      if (b == from || ! (b instanceof Trader)) continue;
-      ActorAsVessel v = (ActorAsVessel) b;
-      if (! v.landed()) continue;
-      
       if (b.base() != homeCity) {
         if      (tradePartner == null    ) continue;
         else if (b.base() != tradePartner) continue;
@@ -211,8 +201,10 @@ public class BuildingForTrade extends Building implements Trader {
     for (Trader t : targets) {
       World w = map.world;
       Base c = (t == t.base()) ? ((Base) t) : null;
-      Tally <Good> cargoAway = TaskTrading.configureCargo(from, t, false, w);
-      Tally <Good> cargoBack = TaskTrading.configureCargo(t, from, true , w);
+      
+      Tally <Good> cargoAway, cargoBack;
+      cargoAway = TaskTrading.configureCargo(from, t, false       , w);
+      cargoBack = TaskTrading.configureCargo(t, from, cityBackOnly, w);
       
       float distRating = TaskTrading.distanceRating(from, t);
       float rating = 0;

@@ -95,6 +95,7 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
       Task old = task();
       old.checkAndUpdateTask();
     }
+    
     super.assignTask(task);
   }
   //*/
@@ -139,12 +140,15 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
           Area map = map();
           Base partner = trading.tradeGoes.base();
           
+          
           /*
           return TaskDelivery.pickNextDelivery(
             actor, this, this, MAX_TRADER_RANGE, 1, map().world.goodTypes()
           );
           //*/
-          return BuildingForTrade.selectTraderBehaviour(this, actor, partner, map);
+          return BuildingForTrade.selectTraderBehaviour(
+            this, actor, partner, false, map
+          );
         }
       }
     }
@@ -276,17 +280,13 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   
   public void onArrival(Base goes, Journey journey) {
     
-    if (type().isAirship()) {
+    if (type().isAirship() && goes.activeMap() != null) {
       //  TODO:  Create a separate Task to allow ships to dock and land,
-      //  distinct from the methods in TaskTrading, and assign it here!
+      //  distinct from the methods in TaskTrading, and assign it here.
       this.landsAt = findLandingPoint(goes.activeMap(), goes, task());
     }
     
     super.onArrival(goes, journey);
-    
-    if (type().isAirship()) {
-      I.say("ENTERED MAP AT TIME: "+map.time()+", AT: "+at());
-    }
     
     if (goes.activeMap() != null) {
       AreaTile at = at();
@@ -304,22 +304,18 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   }
   
   
-  public void setLocation(AreaTile at, Area map) {
-    
-    if (type().isAirship() && onMap() && at != at()) {
-      I.say("SETTING LOCATION: "+at+", TIME: "+map.time());
-    }
-    
-    super.setLocation(at, map);
-  }
-  
-  
   void update() {
     super.update();
     
     Vec3D pos = exactPosition(null);
     for (Actor a : inside) {
       a.setExactLocation(pos, map, false);
+    }
+    
+    if (type().isAirship() && task() instanceof TaskTrading) {
+      TaskTrading trading = (TaskTrading) task();
+      needLevel.clear();
+      needLevel.add(trading.taken);
     }
   }
   
@@ -330,10 +326,6 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
       I.say("\nWARNING: "+this+" LANDING AT INCORRECT LOCATION: "+at());
       I.say("  Should be: "+landing);
       setExactLocation(landing.exactPosition(null), map, false);
-    }
-    
-    if (type().isAirship()) {
-      I.say("LANDING AT TIME: "+map.time()+", AT: "+landing);
     }
     
     //
@@ -388,7 +380,9 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   public void onDeparture(Base goes, World.Journey journey) {
     super.onDeparture(goes, journey);
     
+    Batch <Actor> going = new Batch();
     for (Actor a : inside) {
+      going.add(a);
       if (a.onMap()) {
         a.exitMap(map);
       }
@@ -396,6 +390,13 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
       else {
         continue;
       }
+    }
+    //
+    //  NOTE:  Actors exiting the map remove themselves from the vehicle, so we
+    //  need to stick them back in.
+    //  (TODO:  This is a bit of hack and may need a cleaner solution.)
+    for (Actor a : going) {
+      a.setInside(this, true);
     }
   }
   

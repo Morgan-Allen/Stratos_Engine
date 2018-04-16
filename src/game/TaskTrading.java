@@ -66,11 +66,16 @@ public class TaskTrading extends Task {
     Employer origin = null;
     if (from instanceof Employer) origin = (Employer) from;
     
-    task.configTravel(from, from, JOB.TRADING, origin, false);
-    
-    if (trading.onMap() && task.path == null) {
-      return null;
+    if (task.doingLanding(from.base())) {
+      ActorAsVessel ship = (ActorAsVessel) trading;
+      AreaTile docks = ship.landsAt();
+      task.configTask(origin, null, docks, JOB.DOCKING, 10);
     }
+    else {
+      task.configTravel(from, from, JOB.TRADING, origin, false);
+      if (trading.onMap() && task.path == null) return null;
+    }
+    
     return task;
   }
   
@@ -78,7 +83,7 @@ public class TaskTrading extends Task {
   
   /**  Additional utility methods for off-map ships and visitors...
     */
-  public void beginFromOffmap(Base from) {
+  public void beginAsVessel(Base from) {
     onVisit(from);
   }
   
@@ -183,18 +188,40 @@ public class TaskTrading extends Task {
     int moveMode = actor.type().moveMode;
     //
     //  If this is a place you're waiting for trade, stay there for a while.
-    if (type == JOB.DOCKING && actor.type().isVessel() && target.isTile()) {
+    if (type == JOB.DOCKING) {
       ActorAsVessel ship = (ActorAsVessel) actor;
       Area map = ship.map();
       
       if (! ship.landed()) {
         ship.doLanding((AreaTile) target);
-        waitInitTime = map.time();
       }
+      if (waitInitTime == -1) {
+        World world = map.world;
+        waitInitTime = map.time();
+        
+        if (! didExport) {
+          taken = configureCargo(tradeFrom, tradeGoes, false, world);
+        }
+        else if (! didImport) {
+          taken = configureCargo(tradeGoes, tradeFrom, false, world);
+        }
+        else {
+          taken = new Tally();
+        }
+      }
+      
       if (shouldTakeoff(map) && ship.readyForTakeoff()) {
         ship.doTakeoff((AreaTile) target);
-        didImport = true;
-        configTravel(tradeGoes, tradeFrom, JOB.DEPARTING, origin, true);
+        waitInitTime = -1;
+        
+        if (! didExport) {
+          didExport = true;
+          configTravel(tradeFrom, tradeGoes, JOB.DEPARTING, origin, true);
+        }
+        else {
+          didImport = true;
+          configTravel(tradeGoes, tradeFrom, JOB.DEPARTING, origin, true);
+        }
       }
       else {
         configTask(origin, null, target, JOB.DOCKING, 10);
@@ -254,6 +281,7 @@ public class TaskTrading extends Task {
     //
     else if (visits == tradeFrom) {
       transferGoods(actor, tradeFrom, taken);
+      taken = new Tally();
       int profit = (int) actor.carried(CASH);
       actor.setCarried(CASH, 0);
       incFunds(tradeFrom, profit);

@@ -166,8 +166,11 @@ public class LogicTest {
       
       Type type = a.type();
       int fill = type.tint;
-      if      (a.work() != null) fill = ((Element) a.work()).type().tint;
-      else if (a.home() != null) fill = a.home().type().tint;
+      
+      if (! type.isVessel()) {
+        if      (a.work() != null) fill = ((Element) a.work()).type().tint;
+        else if (a.home() != null) fill = a.home().type().tint;
+      }
       
       if (type.wide == 1 && type.high == 1) {
         graphic[at.x][at.y] = fill;
@@ -509,7 +512,21 @@ public class LogicTest {
       report.append("\n  Home: "+a.home());
       report.append("\n  Work: "+a.work());
       
-      if (! a.carried().empty()) {
+      if (t.isVessel()) {
+        ActorAsVessel v = (ActorAsVessel) a;
+        report.append("\n  Cargo:");
+        for (Good g : e.map().world.goodTypes()) {
+          float amount = v.carried(g);
+          float demand = v.needLevels().valueFor(g);
+          if (amount <= 0 && demand <= 0) continue;
+          report.append("\n    "+g+": "+I.shorten(amount, 1)+"/"+I.shorten(demand, 1));
+        }
+        report.append("\n  Crew:");
+        for (Actor w : v.crew()) {
+          report.append("\n    "+w+" ("+w.jobType()+")");
+        }
+      }
+      else if (! a.carried().empty()) {
         report.append("\n  Carried:");
         for (Good g : a.carried().keys()) {
           report.append("\n    "+g+": "+a.carried(g));

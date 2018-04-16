@@ -21,8 +21,6 @@ public class TestVessels extends LogicTest {
   }
   
   
-  //  TODO:  Test to ensure that goods are picked up as well as deposited.
-  
   //  TODO:  Limit the cargo that can be delivered by the supply corps
   //  workers- 40 or 50 units in one go is a little too much!
   
@@ -98,29 +96,41 @@ public class TestVessels extends LogicTest {
       dock.enterMap(map, 6, 2, 1, homeC);
     }
     
-    if (fromLocal) {
+    {
       ActorAsVessel ship = (ActorAsVessel) Vassals.DROPSHIP.generate();
-      ship.assignBase(homeC);
-      AreaTile point = dock.nextFreeDockPoint();
-      dock.setWorker(ship, true);
-      ship.enterMap(map, point.x, point.y, 1, homeC);
-      ship.doLanding(point);
-      
-      TaskTrading trading = BuildingForTrade.selectTraderBehaviour(
-        post, ship, homeC, map
-      );
-      ship.assignTask(trading);
-    }
-    else if (createShip) {
-      ActorAsVessel ship = (ActorAsVessel) Vassals.DROPSHIP.generate();
-      ship.assignBase(awayC);
+      ship.assignBase(fromLocal ? homeC : awayC);
       
       for (int n = 2; n-- > 0;) {
         Actor porter = (Actor) Vassals.SUPPLY_CORPS.generate();
         porter.type().initAsMigrant((ActorAsPerson) porter);
-        porter.assignBase(awayC);
+        porter.assignBase(ship.base());
         porter.setInside(ship, true);
         ship.setWorker(porter, true);
+      }
+      
+      if (fromLocal) {
+        AreaTile point = dock.nextFreeDockPoint();
+        dock.setWorker(ship, true);
+        ship.enterMap(map, point.x, point.y, 1, homeC);
+        ship.doLanding(point);
+        
+        AreaTile at = ship.centre();
+        for (Actor a : ship.crew()) if (! a.onMap()) {
+          a.enterMap(map, at.x, at.y, 1, a.base());
+        }
+        
+        TaskTrading trading = BuildingForTrade.selectTraderBehaviour(
+          post, ship, homeC, false, map
+        );
+        ship.assignTask(trading);
+      }
+      
+      else if (createShip) {
+        TaskTrading trading = BuildingForTrade.selectTraderBehaviour(
+          awayC, ship, homeC, false, map
+        );
+        ship.assignTask(trading);
+        trading.beginAsVessel(awayC);
       }
       
       I.say("\n\nShip's crew is: "+ship.crew());
@@ -128,23 +138,19 @@ public class TestVessels extends LogicTest {
         I.say(a+" is inside: "+a.inside());
       }
       
-      TaskTrading trading = BuildingForTrade.selectTraderBehaviour(
-        awayC, ship, homeC, map
-      );
-      if (trading == null) {
-        I.say("\nCould not generate trade-task for ship!");
+      if (ship.task() == null) {
+        I.say("\nCOULD NOT CONFIGURE TRADE FOR VESSEL");
         return false;
       }
-      
-      ship.assignTask(trading);
-      trading.beginFromOffmap(awayC);
     }
     
+    
+    //
+    //  TODO:  See if you can unify these...
     
     if (fromLocal) {
       final int RUN_TIME = YEAR_LENGTH;
       
-      boolean shipExport = false;
       boolean shipGoing  = false;
       boolean shipTraded = false;
       boolean shipReturn = false;
@@ -156,12 +162,7 @@ public class TestVessels extends LogicTest {
       while (map.time() < RUN_TIME || graphics) {
         runLoop(homeC, 1, graphics, "saves/test_vessels.str");
         
-        if (! shipExport) {
-          shipExport = post.inventory(ORES) == 0;
-          shipExport &= ship.carried(ORES) >= 20;
-        }
-        
-        if (shipExport && ! shipGoing) {
+        if (! shipGoing) {
           shipGoing = ! ship.landed();
         }
         
@@ -184,6 +185,7 @@ public class TestVessels extends LogicTest {
           boolean goodsMoved = true;
           goodsMoved &= post.inventory(GREENS  ) >= 30;
           goodsMoved &= post.inventory(MEDICINE) >= 10;
+          goodsMoved &= post.inventory(ORES    ) ==  0;
           shipImport = goodsMoved;
         }
         
@@ -193,6 +195,13 @@ public class TestVessels extends LogicTest {
           if (! graphics) return true;
         }
       }
+      
+      I.say("\n"+title+" TEST FAILED!");
+      I.say("  Ship going:  "+shipGoing );
+      I.say("  Ship traded: "+shipTraded);
+      I.say("  Ship return: "+shipReturn);
+      I.say("  Ship landed: "+shipLanded);
+      I.say("  Ship import: "+shipImport);
     }
     
     else {
