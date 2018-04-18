@@ -589,7 +589,7 @@ public class LogicTest {
       float amount   = b.inventory(g);
       float demand   = b.stockLimit(g);
       float consumes = homeCons.valueFor(g);
-      if (amount <= 0 && demand <= 0 && consumes <= 0) continue;
+      if (amount == 0 && demand <= 0 && consumes <= 0) continue;
       
       demand += consumes;
       goodRep.add("\n  "+g+": "+I.shorten(amount, 1)+"/"+I.shorten(demand, 1));

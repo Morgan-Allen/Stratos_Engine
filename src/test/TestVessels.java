@@ -21,19 +21,45 @@ public class TestVessels extends LogicTest {
   }
   
   //  TODO:  You need to auto-generate traders at bases that have 'Trader'
-  //  posture or better.
+  //  posture or better, and dispatch them on trading missions at regular
+  //  intervals.
   
   //  TODO:  You need to ensure that airships are constructed/spawned at local
-  //  docks.
+  //  docks, and are given a crew, and dispatch them on trading missions at
+  //  regular intervals.
+  
+  //  TODO:  Ensure that migrants are spawned off-map in the first place after
+  //  hiring.  (And disallow if you have no trading partners.)
+  
+  //  Okay.  I can hack those into place relatively easily.
+  
+
+  
+  //  TODO:  See if you can at least streamline the TaskTrading class.  And
+  //  just use TaskDelivery to do the local cargo-transport.
   
   //  TODO:  Ideally, traders should use 'fuzzy' calibration of supply/demand
   //  when selecting a dock-point and cargo.
   
-  //  TODO:  Finally, you should ideally create a separate Task for ship-
-  //  visits.
+  //  TODO:  Ensure that Dropships dump their earnings at the dock-site!
   
-  //  TODO:  Limit the cargo that can be delivered by the supply corps
-  //  workers- 40 or 50 units in one go is a little too much!
+  //  TODO:  And then attach TaskTrading and/or TaskMissionDropoff to the
+  //  Vessel class.  (Create the latter as a separate task-class.)
+  
+  
+  
+  //  What about regular old human traders, though?
+  //  Tlatoani would properly require a MissionTrade for the purpose, auto-
+  //  created by the post.  And then all the recruits would come from the post
+  //  and do pickups/deliveries as part of the mission.  Simple enough.
+  
+  //  Okay.  Do that when the time comes.  As a stop-gap hack, you could create
+  //  a 'vehicle' that looks just like a person and has porters trailing after
+  //  like ghosts.
+  
+  //  Okay.  Do that.
+  
+  
   
   
   static boolean testForeignToLand(boolean graphics) {

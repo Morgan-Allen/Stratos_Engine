@@ -2,8 +2,7 @@
 
 package game;
 import static game.GameConstants.*;
-
-import game.World.Journey;
+import static game.World.*;
 import util.*;
 
 

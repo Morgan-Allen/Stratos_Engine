@@ -186,6 +186,9 @@ public class TaskTrading extends Task {
     Actor actor = (Actor) this.active;
     Base from = tradeFrom.base(), goes = tradeGoes.base();
     int moveMode = actor.type().moveMode;
+    
+    
+    //  TODO:  Move this into a separate task...?
     //
     //  If this is a place you're waiting for trade, stay there for a while.
     if (type == JOB.DOCKING) {
@@ -252,6 +255,7 @@ public class TaskTrading extends Task {
   protected void onVisit(Trader visits) {
     Actor actor = (Actor) active;
     World world = homeCity.world;
+    boolean report = actor.reports();
     //
     //  If migrants are waiting at a foreign base, take them aboard-
     if (visits == visits.base() && actor.type().isVessel()) {
@@ -271,6 +275,12 @@ public class TaskTrading extends Task {
         taken = configureCargo(tradeFrom, tradeGoes, false, world);
       }
       transferGoods(tradeFrom, actor, taken);
+      
+      if (report) {
+        I.say("\n"+actor+" starts with goods: "+taken);
+        I.say("  Profit: "+actor.carried(CASH));
+      }
+      
       configTravel(tradeFrom, tradeGoes, Task.JOB.TRADING, origin, true);
       didExport = true;
     }
@@ -279,9 +289,22 @@ public class TaskTrading extends Task {
     //  goods, and return to your 'from' point.
     //
     else if (visits == tradeGoes && ! didImport) {
+      
       transferGoods(actor, tradeGoes, taken);
+
+      if (report) {
+        I.say("\n"+actor+" dropped off goods: "+taken);
+        I.say("  Profit: "+actor.carried(CASH));
+      }
+      
       taken = configureCargo(tradeGoes, tradeFrom, false, world);
       transferGoods(tradeGoes, actor, taken);
+      
+      if (report) {
+        I.say("\n"+actor+" picked up goods: "+taken);
+        I.say("  Profit: "+actor.carried(CASH));
+      }
+      
       configTravel(tradeGoes, tradeFrom, Task.JOB.TRADING, origin, true);
       didImport = true;
     }
@@ -295,7 +318,8 @@ public class TaskTrading extends Task {
       int profit = (int) actor.carried(CASH);
       actor.setCarried(CASH, 0);
       incFunds(tradeFrom, profit);
-      if (reports() && profit != 0) {
+      
+      if (report) {
         I.say("\n"+actor+" returned profit: "+profit);
       }
     }
@@ -321,7 +345,7 @@ public class TaskTrading extends Task {
     
     for (Good g : cargo.keys()) {
       if (g == CASH) continue;
-
+      
       float priceP = goesB.importPrice(g, fromB);
       float priceG = fromB.exportPrice(g, goesB);
       float amount = cargo.valueFor(g);
