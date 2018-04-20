@@ -11,6 +11,23 @@ import util.*;
 
 
 
+//  TODO:  Later, attach TaskTrading and/or TaskMissionDropoff to the
+//  Vessel class.  (Create the latter as a separate task-class.)  And see if
+//  you can at least streamline the TaskTrading class.
+//  (And just use TaskDelivery to do the local cargo-transport!)
+
+//  TODO:  Ensure that migrants are spawned off-map in the first place after
+//  hiring- as long as there's a method for arriving by air or supply barge,
+//  rather than on foot.
+
+//  ...How do I decide where migrants come from, though?  Homeland by default,
+//  I guess.  Maybe nowhere else?
+
+//  TODO:  Ensure that Dropships dump their earnings at the dock-site!
+
+//  TODO:  Add the crew check down further in the suite...
+
+
 public class TestVessels extends LogicTest {
   
   
@@ -18,47 +35,9 @@ public class TestVessels extends LogicTest {
     testForeignToLand(false);
     testForeignToDock(false);
     testDockToForeign(false);
+    testForeignSpawn (false);
+    testLocalSpawn   (false);
   }
-  
-  //  TODO:  You need to auto-generate traders at bases that have 'Trader'
-  //  posture or better, and dispatch them on trading missions at regular
-  //  intervals.
-  
-  //  TODO:  You need to ensure that airships are constructed/spawned at local
-  //  docks, and are given a crew, and dispatch them on trading missions at
-  //  regular intervals.
-  
-  //  TODO:  Ensure that migrants are spawned off-map in the first place after
-  //  hiring.  (And disallow if you have no trading partners.)
-  
-  //  Okay.  I can hack those into place relatively easily.
-  
-
-  
-  //  TODO:  See if you can at least streamline the TaskTrading class.  And
-  //  just use TaskDelivery to do the local cargo-transport.
-  
-  //  TODO:  Ideally, traders should use 'fuzzy' calibration of supply/demand
-  //  when selecting a dock-point and cargo.
-  
-  //  TODO:  Ensure that Dropships dump their earnings at the dock-site!
-  
-  //  TODO:  And then attach TaskTrading and/or TaskMissionDropoff to the
-  //  Vessel class.  (Create the latter as a separate task-class.)
-  
-  
-  
-  //  What about regular old human traders, though?
-  //  Tlatoani would properly require a MissionTrade for the purpose, auto-
-  //  created by the post.  And then all the recruits would come from the post
-  //  and do pickups/deliveries as part of the mission.  Simple enough.
-  
-  //  Okay.  Do that when the time comes.  As a stop-gap hack, you could create
-  //  a 'vehicle' that looks just like a person and has porters trailing after
-  //  like ghosts.
-  
-  //  Okay.  Do that.
-  
   
   
   
@@ -80,6 +59,18 @@ public class TestVessels extends LogicTest {
   }
   
   
+  static boolean testForeignSpawn(boolean graphics) {
+    TestVessels test = new TestVessels();
+    return test.vesselTest(false, false, false, "FOREIGN VESSEL SPAWN", graphics);
+  }
+  
+  
+  static boolean testLocalSpawn(boolean graphics) {
+    TestVessels test = new TestVessels();
+    return test.vesselTest(true, false, false, "LOCAL VESSEL SPAWN", graphics);
+  }
+  
+  
   
   boolean vesselTest(
     boolean fromLocal, boolean goesDock, boolean createShip,
@@ -87,6 +78,10 @@ public class TestVessels extends LogicTest {
   ) {
     
     World world = new World(ALL_GOODS);
+    world.assignTypes(
+      ALL_BUILDINGS, ALL_SHIPS(), ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES()
+    );
+    
     Base  homeC = new Base(world, world.addLocale(2, 2));
     Base  awayC = new Base(world, world.addLocale(3, 3));
     world.addBases(homeC, awayC);
@@ -134,7 +129,7 @@ public class TestVessels extends LogicTest {
       migrants.add(migrant);
     }
     
-    {
+    if (createShip) {
       ActorAsVessel ship = (ActorAsVessel) Vassals.DROPSHIP.generate();
       ship.assignBase(fromLocal ? homeC : awayC);
       
@@ -163,7 +158,7 @@ public class TestVessels extends LogicTest {
         ship.assignTask(trading);
       }
       
-      else if (createShip) {
+      else {
         TaskTrading trading = BuildingForTrade.selectTraderBehaviour(
           awayC, ship, homeC, false, map
         );
@@ -171,9 +166,14 @@ public class TestVessels extends LogicTest {
         trading.beginAsVessel(awayC);
       }
     }
+    else if (fromLocal) {
+      dock.beginUpgrade(UPGRADE_DROPSHIP);
+      dock.setBuildLevel(1);
+    }
     
     
     final int RUN_TIME = YEAR_LENGTH;
+    boolean spawnDone   = false;
     boolean shipComing  = false;
     boolean shipArrive  = false;
     boolean shipLanded  = false;
@@ -185,11 +185,43 @@ public class TestVessels extends LogicTest {
     while (map.time() < RUN_TIME || graphics) {
       runLoop(homeC, 1, graphics, "saves/test_vessels.str");
       
-      if (! shipComing) {
+      if (createShip) {
+        spawnDone = true;
+      }
+      else if (! spawnDone) {
+        boolean hasShip = false;
+        ActorAsVessel spawned = null;
+        if (fromLocal) {
+          for (Actor a : dock.workers()) if (a.type().isVessel()) {
+            hasShip = true;
+            spawned = (ActorAsVessel) a;
+          }
+        }
+        else {
+          for (ActorAsVessel v : awayC.traders()) if (v.guestBase() == homeC) {
+            hasShip = true;
+            spawned = v;
+          }
+        }
+        
+        /*
+        if (hasShip) {
+          int numCrew = 0;
+          for (Actor a : spawned.crew()) {
+            if (fromLocal && ! a.onMap()) continue;
+            if (a.type() == Vassals.SUPPLY_CORPS) numCrew += 1;
+          }
+          hasShip &= numCrew >= 2;
+        }
+        //*/
+        
+        spawnDone = hasShip;
+      }
+      
+      if (spawnDone && ! shipComing) {
         for (Journey j : world.journeys()) {
           for (Journeys g : j.going()) {
-            if (! g.isElement()) continue;
-            if (j.goes() != homeC) continue;
+            if (j.goes() != homeC || ! g.isActor()) continue;
             Element e = (Element) g;
             if (e.type().isAirship()) {
               ship = (ActorAsVessel) e;
@@ -261,6 +293,7 @@ public class TestVessels extends LogicTest {
     }
     
     I.say("\n"+title+" TEST FAILED!");
+    I.say("  Spawn done:   "+spawnDone  );
     I.say("  Ship coming:  "+shipComing );
     I.say("  Ship arrive:  "+shipArrive );
     I.say("  Ship landed:  "+shipLanded );

@@ -366,10 +366,11 @@ public class Base implements Session.Saveable, Trader {
     //  reflected in the other city-
     if (symmetric) {
       POSTURE reverse = POSTURE.NEUTRAL;
-      if (p == POSTURE.VASSAL) reverse = POSTURE.LORD  ;
-      if (p == POSTURE.LORD  ) reverse = POSTURE.VASSAL;
-      if (p == POSTURE.ALLY  ) reverse = POSTURE.ALLY  ;
-      if (p == POSTURE.ENEMY ) reverse = POSTURE.ENEMY ;
+      if (p == POSTURE.TRADING) reverse = POSTURE.TRADING;
+      if (p == POSTURE.VASSAL ) reverse = POSTURE.LORD  ;
+      if (p == POSTURE.LORD   ) reverse = POSTURE.VASSAL;
+      if (p == POSTURE.ALLY   ) reverse = POSTURE.ALLY  ;
+      if (p == POSTURE.ENEMY  ) reverse = POSTURE.ENEMY ;
       setPosture(b, a, reverse, false);
     }
   }
@@ -569,21 +570,6 @@ public class Base implements Session.Saveable, Trader {
   
   public float shopPrice(Good good, Task purchase) {
     return good.price;
-  }
-
-
-  public Series <ActorAsVessel> traders() {
-    return traders;
-  }
-  
-  
-  public void addMigrant(Actor migrant) {
-    this.migrants.add(migrant);
-  }
-  
-  
-  public Series <Actor> migrants() {
-    return migrants;
   }
   
   
@@ -853,14 +839,105 @@ public class Base implements Session.Saveable, Trader {
       }
     }
     //
-    //  And update any formations and actors currently active-
+    //  Update any formations and actors currently active-
     for (Mission f : missions) {
       f.update();
     }
     for (Actor a : council.members()) {
-      if (a.mission() != null || a.onMap()) continue;
+      if (a.mission() != null || a.onMap() || a.offmapBase() == this) continue;
       a.updateOffMap(this);
     }
+    for (Actor a : visitors) {
+      a.updateOffMap(this);
+    }
+    //
+    //  And update traders-
+    if (updateStats && ! activeMap) {
+      updateOffmapTraders();
+    }
+  }
+  
+  
+  
+  /**  Methods for handling traders and migrants-
+    */
+  void updateOffmapTraders() {
+    if (Visit.empty(world.shipTypes)) return;
+    
+    for (Base b : world.bases) {
+      
+      POSTURE p = this.posture(b);
+      boolean shouldTrade =
+        p != POSTURE.NEUTRAL &&
+        p != POSTURE.ENEMY   &&
+        b.activeMap() != null
+      ;
+      
+      ActorAsVessel trader = null;
+      for (ActorAsVessel t : traders) if (t.guestBase() == b) trader = t;
+      boolean isHome = trader != null && visitors.includes(trader);
+      
+      if (trader != null && isHome && ! shouldTrade) {
+        toggleVisitor(trader, false);
+        traders.remove(trader);
+        for (Actor a : trader.crew) toggleVisitor(a, false);
+        continue;
+      }
+      
+      if (shouldTrade && trader == null) {
+        ActorType forShip = (ActorType) world.shipTypes[0];
+        trader = (ActorAsVessel) forShip.generate();
+        trader.assignBase(this);
+        trader.assignGuestBase(b);
+        traders.add(trader);
+        toggleVisitor(trader, true);
+      }
+      
+      if (trader != null && shouldTrade && isHome && trader.readyForTakeoff()) {
+        TaskTrading trading = BuildingForTrade.selectTraderBehaviour(
+          this, trader, b, true, b.activeMap()
+        );
+        if (trading != null) {
+          trader.assignTask(trading);
+          trading.beginAsVessel(this);
+        }
+      }
+    }
+  }
+
+
+  public Series <ActorAsVessel> traders() {
+    return traders;
+  }
+  
+  
+  public void toggleVisitor(Actor visitor, boolean is) {
+    Base offmap = visitor.offmapBase();
+    if (offmap == this &&   is) return;
+    if (offmap != this && ! is) return;
+    
+    visitors.toggleMember(visitor, is);
+    visitor.setOffmap(is ? this : null);
+  }
+  
+  
+  public Series <Actor> visitors() {
+    return visitors;
+  }
+  
+  
+  public int hireCost(ActorType workerType) {
+    return workerType.hireCost;
+  }
+  
+  
+  public void addMigrant(Actor migrant) {
+    this.migrants.add(migrant);
+  }
+  
+  
+  public Series <Actor> migrants() {
+    return migrants;
   }
   
   

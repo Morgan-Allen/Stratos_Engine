@@ -40,6 +40,7 @@ public class Actor extends Element implements
   private Building home;
   private Base     guestBase;
   private Mission  mission;
+  private Base     offmap;
   
   private Task task;
   private Task reaction;
@@ -81,6 +82,7 @@ public class Actor extends Element implements
     home      = (Building) s.loadObject();
     guestBase = (Base    ) s.loadObject();
     mission   = (Mission ) s.loadObject();
+    offmap    = (Base    ) s.loadObject();
     
     task      = (Task) s.loadObject();
     reaction  = (Task) s.loadObject();
@@ -116,6 +118,7 @@ public class Actor extends Element implements
     s.saveObject(home     );
     s.saveObject(guestBase);
     s.saveObject(mission  );
+    s.saveObject(offmap   );
     
     s.saveObject(task     );
     s.saveObject(reaction );
@@ -210,6 +213,16 @@ public class Actor extends Element implements
   
   void setWork(Employer work) {
     this.work = work;
+  }
+  
+  
+  void setOffmap(Base offmap) {
+    this.offmap = offmap;
+  }
+  
+  
+  public Base offmapBase() {
+    return offmap;
   }
   
   
@@ -591,7 +604,7 @@ public class Actor extends Element implements
   }
   
   
-  public boolean isElement() {
+  public boolean isActor() {
     return true;
   }
   

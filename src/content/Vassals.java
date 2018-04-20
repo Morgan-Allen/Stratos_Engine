@@ -149,10 +149,11 @@ public class Vassals {
     );
     DROPSHIP.tint = TINT_VEHICLE;
     
-    DROPSHIP.organic = false;
-    DROPSHIP.moveMode = Type.MOVE_AIR;
+    DROPSHIP.organic   = false;
+    DROPSHIP.moveMode  = Type.MOVE_AIR;
     DROPSHIP.maxHealth = 150;
     DROPSHIP.setDimensions(4, 4, 2, Type.WIDE_MARGIN);
+    DROPSHIP.crewTypes.setWith(SUPPLY_CORPS, 2);
   }
   
   

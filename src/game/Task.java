@@ -295,7 +295,7 @@ public class Task implements Session.Saveable {
       priorityEval = NO_PRIORITY;
       inContact = false;
       
-      if (visits != null && asActor.inside() == visits) {
+      if (visits != null && mobile && asActor.inside() == visits) {
         ticksSpent += 1;
         int progress = checkActionProgress();
         

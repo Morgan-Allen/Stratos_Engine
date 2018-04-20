@@ -240,7 +240,7 @@ public abstract class Mission implements
   }
   
   
-  public boolean isElement() {
+  public boolean isActor() {
     return false;
   }
   

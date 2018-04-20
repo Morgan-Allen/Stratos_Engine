@@ -43,6 +43,7 @@ public class ScenarioBlankMap extends AreaScenario {
     World world = new World(ALL_GOODS);
     world.assignTypes(
       ALL_BUILDINGS,
+      ALL_SHIPS(),
       ALL_CITIZENS(),
       ALL_SOLDIERS(),
       ALL_NOBLES()

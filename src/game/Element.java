@@ -264,14 +264,20 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
     if (! type.mobile) {
       imposeFootprint();
       map.planning.placeObject(this);
-      
-      for (Good g : materials()) {
-        float need = materialNeed(g);
-        setMaterialLevel(g, need * buildLevel);
-      }
+      setBuildLevel(buildLevel);
     }
     else if (buildLevel >= 1) {
       stateBits |= FLAG_BUILT;
+    }
+  }
+  
+  
+  public void setBuildLevel(float buildLevel) {
+    if (type.mobile) return;
+    
+    for (Good g : materials()) {
+      float need = materialNeed(g);
+      setMaterialLevel(g, need * buildLevel);
     }
   }
   

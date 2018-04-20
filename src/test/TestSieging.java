@@ -30,7 +30,9 @@ public class TestSieging extends LogicTest {
     );
     baseC.setName("Home City");
     awayC.setName("Away City");
-    world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES());
+    world.assignTypes(
+      ALL_BUILDINGS, ALL_SHIPS(), ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES()
+    );
     world.addBases(baseC, awayC);
     
     world.settings.toggleFog     = false;

@@ -61,11 +61,12 @@ public class World implements Session.Saveable {
     */
   final public WorldSettings settings = new WorldSettings(this);
   
-  Good goodTypes   [] = {};
-  Type buildTypes  [] = {};
-  Type citizenTypes[] = {};
-  Type soldierTypes[] = {};
-  Type nobleTypes  [] = {};
+  Good      goodTypes   [] = {};
+  BuildType buildTypes  [] = {};
+  ActorType shipTypes   [] = {};
+  ActorType citizenTypes[] = {};
+  ActorType soldierTypes[] = {};
+  ActorType nobleTypes  [] = {};
   
   int time = 0;
   final public WorldCalendar calendar = new WorldCalendar(this);
@@ -86,12 +87,14 @@ public class World implements Session.Saveable {
   
   
   public void assignTypes(
-    Type buildTypes[], Type citizens[], Type soldiers[], Type nobles[]
+    BuildType builds[], ActorType ships[],
+    ActorType citizens[], ActorType soldiers[], ActorType nobles[]
   ) {
-    this.buildTypes   = buildTypes;
-    this.citizenTypes = citizens  ;
-    this.soldierTypes = soldiers  ;
-    this.nobleTypes   = nobles    ;
+    this.buildTypes   = builds  ;
+    this.shipTypes    = ships   ;
+    this.citizenTypes = citizens;
+    this.soldierTypes = soldiers;
+    this.nobleTypes   = nobles  ;
   }
   
   
@@ -104,11 +107,12 @@ public class World implements Session.Saveable {
     s.cacheInstance(this);
     
     settings.loadState(s);
-    goodTypes    = (Good[]) s.loadObjectArray(Good.class);
-    buildTypes   = (Type[]) s.loadObjectArray(Type.class);
-    citizenTypes = (Type[]) s.loadObjectArray(Type.class);
-    soldierTypes = (Type[]) s.loadObjectArray(Type.class);
-    nobleTypes   = (Type[]) s.loadObjectArray(Type.class);
+    goodTypes    = (Good     []) s.loadObjectArray(Good     .class);
+    buildTypes   = (BuildType[]) s.loadObjectArray(BuildType.class);
+    shipTypes    = (ActorType[]) s.loadObjectArray(ActorType.class);
+    citizenTypes = (ActorType[]) s.loadObjectArray(ActorType.class);
+    soldierTypes = (ActorType[]) s.loadObjectArray(ActorType.class);
+    nobleTypes   = (ActorType[]) s.loadObjectArray(ActorType.class);
     
     time = s.loadInt();
     
@@ -162,6 +166,7 @@ public class World implements Session.Saveable {
     settings.saveState(s);
     s.saveObjectArray(goodTypes   );
     s.saveObjectArray(buildTypes  );
+    s.saveObjectArray(shipTypes   );
     s.saveObjectArray(citizenTypes);
     s.saveObjectArray(soldierTypes);
     s.saveObjectArray(nobleTypes  );
@@ -297,9 +302,13 @@ public class World implements Session.Saveable {
     j.arriveTime = (int) (j.startTime + travelTime);
     
     for (Journeys g : going) j.going.add(g);
+    
     journeys.add(j);
     
-    for (Journeys g : going) g.onDeparture(goes, j);
+    for (Journeys g : going) {
+      g.onDeparture(goes, j);
+      if (g.isActor()) from.toggleVisitor((Actor) g, false);
+    }
     
     if (reports(j)) {
       I.say("\nBeginning journey: "+j.from+" to "+j.goes);
@@ -320,7 +329,12 @@ public class World implements Session.Saveable {
   
   public boolean completeJourney(Journey j) {
     journeys.remove(j);
+    Base goes = j.goes;
+    
     for (Journeys g : j.going) {
+      if (goes.activeMap() == null && g.isActor()) {
+        goes.toggleVisitor((Actor) g, true);
+      }
       g.onArrival(j.goes, j);
     }
     return true;

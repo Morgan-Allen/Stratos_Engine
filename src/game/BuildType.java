@@ -28,6 +28,7 @@ public class BuildType extends Type {
   public BuildType upgradeTiers[] = NO_TIERS;
   public BuildType allUpgrades[] = NO_UPGRADES;
   public BuildType needsAsUpgrade[] = {};
+  public ActorType vesselTemplate = null;
   
   public int residentClasses[] = {};
   public int maxResidents      = 0;

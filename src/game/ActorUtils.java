@@ -78,15 +78,12 @@ public class ActorUtils {
   /**  Finding migrants in and out-
     */
   public static Actor generateMigrant(
-    ActorType jobType, Building employs, boolean payHireCost
+    ActorType jobType, Element employs, boolean payHireCost
   ) {
     //  TODO:  Consider a wider variety of cities to source from!
     
-    Area map  = employs.map();
-    Base from = map.locals;
     Base goes = employs.base();
-    int  cost = employs.hireCost(jobType);
-    
+    int  cost = goes.hireCost(jobType);
     if (payHireCost) goes.incFunds(0 - cost);
     
     Actor migrant = (Actor) jobType.generate();
@@ -94,11 +91,18 @@ public class ActorUtils {
       jobType.initAsMigrant((ActorAsPerson) migrant);
     }
     
-    //  TODO:  Most migrants should be arriving by ship instead.
-    
     migrant.assignBase(goes);
-    employs.setWorker(migrant, true);
-    map.world.beginJourney(from, goes, Type.MOVE_AIR, migrant);
+    ((Employer) employs).setWorker(migrant, true);
+    
+    //  TODO:  Most migrants should be arriving by ship instead!
+    if (employs.onMap()) {
+      Area map  = employs.map();
+      Base from = map.locals;
+      map.world.beginJourney(from, goes, Type.MOVE_AIR, migrant);
+    }
+    else {
+      migrant.setInside((Pathing) employs, true);
+    }
     
     return migrant;
   }

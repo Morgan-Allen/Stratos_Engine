@@ -522,7 +522,7 @@ public class GameConstants {
     void onArrival  (Base goes, World.Journey journey);
     void onDeparture(Base goes, World.Journey journey);
     Base base();
-    boolean isElement();
+    boolean isActor();
   }
   
   

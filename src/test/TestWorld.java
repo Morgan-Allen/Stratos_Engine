@@ -297,7 +297,9 @@ public class TestWorld extends LogicTest {
     
     {
       World world = new World(ALL_GOODS);
-      world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES());
+      world.assignTypes(
+        ALL_BUILDINGS, ALL_SHIPS(), ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES()
+      );
       
       Base from[] = new Base[6];
       Base goes[] = new Base[4];
@@ -386,7 +388,9 @@ public class TestWorld extends LogicTest {
     //  each of the compass-points on the map, and run the simulation for a
     //  while to ensure that invasions take place at reasonable frequency-
     World world = new World(ALL_GOODS);
-    world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES());
+    world.assignTypes(
+      ALL_BUILDINGS, ALL_SHIPS(), ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES()
+    );
     
     final int NUM_CITIES = 4;
     final String names[] = { "Base A", "Base B", "Base C", "Base D" };
@@ -539,7 +543,9 @@ public class TestWorld extends LogicTest {
   
   static Base[] configWeakStrongCityPair() {
     World world = new World(ALL_GOODS);
-    world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES());
+    world.assignTypes(
+      ALL_BUILDINGS, ALL_SHIPS(), ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES()
+    );
     Base a = new Base(world, world.addLocale(0, 0));
     Base b = new Base(world, world.addLocale(1, 0));
     a.setName("Victim City" );

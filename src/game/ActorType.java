@@ -9,14 +9,15 @@ import util.*;
 public class ActorType extends Type {
   
   
-
   String nameValues[][] = new String[0][0];
   
   public int  socialClass  = CLASS_COMMON;
   public int  genderRole   = SEX_EITHER;
   public int  hireCost     = AVG_HIRE_COST;
   public Type patronGods[] = null;
-  public boolean isPorter  = false;
+  
+  public boolean isPorter = false;
+  public Tally <ActorType> crewTypes = new Tally();
   
   public int moveSpeed = AVG_MOVE_SPEED;
   public int moveMode  = MOVE_LAND;

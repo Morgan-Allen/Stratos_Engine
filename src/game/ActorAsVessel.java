@@ -15,6 +15,7 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   Tally <Good> prodLevel = new Tally();
   Tally <Good> needLevel = new Tally();
   
+  private int lastUpdateTime = -1;
   Actor pilot = null;
   List <Actor> crew   = new List();
   List <Actor> inside = new List();
@@ -38,6 +39,7 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
     s.loadTally(prodLevel);
     s.loadTally(needLevel);
     
+    lastUpdateTime = s.loadInt();
     pilot = (Actor) s.loadObject();
     s.loadObjects(crew);
     s.loadObjects(inside);
@@ -58,6 +60,7 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
     s.saveTally(prodLevel);
     s.saveTally(needLevel);
     
+    s.saveInt(lastUpdateTime);
     s.saveObject(pilot);
     s.saveObjects(crew);
     s.saveObjects(inside);
@@ -85,19 +88,6 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
       assignTask(TaskResting.configResting(this, home()));
     }
   }
-  
-  
-  /*
-  public void assignTask(Task task) {
-    if (type().isAirship() && task == null) {
-      I.say("?");
-      Task old = task();
-      old.checkAndUpdateTask();
-    }
-    
-    super.assignTask(task);
-  }
-  //*/
   
   
   
@@ -168,6 +158,30 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   
   public void actorVisits(Actor actor, Pathing visits) {
     return;
+  }
+  
+  
+  void updateOffMap(Base city) {
+    super.updateOffMap(city);
+    updateWorkers(city.world.time());
+  }
+
+
+  void updateWorkers(int time) {
+    
+    if (type().crewTypes.empty()) return;
+    if (time - lastUpdateTime < AVG_UPDATE_GAP) return;
+    lastUpdateTime = time;
+    
+    for (ActorType w : type().crewTypes.keys()) {
+      int maxWorkers = (int) type().crewTypes.valueFor(w);
+      int numWorkers = 0;
+      for (Actor a : crew) if (a.type() == w) numWorkers += 1;
+      
+      if (numWorkers < maxWorkers && w.socialClass == CLASS_COMMON) {
+        ActorUtils.generateMigrant(w, this, false);
+      }
+    }
   }
   
   
@@ -306,6 +320,8 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   void update() {
     super.update();
     
+    updateWorkers(map().time());
+    
     Vec3D pos = exactPosition(null);
     for (Actor a : inside) {
       a.setExactLocation(pos, map, false);
@@ -347,9 +363,16 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   }
   
   
+  
+  
+  
   public boolean readyForTakeoff() {
-    for (Actor a : crew) if (a.inside() != this) return false;
-    return true;
+    boolean hasCrew = false;
+    for (Actor a : crew) {
+      if (a.inside() != this) return false;
+      else hasCrew = true;
+    }
+    return hasCrew;
   }
   
   
