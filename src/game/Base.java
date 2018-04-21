@@ -863,6 +863,7 @@ public class Base implements Session.Saveable, Trader {
     */
   void updateOffmapTraders() {
     if (Visit.empty(world.shipTypes)) return;
+    if (! world.settings.toggleShipping) return;
     
     for (Base b : world.bases) {
       
@@ -873,8 +874,7 @@ public class Base implements Session.Saveable, Trader {
         b.activeMap() != null
       ;
       
-      ActorAsVessel trader = null;
-      for (ActorAsVessel t : traders) if (t.guestBase() == b) trader = t;
+      ActorAsVessel trader = traderFor(b);
       boolean isHome = trader != null && visitors.includes(trader);
       
       if (trader != null && isHome && ! shouldTrade) {
@@ -908,6 +908,12 @@ public class Base implements Session.Saveable, Trader {
 
   public Series <ActorAsVessel> traders() {
     return traders;
+  }
+  
+  
+  public ActorAsVessel traderFor(Base other) {
+    for (ActorAsVessel t : traders) if (t.guestBase() == other) return t;
+    return null;
   }
   
   

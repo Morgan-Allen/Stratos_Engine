@@ -309,10 +309,7 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
       if (type().moveMode == Type.MOVE_AIR) this.flying = true;
     }
     else {
-      //  TODO:  Add these to the roster of off-map visitors...
-      for (Actor a : inside) {
-        continue;
-      }
+      transferCash(false, goes);
     }
   }
   
@@ -349,6 +346,7 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
       dockedAt = (BuildingForDock) landing.above;
       dockedAt.toggleDocking(this, landing, true);
       entrance = null;
+      transferCash(true, dockedAt.base());
     }
     else {
       imposeFootprint();
@@ -357,13 +355,11 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
       int coords[] = Building.entranceCoords(t.wide, t.high, Building.FACE_EAST);
       entrance = map.tileAt(at.x + coords[0], at.y + coords[1]);
     }
+    
     this.flying = false;
     this.landed = true;
     this.landsAt = landing;
   }
-  
-  
-  
   
   
   public boolean readyForTakeoff() {
@@ -396,6 +392,20 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
     this.dockedAt = null;
     this.landed = false;
     this.flying = true;
+  }
+  
+  
+  void transferCash(boolean onMap, Base visits) {
+    if (onMap && dockedAt != null && dockedAt == work()) {
+      float cash = this.carried(CASH);
+      setCarried(CASH, 0);
+      dockedAt.addInventory(cash, CASH);
+    }
+    if (visits == base() && ! onMap) {
+      float cash = this.carried(CASH);
+      setCarried(CASH, 0);
+      visits.incFunds((int) cash);
+    }
   }
   
   

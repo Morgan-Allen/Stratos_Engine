@@ -16,16 +16,7 @@ import util.*;
 //  you can at least streamline the TaskTrading class.
 //  (And just use TaskDelivery to do the local cargo-transport!)
 
-//  TODO:  Ensure that migrants are spawned off-map in the first place after
-//  hiring- as long as there's a method for arriving by air or supply barge,
-//  rather than on foot.
-
-//  ...How do I decide where migrants come from, though?  Homeland by default,
-//  I guess.  Maybe nowhere else?
-
-//  TODO:  Ensure that Dropships dump their earnings at the dock-site!
-
-//  TODO:  Add the crew check down further in the suite...
+//  TODO:  Add the crew check down further in the suite?
 
 
 public class TestVessels extends LogicTest {
@@ -91,6 +82,7 @@ public class TestVessels extends LogicTest {
     
     World.setupRoute(homeC.locale, awayC.locale, 1, Type.MOVE_AIR);
     Base.setPosture(homeC, awayC, Base.POSTURE.TRADING, true);
+    homeC.setHomeland(awayC);
     
     
     Tally <Good> supplies = new Tally().setWith(GREENS, 10, SPYCE, 5);
@@ -108,12 +100,25 @@ public class TestVessels extends LogicTest {
     world.settings.toggleFatigue   = false;
     world.settings.toggleBuilding  = false;
     world.settings.togglePurchases = false;
-    world.settings.toggleShipping  = false;
+    world.settings.toggleShipping  = ! createShip;
+    
     
     BuildingForTrade post = (BuildingForTrade) SUPPLY_DEPOT.generate();
     post.enterMap(map, 1, 6, 1, homeC);
     post.setProdLevels(true, ORES, 10);
     post.setNeedLevels(false, GREENS, 30, MEDICINE, 10);
+    ActorUtils.fillWorkVacancies(post);
+    
+    int cashEstimate = 0, totalCash = -1;
+    for (Good g : post.prodLevels().keys()) {
+      float prod = post.prodLevels().valueFor(g);
+      cashEstimate += prod * homeC.exportPrice(g, awayC);
+    }
+    for (Good g : post.needLevels().keys()) {
+      float need = post.needLevels().valueFor(g);
+      cashEstimate -= need * homeC.importPrice(g, awayC);
+    }
+    
     
     BuildingForDock dock = null; if (goesDock || fromLocal) {
       dock = (BuildingForDock) AIRFIELD.generate();
@@ -128,6 +133,7 @@ public class TestVessels extends LogicTest {
       awayC.addMigrant(migrant);
       migrants.add(migrant);
     }
+    
     
     if (createShip) {
       ActorAsVessel ship = (ActorAsVessel) Vassals.DROPSHIP.generate();
@@ -179,6 +185,7 @@ public class TestVessels extends LogicTest {
     boolean shipLanded  = false;
     boolean shipTraded  = false;
     boolean migrateDone = false;
+    boolean cashOkay    = false;
     boolean testOkay    = false;
     ActorAsVessel ship = null;
     
@@ -285,7 +292,14 @@ public class TestVessels extends LogicTest {
         migrateDone = allHere;
       }
       
-      if (shipTraded && migrateDone && ! testOkay) {
+      if (shipTraded && ! cashOkay) {
+        totalCash = 0;
+        if (post != null) totalCash += post.inventory(CASH);
+        if (dock != null) totalCash += dock.inventory(CASH);
+        cashOkay = Nums.abs(totalCash - cashEstimate) < 1;
+      }
+      
+      if (shipTraded && migrateDone && cashOkay && ! testOkay) {
         testOkay = true;
         I.say("\n"+title+" TEST CONCLUDED SUCCESSFULLY!");
         if (! graphics) return true;
@@ -299,11 +313,12 @@ public class TestVessels extends LogicTest {
     I.say("  Ship landed:  "+shipLanded );
     I.say("  Ship traded:  "+shipTraded );
     I.say("  Migrate done: "+migrateDone);
+    I.say("  Cash okay:    "+cashOkay   );
+    I.say("  Cash/estimate: "+totalCash+"/"+cashEstimate);
     
     return false;
   }
   
-
 }
 
 

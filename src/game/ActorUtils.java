@@ -31,11 +31,6 @@ public class ActorUtils {
     //  TODO:  Make sure there's a pathing connection to the main settlement
     //  here!
     
-    //  TODO:  You will need a different transit point for actors that are
-    //  bigger than 1x1, or that have different motion-modes (sea, air, etc.)
-    
-    //  ...It's a similar problem to using the path-cache for such actors...
-    
     boolean land = moveMode == Type.MOVE_LAND;
     
     if (land) {
@@ -80,25 +75,34 @@ public class ActorUtils {
   public static Actor generateMigrant(
     ActorType jobType, Element employs, boolean payHireCost
   ) {
-    //  TODO:  Consider a wider variety of cities to source from!
+    Base  goes  = employs.base();
+    World world = goes.world;
+    int   cost  = goes.hireCost(jobType);
     
-    Base goes = employs.base();
-    int  cost = goes.hireCost(jobType);
+    if (! world.settings.toggleMigrate) return null;
     if (payHireCost) goes.incFunds(0 - cost);
     
     Actor migrant = (Actor) jobType.generate();
-    if (jobType.isPerson()) {
-      jobType.initAsMigrant((ActorAsPerson) migrant);
-    }
-    
     migrant.assignBase(goes);
     ((Employer) employs).setWorker(migrant, true);
+    if (jobType.isPerson()) jobType.initAsMigrant((ActorAsPerson) migrant);
     
-    //  TODO:  Most migrants should be arriving by ship instead!
     if (employs.onMap()) {
-      Area map  = employs.map();
-      Base from = map.locals;
-      map.world.beginJourney(from, goes, Type.MOVE_AIR, migrant);
+      //  TODO:  Consider a wider variety of cities to source from...
+      if (world.settings.toggleShipping) {
+        Base homeland = goes.homeland();
+        if (homeland != null && homeland.traderFor(goes) != null) {
+          homeland.addMigrant(migrant);
+        }
+        else {
+          return null;
+        }
+      }
+      else {
+        Area map  = employs.map();
+        Base from = map.locals;
+        map.world.beginJourney(from, goes, Type.MOVE_AIR, migrant);
+      }
     }
     else {
       migrant.setInside((Pathing) employs, true);
