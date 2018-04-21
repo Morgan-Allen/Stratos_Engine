@@ -1,9 +1,9 @@
 
 
 package game;
-import util.*;
 import static game.ActorUtils.*;
 import static game.GameConstants.*;
+import util.*;
 
 
 
@@ -18,6 +18,8 @@ public class TaskTrading extends Task {
   Trader  tradeGoes;
   boolean didExport;
   boolean didImport;
+  int waitInitTime = -1;
+  boolean takeoff = false;
   
   
   public TaskTrading(Actor actor) {
@@ -33,6 +35,8 @@ public class TaskTrading extends Task {
     tradeGoes = (Trader) s.loadObject();
     didExport = s.loadBool();
     didImport = s.loadBool();
+    waitInitTime = s.loadInt();
+    takeoff      = s.loadBool();
   }
   
   
@@ -44,38 +48,80 @@ public class TaskTrading extends Task {
     s.saveObject(tradeGoes);
     s.saveBool(didExport);
     s.saveBool(didImport);
+    s.saveInt(waitInitTime);
+    s.saveBool(takeoff);
   }
   
   
-  TaskTrading configTrading(
-    BuildingForTrade from, Trader goes, Tally <Good> taken
+  public static TaskTrading configTrading(
+    Trader from, Trader goes, Actor trading, Tally <Good> taken
   ) {
-    this.taken     = taken;
-    this.tradeFrom = from ;
-    this.tradeGoes = goes ;
-    this.homeCity  = from.base();
+    TaskTrading task = new TaskTrading(trading);
     
-    configTravel(from, from, JOB.TRADING, from);
-    return this;
+    task.taken     = taken;
+    task.tradeFrom = from ;
+    task.tradeGoes = goes ;
+    task.homeCity  = from.base();
+    
+    Employer origin = null;
+    if (from instanceof Employer) origin = (Employer) from;
+    
+    if (task.doingLanding(from.base())) {
+      ActorAsVessel ship = (ActorAsVessel) trading;
+      AreaTile docks = ship.landsAt();
+      task.configTask(origin, null, docks, JOB.DOCKING, 10);
+    }
+    else {
+      task.configTravel(from, from, JOB.TRADING, origin, false);
+      if (trading.onMap() && task.path == null) return null;
+    }
+    
+    return task;
+  }
+  
+  
+  
+  /**  Additional utility methods for off-map ships and visitors...
+    */
+  public void beginAsVessel(Base from) {
+    onVisit(from);
+  }
+  
+  
+  boolean doingLanding(Base local) {
+    return local.activeMap() != null && active.type().isAirship();
+  }
+  
+  
+  boolean shouldTakeoff(Area map) {
+    return map.time() - waitInitTime > SHIP_WAIT_TIME;
+  }
+  
+  
+  Area activeMap(Trader t) {
+    if (t.base() == t) return ((Base) t).activeMap();
+    return ((Element) t).map();
   }
   
   
   
   /**  Handling actor events-
     */
-  void configTravel(Trader from, Trader trader, Task.JOB jobType, Employer e) {
+  void configTravel(
+    Trader from, Trader goes, Task.JOB jobType, Employer e, boolean duringTask
+  ) {
     Actor actor = (Actor) active;
-    Area fromA = from.base().activeMap(), goesA = trader.base().activeMap();
+    Area fromA = activeMap(from), goesA = activeMap(goes);
     //
     //  If your're headed to a building on the same map, either proceed to the
     //  entrance or head to the corner tile.
     if (fromA != null && fromA == goesA) {
-      Building goes = (Building) trader;
-      if (goes.complete()) {
-        configTask(e, goes, null, jobType, 0);
+      Pathing goesB = (Pathing) goes;
+      if (goesB.complete()) {
+        configTask(e, goesB, null, jobType, 0);
       }
       else {
-        configTask(e, null, goes.at(), jobType, 0);
+        configTask(e, null, goesB.at(), jobType, 0);
       }
     }
     //
@@ -83,19 +129,48 @@ public class TaskTrading extends Task {
     //  point or begin your journey directly.
     else {
       if (actor.onMap()) {
-        AreaTile exits = findTransitPoint(actor.map(), from.base(), trader.base());
-        configTask(origin, null, exits, Task.JOB.TRADING, 0);
+        AreaTile exits = findTransitPoint(
+          actor.map(), from.base(), goes.base(), actor
+        );
+        configTask(origin, null, exits, Task.JOB.DEPARTING, 0);
       }
-      else {
+      else if (duringTask) {
         World world = homeCity.world;
-        world.beginJourney(from.base(), trader.base(), actor);
+        int moveMode = actor.type().moveMode;
+        world.beginJourney(from.base(), goes.base(), moveMode, actor);
       }
     }
   }
   
   
+  protected void onArrival(Base goes, World.Journey journey) {
+    //
+    //  If you're landing as a ship, proceed to whichever docking site is
+    //  available-
+    if (doingLanding(goes)) {
+      ActorAsVessel ship = (ActorAsVessel) active;
+      AreaTile docks = ship.landsAt();
+      configTask(origin, null, docks, JOB.DOCKING, 10);
+      return;
+    }
+    //
+    //  If you've arrived at your destination city, offload your cargo, take on
+    //  fresh goods, and record any profits in the process:
+    if (goes != homeCity && ! didImport) {
+      onVisit(goes);
+    }
+    //
+    //  If you've arrived back on your home map, return to your post-
+    else if (goes == homeCity) {
+      configTravel(tradeFrom, tradeFrom, JOB.RETURNING, origin, true);
+    }
+    //
+    //  ...Fwaaah?
+    else I.complain("THIS SHOULDN'T HAPPEN");
+  }
+  
+  
   protected void onTarget(Target target) {
-    Actor actor = (Actor) this.active;
     //
     //  We might be visiting an incomplete structure:
     if (target.at().above == tradeFrom) {
@@ -107,25 +182,77 @@ public class TaskTrading extends Task {
       return;
     }
     //
-    //  If you've arrived at the edge of the map, begin your journey to a
-    //  foreign city-
-    if (tradeGoes.base() == tradeGoes) {
-      Base city = tradeFrom.base();
-      city.world.beginJourney(city, (Base) tradeGoes, actor);
+    //  Otherwise, assemble some basic facts...
+    Actor actor = (Actor) this.active;
+    Base from = tradeFrom.base(), goes = tradeGoes.base();
+    int moveMode = actor.type().moveMode;
+    
+    
+    //  TODO:  Move this into a separate task...?
+    //
+    //  If this is a place you're waiting for trade, stay there for a while.
+    if (type == JOB.DOCKING) {
+      ActorAsVessel ship = (ActorAsVessel) actor;
+      Area map = ship.map();
+      
+      if (! ship.landed()) {
+        ship.doLanding((AreaTile) target);
+      }
+      if (waitInitTime == -1) {
+        World world = map.world;
+        waitInitTime = map.time();
+        
+        if (! didExport) {
+          taken = configureCargo(tradeFrom, tradeGoes, false, world);
+        }
+        else if (! didImport) {
+          taken = configureCargo(tradeGoes, tradeFrom, false, world);
+        }
+        else {
+          taken = new Tally();
+        }
+      }
+      
+      if (shouldTakeoff(map) && ship.readyForTakeoff()) {
+        ship.doTakeoff((AreaTile) target);
+        waitInitTime = -1;
+        
+        if (! didExport) {
+          didExport = true;
+          configTravel(tradeFrom, tradeGoes, JOB.DEPARTING, origin, true);
+        }
+        else {
+          didImport = true;
+          configTravel(tradeGoes, tradeFrom, JOB.DEPARTING, origin, true);
+        }
+      }
+      else {
+        configTask(origin, null, target, JOB.DOCKING, 10);
+      }
+      return;
+    }
+    //
+    //  But if you've arrived at the edge of the map, begin your journey to a
+    //  foreign city:
+    else if (type == JOB.DEPARTING && ! didImport) {
+      from.world.beginJourney(from, goes, moveMode, actor);
+      actor.exitMap(actor.map);
+    }
+    else if (type == JOB.DEPARTING && didImport) {
+      from.world.beginJourney(goes, from, moveMode, actor);
       actor.exitMap(actor.map);
     }
   }
   
   
-  protected void onVisit(Building visits) {
+  protected void onVisit(Pathing visits) {
     //
     //  Any visited building is assumed to be one of the depots-
     onVisit((Trader) visits);
   }
   
-
+  
   protected boolean updateOnArrival(Base goes, World.Journey journey) {
-  //protected void onArrival(Base goes, World.Journey journey) {
     //
     //  If you've arrived at your destination city, offload your cargo, take on
     //  fresh goods, and record any profits in the process:
@@ -136,7 +263,7 @@ public class TaskTrading extends Task {
     //
     //  If you've arrived back on your home map, return to your post-
     else if (goes == homeCity) {
-      configTravel(tradeFrom, tradeFrom, Task.JOB.TRADING, origin);
+      configTravel(tradeFrom, tradeFrom, Task.JOB.TRADING, origin, true);
       return true;
     }
     //
@@ -151,6 +278,17 @@ public class TaskTrading extends Task {
   protected void onVisit(Trader visits) {
     Actor actor = (Actor) active;
     World world = homeCity.world;
+    boolean report = actor.reports();
+    //
+    //  If migrants are waiting at a foreign base, take them aboard-
+    if (visits == visits.base() && actor.type().isVessel()) {
+      Base goes = visits.base();
+      //  TODO:  Screen migrants based on base of destination?  To be safe?...
+      ActorAsVessel ship = (ActorAsVessel) active;
+      for (Actor a : goes.migrants) {
+        a.setInside(ship, true);
+      }
+    }
     //
     //  If you haven't done your export, and this is your 'from' point, take on
     //  goods, then head to your 'goes' point.
@@ -160,7 +298,13 @@ public class TaskTrading extends Task {
         taken = configureCargo(tradeFrom, tradeGoes, false, world);
       }
       transferGoods(tradeFrom, actor, taken);
-      configTravel(tradeFrom, tradeGoes, Task.JOB.TRADING, origin);
+      
+      if (report) {
+        I.say("\n"+actor+" starts with goods: "+taken);
+        I.say("  Profit: "+actor.outfit.carried(CASH));
+      }
+      
+      configTravel(tradeFrom, tradeGoes, Task.JOB.TRADING, origin, true);
       didExport = true;
     }
     //
@@ -168,10 +312,23 @@ public class TaskTrading extends Task {
     //  goods, and return to your 'from' point.
     //
     else if (visits == tradeGoes && ! didImport) {
+      
       transferGoods(actor, tradeGoes, taken);
+
+      if (report) {
+        I.say("\n"+actor+" dropped off goods: "+taken);
+        I.say("  Profit: "+actor.outfit.carried(CASH));
+      }
+      
       taken = configureCargo(tradeGoes, tradeFrom, false, world);
       transferGoods(tradeGoes, actor, taken);
-      configTravel(tradeGoes, tradeFrom, Task.JOB.TRADING, origin);
+      
+      if (report) {
+        I.say("\n"+actor+" picked up goods: "+taken);
+        I.say("  Profit: "+actor.outfit.carried(CASH));
+      }
+      
+      configTravel(tradeGoes, tradeFrom, Task.JOB.TRADING, origin, true);
       didImport = true;
     }
     //
@@ -180,10 +337,12 @@ public class TaskTrading extends Task {
     //
     else if (visits == tradeFrom) {
       transferGoods(actor, tradeFrom, taken);
+      taken = new Tally();
       int profit = (int) actor.outfit.carried(CASH);
       actor.outfit.setCarried(CASH, 0);
       incFunds(tradeFrom, profit);
-      if (reports() && profit != 0) {
+      
+      if (report) {
         I.say("\n"+actor+" returned profit: "+profit);
       }
     }
@@ -209,7 +368,7 @@ public class TaskTrading extends Task {
     
     for (Good g : cargo.keys()) {
       if (g == CASH) continue;
-
+      
       float priceP = goesB.importPrice(g, fromB);
       float priceG = fromB.exportPrice(g, goesB);
       float amount = cargo.valueFor(g);
@@ -267,7 +426,6 @@ public class TaskTrading extends Task {
   static Tally <Good> configureCargo(
     Trader from, Trader goes, boolean cityOnly, World world
   ) {
-    
     //  TODO:  You need to cap the total sum of goods transported based on
     //  cargo limits!
     

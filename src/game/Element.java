@@ -262,27 +262,38 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
     assignBase(owns);
     
     if (! type.mobile) {
-      
-      for (AreaTile t : footprint(map, true)) if (t != null) {
-        int footMask = type.footprint(t, this);
-        int check = canPlaceOver(t.above, footMask);
-        
-        if (t.above != null && check != IS_OKAY) {
-          t.above.exitMap(map);
-        }
-        if (footMask == 1) {
-          map.setAbove(t, this);
-          map.pathCache.checkPathingChanged(t);
-        }
-      }
-      
+      imposeFootprint();
       map.planning.placeObject(this);
+      setBuildLevel(buildLevel);
+    }
+    else if (buildLevel >= 1) {
+      stateBits |= FLAG_BUILT;
+    }
+  }
+  
+  
+  public void setBuildLevel(float buildLevel) {
+    if (type.mobile) return;
+    
+    for (Good g : materials()) {
+      float need = materialNeed(g);
+      setMaterialLevel(g, need * buildLevel);
+    }
+  }
+  
+  
+  protected void imposeFootprint() {
+    for (AreaTile t : footprint(map, true)) if (t != null) {
+      int footMask = type.footprint(t, this);
+      int check = canPlaceOver(t.above, footMask);
       
-      for (Good g : materials()) {
-        float need = materialNeed(g);
-        setMaterialLevel(g, need * buildLevel);
+      if (t.above != null && check != IS_OKAY) {
+        t.above.exitMap(map);
       }
-      
+      if (footMask == 1) {
+        map.setAbove(t, this);
+        map.pathCache.checkPathingChanged(t);
+      }
     }
   }
   
@@ -293,10 +304,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
       if (true       ) setFlagging(false, type.flagKey);
       if (type.isCrop) setFlagging(false, NEED_PLANT  );
       
-      for (AreaTile t : footprint(map, false)) {
-        if (t.above == this) map.setAbove(t, null);
-        map.pathCache.checkPathingChanged(t);
-      }
+      removeFootprint();
       
       map.planning.unplaceObject(this);
       setDestroyed();
@@ -306,6 +314,14 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
     this.map = null;
     stateBits |=  FLAG_EXIT;
     stateBits &= ~FLAG_ON_MAP;
+  }
+  
+  
+  protected void removeFootprint() {
+    for (AreaTile t : footprint(map, false)) {
+      if (t.above == this) map.setAbove(t, null);
+      map.pathCache.checkPathingChanged(t);
+    }
   }
   
   

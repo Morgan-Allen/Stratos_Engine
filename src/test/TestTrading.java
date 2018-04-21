@@ -29,7 +29,7 @@ public class TestTrading extends LogicTest {
     baseC.setName("(Home City)");
     awayC.setName("(Away City)");
     
-    World.setupRoute(baseC.locale, awayC.locale, 1);
+    World.setupRoute(baseC.locale, awayC.locale, 1, Type.MOVE_LAND);
     Base.setPosture(baseC, awayC, Base.POSTURE.VASSAL, true);
     
     Tally <Good> supplies = new Tally().setWith(GREENS, 10, SPYCE, 5);
@@ -123,18 +123,24 @@ public class TestTrading extends LogicTest {
       
       boolean allHome = true;
       for (Building b : map.buildings()) for (Actor a : b.workers()) {
-        if (a.jobType() == Task.JOB.TRADING) allHome = false;
+        if (a.task() instanceof TaskTrading) allHome = false;
       }
+      
       if (tradeStop && allHome && ! moneyOkay) {
         float estimate = projectedEarnings(baseC, awayC, initFunds, false);
         
         float funds = baseC.funds();
-        for (Building b : map.buildings()) funds += b.inventory(CASH);
+        I.say("\n\nCurrent funds: "+funds);
+        
+        for (Building b : map.buildings()) {
+          I.say("  "+b+" cash: "+b.inventory(CASH));
+          funds += b.inventory(CASH);
+        }
         
         if (Nums.abs(estimate - funds) > 1) {
           I.say("\nTrade-earnings do not match projections!");
-          I.say("  Expected: "+estimate        );
-          I.say("  Actual:   "+baseC.funds());
+          I.say("  Expected: "+estimate);
+          I.say("  Actual:   "+funds   );
           projectedEarnings(baseC, awayC, initFunds, true);
           break;
         }
@@ -184,6 +190,11 @@ public class TestTrading extends LogicTest {
         I.say("    Total: "+pays);
       }
     }
+    if (report) {
+      I.say("  Initial funds: "+initFunds);
+      I.say("  Projected balance: "+projectedFunds);
+    }
+    
     return projectedFunds;
   }
   

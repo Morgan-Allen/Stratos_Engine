@@ -6,6 +6,8 @@ import util.*;
 import static game.GameConstants.*;
 import java.lang.reflect.*;
 
+import game.GameConstants.Good;
+
 
 
 
@@ -25,20 +27,21 @@ public class Type extends Index.Entry implements Session.Saveable {
     IS_UPGRADE     =  5,
     IS_CRAFTS_BLD  =  6,
     IS_GATHER_BLD  =  7,
-    IS_WATER_BLD   =  8,
+    IS_MARKET_BLD  =  8,
     IS_TRADE_BLD   =  9,
-    IS_HOME_BLD    =  10,
-    IS_AMENITY_BLD =  11,
-    IS_GOVERN_BLD  =  12,
-    IS_HUNTS_BLD   =  13,
-    IS_ARMY_BLD    =  14,
-    IS_WALLS_BLD   =  15,
-    IS_FAITH_BLD   =  16,
-    IS_NEST_BLD    =  17,
-    IS_ACTOR       =  18,
-    IS_PERSON_ACT  =  19,
-    IS_ANIMAL_ACT  =  20,
-    IS_VESSEL_ACT  =  21
+    IS_DOCK_BLD    =  10,
+    IS_HOME_BLD    =  11,
+    IS_AMENITY_BLD =  12,
+    IS_GOVERN_BLD  =  13,
+    IS_HUNTS_BLD   =  14,
+    IS_ARMY_BLD    =  15,
+    IS_WALLS_BLD   =  16,
+    IS_FAITH_BLD   =  17,
+    IS_NEST_BLD    =  18,
+    IS_ACTOR       =  19,
+    IS_PERSON_ACT  =  20,
+    IS_ANIMAL_ACT  =  21,
+    IS_VESSEL_ACT  =  22
   ;
   final public static int
     PATH_NONE   = -1,
@@ -48,6 +51,12 @@ public class Type extends Index.Entry implements Session.Saveable {
     PATH_WALLS  =  4,
     PATH_BLOCK  =  5,
     PATH_WATER  =  6
+  ;
+  final public static int
+    MOVE_NONE  = -1,
+    MOVE_LAND  =  1,
+    MOVE_WATER =  2,
+    MOVE_AIR   =  3
   ;
   final public static int
     NO_MARGIN   = 0,
@@ -129,8 +138,9 @@ public class Type extends Index.Entry implements Session.Saveable {
   public Class baseClass;
   public int category;
   public Type flagKey = null;
-  public int wide = 1, high = 1, deep = 1;
+  public Good features[] = NO_GOODS;
   
+  public int wide = 1, high = 1, deep = 1;
   private byte[][] footprint = {{ 1 }};
   int clearMargin;
   
@@ -159,7 +169,6 @@ public class Type extends Index.Entry implements Session.Saveable {
   public int rangeDamage = 0;
   public int rangeDist   = 0;
   public int armourClass = 0;
-  public int moveSpeed   = AVG_MOVE_SPEED;
   public int sightRange  = AVG_SIGHT;
   
   
@@ -290,6 +299,11 @@ public class Type extends Index.Entry implements Session.Saveable {
   }
   
   
+  public boolean isAirship() {
+    return isVessel() && ((ActorType) this).moveMode == MOVE_AIR;
+  }
+  
+  
   public boolean isHomeBuilding() {
     return category == IS_HOME_BLD;
   }
@@ -300,8 +314,18 @@ public class Type extends Index.Entry implements Session.Saveable {
   }
   
   
+  public boolean isDockBuilding() {
+    return category == IS_DOCK_BLD;
+  }
+  
+  
   public boolean isArmyOrWallsBuilding() {
     return category == IS_ARMY_BLD || category == IS_WALLS_BLD;
+  }
+  
+  
+  public boolean hasFeature(Good feature) {
+    return Visit.arrayIncludes(features, feature);
   }
   
   

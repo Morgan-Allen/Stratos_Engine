@@ -190,6 +190,11 @@ public class AreaTile implements Pathing, Selection.Focus {
   }
   
   
+  public boolean allowsExit(Actor a) {
+    return true;
+  }
+  
+  
   public void setInside(Actor a, boolean is) {
     inside = Element.setMember(a, is, inside);
   }
@@ -197,6 +202,16 @@ public class AreaTile implements Pathing, Selection.Focus {
   
   public Series <Actor> allInside() {
     return inside == null ? NO_ACTORS : inside;
+  }
+  
+  
+  public AreaTile mainEntrance() {
+    return this;
+  }
+  
+  
+  public boolean complete() {
+    return true;
   }
   
   

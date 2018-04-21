@@ -163,9 +163,9 @@ public class TaskPurchase extends Task {
     
     return RESUME_YES;
   }
-
-
-  protected void onVisit(Building visits) {
+  
+  
+  protected void onVisit(Pathing visits) {
     ActorAsPerson actor = (ActorAsPerson) this.active;
     
     if (type == JOB.SHOPPING && visits == shop) {

@@ -43,6 +43,7 @@ public class ScenarioBlankMap extends AreaScenario {
     World world = new World(ALL_GOODS);
     world.assignTypes(
       ALL_BUILDINGS,
+      ALL_SHIPS(),
       ALL_CITIZENS(),
       ALL_SOLDIERS(),
       ALL_NOBLES()
@@ -72,7 +73,7 @@ public class ScenarioBlankMap extends AreaScenario {
   
   protected Base createBase(Area stage, World world) {
     World.Locale homeworld = world.addLocale(1, 1, "Homeworld");
-    World.setupRoute(homeworld, stage.locale, 1);
+    World.setupRoute(homeworld, stage.locale, 1, Type.MOVE_AIR);
     
     Base patron = new Base(world, homeworld);
     patron.setName("Homeworld Base");
@@ -123,7 +124,8 @@ public class ScenarioBlankMap extends AreaScenario {
       
       ActorUtils.fillWorkVacancies(bastion);
       ActorUtils.fillWorkVacancies(depot);
-      playUI().assignHomePoint(bastion);
+      base.setHeadquarters(bastion);
+      playUI().setLookPoint(bastion);
       
       base.initFunds(4000);
       bastion.addInventory(35, PLASTICS);

@@ -112,7 +112,7 @@ public class TestCity extends LogicTest {
       for (Building b : map.buildings()) if (b.base() == base) {
         for (ActorType job : b.type().workerTypes.keys()) {
           int num = b.numWorkers(job), max = b.maxWorkers(job);
-          boolean canHire = b.hireCost(job) <= base.funds();
+          boolean canHire = base.hireCost(job) <= base.funds();
           if (job.socialClass != CLASS_COMMON && num < max && canHire) {
             ActorUtils.generateMigrant(job, b, true);
           }

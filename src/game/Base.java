@@ -1,8 +1,9 @@
 
 
 package game;
-import util.*;
 import static game.GameConstants.*;
+import static game.World.*;
+import util.*;
 
 
 
@@ -62,6 +63,7 @@ public class Base implements Session.Saveable, Trader {
     Tally <Good> suppliesSent = new Tally();
   }
   
+  
   String name = "City";
   int tint = CITY_COLOR;
   
@@ -70,9 +72,11 @@ public class Base implements Session.Saveable, Trader {
   
   GOVERNMENT government = GOVERNMENT.FEUDAL;
   float prestige = PRESTIGE_AVG;
-  Base homeland = null;
   final public BaseCouncil council = new BaseCouncil(this);
   final Table <Base, Relation> relations = new Table();
+  
+  Base homeland = null;
+  Building headquarters = null;
   
   private int   currentFunds = 0;
   private float population   = 0;
@@ -80,11 +84,17 @@ public class Base implements Session.Saveable, Trader {
   Tally <Good> needLevel = new Tally();
   Tally <Good> prodLevel = new Tally();
   Tally <Good> inventory = new Tally();
+  
   Tally <BuildType> buildLevel = new Tally();
+  List <Mission> missions = new List();
+  
+  //
+  //  These are specific to off-map bases...
+  List <ActorAsVessel> traders = new List();
+  List <Actor> visitors = new List();
+  List <Actor> migrants = new List();
   
   List <BuildType> buildTypes = new List();
-  
-  List <Mission> missions = new List();
   
   private boolean active;
   private Area map;
@@ -119,9 +129,7 @@ public class Base implements Session.Saveable, Trader {
     
     government = GOVERNMENT.values()[s.loadInt()];
     prestige = s.loadFloat();
-    homeland = (Base) s.loadObject();
     council.loadState(s);
-    
     for (int n = s.loadInt(); n-- > 0;) {
       Relation r = new Relation();
       r.with    = (Base) s.loadObject();
@@ -134,6 +142,9 @@ public class Base implements Session.Saveable, Trader {
       relations.put(r.with, r);
     }
     
+    homeland = (Base) s.loadObject();
+    headquarters = (Building) s.loadObject();
+    
     currentFunds = s.loadInt();
     population   = s.loadFloat();
     armyPower    = s.loadFloat();
@@ -142,9 +153,12 @@ public class Base implements Session.Saveable, Trader {
     s.loadTally(inventory );
     s.loadTally(buildLevel);
     
-    s.loadObjects(buildTypes);
-    
     s.loadObjects(missions);
+    s.loadObjects(traders );
+    s.loadObjects(visitors);
+    s.loadObjects(migrants);
+    
+    s.loadObjects(buildTypes);
     
     active = s.loadBool();
     map    = (Area) s.loadObject();
@@ -163,9 +177,7 @@ public class Base implements Session.Saveable, Trader {
     
     s.saveInt(government.ordinal());
     s.saveFloat(prestige);
-    s.saveObject(homeland);
     council.saveState(s);
-    
     s.saveInt(relations.size());
     for (Relation r : relations.values()) {
       s.saveObject(r.with);
@@ -177,6 +189,9 @@ public class Base implements Session.Saveable, Trader {
       s.saveTally(r.suppliesSent);
     }
     
+    s.saveObject(homeland);
+    s.saveObject(headquarters);
+    
     s.saveInt(currentFunds);
     s.saveFloat(population);
     s.saveFloat(armyPower );
@@ -185,9 +200,12 @@ public class Base implements Session.Saveable, Trader {
     s.saveTally(inventory );
     s.saveTally(buildLevel);
     
-    s.saveObjects(buildTypes);
-    
     s.saveObjects(missions);
+    s.saveObjects(traders );
+    s.saveObjects(visitors);
+    s.saveObjects(migrants);
+    
+    s.saveObjects(buildTypes);
     
     s.saveBool(active);
     s.saveObject(map);
@@ -211,14 +229,19 @@ public class Base implements Session.Saveable, Trader {
   }
   
   
-  public float distance(Base other) {
+  public float distance(Base other, int moveMode) {
     if (other.locale == this.locale) return 0;
-    Integer dist = locale.distances.get(other.locale);
-    if (dist != null) return (float) dist;
+    Route route = locale.routes.get(other.locale);
     
+    if (route == null) return -100;
+    if (moveMode != Type.MOVE_AIR && moveMode != route.moveMode) return -100;
+    
+    return route.distance;
+    /*
     float dx = locale.mapX - other.locale.mapX;
     float dy = locale.mapY - other.locale.mapY;
     return (int) Nums.sqrt((dx * dx) + (dy * dy));
+    //*/
   }
   
   
@@ -279,6 +302,16 @@ public class Base implements Session.Saveable, Trader {
   }
   
   
+  public void setHeadquarters(Building headquarters) {
+    this.headquarters = headquarters;
+  }
+  
+  
+  public Building headquarters() {
+    return headquarters;
+  }
+  
+  
   public void setHomeland(Base homeland) {
     this.homeland = homeland;
   }
@@ -333,10 +366,11 @@ public class Base implements Session.Saveable, Trader {
     //  reflected in the other city-
     if (symmetric) {
       POSTURE reverse = POSTURE.NEUTRAL;
-      if (p == POSTURE.VASSAL) reverse = POSTURE.LORD  ;
-      if (p == POSTURE.LORD  ) reverse = POSTURE.VASSAL;
-      if (p == POSTURE.ALLY  ) reverse = POSTURE.ALLY  ;
-      if (p == POSTURE.ENEMY ) reverse = POSTURE.ENEMY ;
+      if (p == POSTURE.TRADING) reverse = POSTURE.TRADING;
+      if (p == POSTURE.VASSAL ) reverse = POSTURE.LORD  ;
+      if (p == POSTURE.LORD   ) reverse = POSTURE.VASSAL;
+      if (p == POSTURE.ALLY   ) reverse = POSTURE.ALLY  ;
+      if (p == POSTURE.ENEMY  ) reverse = POSTURE.ENEMY ;
       setPosture(b, a, reverse, false);
     }
   }
@@ -460,7 +494,7 @@ public class Base implements Session.Saveable, Trader {
   
   
   public void setTradeLevel(Good g, float need, float accept) {
-    needLevel  .set(g, need  );
+    needLevel.set(g, need  );
     prodLevel.set(g, accept);
   }
   
@@ -531,6 +565,11 @@ public class Base implements Session.Saveable, Trader {
     if (buys.base().homeland() == this) return true;
     if (Base.suppliesDue(this, buys.base(), g) > 0) return true;
     return prodLevel.valueFor(g) > 0;
+  }
+  
+  
+  public float shopPrice(Good good, Task purchase) {
+    return good.price;
   }
   
   
@@ -800,14 +839,111 @@ public class Base implements Session.Saveable, Trader {
       }
     }
     //
-    //  And update any formations and actors currently active-
+    //  Update any formations and actors currently active-
     for (Mission f : missions) {
       f.update();
     }
     for (Actor a : council.members()) {
-      if (a.mission() != null || a.onMap()) continue;
+      if (a.mission() != null || a.onMap() || a.offmapBase() == this) continue;
       a.updateOffMap(this);
     }
+    for (Actor a : visitors) {
+      a.updateOffMap(this);
+    }
+    //
+    //  And update traders-
+    if (updateStats && ! activeMap) {
+      updateOffmapTraders();
+    }
+  }
+  
+  
+  
+  /**  Methods for handling traders and migrants-
+    */
+  void updateOffmapTraders() {
+    if (Visit.empty(world.shipTypes)) return;
+    if (! world.settings.toggleShipping) return;
+    
+    for (Base b : world.bases) {
+      
+      POSTURE p = this.posture(b);
+      boolean shouldTrade =
+        p != POSTURE.NEUTRAL &&
+        p != POSTURE.ENEMY   &&
+        b.activeMap() != null
+      ;
+      
+      ActorAsVessel trader = traderFor(b);
+      boolean isHome = trader != null && visitors.includes(trader);
+      
+      if (trader != null && isHome && ! shouldTrade) {
+        toggleVisitor(trader, false);
+        traders.remove(trader);
+        for (Actor a : trader.crew) toggleVisitor(a, false);
+        continue;
+      }
+      
+      if (shouldTrade && trader == null) {
+        ActorType forShip = (ActorType) world.shipTypes[0];
+        trader = (ActorAsVessel) forShip.generate();
+        trader.assignBase(this);
+        trader.assignGuestBase(b);
+        traders.add(trader);
+        toggleVisitor(trader, true);
+      }
+      
+      if (trader != null && shouldTrade && isHome && trader.readyForTakeoff()) {
+        TaskTrading trading = BuildingForTrade.selectTraderBehaviour(
+          this, trader, b, true, b.activeMap()
+        );
+        if (trading != null) {
+          trader.assignTask(trading, this);
+          trading.beginAsVessel(this);
+        }
+      }
+    }
+  }
+
+
+  public Series <ActorAsVessel> traders() {
+    return traders;
+  }
+  
+  
+  public ActorAsVessel traderFor(Base other) {
+    for (ActorAsVessel t : traders) if (t.guestBase() == other) return t;
+    return null;
+  }
+  
+  
+  public void toggleVisitor(Actor visitor, boolean is) {
+    Base offmap = visitor.offmapBase();
+    if (offmap == this &&   is) return;
+    if (offmap != this && ! is) return;
+    
+    visitors.toggleMember(visitor, is);
+    visitor.setOffmap(is ? this : null);
+  }
+  
+  
+  public Series <Actor> visitors() {
+    return visitors;
+  }
+  
+  
+  public int hireCost(ActorType workerType) {
+    return workerType.hireCost;
+  }
+  
+  
+  public void addMigrant(Actor migrant) {
+    this.migrants.add(migrant);
+  }
+  
+  
+  public Series <Actor> migrants() {
+    return migrants;
   }
   
   

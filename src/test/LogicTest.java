@@ -147,6 +147,10 @@ public class LogicTest {
         if (above != null) {
           if (above.growLevel() == -1) fill = MISSED_COLOR;
           else fill = above.debugTint();
+          
+          if (hover.x == at.x && hover.y == at.y) {
+            this.above = above;
+          }
         }
         else if (at.terrain() != null && ! viewPlanMap) {
           fill = at.terrain().tint;
@@ -159,10 +163,32 @@ public class LogicTest {
     if (! viewPlanMap) for (Actor a : map.actors()) {
       AreaTile at = a.at();
       if (at == null || a.indoors()) continue;
-      int fill = WALKER_COLOR;
-      if      (a.work() != null) fill = a.work().type().tint;
-      else if (a.home() != null) fill = a.home().type().tint;
-      graphic[at.x][at.y] = fill;
+      
+      Type type = a.type();
+      int fill = type.tint;
+      
+      if (! type.isVessel()) {
+        if      (a.work() != null) fill = ((Element) a.work()).type().tint;
+        else if (a.home() != null) fill = a.home().type().tint;
+      }
+      
+      if (type.wide == 1 && type.high == 1) {
+        graphic[at.x][at.y] = fill;
+
+        if (hover.x == at.x && hover.y == at.y) {
+          this.above = a;
+        }
+      }
+      else {
+        for (Coord c : Visit.grid(0, 0, type.wide, type.high, 1)) try {
+          graphic[at.x + c.x][at.y + c.y] = fill;
+          
+          if (hover.x == at.x + c.x && hover.y == at.y + c.y) {
+            this.above = a;
+          }
+        }
+        catch (Exception e) {}
+      }
     }
     
     /*
@@ -242,7 +268,6 @@ public class LogicTest {
   }
   
   
-  
   private void updateCityFogLayer(Area map, Base base) {
     AreaFog fogMap = map.fogMap(base, false);
     if (fogMap == null) return;
@@ -320,6 +345,10 @@ public class LogicTest {
       
       if (graphics) {
         World world = map.world;
+        above = null;
+        hover   = I.getDataCursor(VIEW_NAME, false);
+        pressed = I.getKeysPressed(VIEW_NAME);
+        
         if (! world.settings.worldView) {
           if (viewPathMap) {
             updatePathingView(map, base);
@@ -334,19 +363,7 @@ public class LogicTest {
           updateWorldMapView(map);
           I.present(VIEW_NAME, 400, 400, graphic);
         }
-        hover   = I.getDataCursor(VIEW_NAME, false);
-        pressed = I.getKeysPressed(VIEW_NAME);
         
-        if (! world.settings.worldView) {
-          above = map.above(hover.x, hover.y);
-          for (Actor a : map.actors()) {
-            AreaTile at = a.at();
-            if (at.x == hover.x && at.y == hover.y) above = a;
-          }
-        }
-        else {
-          above = map.world.onMap(hover.x / 2, hover.y / 2);
-        }
         I.talkAbout = above;
         I.used60Frames = (frames++ % 60) == 0;
         
@@ -500,7 +517,21 @@ public class LogicTest {
       report.append("\n  Home: "+a.home());
       report.append("\n  Work: "+a.work());
       
-      if (! a.outfit.carried().empty()) {
+      if (t.isVessel()) {
+        ActorAsVessel v = (ActorAsVessel) a;
+        report.append("\n  Cargo:");
+        for (Good g : e.map().world.goodTypes()) {
+          float amount = v.outfit.carried(g);
+          float demand = v.needLevels().valueFor(g);
+          if (amount <= 0 && demand <= 0) continue;
+          report.append("\n    "+g+": "+I.shorten(amount, 1)+"/"+I.shorten(demand, 1));
+        }
+        report.append("\n  Crew:");
+        for (Actor w : v.crew()) {
+          report.append("\n    "+w+" ("+w.jobType()+")");
+        }
+      }
+      else if (! a.outfit.carried().empty()) {
         report.append("\n  Carried:");
         for (Good g : a.outfit.carried().keys()) {
           report.append("\n    "+g+": "+a.outfit.carried(g));
@@ -563,7 +594,7 @@ public class LogicTest {
       float amount   = b.inventory(g);
       float demand   = b.stockLimit(g);
       float consumes = homeCons.valueFor(g);
-      if (amount <= 0 && demand <= 0 && consumes <= 0) continue;
+      if (amount == 0 && demand <= 0 && consumes <= 0) continue;
       
       demand += consumes;
       goodRep.add("\n  "+g+": "+I.shorten(amount, 1)+"/"+I.shorten(demand, 1));

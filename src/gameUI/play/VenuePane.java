@@ -29,6 +29,7 @@ public class VenuePane extends DetailPane {
     BuildType type = venue.type();
     boolean controls = venue.base() == PlayUI.playerBase();
     World world = venue.map().world;
+    Base base = venue.base();
     
     d.append(""+venue.toString());
     d.append("\n");
@@ -46,7 +47,7 @@ public class VenuePane extends DetailPane {
     
     for (final ActorType w : type.workerTypes.keys()) {
       int num = venue.numWorkers(w), max = venue.maxWorkers(w);
-      int cost = venue.hireCost(w);
+      int cost = base.hireCost(w);
       boolean canHire = venue.base().funds() >= cost;
       
       d.append("\n\n"+w.name+": ("+num+"/"+max+")");
@@ -151,7 +152,7 @@ public class VenuePane extends DetailPane {
       
       for (final BuildType upgrade : upgrades) {
         
-        boolean done    = venue.hasUpgrade(upgrade);
+        boolean done    = venue.upgradeComplete(upgrade);
         boolean current = venue.currentUpgrade() == upgrade;
         boolean canDo   = venue.canBeginUpgrade(upgrade, false);
         String  name    = upgrade.name;

@@ -4,6 +4,7 @@ package test;
 import game.*;
 import static game.GameConstants.*;
 import static game.ActorTraits.*;
+import static game.ActorAsPerson.*;
 import static game.Base.*;
 import static game.BaseCouncil.*;
 import static content.GameContent.*;
@@ -30,7 +31,9 @@ public class TestDiplomacy extends LogicTest {
     Area  map   = AreaTerrain.generateTerrain(
       baseC, 32, 0, MEADOW, JUNGLE
     );
-    world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES());
+    world.assignTypes(
+      ALL_BUILDINGS, ALL_SHIPS(), ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES()
+    );
     world.addBases(baseC, awayC, neutC);
     baseC.setName("Home City");
     awayC.setName("Away City");
@@ -38,11 +41,13 @@ public class TestDiplomacy extends LogicTest {
     awayC.council.setTypeAI(AI_OFF);
     neutC.council.setTypeAI(AI_OFF);
     
+    World.setupRoute(baseC.locale, awayC.locale, 1, Type.MOVE_LAND);
+    World.setupRoute(baseC.locale, neutC.locale, 1, Type.MOVE_LAND);
+    
     world.settings.toggleFog     = false;
     world.settings.toggleMigrate = false;
     world.settings.toggleHunger  = false;
     world.settings.toggleFatigue = false;
-    
     
     AreaPlanning.placeStructure(SHIELD_WALL, baseC, true, 7, 7, 12, 12);
     AreaPlanning.markDemolish(map, true, 8, 8, 10, 10);

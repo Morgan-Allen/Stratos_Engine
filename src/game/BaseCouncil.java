@@ -591,8 +591,8 @@ public class BaseCouncil {
     //  want your own city to be vulnerable?  And multiple options for terms
     //  during diplomacy?
     for (Base other : base.world.bases) if (other != base) {
-      Integer distance = base.locale.distances.get(other.locale);
-      if (distance == null) continue;
+      float distance = base.distance(other, Type.MOVE_LAND);
+      if (distance < 0) continue;
       
       if (! (
         other.isLoyalVassalOf(base) ||

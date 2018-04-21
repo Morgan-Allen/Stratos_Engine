@@ -5,6 +5,8 @@
   */
 package game;
 import static game.GameConstants.*;
+
+import game.GameConstants.Pathing;
 import util.*;
 
 
@@ -87,7 +89,7 @@ public class TaskWaiting extends Task {
   }
   
   
-  protected void onVisit(Building visits) {
+  protected void onVisit(Pathing visits) {
     Actor actor = (Actor) active;
     
     final boolean report = I.talkAbout == actor && stepsVerbose;

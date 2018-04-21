@@ -350,16 +350,20 @@ public class GameContent {
     PHYSICIAN = new HumanType("actor_physician", CLASS_SOLDIER)
   ;
   
-  public static Type[] ALL_CITIZENS() {
-    return new Type[]{ Vassals.PYON, Vassals.VENDOR, Vassals.AUDITOR };
+  public static ActorType[] ALL_CITIZENS() {
+    return new ActorType[]{ Vassals.PYON, Vassals.VENDOR, Vassals.AUDITOR };
   }
   
-  public static Type[] ALL_SOLDIERS() {
-    return new Type[]{ Trooper.TROOPER, RUNNER, Nobles.NOBLE };
+  public static ActorType[] ALL_SOLDIERS() {
+    return new ActorType[]{ Trooper.TROOPER, RUNNER, Nobles.NOBLE };
   }
   
-  public static Type[] ALL_NOBLES() {
-    return new Type[]{ Nobles.NOBLE, Nobles.CONSORT };
+  public static ActorType[] ALL_NOBLES() {
+    return new ActorType[]{ Nobles.NOBLE, Nobles.CONSORT };
+  }
+  
+  public static ActorType[] ALL_SHIPS() {
+    return new ActorType[]{ Vassals.DROPSHIP };
   }
   
   
@@ -480,6 +484,9 @@ public class GameContent {
     CANTINA           = new BuildType(BuildingForAmenity.class, "venue_cantina"  , IS_AMENITY_BLD),
     STOCK_EXCHANGE    = new BuildType(BuildingForCrafts.class , "venue_stock_ex" , IS_CRAFTS_BLD ),
     SUPPLY_DEPOT      = new BuildType(BuildingForTrade.class  , "venue_supply_d" , IS_TRADE_BLD  ),
+    AIRFIELD          = new BuildType(BuildingForDock.class   , "venue_airfield" , IS_DOCK_BLD   ),
+    
+    UPGRADE_DROPSHIP  = new BuildType(BuildingForDock.class   , "up_dropship"    , IS_UPGRADE    ),
     //RUNNER_MARKET
     
     WALKWAY           = new BuildType(Element.class           , "type_walkway"   , IS_STRUCTURAL ),
@@ -490,7 +497,7 @@ public class GameContent {
     //HOUSE_T3
     COMMERCE_BUILDINGS[] =
     {
-      CANTINA, STOCK_EXCHANGE, SUPPLY_DEPOT,  // RUNNER_MARKET,
+      CANTINA, STOCK_EXCHANGE, SUPPLY_DEPOT, AIRFIELD,  // RUNNER_MARKET,
       WALKWAY, HOLDING,  //SERVICE_HATCH
     },
     
@@ -686,6 +693,28 @@ public class GameContent {
     SUPPLY_DEPOT.features   = new Good[] { IS_TRADER };
     SUPPLY_DEPOT.buildsWith = new Good[] { PLASTICS, PARTS };
     SUPPLY_DEPOT.maxHealth  = 55;
+    
+    
+    AIRFIELD.name = "Airfield";
+    AIRFIELD.tint = TINT_LITE_COMMERCIAL;
+    AIRFIELD.model = CutoutModel.fromImage(
+      GameContent.class, "airfield_model",
+      "media/Buildings/airfield.png", 6, 1
+    );
+    AIRFIELD.foundationModel = FOUNDATIONS[6];
+    
+    AIRFIELD.setDimensions(6, 6, 1, WIDE_MARGIN);
+    AIRFIELD.setBuildMaterials(PLASTICS, 3, PARTS, 5);
+    AIRFIELD.dockPoints  = new Coord[] { new Coord(2, 0) };
+    AIRFIELD.features    = new Good[] { IS_DOCK };
+    AIRFIELD.maxHealth   = 155;
+    AIRFIELD.maxUpgrades = 4;
+    
+    UPGRADE_DROPSHIP.name = "Dropship Upgrade";
+    UPGRADE_DROPSHIP.setBuildMaterials(PLASTICS, 3, PARTS, 7);
+    UPGRADE_DROPSHIP.vesselTemplate = Vassals.DROPSHIP;
+    
+    AIRFIELD.allUpgrades = new BuildType[]{ UPGRADE_DROPSHIP };
     
     //
     //  Religious structures:
@@ -974,7 +1003,7 @@ public class GameContent {
     World world = new World(ALL_GOODS);
     Base  cityA = new Base(world, world.addLocale(1, 1, "Elysium Sector"));
     Base  cityB = new Base(world, world.addLocale(3, 3, "Pavonis Sector"));
-    world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES());
+    world.assignTypes(ALL_BUILDINGS, ALL_SHIPS(), ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES());
     
     cityA.setName("Elysium Base");
     cityA.setTradeLevel(PARTS   , 0, 5 );
@@ -1002,7 +1031,7 @@ public class GameContent {
     );
     world.addBases(cityB);
     
-    World.setupRoute(cityA.locale, cityB.locale, AVG_CITY_DIST / 2);
+    World.setupRoute(cityA.locale, cityB.locale, AVG_CITY_DIST / 2, MOVE_LAND);
     world.setMapSize(10, 10);
     
     return world;

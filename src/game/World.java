@@ -11,10 +11,16 @@ public class World implements Session.Saveable {
   
   /**  Public interfaces-
     */
+  public static class Route {
+    int distance;
+    int moveMode;
+  }
+  
+  
   public static class Locale {
     
     float mapX, mapY;
-    Table <Locale, Integer> distances = new Table();
+    Table <Locale, Route> routes = new Table();
     
     String label;
     
@@ -55,11 +61,12 @@ public class World implements Session.Saveable {
     */
   final public WorldSettings settings = new WorldSettings(this);
   
-  Good goodTypes   [] = {};
-  Type buildTypes  [] = {};
-  Type citizenTypes[] = {};
-  Type soldierTypes[] = {};
-  Type nobleTypes  [] = {};
+  Good      goodTypes   [] = {};
+  BuildType buildTypes  [] = {};
+  ActorType shipTypes   [] = {};
+  ActorType citizenTypes[] = {};
+  ActorType soldierTypes[] = {};
+  ActorType nobleTypes  [] = {};
   
   int time = 0;
   final public WorldCalendar calendar = new WorldCalendar(this);
@@ -80,12 +87,14 @@ public class World implements Session.Saveable {
   
   
   public void assignTypes(
-    Type buildTypes[], Type citizens[], Type soldiers[], Type nobles[]
+    BuildType builds[], ActorType ships[],
+    ActorType citizens[], ActorType soldiers[], ActorType nobles[]
   ) {
-    this.buildTypes   = buildTypes;
-    this.citizenTypes = citizens  ;
-    this.soldierTypes = soldiers  ;
-    this.nobleTypes   = nobles    ;
+    this.buildTypes   = builds  ;
+    this.shipTypes    = ships   ;
+    this.citizenTypes = citizens;
+    this.soldierTypes = soldiers;
+    this.nobleTypes   = nobles  ;
   }
   
   
@@ -98,11 +107,12 @@ public class World implements Session.Saveable {
     s.cacheInstance(this);
     
     settings.loadState(s);
-    goodTypes    = (Good[]) s.loadObjectArray(Good.class);
-    buildTypes   = (Type[]) s.loadObjectArray(Type.class);
-    citizenTypes = (Type[]) s.loadObjectArray(Type.class);
-    soldierTypes = (Type[]) s.loadObjectArray(Type.class);
-    nobleTypes   = (Type[]) s.loadObjectArray(Type.class);
+    goodTypes    = (Good     []) s.loadObjectArray(Good     .class);
+    buildTypes   = (BuildType[]) s.loadObjectArray(BuildType.class);
+    shipTypes    = (ActorType[]) s.loadObjectArray(ActorType.class);
+    citizenTypes = (ActorType[]) s.loadObjectArray(ActorType.class);
+    soldierTypes = (ActorType[]) s.loadObjectArray(ActorType.class);
+    nobleTypes   = (ActorType[]) s.loadObjectArray(ActorType.class);
     
     time = s.loadInt();
     
@@ -113,7 +123,11 @@ public class World implements Session.Saveable {
       locales.add(l);
     }
     for (Locale l : locales) for (int d = s.loadInt(); d-- > 0;) {
-      l.distances.put(locales.atIndex(s.loadInt()), s.loadInt());
+      Locale with = locales.atIndex(s.loadInt());
+      Route route = new Route();
+      route.distance = s.loadInt();
+      route.moveMode = s.loadInt();
+      l.routes.put(with, route);
     }
     
     s.loadObjects(bases);
@@ -152,6 +166,7 @@ public class World implements Session.Saveable {
     settings.saveState(s);
     s.saveObjectArray(goodTypes   );
     s.saveObjectArray(buildTypes  );
+    s.saveObjectArray(shipTypes   );
     s.saveObjectArray(citizenTypes);
     s.saveObjectArray(soldierTypes);
     s.saveObjectArray(nobleTypes  );
@@ -164,10 +179,12 @@ public class World implements Session.Saveable {
       s.saveFloat(l.mapY);
     }
     for (Locale l : locales) {
-      s.saveInt(l.distances.size());
-      for (Locale d : l.distances.keySet()) {
+      s.saveInt(l.routes.size());
+      for (Locale d : l.routes.keySet()) {
         s.saveInt(locales.indexOf(d));
-        s.saveInt(l.distances.get(d));
+        Route route = l.routes.get(d);
+        s.saveInt(route.distance);
+        s.saveInt(route.moveMode);
       }
     }
     
@@ -210,9 +227,12 @@ public class World implements Session.Saveable {
   
   /**  Managing Cities and Locales:
     */
-  public static void setupRoute(Locale a, Locale b, int distance) {
-    a.distances.put(b, distance);
-    b.distances.put(a, distance);
+  public static void setupRoute(Locale a, Locale b, int distance, int moveMode) {
+    Route route = new Route();
+    route.distance = distance;
+    route.moveMode = moveMode;
+    a.routes.put(b, route);
+    b.routes.put(a, route);
   }
   
   
@@ -261,18 +281,34 @@ public class World implements Session.Saveable {
   
   /**  Registering and updating journeys:
     */
-  public Journey beginJourney(Base from, Base goes, Journeys... going) {
+  public Journey beginJourney(
+    Base from, Base goes, int moveMode, Journeys... going
+  ) {
     if (from == null || goes == null) return null;
     
-    float distance = Nums.max(1, from.distance(goes));
+    float distance = from.distance(goes, moveMode);
+    if (distance < 0) return null;
+    
+    distance = Nums.max(1, distance);
+    float travelTime = distance;
+    if (moveMode == Type.MOVE_LAND ) travelTime *= LAND_TRAVEL_TIME ;
+    if (moveMode == Type.MOVE_WATER) travelTime *= WATER_TRAVEL_TIME;
+    if (moveMode == Type.MOVE_AIR  ) travelTime *= AIR_TRAVEL_TIME  ;
     
     Journey j = new Journey();
     j.from       = from;
     j.goes       = goes;
     j.startTime  = time;
-    j.arriveTime = (int) (j.startTime + (distance * TRADE_DIST_TIME));
+    j.arriveTime = (int) (j.startTime + travelTime);
+    
     for (Journeys g : going) j.going.add(g);
+    
     journeys.add(j);
+    
+    for (Journeys g : going) {
+      g.onDeparture(goes, j);
+      if (g.isActor()) from.toggleVisitor((Actor) g, false);
+    }
     
     if (reports(j)) {
       I.say("\nBeginning journey: "+j.from+" to "+j.goes);
@@ -284,14 +320,21 @@ public class World implements Session.Saveable {
   }
 
   
-  public Journey beginJourney(Base from, Base goes, Series <Journeys> going) {
-    return beginJourney(from, goes, going.toArray(Journeys.class));
+  public Journey beginJourney(
+    Base from, Base goes, int moveMode, Series <Journeys> going
+  ) {
+    return beginJourney(from, goes, moveMode, going.toArray(Journeys.class));
   }
   
   
   public boolean completeJourney(Journey j) {
     journeys.remove(j);
+    Base goes = j.goes;
+    
     for (Journeys g : j.going) {
+      if (goes.activeMap() == null && g.isActor()) {
+        goes.toggleVisitor((Actor) g, true);
+      }
       g.onArrival(j.goes, j);
     }
     return true;

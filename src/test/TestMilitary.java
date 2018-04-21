@@ -26,7 +26,9 @@ public class TestMilitary extends LogicTest {
     Area  map   = AreaTerrain.generateTerrain(
       baseC, 32, 0, MEADOW, JUNGLE
     );
-    world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES());
+    world.assignTypes(
+      ALL_BUILDINGS, ALL_SHIPS(), ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES()
+    );
     world.addBases(baseC, awayC);
     baseC.setName("Home City");
     awayC.setName("Away City");
@@ -34,7 +36,7 @@ public class TestMilitary extends LogicTest {
     
     world.settings.toggleFog = false;
     
-    World.setupRoute(baseC.locale, awayC.locale, 1);
+    World.setupRoute(baseC.locale, awayC.locale, 1, Type.MOVE_LAND);
     Base.setPosture(baseC, awayC, Base.POSTURE.ENEMY, true);
     awayC.setArmyPower(0);
     

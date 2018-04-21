@@ -173,9 +173,13 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   /**  Auxiliary pathing-assist methods:
     */
   public Pathing[] adjacent(Pathing[] temp, Area map) {
-    if (temp == null) temp = new Pathing[1];
+    
+    int numE = entrances == null ? 0 : entrances.length;
+    if (temp == null || temp.length < numE) temp = new Pathing[numE];
+    
     for (int i = temp.length; i-- > 0;) temp[i] = null;
     if (entrances == null) return temp;
+    
     for (int i = entrances.length; i-- > 0;) temp[i] = entrances[i];
     return temp;
   }
@@ -188,6 +192,11 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   
   
   public boolean allowsEntry(Actor a) {
+    return true;
+  }
+  
+  
+  public boolean allowsExit(Actor a) {
     return true;
   }
   
@@ -244,7 +253,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   }
   
   
-  public float shopPrice(Good g, TaskDelivery s) {
+  public float shopPrice(Good g, Task s) {
     if (type().hasFeature(IS_VENDOR)) {
       return g.price * (1 + (MARKET_MARGIN / 100f));
     }
@@ -490,7 +499,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
       if (Visit.arrayIncludes(t.needsAsUpgrade, upgrade)) return false;
     }
     else for (BuildType need : upgrade.needsAsUpgrade) {
-      if (! hasUpgrade(need)) return false;
+      if (! upgradeComplete(need)) return false;
     }
     if (upgradeAdds != null || upgradeTake != null || ! complete()) {
       return false;
@@ -554,7 +563,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   }
   
   
-  public boolean hasUpgrade(BuildType upgrade) {
+  public boolean upgradeComplete(BuildType upgrade) {
     if (upgrade == null            ) return false;
     if (upgrade == type()          ) return true ;
     if (upgrade == currentUpgrade()) return false;
@@ -594,7 +603,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   public BuildType currentBuildingTier() {
     BuildType tiers[] = type().upgradeTiers;
     for (int n = tiers.length; n-- > 0;) {
-      if (hasUpgrade(tiers[n])) return tiers[n];
+      if (upgradeComplete(tiers[n])) return tiers[n];
     }
     return null;
   }
@@ -609,11 +618,6 @@ public class Building extends Element implements Pathing, Employer, Carrier {
         ActorUtils.generateMigrant(w, this, false);
       }
     }
-  }
-  
-  
-  public int hireCost(ActorType workerType) {
-    return workerType.hireCost;
   }
   
   
@@ -736,7 +740,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   }
   
   
-  public void actorVisits(Actor actor, Building visits) {
+  public void actorVisits(Actor actor, Pathing visits) {
     return;
   }
   

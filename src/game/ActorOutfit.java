@@ -34,19 +34,19 @@ public class ActorOutfit {
   
   /**  State-modifiers-
     */
-  public void pickupGood(Good carried, float amount, Building store) {
+  public void pickupGood(Good carried, float amount, Carrier store) {
     if (store == null || carried == null || amount <= 0) return;
     
-    store.addInventory(0 - amount, carried);
+    store.inventory().add(0 - amount, carried);
     incCarried(carried, amount);
   }
   
   
-  public void offloadGood(Good good, Building store) {
+  public void offloadGood(Good good, Carrier store) {
     float amount = carried.valueFor(good);
     if (store == null || amount == 0) return;
     
-    store.addInventory(amount, good);
+    store.inventory().add(amount, good);
     carried.set(good, 0);
   }
   

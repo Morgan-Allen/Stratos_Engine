@@ -146,7 +146,7 @@ public class TestBuilding extends LogicTest {
       }
       
       if (upgradeBegun && ! upgradeOkay) {
-        upgradeOkay = palace.hasUpgrade(BASTION_L2);
+        upgradeOkay = palace.upgradeComplete(BASTION_L2);
         if (upgradeOkay) palace.beginRemovingUpgrade(BASTION_L2);
       }
       

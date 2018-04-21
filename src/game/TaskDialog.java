@@ -55,7 +55,7 @@ public class TaskDialog extends Task {
     //  Find a promising new target-
     Pick <Active> pick = new Pick(0);
     for (Active a : assessed) {
-      if (! a.isActor()) continue;
+      if (! a.mobile()) continue;
       pick.compare(a, dialogRating(actor, (Actor) a));
     }
     if (pick.empty()) return null;

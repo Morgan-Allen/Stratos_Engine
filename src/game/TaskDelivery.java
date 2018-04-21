@@ -12,8 +12,8 @@ public class TaskDelivery extends Task {
   
   /**  Data fields, construction and save/load methods-
     */
-  Building from;
-  Building goes;
+  Pathing from;
+  Pathing goes;
   Good carried;
   float amount;
   
@@ -25,9 +25,9 @@ public class TaskDelivery extends Task {
   
   public TaskDelivery(Session s) throws Exception {
     super(s);
-    from    = (Building) s.loadObject();
-    goes    = (Building) s.loadObject();
-    carried = (Good) s.loadObject();
+    from    = (Pathing) s.loadObject();
+    goes    = (Pathing) s.loadObject();
+    carried = (Good   ) s.loadObject();
     amount  = s.loadFloat();
   }
   
@@ -44,7 +44,12 @@ public class TaskDelivery extends Task {
   
   /**  Other config utilities:
     */
-  //  TODO:  Move the shopping code over here from BuildingForHome!
+  static TaskDelivery pickNextDelivery(
+    Actor actor, Building from, int minStock, Good... produced
+  ) {
+    int maxRange = from.type().maxDeliverRange;
+    return pickNextDelivery(actor, from, from, maxRange, minStock, produced);
+  }
   
   
   static TaskDelivery pickNextShopping(
@@ -122,16 +127,20 @@ public class TaskDelivery extends Task {
   
   
   static TaskDelivery pickNextDelivery(
-    Actor actor, Building from, int minStock, Good... produced
+    Actor actor, Pathing from, Employer e, int maxRange,
+    int minStock, Good... produced
   ) {
     //
-    //  Find someone to deliver to:
-    class Order { Building goes; Good good; float amount; }
-    Pick <Order> pickD = new Pick();
-    int maxRange = from.type().maxDeliverRange;
+    //  Basic sanity-checks first:
+    if (! (from.type().isBuilding() || from.type().isVessel())) return null;
     
+    class Order { Pathing goes; Good good; float amount; }
+    Pick <Order> pickD = new Pick();
+    Carrier venue = (Carrier) from;
+    //
+    //  Find someone to deliver to:
     for (Good made : produced) {
-      int amount = (int) from.inventory(made);
+      int amount = (int) venue.inventory().valueFor(made);
       if (amount <= minStock) continue;
       
       //  TODO:  Iterate over suitable building-types here.
@@ -156,7 +165,7 @@ public class TaskDelivery extends Task {
     if (! pickD.empty()) {
       Order o = pickD.result();
       TaskDelivery task = new TaskDelivery(actor);
-      task.configDelivery(from, o.goes, JOB.DELIVER, o.good, o.amount, from);
+      task.configDelivery(from, o.goes, JOB.DELIVER, o.good, o.amount, e);
       return task;
     }
     else {
@@ -166,21 +175,21 @@ public class TaskDelivery extends Task {
   
   
   static Building findNearestOfType(
-    Type type, int maxDist, Building from
+    Type type, int maxDist, Pathing from
   ) {
     return findNearestDemanding(type, null, null, maxDist, from, false);
   }
   
   
   static Building findNearestWithFeature(
-    Good feature, int maxDist, Building from
+    Good feature, int maxDist, Pathing from
   ) {
     return findNearestDemanding(null, feature, null, maxDist, from, false);
   }
   
   
   static Building findNearestDemanding(
-    Type type, Good needed, int maxDist, Building from
+    Type type, Good needed, int maxDist, Pathing from
   ) {
     return findNearestDemanding(type, null, needed, maxDist, from, false);
   }
@@ -189,12 +198,13 @@ public class TaskDelivery extends Task {
   static Building findNearestDemanding(
     Type type, Good feature,
     Good needed, int maxDist,
-    Building from, boolean excludeFrom
+    Pathing from, boolean excludeFrom
   ) {
+    Area map = ((Element) from).map();
     Pick <Building> pick = new Pick();
     boolean trades = from.type().isTradeBuilding();
     
-    for (Building b : from.map.buildings) {
+    for (Building b : map.buildings) {
       if (type != null && b.type() != type) continue;
       if (excludeFrom && b == from) continue;
       
@@ -253,7 +263,7 @@ public class TaskDelivery extends Task {
   /**  Scripting and events-handling-
     */
   TaskDelivery configDelivery(
-    Building from, Building goes, Task.JOB jobType,
+    Pathing from, Pathing goes, Task.JOB jobType,
     Good carried, float amount, Employer e
   ) {
     this.from    = from;
@@ -263,9 +273,9 @@ public class TaskDelivery extends Task {
     configTravel(from, jobType, e);
     return this;
   }
-
-
-  void configTravel(Building site, Task.JOB jobType, Employer e) {
+  
+  
+  void configTravel(Pathing site, Task.JOB jobType, Employer e) {
     if (site.complete()) {
       configTask(e, site, null, jobType, 0);
     }
@@ -275,30 +285,36 @@ public class TaskDelivery extends Task {
   }
   
   
-  protected void onVisit(Building visits) {
+  protected void onVisit(Pathing visits) {
     Actor actor = (Actor) this.active;
     
+    //  TODO:  Fill this in...!
+    
     if (visits == from) {
-      amount = Nums.min(amount, visits.inventory(carried));
+      Carrier venue = (Carrier) from;
+      
+      amount = Nums.min(amount, venue.inventory().valueFor(carried));
       amount = Nums.max(amount, 0);
       
       boolean privateSale = amount > 0 && goes.type().hasFeature(IS_HOUSING);
       if (type == JOB.DELIVER && privateSale) {
-        float cashPaid = amount * from.shopPrice(carried, this);
-        from.addInventory(cashPaid, CASH);
+        float cashPaid = amount * venue.shopPrice(carried, this);
+        venue.inventory().add(cashPaid, CASH);
       }
       if (type == JOB.SHOPPING && privateSale) {
-        float cashPaid = amount * from.shopPrice(carried, this);
-        from.addInventory(cashPaid, CASH);
+        float cashPaid = amount * venue.shopPrice(carried, this);
+        venue.inventory().add(cashPaid, CASH);
       }
       
       if (amount > 0.1f) {
-        actor.outfit.pickupGood(carried, amount, from);
+        actor.outfit.pickupGood(carried, amount, venue);
         configTravel(goes, type, origin);
       }
     }
+    
     if (visits == goes) {
-      actor.outfit.offloadGood(carried, goes);
+      Carrier venue = (Carrier) goes;
+      actor.outfit.offloadGood(carried, venue);
     }
   }
   
@@ -320,9 +336,9 @@ public class TaskDelivery extends Task {
   private float[] totalMaterial() {
     Actor actor = (Actor) this.active;
     float total[] = new float[4];
-    total[0] += total[1] = from.inventory(carried);
+    total[0] += total[1] = ((Carrier) from).inventory().valueFor(carried);
     total[0] += total[2] = actor.outfit.carried(carried);
-    total[0] += total[3] = goes.inventory(carried);
+    total[0] += total[3] = ((Carrier) goes).inventory().valueFor(carried);
     return total;
   }
   

@@ -2,8 +2,8 @@
 
 
 package game;
-import util.*;
 import static game.GameConstants.*;
+import util.*;
 
 
 
@@ -11,10 +11,11 @@ import static game.GameConstants.*;
 public class TaskRetreat extends Task {
   
   
-  Building hides;
+  Pathing hides;
+  float priorityBonus = 0;
   
   
-  public TaskRetreat(Actor actor, Building hides) {
+  public TaskRetreat(Actor actor, Pathing hides) {
     super(actor);
     this.hides = hides;
   }
@@ -22,13 +23,15 @@ public class TaskRetreat extends Task {
   
   public TaskRetreat(Session s) throws Exception {
     super(s);
-    this.hides = (Building) s.loadObject();
+    this.hides = (Pathing) s.loadObject();
+    this.priorityBonus = s.loadFloat();
   }
   
   
   public void saveState(Session s) throws Exception {
     super.saveState(s);
     s.saveObject(hides);
+    s.saveFloat(priorityBonus);
   }
   
   
@@ -64,7 +67,7 @@ public class TaskRetreat extends Task {
       if (hostility > 0) dangerSum += power * hostility;
       if (alliance  > 0) allySum   += power * alliance ;
       
-      if (power > 0 && allied && other.isActor()) {
+      if (power > 0 && allied && other.mobile()) {
         storeBackup.add((Actor) other);
       }
     }
@@ -80,10 +83,17 @@ public class TaskRetreat extends Task {
   }
   
   
+  static TaskRetreat configRetreat(Actor actor, Pathing hides, float priority) {
+    TaskRetreat hiding = new TaskRetreat(actor, hides);
+    hiding.priorityBonus = priority;
+    return (TaskRetreat) hiding.configTask(null, hides, null, JOB.RETREAT, 10);
+  }
+  
+  
   static TaskRetreat configRetreat(Actor actor) {
     
-    Building home = actor.home();
-    if (home == null) home = actor.work();
+    Pathing home = actor.home();
+    if (home == null) home = (Pathing) actor.work();
     Area map = actor.map;
     Pick <Building> pickHide = new Pick();
     
@@ -119,7 +129,7 @@ public class TaskRetreat extends Task {
   
   protected float successPriority() {
     Actor actor = (Actor) this.active;
-    return actor.fearLevel() * PARAMOUNT;
+    return (actor.fearLevel() * PARAMOUNT) + priorityBonus;
   }
   
   
@@ -143,7 +153,7 @@ public class TaskRetreat extends Task {
   }
 
 
-  protected void onVisit(Building visits) {
+  protected void onVisit(Pathing visits) {
     super.onVisit(visits);
   }
   

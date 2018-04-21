@@ -30,7 +30,9 @@ public class TestSieging extends LogicTest {
     );
     baseC.setName("Home City");
     awayC.setName("Away City");
-    world.assignTypes(ALL_BUILDINGS, ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES());
+    world.assignTypes(
+      ALL_BUILDINGS, ALL_SHIPS(), ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES()
+    );
     world.addBases(baseC, awayC);
     
     world.settings.toggleFog     = false;
@@ -41,7 +43,7 @@ public class TestSieging extends LogicTest {
     awayC.initBuildLevels(TROOPER_LODGE, 9, HOLDING, 1);
     awayC.council.setTypeAI(BaseCouncil.AI_OFF);
     
-    World.setupRoute(baseC.locale, awayC.locale, 1);
+    World.setupRoute(baseC.locale, awayC.locale, 1, Type.MOVE_LAND);
     Base.setPosture(baseC, awayC, Base.POSTURE.ENEMY, true);
     
     
@@ -216,7 +218,9 @@ public class TestSieging extends LogicTest {
         }
         
         if (testPathing != null) {
-          ActorPathSearch search = new ActorPathSearch(testPathing, fort);
+          ActorPathSearch search = new ActorPathSearch(
+            testPathing, Task.pathOrigin(testPathing), fort
+          );
           search.doSearch();
           if (search.success()) {
             I.say("\nGatehouse should not allow entry to invaders!");

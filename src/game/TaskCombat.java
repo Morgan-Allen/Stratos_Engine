@@ -239,7 +239,7 @@ public class TaskCombat extends Task {
     //  In the case of immobile actives, such as turrets, you don't bother with
     //  the fancy pathing-connection tests.  You just check if the target is in
     //  range.
-    if (! active.isActor()) {
+    if (! active.mobile()) {
       float distance     = Area.distance(active.at(), target);
       float rangeMelee   = 1.5f;
       float rangeMissile = active.type().rangeDist;
@@ -275,7 +275,7 @@ public class TaskCombat extends Task {
       //  TODO:  This is a temporary hack until I can get the pathing-cache to
       //  store data for particular cities...
       final AreaTile from;
-      Pathing inside = active.isActor() ? ((Actor) active).inside() : null;
+      Pathing inside = active.mobile() ? ((Actor) active).inside() : null;
       if (inside instanceof Building) {
         from = ((Building) inside).mainEntrance();
       }
@@ -402,7 +402,7 @@ public class TaskCombat extends Task {
     float targetPower = attackPower(primary);
     
     float priority = 0, empathy = 1, cruelty = 1;
-    if (actor.isActor()) {
+    if (actor.mobile()) {
       empathy = (((Actor) actor).traits.levelOf(TRAIT_EMPATHY) + 2) / 2;
       cruelty = 2 - empathy;
     }
@@ -472,7 +472,7 @@ public class TaskCombat extends Task {
   
   
   protected float successChance() {
-    if (! active.isActor()) return 1;
+    if (! active.mobile()) return 1;
     return attackChance((Actor) active, primary);
   }
   
@@ -529,9 +529,9 @@ public class TaskCombat extends Task {
     //  TODO:  This might not always be the case.  Check again...
     return Actor.MOVE_RUN;
   }
-
-
-  boolean checkContact(Pathing[] path) {
+  
+  
+  boolean checkTargetContact(Target from) {
     float range = Area.distance(active, primary);
     float maxRange = actionRange();
     return range < maxRange;

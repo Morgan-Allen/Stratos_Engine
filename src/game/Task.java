@@ -6,6 +6,8 @@ import util.*;
 import static game.Area.*;
 import static game.GameConstants.*;
 
+import game.GameConstants.Pathing;
+
 
 
 public class Task implements Session.Saveable {
@@ -23,6 +25,7 @@ public class Task implements Session.Saveable {
     DELIVER   ,
     SHOPPING  ,
     TRADING   ,
+    DOCKING   ,
     WAITING   ,
     VISITING  ,
     PLANTING  ,
@@ -82,9 +85,9 @@ public class Task implements Session.Saveable {
   
   Pathing path[] = null;
   int pathIndex = -1;
-  boolean  offMap;
-  Target   target;
-  Building visits;
+  boolean offMap;
+  Target  target;
+  Pathing visits;
   
   private float priorityEval = NO_PRIORITY;
   private boolean inContact = false;
@@ -162,7 +165,7 @@ public class Task implements Session.Saveable {
   /**  Supplemental setup methods-
     */
   Task configTask(
-    Employer origin, Building visits, Target target, JOB jobType, int maxTime
+    Employer origin, Pathing visits, Target target, JOB jobType, int maxTime
   ) {
     //  Note- the un/assign task calls are needed to ensure that current focus
     //  for the actor is updated correctly.
@@ -281,7 +284,7 @@ public class Task implements Session.Saveable {
       return false;
     }
     
-    if (active.isActor() && ! checkPathing(pathTarget())) {
+    if (active.mobile() && ! checkPathing(pathTarget())) {
       updatePathing();
       if (! checkPathing(pathTarget())) {
         return false;
@@ -289,25 +292,24 @@ public class Task implements Session.Saveable {
     }
     
     Area    map     = active.map();
-    boolean isActor = active.isActor();
-    Actor   asActor = isActor ? (Actor) active : null;
+    boolean mobile  = active.mobile();
+    Actor   asActor = mobile ? (Actor) active : null;
     
     final float BASE_TILES_PER_SECOND = 1.5f;
     float motion = BASE_TILES_PER_SECOND / map.ticksPS;
-    motion *= isActor ? asActor.moveSpeed() : 0;
+    motion *= mobile ? asActor.moveSpeed() : 0;
     
     
-    while (motion > 0 || ! isActor) {
+    while (motion > 0 || ! mobile) {
       
-      Pathing  path[]   = this.path;
-      boolean  contacts = checkContact(path);
-      Building visits   = this.visits;
-      Target   target   = this.target;
+      Pathing path[]   = this.path;
+      Pathing visits   = this.visits;
+      Target  target   = this.target;
       
       priorityEval = NO_PRIORITY;
       inContact = false;
       
-      if (visits != null && asActor.inside() == visits) {
+      if (visits != null && mobile && asActor.inside() == visits) {
         ticksSpent += 1;
         int progress = checkActionProgress();
         
@@ -319,10 +321,9 @@ public class Task implements Session.Saveable {
           return true;
         }
         else {
-          if (isActor) {
+          if (mobile) {
             onVisit(visits);
             asActor.onVisit(visits);
-            visits.visitedBy(asActor);
             if (origin != null) origin.actorVisits(asActor, visits);
           }
           if (progress == PROG_FINISHING) {
@@ -332,7 +333,7 @@ public class Task implements Session.Saveable {
           return true;
         }
       }
-      else if (contacts) {
+      else if (target != null && checkTargetContact(target)) {
         ticksSpent += 1;
         int progress = checkActionProgress();
         
@@ -346,7 +347,7 @@ public class Task implements Session.Saveable {
         else {
           onTarget(target);
           target.targetedBy(active);
-          if (isActor) {
+          if (mobile) {
             asActor.onTarget(target);
             if (origin != null) origin.actorTargets(asActor, target);
           }
@@ -357,8 +358,7 @@ public class Task implements Session.Saveable {
           return true;
         }
       }
-      else if (isActor) {
-
+      else if (mobile) {
         Pathing from     = Task.pathOrigin(asActor);
         Pathing inside   = asActor.inside();
         Pathing ahead    = nextOnPath();
@@ -366,11 +366,10 @@ public class Task implements Session.Saveable {
         Vec3D   aheadPos = ahead   .exactPosition(null);
         Vec3D   diff     = aheadPos.sub(actorPos, null);
         float   dist     = diff.length();
-        boolean jump     = from.isTile() != ahead.isTile();
+        boolean jump     = ! (from.isTile() && ahead.isTile());
         
         if (jump) {
-          ///I.say(active+" jumping from "+from+" to "+ahead);
-          asActor.setExactLocation(aheadPos, map);
+          asActor.setExactLocation(aheadPos, map, true);
           if (! from .isTile()) asActor.setInside(inside, false);
           if (! ahead.isTile()) asActor.setInside(ahead , true );
         }
@@ -382,7 +381,7 @@ public class Task implements Session.Saveable {
           actorPos.y += distMoved * diff.y;
           
           motion -= distMoved;
-          asActor.setExactLocation(actorPos, map);
+          asActor.setExactLocation(actorPos, map, false);
         }
         
         if (asActor.at().above == ahead || asActor.at() == ahead) {
@@ -404,12 +403,12 @@ public class Task implements Session.Saveable {
   
   /**  Activity calls-
     */
-  protected void onVisit(Building visits) {
+  protected void onVisit(Pathing visits) {
     return;
   }
   
   
-  protected void onVisitEnds(Building visits) {
+  protected void onVisitEnds(Pathing visits) {
     return;
   }
   
@@ -489,7 +488,7 @@ public class Task implements Session.Saveable {
   }
   
   
-  public Building visits() {
+  public Pathing visits() {
     return visits;
   }
   
@@ -510,12 +509,6 @@ public class Task implements Session.Saveable {
   }
   
   
-  boolean checkContact(Pathing path[]) {
-    Pathing from = (Pathing) Visit.last(path);
-    return Area.distance(active, from) < actionRange();
-  }
-  
-  
   int checkActionProgress() {
     Area map = active.map();
     if (map == null) return PROG_CLOSING;
@@ -528,6 +521,14 @@ public class Task implements Session.Saveable {
     if (ticksSpent == maxTicks) return PROG_FINISHING;
     if (exactInterval         ) return PROG_ACTION;
     return PROG_CONTACT;
+  }
+  
+  
+  boolean checkTargetContact(Target from) {
+    Pathing last = (Pathing) Visit.last(path);
+    if (from != last && active.at() == last) return true;
+    if (Area.distance(active, from) < actionRange()) return true;
+    return false;
   }
   
   
@@ -580,6 +581,8 @@ public class Task implements Session.Saveable {
     Pathing last = (Pathing) Visit.last(path);
     Actor actor = (Actor) this.active;
     Area map = actor.map();
+    boolean flight = actor.type().moveMode == Type.MOVE_AIR;
+    
     if (Area.distance(last, target) > 1.5f) return false;
     
     int index = Nums.clamp(pathIndex, path.length);
@@ -589,8 +592,20 @@ public class Task implements Session.Saveable {
     for (int i = 0; i < actor.type().sightRange; i++, index++) {
       if (index >= path.length) break;
       Pathing t = path[index];
-      if (t.isTile() && map.blocked((AreaTile) t)) return false;
-      if (! (t.onMap() && t.allowsEntry(actor))) return false;
+      
+      //  TODO:  Reference an 'isBlocked' check in the ActorPathSearch class
+      //  here!
+      
+      if (
+        t.isTile() && (! flight) &&
+        map.blocked((AreaTile) t) &&
+        map.above((AreaTile) t) != actor
+      ) {
+        return false;
+      }
+      if (! (t.onMap() && t.allowsEntry(actor))) {
+        return false;
+      }
     }
     
     return true;
@@ -598,10 +613,13 @@ public class Task implements Session.Saveable {
   
   
   boolean updatePathing() {
+    if (! active.mobile()) return false;
+    
     boolean report  = reports();
     boolean verbose = false;
     
-    Area map      = active.map();
+    Actor   actor    = (Actor) active;
+    Area    map      = active.map();
     boolean visiting = visits != null;
     Pathing from     = pathOrigin(active);
     Pathing heads    = pathTarget();
@@ -614,18 +632,21 @@ public class Task implements Session.Saveable {
       return false;
     }
     
-    ActorPathSearch search = new ActorPathSearch(map, from, heads, -1);
-    
     //  TODO:  You should have map-settings that toggle whether the
     //  path-cache is used at all.  Default to simpler checks in that
     //  case.
-    if ((! visiting) && ! map.pathCache.pathConnects(from, heads, false, false)) {
+    
+    ActorPathSearch search = new ActorPathSearch(actor, from, heads);
+    if (
+      (! visiting) && (! search.flight) &&
+      ! map.pathCache.pathConnects(from, heads, false, false)
+    ) {
       search.setProximate(true);
     }
-    //search.verbosity = Search.VERBOSE;
     search.doSearch();
     this.path = search.fullPath(Pathing.class);
     this.pathIndex = 0;
+    
     
     if (path == null) {
       if (report) I.say("  Could not find path for "+this);

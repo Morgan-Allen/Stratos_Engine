@@ -3,7 +3,7 @@
 package game;
 import static game.ActorUtils.*;
 import static game.GameConstants.*;
-import game.Task.JOB;
+import static game.Task.*;
 import gameUI.play.*;
 import graphics.common.*;
 import util.*;
@@ -128,6 +128,11 @@ public abstract class Mission implements
   }
   
   
+  public void setWorker(Actor a, boolean is) {
+    toggleRecruit(a, is);
+  }
+  
+  
   public void setLocalFocus(Target focus) {
     this.localFocus = focus;
   }
@@ -165,7 +170,7 @@ public abstract class Mission implements
     }
     
     if (transitTile == null && map != null && offmap != null) {
-      transitTile = findTransitPoint(map, localBase, offmap);
+      transitTile = findTransitPoint(map, localBase, offmap, Type.MOVE_LAND, 1);
     }
     if (allDeparting && ! complete()) {
       beginJourney(localBase, worldFocus());
@@ -191,7 +196,9 @@ public abstract class Mission implements
     going.add(this);
     
     World.Journey journey;
-    journey = world.beginJourney(from, goes, going.toArray(Journeys.class));
+    int moveMode = Type.MOVE_LAND;
+    if (transitShip != null) moveMode = transitShip.type().moveMode;
+    journey = world.beginJourney(from, goes, moveMode, going);
     
     //I.say(this+" beginning journey from "+from+" to "+goes);
     //I.say("  ETA: "+world.arriveTime(this));
@@ -211,6 +218,11 @@ public abstract class Mission implements
   }
   
   
+  public void onDeparture(Base goes, World.Journey journey) {
+    return;
+  }
+  
+  
   public void onArrival(Base goes, World.Journey journey) {
     this.localBase  = goes;
     this.arriveTime = goes.world.time();
@@ -225,6 +237,11 @@ public abstract class Mission implements
         handleOffmapArrival(goes, journey);
       }
     }
+  }
+  
+  
+  public boolean isActor() {
+    return false;
   }
   
   
@@ -386,7 +403,7 @@ public abstract class Mission implements
   }
   
   
-  public void actorVisits(Actor actor, Building visits) {
+  public void actorVisits(Actor actor, Pathing visits) {
     return;
   }
   

@@ -5,6 +5,8 @@ package game;
 import util.*;
 import static game.GameConstants.*;
 
+import game.GameConstants.Pathing;
+
 
 
 public class TaskAssessTax extends Task {
@@ -70,9 +72,13 @@ public class TaskAssessTax extends Task {
   
   
   protected float successPriority() {
-    Actor actor = (Actor) active;
-    float cash = actor.outfit.carried(CASH);
-    if (visits != store) cash = Nums.max(cash, visits.inventory(CASH));
+    Actor   actor = (Actor) active;
+    Carrier venue = (Carrier) visits;
+    float   cash  = actor.outfit.carried(CASH);
+    
+    if (visits != store) {
+      cash = Nums.max(cash, venue.inventory().valueFor(CASH));
+    }
     
     //  TODO:  This needs to be reconsidered.  Seems a bit extreme?
     
@@ -81,17 +87,18 @@ public class TaskAssessTax extends Task {
   }
   
   
-  protected void onVisit(Building visits) {
+  protected void onVisit(Pathing visits) {
     Actor actor = (Actor) this.active;
+    Carrier venue = (Carrier) visits;
     
     //  NOTE:  Operations with cash need some special handling to allow for
     //  negative numbers...
     
     if (actor.jobType() == JOB.COLLECTING) {
-      float cash = visits.inventory(CASH);
+      float cash = venue.inventory().valueFor(CASH);
       
       actor.inventory().add(cash, CASH);
-      visits.setInventory(CASH, 0);
+      venue.inventory().set(CASH, 0);
       
       TaskAssessTax next = nextAssessment(actor, store, maxCollect);
       if (next != null) actor.assignTask(next, this);

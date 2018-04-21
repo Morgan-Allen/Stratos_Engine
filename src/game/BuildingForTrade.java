@@ -1,10 +1,8 @@
 
 
-
 package game;
-import util.*;
 import static game.GameConstants.*;
-import static game.ActorUtils.*;
+import util.*;
 
 
 
@@ -13,12 +11,14 @@ public class BuildingForTrade extends Building implements Trader {
   
   /**  Data fields, setup and save/load methods-
     */
-  Tally <Good> prodLevel  = new Tally();
-  Tally <Good> needLevel  = new Tally();
+  Tally <Good> prodLevel = new Tally();
+  Tally <Good> needLevel = new Tally();
+  
   Base tradePartner = null;
   boolean exports  = true ;
   boolean tradeOff = false;
   Good needed[] = NO_GOODS, produced[] = NO_GOODS;
+  
   
   
   public BuildingForTrade(BuildType type) {
@@ -28,8 +28,10 @@ public class BuildingForTrade extends Building implements Trader {
   
   public BuildingForTrade(Session s) throws Exception {
     super(s);
+    
     s.loadTally(prodLevel);
     s.loadTally(needLevel);
+    
     tradePartner = (Base) s.loadObject();
     exports = s.loadBool();
     tradeOff = s.loadBool();
@@ -38,8 +40,10 @@ public class BuildingForTrade extends Building implements Trader {
   
   public void saveState(Session s) throws Exception {
     super.saveState(s);
+    
     s.saveTally(prodLevel);
     s.saveTally(needLevel);
+    
     s.saveObject(tradePartner);
     s.saveBool(exports);
     s.saveBool(tradeOff);
@@ -137,9 +141,12 @@ public class BuildingForTrade extends Building implements Trader {
   public Task selectActorBehaviour(Actor actor) {
     
     if (actor.type().isVessel()) {
-      Task trading = selectTraderBehaviour(actor);
-      if (trading != null) return trading;
-      
+      if (! tradeOff) {
+        Task trading = selectTraderBehaviour(
+          this, actor, tradePartner, true, map()
+        );
+        if (trading != null) return trading;
+      }
       Task coming = returnActorHere(actor);
       if (coming != null) return coming;
     }
@@ -158,42 +165,48 @@ public class BuildingForTrade extends Building implements Trader {
   }
   
   
-  Task selectTraderBehaviour(Actor trader) {
-    if (tradeOff) return null;
+  public static TaskTrading selectTraderBehaviour(
+    Trader from, Actor trading,
+    Base tradePartner, boolean cityBackOnly, Area map
+  ) {
+    boolean reports = trading.reports();
     
     class Order { Tally <Good> cargo; Trader goes; float rating; }
     List <Trader> targets = new List();
     List <Order> orders = new List();
-    Base homeCity = base();
+    Base homeCity = from.base();
     World world = homeCity.world;
+    int moveMode = trading.type().moveMode;
     
-    for (Building b : map.buildings) {
-      if (b == this || ! (b instanceof Trader)) continue;
-      if (b.base() != base()) {
+    for (Building b : map.buildings()) {
+      if (b == from || ! (b instanceof Trader)) continue;
+      if (b.base() != homeCity) {
         if      (tradePartner == null    ) continue;
         else if (b.base() != tradePartner) continue;
       }
       targets.add((Trader) b);
     }
     
-    if (tradePartner != null && tradePartner.activeMap() != trader.map()) {
+    if (tradePartner != null && tradePartner.activeMap() != trading.map()) {
       targets.add(tradePartner);
     }
     else for (Base c : world.bases) {
-      if (c.activeMap() == map       ) continue;
-      if (c == homeCity              ) continue;
-      if (c.isEnemyOf(homeCity)      ) continue;
-      if (c.distance (homeCity) == -1) continue;
+      if (c.activeMap() == map ) continue;
+      if (c == homeCity        ) continue;
+      if (c.isEnemyOf(homeCity)) continue;
+      if (c.distance(homeCity, moveMode) < 0) continue;
       targets.add(c);
     }
     
     for (Trader t : targets) {
       World w = map.world;
       Base c = (t == t.base()) ? ((Base) t) : null;
-      Tally <Good> cargoAway = TaskTrading.configureCargo(this, t, false, w);
-      Tally <Good> cargoBack = TaskTrading.configureCargo(t, this, true , w);
       
-      float distRating = TaskTrading.distanceRating(this, t);
+      Tally <Good> cargoAway, cargoBack;
+      cargoAway = TaskTrading.configureCargo(from, t, false       , w);
+      cargoBack = TaskTrading.configureCargo(t, from, cityBackOnly, w);
+      
+      float distRating = TaskTrading.distanceRating(from, t);
       float rating = 0;
       
       if (cargoAway.size() > 0) {
@@ -229,24 +242,16 @@ public class BuildingForTrade extends Building implements Trader {
     
     if (! pick.empty()) {
       Order o = pick.result();
-      
-      if (reports()) {
-        I.say("\n"+this+" assigning delivery to "+trader);
+      if (reports) {
+        I.say("\n"+from+" assigning delivery to "+trading);
         I.say("  Cargo is: "+o.cargo);
         I.say("  Destination is: "+o.goes);
       }
-      
-      TaskTrading t = new TaskTrading(trader);
-      t = t.configTrading(this, o.goes, o.cargo);
-      return t;
+      return TaskTrading.configTrading(from, o.goes, trading, o.cargo);
     }
     
     return null;
   }
-  
-  
-  
-  
   
 }
 

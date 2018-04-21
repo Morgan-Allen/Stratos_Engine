@@ -125,7 +125,7 @@ public class BuildingForWalls extends Building implements Active {
   
   /**  Handling the Active contract-
     */
-  public boolean isActor() {
+  public boolean mobile() {
     return false;
   }
   

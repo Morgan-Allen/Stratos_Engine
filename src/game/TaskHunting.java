@@ -5,6 +5,8 @@ import util.*;
 import static game.GameConstants.*;
 import static game.TaskCombat.*;
 
+import game.GameConstants.Pathing;
+
 
 
 public class TaskHunting extends Task {
@@ -128,12 +130,12 @@ public class TaskHunting extends Task {
       configTask(store, store, null, JOB.DELIVER, 0);
     }
   }
-
-
-  protected void onVisit(Building visits) {
+  
+  
+  protected void onVisit(Pathing visits) {
     Actor actor = (Actor) this.active;
     if (visits == store) {
-      actor.outfit.offloadGood(prey.type().meatType, visits);
+      actor.outfit.offloadGood(prey.type().meatType, (Carrier) visits);
     }
   }
   

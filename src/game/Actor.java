@@ -31,10 +31,11 @@ public class Actor extends Element implements
   
   private String ID;
   
-  private Building work;
+  private Employer work;
   private Building home;
   private Base     guestBase;
   private Mission  mission;
+  private Base     offmap;
   
   private Task task;
   private Task reaction;
@@ -75,6 +76,7 @@ public class Actor extends Element implements
     home      = (Building) s.loadObject();
     guestBase = (Base    ) s.loadObject();
     mission   = (Mission ) s.loadObject();
+    offmap    = (Base    ) s.loadObject();
     
     task      = (Task) s.loadObject();
     reaction  = (Task) s.loadObject();
@@ -106,6 +108,7 @@ public class Actor extends Element implements
     s.saveObject(home     );
     s.saveObject(guestBase);
     s.saveObject(mission  );
+    s.saveObject(offmap   );
     
     s.saveObject(task    );
     s.saveObject(reaction);
@@ -133,7 +136,7 @@ public class Actor extends Element implements
   }
   
   
-  public boolean isActor() {
+  public boolean mobile() {
     return true;
   }
   
@@ -143,18 +146,19 @@ public class Actor extends Element implements
     */
   public void enterMap(Area map, int x, int y, float buildLevel, Base owns) {
     super.enterMap(map, x, y, buildLevel, owns);
+    
     map.actors.add(this);
+    if (type().isVessel()) map.vessels.add(this);
   }
   
   
   public void exitMap(Area map) {
     
     if (inside != null) setInside(inside, false);
-    map.actors.remove(this);
     
-    if (map.actors.includes(this)) {
-      I.complain("\nMap still contains "+this);
-    }
+    map.actors.remove(this);
+    if (type().isVessel()) map.vessels.remove(this);
+    
     super.exitMap(map);
   }
   
@@ -184,7 +188,7 @@ public class Actor extends Element implements
   }
   
   
-  public Building work() {
+  public Employer work() {
     return work;
   }
   
@@ -194,8 +198,18 @@ public class Actor extends Element implements
   }
   
   
-  void setWork(Building work) {
+  void setWork(Employer work) {
     this.work = work;
+  }
+  
+  
+  void setOffmap(Base offmap) {
+    this.offmap = offmap;
+  }
+  
+  
+  public Base offmapBase() {
+    return offmap;
   }
   
   
@@ -207,10 +221,8 @@ public class Actor extends Element implements
     //  Some checks to assist in case of blockage, and refreshing position-
     lastPosition.setTo(exactPosition);
     wasIndoors = indoors();
-    boolean trapped = false;
-    trapped |= inside == null && ! map.pathCache.hasGroundAccess(at());
-    trapped |= inside != null && Visit.empty(((Building) inside).entrances());
-    if (trapped) {
+    boolean escape = checkPathingEscape();
+    if (escape) {
       AreaTile free = map.pathCache.mostOpenNeighbour(at());
       if (free == null) free = AreaTile.nearestOpenTile(at(), map, 6);
       if (free != null) {
@@ -242,7 +254,7 @@ public class Actor extends Element implements
       //
       //  And update anything you're carrying-
       if (attached != null && onMap()) {
-        attached.setExactLocation(exactPosition, map);
+        attached.setExactLocation(exactPosition, map, false);
       }
     }
     //
@@ -251,6 +263,26 @@ public class Actor extends Element implements
     if (onMap()) health.updateHealth();
     if (onMap()) health.checkHealthState();
     if (onMap() && health.alive()) health.updateLifeCycle(base(), true);
+  }
+  
+  
+  boolean checkPathingEscape() {
+    //
+    //  TODO:  Use proper collision-checks for this!
+    
+    boolean trapped = false;
+    trapped |=
+      inside == null &&
+      type().moveMode != Type.MOVE_AIR &&
+      ! map.pathCache.hasGroundAccess(at())
+    ;
+    trapped |=
+      inside != null &&
+      inside.mainEntrance() == null &&
+      Visit.empty(inside.adjacent(null, map)) &&
+      inside.allowsExit(this)
+    ;
+    return trapped;
   }
   
   
@@ -279,11 +311,13 @@ public class Actor extends Element implements
   /**  Pathing and visitation utilities:
     */
   public void setInside(Pathing b, boolean yes) {
-    if (b == null || ! b.onMap()) {
+    if (b == null || ((Element) b).destroyed()) {
       if (b == inside) inside = null;
       return;
     }
+    
     final Pathing old = inside;
+    
     if (yes && b != old) {
       if (old != null) {
         setInside(old, false);
@@ -303,6 +337,7 @@ public class Actor extends Element implements
       super.setLocation(at, map);
       return;
     }
+    
     AreaTile old = this.at();
     super.setLocation(at, map);
     
@@ -320,12 +355,17 @@ public class Actor extends Element implements
   }
   
   
-  public void setExactLocation(Vec3D location, Area map) {
+  public void setExactLocation(Vec3D location, Area map, boolean jump) {
     AreaTile goes = map.tileAt(location.x, location.y);
     setLocation(goes, map);
     
     float height = exactPosition.z;
     exactPosition.set(location.x, location.y, height);
+    
+    if (jump) {
+      lastPosition.setTo(exactPosition);
+      wasIndoors = indoors();
+    }
   }
   
   
@@ -335,7 +375,7 @@ public class Actor extends Element implements
   }
   
   
-  protected void onVisit(Building visits) {
+  protected void onVisit(Pathing visits) {
     return;
   }
   
@@ -411,7 +451,7 @@ public class Actor extends Element implements
   
   
   public Task visitTask(
-    Building goes, int maxTime, JOB jobType, Employer e
+    Pathing goes, int maxTime, JOB jobType, Employer e
   ) {
     if (goes == null) return null;
     if (reports()) I.say(this+" will visit "+goes+" for time "+maxTime);
@@ -491,19 +531,33 @@ public class Actor extends Element implements
   }
   
   
+  public float shopPrice(Good good, Task purchase) {
+    return good.price;
+  }
+  
   
   /**  Handling migration and off-map tasks-
     */
   public void onArrival(Base goes, World.Journey journey) {
     if (goes.activeMap() != null) {
       AreaTile entry = ActorUtils.findTransitPoint(
-        goes.activeMap(), goes, journey.from
+        goes.activeMap(), goes, journey.from, this
       );
       enterMap(goes.activeMap(), entry.x, entry.y, 1, base());
     }
     if (task != null && ! task.updateOnArrival(goes, journey)) {
       assignTask(null, this);
     }
+  }
+  
+  
+  public void onDeparture(Base goes, World.Journey journey) {
+    return;
+  }
+  
+  
+  public boolean isActor() {
+    return true;
   }
   
   

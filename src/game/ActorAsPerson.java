@@ -112,7 +112,7 @@ public class ActorAsPerson extends Actor {
       choice.add(TaskWander.configWandering(this));
       choice.add(selectTechniqueUse(false, (Series) map.actors()));
       
-      if (work() != null && work().complete()) {
+      if (work() != null && ((Element) work()).complete()) {
         choice.add(work().selectActorBehaviour(this));
       }
       if (home() != null && home().complete()) {
