@@ -10,12 +10,6 @@ import content.*;
 import util.*;
 
 
-
-//  TODO:  Later, attach TaskTrading and/or TaskMissionDropoff to the
-//  Vessel class.  (Create the latter as a separate task-class.)  And see if
-//  you can at least streamline the TaskTrading class.
-//  (And just use TaskDelivery to do the local cargo-transport!)
-
 //  TODO:  Add the crew check down further in the suite?
 
 
