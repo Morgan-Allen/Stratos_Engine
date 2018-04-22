@@ -14,7 +14,7 @@ public class TestCity extends LogicTest {
   
   
   public static void main(String args[]) {
-    testCity(false);
+    testCity(true);
   }
   
   
@@ -24,6 +24,18 @@ public class TestCity extends LogicTest {
     Base base = setupTestBase(32, ALL_GOODS, false);
     Area map = base.activeMap();
     World world = map.world;
+    world.assignTypes(
+      ALL_BUILDINGS, ALL_SHIPS(), ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES()
+    );
+    
+    Base homeland = new Base(world, world.addLocale(8, 8));
+    homeland.setName("Homeland");
+    world.addBases(homeland);
+    base.setHomeland(homeland);
+    
+    World.setupRoute(base.locale, homeland.locale, 3, Type.MOVE_AIR);
+    Base.setPosture(base, homeland, Base.POSTURE.VASSAL, true);
+    
     world.settings.toggleFog = false;
     
     base.initFunds(5000);
@@ -211,7 +223,15 @@ public class TestCity extends LogicTest {
     I.say("  RUN TIME: "+RUN_TIME+", YEAR LENGTH: "+YEAR_LENGTH);
     I.say("  TOTAL CRAFT TIME: "+TaskCrafting.totalCraftTime);
     I.say("  TOTAL PROGRESS:   "+TaskCrafting.totalProgInc  );
+    
+    int mapCitizens = 0, totalCitizens = 0;
+    for (Building b : map.buildings()) for (Actor a : b.workers()) {
+      totalCitizens += 1;
+      if (a.onMap()) mapCitizens += 1;
+    }
+    I.say("\n  CITIZENS ON MAP: "+mapCitizens+"/"+totalCitizens);
     I.say("");
+    
     
     reportOnMap(map, base, false, PARTS, MEDICINE);
     return false;

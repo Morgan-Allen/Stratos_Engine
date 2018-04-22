@@ -229,6 +229,9 @@ public class Actor extends Element implements
         setInside(inside, false);
         setLocation(free, map);
       }
+      if (attachTo != null) {
+        attachTo.setPassenger(this, false);
+      }
     }
     
     if (health.active() && attachTo == null) {
@@ -269,6 +272,10 @@ public class Actor extends Element implements
   boolean checkPathingEscape() {
     //
     //  TODO:  Use proper collision-checks for this!
+    
+    if (attachTo != null) {
+      return attachTo.checkPathingEscape();
+    }
     
     boolean trapped = false;
     trapped |=
@@ -512,7 +519,9 @@ public class Actor extends Element implements
       p.attachTo = null;
       attached = null;
     }
-    else I.complain("\nIncorrect passenger parameters!");
+    else {
+      I.say("\nWARNING: Incorrect passenger parameters!");
+    }
   }
   
   

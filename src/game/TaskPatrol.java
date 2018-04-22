@@ -99,7 +99,7 @@ public class TaskPatrol extends Task implements TileConstants {
       Building building = (Building) guarded;
       
       AreaTile from = actor.at();
-      if (actor.indoors()) from = ((Building) actor.inside()).mainEntrance();
+      if (actor.indoors()) from = ((Pathing) actor.inside()).mainEntrance();
       Batch <AreaTile> around = new Batch();
       
       for (AreaTile t : building.perimeter(map)) {

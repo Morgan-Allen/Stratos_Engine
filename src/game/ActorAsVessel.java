@@ -317,17 +317,19 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   void update() {
     super.update();
     
-    updateWorkers(map().time());
-    
-    Vec3D pos = exactPosition(null);
-    for (Actor a : inside) {
-      a.setExactLocation(pos, map, false);
-    }
-    
-    if (type().isAirship() && task() instanceof TaskTrading) {
-      TaskTrading trading = (TaskTrading) task();
-      needLevel.clear();
-      needLevel.add(trading.taken);
+    if (onMap()) {
+      updateWorkers(map().time());
+      
+      Vec3D pos = exactPosition(null);
+      for (Actor a : inside) {
+        a.setExactLocation(pos, map, false);
+      }
+      
+      if (type().isAirship() && task() instanceof TaskTrading) {
+        TaskTrading trading = (TaskTrading) task();
+        needLevel.clear();
+        needLevel.add(trading.taken);
+      }
     }
   }
   

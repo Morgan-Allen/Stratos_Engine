@@ -59,6 +59,7 @@ public class TestBounties extends LogicTest {
         Actor creature = (Actor) MICOVORE.generate();
         creature.enterMap(map, 20, 20, 1, map.locals);
         creature.takeDamage(creature.health.maxHealth() * 0.7f);
+        creature.health.incBleed(-1000);
         
         MissionStrike mission = new MissionStrike(base);
         mission.setLocalFocus(creature);

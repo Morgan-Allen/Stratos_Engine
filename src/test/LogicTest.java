@@ -168,6 +168,7 @@ public class LogicTest {
       int fill = type.tint;
       
       if (! type.isVessel()) {
+        fill = WALKER_COLOR;
         if      (a.work() != null) fill = ((Element) a.work()).type().tint;
         else if (a.home() != null) fill = a.home().type().tint;
       }

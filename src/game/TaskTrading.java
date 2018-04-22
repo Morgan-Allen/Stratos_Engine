@@ -134,7 +134,7 @@ public class TaskTrading extends Task {
         );
         configTask(origin, null, exits, Task.JOB.DEPARTING, 0);
       }
-      else if (duringTask) {
+      else if (duringTask && goes != actor.offmapBase()) {
         World world = homeCity.world;
         int moveMode = actor.type().moveMode;
         world.beginJourney(from.base(), goes.base(), moveMode, actor);
@@ -143,7 +143,7 @@ public class TaskTrading extends Task {
   }
   
   
-  protected void onArrival(Base goes, World.Journey journey) {
+  protected boolean updateOnArrival(Base goes, World.Journey journey) {
     //
     //  If you're landing as a ship, proceed to whichever docking site is
     //  available-
@@ -151,22 +151,27 @@ public class TaskTrading extends Task {
       ActorAsVessel ship = (ActorAsVessel) active;
       AreaTile docks = ship.landsAt();
       configTask(origin, null, docks, JOB.DOCKING, 10);
-      return;
+      return true;
     }
     //
     //  If you've arrived at your destination city, offload your cargo, take on
     //  fresh goods, and record any profits in the process:
     if (goes != homeCity && ! didImport) {
       onVisit(goes);
+      return true;
     }
     //
     //  If you've arrived back on your home map, return to your post-
-    else if (goes == homeCity) {
+    else if (goes == homeCity && goes.activeMap() != null) {
       configTravel(tradeFrom, tradeFrom, JOB.RETURNING, origin, true);
+      return true;
     }
     //
-    //  ...Fwaaah?
-    else I.complain("THIS SHOULDN'T HAPPEN");
+    //  Otherwise, you've arrived back on your home map, which is a foreign
+    //  base, and you're done:
+    else {
+      return false;
+    }
   }
   
   
@@ -251,29 +256,6 @@ public class TaskTrading extends Task {
     onVisit((Trader) visits);
   }
   
-  
-  protected boolean updateOnArrival(Base goes, World.Journey journey) {
-    //
-    //  If you've arrived at your destination city, offload your cargo, take on
-    //  fresh goods, and record any profits in the process:
-    if (goes != homeCity && ! didImport) {
-      onVisit(goes);
-      return true;
-    }
-    //
-    //  If you've arrived back on your home map, return to your post-
-    else if (goes == homeCity) {
-      configTravel(tradeFrom, tradeFrom, Task.JOB.TRADING, origin, true);
-      return true;
-    }
-    //
-    //  ...Fwaaah?
-    else {
-      I.complain("THIS SHOULDN'T HAPPEN");
-      return false;
-    }
-  }
-  
     
   protected void onVisit(Trader visits) {
     Actor actor = (Actor) active;
@@ -286,6 +268,7 @@ public class TaskTrading extends Task {
       //  TODO:  Screen migrants based on base of destination?  To be safe?...
       ActorAsVessel ship = (ActorAsVessel) active;
       for (Actor a : goes.migrants) {
+        goes.removeMigrant(a);
         a.setInside(ship, true);
       }
     }

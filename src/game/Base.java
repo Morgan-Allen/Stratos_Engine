@@ -898,8 +898,12 @@ public class Base implements Session.Saveable, Trader {
           this, trader, b, true, b.activeMap()
         );
         if (trading != null) {
+          ///I.say(trader+" begins task: "+trading);
           trader.assignTask(trading, this);
           trading.beginAsVessel(this);
+        }
+        else {
+          ///I.say(trader+" could not find trading behaviour!");
         }
       }
     }
@@ -918,6 +922,7 @@ public class Base implements Session.Saveable, Trader {
   
   
   public void toggleVisitor(Actor visitor, boolean is) {
+    
     Base offmap = visitor.offmapBase();
     if (offmap == this &&   is) return;
     if (offmap != this && ! is) return;
@@ -939,6 +944,11 @@ public class Base implements Session.Saveable, Trader {
   
   public void addMigrant(Actor migrant) {
     this.migrants.add(migrant);
+  }
+  
+  
+  public void removeMigrant(Actor migrant) {
+    this.migrants.remove(migrant);
   }
   
   

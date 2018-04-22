@@ -185,12 +185,14 @@ public class TaskFirstAid extends Task {
   }
   
   
-  protected void onVisit(Building visits) {
+  protected void onVisit(Pathing visits) {
     Actor actor = (Actor) active;
     actor.setPassenger(patient, false);
     patient.setInside(visits, true);
   }
   
 }
+
+
 
 

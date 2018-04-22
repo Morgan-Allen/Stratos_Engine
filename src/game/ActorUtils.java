@@ -72,20 +72,18 @@ public class ActorUtils {
   
   /**  Finding migrants in and out-
     */
+  //  TODO:  You need to give a clearer indication of whether migration is
+  //  even possible, and from where...
+  
+  
   public static Actor generateMigrant(
     ActorType jobType, Element employs, boolean payHireCost
   ) {
     Base  goes  = employs.base();
     World world = goes.world;
-    int   cost  = goes.hireCost(jobType);
-    
     if (! world.settings.toggleMigrate) return null;
-    if (payHireCost) goes.incFunds(0 - cost);
     
     Actor migrant = (Actor) jobType.generate();
-    migrant.assignBase(goes);
-    ((Employer) employs).setWorker(migrant, true);
-    if (jobType.isPerson()) jobType.initAsMigrant((ActorAsPerson) migrant);
     
     if (employs.onMap()) {
       //  TODO:  Consider a wider variety of cities to source from...
@@ -93,6 +91,7 @@ public class ActorUtils {
         Base homeland = goes.homeland();
         if (homeland != null && homeland.traderFor(goes) != null) {
           homeland.addMigrant(migrant);
+          I.say("Adding migrant "+migrant+" to "+homeland);
         }
         else {
           return null;
@@ -107,6 +106,13 @@ public class ActorUtils {
     else {
       migrant.setInside((Pathing) employs, true);
     }
+
+    int cost = goes.hireCost(jobType);
+    if (payHireCost) goes.incFunds(0 - cost);
+    
+    migrant.assignBase(goes);
+    ((Employer) employs).setWorker(migrant, true);
+    if (jobType.isPerson()) jobType.initAsMigrant((ActorAsPerson) migrant);
     
     return migrant;
   }
