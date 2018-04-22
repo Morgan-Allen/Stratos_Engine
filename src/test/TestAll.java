@@ -41,7 +41,12 @@ public class TestAll {
     record(TestFirstAid .testFirstAid (false));
     record(TestDialog   .testDialog   (false));
     record(TestWorld    .testWorld    (false));
-    record(TestCity     .testCity     (false));
+    
+    record(TestVessels.testForeignToLand(false));
+    record(TestVessels.testForeignToDock(false));
+    record(TestVessels.testDockToForeign(false));
+    record(TestVessels.testForeignSpawn (false));
+    record(TestVessels.testLocalSpawn   (false));
     
     record(TestBounties.testAttackBuildingMission(false));
     record(TestBounties.testAttackActorMission   (false));
@@ -49,6 +54,8 @@ public class TestAll {
     record(TestBounties.testDefendBuildingMission(false));
     
     record(TestPowersCollective.testHeal(false));
+    
+    record(TestCity.testCity(false));
     
     long taken = System.currentTimeMillis() - init;
     

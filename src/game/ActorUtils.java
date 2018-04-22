@@ -91,7 +91,7 @@ public class ActorUtils {
         Base homeland = goes.homeland();
         if (homeland != null && homeland.traderFor(goes) != null) {
           homeland.addMigrant(migrant);
-          I.say("Adding migrant "+migrant+" to "+homeland);
+          ///I.say("Adding migrant "+migrant+" to "+homeland);
         }
         else {
           return null;

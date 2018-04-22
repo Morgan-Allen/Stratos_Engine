@@ -99,8 +99,8 @@ public class TaskTrading extends Task {
   
   
   Area activeMap(Trader t) {
-    if (t.base() == t) return ((Base) t).activeMap();
-    return ((Element) t).map();
+    if (t instanceof Element) return ((Element) t).map();
+    else return t.base().activeMap();
   }
   
   

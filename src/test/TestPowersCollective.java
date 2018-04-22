@@ -35,6 +35,7 @@ public class TestPowersCollective {
         Actor subject = (Actor) ECOLOGIST.generate();
         subject.enterMap(map, 20, 20, 1, guild.base());
         subject.takeDamage(subject.health.maxHealth() * 0.75f);
+        subject.health.incBleed(-1000);
         return subject;
       }
       
