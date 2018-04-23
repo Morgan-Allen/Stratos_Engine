@@ -8,13 +8,13 @@ import static game.GameConstants.*;
 
 
 
-public class ActorPane extends DetailPane {
+public class PaneActor extends DetailPane {
   
   
   final Actor actor;
   
   
-  public ActorPane(HUD UI, Actor actor) {
+  public PaneActor(HUD UI, Actor actor) {
     super(UI, actor);
     this.actor = actor;
   }

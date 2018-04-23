@@ -749,7 +749,7 @@ public class Actor extends Element implements
   
   
   public boolean setSelected(PlayUI UI) {
-    UI.setDetailPane(new ActorPane (UI, this));
+    UI.setDetailPane(new PaneActor (UI, this));
     return true;
   }
   

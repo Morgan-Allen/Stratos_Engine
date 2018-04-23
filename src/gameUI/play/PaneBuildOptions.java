@@ -12,14 +12,14 @@ import com.badlogic.gdx.graphics.Texture;
 
 
 
-public class InstallPane extends DetailPane {
+public class PaneBuildOptions extends DetailPane {
   
   
   final PlayUI UI;
   private Element placed = null;
   
   
-  InstallPane(PlayUI UI) {
+  PaneBuildOptions(PlayUI UI) {
     super(UI, null);
     this.UI = UI;
   }

@@ -10,15 +10,15 @@ import util.*;
 
 
 
-public class VenuePane extends DetailPane {
+public class PaneBuilding extends DetailPane {
   
   
-  final Building venue;
+  final Building built;
   
   
-  public VenuePane(HUD UI, Building venue) {
+  public PaneBuilding(HUD UI, Building venue) {
     super(UI, venue);
-    this.venue = venue;
+    this.built = venue;
   }
   
   
@@ -27,18 +27,18 @@ public class VenuePane extends DetailPane {
     this.text.setText("");
     final Description d = this.text;
     
-    BuildType type = venue.type();
-    boolean controls = venue.base() == PlayUI.playerBase();
-    World world = venue.map().world;
-    Base base = venue.base();
+    BuildType type = built.type();
+    boolean controls = built.base() == PlayUI.playerBase();
+    World world = built.map().world;
+    Base base = built.base();
     
-    d.append(""+venue.toString());
+    d.append(""+built.toString());
     d.append("\n");
     
     d.append("\nHP: ");
     final int
-      maxHP = venue.type().maxHealth,
-      HP    = (int) (maxHP * venue.buildLevel())
+      maxHP = built.type().maxHealth,
+      HP    = (int) (maxHP * built.buildLevel())
     ;
     d.append(HP+"/"+maxHP);
     //d.append("\nDamage: "+venue.structure.damage());
@@ -46,18 +46,18 @@ public class VenuePane extends DetailPane {
     //d.append("\nCredits: "+venue.stocks.credits ());
     
     for (final ActorType w : type.workerTypes.keys()) {
-      int num = venue.numWorkers(w), max = venue.maxWorkers(w);
+      int num = built.numWorkers(w), max = built.maxWorkers(w);
       int cost = base.hireCost(w);
       
       d.append("\n\n"+w.name+": ("+num+"/"+max+")");
       
       if (num < max && w.socialClass >= CLASS_SOLDIER) {
-        Object hireCheck = ActorUtils.hireCheck(w, venue, true);
+        Object hireCheck = ActorUtils.hireCheck(w, built, true);
         if (hireCheck == MIGRATE.OKAY) {
           d.append("\n  ");
           d.append(new Description.Link("Hire "+w.name+" ("+cost+" Cr)") {
             public void whenClicked(Object context) {
-              ActorUtils.generateMigrant(w, venue, true);
+              ActorUtils.generateMigrant(w, built, true);
             }
           });
         }
@@ -78,7 +78,7 @@ public class VenuePane extends DetailPane {
         }
       }
       
-      for (Actor a : venue.workers()) if (a.type() == w) {
+      for (Actor a : built.workers()) if (a.type() == w) {
         if (a.onMap()) {
           d.appendAll("\n  ", a, "  ", a.jobDesc());
         }
@@ -88,9 +88,9 @@ public class VenuePane extends DetailPane {
       }
     }
     
-    if (! venue.residents().empty()) {
+    if (! built.residents().empty()) {
       d.append("\n\nResidents:");
-      for (Actor a : venue.residents()) {
+      for (Actor a : built.residents()) {
         if (a.onMap()) {
           d.appendAll("\n  ", a, "  ", a.jobDesc());
         }
@@ -101,13 +101,13 @@ public class VenuePane extends DetailPane {
     }
     
     
-    if (venue instanceof BuildingForTrade) {
-      final BuildingForTrade t = (BuildingForTrade) venue;
+    if (built instanceof BuildingForTrade) {
+      final BuildingForTrade t = (BuildingForTrade) built;
       final boolean exports = t.allowExports();
       
       d.append("\n\nTrade Levels:");
       
-      for (final Good g : venue.map().world.goodTypes()) {
+      for (final Good g : built.map().world.goodTypes()) {
         if (g == CASH) continue;
         
         final int have = (int) t.inventory ().valueFor(g);
@@ -137,24 +137,24 @@ public class VenuePane extends DetailPane {
         }
       });
     }
-    else if (! venue.inventory().empty()) {
+    else if (! built.inventory().empty()) {
       d.append("\n\nInventory:");
       
       Batch <Good> goods = new Batch();
-      Visit.appendTo(goods, venue.map().world.goodTypes());
-      for (Good g : venue.inventory().keys()) goods.include(g);
+      Visit.appendTo(goods, built.map().world.goodTypes());
+      for (Good g : built.inventory().keys()) goods.include(g);
       
       for (Good g : goods) {
-        float have = venue.inventory(g);
-        int demand = (int) venue.stockLimit(g);
+        float have = built.inventory(g);
+        int demand = (int) built.stockLimit(g);
         if (have == 0 && demand == 0) continue;
         
         d.appendAll("\n  ", g, ": ", I.shorten(have, 1));
         if (demand > 0) d.append("/"+demand);
       }
       
-      if (venue instanceof BuildingForCrafts) {
-        BuildingForCrafts BC = (BuildingForCrafts) venue;
+      if (built instanceof BuildingForCrafts) {
+        BuildingForCrafts BC = (BuildingForCrafts) built;
         for (Object order : BC.orders()) {
           d.append("\n  "+BC.descOrder(order));
         }
@@ -162,23 +162,23 @@ public class VenuePane extends DetailPane {
     }
     
     
-    BuildType upgrades[] = venue.type().allUpgrades;
+    BuildType upgrades[] = built.type().allUpgrades;
     if (controls && ! Visit.empty(upgrades)) {
-      int num = venue.numSideUpgrades(), max = venue.maxUpgrades();
+      int num = built.numSideUpgrades(), max = built.maxUpgrades();
       d.append("\n\nUpgrades: ("+num+"/"+max+")");
       
       for (final BuildType upgrade : upgrades) {
         
-        boolean done    = venue.upgradeComplete(upgrade);
-        boolean current = venue.currentUpgrade() == upgrade;
-        boolean canDo   = venue.canBeginUpgrade(upgrade, false);
+        boolean done    = built.upgradeComplete(upgrade);
+        boolean current = built.currentUpgrade() == upgrade;
+        boolean canDo   = built.canBeginUpgrade(upgrade, false);
         String  name    = upgrade.name;
         
         if (done) {
           d.append("\n  "+name+" (complete)");
         }
         else if (current) {
-          float progress = venue.upgradeProgress();
+          float progress = built.upgradeProgress();
           d.append("\n  "+name+" ("+I.percent(progress)+"%)");
         }
         else if (canDo) {
@@ -187,7 +187,7 @@ public class VenuePane extends DetailPane {
           d.append("\n  ");
           d.append(new Description.Link(name) {
             public void whenClicked(Object context) {
-              venue.beginUpgrade(upgrade);
+              built.beginUpgrade(upgrade);
             }
           });
         }
@@ -198,7 +198,7 @@ public class VenuePane extends DetailPane {
     }
     
     d.append("\n\nVisitors:");
-    for (Element i : venue.allInside()) {
+    for (Element i : built.allInside()) {
       d.appendAll("\n  ", i);
     }
     
@@ -206,10 +206,10 @@ public class VenuePane extends DetailPane {
       d.append("\n\n");
       d.append(new Description.Link("DEMOLISH") {
         public void whenClicked(Object context) {
-          Area map = venue.map();
+          Area map = built.map();
           if (map == null) return;
-          map.planning.unplaceObject(venue);
-          venue.exitMap(venue.map());
+          map.planning.unplaceObject(built);
+          built.exitMap(built.map());
         }
       });
     }

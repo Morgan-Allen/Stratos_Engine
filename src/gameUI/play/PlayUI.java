@@ -15,12 +15,25 @@ import com.badlogic.gdx.graphics.Texture;
 
 public class PlayUI extends HUD implements UIConstants {
   
+  
   /**  Data fields, constructors, setup and save/load methods-
     */
   final static ImageAsset
-    INSTALL_TAB_IMG = ImageAsset.fromImage(
-      PlayUI.class, "img_install_tab",
-      "media/GUI/panels/installations_tab.png"
+    BUILD_TAB_IMG = ImageAsset.fromImage(
+      PlayUI.class, "img_build_tab",
+      "media/GUI/panels/build_tab.png"
+    ),
+    MARKETS_TAB_IMG = ImageAsset.fromImage(
+      PlayUI.class, "img_markets_tab",
+      "media/GUI/panels/markets_tab.png"
+    ),
+    ROSTER_TAB_IMG = ImageAsset.fromImage(
+      PlayUI.class, "img_roster_tab",
+      "media/GUI/panels/roster_tab.png"
+    ),
+    CHARTS_TAB_IMG = ImageAsset.fromImage(
+      PlayUI.class, "img_charts_tab",
+      "media/GUI/panels/charts_tab.png"
     ),
     DEFAULT_CURSOR = ImageAsset.fromImage(
       PlayUI.class, "img_default_cursor",
@@ -33,8 +46,17 @@ public class PlayUI extends HUD implements UIConstants {
   Area area;
   Base base;
   
-  Button     installTab ;
-  DetailPane installPane;
+  DetailPane buildOptions;
+  DetailPane markets;
+  DetailPane roster;
+  DetailPane charts;
+  DetailPane panes[];
+  
+  Button buildTab;
+  Button marketsTab;
+  Button rosterTab;
+  Button chartsTab;
+  Button paneTabs[];
   
   UIGroup    detailArea;
   DetailPane detailPane;
@@ -55,25 +77,40 @@ public class PlayUI extends HUD implements UIConstants {
   public PlayUI(Rendering rendering) {
     super(rendering);
     
-    if (INSTALL_TAB_IMG != null) {
-      installTab = new Button(
-        this, "install_button", INSTALL_TAB_IMG, "Install Facilities"
+    buildOptions = new PaneBuildOptions(this);
+    markets      = new PaneMarkets(this);
+    roster       = new PaneRoster(this);
+    charts       = new PaneCharts(this);
+    
+    panes        = new DetailPane[] { buildOptions, markets, roster, charts };
+    paneTabs     = new Button[4];
+    
+    ImageAsset TAB_IMAGES[] = {BUILD_TAB_IMG, MARKETS_TAB_IMG, ROSTER_TAB_IMG, CHARTS_TAB_IMG };
+    String TAB_DESC[] = {"Build Options", "Markets", "Roster", "Charts"};
+    int tabWide = INFO_PANEL_WIDE / 4, tabsHigh = (int) (PANEL_TABS_HIGH * 0.7f);
+    
+    for (final int i : new int[] { 0, 1, 2, 3 }) {
+      Button button = new Button(
+        this, "tab_button_"+i, TAB_IMAGES[i], TAB_DESC[i]
       ) {
         protected void whenClicked() {
-          if (installPane == detailPane) setDetailPane(null);
-          else setDetailPane(installPane);
+          if (detailPane == panes[i]) setDetailPane(null);
+          else setDetailPane(panes[i]);
         }
       };
-      installTab.alignLeft  (0, PANEL_TAB_SIZE );
-      installTab.alignBottom(0, BAR_BUTTON_SIZE);
-      installTab.attachTo(this);
+      button.alignLeft(tabWide * i, tabWide);
+      button.alignTop(0, tabsHigh);
+      button.attachTo(this);
+      paneTabs[i] = button;
     }
+    buildTab   = paneTabs[0];
+    marketsTab = paneTabs[1];
+    rosterTab  = paneTabs[2];
     
-    installPane = new InstallPane(this);
     
     detailArea = new UIGroup(this);
     detailArea.alignLeft    (0, INFO_PANEL_WIDE);
-    detailArea.alignVertical(BAR_BUTTON_SIZE, 0);
+    detailArea.alignVertical(0, tabsHigh);
     detailArea.attachTo(this);
     
     optionList = new OptionList(this);
@@ -85,8 +122,11 @@ public class PlayUI extends HUD implements UIConstants {
     readout.attachTo(this);
     
     progressOptions = new ProgressOptions(this);
-    progressOptions.alignVertical  (0, 0);
-    progressOptions.alignHorizontal(0, 0);
+    progressOptions.alignTop(0, 25);
+    progressOptions.alignRight(0, 300);
+    
+    //progressOptions.alignVertical  (0, 0);
+    //progressOptions.alignHorizontal(0, 0);
     progressOptions.attachTo(this);
     
     cursor = new Cursor(this, DEFAULT_CURSOR);

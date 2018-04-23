@@ -111,16 +111,19 @@ public class ProgressOptions extends UIGroup implements UIConstants {
     
     lastSpeed = norms;
     
-    final int sizeB = OPT_BUTTON_SIZE - OPT_MARGIN;
-    int across = PANEL_TAB_SIZE;
+    int height = 25;
+    //final int sizeB = OPT_BUTTON_SIZE - OPT_MARGIN;
+    //int across = PANEL_TAB_SIZE;
+    int across = 0;
+    
     for (UINode option : options) {
       option.setToPreferredSize();
       int imgH = (int) option.absBound().ydim();
       int imgW = (int) option.absBound().xdim();
-      int optW = (int) (imgW * (sizeB * 1f / imgH));
+      int optW = (int) (imgW * (height * 1f / imgH));
       
       option.alignLeft(across, optW);
-      option.alignBottom(OPT_MARGIN, sizeB);
+      option.alignBottom(0, height);
       option.attachTo(this);
       across += optW;
     }

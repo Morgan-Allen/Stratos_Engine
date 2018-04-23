@@ -504,7 +504,7 @@ public abstract class Mission implements
   
   
   public boolean setSelected(PlayUI UI) {
-    UI.setDetailPane(new MissionPane(UI, this));
+    UI.setDetailPane(new PaneMission(UI, this));
     return true;
   }
   

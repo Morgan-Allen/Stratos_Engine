@@ -8,13 +8,13 @@ import util.*;
 
 
 
-public class MissionPane extends DetailPane {
+public class PaneMission extends DetailPane {
   
   
   final Mission mission;
   
   
-  public MissionPane(HUD UI, Mission subject) {
+  public PaneMission(HUD UI, Mission subject) {
     super(UI, subject);
     this.mission = subject;
   }

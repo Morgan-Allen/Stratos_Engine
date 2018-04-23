@@ -833,7 +833,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   
   
   public boolean setSelected(PlayUI UI) {
-    UI.setDetailPane(new VenuePane(UI, this));
+    UI.setDetailPane(new PaneBuilding(UI, this));
     return true;
   }
   
