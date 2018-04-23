@@ -94,7 +94,7 @@ public class Task implements Session.Saveable {
   
   
   
-  Task(Active actor) {
+  protected Task(Active actor) {
     this.active = actor;
   }
   

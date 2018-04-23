@@ -73,8 +73,6 @@ public class ScenarioBlankMap extends AreaScenario {
   
   protected Base createBase(Area stage, World world) {
     World.Locale homeworld = world.addLocale(1, 1, "Homeworld");
-    World.setupRoute(homeworld, stage.locale, 1, Type.MOVE_AIR);
-    
     Base patron = new Base(world, homeworld);
     patron.setName("Homeworld Base");
     
@@ -85,6 +83,10 @@ public class ScenarioBlankMap extends AreaScenario {
     
     stage.addBase(landing);
     world.addBases(patron, landing);
+    
+    World.setupRoute(homeworld, stage.locale, 1, Type.MOVE_AIR);
+    Base.setPosture(patron, landing, Base.POSTURE.VASSAL, true);
+    patron.updateOffmapTraders();
     
     return landing;
   }

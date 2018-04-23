@@ -163,7 +163,7 @@ public class TestVessels extends LogicTest {
           awayC, ship, homeC, false, map
         );
         ship.assignTask(trading, ship);
-        trading.beginAsVessel(awayC);
+        trading.beginFromOffmap(awayC);
       }
     }
     else if (fromLocal) {

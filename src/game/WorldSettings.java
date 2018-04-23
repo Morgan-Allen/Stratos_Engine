@@ -34,9 +34,10 @@ public class WorldSettings {
     toggleBuildEvolve = true,
     toggleAutoBuild   = true,
     
-    toggleEasyHunger  = true,
-    toggleEasyCraft   = true,
-    toggleEasyBuild   = true,
+    toggleEasyMigrate = false,
+    toggleEasyHunger  = false,
+    toggleEasyCraft   = false,
+    toggleEasyBuild   = false,
     
     slowed            = false,
     speedUp           = false,

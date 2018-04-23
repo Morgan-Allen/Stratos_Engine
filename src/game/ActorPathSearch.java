@@ -81,8 +81,10 @@ public class ActorPathSearch extends Search <Pathing> {
       return true;
     }
     else if (oneTile) {
-      if (spot.isTile() && map.blocked((AreaTile) spot)) {
-        return false;
+      if (spot.isTile()) {
+        AreaTile t = (AreaTile) spot;
+        if (map.blocked(t)) return false;
+        //if (client != null && client.at() != t && ! t.allInside().empty()) return false;
       }
       if (client != null && ! spot.allowsEntry(client)) {
         return false;

@@ -861,7 +861,7 @@ public class Base implements Session.Saveable, Trader {
   
   /**  Methods for handling traders and migrants-
     */
-  void updateOffmapTraders() {
+  public void updateOffmapTraders() {
     if (Visit.empty(world.shipTypes)) return;
     if (! world.settings.toggleShipping) return;
     
@@ -889,6 +889,7 @@ public class Base implements Session.Saveable, Trader {
         trader = (ActorAsVessel) forShip.generate();
         trader.assignBase(this);
         trader.assignGuestBase(b);
+        trader.setBuildLevel(1);
         traders.add(trader);
         toggleVisitor(trader, true);
       }
@@ -898,12 +899,12 @@ public class Base implements Session.Saveable, Trader {
           this, trader, b, true, b.activeMap()
         );
         if (trading != null) {
-          ///I.say(trader+" begins task: "+trading);
+          I.say(trader+" begins task: "+trading);
           trader.assignTask(trading, this);
-          trading.beginAsVessel(this);
+          trading.beginFromOffmap(this);
         }
         else {
-          ///I.say(trader+" could not find trading behaviour!");
+          I.say(trader+" could not find trading behaviour!");
         }
       }
     }

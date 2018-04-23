@@ -83,7 +83,7 @@ public class TaskTrading extends Task {
   
   /**  Additional utility methods for off-map ships and visitors...
     */
-  public void beginAsVessel(Base from) {
+  public void beginFromOffmap(Base from) {
     onVisit(from);
   }
   
@@ -343,7 +343,7 @@ public class TaskTrading extends Task {
     Base fromB = from.base(), goesB = goes.base();
     boolean paymentDue = fromB != goesB;
     boolean tributeDue = fromB.isLoyalVassalOf(goesB);
-    boolean fromFlex   = from == goes.base().homeland();
+    boolean fromFlex   = flexibleGoods(from, tradeFrom, tradeGoes);
     Base.Relation relation = fromB.relationWith(goesB);
     
     Tally <Good> stock = from.inventory();
@@ -388,6 +388,21 @@ public class TaskTrading extends Task {
   
   /**  Other utility methods:
     */
+  static boolean flexibleGoods(Carrier c, Trader from, Trader goes) {
+    //
+    //  The homeland is more flexible about the goods it will import and
+    //  export.
+    
+    //  TODO:  Move this into the same code-region that deals with pricing.
+    
+    if (c != c.base()) return false;
+    Base land = c.base();
+    if (land == from) return land == goes.base().homeland();
+    if (land == goes) return land == from.base().homeland();
+    return false;
+  }
+  
+  
   void incFunds(Carrier gets, float payment) {
     if (gets.base() == gets) {
       gets.base().incFunds((int) payment);
@@ -420,8 +435,8 @@ public class TaskTrading extends Task {
     
     boolean fromCity = from.base() == from;
     boolean goesCity = goes.base() == goes;
-    boolean fromFlex = from == goes.base().homeland();
-    boolean goesFlex = goes == from.base().homeland();
+    boolean fromFlex = flexibleGoods(from, from, goes);
+    boolean goesFlex = flexibleGoods(goes, from, goes);
     if (cityOnly && ! (fromCity || goesCity)) return cargo;
     
     Base.Relation fromR = goes.base().relationWith(from.base());

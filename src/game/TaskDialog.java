@@ -173,7 +173,7 @@ public class TaskDialog extends Task {
       mission.terms.sendTerms(with.base());
     }
     
-    if (rating > 0 && talksWith(with) == actor) {
+    if (rating >= IDLE && talksWith(with) == actor) {
       configTask(origin, null, with, JOB.DIALOG, 1);
     }
     else {

@@ -3,6 +3,7 @@
 package gameUI.play;
 import game.*;
 import static game.GameConstants.*;
+import static game.ActorUtils.*;
 import graphics.common.*;
 import graphics.widgets.*;
 import util.*;
@@ -42,23 +43,39 @@ public class VenuePane extends DetailPane {
     d.append(HP+"/"+maxHP);
     //d.append("\nDamage: "+venue.structure.damage());
     //d.append("\nArmour: "+venue.structure.armour());
-    //d.append("\nCredits: "+venue.stocks.credits());
-    
+    //d.append("\nCredits: "+venue.stocks.credits ());
     
     for (final ActorType w : type.workerTypes.keys()) {
       int num = venue.numWorkers(w), max = venue.maxWorkers(w);
       int cost = base.hireCost(w);
-      boolean canHire = venue.base().funds() >= cost;
       
       d.append("\n\n"+w.name+": ("+num+"/"+max+")");
       
-      if (num < max && w.socialClass >= CLASS_SOLDIER && canHire) {
-        d.append("\n  ");
-        d.append(new Description.Link("Hire "+w.name+" ("+cost+" Cr)") {
-          public void whenClicked(Object context) {
-            ActorUtils.generateMigrant(w, venue, true);
-          }
-        });
+      if (num < max && w.socialClass >= CLASS_SOLDIER) {
+        Object hireCheck = ActorUtils.hireCheck(w, venue, true);
+        if (hireCheck == MIGRATE.OKAY) {
+          d.append("\n  ");
+          d.append(new Description.Link("Hire "+w.name+" ("+cost+" Cr)") {
+            public void whenClicked(Object context) {
+              ActorUtils.generateMigrant(w, venue, true);
+            }
+          });
+        }
+        else if (hireCheck == MIGRATE.NO_FUNDS) {
+          Text.appendColour("Hire "+w.name+" ("+cost+" Cr)", Colour.RED, d);
+        }
+        else if (hireCheck == MIGRATE.NOT_COMPLETE) {
+          d.append("\n  Construction incomplete.");
+        }
+        else if (hireCheck == MIGRATE.NO_HOMELAND) {
+          d.append("\n  No homeland.");
+        }
+        else if (hireCheck == MIGRATE.NO_TRANSPORT) {
+          d.append("\n  No transport.");
+        }
+        else {
+          d.append("\n  Settings do not allow recruitment.");
+        }
       }
       
       for (Actor a : venue.workers()) if (a.type() == w) {
@@ -165,7 +182,6 @@ public class VenuePane extends DetailPane {
           d.append("\n  "+name+" ("+I.percent(progress)+"%)");
         }
         else if (canDo) {
-          
           //  TODO:  List building materials as well...
           
           d.append("\n  ");

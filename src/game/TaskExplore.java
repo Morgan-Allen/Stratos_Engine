@@ -75,7 +75,7 @@ public class TaskExplore extends Task {
     Area    map   = actor.map();
     AreaFog fog   = map.fogMap(actor.base(), true);
     
-    fog.liftFog(target.at(), actor.sightRange());
+    fog.liftFog(target.at(), actor.sightRange() * 2);
     
     int range = maxRange > 0 ? maxRange : (int) (actor.sightRange() * 2);
     AreaTile goes = fog.findNearbyFogPoint(from, range);

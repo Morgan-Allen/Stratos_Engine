@@ -3,11 +3,17 @@
 package game;
 import static game.GameConstants.*;
 import static game.World.*;
+import graphics.common.*;
 import util.*;
 
 
 
 public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
+  
+  
+  
+  static int
+    MAX_HEIGHT = 3, DESCENT_RANGE = 4, DESCENT_TIME = 5;
   
   
   /**  Data fields, construction and save/load methods-
@@ -291,12 +297,17 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   }
   
   
+  public void setLandPoint(AreaTile at) {
+    this.landsAt = at;
+  }
+  
+  
   public void onArrival(Base goes, Journey journey) {
     
     if (type().isAirship() && goes.activeMap() != null) {
       //  TODO:  Create a separate Task to allow ships to dock and land,
       //  distinct from the methods in TaskTrading, and assign it here.
-      this.landsAt = findLandingPoint(goes.activeMap(), goes, task());
+      setLandPoint(findLandingPoint(goes.activeMap(), goes, task()));
     }
     
     super.onArrival(goes, journey);
@@ -319,6 +330,7 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
     
     if (onMap()) {
       updateWorkers(map().time());
+      updateFlight();
       
       Vec3D pos = exactPosition(null);
       for (Actor a : inside) {
@@ -490,7 +502,55 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   public boolean allowExport(Good g, Trader buys) {
     return true;
   }
+  
+  
+  
+  /**  Graphical, debug and interface methods-
+    */
+  void updateFlight() {
+    if (! type().isAirship()) return;
+    
+    float targetHeight = MAX_HEIGHT;
+    if (jobFocus() == landsAt && Area.distance(this, landsAt) < DESCENT_RANGE) {
+      targetHeight = 0;
+    }
+    
+    //I.say("Height is: "+flyHeight+"/"+targetHeight);
+    //I.add("  Pos: "+this.exactPosition(null));
+    
+    float maxChange = MAX_HEIGHT * 1f / (map.ticksPS * DESCENT_TIME);
+    float diff = targetHeight - flyHeight;
+    diff = Nums.clamp(diff, 0 - maxChange, maxChange);
+    flyHeight = Nums.clamp(flyHeight + diff, 0, MAX_HEIGHT);
+    
+    Vec3D pos = this.exactPosition(null);
+    this.setExactLocation(pos, map, false);
+  }
+  
+  
+  protected float moveHeight() {
+    return flyHeight;
+  }
+  
+  
+  protected void updateSprite(
+    Sprite s, String animName, float animProg, boolean loop
+  ) {
+    if (type().isAirship()) {
+      float prog = 1f - (flyHeight / MAX_HEIGHT);
+      s.setAnimation("descend", Nums.clamp(prog, 0, 1), loop);
+    }
+    else {
+      super.updateSprite(s, animName, animProg, loop);
+    }
+  }
+  
+  
 }
+
+
+
+
 
 
 

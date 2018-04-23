@@ -3,6 +3,7 @@
 package test;
 import game.*;
 import static game.GameConstants.*;
+import static content.GameContent.*;
 import start.*;
 
 
@@ -22,7 +23,8 @@ public abstract class ViewTest extends AreaScenario {
   }
   
   protected World createWorld() {
-    initBase = LogicTest.setupTestBase(mapSize, new Good[0], false);
+    Terrain gradient[] = new Terrain[] { MEADOW };
+    initBase = LogicTest.setupTestBase(mapSize, new Good[0], true, gradient);
     return initBase.world;
   }
   

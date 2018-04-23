@@ -15,8 +15,6 @@ public class BuildingForDock extends Building {
   public static class TradeProxy implements Trader {
     
     final Trader trader;
-    
-    Target near;
     Tally <Good> nearDemand = new Tally();
     Tally <Good> nearSupply = new Tally();
     Tally <Good> inventory  = new Tally();
@@ -77,6 +75,14 @@ public class BuildingForDock extends Building {
     super(s);
     
     tradePartner = (Base) s.loadObject();
+    for (int n = s.loadInt(); n-- > 0;) {
+      Trader t = (Trader) s.loadObject();
+      TradeProxy p = new TradeProxy(t);
+      s.loadTally(p.nearDemand);
+      s.loadTally(p.nearSupply);
+      s.loadTally(p.inventory );
+      tradeProxies.add(p);
+    }
     
     docking = (ActorAsVessel[]) s.loadObjectArray(ActorAsVessel.class);
   }
@@ -86,6 +92,13 @@ public class BuildingForDock extends Building {
     super.saveState(s);
     
     s.saveObject(tradePartner);
+    s.saveInt(tradeProxies.size());
+    for (TradeProxy p : tradeProxies) {
+      s.saveObject(p.trader);
+      s.saveTally(p.nearDemand);
+      s.saveTally(p.nearSupply);
+      s.saveTally(p.inventory );
+    }
     
     s.saveObjectArray(docking);
   }
@@ -142,7 +155,6 @@ public class BuildingForDock extends Building {
       proxy.nearDemand.clear();
       proxy.nearSupply.clear();
       proxy.inventory .clear();
-      proxy.near = this;
       
       for (Building b : map.buildings) {
         if (b.base() != base() || ! b.type().isTradeBuilding()) continue;

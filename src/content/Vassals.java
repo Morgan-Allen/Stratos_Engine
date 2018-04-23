@@ -145,7 +145,7 @@ public class Vassals {
     DROPSHIP.name = "Dropship";
     DROPSHIP.model = MS3DModel.loadFrom(
       "media/Actors/vehicles/", "dropship.ms3d",
-      Vassals.class, "VehiclesModels.xml", "Dropship"
+      Vassals.class, "VehicleModels.xml", "Dropship"
     );
     DROPSHIP.tint = TINT_VEHICLE;
     

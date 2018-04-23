@@ -35,6 +35,7 @@ public class World implements Session.Saveable {
     Base goes;
     int startTime;
     int arriveTime;
+    int moveMode;
     Batch <Journeys> going = new Batch();
     
     public Base from() { return from; }
@@ -138,6 +139,7 @@ public class World implements Session.Saveable {
       j.goes       = (Base) s.loadObject();
       j.startTime  = s.loadInt();
       j.arriveTime = s.loadInt();
+      j.moveMode   = s.loadInt();
       s.loadObjects(j.going);
       journeys.add(j);
     }
@@ -196,6 +198,7 @@ public class World implements Session.Saveable {
       s.saveObject(j.goes);
       s.saveInt(j.startTime );
       s.saveInt(j.arriveTime);
+      s.saveInt(j.moveMode  );
       s.saveObjects(j.going);
     }
     
@@ -281,13 +284,9 @@ public class World implements Session.Saveable {
   
   /**  Registering and updating journeys:
     */
-  public Journey beginJourney(
-    Base from, Base goes, int moveMode, Journeys... going
-  ) {
-    if (from == null || goes == null) return null;
-    
+  public float travelTime(Base from, Base goes, int moveMode) {
     float distance = from.distance(goes, moveMode);
-    if (distance < 0) return null;
+    if (distance < 0) return -100;
     
     distance = Nums.max(1, distance);
     float travelTime = distance;
@@ -295,10 +294,21 @@ public class World implements Session.Saveable {
     if (moveMode == Type.MOVE_WATER) travelTime *= WATER_TRAVEL_TIME;
     if (moveMode == Type.MOVE_AIR  ) travelTime *= AIR_TRAVEL_TIME  ;
     
+    return travelTime;
+  }
+  
+  
+  public Journey beginJourney(
+    Base from, Base goes, int moveMode, Journeys... going
+  ) {
+    if (from == null || goes == null) return null;
+    
+    float travelTime = travelTime(from, goes, moveMode);
     Journey j = new Journey();
     j.from       = from;
     j.goes       = goes;
     j.startTime  = time;
+    j.moveMode   = moveMode;
     j.arriveTime = (int) (j.startTime + travelTime);
     
     for (Journeys g : going) j.going.add(g);
@@ -364,10 +374,28 @@ public class World implements Session.Saveable {
   }
   
   
-  public int arriveTime(Journeys going) {
+  public int arriveTime(Actor going) {
     Journey j = journeyFor(going);
-    if (j == null) return -1;
-    return j.arriveTime;
+    if (j != null) return j.arriveTime;
+    
+    if (going.inside() instanceof Actor) {
+      j = journeyFor((Actor) going.inside());
+      if (j != null) return j.arriveTime;
+    }
+    
+    Base offmap = going.offmapBase();
+    if (offmap != null && offmap.migrants().includes(going)) {
+      ActorAsVessel t = offmap.traderFor(going.base());
+      j = t == null ? null : journeyFor(t);
+      
+      if (j != null && j.goes == offmap) {
+        int arriveTime = j.arriveTime;
+        arriveTime += travelTime(j.from, j.goes, j.moveMode);
+        return arriveTime;
+      }
+    }
+    
+    return -1;
   }
   
   

@@ -72,49 +72,76 @@ public class ActorUtils {
   
   /**  Finding migrants in and out-
     */
-  //  TODO:  You need to give a clearer indication of whether migration is
-  //  even possible, and from where...
+  public static enum MIGRATE {
+    OKAY,
+    NO_MIGRANTS,
+    NO_SHIPPING,
+    NOT_COMPLETE,
+    NO_FUNDS,
+    NO_HOMELAND,
+    NO_TRANSPORT
+  };
   
-  
-  public static Actor generateMigrant(
-    ActorType jobType, Element employs, boolean payHireCost
+  public static Object generateMigrantResult(
+    ActorType jobType, Element employs, boolean payHireCost, boolean checkOnly
   ) {
     Base  goes  = employs.base();
     World world = goes.world;
-    if (! world.settings.toggleMigrate) return null;
+    if (! world.settings.toggleMigrate) return MIGRATE.NO_MIGRANTS;
+    if (! employs.complete()) return MIGRATE.NOT_COMPLETE;
     
-    Actor migrant = (Actor) jobType.generate();
+    Actor migrant = checkOnly ? null : (Actor) jobType.generate();
+    Base homeland = goes.homeland();
     
+    int cost = payHireCost ? goes.hireCost(jobType) : 0;
+    if (goes.funds() < cost) return MIGRATE.NO_FUNDS;
+
     if (employs.onMap()) {
-      //  TODO:  Consider a wider variety of cities to source from...
       if (world.settings.toggleShipping) {
-        Base homeland = goes.homeland();
-        if (homeland != null && homeland.traderFor(goes) != null) {
-          homeland.addMigrant(migrant);
-          ///I.say("Adding migrant "+migrant+" to "+homeland);
-        }
-        else {
-          return null;
-        }
+        if (homeland == null) return MIGRATE.NO_HOMELAND;
+        if (homeland.traderFor(goes) == null) return MIGRATE.NO_TRANSPORT;
+        if (checkOnly) return MIGRATE.OKAY;
+        
+        homeland.addMigrant(migrant);
       }
-      else {
+      else if (world.settings.toggleEasyMigrate) {
+        if (checkOnly) return MIGRATE.OKAY;
+        
         Area map  = employs.map();
         Base from = map.locals;
         map.world.beginJourney(from, goes, Type.MOVE_AIR, migrant);
       }
+      else {
+        return MIGRATE.NO_SHIPPING;
+      }
     }
     else {
+      if (checkOnly) return MIGRATE.OKAY;
+      
       migrant.setInside((Pathing) employs, true);
     }
-
-    int cost = goes.hireCost(jobType);
-    if (payHireCost) goes.incFunds(0 - cost);
     
     migrant.assignBase(goes);
     ((Employer) employs).setWorker(migrant, true);
     if (jobType.isPerson()) jobType.initAsMigrant((ActorAsPerson) migrant);
-    
+    goes.incFunds(0 - cost);
     return migrant;
+  }
+  
+  
+  public static Object hireCheck(
+    ActorType jobType, Element employs, boolean payHireCost
+  ) {
+    return generateMigrantResult(jobType, employs, payHireCost, true);
+  }
+  
+
+  public static Actor generateMigrant(
+    ActorType jobType, Element employs, boolean payHireCost
+  ) {
+    Object result = generateMigrantResult(jobType, employs, payHireCost, false);
+    if (result instanceof Actor) return (Actor) result;
+    else return null;
   }
   
   

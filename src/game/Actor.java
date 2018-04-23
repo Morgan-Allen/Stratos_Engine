@@ -349,11 +349,13 @@ public class Actor extends Element implements
     super.setLocation(at, map);
     
     if (at != null) {
-      float height = at.elevation;
       Element above = at.above;
+      float height = 0;
       if (inside == null && above != null && above.pathType() == Type.PATH_WALLS) {
         height += above.height();
       }
+      height = Nums.max(height, moveHeight());
+      height += at.elevation;
       exactPosition.set(at.x + 0.5f, at.y + 0.5f, height);
     }
     
@@ -389,6 +391,11 @@ public class Actor extends Element implements
   
   protected void onTarget(Target target) {
     return;
+  }
+  
+  
+  protected float moveHeight() {
+    return 0;
   }
   
   
@@ -655,6 +662,12 @@ public class Actor extends Element implements
       if (fog != null) fog.liftFog(at(), range);
     }
     
+    if (guestBase() != map.locals) {
+      AreaFog fog = map.fogMap(guestBase(), true);
+      float range = sightRange();
+      if (fog != null) fog.liftFog(at(), range);
+    }
+    
     float noticeRange = sightRange();
     if (mission != null && mission.active()) noticeRange += AVG_FILE;
     seen = map.activeInRange(at(), noticeRange);
@@ -757,12 +770,15 @@ public class Actor extends Element implements
     Sprite s = sprite();
     if (s == null) return;
 
+    Type t = type();
     Vec3D from = lastPosition, goes = exactPosition;
     float alpha = Rendering.frameAlpha(), rem = 1 - alpha;
+    float offX = (t.wide - 1) / 2f, offY = (t.high - 1) / 2f;
+    
     s.position.set(
-      (from.x * rem) + (goes.x * alpha),
-      (from.y * rem) + (goes.y * alpha),
-      0
+      (from.x * rem) + (goes.x * alpha) + offX,
+      (from.y * rem) + (goes.y * alpha) + offY,
+      (from.z * rem) + (goes.z * alpha)
     );
     
     boolean contact = task != null && task.inContact();
@@ -774,7 +790,7 @@ public class Actor extends Element implements
     float animProg = Rendering.activeTime() * ANIM_MULT;
     
     if (contact) {
-      s.setAnimation(task.animName(), animProg % 1, true);
+      updateSprite(s, task.animName(), animProg, true);
     }
     else {
       animProg *= moveSpeed();
@@ -782,7 +798,7 @@ public class Actor extends Element implements
       String animName = AnimNames.MOVE;
       if (mode == MOVE_RUN  ) animName = AnimNames.MOVE_FAST;
       if (mode == MOVE_SNEAK) animName = AnimNames.MOVE_SNEAK;
-      s.setAnimation(animName, animProg % 1, true);
+      updateSprite(s, animName, animProg, true);
     }
     super.renderElement(rendering, base);
     
@@ -803,18 +819,27 @@ public class Actor extends Element implements
   }
   
   
+  protected void updateSprite(
+    Sprite s, String animName, float animProg, boolean loop
+  ) {
+    s.setAnimation(animName, animProg % 1, loop);
+  }
+  
+  
   public Vec3D trackPosition() {
     if (indoors()) {
       return ((Element) inside).trackPosition();
     }
     else {
+      Type t = type();
       Vec3D s = new Vec3D();
       Vec3D from = lastPosition, goes = exactPosition;
       float alpha = Rendering.frameAlpha(), rem = 1 - alpha;
+      float offX = (t.wide - 1) / 2f, offY = (t.high - 1) / 2f;
       s.set(
-        (from.x * rem) + (goes.x * alpha),
-        (from.y * rem) + (goes.y * alpha),
-        0
+        (from.x * rem) + (goes.x * alpha) + offX,
+        (from.y * rem) + (goes.y * alpha) + offY,
+        (from.z * rem) + (goes.z * alpha)
       );
       return s;
     }
