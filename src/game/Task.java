@@ -647,14 +647,8 @@ public class Task implements Session.Saveable {
     this.path = search.fullPath(Pathing.class);
     this.pathIndex = 0;
     
-    
     if (path == null) {
       if (report) I.say("  Could not find path for "+this);
-      return false;
-    }
-    else if (path.length < (Area.distance(from, heads) / 2) - 1) {
-      if (report) I.say("  Path is impossible!");
-      this.path = null;
       return false;
     }
     else {

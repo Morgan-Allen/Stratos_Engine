@@ -39,7 +39,7 @@ public class Tooltips extends UIGroup {
   }
   
   
-  protected UINode selectionAt(Vector2 mousePos) {
+  protected UINode selectionAt(Vec2D mousePos) {
     return null;
   }
 

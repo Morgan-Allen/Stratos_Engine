@@ -6,6 +6,7 @@ import static game.GameConstants.*;
 import static game.Task.*;
 import gameUI.play.*;
 import graphics.common.*;
+import graphics.widgets.*;
 import util.*;
 
 
@@ -73,6 +74,7 @@ public abstract class Mission implements
     
     s.loadObjects(recruits);
     s.loadObjects(envoys);
+    rewards.loadState(s);
     terms.loadState(s);
     
     active   = s.loadBool();
@@ -99,6 +101,7 @@ public abstract class Mission implements
     
     s.saveObjects(recruits);
     s.saveObjects(envoys);
+    rewards.saveState(s);
     terms.saveState(s);
     
     s.saveBool(active  );
@@ -432,6 +435,31 @@ public abstract class Mission implements
   }
   
   
+  private Type flagMedia() {
+    String key = "";
+    if (objective == OBJECTIVE_STRIKE ) key = World.KEY_ATTACK_FLAG ;
+    if (objective == OBJECTIVE_SECURE ) key = World.KEY_DEFEND_FLAG ;
+    if (objective == OBJECTIVE_RECON  ) key = World.KEY_EXPLORE_FLAG;
+    if (objective == OBJECTIVE_CONTACT) key = World.KEY_CONTACT_FLAG;
+    return homeBase.world.mediaTypeWithKey(key);
+  }
+  
+  
+  public Composite portrait() {
+    final String key = "mission_ob"+objective+"_"+localFocus.hashCode();
+    final Composite cached = Composite.fromCache(key);
+    if (cached != null) return cached;
+    
+    //final int size = SelectionPane.PORTRAIT_SIZE;
+    final int size = 40;
+    
+    Type type = flagMedia();
+    if (type == null) return Composite.withSize(size, size, key);
+    
+    return Composite.withImage(type.icon, key);
+  }
+  
+  
   public String fullName() {
     Object focus = localFocus == null ? worldFocus : localFocus;
     return "Mission: "+OBJECTIVE_NAMES[objective]+": "+focus;
@@ -458,12 +486,7 @@ public abstract class Mission implements
   
   public void renderFlag(Rendering rendering) {
     if (flag == null) {
-      String key = "";
-      if (objective == OBJECTIVE_STRIKE ) key = World.KEY_ATTACK_FLAG ;
-      if (objective == OBJECTIVE_SECURE ) key = World.KEY_DEFEND_FLAG ;
-      if (objective == OBJECTIVE_RECON  ) key = World.KEY_EXPLORE_FLAG;
-      if (objective == OBJECTIVE_CONTACT) key = World.KEY_CONTACT_FLAG;
-      Type type = homeBase.world.mediaTypeWithKey(key);
+      Type type = flagMedia();
       if (type == null || type.model == null) {
         flag   = null;
         noFlag = true;

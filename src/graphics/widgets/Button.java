@@ -121,7 +121,7 @@ public class Button extends Image {
   
   /**  UI method overrides/implementations-
     */
-  protected UINode selectionAt(Vector2 mousePos) {
+  protected UINode selectionAt(Vec2D mousePos) {
     return (trueBounds().contains(mousePos.x, mousePos.y)) ? this : null;
     //  TODO:  Consider restoring multiple selection modes.
   }

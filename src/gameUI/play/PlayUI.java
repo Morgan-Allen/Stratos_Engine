@@ -58,6 +58,8 @@ public class PlayUI extends HUD implements UIConstants {
   Button chartsTab;
   Button paneTabs[];
   
+  ReminderListing reminders;
+  
   UIGroup    detailArea;
   DetailPane detailPane;
   OptionList optionList;
@@ -107,11 +109,15 @@ public class PlayUI extends HUD implements UIConstants {
     marketsTab = paneTabs[1];
     rosterTab  = paneTabs[2];
     
-    
     detailArea = new UIGroup(this);
     detailArea.alignLeft    (0, INFO_PANEL_WIDE);
     detailArea.alignVertical(0, tabsHigh);
     detailArea.attachTo(this);
+    
+    reminders = new ReminderListing(this);
+    reminders.alignHorizontal(20, 0);
+    reminders.alignVertical(40, 40);
+    reminders.attachTo(detailArea);
     
     optionList = new OptionList(this);
     optionList.attachTo(this);
@@ -124,9 +130,6 @@ public class PlayUI extends HUD implements UIConstants {
     progressOptions = new ProgressOptions(this);
     progressOptions.alignTop(0, 25);
     progressOptions.alignRight(0, 300);
-    
-    //progressOptions.alignVertical  (0, 0);
-    //progressOptions.alignHorizontal(0, 0);
     progressOptions.attachTo(this);
     
     cursor = new Cursor(this, DEFAULT_CURSOR);
@@ -198,12 +201,15 @@ public class PlayUI extends HUD implements UIConstants {
   /**  Custom methods-
     */
   public void setDetailPane(DetailPane pane) {
-    if (detailPane != null) detailPane.detach();
+    if (detailPane != null) {
+      detailPane.detach();
+    }
     this.detailPane = pane;
     if (detailPane != null) {
       detailPane.alignToFill();
       detailPane.attachTo(detailArea);
     }
+    reminders.hidden = detailPane != null;
   }
   
   

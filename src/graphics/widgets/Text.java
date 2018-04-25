@@ -328,7 +328,7 @@ public class Text extends UIGroup implements Description {
   }
   
   
-  protected UINode selectionAt(Vector2 mousePos) {
+  protected UINode selectionAt(Vec2D mousePos) {
     if (! trueBounds().contains(mousePos.x, mousePos.y)) return null;
 
     final Clickable link = getTextSelection(UI.mousePos(), scrolled);
@@ -370,7 +370,7 @@ public class Text extends UIGroup implements Description {
   }
   
   
-  protected Clickable getTextSelection(Vector2 mousePos, Box2D scrolled) {
+  protected Clickable getTextSelection(Vec2D mousePos, Box2D scrolled) {
     final float
       mX = mousePos.x + scrolled.xpos() - this.xpos(),
       mY = mousePos.y + scrolled.ypos() - this.ypos();

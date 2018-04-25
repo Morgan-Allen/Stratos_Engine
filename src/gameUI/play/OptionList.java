@@ -12,7 +12,6 @@ import util.*;
 import static game.GameConstants.*;
 
 import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.graphics.Texture;
 
 
@@ -219,7 +218,7 @@ public class OptionList extends UIGroup implements UIConstants {
   }
   
   
-  protected UINode selectionAt(Vector2 mousePos) {
+  protected UINode selectionAt(Vec2D mousePos) {
     if (fadeout || relAlpha < 1) return null;
     return super.selectionAt(mousePos);
   }

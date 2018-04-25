@@ -49,12 +49,11 @@ public class ScenarioBlankMap extends AreaScenario {
       ALL_NOBLES()
     );
     world.assignMedia(
-      World.KEY_ATTACK_FLAG , FLAG_STRIKE,
-      World.KEY_EXPLORE_FLAG, FLAG_RECON
+      World.KEY_ATTACK_FLAG , FLAG_STRIKE ,
+      World.KEY_EXPLORE_FLAG, FLAG_RECON  ,
+      World.KEY_DEFEND_FLAG , FLAG_SECURE ,
+      World.KEY_CONTACT_FLAG, FLAG_CONTACT
     );
-    
-    //world.settings.toggleFog = false;
-    
     return world;
   }
   

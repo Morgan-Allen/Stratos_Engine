@@ -67,7 +67,7 @@ public class BorderedLabel extends UIGroup implements UIConstants {
   }
   
   
-  protected UINode selectionAt(Vector2 mousePos) {
+  protected UINode selectionAt(Vec2D mousePos) {
     if (doFade) return null;
     else return super.selectionAt(mousePos);
   }

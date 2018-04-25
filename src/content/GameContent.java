@@ -59,18 +59,26 @@ public class GameContent {
   
   
   final public static Type
-    FLAG_STRIKE = new Type(null, "flag_strike", IS_MEDIA),
-    FLAG_RECON  = new Type(null, "flag_recon" , IS_MEDIA)
+    FLAG_STRIKE  = new Type(null, "flag_strike" , IS_MEDIA),
+    FLAG_RECON   = new Type(null, "flag_recon"  , IS_MEDIA),
+    FLAG_SECURE  = new Type(null, "flag_secure" , IS_MEDIA),
+    FLAG_CONTACT = new Type(null, "flag_contact", IS_MEDIA),
+    FLAG_TYPES[] = { FLAG_STRIKE, FLAG_RECON, FLAG_SECURE, FLAG_CONTACT }
   ;
   static {
-    FLAG_STRIKE.model = CutoutModel.fromImage(
-      GameContent.class, "flag_strike_model",
-      "media/GUI/Missions/flag_strike.gif", 0.5f, 1
-    );
-    FLAG_RECON.model = CutoutModel.fromImage(
-      GameContent.class, "flag_recon_model",
-      "media/GUI/Missions/flag_recon.gif", 0.5f, 1
-    );
+    final String IDs[] = { "strike", "recon", "security", "contact" };
+    for (int i = 4; i-- > 0;) {
+      Type flag = FLAG_TYPES[i];
+      String ID = IDs[i];
+      flag.model = CutoutModel.fromImage(
+        GameContent.class, "flag_"+ID+"_model",
+        "media/GUI/Missions/flag_"+ID+".gif", 0.5f, 1
+      );
+      flag.icon = ImageAsset.fromImage(
+        GameContent.class, "flag_"+ID+"_icon",
+        "media/GUI/Missions/button_"+ID+".png"
+      );
+    }
   }
   
   

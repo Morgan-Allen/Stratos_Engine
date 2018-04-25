@@ -3,7 +3,7 @@
 package gameUI.play;
 import graphics.common.*;
 import graphics.widgets.*;
-import com.badlogic.gdx.math.Vector2;
+import util.Vec2D;
 
 
 
@@ -26,7 +26,7 @@ public class Cursor extends Image {
   }
   
   
-  protected UINode selectionAt(Vector2 mousePos) {
+  protected UINode selectionAt(Vec2D mousePos) {
     return null;
   }
   

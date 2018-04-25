@@ -52,9 +52,9 @@ public class PaneBuilding extends DetailPane {
       d.append("\n\n"+w.name+": ("+num+"/"+max+")");
       
       if (num < max && w.socialClass >= CLASS_SOLDIER) {
+        d.append("\n  ");
         Object hireCheck = ActorUtils.hireCheck(w, built, true);
         if (hireCheck == MIGRATE.OKAY) {
-          d.append("\n  ");
           d.append(new Description.Link("Hire "+w.name+" ("+cost+" Cr)") {
             public void whenClicked(Object context) {
               ActorUtils.generateMigrant(w, built, true);
@@ -65,31 +65,32 @@ public class PaneBuilding extends DetailPane {
           Text.appendColour("Hire "+w.name+" ("+cost+" Cr)", Colour.RED, d);
         }
         else if (hireCheck == MIGRATE.NOT_COMPLETE) {
-          d.append("\n  Construction incomplete.");
+          d.append("Construction incomplete.");
         }
         else if (hireCheck == MIGRATE.NO_HOMELAND) {
-          d.append("\n  No homeland.");
+          d.append("No homeland.");
         }
         else if (hireCheck == MIGRATE.NO_TRANSPORT) {
-          d.append("\n  No transport.");
+          d.append("No transport.");
         }
         else {
-          d.append("\n  Settings do not allow recruitment.");
+          d.append("Settings do not allow recruitment.");
         }
+        d.append("\n");
       }
       
       for (Actor a : built.workers()) if (a.type() == w) {
         if (a.onMap()) {
-          d.appendAll("\n  ", a, "  ", a.jobDesc());
+          d.appendAll("\n  ", a, "\n    ", a.jobDesc());
         }
         else {
           Base offmap = a.offmapBase();
           int ETA = world.arriveTime(a, base);
           if (ETA < 0) {
-            d.appendAll("\n  ", a, " (On "+offmap+")");
+            d.appendAll("\n  ", a, "\n    (On "+offmap+")");
           }
           else {
-            d.appendAll("\n  ", a, " (ETA "+ETA+")");
+            d.appendAll("\n  ", a, "\n    (ETA "+ETA+")");
           }
         }
       }
@@ -99,16 +100,16 @@ public class PaneBuilding extends DetailPane {
       d.append("\n\nResidents:");
       for (Actor a : built.residents()) {
         if (a.onMap()) {
-          d.appendAll("\n  ", a, "  ", a.jobDesc());
+          d.appendAll("\n  ", a, "\n    ", a.jobDesc());
         }
         else {
           Base offmap = a.offmapBase();
           int ETA = world.arriveTime(a, base);
           if (ETA < 0) {
-            d.appendAll("\n  ", a, " (On "+offmap+")");
+            d.appendAll("\n  ", a, "\n    (On "+offmap+")");
           }
           else {
-            d.appendAll("\n  ", a, " (ETA "+ETA+")");
+            d.appendAll("\n  ", a, "\n    (ETA "+ETA+")");
           }
         }
       }

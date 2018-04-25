@@ -955,11 +955,13 @@ public class Base implements Session.Saveable, Trader {
   
   public void addMigrant(Actor migrant) {
     this.migrants.add(migrant);
+    toggleVisitor(migrant, true);
   }
   
   
   public void removeMigrant(Actor migrant) {
     this.migrants.remove(migrant);
+    toggleVisitor(migrant, false);
   }
   
   

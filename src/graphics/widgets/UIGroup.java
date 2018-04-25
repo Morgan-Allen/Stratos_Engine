@@ -43,7 +43,7 @@ public class UIGroup extends UINode {
   }
   
   
-  protected UINode selectionAt(Vector2 mousePos) {
+  protected UINode selectionAt(Vec2D mousePos) {
     UINode selected = null;
     for (UINode kid : kids) if (! kid.hidden) {
       final UINode kidSelect = kid.selectionAt(mousePos);

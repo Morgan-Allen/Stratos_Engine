@@ -28,9 +28,9 @@ public class HUD extends UIGroup {
   
   private long
     hoverStart = -1;
-  private Vector2
-    nextMP = new Vector2(),
-    dragMP = new Vector2();
+  private Vec2D
+    nextMP = new Vec2D(),
+    dragMP = new Vec2D();
   private boolean
     nextMB;
   
@@ -41,8 +41,8 @@ public class HUD extends UIGroup {
     mouseB;
   private byte
     mouseState = HOVERED;
-  private Vector2
-    mousePos = new Vector2();
+  private Vec2D
+    mousePos = new Vec2D();
   
   private Table <String, UINode> widgetsByID = new Table();
   
@@ -57,7 +57,7 @@ public class HUD extends UIGroup {
   /**  Regular updates, input records and rendering cycle-
     */
   public void updateInput() {
-    nextMB = Gdx.input.isButtonPressed(Buttons.LEFT);
+    nextMB   = Gdx.input.isButtonPressed(Buttons.LEFT);
     nextMP.x = Gdx.input.getX();
     nextMP.y = Gdx.graphics.getHeight() - Gdx.input.getY();
     
@@ -65,12 +65,12 @@ public class HUD extends UIGroup {
     
     if ((! mouseB) && nextMB) {
       mouseState = CLICKED;
-      dragMP.set(nextMP);
+      dragMP.setTo(nextMP);
     }
     if (mouseB && nextMB) {
       mouseState = DRAGGED;
     }
-    mousePos.set(nextMP);
+    mousePos.setTo(nextMP);
     mouseB = nextMB;
   }
   
@@ -144,8 +144,8 @@ public class HUD extends UIGroup {
   
   /**  Handling mouse activity-
     */
-  public Vector2 mousePos() { return mousePos; }
-  public Vector2 dragOrigin() { return dragMP; }
+  public Vec2D mousePos() { return mousePos; }
+  public Vec2D dragOrigin() { return dragMP; }
   
   public int mouseX() { return (int) mousePos.x; }
   public int mouseY() { return (int) mousePos.y; }

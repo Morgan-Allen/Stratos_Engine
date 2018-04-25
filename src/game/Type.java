@@ -132,6 +132,7 @@ public class Type extends Index.Entry implements Session.Saveable {
   public String traitRangeNames[];
   public int tint = BLACK_COLOR;
   
+  public ImageAsset icon = null;
   public ModelAsset model = null;
   public ModelAsset modelVariants[] = {};
   

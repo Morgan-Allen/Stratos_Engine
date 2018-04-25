@@ -10,7 +10,6 @@ import util.*;
 import static graphics.common.Colour.*;
 
 import com.badlogic.gdx.graphics.*;
-import com.badlogic.gdx.math.Vector2;
 
 
 
@@ -101,7 +100,7 @@ public class Image extends UINode {
   
   /**  Rendering and feedback methods-
     */
-  protected UINode selectionAt(Vector2 mousePos) {
+  protected UINode selectionAt(Vec2D mousePos) {
     if (blocksSelect) return super.selectionAt(mousePos);
     else return null;
   }

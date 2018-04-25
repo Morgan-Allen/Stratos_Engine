@@ -103,7 +103,7 @@ public class Scrollbar extends UINode {
   
   protected void whenDragged() {
     if (initScrollPos == -1 || ! showScroll) return;
-    final Vector2 mP = UI.mousePos(), dP = UI.dragOrigin();
+    final Vec2D mP = UI.mousePos(), dP = UI.dragOrigin();
     final float stretch = (mP.y - dP.y) / (ydim() - grabArea.ydim());
     scrollPos = initScrollPos + stretch;
     if (scrollPos < 0) scrollPos = 0;

@@ -3,11 +3,8 @@
   *  I intend to slap on some kind of open-source license here in a while, but
   *  for now, feel free to poke around for non-commercial purposes.
   */
-
 package graphics.widgets;
 import util.*;
-
-import com.badlogic.gdx.math.*;
 
 
 
@@ -56,7 +53,7 @@ public abstract class UINode {
   }
   
   
-  protected UINode selectionAt(Vector2 mousePos) {
+  protected UINode selectionAt(Vec2D mousePos) {
     return (bounds.contains(mousePos.x, mousePos.y)) ? this : null;
   }
   
