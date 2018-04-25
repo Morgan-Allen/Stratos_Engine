@@ -303,24 +303,34 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   
   
   public void onArrival(Base goes, Journey journey) {
+    //
+    //  PLEASE NOTE:  The super.onArrival call may itself trigger a new journey
+    //  when visiting off-map bases, and most of the on-map calls require that
+    //  a landing/entry point has been found, so the order of operations here
+    //  is somewhat delicate.  Tinker with care.
+    boolean onMap = goes.activeMap() != null;
+
+    if (! onMap) {
+      for (Actor a : inside) {
+        a.setInside(this, false);
+        goes.toggleVisitor(a, true);
+      }
+      transferCash(false, goes);
+    }
     
-    if (type().isAirship() && goes.activeMap() != null) {
-      //  TODO:  Create a separate Task to allow ships to dock and land,
-      //  distinct from the methods in TaskTrading, and assign it here.
+    else if (type().isAirship()) {
       setLandPoint(findLandingPoint(goes.activeMap(), goes, task()));
+      this.flying    = true;
+      this.flyHeight = MAX_HEIGHT;
     }
     
     super.onArrival(goes, journey);
     
-    if (goes.activeMap() != null) {
+    if (onMap) {
       AreaTile at = at();
       for (Actor a : inside) {
         a.enterMap(map, at.x, at.y, 1, a.base());
       }
-      if (type().moveMode == Type.MOVE_AIR) this.flying = true;
-    }
-    else {
-      transferCash(false, goes);
     }
   }
   
@@ -424,24 +434,28 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   
   
   public void onDeparture(Base goes, World.Journey journey) {
-    super.onDeparture(goes, journey);
-    
-    Batch <Actor> going = new Batch();
-    for (Actor a : inside) {
-      going.add(a);
-      if (a.onMap()) {
-        a.exitMap(map);
-      }
-      //  TODO:  Remove these from the roster of off-map visitors...
-      else {
-        continue;
+    //
+    //  If you're departing from a foreign base, scoop up your crew:
+    if (! onMap()) {
+      Base offmap = offmapBase();
+      for (Actor a : crew) if (a.offmapBase() == offmap) {
+        offmap.toggleVisitor(a, false);
+        a.setInside(this, true);
       }
     }
+    
+    super.onDeparture(goes, journey);
+    
     //
-    //  NOTE:  Actors exiting the map remove themselves from the vehicle, so we
-    //  need to stick them back in.
-    //  (TODO:  This is a bit of hack and may need a cleaner solution.)
+    //  If you're departing from an active map, ensure that any passengers
+    //  exit as well.  NOTE:  Actors exiting the map remove themselves from the
+    //  vehicle, so we need to stick them back in...
+    //  (TODO:  This is a bit of hack and may need a cleaner solution?)
+    Batch <Actor> going = new Batch();
+    Visit.appendTo(going, inside);
+    
     for (Actor a : going) {
+      if (a.onMap()) a.exitMap(map);
       a.setInside(this, true);
     }
   }

@@ -116,13 +116,34 @@ public class ActorHealth {
   
   /**  Regular state updates-
     */
-  void updateHealth() {
+  void updateHealth(Area map) {
     //
-    //  Obtain some basic settings first-
-    Area map = actor.map();
-    WorldSettings settings = map.world.settings;
+    //  Health-updates can occur a little more frequently on-map:
     float tick = 1f / map.ticksPS;
     float time = map.time() + map.timeInUpdate();
+    
+    boolean resting = state == STATE_KO;
+    resting |= actor.jobType() == JOB.RESTING && actor.task().inContact();
+    
+    updateHealth(tick, time, resting, map.world);
+  }
+  
+  
+  void updateHealthOffmap(Base base) {
+    //
+    //  We're assuming the actor can always eat/rest off-map:
+    if (organic()) {
+      hunger -= (maxHealth() + 1) / HUNGER_REGEN;
+    }
+    updateHealth(1, base.world.time(), true, base.world);
+  }
+  
+  
+  void updateHealth(
+    float tick, float time, boolean rest, World world
+  ) {
+    boolean canHunger = world.settings.toggleHunger;
+    boolean canTire   = world.settings.toggleFatigue;
     //
     //  Adjust health-parameters accordingly-
     if (! alive()) {
@@ -132,34 +153,36 @@ public class ActorHealth {
       injury += decay;
     }
     else if (organic()) {
-      hunger += settings.toggleHunger ? (tick / STARVE_INTERVAL) : 0;
-      cooldown = Nums.max(0, cooldown - tick);
-      
+      float maxHurt = maxHealth() + 1;
+      {
+        cooldown = Nums.max(0, cooldown - tick);
+      }
+      {
+        hunger += canHunger ? (tick / STARVE_INTERVAL) : 0;
+        hunger = Nums.clamp(hunger, 0, maxHurt);
+      }
       if (bleed > 0) {
         float bleedInc = tick * 1f / BLEED_UNIT_TIME;
         injury += bleedInc;
         bleed -= bleedInc;
       }
-      
-      boolean resting = state == STATE_KO;
-      resting |= actor.jobType() == JOB.RESTING && actor.task().inContact();
-      
-      if (resting) {
+      if (rest) {
         float rests = tick / FATIGUE_REGEN;
         float heals = tick / HEALTH_REGEN ;
-        fatigue = Nums.max(0, fatigue - rests);
-        injury  = Nums.max(0, injury  - heals);
+        fatigue = Nums.clamp(fatigue - rests, 0, maxHurt);
+        injury  = Nums.clamp(injury  - heals, 0, maxHurt);
       }
       else {
-        fatigue += settings.toggleFatigue ? (tick / FATIGUE_INTERVAL) : 0;
+        float tire  = canTire ? (tick / FATIGUE_INTERVAL) : 0;
         float heals = tick * 0.5f / HEALTH_REGEN;
-        injury = Nums.max(0, injury - heals);
+        fatigue = Nums.clamp(fatigue + tire , 0, maxHurt);
+        injury  = Nums.clamp(injury  - heals, 0, maxHurt);
       }
     }
     else {
       float rests = tick / FATIGUE_REGEN;
       bleed = 0;
-      fatigue = Nums.max(0, fatigue - rests);
+      fatigue  = Nums.max(0, fatigue - rests);
       cooldown = Nums.max(0, cooldown - tick);
     }
     //
@@ -300,8 +323,7 @@ public class ActorHealth {
   public void takeDamage(float damage) {
     Area map = actor.map();
     if (map == null || ! map.world.settings.toggleInjury) return;
-    injury += damage;
-    injury = Nums.clamp(injury, 0, maxHealth() + 1);
+    injury = Nums.clamp(injury + damage, 0, maxHealth() + 1);
     if (damage > 0) incBleed(damage * BLEEDING_PERCENT / 100f);
     checkHealthState();
   }
@@ -317,8 +339,7 @@ public class ActorHealth {
   public void takeFatigue(float tire) {
     Area map = actor.map();
     if (map == null || ! map.world.settings.toggleFatigue) return;
-    fatigue += tire;
-    fatigue = Nums.clamp(tire, 0, maxHealth() + 1);
+    fatigue = Nums.clamp(tire + tire, 0, maxHealth() + 1);
     checkHealthState();
   }
   

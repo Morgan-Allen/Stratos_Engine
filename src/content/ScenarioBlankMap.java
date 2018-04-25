@@ -84,7 +84,7 @@ public class ScenarioBlankMap extends AreaScenario {
     stage.addBase(landing);
     world.addBases(patron, landing);
     
-    World.setupRoute(homeworld, stage.locale, 1, Type.MOVE_AIR);
+    World.setupRoute(homeworld, stage.locale, 12, Type.MOVE_AIR);
     Base.setPosture(patron, landing, Base.POSTURE.VASSAL, true);
     patron.updateOffmapTraders();
     

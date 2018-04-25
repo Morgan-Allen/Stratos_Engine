@@ -375,6 +375,11 @@ public class World implements Session.Saveable {
   
   
   public int arriveTime(Actor going) {
+    return arriveTime(going, null);
+  }
+  
+  
+  public int arriveTime(Actor going, Base goes) {
     Journey j = journeyFor(going);
     if (j != null) return j.arriveTime;
     

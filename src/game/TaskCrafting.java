@@ -3,9 +3,6 @@
 package game;
 import util.*;
 import static game.GameConstants.*;
-
-import game.GameConstants.Pathing;
-
 import static game.BuildingForCrafts.*;
 import graphics.common.*;
 
@@ -143,7 +140,6 @@ public class TaskCrafting extends Task {
     for (Good need : recipe.inputs) {
       venue.addInventory(0 - progInc, need);
     }
-    
     if (order == null) {
       venue.setInventory(recipe.made, progress + progInc);
     }

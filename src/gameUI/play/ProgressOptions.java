@@ -111,6 +111,9 @@ public class ProgressOptions extends UIGroup implements UIConstants {
     
     lastSpeed = norms;
     
+    
+    //  TODO:  Use Constants for this...
+    
     int height = 25;
     //final int sizeB = OPT_BUTTON_SIZE - OPT_MARGIN;
     //int across = PANEL_TAB_SIZE;

@@ -31,7 +31,7 @@ public class PaneBuildOptions extends DetailPane {
     
     this.text.setText("");
     final Description d = this.text;
-    d.append("\nFacilities: ");
+    d.append("\nBuilding Types: ");
     
     for (final Type type : UI.base.buildTypes()) {
       if (! type.rulerCanBuild(base, area)) continue;

@@ -74,10 +74,9 @@ public class TestVessels extends LogicTest {
     homeC.setName("(Home City)");
     awayC.setName("(Away City)");
     
-    World.setupRoute(homeC.locale, awayC.locale, 1, Type.MOVE_AIR);
+    World.setupRoute(homeC.locale, awayC.locale, 10, Type.MOVE_AIR);
     Base.setPosture(homeC, awayC, Base.POSTURE.TRADING, true);
     homeC.setHomeland(awayC);
-    
     
     Tally <Good> supplies = new Tally().setWith(GREENS, 10, SPYCE, 5);
     Base.setSuppliesDue(awayC, homeC, supplies);
@@ -89,6 +88,7 @@ public class TestVessels extends LogicTest {
     
     Area map = new Area(world, homeC.locale, homeC);
     map.performSetup(10, new Terrain[0]);
+    
     world.settings.toggleFog       = false;
     world.settings.toggleHunger    = false;
     world.settings.toggleFatigue   = false;
@@ -159,6 +159,20 @@ public class TestVessels extends LogicTest {
       }
       
       else {
+        awayC.toggleVisitor(ship, true);
+        for (Actor a : ship.crew()) {
+          awayC.toggleVisitor(a, true);
+          a.health.setHungerLevel(0.5f);
+        }
+        for (int n = HUNGER_REGEN; n-- > 0;) {
+          map.update(1);
+        }
+        for (Actor a : ship.crew()) {
+          if (a.health.hungerLevel() > 0) {
+            I.say("WARNING: CREW WERE HUNGRY!");
+          }
+        }
+        
         TaskTrading trading = BuildingForTrade.selectTraderBehaviour(
           awayC, ship, homeC, false, map
         );

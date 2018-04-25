@@ -72,7 +72,7 @@ public class Actor extends Element implements
     
     ID = s.loadString();
     
-    work      = (Building) s.loadObject();
+    work      = (Employer) s.loadObject();
     home      = (Building) s.loadObject();
     guestBase = (Base    ) s.loadObject();
     mission   = (Mission ) s.loadObject();
@@ -263,7 +263,7 @@ public class Actor extends Element implements
     //
     //  And update health-state and life-cycle-
     if (onMap()) traits.updateTraits();
-    if (onMap()) health.updateHealth();
+    if (onMap()) health.updateHealth(map());
     if (onMap()) health.checkHealthState();
     if (onMap() && health.alive()) health.updateLifeCycle(base(), true);
   }
@@ -294,6 +294,7 @@ public class Actor extends Element implements
   
   
   void updateOffMap(Base city) {
+    health.updateHealthOffmap(city);
     health.updateLifeCycle(city, false);
   }
   
@@ -656,16 +657,18 @@ public class Actor extends Element implements
   void updateVision() {
     if (indoors()) return;
     
+    AreaTile from = centre();
+    
     if (base() != map.locals) {
       AreaFog fog = map.fogMap(base(), true);
       float range = sightRange();
-      if (fog != null) fog.liftFog(at(), range);
+      if (fog != null) fog.liftFog(from, range);
     }
     
     if (guestBase() != map.locals) {
       AreaFog fog = map.fogMap(guestBase(), true);
       float range = sightRange();
-      if (fog != null) fog.liftFog(at(), range);
+      if (fog != null) fog.liftFog(from, range);
     }
     
     float noticeRange = sightRange();

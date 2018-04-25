@@ -554,6 +554,11 @@ public class Base implements Session.Saveable, Trader {
     return makeTotals.valueFor(g);
   }
   
+  
+  public float totalUsed(Good g) {
+    return usedTotals.valueFor(g);
+  }
+  
 
   public Tally <Good> needLevels() { return needLevel; }
   public Tally <Good> prodLevels() { return prodLevel; }
@@ -680,7 +685,8 @@ public class Base implements Session.Saveable, Trader {
   /**  Regular updates-
     */
   void updateCity() {
-    boolean updateStats = world.time % DAY_LENGTH == 0;
+    final int UPDATE_GAP = map == null ? DAY_LENGTH : 10;
+    boolean updateStats = world.time % UPDATE_GAP == 0;
     boolean activeMap   = map != null;
     Base    lord        = currentLord();
     //
@@ -693,10 +699,10 @@ public class Base implements Session.Saveable, Trader {
       for (Actor a : map.actors) if (a.base() == this) {
         citizens += 1;
       }
-      population = citizens * POP_PER_CITIZEN;
+      this.population = citizens * POP_PER_CITIZEN;
       
       float armyPower = 0;
-      for (Building b : map.buildings) {
+      for (Building b : map.buildings()) if (b.base() == this) {
         if (b.type().category == Type.IS_ARMY_BLD) {
           armyPower += MissionStrike.powerSum(b.workers(), map);
         }
@@ -713,8 +719,10 @@ public class Base implements Session.Saveable, Trader {
       //  TODO:  You might want to update this more frequently.
       //  TODO:  And put in a basic test-routine for this...
       
-      for (Building b : map.buildings) {
-        for (Good g : world.goodTypes) {
+      //  Once every 10 seconds or so, at least.
+      
+      for (Building b : map.buildings()) if (b.base() == this) {
+        for (Good g : world.goodTypes()) {
           inventory.add(b.inventory(g), g);
         }
         if (b.type().category != Type.IS_TRADE_BLD) {
@@ -734,8 +742,8 @@ public class Base implements Session.Saveable, Trader {
     if (updateStats && ! activeMap) {
       council.updateCouncil(false);
       
-      float popRegen  = DAY_LENGTH * 1f / (LIFESPAN_LENGTH / 2);
-      float usageInc  = DAY_LENGTH * 1f / YEAR_LENGTH;
+      float popRegen  = UPDATE_GAP * 1f / (LIFESPAN_LENGTH / 2);
+      float usageInc  = UPDATE_GAP * 1f / YEAR_LENGTH;
       float idealPop  = idealPopulation();
       float idealArmy = idealArmyPower();
       
@@ -762,8 +770,10 @@ public class Base implements Session.Saveable, Trader {
         inventory.set(g, Nums.max(0, amount));
       }
       
+      //  TODO:  Move this to the Council class?
+      
       if (isLoyalVassalOf(lord)) {
-        if (council.considerRevolt(lord, DAY_LENGTH)) {
+        if (council.considerRevolt(lord, UPDATE_GAP)) {
           toggleRebellion(lord, true);
         }
         //  TODO:  You may have to generate caravans to visit player cities...
@@ -780,7 +790,7 @@ public class Base implements Session.Saveable, Trader {
     //  Either way, we allow prestige and loyalty to return gradually to
     //  defaults over time:
     if (updateStats) {
-      float presDrift = DAY_LENGTH * PRESTIGE_AVG * 1f / PRES_FADEOUT_TIME;
+      float presDrift = UPDATE_GAP * PRESTIGE_AVG * 1f / PRES_FADEOUT_TIME;
       float presDiff = PRESTIGE_AVG - prestige;
       if (Nums.abs(presDiff) > presDrift) {
         presDiff = presDrift * (presDiff > 0 ? 1 : -1);

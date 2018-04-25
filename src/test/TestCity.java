@@ -254,7 +254,7 @@ public class TestCity extends LogicTest {
     }
     I.say("\nTotal goods consumed:");
     for (Good g : goods) {
-      I.say("  "+g+": "+base.totalMade(g));
+      I.say("  "+g+": "+base.totalUsed(g));
     }
   }
   

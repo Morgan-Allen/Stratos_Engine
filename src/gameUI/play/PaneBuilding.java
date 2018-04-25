@@ -83,7 +83,14 @@ public class PaneBuilding extends DetailPane {
           d.appendAll("\n  ", a, "  ", a.jobDesc());
         }
         else {
-          d.appendAll("\n  ", a, " (ETA "+world.arriveTime(a)+")");
+          Base offmap = a.offmapBase();
+          int ETA = world.arriveTime(a, base);
+          if (ETA < 0) {
+            d.appendAll("\n  ", a, " (On "+offmap+")");
+          }
+          else {
+            d.appendAll("\n  ", a, " (ETA "+ETA+")");
+          }
         }
       }
     }
@@ -95,7 +102,14 @@ public class PaneBuilding extends DetailPane {
           d.appendAll("\n  ", a, "  ", a.jobDesc());
         }
         else {
-          d.appendAll("\n  ", a, " (ETA T"+world.arriveTime(a)+")");
+          Base offmap = a.offmapBase();
+          int ETA = world.arriveTime(a, base);
+          if (ETA < 0) {
+            d.appendAll("\n  ", a, " (On "+offmap+")");
+          }
+          else {
+            d.appendAll("\n  ", a, " (ETA "+ETA+")");
+          }
         }
       }
     }
