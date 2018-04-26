@@ -6,23 +6,15 @@ import util.*;
 
 
 
+
 public class ActorType extends Type {
   
   
   String nameValues[][] = new String[0][0];
   
-  public int  socialClass  = CLASS_COMMON;
-  public int  genderRole   = SEX_EITHER;
-  public int  hireCost     = AVG_HIRE_COST;
-  public Type patronGods[] = null;
-  
-  public boolean isPorter = false;
-  public Tally <ActorType> crewTypes = new Tally();
   
   public int moveSpeed = AVG_MOVE_SPEED;
   public int moveMode  = MOVE_LAND;
-  
-  public Tally <Trait> initTraits = new Tally();
   
   public Terrain habitats[] = NO_HABITAT;
   public boolean predator   = false;
@@ -31,8 +23,20 @@ public class ActorType extends Type {
   public Good    meatType   = null;
   public Type    nestType   = null;
   
+  public int socialClass = CLASS_COMMON;
+  public int genderRole  = SEX_EITHER;
+  public int hireCost    = AVG_HIRE_COST;
+  public Tally <Trait> initTraits = new Tally();
   
+  public int classLevelXP = BASE_CLASS_XP;
+  public Tally <Trait> coreSkills = new Tally();
   public ActorTechnique[] classTechniques = {};
+  
+  public boolean isPorter = false;
+  public Tally <ActorType> crewTypes = new Tally();
+  
+  
+  
   
   public ActorType(Class baseClass, String ID, int category, int socialClass) {
     super(baseClass, ID, category);
@@ -59,15 +63,20 @@ public class ActorType extends Type {
     a.health.setSexData(sex);
     a.health.setHunger(Rand.num() - 0.5f);
     
-    for (Trait t : initTraits.keys()) {
-      a.traits.setLevel(t, initTraits.valueFor(t));
+    for (Trait t : ALL_SKILLS) {
+      float value = initTraits.valueFor(t) * 1f;
+      if (value > 0) value += Rand.index(INIT_SKILL_RANGE + 1);
+      a.traits.setLevel(t, value);
     }
     
     for (Trait t : ALL_PERSONALITY) {
-      a.traits.setLevel(t, Rand.range(-1, 1));
+      float value = (initTraits.valueFor(t) - 50) / 50f;
+      value += Rand.range(-1, 1) * INIT_PERS_RANGE / 100f;
+      value = Nums.clamp(value, -1, 1);
+      a.traits.setLevel(t, value);
     }
     
-    ///I.say("INITIAL LEVELS: "+a.levels);
+    a.traits.setClassLevel(1);
   }
   
   

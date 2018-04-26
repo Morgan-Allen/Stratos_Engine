@@ -67,7 +67,17 @@ public class Vassals {
   static {
     AUDITOR.name = "Auditor";
     AUDITOR.attachCostume(Vassals.class, "auditor_skin.gif");
-    AUDITOR.initTraits.setWith(SKILL_SPEAK, 4, SKILL_WRITE, 4);
+    
+    AUDITOR.coreSkills.setWith(
+      SKILL_SPEAK, 8,
+      SKILL_WRITE, 8
+    );
+    AUDITOR.initTraits.setWith(
+      TRAIT_EMPATHY  , 30,
+      TRAIT_DILIGENCE, 60,
+      TRAIT_BRAVERY  , 20,
+      TRAIT_CURIOSITY, 40
+    );
   }
   
   
@@ -84,7 +94,17 @@ public class Vassals {
   static {
     VENDOR.name = "Vendor";
     VENDOR.attachCostume(Vassals.class, "vendor_skin.gif");
-    VENDOR.initTraits.setWith(SKILL_SPEAK, 2, SKILL_WRITE, 2);
+    
+    VENDOR.coreSkills.setWith(
+      SKILL_SPEAK, 6,
+      SKILL_WRITE, 4
+    );
+    VENDOR.initTraits.setWith(
+      TRAIT_EMPATHY  , 30,
+      TRAIT_DILIGENCE, 60,
+      TRAIT_BRAVERY  , 20,
+      TRAIT_CURIOSITY, 40
+    );
   }
   
   
@@ -101,7 +121,18 @@ public class Vassals {
   static {
     PYON.name = "Pyon";
     PYON.attachCostume(Vassals.class, "pyon_skin.gif");
-    PYON.initTraits.setWith(SKILL_FARM, 1, SKILL_BUILD, 1, SKILL_CRAFT, 1);
+    
+    PYON.coreSkills.setWith(
+      SKILL_FARM , 4,
+      SKILL_BUILD, 4,
+      SKILL_CRAFT, 4
+    );
+    PYON.initTraits.setWith(
+      TRAIT_EMPATHY  , 55,
+      TRAIT_DILIGENCE, 65,
+      TRAIT_BRAVERY  , 20,
+      TRAIT_CURIOSITY, 40
+    );
   }
   
   
@@ -118,7 +149,17 @@ public class Vassals {
   static {
     SUPPLY_CORPS.name = "Supply Corps";
     SUPPLY_CORPS.attachCostume(Vassals.class, "pyon_skin.gif");
-    SUPPLY_CORPS.initTraits.setWith(SKILL_CRAFT, 1, SKILL_PILOT, 2);
+    
+    SUPPLY_CORPS.coreSkills.setWith(
+      SKILL_CRAFT, 2,
+      SKILL_PILOT, 6
+    );
+    SUPPLY_CORPS.initTraits.setWith(
+      TRAIT_EMPATHY  , 55,
+      TRAIT_DILIGENCE, 65,
+      TRAIT_BRAVERY  , 20,
+      TRAIT_CURIOSITY, 40
+    );
   }
   
   

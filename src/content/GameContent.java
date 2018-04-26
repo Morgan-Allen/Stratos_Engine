@@ -419,6 +419,7 @@ public class GameContent {
     KOMMANDO.initTraits.setWith(SKILL_MELEE, 7, SKILL_EVADE, 5);
     
     
+    
     ECOLOGIST.name = "Ecologist";
     ECOLOGIST.attachCostume(GameContent.class, "ecologist_skin.gif");
     
@@ -427,7 +428,22 @@ public class GameContent {
     ECOLOGIST.rangeDist   = 6;
     ECOLOGIST.maxHealth   = 16;
     ECOLOGIST.moveSpeed   = 110;
-    ECOLOGIST.initTraits.setWith(SKILL_RANGE, 5, SKILL_EVADE, 3, SKILL_FARM, 4);
+    
+    ECOLOGIST.coreSkills.setWith(
+      SKILL_FARM , 10,
+      SKILL_RANGE, 8 ,
+      SKILL_WRITE, 7 ,
+      SKILL_EVADE, 6 ,
+      SKILL_SPEAK, 5 ,
+      SKILL_HEAL , 4 
+    );
+    ECOLOGIST.initTraits.setWith(
+      TRAIT_EMPATHY  , 65,
+      TRAIT_DILIGENCE, 55,
+      TRAIT_BRAVERY  , 50,
+      TRAIT_CURIOSITY, 70
+    );
+    //ECOLOGIST.initTraits.setWith(SKILL_RANGE, 5, SKILL_EVADE, 3, SKILL_FARM, 4);
     
     ENGINEER.name = "Engineer";
     ENGINEER.attachCostume(GameContent.class, "engineer_skin.gif");
@@ -436,7 +452,22 @@ public class GameContent {
     ENGINEER.armourClass = 14;
     ENGINEER.maxHealth   = 20;
     ENGINEER.moveSpeed   = 70;
-    ENGINEER.initTraits.setWith(SKILL_MELEE, 3, SKILL_CRAFT, 5, SKILL_BUILD, 5);
+    
+    ENGINEER.coreSkills.setWith(
+      SKILL_CRAFT, 10,
+      SKILL_BUILD, 10,
+      SKILL_MELEE, 6 ,
+      SKILL_PILOT, 6 ,
+      SKILL_WRITE, 4 ,
+      SKILL_RANGE, 4
+    );
+    ENGINEER.initTraits.setWith(
+      TRAIT_EMPATHY  , 40,
+      TRAIT_DILIGENCE, 80,
+      TRAIT_BRAVERY  , 50,
+      TRAIT_CURIOSITY, 60
+    );
+    //ENGINEER.initTraits.setWith(SKILL_MELEE, 3, SKILL_CRAFT, 5, SKILL_BUILD, 5);
     
     PHYSICIAN.name = "Physician";
     PHYSICIAN.attachCostume(GameContent.class, "physician_skin.gif");
@@ -446,7 +477,22 @@ public class GameContent {
     PHYSICIAN.armourClass = 2;
     PHYSICIAN.maxHealth   = 12;
     PHYSICIAN.moveSpeed   = 110;
-    PHYSICIAN.initTraits.setWith(SKILL_CRAFT, 6, SKILL_WRITE, 4, SKILL_SPEAK, 3);
+    
+    PHYSICIAN.coreSkills.setWith(
+      SKILL_HEAL  , 10,
+      SKILL_WRITE , 9 ,
+      SKILL_SPEAK , 8 ,
+      SKILL_CRAFT , 7 ,
+      SKILL_RANGE , 5 ,
+      SKILL_MELEE , 2 
+    );
+    PHYSICIAN.initTraits.setWith(
+      TRAIT_EMPATHY  , 55,
+      TRAIT_DILIGENCE, 60,
+      TRAIT_BRAVERY  , 40,
+      TRAIT_CURIOSITY, 70
+    );
+    //PHYSICIAN.initTraits.setWith(SKILL_CRAFT, 6, SKILL_WRITE, 4, SKILL_SPEAK, 3);
   }
   
   

@@ -2,6 +2,7 @@
 
 package gameUI.play;
 import game.*;
+import graphics.common.*;
 import graphics.widgets.*;
 import util.*;
 import static game.GameConstants.*;
@@ -25,7 +26,12 @@ public class PaneActor extends DetailPane {
     this.text.setText("");
     final Description d = this.text;
     
-    d.append(""+actor.fullName()+" ("+actor.type()+")");
+    int classLevel = actor.traits.classLevel();
+    int fullXP = actor.traits.classLevelFullXP() * 100;
+    int XP = (int) (actor.traits.classLevelProgress() * fullXP);
+    
+    d.append(""+actor.fullName()+" (Level "+classLevel+" "+actor.type()+")");
+    d.append("\n  XP: "+XP+"/"+fullXP);
     d.append("\n");
     
     int maxHP = actor.type().maxHealth;
@@ -57,71 +63,42 @@ public class PaneActor extends DetailPane {
       d.appendAll("\n    ", I.shorten(carried.valueFor(g), 1), " ", g);
     }
     
-    //d.appendAll("\n  Carrying:  ", actor.outfit.carried());
-    
-    Series <Trait> traits = actor.traits.allTraits();
-    if (traits.size() > 0) {
-      d.append("\n\nTraits:");
-      for (Trait t : actor.traits.allTraits()) {
-        d.appendAll("\n  ", t, ":"+I.shorten(actor.traits.levelOf(t), 1));
+    if (actor.type().isPerson()) {
+      d.append("\n");
+      d.append("\n  Skills:");
+      
+      int skillI = 0;
+      for (Trait t : ALL_SKILLS) {
+        int level = (int) actor.traits.levelOf(t);
+        
+        if (skillI++ % 2 == 0) d.append("\n    ");
+        else d.append(" ");
+        
+        Colour c = Colour.GREY;
+        if (level > 3) c = Colour.LITE_GREY;
+        if (level > 6) c = Colour.WHITE;
+        
+        Text.appendColour(I.padToLength(t.name, 6)+": ", c, d);
+        Text.appendColour(I.padToLength(""+level, 2)   , c, d);
+      }
+      
+      d.append("\n  Traits:");
+      for (Trait t : ALL_PERSONALITY) {
+        int level = (int) (actor.traits.levelOf(t) * 100);
+        
+        String name = level > 0 ? t.name : (String) Visit.last(t.traitRangeNames);
+        level = Nums.abs(level);
+        
+        Colour c = Colour.GREY;
+        if (level > 25) c = Colour.LITE_GREY;
+        if (level > 75) c = Colour.WHITE;
+        
+        d.append("\n    ");
+        Text.appendColour(I.padToLength(name, 9)+": ", c, d);
+        Text.appendColour(I.padToLength(level+"%", 5)  , c, d);
       }
     }
     
-    /*
-    final int
-      level  = actor.traits.characterLevel(),
-      remXP  = actor.traits.remainderXP(),
-      needXP = actor.traits.requiredXP(),
-      maxHP  = actor.traits.maxHP(),
-      HP     = (int) (maxHP - actor.traits.health.injury()),
-      tired  = (int) actor.traits.health.fatigue()
-    ;
-
-    d.append(""+actor.toString());
-    if (! actor.species().creature) {
-      d.append("\n"+actor.species());
-      d.append(" Level: "+level+" (XP "+remXP+"/"+needXP+")");
-    }
-    d.append("\n");
-    
-    d.append("\nHP: ");
-    d.append(HP+"/"+maxHP);
-    if (tired > 0) d.append(" (Fatigue "+tired+")");
-    d.append("\nDamage: "+actor.traits.damage());
-    d.append("\nArmour: "+actor.traits.armour());
-    d.append("\nCredits: "+actor.gear.credits());
-    
-    final Series <Item> allItems = actor.gear.allItems();
-    if (! allItems.empty()) {
-      d.append("\nCarried:");
-      for (Item i : allItems) d.appendAll("\n  ", i);
-    }
-    
-    d.append("\n\nHome at: ");
-    if (actor.home() == null) d.append("None");
-    else d.append(actor.home());
-    
-    d.append("\nCurrently: ");
-    final Plan doing = actor.plan();
-    if (doing == null) {
-      d.append("Thinking");
-    }
-    else if (doing.mission() != null) {
-      d.append("On ");
-      doing.mission().describeMission(d);
-      d.append(" ("+I.shorten(doing.priority(), 1)+")");
-    }
-    else {
-      doing.describePlan(d);
-      d.append(" ("+I.shorten(doing.priority(), 1)+")");
-    }
-    
-    d.append("\n\nSkills:");
-    for (Trait t : actor.traits.allTraits(Trait.TYPE_SKILL)) {
-      int skillL = (int) actor.traits.traits.levelOf(t);
-      d.append("\n  "+t+": "+skillL);
-    }
-    //*/
     super.updateState();
   }
 }

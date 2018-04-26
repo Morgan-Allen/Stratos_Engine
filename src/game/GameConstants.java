@@ -122,7 +122,11 @@ public class GameConstants {
     //  Skills and XP-
     SKILL_XP_MULTS[] = { 1 , 2 , 3 , 4 , 5 , 6 , 7 , 8 , 9 , 10, -1 },
     SKILL_XP_TOTAL[] = { 0 , 1 , 3 , 6 , 10, 15, 21, 28, 36, 45, 55 },
+    INIT_SKILL_RANGE = 2 ,  //  point variation in starting skills
+    INIT_PERS_RANGE  = 50,  //  percent variation in personality traits
     MAX_SKILL_LEVEL  = 10,
+    MAX_CLASS_LEVEL  = 10,
+    BASE_CLASS_XP    = 5 ,
     ALL_LEVELS_SUM   = SKILL_XP_TOTAL[10],
     MAX_TRAIN_TIME   = (YEAR_LENGTH * 10) / 3,
     BASE_LEVEL_XP    = MAX_TRAIN_TIME / ALL_LEVELS_SUM,
@@ -354,6 +358,7 @@ public class GameConstants {
     boolean isBasic;
     boolean isSkill;
     boolean isPersonality;
+    Trait parent;
     
     
     public Trait(String ID, String... names) {
@@ -369,11 +374,8 @@ public class GameConstants {
     void passiveEffect(Actor actor) {
       return;
     }
-    
   }
   
-  //public static class Condition extends Type {
-  //}
   
   public static class Recipe {
     
@@ -459,38 +461,48 @@ public class GameConstants {
   /**  Walker types-
     */
   final public static Trait
+    
+    TRAIT_TOUGH = new Trait("skill_tough", "Tough"),
+    TRAIT_FAST  = new Trait("skill_fast" , "Fast" ),
+    TRAIT_SMART = new Trait("skill_smart", "Smart"),
+    
+    ALL_ATTRIBUTES[] = {
+      TRAIT_TOUGH, TRAIT_FAST, TRAIT_SMART
+    },
+    
     SKILL_MELEE = new Trait("skill_melee", "Melee"),
     SKILL_RANGE = new Trait("skill_range", "Range"),
     SKILL_EVADE = new Trait("skill_evade", "Evade"),
-    SKILL_PILOT = new Trait("skill_pilot", "Pilot"),
     SKILL_FARM  = new Trait("skill_farm" , "Farm" ),
     SKILL_BUILD = new Trait("skill_build", "Build"),
     SKILL_CRAFT = new Trait("skill_craft", "Craft"),
     SKILL_SPEAK = new Trait("skill_speak", "Speak"),
     SKILL_WRITE = new Trait("skill_write", "Write"),
     SKILL_PRAY  = new Trait("skill_pray" , "Pray" ),
+    SKILL_PILOT = new Trait("skill_pilot", "Pilot"),
     SKILL_HEAL  = new Trait("skill_heal" , "Heal" ),
+    SKILL_LABOR = new Trait("skill_labor", "Labor"),
     
     ALL_SKILLS[] = {
       SKILL_MELEE, SKILL_RANGE, SKILL_EVADE,
       SKILL_FARM , SKILL_BUILD, SKILL_CRAFT,
       SKILL_SPEAK, SKILL_WRITE, SKILL_PRAY ,
+      SKILL_PILOT, SKILL_HEAL , SKILL_LABOR
     },
     
     TRAIT_EMPATHY = new Trait("trait_empathy",
-      "Empathic", null, "Cruel"
+      "Empathy", null, "Greed"
     ),
     TRAIT_DILIGENCE = new Trait("trait_diligence",
-      "Diligent", null, "Fickle"
+      "Diligence", null, "Indolence"
     ),
     TRAIT_BRAVERY = new Trait("trait_bravery",
-      "Brave", null, "Nervous"
+      "Bravery", null, "Caution"
     ),
     TRAIT_CURIOSITY = new Trait("trait_curiosity",
-      "Curious", null, "Dull"
+      "Curiosity", null, "Aversion"
     ),
-    ALL_PERSONALITY[] =
-    {
+    ALL_PERSONALITY[] = {
       TRAIT_EMPATHY, TRAIT_DILIGENCE, TRAIT_BRAVERY, TRAIT_CURIOSITY
     }
   ;

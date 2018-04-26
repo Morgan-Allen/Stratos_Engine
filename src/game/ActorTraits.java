@@ -41,6 +41,8 @@ public class ActorTraits {
   
   final Actor actor;
   
+  float classXP = 0;
+  int classLevel = 0;
   List <Level> levels = new List();
   List <Bond > bonds  = new List();
   List <ActorTechnique> known = new List();
@@ -54,6 +56,9 @@ public class ActorTraits {
   
   
   void loadState(Session s) throws Exception {
+    
+    classXP = s.loadFloat();
+    classLevel = s.loadInt();
     
     for (int n = s.loadInt(); n-- > 0;) {
       Level l = new Level();
@@ -78,6 +83,9 @@ public class ActorTraits {
   
   void saveState(Session s) throws Exception {
     
+    s.saveFloat(classXP);
+    s.saveInt(classLevel);
+    
     s.saveInt(levels.size());
     for (Level l : levels) {
       s.saveObject(l.trait);
@@ -95,7 +103,6 @@ public class ActorTraits {
     s.saveObjects(known);
     s.saveObjects(affecting);
   }
-  
   
   
   
@@ -130,9 +137,23 @@ public class ActorTraits {
       }
     }
     //
+    //  And calculate current class level and skill-multiples:
+    ActorType classType = actor.type();
+    int typeLevelXP = classType.classLevelXP;
+    for (int l = MAX_CLASS_LEVEL; l-- > 0;) {
+      if (SKILL_XP_TOTAL[l] <= (classXP / typeLevelXP)) {
+        classLevel = l;
+        break;
+      }
+    }
+    float classMult = 0;
+    if (classLevel < 1) classMult = classXP * 0.5f / typeLevelXP;
+    else classMult = (1 + ((classLevel - 1) / (MAX_CLASS_LEVEL - 1f))) / 2;
+    //
     //  And then apply any passive effects those may have-
     for (Level l : levels) {
       l.bonus = 0;
+      l.bonus += (int) (classType.coreSkills.valueFor(l.trait) * classMult);
       for (Trait t : affecting) {
         l.bonus += t.passiveBonus(l.trait);
       }
@@ -147,7 +168,29 @@ public class ActorTraits {
   /**  Handling skills and traits-
     */
   public int classLevel() {
-    return 1;
+    return classLevel;
+  }
+  
+  
+  public void setClassLevel(int level) {
+    int typeLevelXP = actor.type().classLevelXP;
+    level = Nums.clamp(level, MAX_CLASS_LEVEL + 1);
+    this.classLevel = level;
+    this.classXP = SKILL_XP_TOTAL[level] * typeLevelXP;
+  }
+  
+  
+  public float classLevelProgress() {
+    int typeLevelXP = actor.type().classLevelXP;
+    int floor = SKILL_XP_TOTAL[classLevel];
+    int gapXP = SKILL_XP_MULTS[classLevel];
+    return ((classXP / typeLevelXP) - floor) / gapXP;
+  }
+  
+  
+  public int classLevelFullXP() {
+    int typeLevelXP = actor.type().classLevelXP;
+    return SKILL_XP_MULTS[classLevel] * typeLevelXP;
   }
   
   
@@ -168,8 +211,13 @@ public class ActorTraits {
   public void setLevel(Trait trait, float level) {
     Level l = levelFor(trait, true);
     l.level = level = Nums.clamp(level, -1, MAX_SKILL_LEVEL);
-    l.XP =  BASE_LEVEL_XP * SKILL_XP_TOTAL[(int) level];
-    l.XP += BASE_LEVEL_XP * SKILL_XP_MULTS[(int) level] * (l.level % 1);
+    if (level <= 0) {
+      l.XP = 0;
+    }
+    else {
+      l.XP =  BASE_LEVEL_XP * SKILL_XP_TOTAL[(int) level];
+      l.XP += BASE_LEVEL_XP * SKILL_XP_MULTS[(int) level] * (l.level % 1);
+    }
   }
   
   
@@ -186,6 +234,11 @@ public class ActorTraits {
   public void gainXP(Trait trait, float XP) {
     Level l = levelFor(trait, true);
     setXP(trait, l.XP + XP);
+    
+    ActorType classType = actor.type();
+    float coreLevel = classType.coreSkills.valueFor(trait);
+    float coreXP = XP * coreLevel / MAX_SKILL_LEVEL;
+    classXP += coreXP;
   }
   
   

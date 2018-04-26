@@ -63,7 +63,22 @@ public class Trooper {
     
     TROOPER.maxHealth    = 20;
     TROOPER.moveSpeed    = 80;
-    TROOPER.initTraits.setWith(SKILL_MELEE, 4, SKILL_RANGE, 6, SKILL_EVADE, 2);
+    
+    TROOPER.coreSkills.setWith(
+      SKILL_RANGE, 10,
+      SKILL_PILOT, 7 ,
+      SKILL_MELEE, 6 ,
+      SKILL_EVADE, 4 ,
+      SKILL_CRAFT, 3 ,
+      SKILL_HEAL , 3
+    );
+    TROOPER.initTraits.setWith(
+      TRAIT_EMPATHY  , 50,
+      TRAIT_DILIGENCE, 85,
+      TRAIT_BRAVERY  , 70,
+      TRAIT_CURIOSITY, 25
+    );
+    //TROOPER.initTraits.setWith(SKILL_MELEE, 4, SKILL_RANGE, 6, SKILL_EVADE, 2);
   }
   
 }

@@ -108,12 +108,27 @@ public class Collective {
   static {
     COLLECTIVE.name = "Collective";
     COLLECTIVE.attachCostume(Collective.class, "collective_skin.gif");
+    
     COLLECTIVE.maxHealth   = 12;
     COLLECTIVE.meleeDamage = 0;
     COLLECTIVE.rangeDamage = 0;
     COLLECTIVE.rangeDist   = 0;
     COLLECTIVE.armourClass = 0;
-    COLLECTIVE.initTraits.setWith(SKILL_SPEAK, 3, SKILL_PRAY, 4, SKILL_WRITE, 1);
+    
+    COLLECTIVE.coreSkills.setWith(
+      SKILL_PRAY , 8 ,
+      SKILL_HEAL , 6 ,
+      SKILL_SPEAK, 6 ,
+      SKILL_WRITE, 2
+    );
+    COLLECTIVE.initTraits.setWith(
+      TRAIT_EMPATHY  , 95,
+      TRAIT_DILIGENCE, 50,
+      TRAIT_BRAVERY  , 65,
+      TRAIT_CURIOSITY, 30
+    );
+    //COLLECTIVE.initTraits.setWith(SKILL_SPEAK, 3, SKILL_PRAY, 4, SKILL_WRITE, 1);
+    
     COLLECTIVE.classTechniques = new ActorTechnique[] { PSY_HEAL };
   }
 }

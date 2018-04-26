@@ -49,7 +49,18 @@ public class Nobles {
   static {
     NOBLE.name = "Noble";
     NOBLE.attachCostume(Nobles.class, "noble_skin.gif");
-    NOBLE.initTraits.setWith(SKILL_MELEE, 1, SKILL_SPEAK, 2, SKILL_WRITE, 2);
+    
+    NOBLE.coreSkills.setWith(
+      SKILL_MELEE, 8,
+      SKILL_SPEAK, 7,
+      SKILL_WRITE, 4
+    );
+    NOBLE.initTraits.setWith(
+      TRAIT_EMPATHY  , 40,
+      TRAIT_DILIGENCE, 50,
+      TRAIT_BRAVERY  , 70,
+      TRAIT_CURIOSITY, 30
+    );
   }
   
   
@@ -66,10 +77,24 @@ public class Nobles {
   static {
     CONSORT.name = "Consort";
     CONSORT.attachCostume(Nobles.class, "consort_skin.gif");
-    CONSORT.initTraits.setWith(SKILL_SPEAK, 2, SKILL_WRITE, 1, SKILL_EVADE, 2);
+    
+    CONSORT.coreSkills.setWith(
+      SKILL_SPEAK, 8,
+      SKILL_WRITE, 4,
+      SKILL_EVADE, 6
+    );
+    CONSORT.initTraits.setWith(
+      TRAIT_EMPATHY  , 50,
+      TRAIT_DILIGENCE, 40,
+      TRAIT_BRAVERY  , 30,
+      TRAIT_CURIOSITY, 60
+    );
   }
   
 }
+
+
+
 
 
 
