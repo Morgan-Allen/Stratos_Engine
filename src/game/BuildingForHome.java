@@ -287,41 +287,12 @@ public class BuildingForHome extends Building {
       return TaskWaiting.configWaiting(actor, this, TaskWaiting.TYPE_DOMESTIC);
     }
     //
-    //  Non-nobles have work to do-
+    //  But non-nobles have work to do-
     if (actor.type().socialClass != CLASS_NOBLE) {
       TaskDelivery shopping = TaskDelivery.pickNextShopping(actor, this, homeUsed());
       if (shopping != null) return shopping;
     }
-    
-    
-    //  TODO:  Move this out to the basic AI for citizens!
-    //
-    //  Failing that, select a leisure behaviour to perform:
-    
-    //  TODO:  Compare all nearby amenities!
-    Pick <Building> pickV = new Pick();
-    
-    pickV.compare(this, 1.0f * Rand.num());
-    Building goes = TaskDelivery.findNearestWithFeature(DIVERSION, 50, this);
-    if (goes != null) {
-      pickV.compare(goes, 1.0f * Rand.num());
-    }
-    goes = pickV.result();
-    
-    if (goes != this && goes != null) {
-      Task visit = TaskResting.configResting(actor, goes);
-      if (visit != null) return visit;
-    }
-    if (goes == this && Rand.yes()) {
-      Task visit = TaskResting.configResting(actor, this);
-      if (visit != null) return visit;
-    }
-    if (goes == this) {
-      return TaskWander.configWandering(actor);
-    }
-    else {
-      return super.selectActorBehaviour(actor);
-    }
+    return null;
   }
   
   

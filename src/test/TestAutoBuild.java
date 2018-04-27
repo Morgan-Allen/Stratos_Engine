@@ -51,7 +51,7 @@ public class TestAutoBuild extends LogicTest {
     
     Actor peon = farm.workers().first();
     Building rests = TaskResting.findRestVenue(peon, map);
-    Task resting = TaskResting.configResting(peon, rests);
+    Task resting = TaskResting.nextResting(peon, rests);
     
     if (rests != vault || resting == null) {
       I.say("\nBastion should act as refuge until housing is complete!");

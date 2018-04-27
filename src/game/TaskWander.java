@@ -27,7 +27,7 @@ public class TaskWander extends Task {
   
   
   
-  static TaskWander configWandering(Actor actor) {
+  static TaskWander nextWandering(Actor actor) {
     TaskWander t = new TaskWander(actor);
     AreaTile goes = t.wanderTarget();
     t = (TaskWander) t.configTask(null, null, goes, JOB.WANDERING, 0);
@@ -76,7 +76,9 @@ public class TaskWander extends Task {
   
   
   protected float successPriority() {
-    return Task.IDLE;
+    Actor actor = (Actor) this.active;
+    float curiosity = (actor.traits.levelOf(TRAIT_CURIOSITY) + 2) / 2;
+    return IDLE * (0.5f + curiosity);
   }
   
   

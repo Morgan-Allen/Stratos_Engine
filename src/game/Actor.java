@@ -301,7 +301,7 @@ public class Actor extends Element implements
   
   void beginNextBehaviour() {
     assignTask(null, this);
-    assignTask(TaskWander.configWandering(this), this);
+    assignTask(TaskWander.nextWandering(this), this);
   }
   
   

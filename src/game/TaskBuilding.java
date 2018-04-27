@@ -202,6 +202,18 @@ public class TaskBuilding extends Task {
   
   
   
+  /**  Priority-evaluation-
+    */
+  protected float successPriority() {
+    Actor actor = (Actor) active;
+    float diligence = (actor.traits.levelOf(TRAIT_DILIGENCE) + 1) / 2;
+    float priority = ROUTINE;
+    priority *= diligence + 0.5f;
+    return priority;
+  }
+  
+  
+  
   /**  Methods invoked once you arrive at the site:
     */
   boolean configTravel(

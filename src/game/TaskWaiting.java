@@ -5,8 +5,6 @@
   */
 package game;
 import static game.GameConstants.*;
-
-import game.GameConstants.Pathing;
 import util.*;
 
 
@@ -80,11 +78,14 @@ public class TaskWaiting extends Task {
   /**  Behaviour implementation-
     */
   protected float successPriority() {
+    Actor actor = (Actor) active;
+    float diligence = (actor.traits.levelOf(TRAIT_DILIGENCE) + 1) / 2;
+    
     if (type == TYPE_DOMESTIC || type == TYPE_INVENTORY) {
-      return Task.ROUTINE;
+      return Task.ROUTINE * (0.5f + diligence);
     }
     else {
-      return Task.CASUAL;
+      return Task.CASUAL * (0.5f + diligence);
     }
   }
   

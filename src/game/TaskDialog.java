@@ -46,26 +46,15 @@ public class TaskDialog extends Task {
   
   /**  External factory methods-
     */
-  static TaskDialog nextCasualDialog(Actor actor, Series <Active> assessed) {
-    if (! actor.map().world.settings.toggleDialog) return null;
-    //
-    //  Don't generate a new dialog if one is in progress...
-    if (actor.jobType() == JOB.DIALOG) return null;
-    //
-    //  Find a promising new target-
-    Pick <Active> pick = new Pick(0);
-    for (Active a : assessed) {
-      if (! a.mobile()) continue;
-      pick.compare(a, dialogRating(actor, (Actor) a));
-    }
-    if (pick.empty()) return null;
-    Actor with = (Actor) pick.result();
-    //
-    //  Then configure and return...
-    TaskDialog dialog = new TaskDialog(actor, with, true);
-    dialog.configTask(null, null, with, JOB.DIALOG, 1);
-    dialog.casual = true;
-    return dialog.pathValid() ? dialog : null;
+  static TaskDialog nextContactDialog(Actor actor) {
+    Series <Active> others = (Series) actor.map().actors();
+    return nextDialog(actor, others, false);
+  }
+  
+  
+  static TaskDialog nextCasualDialog(Actor actor) {
+    Series <Active> others = (Series) actor.seen();
+    return nextDialog(actor, others, true);
   }
   
   
@@ -79,13 +68,39 @@ public class TaskDialog extends Task {
   }
   
   
+  static TaskDialog nextDialog(
+    Actor actor, Series <Active> assessed, boolean casual
+  ) {
+    if (! actor.map().world.settings.toggleDialog) return null;
+    //
+    //  Don't generate a new dialog if one is in progress...
+    if (actor.jobType() == JOB.DIALOG) return null;
+    //
+    //  Find a promising new target-
+    Pick <Active> pick = new Pick(0);
+    for (Active a : assessed) {
+      if (! a.mobile()) continue;
+      if (((Actor) a).maxSightLevel(actor.base()) <= 0) continue;
+      pick.compare(a, dialogRating(actor, (Actor) a, casual));
+    }
+    if (pick.empty()) return null;
+    Actor with = (Actor) pick.result();
+    //
+    //  Then configure and return...
+    TaskDialog dialog = new TaskDialog(actor, with, true);
+    dialog.configTask(null, null, with, JOB.DIALOG, 1);
+    dialog.casual = true;
+    return dialog.pathValid() ? dialog : null;
+  }
+  
+  
   
   /**  Priority-evaluation-
     */
   //  TODO:  Consider chatting with animals, if you have the right knowledge?
   
   
-  static float dialogRating(Actor actor, Actor with) {
+  static float dialogRating(Actor actor, Actor with, boolean casual) {
     //
     //  Basic sanity-checks first-
     if (with == actor || with.indoors()) return 0;
@@ -126,8 +141,13 @@ public class TaskDialog extends Task {
   protected float successPriority() {
     Actor actor = (Actor) active;
     
-    float rating = dialogRating(actor, with) / ROUTINE;
+    float rating = dialogRating(actor, with, casual) / ROUTINE;
     if (rating <= 0) return -1;
+    
+    //  TODO:  Include effects of curiosity if this is a brand new actor and/or
+    //  belongs to an unfamiliar tribe... (!!!)
+    
+    //  TODO:  And include effects of ambient danger...
     
     float empathy = actor.traits.levelOf(TRAIT_EMPATHY);
     float priority = contact ? ROUTINE : CASUAL;
@@ -156,7 +176,7 @@ public class TaskDialog extends Task {
     
     Actor actor = (Actor) active;
     Mission mission = contact ? (Mission) origin : null;
-    float rating = dialogRating(actor, with);
+    float rating = dialogRating(actor, with, casual);
     
     if (began && rating > 0 && talksWith(with) != actor) {
       TaskDialog response = new TaskDialog(with, actor, false);

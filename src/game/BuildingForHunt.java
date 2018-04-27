@@ -36,7 +36,7 @@ public class BuildingForHunt extends Building {
     Task delivery = TaskDelivery.pickNextDelivery(actor, this, 5, produced());
     if (delivery != null) return delivery;
     
-    TaskHunting hunt = TaskHunting.configHunting(actor, this, produced());
+    TaskHunting hunt = TaskHunting.nextHunting(actor, this, produced());
     if (hunt != null) return hunt;
     
     delivery = TaskDelivery.pickNextDelivery(actor, this, 0, produced());

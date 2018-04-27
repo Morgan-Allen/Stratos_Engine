@@ -45,6 +45,11 @@ public class TaskFirstAid extends Task {
   
   /**  Factory methods for outside use-
     */
+  public static TaskFirstAid nextFirstAid(Actor actor) {
+    return configFirstAid(actor, null);
+  }
+  
+  
   public static TaskFirstAid nextSickbayTask(Actor actor, Building refuge) {
     if (! refuge.type().hasFeature(IS_SICKBAY)) return null;
     return configFirstAid(actor, refuge);
@@ -62,20 +67,22 @@ public class TaskFirstAid extends Task {
     }
     
     Actor patient = pick.result();
-    if (patient != null) {
-      if (refuge == null) refuge = findRefuge(map, null, actor, patient);
-      TaskFirstAid aid = new TaskFirstAid(actor, patient, refuge);
-      
-      if (aid.configTask(refuge, null, patient, JOB.HEALING, 1) != null) {
-        return aid;
-      }
+    if (patient == null) return null;
+    
+    if (refuge == null) refuge = findRefuge(map, null, actor, patient);
+    if (refuge == null) return null;
+
+    TaskFirstAid aid = new TaskFirstAid(actor, patient, refuge);
+    
+    if (aid.configTask(refuge, null, patient, JOB.HEALING, 1) != null) {
+      return aid;
     }
     
     return null;
   }
   
   
-  //  TODO:  This should be cached for efficiency...
+  //  TODO:  This could be cached for efficiency?
   
   static Building findRefuge(
     Area map, Building old, Actor actor, Actor patient
@@ -107,7 +114,7 @@ public class TaskFirstAid extends Task {
     if (other.indoors() && other.health.bleed() <= 0) return -1;
     
     //  TODO:  Also allow treatment if the actor is seeking aid for their
-    //  injuries/disease at a sickbay...
+    //  injuries/disease at a sickbay?
     
     float bandageLevel = other.outfit.carried(BANDAGES);
     if (bandageLevel >= (midTask ? 1 : 0.5f)) return -1;
@@ -118,8 +125,6 @@ public class TaskFirstAid extends Task {
     
     if (TaskCombat.allied (actor, other)) relation += 0.5f;
     if (TaskCombat.hostile(actor, other)) relation -= 0.5f;
-    
-    //  TODO:  Take danger into account as well.
     
     return injury * relation * distMult;
   }
@@ -137,8 +142,25 @@ public class TaskFirstAid extends Task {
   
   
   protected float successChance() {
+    if (type == JOB.DELIVER) return 1;
+    
     Actor actor = (Actor) active;
     return (1 + (actor.traits.levelOf(SKILL_HEAL) / MAX_SKILL_LEVEL)) / 2f;
+  }
+  
+  
+  protected float failCostPriority() {
+    if (type == JOB.DELIVER) return 0;
+    
+    Actor actor = (Actor) active;
+    AreaTile around = target.at();
+    
+    AreaDanger dangerMap = actor.map().dangerMap(actor.base(), true);
+    float danger = dangerMap.fuzzyLevel(around.x, around.y);
+    if (danger <= 0) return 0;
+    
+    float power = TaskCombat.attackPower(actor);
+    return (danger / (danger + power)) * PARAMOUNT;
   }
   
   

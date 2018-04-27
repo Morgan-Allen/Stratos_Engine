@@ -45,3 +45,6 @@ public class BuildingForArmy extends Building {
 
 
 
+
+
+

@@ -88,7 +88,7 @@ public class ActorAsAnimal extends Actor {
     //
     //  If that all fails, wander about a little-
     if (idle()) {
-      assignTask(TaskWander.configWandering(this), this);
+      assignTask(TaskWander.nextWandering(this), this);
     }
   }
   

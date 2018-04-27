@@ -249,14 +249,17 @@ public class TaskDelivery extends Task {
     */
   protected float successPriority() {
     Actor actor = (Actor) active;
-    float base = super.successPriority();
+    
+    float base = ROUTINE;
+    float diligence = (actor.traits.levelOf(TRAIT_DILIGENCE) + 1) / 2;
+    base *= diligence + 0.5f;
+    
     if (carried.isEdible && goes == actor.home()) {
       float max = actor.health.hungerLevel();
       return base + ((Task.PARAMOUNT - base) * max);
     }
     else return base;
   }
-  
   
   
   

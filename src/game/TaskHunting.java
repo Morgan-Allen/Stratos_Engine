@@ -5,8 +5,6 @@ import util.*;
 import static game.GameConstants.*;
 import static game.TaskCombat.*;
 
-import game.GameConstants.Pathing;
-
 
 
 public class TaskHunting extends Task {
@@ -45,24 +43,38 @@ public class TaskHunting extends Task {
   
   /**  External factory methods and priority-evaluation-
     */
-  static TaskHunting configHunting(
+  static Building findDropoffPoint(Good meat) {
+    return null;
+  }
+  
+  
+  static TaskHunting nextHunting(Actor actor) {
+    return nextHunting(actor, null);
+  }
+  
+  
+  static TaskHunting nextHunting(
     Actor actor, Building store, Good... meatTypes
   ) {
     Pick <Actor> forHunt = new Pick();
+    boolean forMeat = store != null && ! Visit.empty(meatTypes);
+    
     for (Actor a : actor.map().actors()) {
-      if (! a.type().isAnimal()                 ) continue;
-      if (a.type().predator || a.growLevel() < 1) continue;
-      if (a.maxSightLevel(actor.base()) == 0    ) continue;
-      if (hasTaskFocus(a, JOB.HUNTING)          ) continue;
+      if (a.maxSightLevel(actor.base()) == 0) continue;
       
-      Good meat = a.type().meatType;
-      if (! Visit.arrayIncludes(meatTypes, meat)) continue;
-      if (store.inventory(meat) >= store.type().maxStock) continue;
-      
-      float dist = Area.distance(actor.at(), a.at());
+      float dist = Area.distance(actor, a);
       if (dist > MAX_EXPLORE_DIST) continue;
       
-      //  TODO:  Check to make sure there's pathing access...
+      if (forMeat) {
+        if (hasTaskFocus(a, JOB.HUNTING)) continue;
+        if (! a.type().isAnimal()) continue;
+        if (a.type().predator || a.growLevel() < 1) continue;
+        
+        Good meat = a.type().meatType;
+        if (! Visit.arrayIncludes(meatTypes, meat)) continue;
+        if (store.inventory(meat) >= store.type().maxStock) continue;
+      }
+      
       forHunt.compare(a, Area.distancePenalty(dist));
     }
     
@@ -79,8 +91,9 @@ public class TaskHunting extends Task {
   protected float successPriority() {
     if (type != JOB.HUNTING) return ROUTINE;
     Actor actor = (Actor) this.active;
-    float combat = TaskCombat.attackPriority(actor, prey, false);
-    return Nums.max(ROUTINE, combat);
+    float combat = TaskCombat.attackPriority(actor, prey, false, false);
+    if (store != null) combat = Nums.max(ROUTINE, combat);
+    return combat;
   }
   
   
@@ -88,6 +101,12 @@ public class TaskHunting extends Task {
     if (type != JOB.HUNTING) return 1;
     Actor actor = (Actor) this.active;
     return TaskCombat.attackChance(actor, prey);
+  }
+  
+  
+  protected float failCostPriority() {
+    if (type != JOB.HUNTING) return 0;
+    return PARAMOUNT;
   }
   
   
@@ -116,16 +135,17 @@ public class TaskHunting extends Task {
       if (prey.health.alive()) {
         actor.performAttack(prey, attackMode == ATTACK_MELEE);
       }
-      if (prey.health.dead()) {
+      if (prey.health.alive()) {
+        configTask(store, null, prey, JOB.HUNTING, 0);
+      }
+      else if (store != null) {
         AreaTile site = prey.at();
         configTask(store, null, site, JOB.COLLECTING, 0);
       }
-      else {
-        configTask(store, null, prey, JOB.HUNTING, 0);
-      }
     }
-    else if (type == JOB.COLLECTING) {
+    else if (type == JOB.COLLECTING && prey.onMap()) {
       float yield = ActorAsAnimal.meatYield(prey);
+      prey.exitMap(actor.map());
       actor.outfit.incCarried(prey.type().meatType, yield);
       configTask(store, store, null, JOB.DELIVER, 0);
     }

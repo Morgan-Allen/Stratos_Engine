@@ -536,6 +536,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   /**  Support methods for sight and fog-levels:
     */
   public float sightLevel(Base views) {
+    if (map == null) return 0;
     AreaFog fog = map.fogMap(views, false);
     if (fog == null) return 1;
     AreaTile from = (type.wide == 1 && type.high == 1) ? at : centre();
@@ -544,6 +545,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   
   
   public float maxSightLevel(Base views) {
+    if (map == null) return 0;
     AreaFog fog = map.fogMap(views, false);
     if (fog == null) return 1;
     AreaTile from = (type.wide == 1 && type.high == 1) ? at : centre();

@@ -163,18 +163,28 @@ public class TaskPatrol extends Task implements TileConstants {
   
   
   
+  /**  Priority-evaluation:
+    */
+  protected float successPriority() {
+    Actor actor = (Actor) active;
+    float diligence = (actor.traits.levelOf(TRAIT_DILIGENCE) + 1) / 2;
+    return ROUTINE * (0.5f + diligence);
+  }
+  
+  
+  
   /**  Behaviour execution-
     */
   void toggleFocus(boolean activeNow) {
     super.toggleFocus(activeNow);
     guarded.setFocused(active, activeNow);
   }
-  
-  
+
+
   protected Task reaction() {
     final Actor actor = (Actor) active;
     return Task.inCombat(actor) ? null :
-      TaskCombat.nextReaction(actor, guarded, origin, actor.seen())
+      TaskCombat.nextReaction(actor, guarded, origin, true, actor.seen())
     ;
   }
 

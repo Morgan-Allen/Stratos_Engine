@@ -2,12 +2,12 @@
 
 package test;
 import game.*;
-import content.*;
-import util.*;
 import static content.GameContent.*;
 import static game.Area.*;
 import static game.GameConstants.*;
 import static game.Task.*;
+import content.*;
+import util.*;
 
 
 

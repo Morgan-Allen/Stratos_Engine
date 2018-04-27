@@ -2,10 +2,6 @@
 
 package game;
 import static game.GameConstants.*;
-
-import game.GameConstants.Pathing;
-
-import static game.Area.*;
 import static game.BuildingForGather.*;
 import graphics.common.*;
 import util.*;
@@ -15,7 +11,8 @@ import util.*;
 public class TaskGathering extends Task {
   
   
-  
+  /**  Data fields, construction and save/load methods-
+    */
   BuildingForGather store;
   Good plants = null;
   
@@ -41,6 +38,8 @@ public class TaskGathering extends Task {
   
   
   
+  /**  External factory methods-
+    */
   static boolean canPlant(BuildingForGather store) {
     boolean canPlant = false;
     for (Good g : store.type().produced) if (g.isCrop) canPlant = true;
@@ -153,6 +152,21 @@ public class TaskGathering extends Task {
   }
   
   
+  
+  /**  Priority-evaluation-
+    */
+  protected float successPriority() {
+    Actor actor = (Actor) active;
+    float diligence = (actor.traits.levelOf(TRAIT_DILIGENCE) + 1) / 2;
+    float priority = ROUTINE;
+    priority *= diligence + 0.5f;
+    return priority;
+  }
+  
+  
+  
+  /**  Behaviour-execution-
+    */
   protected void onTarget(Target other) {
     if (other == null) return;
     

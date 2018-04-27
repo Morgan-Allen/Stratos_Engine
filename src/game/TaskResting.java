@@ -52,7 +52,33 @@ public class TaskResting extends Task {
   }
   
   
-  public static TaskResting configResting(Actor actor, Pathing rests) {
+  public static TaskResting nextRelaxing(Actor actor) {
+    Area map = actor.map();
+    Pick <Building> pickV = new Pick(0);
+    
+    for (Building b : map.buildings()) {
+      if (! b.type().hasFeature(DIVERSION)) continue;
+      if (TaskCombat.hostile(actor, b)) continue;
+      
+      float dist = Area.distance(actor, b);
+      if (dist > MAX_WANDER_RANGE) continue;
+      
+      float rating = 1.0f;
+      rating *= Area.distancePenalty(dist);
+      rating *= b.type().featureAmount;
+      rating *= (actor.base().loyalty(b.base()) + 1) / 2;
+      rating *= Rand.num();
+      pickV.compare(b, rating);
+    }
+    
+    if (pickV.empty()) return null;
+    
+    Building goes = pickV.result();
+    return TaskResting.nextResting(actor, goes);
+  }
+  
+  
+  public static TaskResting nextResting(Actor actor, Pathing rests) {
     if (actor == null || rests == null) return null;
     
     TaskResting t = new TaskResting(actor);
@@ -80,17 +106,24 @@ public class TaskResting extends Task {
     hurtRating += menu.size() > 0 ? actor.health.hunger() : 0;
     return hurtRating / actor.health.maxHealth();
   }
+
+  
+  
+  
+  /**  Priority-evaluation-
+    */
+  protected float successPriority() {
+    Actor actor = (Actor) active;
+    float diligence = (actor.traits.levelOf(TRAIT_DILIGENCE) + 1) / 2;
+    float urgency = restUrgency(actor, visits);
+    urgency *= 1.5f - diligence;
+    return urgency * PARAMOUNT;
+  }
   
   
   
   /**  Behaviour implementation-
     */
-  protected float successPriority() {
-    Actor actor = (Actor) active;
-    return restUrgency(actor, visits) * PARAMOUNT;
-  }
-  
-  
   protected void onVisit(Pathing visits) {
     Actor actor = (Actor) active;
     if (actor.health.hunger() >= 1f / HUNGER_REGEN) {

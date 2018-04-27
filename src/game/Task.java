@@ -6,8 +6,6 @@ import util.*;
 import static game.Area.*;
 import static game.GameConstants.*;
 
-import game.GameConstants.Pathing;
-
 
 
 public class Task implements Session.Saveable {
@@ -232,11 +230,16 @@ public class Task implements Session.Saveable {
   
   protected float rewardPriority() {
     if (origin instanceof Mission) {
+      Actor actor = (Actor) active;
       Mission mission = (Mission) origin;
+      
       if (mission.rewards.isBounty()) {
-        float reward = 0;
+        //  ...Something of a simplistic hack here?  Examine again later.
+        float greed = (1 - actor.traits.levelOf(TRAIT_EMPATHY)) / 2;
+        float reward = 0, priority = PRIORITY_PER_100_CASH;
         reward += mission.rewards.cashReward();
-        return PRIORITY_PER_100_CASH * reward / 100f;
+        priority *= greed < 0.5f ? (greed + 0.5f) : (greed * 2);
+        return priority * reward / 100f;
       }
       else {
         return mission.rewards.basePriority();
@@ -248,12 +251,21 @@ public class Task implements Session.Saveable {
   
   public float priority() {
     if (priorityEval == NO_PRIORITY) {
+      
       float
         chance  = successChance(),
         success = successPriority(),
         failure = failCostPriority(),
         reward  = rewardPriority()
       ;
+      
+      if (active.mobile()) {
+        Actor actor = (Actor) active;
+        float bravery = (actor.traits.levelOf(TRAIT_BRAVERY) + 1) / 2;
+        failure *= (1.5f - bravery);
+        chance = Nums.clamp(chance + ((bravery - 0.5f) / 2), 0, 1);
+      }
+      
       priorityEval = (chance * (success + reward)) - ((1 - chance) * failure);
     }
     return Nums.max(0, priorityEval);

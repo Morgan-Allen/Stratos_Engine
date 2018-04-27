@@ -176,6 +176,7 @@ public class Vassals {
     
     CARGO_BARGE.organic = false;
     CARGO_BARGE.maxHealth = 35;
+    CARGO_BARGE.carryLimit = 40;
   }
   
   
@@ -190,20 +191,16 @@ public class Vassals {
     );
     DROPSHIP.tint = TINT_VEHICLE;
     
-    DROPSHIP.organic   = false;
-    DROPSHIP.moveMode  = Type.MOVE_AIR;
-    DROPSHIP.maxHealth = 150;
+    DROPSHIP.organic    = false;
+    DROPSHIP.moveMode   = Type.MOVE_AIR;
+    DROPSHIP.maxHealth  = 150;
+    DROPSHIP.carryLimit = 120;
     DROPSHIP.setDimensions(4, 4, 2, Type.WIDE_MARGIN);
     DROPSHIP.crewTypes.setWith(SUPPLY_CORPS, 2);
   }
   
   
 }
-
-
-
-
-
 
 
 

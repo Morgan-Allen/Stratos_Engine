@@ -11,6 +11,8 @@ import graphics.common.*;
 public class TaskCrafting extends Task {
   
   
+  /**  Data fields, constructors and save/load methods-
+    */
   final BuildingForCrafts venue;
   final Recipe recipe;
   int orderID = -1;
@@ -43,6 +45,9 @@ public class TaskCrafting extends Task {
   }
   
   
+  
+  /**  External factory methods-
+    */
   static TaskCrafting nextCraftingTask(Actor actor, BuildingForCrafts venue) {
     Pick <TaskCrafting> pick = new Pick();
     
@@ -106,10 +111,23 @@ public class TaskCrafting extends Task {
   
   
   
+  /**  Priority-evaluation-
+    */
+  protected float successPriority() {
+    Actor actor = (Actor) active;
+    float diligence = (actor.traits.levelOf(TRAIT_DILIGENCE) + 1) / 2;
+    float priority = ROUTINE;
+    priority *= diligence + 0.5f;
+    return priority;
+  }
+  
+  
+  
+  /**  Behaviour-execution-
+    */
   //  NOTE:  Used purely for debug purposes, possibly remove later.
   public static int totalCraftTime = 0;
   public static double totalProgInc = 0;
-  
   
 
   protected void onVisit(Pathing visits) {

@@ -135,7 +135,7 @@ public class MissionSecure extends Mission {
     
     //  TODO:  Don't stray too far from the original guard-point...
     TaskCombat taskC = Task.inCombat(actor) ? null :
-      TaskCombat.nextReaction(actor, anchor, this, actor.seen())
+      TaskCombat.nextReaction(actor, anchor, this, true, actor.seen())
     ;
     if (taskC != null) return taskC;
     

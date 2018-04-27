@@ -201,7 +201,8 @@ public class GameConstants {
     WATER_TRAVEL_TIME = 25 ,
     AIR_TRAVEL_TIME   = 10 ,
     MIGRANTS_PER_1KM  = 10 ,  //  per month per 1000 foreign citizens
-    SHIP_WAIT_TIME    = DAY_LENGTH
+    SHIP_WAIT_TIME    = DAY_LENGTH,
+    AVG_CARRY_LIMIT   = 10
   ;
   final public static int
     //

@@ -343,6 +343,7 @@ public class Base implements Session.Saveable, Trader {
   
   public float loyalty(Base other) {
     if (other == null) return 0;
+    if (other == this) return 1;
     return relationWith(other).loyalty;
   }
   

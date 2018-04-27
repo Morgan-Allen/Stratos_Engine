@@ -13,8 +13,9 @@ public class ActorType extends Type {
   String nameValues[][] = new String[0][0];
   
   
-  public int moveSpeed = AVG_MOVE_SPEED;
-  public int moveMode  = MOVE_LAND;
+  public int moveSpeed  = AVG_MOVE_SPEED;
+  public int moveMode   = MOVE_LAND;
+  public int carryLimit = AVG_CARRY_LIMIT;
   
   public Terrain habitats[] = NO_HABITAT;
   public boolean predator   = false;
@@ -43,6 +44,7 @@ public class ActorType extends Type {
     this.socialClass = socialClass;
     this.mobile      = true;
   }
+  
   
   public ActorType(Class baseClass, String ID, int category) {
     this(baseClass, ID, category, CLASS_COMMON);

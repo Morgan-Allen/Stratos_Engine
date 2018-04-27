@@ -103,7 +103,7 @@ public class MissionStrike extends Mission {
     
     if (terms.rejected() || terms.expired() || ! haveTerms) {
       TaskCombat taskC = (Task.inCombat(actor) || isEnvoy) ? null :
-        TaskCombat.nextReaction(actor, stands, this, actor.seen())
+        TaskCombat.nextReaction(actor, stands, this, false, actor.seen())
       ;
       if (taskC != null) return taskC;
       
@@ -121,17 +121,6 @@ public class MissionStrike extends Mission {
     
     return null;
   }
-  
-  
-  
-  
-
-  
-  /*
-  public int powerSum() {
-    return powerSum(recruits, null);
-  }
-  //*/
   
   
   public float casualtyLevel() {

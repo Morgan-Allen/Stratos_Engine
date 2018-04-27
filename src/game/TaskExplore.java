@@ -64,12 +64,54 @@ public class TaskExplore extends Task {
   }
   
   
+  
+  /**  Priority-evaluation-
+    */
+  protected float successPriority() {
+    Actor actor = (Actor) active;
+    
+    float curiosity = (actor.traits.levelOf(TRAIT_CURIOSITY) + 2) / 2;
+    float bravery   = (actor.traits.levelOf(TRAIT_BRAVERY  ) + 2) / 2;
+    
+    float priority = ROUTINE;
+    priority *= (curiosity + bravery + 1) / 2f;
+    return priority;
+  }
+  
+
+  protected float successChance() {
+    Actor actor = (Actor) active;
+    float skill = 0;
+    skill += actor.type().sightRange * 0.5f / AVG_SIGHT;
+    skill += actor.type().moveSpeed  * 0.5f / AVG_MOVE_SPEED;
+    float chance = Nums.clamp((skill + 0.5f) / 2, 0, 1);
+    return chance;
+  }
+  
+  
+  protected float failCostPriority() {
+    Actor actor = (Actor) active;
+    AreaTile around = target.at();
+    
+    AreaDanger dangerMap = actor.map().dangerMap(actor.base(), true);
+    float danger = dangerMap.fuzzyLevel(around.x, around.y);
+    if (danger <= 0) return 0;
+    
+    float power = TaskCombat.attackPower(actor);
+    return (danger / (danger + power)) * PARAMOUNT;
+  }
+  
+  
+  
+  
+  /**  Behaviour-execution-
+    */
   float actionRange() {
     Actor actor = (Actor) this.active;
     return actor.sightRange();
   }
-  
-  
+
+
   protected void onTarget(Target target) {
     Actor   actor = (Actor) this.active;
     Area    map   = actor.map();

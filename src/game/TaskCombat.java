@@ -23,6 +23,7 @@ public class TaskCombat extends Task {
   ;
   
   final public Element primary;
+  boolean defends;
   int attackMode;
   
   
@@ -35,6 +36,7 @@ public class TaskCombat extends Task {
   public TaskCombat(Session s) throws Exception {
     super(s);
     primary = (Element) s.loadObject();
+    defends = s.loadBool();
     attackMode = s.loadInt();
   }
   
@@ -42,6 +44,7 @@ public class TaskCombat extends Task {
   public void saveState(Session s) throws Exception {
     super.saveState(s);
     s.saveObject(primary);
+    s.saveBool(defends);
     s.saveInt(attackMode);
   }
   
@@ -162,16 +165,20 @@ public class TaskCombat extends Task {
   }
   
   
-  static TaskCombat nextReaction(Active actor, Series <Active> others) {
-    return nextReaction(actor, null, null, others);
+  static TaskCombat nextDefending(Active actor) {
+    Series <Active> others = (Series) actor.map().actors();
+    return nextReaction(actor, null, null, true, others);
   }
   
   
-  //  TODO:  Pass in a series of noticed actives here, rather than relying on
-  //  proximity.
+  static TaskCombat nextReaction(Active actor, Series <Active> others) {
+    return nextReaction(actor, null, null, true, others);
+  }
+  
   
   static TaskCombat nextReaction(
-    Active actor, Target anchor, Employer employer, Series <Active> others
+    Active actor, Target anchor,
+    Employer employer, boolean defends, Series <Active> others
   ) {
     if (! actor.map().world.settings.toggleCombat) return null;
     AreaTile from = actor.at();
@@ -182,7 +189,9 @@ public class TaskCombat extends Task {
     };
     
     for (Active other : others) {
-      float priority = attackPriority(actor, (Element) other, true);
+      if (((Element) other).maxSightLevel(actor.base()) == 0) continue;
+      
+      float priority = attackPriority(actor, (Element) other, true, defends);
       if (priority <= 0) continue;
       
       AreaTile goes = other.at();
@@ -201,7 +210,9 @@ public class TaskCombat extends Task {
     options.queueSort();
     for (Option o : options) {
       TaskCombat c = configCombat(actor, o.other, employer, null, JOB.COMBAT);
-      if (c != null) return c;
+      if (c == null) return null;
+      c.defends = defends;
+      return c;
     }
     
     return null;
@@ -396,8 +407,9 @@ public class TaskCombat extends Task {
   
   /**  Priority-evaluation:
     */
-  static float attackPriority(Active actor, Element primary, boolean quick) {
-    
+  static float attackPriority(
+    Active actor, Element primary, boolean quick, boolean defends
+  ) {
     if (beaten(primary) || primary.indoors()) return -1;
     float targetPower = attackPower(primary);
     
@@ -407,13 +419,13 @@ public class TaskCombat extends Task {
       cruelty = 2 - empathy;
     }
     
-    if (hostile(actor, primary)) priority += ROUTINE * cruelty;
+    if (hostile(actor, primary) && ! defends) priority += ROUTINE * cruelty;
     if (allied (actor, primary)) priority -= ROUTINE * empathy;
     
     if (Task.inCombat(primary)) {
       Target victim = Task.mainTaskFocus(primary);
       if (hostile(actor, victim)) priority -= PARAMOUNT * cruelty;
-      if (allied (actor, victim)) priority += PARAMOUNT * empathy;
+      if (allied(actor, victim) && defends) priority += PARAMOUNT * empathy;
     }
     
     if (priority <= 0) return -1;
@@ -437,7 +449,7 @@ public class TaskCombat extends Task {
   
   
   protected float successPriority() {
-    return attackPriority(active, primary, false);
+    return attackPriority(active, primary, false, defends);
   }
   
   

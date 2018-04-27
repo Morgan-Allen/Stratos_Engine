@@ -52,6 +52,7 @@ public class ActorAsPerson extends Actor {
     //
     //  Establish some facts about the citizen first:
     boolean adult = health.adult();
+    boolean agent = type().socialClass == CLASS_SOLDIER;
     assignTask(null, this);
     //
     //  Adults will search for work and a place to live:
@@ -59,18 +60,22 @@ public class ActorAsPerson extends Actor {
     if (adult && work() == null) ActorUtils.findWork(map, this);
     if (adult && home() == null) ActorUtils.findHome(map, this);
     if (work() != null && ! adult) work().setWorker(this, false);
+    
     //
     //  If you're seriously hungry/beat/tired, try going home:
-    //  TODO:  Work this in as an emergency reaction...
+    //  TODO:  Work this in as an emergency reaction.  It's a bit of a hack
+    //  here.
+    
     Building rests = TaskResting.findRestVenue(this, map);
     float needRest = TaskResting.restUrgency(this, rests);
     if (idle() && needRest > Rand.num() + 0.5f) {
-      assignTask(TaskResting.configResting(this, rests), this);
+      assignTask(TaskResting.nextResting(this, rests), this);
     }
+    
     //
     //  See if there's a missions worth joining.  Or, if you have an active
     //  mission, undertake the next associated task-
-    if (idle() && mission() == null && type().socialClass == CLASS_SOLDIER) {
+    if (idle() && mission() == null && agent) {
       Pick <Mission> pick = new Pick(Task.ROUTINE * Rand.num());
       
       //  TODO:  Use a Choice for this?
@@ -108,8 +113,18 @@ public class ActorAsPerson extends Actor {
     if (idle()) {
       ActorChoice choice = new ActorChoice(this);
       
-      choice.add(TaskPurchase.nextPurchase(this));
-      choice.add(TaskWander.configWandering(this));
+      if (agent) {
+        choice.add(TaskHunting.nextHunting      (this));
+        choice.add(TaskCombat .nextDefending    (this));
+        choice.add(TaskExplore.configExploration(this));
+        choice.add(TaskDialog .nextContactDialog(this));
+      }
+      
+      choice.add(TaskWander  .nextWandering(this));
+      choice.add(TaskFirstAid.nextFirstAid (this));
+      choice.add(TaskResting .nextRelaxing (this));
+      choice.add(TaskResting .nextResting  (this, rests));
+      choice.add(TaskPurchase.nextPurchase (this));
       choice.add(selectTechniqueUse(false, (Series) map.actors()));
       
       if (work() != null && ((Element) work()).complete()) {
@@ -117,9 +132,6 @@ public class ActorAsPerson extends Actor {
       }
       if (home() != null && home().complete()) {
         choice.add(home().selectActorBehaviour(this));
-      }
-      if (rests != null) {
-        choice.add(TaskResting.configResting(this, rests));
       }
       
       assignTask(choice.weightedPick(), this);
@@ -147,7 +159,7 @@ public class ActorAsPerson extends Actor {
       assignTask(retreat, this);
     }
     
-    TaskDialog dialog = TaskDialog.nextCasualDialog(this, seen());
+    TaskDialog dialog = TaskDialog.nextCasualDialog(this);
     if (ActorChoice.wouldSwitch(this, task(), dialog, false, false)) {
       assignTask(dialog, this);
     }

@@ -122,14 +122,15 @@ public class TaskRetreat extends Task {
   
   protected float successChance() {
     //  TODO:  Rate your chance of escape based on speed relative to other
-    //  actors?
+    //  actors.
     return 1.0f;
   }
   
   
   protected float successPriority() {
     Actor actor = (Actor) this.active;
-    return (actor.fearLevel() * PARAMOUNT) + priorityBonus;
+    float bravery = (actor.traits.levelOf(TRAIT_BRAVERY) + 1) / 2;
+    return (actor.fearLevel() * PARAMOUNT) + priorityBonus * (1.5f - bravery);
   }
   
   
