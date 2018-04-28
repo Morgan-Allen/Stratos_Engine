@@ -104,7 +104,7 @@ public abstract class ActorTechnique extends Trait {
   
   
   
-  /**  Property queries-
+  /**  Checking for properties and target-viability-
     */
   public boolean hasProperty(int mask) {
     return (properties & mask) == mask;
@@ -121,7 +121,7 @@ public abstract class ActorTechnique extends Trait {
   }
   
   
-  public boolean canUseActive(Actor using, Target subject) {
+  public boolean canActorUse(Actor using, Target subject) {
     if (using == subject && ! targetSelf()) {
       return false;
     }
@@ -134,17 +134,12 @@ public abstract class ActorTechnique extends Trait {
     if (costTire > 0 && using.health.maxHealth() - using.health.fatigue() < costTire) {
       return false;
     }
-    return canTarget(subject, false);
+    return true;
   }
   
   
-  public boolean canUsePower(Base ruler, Target subject) {
-    if (ruler.funds() < costCash) return false;
-    return subject != null && canTarget(subject, true);
-  }
-  
-  
-  public boolean canTarget(Target subject, boolean asRuler) {
+  public boolean canRulerUse(Base ruler, Target subject) {
+    if (ruler.funds() < costCash || subject == null) return false;
     return true;
   }
   
@@ -271,19 +266,20 @@ public abstract class ActorTechnique extends Trait {
   
   public void applyFromRuler(Base ruler, Target subject) {
     ruler.incFunds(0 - costCash);
-    applyCommonEffects(subject, ruler, null);
   }
   
   
-  public void applyFromActor(Actor actor, Target subject) {
-    if (costAP   > 0) actor.health.setCooldown(costAP  );
-    if (costTire > 0) actor.health.takeFatigue(costTire);
-    applyCommonEffects(subject, null, actor);
+  public void applyFromActor(Actor using, Target subject) {
+    if (costAP   > 0) using.health.setCooldown(costAP  );
+    if (costTire > 0) using.health.takeFatigue(costTire);
   }
   
   
-  public void applyCommonEffects(Target subject, Base ruler, Actor actor) {
-    return;
+  protected void dispenseXP(Actor using, float multiple, Trait... used) {
+    int gainXP = (int) (FIGHT_XP_PERCENT * (costAP + costTire) * multiple);
+    for (Trait t : used) {
+      using.traits.gainXP(t, gainXP);
+    }
   }
   
   

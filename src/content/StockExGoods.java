@@ -22,12 +22,12 @@ public class StockExGoods {
     "tech_medikit_heal", "Medikit"
   ) {
     
-    public boolean canUseActive(Actor using, Target subject) {
-      if (! super.canUseActive(using, subject)) return false;
+    public boolean canActorUse(Actor using, Target subject) {
+      if (! super.canActorUse(using, subject)) return false;
       return using.health.injury() > (using.health.maxHealth() / 2);
     }
     
-    public void applyCommonEffects(Target subject, Base ruler, Actor actor) {
+    public void applyFromActor(Actor using, Target subject) {
       final Actor healed = (Actor) subject;
       healed.health.liftDamage(MEDIKIT_HEAL_AMOUNT);
       healed.outfit.incCarried(MEDIKIT, -1);

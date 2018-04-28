@@ -177,7 +177,7 @@ public class ActorAsPerson extends Actor {
     
     for (Active other : assessed) {
       for (ActorTechnique used : traits.known()) {
-        if (used.canUseActive(this, other)) {
+        if (used.canActorUse(this, other)) {
           Reaction r = new Reaction();
           r.rating  = used.rateUse(this, other);
           r.subject = other;
@@ -186,7 +186,7 @@ public class ActorAsPerson extends Actor {
         }
       }
       for (Good g : outfit.carried.keys()) for (ActorTechnique used : g.allows) {
-        if (used.canUseActive(this, other)) {
+        if (used.canActorUse(this, other)) {
           Reaction r = new Reaction();
           r.rating  = used.rateUse(this, other);
           r.subject = other;
@@ -298,8 +298,8 @@ public class ActorAsPerson extends Actor {
         
         ActorAsPerson child  = (ActorAsPerson) type().childType().generate();
         ActorAsPerson father = (ActorAsPerson) traits.bondedWith(BOND_MARRIED);
-        setBond(actor , child, BOND_CHILD, BOND_PARENT, 0.5f);
-        setBond(father, child, BOND_CHILD, BOND_PARENT, 0.5f);
+        setBond(actor , child, BOND_PARENT, BOND_CHILD, 0.5f);
+        setBond(father, child, BOND_PARENT, BOND_CHILD, 0.5f);
         pregnancy = 0;
         
         if (onMap) {

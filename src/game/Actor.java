@@ -165,6 +165,11 @@ public class Actor extends Element implements
   
   public void setDestroyed() {
     super.setDestroyed();
+    wipeEmployment();
+  }
+  
+  
+  public void wipeEmployment() {
     if (mission != null) mission.toggleRecruit(this, false);
     if (home    != null) home.setResident(this, false);
     if (work    != null) work.setWorker(this, false);

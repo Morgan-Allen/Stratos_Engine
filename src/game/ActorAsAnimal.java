@@ -74,11 +74,17 @@ public class ActorAsAnimal extends Actor {
         assignTask(targetTask(at(), 10, JOB.RESTING, null), this);
       }
     }
-    
     //
     //  If you're assigned a mission, take it on:
     if (idle() && mission() != null && mission().active()) {
       assignTask(mission().selectActorBehaviour(this), this);
+    }
+    //
+    //  If you have a master, keep them safe:
+    Actor master = traits.bondedWith(ActorTraits.BOND_MASTER);
+    if (idle() && master != null) {
+      Task patrol = TaskPatrol.protectionFor(this, master, null);
+      assignTask(patrol, this);
     }
     //
     //  If you have a home, see what that has for you:

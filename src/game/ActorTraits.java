@@ -280,10 +280,10 @@ public class ActorTraits {
   
   
   public static void setBond(
-    Actor a, Actor b, int typeA, int typeB, float level
+    Actor a, Actor b, int roleA, int roleB, float level
   ) {
-    if (a != null && b != null) a.traits.setBond(b, level, typeA);
-    if (b != null && a != null) b.traits.setBond(a, level, typeB);
+    if (a != null && b != null) a.traits.setBond(b, level, roleB);
+    if (b != null && a != null) b.traits.setBond(a, level, roleA);
   }
   
   
@@ -345,7 +345,9 @@ public class ActorTraits {
   
   public Series <Actor> allBondedWith(int type) {
     Batch <Actor> all = new Batch();
-    for (Bond b : bonds) if ((b.properties & type) != 0) all.add(b.with);
+    for (Bond b : bonds) {
+      if ((b.properties & type) != 0) all.add(b.with);
+    }
     return all;
   }
   

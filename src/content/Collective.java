@@ -17,7 +17,7 @@ public class Collective {
       "Une", "Bena", "Blis", "Pax", "Sela", "Nami", "Oolen", "Nioba"
     },
     COLLECTIVE_LN[] = {
-      "of 9", "Primus", "003", "Iambis", "Orela", "the Zen", " of Melding"
+      "of 9", "Primus", "003", "Iambis", "Orela", "the Zen", " of Melding", "10"
     }
   ;
   
@@ -36,17 +36,19 @@ public class Collective {
     "power_psy_heal", "Psy Heal"
   ) {
     
-    public boolean canTarget(Target subject, boolean asRuler) {
+    boolean canHeal(Target subject) {
       if (! subject.type().isActor()) return false;
+      
       final Actor a = (Actor) subject;
-      if (a.type().isVessel() || ! a.type().organic) {
-        return false;
-      }
-      if (asRuler) {
-        float hurtLevel = a.health.injury() + a.health.fatigue() + a.health.hunger();
-        if (hurtLevel < 1) return false;
-      }
+      if (! a.health.organic()) return false;
+      if (a.health.injury() <= 0) return false;
+      
       return true;
+    }
+    
+    public boolean canActorUse(Actor using, Target subject) {
+      if (! super.canActorUse(using, subject)) return false;
+      return canHeal(subject);
     }
     
     public float rateUse(Actor using, Target subject) {
@@ -59,27 +61,36 @@ public class Collective {
       return rating;
     }
     
-    public void applyCommonEffects(Target subject, Base ruler, Actor actor) {
+    public void applyFromActor(Actor using, Target subject) {
+      super.applyFromActor(using, subject);
+      
       final Actor healed = (Actor) subject;
       Area map = healed.map();
       
-      if (ruler != null) {
-        healed.health.liftDamage (PSY_HEAL_AMOUNT    );
-        healed.health.liftFatigue(PSY_HEAL_AMOUNT / 2);
-        healed.health.liftHunger (PSY_HEAL_AMOUNT / 2);
-        healed.health.incBleed(-1000);
-        
-        if (map.ephemera.active()) {
-          map.ephemera.addGhostFromModel(healed, FX_MODEL, 1, 0.5f, 1);
-        }
+      healed.health.liftDamage(PSY_HEAL_AMOUNT);
+      healed.health.incBleed(-1000);
+      dispenseXP(using, 1, SKILL_PRAY);
+      
+      if (map.ephemera.active()) {
+        map.ephemera.addGhostFromModel(healed, FX_MODEL, 1, 0.5f, 1);
       }
-      if (actor != null) {
-        healed.health.liftDamage(PSY_HEAL_AMOUNT);
-        healed.health.incBleed(-1000);
-        
-        if (map.ephemera.active()) {
-          map.ephemera.addGhostFromModel(healed, FX_MODEL, 1, 0.5f, 1);
-        }
+    }
+    
+    public boolean canRulerUse(Base ruler, Target subject) {
+      if (! super.canRulerUse(ruler, subject)) return false;
+      return canHeal(subject);
+    }
+    
+    public void applyFromRuler(Base ruler, Target subject) {
+      super.applyFromRuler(ruler, subject);
+      final Actor healed = (Actor) subject;
+      Area map = healed.map();
+      
+      healed.health.liftDamage(PSY_HEAL_AMOUNT);
+      healed.health.incBleed(-1000);
+      
+      if (map.ephemera.active()) {
+        map.ephemera.addGhostFromModel(healed, FX_MODEL, 1, 0.5f, 1);
       }
     }
   };

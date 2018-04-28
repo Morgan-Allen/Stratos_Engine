@@ -12,7 +12,7 @@ public class TestPowersCollective {
   
   
   public static void main(String args[]) {
-    testHeal(true);
+    testHeal(false);
   }
   
   
@@ -39,7 +39,7 @@ public class TestPowersCollective {
         return subject;
       }
       
-      boolean verifyEffect(Target subject) {
+      boolean verifyEffect(Target subject, Actor caster) {
         Actor healed = (Actor) subject;
         return healed.health.injury() < (healed.health.maxHealth() * 0.25f);
       }

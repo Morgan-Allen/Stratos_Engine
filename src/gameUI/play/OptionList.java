@@ -176,7 +176,7 @@ public class OptionList extends UIGroup implements UIConstants {
         
         public void doTask(PlayUI UI) {
           Target hovered = (Target) UI.selection.hovered();
-          canUse = power.canUsePower(base, hovered);
+          canUse = power.canRulerUse(base, hovered);
           
           if (canUse && UI.mouseClicked()) {
             power.applyFromRuler(base, hovered);

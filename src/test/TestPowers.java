@@ -32,7 +32,7 @@ public class TestPowers extends LogicTest {
       runLoop(base, 1, graphics, "saves/test_bounties.str");
       
       if (! castOkay) {
-        castOkay = verifyEffect(subject);
+        castOkay = verifyEffect(subject, caster);
       }
       
       if (castOkay && ! testOkay) {
@@ -62,7 +62,7 @@ public class TestPowers extends LogicTest {
   }
   
   
-  boolean verifyEffect(Target subject) {
+  boolean verifyEffect(Target subject, Actor caster) {
     return false;
   }
   
