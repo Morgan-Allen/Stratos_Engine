@@ -616,10 +616,8 @@ public class TaskCombat extends Task {
     }
     
     Area map = attacks.map();
-    if (map.ephemera.active()) {
-      Good weaponType = attacks.type().weaponType;
-      Ephemera.applyCombatFX(weaponType, (Active) attacks, other, ! melee, hits, map);
-    }
+    Good weaponType = attacks.type().weaponType;
+    Ephemera.applyCombatFX(weaponType, (Active) attacks, other, ! melee, hits, map);
   }
   
   

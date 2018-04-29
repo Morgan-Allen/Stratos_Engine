@@ -51,7 +51,7 @@ public class ActorType extends Type {
   }
   
   
-  public void initAsMigrant(ActorAsPerson a) {
+  public void initAsMigrant(Actor a) {
     
     float age = Rand.range(AVG_MARRIED, AVG_MENOPAUSE);
     age += Rand.num() - 0.5f;
@@ -82,7 +82,7 @@ public class ActorType extends Type {
   }
   
   
-  public void initAsAnimal(ActorAsAnimal a) {
+  public void initAsAnimal(Actor a) {
     float age = Rand.num() * a.type().lifespan;
     a.health.setAgeYears(age / YEAR_LENGTH);
     a.health.setHunger(Rand.num() - 0.5f);

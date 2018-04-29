@@ -13,9 +13,17 @@ import util.*;
 public class TestPowers extends LogicTest {
   
   
+  boolean actorPowerTest(boolean graphics, String title, ActorTechnique power) {
+    return powerTest(graphics, title, power, false);
+  }
   
-  boolean powerTest(boolean graphics, String title, ActorTechnique technique) {
-    
+  boolean rulerPowerTest(boolean graphics, String title, ActorTechnique power) {
+    return powerTest(graphics, title, power, true);
+  }
+  
+  boolean powerTest(
+    boolean graphics, String title, ActorTechnique power, boolean guildCasts
+  ) {
     Base base = LogicTest.setupTestBase(32, ALL_GOODS, false);
     base.setName("Client Base");
     Area map = base.activeMap();
@@ -23,19 +31,23 @@ public class TestPowers extends LogicTest {
     Building guild      = createGuild(map, base);
     Actor    caster     = guild.workers().first();
     Target   subject    = createSubject(map, guild);
-    boolean  guildCasts = guildCasts();
     
-    boolean castOkay = false;
-    boolean testOkay = false;
+    boolean castOkay   = false;
+    boolean effectOkay = false;
+    boolean testOkay   = false;
     
     while (map.time() < 100 || graphics) {
       runLoop(base, 1, graphics, "saves/test_bounties.str");
       
       if (! castOkay) {
-        castOkay = verifyEffect(subject, caster);
+        castOkay = (! guildCasts) || castAsRuler(power, subject, base);
       }
       
-      if (castOkay && ! testOkay) {
+      if (castOkay && ! effectOkay) {
+        effectOkay = verifyEffect(subject, caster);
+      }
+      
+      if (effectOkay && ! testOkay) {
         testOkay = true;
         I.say("\n"+title+" TEST CONCLUDED SUCCESSFULLY!");
         if (! graphics) return true;
@@ -57,7 +69,7 @@ public class TestPowers extends LogicTest {
   }
   
   
-  boolean guildCasts() {
+  boolean castAsRuler(ActorTechnique power, Target subject, Base ruler) {
     return false;
   }
   

@@ -368,11 +368,11 @@ public class GameConstants {
       this.traitRangeNames = names;
     }
     
-    float passiveBonus(Trait t) {
+    protected float passiveBonus(Trait t) {
       return 0;
     }
     
-    void passiveEffect(Actor actor) {
+    protected void passiveEffect(Actor actor) {
       return;
     }
   }
@@ -399,7 +399,7 @@ public class GameConstants {
     */
   final public static Good
     
-    //  TODO:  Use Traits for this instead.
+    //  TODO:  Use Traits for this instead...
     
     //  Note- 'void' is used to mark foundations for clearing during
     //  construction, and as a default build-material.
@@ -439,7 +439,7 @@ public class GameConstants {
   final static ActorTechnique BANDAGE_EFFECT = new ActorTechnique(
     "bandage_heal_effect", "Bandage Heal Effect"
   ) {
-    void passiveEffect(Actor actor) {
+    protected void passiveEffect(Actor actor) {
       float healInc = 1f / AVG_BANDAGE_TIME;
       actor.health.liftDamage(healInc * INJURY_HEAL_AMOUNT);
       actor.outfit.incCarried(BANDAGES, 0 - healInc);

@@ -79,7 +79,7 @@ public class Ephemera {
   public Ghost addGhostFromModel(
     Target e, ModelAsset model, float size, float duration, float alpha
   ) {
-    if (model == null || e == null) return null;
+    if (model == null || e == null || ! active) return null;
     Sprite s = model.makeSprite();
     e.renderedPosition(s.position);
     s.position.z += e.height() / 2;
@@ -97,7 +97,7 @@ public class Ephemera {
   public Ghost addGhost(
     Target e, Sprite s, float size, float duration, float alpha
   ) {
-    if (s == null) return null;
+    if (s == null || ! active) return null;
     final Ghost ghost = new Ghost();
     
     ghost.size       = (int) Nums.ceil(size);
@@ -139,6 +139,7 @@ public class Ephemera {
   
   
   public void updateGhost(Target e, float size, ModelAsset m, float duration) {
+    if (e == null || m == null || ! active) return;
     //
     //  Search to see if a ghost exists in this area attached to the same
     //  element and using the same sprite-model.  If so, turn back the incept
@@ -226,6 +227,8 @@ public class Ephemera {
     boolean ranged, boolean hits, Area map
   ) {
     if (type == null || uses == null || applied == null) return;
+    if (! map.ephemera.active()) return;
+    
     final float distance = Area.distance(uses, applied);
     if (ranged) {
       applyShotFX(

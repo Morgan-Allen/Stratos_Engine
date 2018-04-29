@@ -108,7 +108,7 @@ public class ActorTraits {
   
   /**  Regular updates-
     */
-  void updateTraits() {
+  public void updateTraits() {
     //
     //  Check to see if a new technique can be learned spontaneously-
     for (ActorTechnique t : actor.type().classTechniques) {

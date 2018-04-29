@@ -24,7 +24,8 @@ public class Collective {
   
   
   final public static int
-    PSY_HEAL_AMOUNT = 10
+    PSY_HEAL_AMOUNT    = 10,
+    HARMONICS_DURATION = 30
   ;
   final static PlaneFX.Model FX_MODEL = PlaneFX.imageModel(
     "heal_fx_model", Collective.class,
@@ -71,9 +72,7 @@ public class Collective {
       healed.health.incBleed(-1000);
       dispenseXP(using, 1, SKILL_PRAY);
       
-      if (map.ephemera.active()) {
-        map.ephemera.addGhostFromModel(healed, FX_MODEL, 1, 0.5f, 1);
-      }
+      map.ephemera.addGhostFromModel(healed, FX_MODEL, 1, 0.5f, 1);
     }
     
     public boolean canRulerUse(Base ruler, Target subject) {
@@ -89,9 +88,7 @@ public class Collective {
       healed.health.liftDamage(PSY_HEAL_AMOUNT);
       healed.health.incBleed(-1000);
       
-      if (map.ephemera.active()) {
-        map.ephemera.addGhostFromModel(healed, FX_MODEL, 1, 0.5f, 1);
-      }
+      map.ephemera.addGhostFromModel(healed, FX_MODEL, 1, 0.5f, 1);
     }
   };
   static {
@@ -104,6 +101,69 @@ public class Collective {
     PSY_HEAL.setCosting(150, MEDIUM_AP_COST, NO_TIRING, LONG_RANGE);
     PSY_HEAL.setMinLevel(1);
   }
+  
+  
+  
+  final static Trait SHIELD_HARMONICS_CONDITION = new Trait(
+    "condition_shield_harmonics", "Shield Harmonics"
+  ) {
+    
+    protected float passiveBonus(Trait t) {
+      if (t == SKILL_EVADE) return 3;
+      
+      //  TODO:  Create an actual 'shields' mechanic to reflect this..
+      return 0;
+    }
+    
+    protected void passiveEffect(Actor actor) {
+      Area map = actor.map();
+      map.ephemera.updateGhost(actor, 1, FX_MODEL, 0.5f);
+    }
+  };
+  
+  final public static ActorTechnique SHIELD_HARMONICS = new ActorTechnique(
+    "power_shield_harmonics", "Shield Harmonics"
+  ) {
+    
+    public boolean canRulerUse(Base ruler, Target subject) {
+      if (! super.canRulerUse(ruler, subject)) return false;
+      return subject.type().isActor();
+    }
+    
+    public void applyFromRuler(Base ruler, Target subject) {
+      super.applyFromRuler(ruler, subject);
+      Actor affects = (Actor) subject;
+      affects.health.addCondition(
+        null, SHIELD_HARMONICS_CONDITION, HARMONICS_DURATION
+      );
+    }
+  };
+  static {
+    SHIELD_HARMONICS.attachMedia(
+      Collective.class, "media/GUI/Powers/power_shield_harmonics.png",
+      "Boosts target shields by _X% for "+HARMONICS_DURATION+" seconds.",
+      AnimNames.LOOK
+    );
+    SHIELD_HARMONICS.setProperties(0, Task.FULL_HELP, MEDIUM_POWER);
+    SHIELD_HARMONICS.setCosting(200, MEDIUM_AP_COST, NO_TIRING, LONG_RANGE);
+  }
+  
+  
+  final public static ActorTechnique MIND_MELD = new ActorTechnique(
+    "power_mind_meld", "Mind Meld"
+  ) {
+    
+    protected float passiveBonus(Trait t) {
+      //
+      //  TODO:  Fill this in.  Use during diplomacy to boost talk-skill and on
+      //  hostile actors for a chance to temporarily force conversation.
+      return 0;
+    }
+    
+    protected void passiveEffect(Actor actor) {
+      return;
+    }
+  };
   
   
   

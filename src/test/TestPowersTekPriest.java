@@ -58,7 +58,7 @@ public class TestPowersTekPriest {
       }
       
     };
-    return test.powerTest(graphics, "DRONE UPLINK", Collective.PSY_HEAL);
+    return test.actorPowerTest(graphics, "DRONE UPLINK", Collective.PSY_HEAL);
   }
   
 }
