@@ -74,7 +74,7 @@ public class TestMilitary extends LogicTest {
     boolean awayWin   = false;
     boolean backHome  = false;
     
-    Trait COMBAT_SKILLS[] = { SKILL_MELEE, SKILL_RANGE, SKILL_EVADE };
+    Trait COMBAT_SKILLS[] = { SKILL_MELEE, SKILL_SIGHT, SKILL_EVADE };
     Table initSkills = null;
     Batch <Actor> fromTroops = new Batch();
     

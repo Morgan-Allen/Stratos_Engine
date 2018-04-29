@@ -57,7 +57,7 @@ public class Vassals {
   final public static HumanType AUDITOR = new HumanType(
     "actor_auditor", CLASS_COMMON
   ) {
-    public void initAsMigrant(ActorAsPerson p) {
+    public void initAsMigrant(Actor p) {
       super.initAsMigrant(p);
       String forenames[] = p.health.man() ? CITIZEN_MN : CITIZEN_FN;
       final String name = generateName(forenames, CITIZEN_LN, null);
@@ -84,7 +84,7 @@ public class Vassals {
   final public static HumanType VENDOR = new HumanType(
     "actor_vendor", CLASS_COMMON
   ) {
-    public void initAsMigrant(ActorAsPerson p) {
+    public void initAsMigrant(Actor p) {
       super.initAsMigrant(p);
       String forenames[] = p.health.man() ? CITIZEN_MN : CITIZEN_FN;
       final String name = generateName(forenames, CITIZEN_LN, null);
@@ -111,7 +111,7 @@ public class Vassals {
   final public static HumanType PYON = new HumanType(
     "actor_pyon", CLASS_COMMON
   ) {
-    public void initAsMigrant(ActorAsPerson p) {
+    public void initAsMigrant(Actor p) {
       super.initAsMigrant(p);
       String forenames[] = p.health.man() ? PYON_MN : PYON_FN;
       final String name = generateName(forenames, PYON_LN, null);
@@ -139,7 +139,7 @@ public class Vassals {
   final public static HumanType SUPPLY_CORPS = new HumanType(
     "actor_supply_corps", CLASS_COMMON
   ) {
-    public void initAsMigrant(ActorAsPerson p) {
+    public void initAsMigrant(Actor p) {
       super.initAsMigrant(p);
       String forenames[] = p.health.man() ? PYON_MN : PYON_FN;
       final String name = generateName(forenames, PYON_LN, null);

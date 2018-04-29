@@ -586,6 +586,11 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
+  public int shieldBonus() {
+    return type.shieldBonus;
+  }
+  
+  
   public void takeDamage(float damage) {
     
     float totalNeed = 0, totalHave = 0;

@@ -54,7 +54,7 @@ public class TestPowersCollective {
   static boolean testHarmonics(boolean graphics) {
     TestPowers test = new TestPowers() {
       
-      final Trait toCheck[] = { SKILL_EVADE };
+      final Trait toCheck[] = { SKILL_EVADE, STAT_SHIELD };
       Tally <Trait> initStats = new Tally();
       boolean boostOK = false;
       boolean fadeOK  = false;
@@ -79,7 +79,7 @@ public class TestPowersCollective {
         power.applyFromRuler(ruler, subject);
         return true;
       }
-
+      
       boolean verifyEffect(Target subject, Actor caster) {
         Actor affects = (Actor) subject;
         boolean allStatsOK = true;

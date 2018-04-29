@@ -571,10 +571,10 @@ public class TaskCombat extends Task {
   static void performAttack(Element attacks, Element other, boolean melee) {
     
     int damage = melee ? attacks.meleeDamage() : attacks.rangeDamage();
-    int armour = other.armourClass();
+    int armour = other.armourClass() + (melee ? 0 : other.shieldBonus());
     if (other == null || damage <= 0) return;
     
-    Trait   attackSkill = melee ? SKILL_MELEE : SKILL_RANGE;
+    Trait   attackSkill = melee ? SKILL_MELEE : SKILL_SIGHT;
     Trait   defendSkill = melee ? SKILL_MELEE : SKILL_EVADE;
     boolean wallBonus   = TaskCombat.wallBonus(attacks, other);
     boolean wallPenalty = TaskCombat.wallBonus(other, attacks);

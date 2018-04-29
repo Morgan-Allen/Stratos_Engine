@@ -26,11 +26,12 @@ public class TekPriest {
   
   
   final public static int
-    MAX_DRONES    = 3,
-    MAX_DRONES_CL = 6
+    MAX_DRONES      = 3,
+    MAX_DRONES_CL   = 6,
+    STASIS_DURATION = 10
   ;
-  final static PlaneFX.Model FX_STASIS_MODEL = PlaneFX.imageModel(
-    "stasis_fx_model", TekPriest.class,
+  final static PlaneFX.Model FX_MODEL = PlaneFX.imageModel(
+    "tek_fx_model", TekPriest.class,
     "media/SFX/tek_priest_psy.png", 0.5f, 0, 0.25f, true, true
   );
   
@@ -130,6 +131,9 @@ public class TekPriest {
       }
       
       dispenseXP(using, 1, SKILL_PRAY);
+      
+      Area map = using.map();
+      map.ephemera.addGhostFromModel(subject, FX_MODEL, 1, 0.5f, 1);
     }
   };
   static {
@@ -148,11 +152,61 @@ public class TekPriest {
   }
   
   
+
+  final static Trait STASIS_FIELD_CONDITION = new Trait(
+    "condition_shield_harmonics", "Shield Harmonics"
+  ) {
+    
+    protected float passiveBonus(Trait t) {
+      if (t == SKILL_MELEE) return -3;
+      if (t == SKILL_SIGHT) return -3;
+      if (t == SKILL_EVADE) return -3;
+      if (t == SKILL_SPEAK) return -3;
+      if (t == STAT_ACTION) return -0.5f;
+      if (t == STAT_SPEED ) return -0.5f;
+      return 0;
+    }
+    
+    protected void passiveEffect(Actor actor) {
+      Area map = actor.map();
+      map.ephemera.updateGhost(actor, 1, FX_MODEL, 0.5f);
+    }
+  };
+  
+  final public static ActorTechnique STASIS_FIELD = new ActorTechnique(
+    "power_drone_uplink", "Drone Uplink"
+  ) {
+    
+    public boolean canRulerUse(Base ruler, Target subject) {
+      if (! super.canRulerUse(ruler, subject)) return false;
+      return subject.type().isActor();
+    }
+    
+    public void applyFromRuler(Base ruler, Target subject) {
+      super.applyFromRuler(ruler, subject);
+      Actor affects = (Actor) subject;
+      affects.health.addCondition(
+        null, STASIS_FIELD_CONDITION, STASIS_DURATION
+      );
+    }
+  };
+  static {
+    STASIS_FIELD.attachMedia(
+      TekPriest.class, "media/GUI/Powers/power_stasis_field.png",
+      "Reduces the target's combat stats and slows all action for "+
+      STASIS_DURATION+" seconds.",
+      AnimNames.PSY_QUICK
+    );
+    STASIS_FIELD.setProperties(0, Task.MILD_HARM, MEDIUM_POWER);
+    STASIS_FIELD.setCosting(250, MEDIUM_AP_COST, NO_TIRING, LONG_RANGE);
+  }
+  
+  
   
   final public static HumanType TEK_PRIEST = new HumanType(
     "actor_tek_priest", CLASS_SOLDIER
   ) {
-    public void initAsMigrant(ActorAsPerson p) {
+    public void initAsMigrant(Actor p) {
       super.initAsMigrant(p);
       final String name = generateName(TEK_PRIEST_FN, TEK_PRIEST_LN, null);
       p.setCustomName(name);

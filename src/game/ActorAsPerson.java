@@ -15,8 +15,6 @@ public class ActorAsPerson extends Actor {
     */
   private List <Task> todo = new List();
   
-  private String customName = "";
-  
   
   public ActorAsPerson(ActorType type) {
     super(type);
@@ -27,8 +25,6 @@ public class ActorAsPerson extends Actor {
     super(s);
     
     s.loadObjects(todo);
-    
-    customName = s.loadString();
   }
   
   
@@ -36,8 +32,6 @@ public class ActorAsPerson extends Actor {
     super.saveState(s);
     
     s.saveObjects(todo);
-    
-    s.saveString(customName);
   }
   
   
@@ -347,20 +341,6 @@ public class ActorAsPerson extends Actor {
         return (sexData & SEX_FEMALE) != 0;
       }
     };
-  }
-  
-  
-  
-  /**  Rendering, debug and interface methods-
-    */
-  public String fullName() {
-    if (customName.length() > 0) return customName;
-    return super.fullName();
-  }
-  
-  
-  public void setCustomName(String name) {
-    this.customName = name;
   }
 }
 

@@ -39,7 +39,7 @@ public class Nobles {
   final public static HumanType NOBLE = new HumanType(
     "actor_noble", CLASS_NOBLE
   ) {
-    public void initAsMigrant(ActorAsPerson p) {
+    public void initAsMigrant(Actor p) {
       super.initAsMigrant(p);
       String forenames[] = p.health.man() ? HIGHBORN_MN : HIGHBORN_FN;
       final String name = generateName(forenames, HIGHBORN_HN, HIGHBORN_TN);
@@ -67,7 +67,7 @@ public class Nobles {
   final public static HumanType CONSORT = new HumanType(
     "actor_consort", CLASS_NOBLE
   ) {
-    public void initAsMigrant(ActorAsPerson p) {
+    public void initAsMigrant(Actor p) {
       super.initAsMigrant(p);
       String forenames[] = p.health.man() ? HIGHBORN_MN : HIGHBORN_FN;
       final String name = generateName(forenames, HIGHBORN_TN, null);

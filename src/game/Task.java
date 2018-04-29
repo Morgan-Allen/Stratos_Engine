@@ -67,8 +67,7 @@ public class Task implements Session.Saveable {
     PROG_CLOSING   = -1,
     PROG_CONTACT   =  0,
     PROG_ACTION    =  1,
-    PROG_FINISHING =  2,
-    PROG_COMPLETE  =  3,
+    PROG_COMPLETE  =  2,
     RESUME_NO      = -1,
     RESUME_WAIT    =  0,
     RESUME_YES     =  1
@@ -77,9 +76,9 @@ public class Task implements Session.Saveable {
   final Active active;
   Employer origin;
   
-  JOB type       = JOB.NONE;
-  int ticksSpent = 0;
-  int maxTime    = 20;
+  JOB   type       = JOB.NONE;
+  float ticksSpent = 0;
+  int   maxTime    = 20;
   
   Pathing path[] = null;
   int pathIndex = -1;
@@ -88,7 +87,7 @@ public class Task implements Session.Saveable {
   Pathing visits;
   
   private float priorityEval = NO_PRIORITY;
-  private boolean inContact = false;
+  private int contactState = PROG_CLOSING;
   
   
   
@@ -103,7 +102,7 @@ public class Task implements Session.Saveable {
     active     = (Actor   ) s.loadObject();
     origin     = (Employer) s.loadObject();
     type       = JOB.values()[s.loadInt()];
-    ticksSpent = s.loadInt();
+    ticksSpent = s.loadFloat();
     maxTime    = s.loadInt();
     
     int PL = s.loadInt();
@@ -123,7 +122,7 @@ public class Task implements Session.Saveable {
     visits    = (Building) s.loadObject();
     
     priorityEval = s.loadFloat();
-    inContact = s.loadBool();
+    contactState = s.loadInt();
   }
   
   
@@ -132,7 +131,7 @@ public class Task implements Session.Saveable {
     s.saveObject(active );
     s.saveObject(origin);
     s.saveInt(type.ordinal());
-    s.saveInt(ticksSpent);
+    s.saveFloat(ticksSpent);
     s.saveInt(maxTime);
     
     if (path == null) s.saveInt(-1);
@@ -155,7 +154,7 @@ public class Task implements Session.Saveable {
     s.saveObject(visits);
     
     s.saveFloat(priorityEval);
-    s.saveBool(inContact);
+    s.saveInt(contactState);
   }
   
   
@@ -307,9 +306,10 @@ public class Task implements Session.Saveable {
     boolean mobile  = active.mobile();
     Actor   asActor = mobile ? (Actor) active : null;
     
-    final float BASE_TILES_PER_SECOND = 1.5f;
-    float motion = BASE_TILES_PER_SECOND / map.ticksPS;
+    float motion = AVG_MOVE_UNIT * 100f / map.ticksPS;
+    float tickProgress = 1.0f;
     motion *= mobile ? asActor.moveSpeed() : 0;
+    tickProgress *= mobile ? asActor.actSpeed() : 1;
     
     
     while (motion > 0 || ! mobile) {
@@ -319,17 +319,15 @@ public class Task implements Session.Saveable {
       Target  target   = this.target;
       
       priorityEval = NO_PRIORITY;
-      inContact = false;
       
       if (visits != null && mobile && asActor.inside() == visits) {
-        ticksSpent += 1;
-        int progress = checkActionProgress();
+        int progress = checkActionProgress(tickProgress);
         
         if (progress == PROG_COMPLETE) {
+          onVisitEnds(visits);
           return false;
         }
         else if (progress == PROG_CONTACT) {
-          inContact = true;
           return true;
         }
         else {
@@ -338,22 +336,17 @@ public class Task implements Session.Saveable {
             asActor.onVisit(visits);
             if (origin != null) origin.actorVisits(asActor, visits);
           }
-          if (progress == PROG_FINISHING) {
-            onVisitEnds(visits);
-          }
-          inContact = true;
           return true;
         }
       }
       else if (target != null && checkTargetContact(target)) {
-        ticksSpent += 1;
-        int progress = checkActionProgress();
+        int progress = checkActionProgress(tickProgress);
         
         if (progress == PROG_COMPLETE) {
+          onTargetEnds(target);
           return false;
         }
         else if (progress == PROG_CONTACT) {
-          inContact = true;
           return true;
         }
         else {
@@ -363,10 +356,6 @@ public class Task implements Session.Saveable {
             asActor.onTarget(target);
             if (origin != null) origin.actorTargets(asActor, target);
           }
-          if (progress == PROG_FINISHING) {
-            onTargetEnds(target);
-          }
-          inContact = true;
           return true;
         }
       }
@@ -521,18 +510,36 @@ public class Task implements Session.Saveable {
   }
   
   
-  int checkActionProgress() {
+  private int checkActionProgress(float tickProgress) {
     Area map = active.map();
     if (map == null) return PROG_CLOSING;
     
+    final float oldProgress = ticksSpent;
     int maxTicks = map.ticksPS * Nums.max(1, maxTime);
-    boolean exactInterval = ticksSpent % map.ticksPS == 0;
-
-    if (ticksSpent >  maxTicks) return PROG_COMPLETE;
-    if (ticksSpent <= 0       ) return PROG_CLOSING;
-    if (ticksSpent == maxTicks) return PROG_FINISHING;
-    if (exactInterval         ) return PROG_ACTION;
-    return PROG_CONTACT;
+    int contact  = maxTicks / 2;
+    
+    ticksSpent += tickProgress;
+    
+    if (oldProgress < contact && ticksSpent >= contact) {
+      return contactState = PROG_ACTION;
+    }
+    else if (ticksSpent <= 0) {
+      return contactState = PROG_CLOSING;
+    }
+    else if (ticksSpent >= maxTicks) {
+      return contactState = PROG_COMPLETE;
+    }
+    else {
+      return contactState = PROG_CONTACT;
+    }
+  }
+  
+  
+  float actionProgress() {
+    Area map = active.map();
+    if (map == null) return -1;
+    int maxTicks = map.ticksPS * Nums.max(1, maxTime);
+    return Nums.clamp(ticksSpent / maxTicks, 0, 1);
   }
   
   
@@ -550,13 +557,12 @@ public class Task implements Session.Saveable {
   
   
   boolean inContact() {
-    int progress = checkActionProgress();
-    return progress != PROG_CLOSING && progress != PROG_COMPLETE;
+    return contactState != PROG_CLOSING && contactState != PROG_COMPLETE;
   }
   
   
   boolean complete() {
-    return checkActionProgress() >= PROG_FINISHING;
+    return contactState >= PROG_COMPLETE;
   }
   
   

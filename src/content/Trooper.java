@@ -41,7 +41,7 @@ public class Trooper {
   final public static HumanType TROOPER = new HumanType(
     "actor_trooper", CLASS_SOLDIER
   ) {
-    public void initAsMigrant(ActorAsPerson p) {
+    public void initAsMigrant(Actor p) {
       super.initAsMigrant(p);
       final String name = generateName(TROOPER_FN, TROOPER_LN, TROOPER_MN);
       p.setCustomName(name);
@@ -65,7 +65,7 @@ public class Trooper {
     TROOPER.moveSpeed    = 80;
     
     TROOPER.coreSkills.setWith(
-      SKILL_RANGE, 10,
+      SKILL_SIGHT, 10,
       SKILL_PILOT, 7 ,
       SKILL_MELEE, 6 ,
       SKILL_EVADE, 4 ,

@@ -168,8 +168,10 @@ public class Type extends Index.Entry implements Session.Saveable {
   public int maxHealth   = AVG_MAX_HEALTH;
   public int meleeDamage = 0;
   public int rangeDamage = 0;
+  public int plasDamage  = 0;
   public int rangeDist   = 0;
   public int armourClass = 0;
+  public int shieldBonus = 0;
   public int sightRange  = AVG_SIGHT;
   
   

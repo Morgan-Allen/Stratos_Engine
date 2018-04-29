@@ -52,6 +52,7 @@ public class ActorTraits {
   
   ActorTraits(Actor actor) {
     this.actor = actor;
+    for (Trait s : ALL_STATS) setLevel(s, 0);
   }
   
   

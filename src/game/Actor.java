@@ -29,7 +29,8 @@ public class Actor extends Element implements
   int dirs[] = new int[4];
   
   
-  private String ID;
+  private String ID = "";
+  private String customName = "";
   
   private Employer work;
   private Building home;
@@ -71,6 +72,7 @@ public class Actor extends Element implements
     super(s);
     
     ID = s.loadString();
+    customName = s.loadString();
     
     work      = (Employer) s.loadObject();
     home      = (Building) s.loadObject();
@@ -103,6 +105,7 @@ public class Actor extends Element implements
     super.saveState(s);
     
     s.saveString(ID);
+    s.saveString(customName);
     
     s.saveObject(work     );
     s.saveObject(home     );
@@ -592,49 +595,83 @@ public class Actor extends Element implements
   /**  Combat and survival-related code:
     */
   public int meleeDamage() {
-    //  TODO:  Add buffs from conditions!
     Good weapon = type().weaponType;
+    int amount = type().meleeDamage;
     if (weapon != null) {
-      int damage = weapon.meleeDamage;
-      damage += outfit.carried(weapon);
-      return damage;
+      amount = weapon.meleeDamage;
+      amount += outfit.carried(weapon);
     }
-    else return super.meleeDamage();
+    amount += traits.levelOf(STAT_DAMAGE);
+    return amount;
   }
   
   
   public int rangeDamage() {
-    //  TODO:  Add buffs from conditions!
     Good weapon = type().weaponType;
+    int amount = type().rangeDamage;
     if (weapon != null) {
-      int damage = weapon.rangeDamage;
-      damage += outfit.carried(weapon);
-      return damage;
+      amount = weapon.rangeDamage;
+      amount += outfit.carried(weapon);
     }
-    else return super.rangeDamage();
-  }
-  
-  
-  public int attackRange() {
-    //  TODO:  Add buffs from conditions!
-    Good weapon = type().weaponType;
-    if (weapon != null) {
-      int range = weapon.rangeDist;
-      return range;
-    }
-    else return super.attackRange();
+    amount += traits.levelOf(STAT_DAMAGE);
+    return amount;
   }
   
   
   public int armourClass() {
-    //  TODO:  Add buffs from conditions!
-    Good armour = type().weaponType;
+    Good armour = type().armourType;
+    int amount = type().armourClass;
     if (armour != null) {
-      int amount = armour.armourClass;
+      amount = armour.armourClass;
       amount += outfit.carried(armour);
-      return amount;
     }
-    else return super.armourClass();
+    amount += traits.levelOf(STAT_ARMOUR);
+    return amount;
+  }
+  
+  
+  public int shieldBonus() {
+    Good armour = type().armourType;
+    int amount = type().shieldBonus;
+    if (armour != null) {
+      amount = armour.shieldBonus;
+      amount += outfit.carried(armour);
+    }
+    amount += traits.levelOf(STAT_SHIELD);
+    return amount;
+  }
+  
+  
+  public int attackRange() {
+    //  TODO:  Include mods from equipment and conditions?
+    Good weapon = type().weaponType;
+    int amount = type().rangeDist;
+    if (weapon != null) amount = weapon.rangeDist;
+    return amount;
+  }
+  
+  
+  public float sightRange() {
+    //  TODO:  Include mods from equipment and conditions?
+    float light = map == null ? 0.5f : map.lightLevel();
+    return type().sightRange * (0.75f + (light * 0.5f));
+  }
+  
+  
+  public float moveSpeed() {
+    int mode = task == null ? MOVE_NORMAL : task.motionMode();
+    float speed = type().moveSpeed * 1f / AVG_MOVE_SPEED;
+    if (mode == MOVE_RUN  ) speed *= RUN_MOVE_SPEED  / 100f;
+    if (mode == MOVE_SNEAK) speed *= HIDE_MOVE_SPEED / 100f;
+    speed *= Nums.clamp(1 + traits.levelOf(STAT_SPEED), 0, 2);
+    return speed;
+  }
+  
+  
+  public float actSpeed() {
+    float speed = 1f;
+    speed *= Nums.clamp(1 + traits.levelOf(STAT_ACTION), 0, 2);
+    return speed;
   }
   
   
@@ -645,12 +682,6 @@ public class Actor extends Element implements
   
   public void takeDamage(float damage) {
     health.takeDamage(damage);
-  }
-  
-  
-  public float sightRange() {
-    float light = map == null ? 0.5f : map.lightLevel();
-    return type().sightRange * (0.75f + (light * 0.5f));
   }
   
   
@@ -687,15 +718,6 @@ public class Actor extends Element implements
   }
   
   
-  public float moveSpeed() {
-    int mode = task == null ? MOVE_NORMAL : task.motionMode();
-    float speed = type().moveSpeed * 1f / AVG_MOVE_SPEED;
-    if (mode == MOVE_RUN  ) speed *= RUN_MOVE_SPEED  / 100f;
-    if (mode == MOVE_SNEAK) speed *= HIDE_MOVE_SPEED / 100f;
-    return speed;
-  }
-  
-  
   public float growLevel() {
     return health.growLevel();
   }
@@ -722,7 +744,13 @@ public class Actor extends Element implements
   }
   
   
+  public void setCustomName(String name) {
+    this.customName = name;
+  }
+  
+  
   public String fullName() {
+    if (customName.length() > 0) return customName;
     return toString();
   }
   

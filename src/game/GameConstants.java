@@ -58,7 +58,8 @@ public class GameConstants {
     FATIGUE_REGEN    = DAY_LENGTH / 4,
     HEALTH_REGEN     = DAY_LENGTH / 2,
     AVG_MAX_HEALTH   = 10  ,
-    AVG_MOVE_SPEED   = 100 ,  //  percent of 1 tile/second
+    AVG_MOVE_SPEED   = 100 ,  //  percent of 1 unit-distance/second
+    AVG_MOVE_UNIT    = 150 ,  //  percent of tiles per distance-unit
     RUN_MOVE_SPEED   = 250 ,
     HIDE_MOVE_SPEED  = 75  ,
     //
@@ -463,16 +464,28 @@ public class GameConstants {
     */
   final public static Trait
     
-    TRAIT_TOUGH = new Trait("skill_tough", "Tough"),
-    TRAIT_FAST  = new Trait("skill_fast" , "Fast" ),
-    TRAIT_SMART = new Trait("skill_smart", "Smart"),
+    TRAIT_TOUGH = new Trait("skill_tough", "Tough" ),
+    TRAIT_FAST  = new Trait("skill_fast" , "Fast"  ),
+    TRAIT_SMART = new Trait("skill_smart", "Smart" ),
     
     ALL_ATTRIBUTES[] = {
       TRAIT_TOUGH, TRAIT_FAST, TRAIT_SMART
     },
     
+    STAT_ARMOUR = new Trait("stat_armour", "Armour"),
+    STAT_SHIELD = new Trait("stat_shield", "Shield"),
+    STAT_DAMAGE = new Trait("stat_damage", "Damage"),
+    STAT_HEALTH = new Trait("stat_health", "Health"),
+    STAT_SPEED  = new Trait("stat_speed" , "Speed" ),
+    STAT_ACTION = new Trait("stat_action", "Action"),
+    
+    ALL_STATS[] = {
+      STAT_ARMOUR, STAT_SHIELD, STAT_DAMAGE,
+      STAT_HEALTH, STAT_SPEED, STAT_ACTION
+    },
+    
     SKILL_MELEE = new Trait("skill_melee", "Melee"),
-    SKILL_RANGE = new Trait("skill_range", "Range"),
+    SKILL_SIGHT = new Trait("skill_sight", "Sight"),
     SKILL_EVADE = new Trait("skill_evade", "Evade"),
     SKILL_FARM  = new Trait("skill_farm" , "Farm" ),
     SKILL_BUILD = new Trait("skill_build", "Build"),
@@ -485,7 +498,7 @@ public class GameConstants {
     SKILL_LABOR = new Trait("skill_labor", "Labor"),
     
     ALL_SKILLS[] = {
-      SKILL_MELEE, SKILL_RANGE, SKILL_EVADE,
+      SKILL_MELEE, SKILL_SIGHT, SKILL_EVADE,
       SKILL_FARM , SKILL_BUILD, SKILL_CRAFT,
       SKILL_SPEAK, SKILL_WRITE, SKILL_PRAY ,
       SKILL_PILOT, SKILL_HEAL , SKILL_LABOR

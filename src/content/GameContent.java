@@ -306,7 +306,7 @@ public class GameContent {
     DRONE.armourClass = 8;
     DRONE.maxHealth   = 15;
     DRONE.weaponType  = Devices.INTRINSIC_BEAM;
-    DRONE.initTraits.setWith(SKILL_RANGE, 2, SKILL_EVADE, 4);
+    DRONE.initTraits.setWith(SKILL_SIGHT, 2, SKILL_EVADE, 4);
     
     
     TRIPOD.name  = "Tripod";
@@ -323,7 +323,7 @@ public class GameContent {
     TRIPOD.armourClass = 12;
     TRIPOD.maxHealth   = 45;
     TRIPOD.weaponType = Devices.INTRINSIC_BEAM;
-    TRIPOD.initTraits.setWith(SKILL_RANGE, 3, SKILL_MELEE, 2);
+    TRIPOD.initTraits.setWith(SKILL_SIGHT, 3, SKILL_MELEE, 2);
     
     
     CRANIAL.name  = "Cranial";
@@ -397,7 +397,7 @@ public class GameContent {
     ENFORCER.armourClass = 6;
     ENFORCER.maxHealth   = 16;
     ENFORCER.moveSpeed   = 100;
-    ENFORCER.initTraits.setWith(SKILL_MELEE, 2, SKILL_RANGE, 5, SKILL_EVADE, 3);
+    ENFORCER.initTraits.setWith(SKILL_MELEE, 2, SKILL_SIGHT, 5, SKILL_EVADE, 3);
     
     RUNNER.name = "Runner";
     RUNNER.attachCostume(GameContent.class, "runner_skin.gif");
@@ -407,7 +407,7 @@ public class GameContent {
     RUNNER.armourClass = 6;
     RUNNER.maxHealth   = 12;
     RUNNER.moveSpeed   = 125;
-    RUNNER.initTraits.setWith(SKILL_RANGE, 5, SKILL_EVADE, 4);
+    RUNNER.initTraits.setWith(SKILL_SIGHT, 5, SKILL_EVADE, 4);
     
     KOMMANDO.name = "Kommando";
     KOMMANDO.attachCostume(GameContent.class, "kommando_skin.gif");
@@ -431,7 +431,7 @@ public class GameContent {
     
     ECOLOGIST.coreSkills.setWith(
       SKILL_FARM , 10,
-      SKILL_RANGE, 8 ,
+      SKILL_SIGHT, 8 ,
       SKILL_WRITE, 7 ,
       SKILL_EVADE, 6 ,
       SKILL_SPEAK, 5 ,
@@ -459,7 +459,7 @@ public class GameContent {
       SKILL_MELEE, 6 ,
       SKILL_PILOT, 6 ,
       SKILL_WRITE, 4 ,
-      SKILL_RANGE, 4
+      SKILL_SIGHT, 4
     );
     ENGINEER.initTraits.setWith(
       TRAIT_EMPATHY  , 40,
@@ -483,7 +483,7 @@ public class GameContent {
       SKILL_WRITE , 9 ,
       SKILL_SPEAK , 8 ,
       SKILL_CRAFT , 7 ,
-      SKILL_RANGE , 5 ,
+      SKILL_SIGHT , 5 ,
       SKILL_MELEE , 2 
     );
     PHYSICIAN.initTraits.setWith(
@@ -788,7 +788,9 @@ public class GameContent {
     SCHOOL_COL.foundationModel = FOUNDATIONS[4];
     
     SCHOOL_COL.workerTypes.setWith(Collective.COLLECTIVE, 2);
-    SCHOOL_COL.rulerPowers = new ActorTechnique[] { Collective.PSY_HEAL };
+    SCHOOL_COL.rulerPowers = new ActorTechnique[] {
+      Collective.PSY_HEAL, Collective.SHIELD_HARMONICS
+    };
     
     SCHOOL_LEN.name = "LENSR School";
     SCHOOL_LEN.model = CutoutModel.fromImage(
@@ -810,6 +812,11 @@ public class GameContent {
       "media/Buildings/school_tek_priest.png", 4, 2
     );
     SCHOOL_TEK.foundationModel = FOUNDATIONS[4];
+    
+    SCHOOL_TEK.workerTypes.setWith(TekPriest.TEK_PRIEST, 2);
+    SCHOOL_TEK.rulerPowers = new ActorTechnique[] {
+      TekPriest.DRONE_UPLINK, TekPriest.STASIS_FIELD
+    };
     
     SCHOOL_SPA.name = "Spacer School";
     SCHOOL_SPA.model = CutoutModel.fromImage(
