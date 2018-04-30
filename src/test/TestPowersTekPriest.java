@@ -2,9 +2,10 @@
 
 package test;
 import game.*;
-import game.GameConstants.*;
+import static game.GameConstants.*;
 import static content.GameContent.*;
 import content.*;
+import util.*;
 
 
 
@@ -12,15 +13,8 @@ public class TestPowersTekPriest {
   
   
   public static void main(String args[]) {
-    testDrones(true);
-  }
-  
-  
-  static Building createGuildCommon(Area map, Base base) {
-    Building guild = (Building) SCHOOL_TEK.generate();
-    guild.enterMap(map, 2, 2, 1, base);
-    ActorUtils.spawnActor(guild, TekPriest.TEK_PRIEST, false);
-    return guild;
+    testDrones(false);
+    testStasis(false);
   }
   
   
@@ -31,7 +25,8 @@ public class TestPowersTekPriest {
       
       Building createGuild(Area map, Base base) {
         map.world.settings.toggleInjury = false;
-        return createGuildCommon(map, base);
+        map.world.settings.toggleFog    = false;
+        return createGuild(map, base, SCHOOL_TEK);
       }
       
       Target createSubject(Area map, Building guild) {
@@ -56,9 +51,16 @@ public class TestPowersTekPriest {
         
         return numDrones == TekPriest.MAX_DRONES;
       }
-      
     };
-    return test.actorPowerTest(graphics, "DRONE UPLINK", Collective.PSY_HEAL);
+    return test.actorPowerTest(graphics, "DRONE UPLINK", TekPriest.DRONE_UPLINK);
+  }
+  
+  
+  static boolean testStasis(boolean graphics) {
+    TestPowers.TestCondition test = new TestPowers.TestCondition(
+      SCHOOL_TEK, ECOLOGIST, Tally.with(SKILL_EVADE, -1, STAT_SPEED, -1)
+    );
+    return test.rulerPowerTest(graphics, "STASIS FIELD", TekPriest.STASIS_FIELD);
   }
   
 }

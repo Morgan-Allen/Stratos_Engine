@@ -152,9 +152,8 @@ public class TekPriest {
   }
   
   
-
   final static Trait STASIS_FIELD_CONDITION = new Trait(
-    "condition_shield_harmonics", "Shield Harmonics"
+    "condition_stasis_field", "Stasis Field"
   ) {
     
     protected float passiveBonus(Trait t) {
@@ -174,7 +173,7 @@ public class TekPriest {
   };
   
   final public static ActorTechnique STASIS_FIELD = new ActorTechnique(
-    "power_drone_uplink", "Drone Uplink"
+    "power_stasis_field", "Stasis Field"
   ) {
     
     public boolean canRulerUse(Base ruler, Target subject) {

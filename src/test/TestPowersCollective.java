@@ -18,19 +18,11 @@ public class TestPowersCollective {
   }
   
   
-  static Building createGuildCommon(Area map, Base base) {
-    Building guild = (Building) SCHOOL_COL.generate();
-    guild.enterMap(map, 2, 2, 1, base);
-    ActorUtils.spawnActor(guild, Collective.COLLECTIVE, false);
-    return guild;
-  }
-  
-  
   static boolean testHeal(boolean graphics) {
     TestPowers test = new TestPowers() {
       
       Building createGuild(Area map, Base base) {
-        return createGuildCommon(map, base);
+        return createGuild(map, base, SCHOOL_COL);
       }
       
       Target createSubject(Area map, Building guild) {
@@ -52,65 +44,12 @@ public class TestPowersCollective {
   
   
   static boolean testHarmonics(boolean graphics) {
-    TestPowers test = new TestPowers() {
-      
-      final Trait toCheck[] = { SKILL_EVADE, STAT_SHIELD };
-      Tally <Trait> initStats = new Tally();
-      boolean boostOK = false;
-      boolean fadeOK  = false;
-      
-      
-      Building createGuild(Area map, Base base) {
-        return createGuildCommon(map, base);
-      }
-      
-      Target createSubject(Area map, Building guild) {
-        Actor subject = (Actor) ECOLOGIST.generate();
-        subject.type().initAsMigrant(subject);
-        subject.enterMap(map, 20, 20, 1, guild.base());
-        subject.traits.updateTraits();
-        for (Trait t : toCheck) {
-          initStats.set(t, subject.traits.levelOf(t));
-        }
-        return subject;
-      }
-      
-      boolean castAsRuler(ActorTechnique power, Target subject, Base ruler) {
-        power.applyFromRuler(ruler, subject);
-        return true;
-      }
-      
-      boolean verifyEffect(Target subject, Actor caster) {
-        Actor affects = (Actor) subject;
-        boolean allStatsOK = true;
-        
-        for (Trait t : toCheck) {
-          float init = initStats.valueFor(t);
-          float current = affects.traits.levelOf(t);
-          
-          if (! boostOK) {
-            if (current <= init) allStatsOK = false;
-          }
-          else if (! fadeOK) {
-            if (current > init) allStatsOK = false;
-          }
-        }
-        
-        if (allStatsOK) {
-          if (! boostOK) boostOK = true;
-          else fadeOK = true;
-        }
-        return allStatsOK;
-      }
-    };
+    TestPowers.TestCondition test = new TestPowers.TestCondition(
+      SCHOOL_COL, ECOLOGIST, Tally.with(SKILL_EVADE, 1, STAT_SHIELD, 1)
+    );
     return test.rulerPowerTest(graphics, "SHIELD HARMONICS", Collective.SHIELD_HARMONICS);
   }
-  
 }
-
-
-
-
 
 
 

@@ -306,7 +306,7 @@ public class Task implements Session.Saveable {
     boolean mobile  = active.mobile();
     Actor   asActor = mobile ? (Actor) active : null;
     
-    float motion = AVG_MOVE_UNIT * 100f / map.ticksPS;
+    float motion = AVG_MOVE_UNIT / (100f * map.ticksPS);
     float tickProgress = 1.0f;
     motion *= mobile ? asActor.moveSpeed() : 0;
     tickProgress *= mobile ? asActor.actSpeed() : 1;
@@ -520,7 +520,7 @@ public class Task implements Session.Saveable {
     
     ticksSpent += tickProgress;
     
-    if (oldProgress < contact && ticksSpent >= contact) {
+    if (oldProgress <= contact && ticksSpent > contact) {
       return contactState = PROG_ACTION;
     }
     else if (ticksSpent <= 0) {
@@ -546,8 +546,8 @@ public class Task implements Session.Saveable {
   boolean checkTargetContact(Target from) {
     Pathing last = (Pathing) Visit.last(path);
     if (from != last && active.at() == last) return true;
-    if (Area.distance(active, from) < actionRange()) return true;
-    return false;
+    float dist = Area.distance(active, from), range = actionRange();
+    return dist < range;
   }
   
   

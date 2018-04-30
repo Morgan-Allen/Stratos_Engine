@@ -15,6 +15,13 @@ public class Tally <K> {
   final Table <K, Float> store = new Table <K, Float> ();
   
   
+  public static Tally with(Object... args) {
+    Tally t = new Tally();
+    t.setWith(args);
+    return t;
+  }
+  
+  
   public Tally setWith(Object... args) {
     Object split[][] = Visit.splitByModulus(args, 2);
     for (int i = split[0].length; i-- > 0;) {

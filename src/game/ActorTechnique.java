@@ -212,6 +212,9 @@ public abstract class ActorTechnique extends Trait {
     
     
     int motionMode() {
+      Actor actor = (Actor) this.active;
+      float dist  = Area.distance(actor, target);
+      if (dist > actor.sightRange()) return Actor.MOVE_NORMAL;
       return Actor.MOVE_RUN;
     }
 
