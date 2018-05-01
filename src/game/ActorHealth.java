@@ -413,6 +413,10 @@ public class ActorHealth {
     return actor.type().organic && ! actor.type().isVessel();
   }
   
+  public float hurtLevel() {
+    return (injury + fatigue + hunger) / maxHealth();
+  }
+  
   public float injury  () { return injury  ; }
   public float bleed   () { return bleed   ; }
   public float fatigue () { return fatigue ; }

@@ -2,6 +2,9 @@
 
 package content;
 import game.*;
+import game.GameConstants.Target;
+import game.GameConstants.Trait;
+
 import static game.GameConstants.*;
 import static game.ActorTechnique.*;
 import static game.ActorTraits.*;
@@ -26,9 +29,11 @@ public class TekPriest {
   
   
   final public static int
-    MAX_DRONES      = 3,
-    MAX_DRONES_CL   = 6,
-    STASIS_DURATION = 10
+    MAX_DRONES        = 3,
+    MAX_DRONES_CL     = 6,
+    STASIS_DURATION   = 15,
+    STASIS_MINI_DUR   = 5,
+    ASSEMBLE_DURATION = 20
   ;
   final static PlaneFX.Model FX_MODEL = PlaneFX.imageModel(
     "tek_fx_model", TekPriest.class,
@@ -141,6 +146,7 @@ public class TekPriest {
     }
     
     
+    /*
     public boolean canRulerUse(Base ruler, Target subject) {
       if (! super.canRulerUse(ruler, subject)) return false;
       if (! subject.type().isConstruct()) return false;
@@ -163,6 +169,7 @@ public class TekPriest {
         affects.assignBase(ruler.base());
       }
     }
+    //*/
   };
   static {
     DRONE_UPLINK.attachMedia(
@@ -215,6 +222,27 @@ public class TekPriest {
       affects.health.addCondition(
         null, STASIS_FIELD_CONDITION, STASIS_DURATION
       );
+      
+      Area map = affects.map();
+      map.ephemera.addGhostFromModel(subject, FX_MODEL, 1, 0.5f, 1);
+    }
+    
+    public boolean canActorUse(Actor using, Target subject) {
+      if (! super.canActorUse(using, subject)) return false;
+      return subject.type().isActor();
+    }
+    
+    public void applyFromActor(Actor using, Target subject) {
+      super.applyFromActor(using, subject);
+
+      Actor affects = (Actor) subject;
+      affects.health.addCondition(
+        null, STASIS_FIELD_CONDITION, STASIS_MINI_DUR
+      );
+      dispenseXP(using, 1, SKILL_PRAY);
+      
+      Area map = using.map();
+      map.ephemera.addGhostFromModel(subject, FX_MODEL, 1, 0.5f, 1);
     }
   };
   static {
@@ -228,6 +256,81 @@ public class TekPriest {
     STASIS_FIELD.setCosting(250, MEDIUM_AP_COST, NO_TIRING, LONG_RANGE);
   }
   
+  
+  final static Trait REASSEMBLY_CONDITION = new Trait(
+    "condition_reassembly", "Reassembly"
+  ) {
+    
+    protected float passiveBonus(Trait t) {
+      return 0;
+    }
+    
+    protected void passiveEffect(Actor actor) {
+      Area map = actor.map();
+      
+      float lift = actor.health.maxHealth();
+      float wake = actor.health.maxHealth() / 2;
+      lift *= 1f / (map.ticksPerSecond() * ASSEMBLE_DURATION);
+      actor.health.liftDamage(lift);
+      actor.health.incBleed(-1000);
+      
+      if (
+        actor.health.dead() && (! actor.health.organic()) &&
+        actor.health.injury() <= wake
+      ) {
+        actor.health.setAsAlive("Regenerated full health!");
+      }
+      
+      map.ephemera.updateGhost(actor, 1, FX_MODEL, 0.5f);
+    }
+  };
+  
+  final public static ActorTechnique REASSEMBLY = new ActorTechnique(
+    "power_reassembly", "Reassembly"
+  ) {
+    public boolean canRulerUse(Base ruler, Target subject) {
+      if (! super.canRulerUse(ruler, subject)) return false;
+      //
+      //  TODO:  Allow casting on cybrid actors (such as tek priests themselves)
+      //  as well.
+      if (subject.type().isActor()) {
+        Actor affects = (Actor) subject;
+        if (! affects.health.organic()) return false;
+        if (affects.health.injury() <= 0) return false;
+        return true;
+      }
+      //  TODO:  You need the ability to apply persistent conditions to
+      //  buildings for this.
+      /*
+      if (subject.type().isBuilding()) {
+        Building affects = (Building) subject;
+        if (! affects.complete()) return false;
+        if (affects.buildLevel() >= 1) return false;
+        return true;
+      }
+      //*/
+      return false;
+    }
+    
+    public void applyFromRuler(Base ruler, Target subject) {
+      super.applyFromRuler(ruler, subject);
+
+      Actor affects = (Actor) subject;
+      affects.health.addCondition(
+        null, REASSEMBLY_CONDITION, ASSEMBLE_DURATION
+      );
+    }
+  };
+  static {
+    REASSEMBLY.attachMedia(
+      TekPriest.class, "media/GUI/Powers/power_reassembly.png",
+      "Regenerates the health of artilects or vehicles over "+
+      ASSEMBLE_DURATION+" seconds.",
+      AnimNames.PSY_QUICK
+    );
+    REASSEMBLY.setProperties(0, Task.FULL_HELP, MAJOR_POWER);
+    REASSEMBLY.setCosting(350, MEDIUM_AP_COST, NO_TIRING, LONG_RANGE);
+  }
   
   
   final public static HumanType TEK_PRIEST = new HumanType(
@@ -254,7 +357,8 @@ public class TekPriest {
     TEK_PRIEST.coreSkills.setWith(
       SKILL_PRAY , 8 ,
       SKILL_SPEAK, 6 ,
-      SKILL_WRITE, 8
+      SKILL_WRITE, 8 ,
+      SKILL_CRAFT, 7
     );
     TEK_PRIEST.initTraits.setWith(
       TRAIT_EMPATHY  , 15,
@@ -262,9 +366,8 @@ public class TekPriest {
       TRAIT_BRAVERY  , 65,
       TRAIT_CURIOSITY, 60
     );
-    //COLLECTIVE.initTraits.setWith(SKILL_SPEAK, 3, SKILL_PRAY, 4, SKILL_WRITE, 1);
     
-    TEK_PRIEST.classTechniques = new ActorTechnique[] { DRONE_UPLINK };
+    TEK_PRIEST.classTechniques = new ActorTechnique[] { DRONE_UPLINK, STASIS_FIELD };
   }
 }
 

@@ -53,7 +53,15 @@ public class TestAll {
     record(TestBounties.testExploreAreaMission   (false));
     record(TestBounties.testDefendBuildingMission(false));
     
-    record(TestPowersCollective.testHeal(false));
+    record(TestPowersCollective.testHeal       (false));
+    record(TestPowersCollective.testHarmonics  (false));
+    record(TestPowersLogician  .testConcentrate(false));
+    record(TestPowersLogician  .testIntegrity  (false));
+    record(TestPowersTekPriest .testDrones     (false));
+    record(TestPowersTekPriest .testStasis     (false));
+    record(TestPowersShaper    .testBonds      (false));
+    record(TestPowersShaper    .testCamo       (false));
+    record(TestPowersShaper    .testRegen      (false));
     
     record(TestCity.testCity(false));
     
@@ -65,5 +73,7 @@ public class TestAll {
   }
   
 }
+
+
 
 

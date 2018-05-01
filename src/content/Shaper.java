@@ -288,7 +288,7 @@ public class Shaper {
       SKILL_CRAFT, 3 
     );
     SHAPER.initTraits.setWith(
-      TRAIT_EMPATHY  , 35,
+      TRAIT_EMPATHY  , 45,
       TRAIT_DILIGENCE, 20,
       TRAIT_BRAVERY  , 50,
       TRAIT_CURIOSITY, 70

@@ -825,7 +825,7 @@ public class GameContent {
     
     SCHOOL_TEK.workerTypes.setWith(TekPriest.TEK_PRIEST, 2);
     SCHOOL_TEK.rulerPowers = new ActorTechnique[] {
-      TekPriest.DRONE_UPLINK, TekPriest.STASIS_FIELD
+      TekPriest.STASIS_FIELD, TekPriest.REASSEMBLY
     };
     
     SCHOOL_SPA.name = "Spacer School";

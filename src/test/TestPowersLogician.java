@@ -15,6 +15,7 @@ public class TestPowersLogician {
   public static void main(String args[]) {
     testConcentrate(false);
     testIntegrity(false);
+    testCombat(false);
   }
   
   
@@ -55,10 +56,43 @@ public class TestPowersLogician {
     return test.rulerPowerTest(graphics, "INTEGRITY", Logician.INTEGRITY);
   }
   
+  
+  static boolean testCombat(boolean graphics) {
+    TestPowers test = new TestPowers() {
+      
+      Building createGuild(Area map, Base base) {
+        return createGuild(map, base, SCHOOL_LOG);
+      }
+      
+      Target createSubject(Area map, Building guild) {
+        Actor subject = createSubject(map, guild, Trooper.TROOPER, true);
+        subject.health.takeDamage(subject.health.maxHealth() * 0.7f);
+        subject.health.incBleed(-1000);
+        return subject;
+      }
+      
+      boolean verifyEffect(Target subject, Actor caster) {
+        Actor strikes = (Actor) subject;
+        
+        caster.traits.setClassLevel(MAX_CLASS_LEVEL);
+        
+        if (! Task.inCombat(caster)) {
+          Task combat = TaskCombat.configHunting(caster, strikes);
+          caster.assignTask(combat, caster);
+        }
+        
+        int minArmour = caster.type().armourClass + Logician.INTEG_ARMOUR;
+        int minTire   = Logician.NERVE_DAMAGE - 1;
+        
+        if (caster.armourClass()     < minArmour) return false;
+        if (strikes.health.fatigue() < minTire  ) return false;
+        return true;
+      }
+    };
+    return test.actorPowerTest(graphics, "NERVE STRIKE", Logician.NERVE_STRIKE);
+  }
+  
 }
-
-
-
 
 
 

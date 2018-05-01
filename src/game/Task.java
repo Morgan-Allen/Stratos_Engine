@@ -15,6 +15,7 @@ public class Task implements Session.Saveable {
     */
   public static enum JOB {
     NONE      ,
+    FLINCH    ,
     COLLECTING,
     RETURNING ,
     DEPARTING ,

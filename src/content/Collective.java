@@ -2,10 +2,12 @@
 
 package content;
 import game.*;
+import game.Task.JOB;
 import static game.GameConstants.*;
 import static game.ActorTechnique.*;
 import graphics.common.*;
 import graphics.sfx.*;
+import util.*;
 
 
 
@@ -27,7 +29,9 @@ public class Collective {
     PSY_HEAL_AMOUNT        = 10,
     HARMONICS_SHIELD_BONUS = 6 ,
     HARMONICS_STATS_BONUS  = 2 ,
-    HARMONICS_DURATION     = 30
+    HARMONICS_DURATION     = 30,
+    SYNERGY_PASSIVE        = 2 ,
+    SYNERGY_GROUP_MULT     = 30
   ;
   final static PlaneFX.Model FX_MODEL = PlaneFX.imageModel(
     "col_fx_model", Collective.class,
@@ -60,7 +64,7 @@ public class Collective {
       
       final Actor a = (Actor) subject;
       float hurtLevel = a.health.injury() / a.health.maxHealth();
-      rating *= hurtLevel;
+      rating *= hurtLevel * 1.5f;
       return rating;
     }
     
@@ -84,6 +88,7 @@ public class Collective {
     
     public void applyFromRuler(Base ruler, Target subject) {
       super.applyFromRuler(ruler, subject);
+      
       final Actor healed = (Actor) subject;
       Area map = healed.map();
       
@@ -101,7 +106,7 @@ public class Collective {
     );
     PSY_HEAL.setProperties(TARGET_OTHERS | SOURCE_TRAINED, Task.FULL_HELP, MEDIUM_POWER);
     PSY_HEAL.setCosting(150, MEDIUM_AP_COST, NO_TIRING, LONG_RANGE);
-    PSY_HEAL.setMinLevel(1);
+    PSY_HEAL.setMinLevel(4);
   }
   
   
@@ -150,23 +155,51 @@ public class Collective {
     SHIELD_HARMONICS.setCosting(100, MEDIUM_AP_COST, NO_TIRING, LONG_RANGE);
   }
   
-  /*
+  
+  
   final public static ActorTechnique SYNERGY = new ActorTechnique(
     "power_synergy", "Synergy"
   ) {
     
     protected float passiveBonus(Trait t) {
-      //
-      //  TODO:  Fill this in.  Use during diplomacy to boost talk-skill and on
-      //  hostile actors for a chance to temporarily force conversation.
+      if (t == SKILL_SPEAK) return SYNERGY_PASSIVE;
+      if (t == SKILL_HEAL ) return SYNERGY_PASSIVE;
       return 0;
     }
     
     protected void passiveEffect(Actor actor) {
+      //  TODO:  Flesh this out a bit more.  Allow a chance to interrupt attacks
+      //  by enemies and prompt conversation, say?
+      /*
+      float stunChance = 0.5f / actor.map().ticksPerSecond();
+      float range = actor.sightRange();
+      
+      for (Active a : actor.focused()) {
+        if (! a.mobile()) continue;
+        Actor other = (Actor) a;
+        
+        if (! Task.inCombat(other)) continue;
+        if (Area.distance(actor, other) > range) continue;
+        
+        if (Rand.num() < stunChance) {
+          Task stun = other.targetTask(other, 1, JOB.FLINCH, null);
+          other.assignReaction(stun);
+        }
+      }
+      //*/
       return;
     }
   };
-  //*/
+  static {
+    SYNERGY.attachMedia(
+      Collective.class, "media/GUI/Powers/power_shield_harmonics.png",
+      "Provides passive bonuses to diplomacy skills and health recovery.",
+      AnimNames.PSY_QUICK
+    );
+    SYNERGY.setProperties(SOURCE_TRAINED | IS_PASSIVE, Task.MILD_HELP, MEDIUM_POWER);
+    SYNERGY.setCosting(100, NO_AP_COST, NO_TIRING, NO_RANGE);
+    SYNERGY.setMinLevel(1);
+  }
   
   
   
@@ -201,9 +234,8 @@ public class Collective {
       TRAIT_BRAVERY  , 65,
       TRAIT_CURIOSITY, 30
     );
-    //COLLECTIVE.initTraits.setWith(SKILL_SPEAK, 3, SKILL_PRAY, 4, SKILL_WRITE, 1);
     
-    COLLECTIVE.classTechniques = new ActorTechnique[] { PSY_HEAL };
+    COLLECTIVE.classTechniques = new ActorTechnique[] { PSY_HEAL, SYNERGY };
   }
 }
 

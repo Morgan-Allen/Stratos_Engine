@@ -15,6 +15,7 @@ public class TestPowersTekPriest {
   public static void main(String args[]) {
     testDrones(false);
     testStasis(false);
+    testAssemble(false);
   }
   
   
@@ -61,6 +62,30 @@ public class TestPowersTekPriest {
       SCHOOL_TEK, ECOLOGIST, Tally.with(SKILL_EVADE, -1, STAT_SPEED, -1)
     );
     return test.rulerPowerTest(graphics, "STASIS FIELD", TekPriest.STASIS_FIELD);
+  }
+  
+  
+  static boolean testAssemble(boolean graphics) {
+    TestPowers.TestCondition test = new TestPowers.TestCondition(
+      SCHOOL_TEK, TRIPOD, Tally.with()
+    ) {
+      
+      Target createSubject(Area map, Building guild) {
+        map.world.settings.toggleFog = false;
+        Actor affects = (Actor) super.createSubject(map, guild);
+        affects.health.takeDamage(1000);
+        return affects;
+      }
+      
+      boolean verifyEffect(Target subject, Actor caster) {
+        Actor affects = (Actor) subject;
+        float maxHP = affects.health.maxHealth();
+        if (! affects.health.alive()) return false;
+        if (affects.health.injury() > (maxHP / 2)) return false;
+        return true;
+      }
+    };
+    return test.rulerPowerTest(graphics, "REASSEMBLY", TekPriest.REASSEMBLY);
   }
   
 }

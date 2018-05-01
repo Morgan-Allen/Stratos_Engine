@@ -91,6 +91,23 @@ public class TestPowers extends LogicTest {
   }
   
   
+  static Actor createSubject(
+    Area map, Building guild, ActorType subjectType, boolean hostile
+  ) {
+    Actor subject = (Actor) subjectType.generate();
+    if (subjectType.isPerson()) {
+      subjectType.initAsMigrant(subject);
+    }
+    if (subjectType.isAnimal()) {
+      subjectType.initAsAnimal(subject);
+    }
+    Base belongs = hostile ? map.locals : guild.base();
+    subject.enterMap(map, 20, 20, 1, belongs);
+    subject.traits.updateTraits();
+    return subject;
+  }
+  
+  
   static class TestCondition extends TestPowers {
     
     final BuildType guildType;
@@ -113,15 +130,7 @@ public class TestPowers extends LogicTest {
     }
     
     Target createSubject(Area map, Building guild) {
-      Actor subject = (Actor) subjectType.generate();
-      if (subjectType.isPerson()) {
-        subjectType.initAsMigrant(subject);
-      }
-      if (subjectType.isAnimal()) {
-        subjectType.initAsAnimal(subject);
-      }
-      subject.enterMap(map, 20, 20, 1, guild.base());
-      subject.traits.updateTraits();
+      Actor subject = createSubject(map, guild, subjectType, false);
       for (Trait t : toCheck.keys()) {
         initStats.set(t, subject.traits.levelOf(t));
       }
