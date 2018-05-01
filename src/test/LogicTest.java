@@ -500,13 +500,14 @@ public class LogicTest {
     if (e instanceof Actor) {
       Actor a = (Actor) e;
       Type t = e.type();
+      float maxHP = a.health.maxHealth();
       report.append(
         "\n  Melee/Range dmg:  "+t.meleeDamage+"/"+t.rangeDamage+
         "\n  Armour class:     "+t.armourClass+
         "\n  Sight/attack rng: "+t.sightRange+"/"+t.rangeDist+
-        "\n  Injury:           "+I.shorten(a.health.injury() , 1)+"/"+t.maxHealth+
-        "\n  Fatigue:          "+I.shorten(a.health.fatigue(), 1)+"/"+t.maxHealth+
-        "\n  Hunger:           "+I.shorten(a.health.hunger() , 1)+"/"+t.maxHealth+
+        "\n  Injury:           "+I.shorten(a.health.injury() , 1)+"/"+maxHP+
+        "\n  Fatigue:          "+I.shorten(a.health.fatigue(), 1)+"/"+maxHP+
+        "\n  Hunger:           "+I.shorten(a.health.hunger() , 1)+"/"+maxHP+
         "\n  Fear Level:       "+I.percent(a.fearLevel())
       );
       

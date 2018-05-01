@@ -1,13 +1,10 @@
 
 
 package test;
-import static content.GameContent.*;
 import static game.GameConstants.*;
+import game.*;
+import static content.GameContent.*;
 import content.*;
-import game.Actor;
-import game.Area;
-import game.Building;
-import game.GameConstants.Target;
 import util.*;
 
 
@@ -35,7 +32,7 @@ public class TestPowersLogician {
     ) {
       float initHP = -1;
       boolean boostHP = false;
-
+      
       Target createSubject(Area map, Building guild) {
         Actor subject = (Actor) super.createSubject(map, guild);
         initHP = subject.health.maxHealth();
@@ -43,22 +40,22 @@ public class TestPowersLogician {
       }
       
       boolean verifyEffect(Target subject, Actor caster) {
+        Actor affects = (Actor) subject;
         if (! boostHP) {
-          boostHP = caster.health.maxHealth() >= initHP + Logician.INTEG_HEALTH;
+          boostHP = affects.health.maxHealth() >= initHP + Logician.INTEG_HEALTH;
           if (! boostHP) return false;
         }
-        return super.verifyEffect(subject, caster);
+        if (super.verifyEffect(subject, caster)) {
+          if (affects.health.maxHealth() > initHP) return false;
+          return true;
+        }
+        return false;
       }
     };
     return test.rulerPowerTest(graphics, "INTEGRITY", Logician.INTEGRITY);
   }
   
 }
-
-
-
-
-
 
 
 

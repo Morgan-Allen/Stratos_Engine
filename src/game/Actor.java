@@ -301,6 +301,7 @@ public class Actor extends Element implements
   
   
   void updateOffMap(Base city) {
+    //  TODO:  Update traits as well.
     health.updateHealthOffmap(city);
     health.updateLifeCycle(city, false);
   }

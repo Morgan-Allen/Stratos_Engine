@@ -37,6 +37,7 @@ public class ActorHealth {
   float fatigue ;
   float stress  ;
   float cooldown;
+  float maxHP = -1;
   int   state = STATE_OKAY;
   
   List <Condition> conditions = new List();
@@ -59,6 +60,7 @@ public class ActorHealth {
     fatigue  = s.loadFloat();
     stress   = s.loadFloat();
     cooldown = s.loadFloat();
+    maxHP    = s.loadFloat();
     state    = s.loadInt();
     
     for (int n = s.loadInt(); n-- > 0;) {
@@ -83,6 +85,7 @@ public class ActorHealth {
     s.saveFloat(fatigue );
     s.saveFloat(stress  );
     s.saveFloat(cooldown);
+    s.saveFloat(maxHP   );
     s.saveInt  (state   );
     
     s.saveInt(conditions.size());
@@ -187,6 +190,8 @@ public class ActorHealth {
     }
     //
     //  And update conditions-
+    maxHP = -1;
+    maxHealth();
     for (Condition c : conditions) {
       if (c.expireTime <= time) conditions.remove(c);
     }
@@ -397,7 +402,11 @@ public class ActorHealth {
   }
   
   public float maxHealth() {
-    return actor.type().maxHealth;
+    if (maxHP == -1) {
+      maxHP =  actor.type().maxHealth;
+      maxHP += actor.traits.levelOf(STAT_HEALTH);
+    }
+    return maxHP;
   }
   
   public boolean organic() {
