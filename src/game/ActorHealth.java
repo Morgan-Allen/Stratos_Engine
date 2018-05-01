@@ -147,7 +147,7 @@ public class ActorHealth {
     //
     //  Adjust health-parameters accordingly-
     if (! alive()) {
-      float decay = tick * 1f * maxHealth();
+      float decay = tick * maxHealth() * 1f / DECOMP_TIME;
       decay *= (DECOMP_PERCENT - KNOCKOUT_PERCENT) / 100f;
       bleed = 0;
       injury += decay;

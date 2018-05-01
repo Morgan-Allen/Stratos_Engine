@@ -244,7 +244,7 @@ public class Shaper {
       
       Actor affects = (Actor) subject;
       affects.health.addCondition(
-        null, REGENERATE_CONDITION, CAMO_DURATION
+        null, REGENERATE_CONDITION, REGEN_DURATION
       );
     }
   };

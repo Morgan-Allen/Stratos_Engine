@@ -66,6 +66,7 @@ public class TestPowersShaper {
     ) {
       
       Target createSubject(Area map, Building guild) {
+        map.world.settings.toggleFog = false;
         Actor affects = (Actor) super.createSubject(map, guild);
         affects.health.takeDamage(1000);
         return affects;
@@ -73,8 +74,9 @@ public class TestPowersShaper {
       
       boolean verifyEffect(Target subject, Actor caster) {
         Actor affects = (Actor) subject;
+        float maxHP = affects.health.maxHealth();
         if (! affects.health.alive()) return false;
-        if (affects.health.injury() > 2) return false;
+        if (affects.health.injury() > (maxHP / 2)) return false;
         return true;
       }
     };

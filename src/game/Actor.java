@@ -156,7 +156,6 @@ public class Actor extends Element implements
   
   
   public void exitMap(Area map) {
-    
     if (inside != null) setInside(inside, false);
     
     map.actors.remove(this);
@@ -559,6 +558,7 @@ public class Actor extends Element implements
   public float shopPrice(Good good, Task purchase) {
     return good.price;
   }
+  
   
   
   /**  Handling migration and off-map tasks-
