@@ -2,6 +2,7 @@
 
 package content;
 import game.*;
+import game.Task.JOB;
 import static game.GameConstants.*;
 import static game.ActorTechnique.*;
 import static game.ActorTraits.*;
@@ -163,6 +164,15 @@ public class Shaper {
     "power_camouflage", "Camouflage"
   ) {
     
+    void applyCamoEffects(Actor affects) {
+      affects.health.addCondition(
+        null, CAMOUFLAGE_CONDITION, CAMO_DURATION
+      );
+      for (Active a : affects.focused()) if (Task.inCombat((Element) a)) {
+        a.assignTask(null, a);
+      }
+    }
+    
     public boolean canRulerUse(Base ruler, Target subject) {
       if (! super.canRulerUse(ruler, subject)) return false;
       if (! subject.type().isActor()) return false;
@@ -176,14 +186,20 @@ public class Shaper {
     
     public void applyFromRuler(Base ruler, Target subject) {
       super.applyFromRuler(ruler, subject);
-      
-      Actor affects = (Actor) subject;
-      affects.health.addCondition(
-        null, CAMOUFLAGE_CONDITION, CAMO_DURATION
-      );
-      for (Active a : affects.focused()) if (Task.inCombat((Element) a)) {
-        a.assignTask(null, ruler);
-      }
+      applyCamoEffects((Actor) subject);
+    }
+    
+    public boolean canActorUse(Actor using, Target subject) {
+      if (! super.canActorUse(using, subject)) return false;
+      if (Task.inCombat(using)) return false;
+      if (using.jobType() == JOB.RETREAT  ) return true;
+      if (using.jobType() == JOB.EXPLORING) return true;
+      return false;
+    }
+    
+    public void applyFromActor(Actor using, Target subject) {
+      super.applyFromActor(using, subject);
+      applyCamoEffects((Actor) subject);
     }
   };
   static {
@@ -194,7 +210,8 @@ public class Shaper {
       AnimNames.PSY_QUICK
     );
     CAMOUFLAGE.setProperties(TARGET_SELF | SOURCE_TRAINED, Task.MILD_HELP, MEDIUM_POWER);
-    CAMOUFLAGE.setCosting(250, MINOR_AP_COST, NO_TIRING, NO_RANGE);
+    CAMOUFLAGE.setCosting(250, NO_AP_COST, NO_TIRING, NO_RANGE);
+    CAMOUFLAGE.setMinLevel(4);
   }
   
   
@@ -294,7 +311,7 @@ public class Shaper {
       TRAIT_CURIOSITY, 70
     );
     
-    SHAPER.classTechniques = new ActorTechnique[] { PHEREMONE_BOND };
+    SHAPER.classTechniques = new ActorTechnique[] { PHEREMONE_BOND, CAMOUFLAGE };
   }
 }
 

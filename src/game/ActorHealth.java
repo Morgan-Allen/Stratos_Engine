@@ -308,11 +308,13 @@ public class ActorHealth {
     if (alive()) {
       if (injury + hunger > maxKnockout) {
         setAsKilled("Injury: "+injury+" Hunger "+hunger);
+        ///I.say("ENTERED DEATH: "+actor);
         injury = maxKnockout;
         hunger = fatigue = 0;
       }
       else if (injury + hunger + fatigue > maxKnockout) {
         this.state = STATE_KO;
+        ///I.say("ENTERED KO: "+actor);
         actor.assignTask(null, actor);
       }
       else if (injury + fatigue < minWakeup) {

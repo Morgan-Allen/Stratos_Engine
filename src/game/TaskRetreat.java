@@ -84,6 +84,9 @@ public class TaskRetreat extends Task {
   
   
   static TaskRetreat configRetreat(Actor actor, Pathing hides, float priority) {
+    Area map = actor.map;
+    if (! map.world.settings.toggleRetreat) return null;
+    
     TaskRetreat hiding = new TaskRetreat(actor, hides);
     hiding.priorityBonus = priority;
     return (TaskRetreat) hiding.configTask(null, hides, null, JOB.RETREAT, 10);
@@ -91,10 +94,11 @@ public class TaskRetreat extends Task {
   
   
   static TaskRetreat configRetreat(Actor actor) {
+    Area map = actor.map;
+    if (! map.world.settings.toggleRetreat) return null;
     
     Pathing home = actor.home();
     if (home == null) home = (Pathing) actor.work();
-    Area map = actor.map;
     Pick <Building> pickHide = new Pick();
     
     for (Building b : map.buildings) {

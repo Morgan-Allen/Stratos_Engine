@@ -463,13 +463,6 @@ public class Task implements Session.Saveable {
   }
   
   
-  public static boolean inCombat(Element f) {
-    if (f == null || ! (f instanceof Active)) return false;
-    JOB type = ((Active) f).jobType();
-    return type == JOB.COMBAT;
-  }
-  
-  
   public static Target mainTaskFocus(Element other) {
     if (! (other instanceof Active)) return null;
     Task t = ((Active) other).task();
@@ -482,6 +475,19 @@ public class Task implements Session.Saveable {
     if (visits != null) return visits;
     if (path   != null) return (Pathing) Visit.last(path);
     return null;
+  }
+  
+  
+  public static boolean inCombat(Element f, Target with) {
+    if (f == null || ! (f instanceof Active)) return false;
+    if (with != null && mainTaskFocus(f) != with) return false;
+    JOB type = ((Active) f).jobType();
+    return type == JOB.COMBAT || type == JOB.HUNTING;
+  }
+  
+  
+  public static boolean inCombat(Element f) {
+    return inCombat(f, null);
   }
   
   

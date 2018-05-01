@@ -169,6 +169,11 @@ public class ActorAsPerson extends Actor {
     class Reaction { ActorTechnique used; Target subject; float rating; }
     Pick <Reaction> pick = new Pick(0);
     
+    boolean talk = assessed.size() > 1 && false;
+    if (talk) {
+      I.say("\n"+this+" Assessing techniques to use.");
+    }
+    
     for (Active other : assessed) {
       for (ActorTechnique used : traits.known()) {
         if (used.canActorUse(this, other)) {
@@ -177,6 +182,7 @@ public class ActorAsPerson extends Actor {
           r.subject = other;
           r.used    = used;
           pick.compare(r, r.rating);
+          if (talk) I.say("  "+r.used+" -> "+r.subject+": "+r.rating);
         }
       }
       for (Good g : outfit.carried.keys()) for (ActorTechnique used : g.allows) {
@@ -186,12 +192,14 @@ public class ActorAsPerson extends Actor {
           r.subject = other;
           r.used    = used;
           pick.compare(r, r.rating);
+          if (talk) I.say("  "+r.used+" -> "+r.subject+": "+r.rating);
         }
       }
     }
     if (pick.empty()) return null;
     
     Reaction r = pick.result();
+    if (talk) I.say("  PICKED: "+r.used+" -> "+r.subject+": "+r.rating);
     return r.used.useFor(this, r.subject);
   }
   

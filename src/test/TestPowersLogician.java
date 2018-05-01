@@ -15,7 +15,7 @@ public class TestPowersLogician {
   public static void main(String args[]) {
     testConcentrate(false);
     testIntegrity(false);
-    testCombat(false);
+    testStrike(false);
   }
   
   
@@ -57,17 +57,19 @@ public class TestPowersLogician {
   }
   
   
-  static boolean testCombat(boolean graphics) {
+  static boolean testStrike(boolean graphics) {
     TestPowers test = new TestPowers() {
       
       Building createGuild(Area map, Base base) {
+        map.world.settings.toggleFog     = false;
+        map.world.settings.toggleRetreat = false;
         return createGuild(map, base, SCHOOL_LOG);
       }
       
       Target createSubject(Area map, Building guild) {
         Actor subject = createSubject(map, guild, Trooper.TROOPER, true);
-        subject.health.takeDamage(subject.health.maxHealth() * 0.7f);
-        subject.health.incBleed(-1000);
+        //subject.health.takeDamage(subject.health.maxHealth() * 0.5f);
+        //subject.health.incBleed(-1000);
         return subject;
       }
       
@@ -75,17 +77,36 @@ public class TestPowersLogician {
         Actor strikes = (Actor) subject;
         
         caster.traits.setClassLevel(MAX_CLASS_LEVEL);
+        int minTire = Logician.NERVE_DAMAGE - 1;
         
-        if (! Task.inCombat(caster)) {
+        if (strikes.health.active() && ! Task.inCombat(caster)) {
           Task combat = TaskCombat.configHunting(caster, strikes);
           caster.assignTask(combat, caster);
         }
+        if (caster.health.injury() > 0) {
+          caster.health.liftDamage(1000);
+        }
+        if (strikes.health.injury() > 0) {
+          strikes.health.liftDamage(1000);
+        }
         
-        int minArmour = caster.type().armourClass + Logician.INTEG_ARMOUR;
-        int minTire   = Logician.NERVE_DAMAGE - 1;
+        /*
+        I.say("\nCaster in combat: "+Task.inCombat(caster));
+        I.say("  Caster cooldown: "+caster.health.cooldown());
+        I.say("  Strikes alive/active? "+strikes.health.alive()+"/"+strikes.health.active());
+        I.say("  Caster  alive/active? "+caster .health.alive()+"/"+caster .health.active());
         
-        if (caster.armourClass()     < minArmour) return false;
-        if (strikes.health.fatigue() < minTire  ) return false;
+        if (strikes.map().time() > 70) {
+          I.say("?");
+        }
+        //*/
+        
+        if (! caster.health.hasCondition(Logician.INTEGRITY_CONDITION)) {
+          return false;
+        }
+        if (strikes.health.fatigue() < minTire) {
+          return false;
+        }
         return true;
       }
     };

@@ -21,6 +21,9 @@ public class TaskCombat extends Task {
     ATTACK_RANGE = 2,
     ATTACK_FIRE  = 3
   ;
+  final static float
+    RANGE_MELEE = 1.5f
+  ;
   
   final public Element primary;
   boolean defends;
@@ -239,40 +242,14 @@ public class TaskCombat extends Task {
   }
   
   
-  static TaskCombat configCombat(
-    final Active active, final Element target, Employer employer,
+  static AreaTile updateStandPoint(
+    Active active, final Element target,
     TaskCombat currentTask, JOB jobType
   ) {
-    if (active == null || target == null || ! target.onMap()) return null;
-    final Area map = active.map();
-    if (map == null || ! map.world.settings.toggleCombat) return null;
-    //
-    //  In the case of immobile actives, such as turrets, you don't bother with
-    //  the fancy pathing-connection tests.  You just check if the target is in
-    //  range.
-    if (! active.mobile()) {
-      float distance     = Area.distance(active.at(), target);
-      float rangeMelee   = 1.5f;
-      float rangeMissile = active.type().rangeDist;
-      float rateMelee    = active.type().meleeDamage;
-      float rateRange    = active.type().rangeDamage;
-      
-      if (distance > rangeMelee  ) rateMelee = 0;
-      if (distance > rangeMissile) rateRange = 0;
-      
-      if (rateMelee <= 0 && rateRange <= 0) return null;
-      
-      if (currentTask == null) currentTask = new TaskCombat(active, target);
-      currentTask.configTask(employer, null, target.at(), jobType, 0);
-      
-      if (rateMelee > rateRange) currentTask.attackMode = ATTACK_MELEE;
-      else currentTask.attackMode = ATTACK_RANGE;
-      
-      return currentTask;
-    }
     //
     //  Otherwise, try and ensure that it's possible to path toward some tile
     //  within range of the target-
+    final Area map = target.map();
     AreaTile inRange[] = null;
     if (currentTask != null) {
       inRange = new AreaTile[] { active.at(), (AreaTile) currentTask.target };
@@ -339,19 +316,18 @@ public class TaskCombat extends Task {
       return null;
     }
     
-    float rangeMelee   = 1.5f;
     float rangeMissile = active.type().rangeDist;
-    float maxRange     = Nums.max(rangeMelee, rangeMissile);
+    float maxRange     = Nums.max(RANGE_MELEE, rangeMissile);
     
     Pick <AreaTile> pick = new Pick();
     
     //  TODO:  It would be helpful if tiles were in strictly ascending order
-    //  by distance.
+    //  by distance?
     
     boolean report = false;
     if (report) {
       I.say("\nChecking tiles-");
-      I.say("  Melee range:   "+rangeMelee  );
+      I.say("  Melee range:   "+RANGE_MELEE );
       I.say("  Missile range: "+rangeMissile);
       I.say("  Max. range:    "+maxRange    );
       I.say("  Target at:     "+target.at() );
@@ -366,15 +342,51 @@ public class TaskCombat extends Task {
       if (dist > maxRange) continue;
       
       float rating = 0;
-      if      (dist < rangeMelee  ) rating += active.type().meleeDamage;
+      if      (dist < RANGE_MELEE ) rating += active.type().meleeDamage;
       else if (dist < rangeMissile) rating += active.type().rangeDamage;
       pick.compare(t, rating);
     }
     
     if (pick.empty()) return null;
+    return pick.result();
+  }
+  
+  
+  static TaskCombat configCombat(
+    final Active active, final Element target, Employer employer,
+    TaskCombat currentTask, JOB jobType
+  ) {
+    if (active == null || target == null || ! target.onMap()) return null;
+    final Area map = active.map();
+    if (map == null || ! map.world.settings.toggleCombat) return null;
+    //
+    //  In the case of immobile actives, such as turrets, you don't bother with
+    //  the fancy pathing-connection tests.  You just check if the target is in
+    //  range.
+    if (! active.mobile()) {
+      float distance     = Area.distance(active.at(), target);
+      float rangeMissile = active.type().rangeDist;
+      float rateMelee    = active.type().meleeDamage;
+      float rateRange    = active.type().rangeDamage;
+      
+      if (distance > RANGE_MELEE ) rateMelee = 0;
+      if (distance > rangeMissile) rateRange = 0;
+      
+      if (rateMelee <= 0 && rateRange <= 0) return null;
+      
+      if (currentTask == null) currentTask = new TaskCombat(active, target);
+      currentTask.configTask(employer, null, target.at(), jobType, 0);
+      
+      if (rateMelee > rateRange) currentTask.attackMode = ATTACK_MELEE;
+      else currentTask.attackMode = ATTACK_RANGE;
+      
+      return currentTask;
+    }
     
     boolean needsConfig = true;
-    AreaTile t = pick.result();
+    AreaTile t = updateStandPoint(active, target, currentTask, jobType);
+    if (t == null) t = updateStandPoint(active, target, null, jobType);
+    
     boolean standWall = t          .pathType() == Type.PATH_WALLS;
     boolean targWall  = target.at().pathType() == Type.PATH_WALLS;
     boolean canTouch  = standWall == targWall;
@@ -386,9 +398,9 @@ public class TaskCombat extends Task {
       needsConfig = false;
     }
     
-    //  TODO:  Decide on a preferred attack-mode first?
+    //  TODO:  Decide on a preferred attack-mode first...?
     
-    if (canTouch && Area.distance(target, t) < rangeMelee) {
+    if (canTouch && Area.distance(target, t) < RANGE_MELEE) {
       currentTask.attackMode = ATTACK_MELEE;
     }
     else {

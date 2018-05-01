@@ -201,6 +201,7 @@ public abstract class ActorTechnique extends Trait {
     
     protected void onTarget(Target target) {
       Actor actor = (Actor) this.active;
+      ///I.say(actor+" applying "+used+" to "+target);
       used.applyFromActor(actor, target);
     }
     
@@ -243,6 +244,7 @@ public abstract class ActorTechnique extends Trait {
     //  cetera.
     if (harmLevel != Task.HARM_NULL) {
       float hostility = TaskCombat.hostility(subject, using);
+      if (Task.inCombat(using, subject)) hostility += 0.5f;
       if (harmLevel >  0 && hostility <= 0) return -5;
       if (harmLevel <= 0 && hostility >  0) return -5;
       rating /= 1 + Nums.abs(harmLevel - hostility);

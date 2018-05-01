@@ -2,14 +2,12 @@
 
 package content;
 import game.*;
-import game.GameConstants.Target;
 import game.Task.JOB;
 import static game.GameConstants.*;
 import static game.ActorTechnique.*;
 import graphics.common.*;
 import graphics.sfx.*;
-import util.Rand;
-import util.Visit;
+import util.*;
 
 
 
@@ -43,7 +41,7 @@ public class Logician {
   );
   
   
-  final static Trait CONCENTRATION_CONDITION = new Trait(
+  final public static Trait CONCENTRATION_CONDITION = new Trait(
     "condition_concentration", "Concentration"
   ) {
     
@@ -105,7 +103,7 @@ public class Logician {
   
   
   
-  final static Trait INTEGRITY_CONDITION = new Trait(
+  final public static Trait INTEGRITY_CONDITION = new Trait(
     "condition_integrity", "Integrity"
   ) {
     
@@ -191,11 +189,12 @@ public class Logician {
     
     public float rateUse(Actor using, Target subject) {
       float rating = super.rateUse(using, subject);
+      if (rating <= 0) return rating;
       
       Actor affects = (Actor) subject;
-      float hurt = affects.health.hurtLevel();
+      float hurt = affects.health.hurtLevel() / 2;
       
-      return rating * (0.5f + hurt);
+      return rating * (0.75f + hurt);
     }
     
     public void applyFromActor(Actor using, Target subject) {
@@ -219,6 +218,10 @@ public class Logician {
         struck.assignReaction(stun);
         
         map.ephemera.addGhostFromModel(struck, FX_MODEL, 1, 0.5f, 1);
+        //I.say("Nerve strike success!");
+      }
+      else {
+        //I.say("Nerve strike failed!");
       }
     }
   };

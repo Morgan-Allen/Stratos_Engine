@@ -823,13 +823,14 @@ public class Actor extends Element implements
     Vec2D angleVec = new Vec2D(goes.x - from.x, goes.y - from.y);
     if (angleVec.length() > 0) s.rotation = angleVec.toAngle();
     
-    final float ANIM_MULT = 1.66f;
-    float animProg = Rendering.activeTime() * ANIM_MULT;
     
     if (contact) {
+      float animProg = task.actionProgress();
       updateSprite(s, task.animName(), animProg, true);
     }
     else {
+      final float ANIM_MULT = 1.66f;
+      float animProg = Rendering.activeTime() * ANIM_MULT;
       animProg *= moveSpeed();
       int mode = task == null ? MOVE_NORMAL : task.motionMode();
       String animName = AnimNames.MOVE;

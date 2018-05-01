@@ -55,10 +55,13 @@ public class TestAll {
     
     record(TestPowersCollective.testHeal       (false));
     record(TestPowersCollective.testHarmonics  (false));
+    record(TestPowersCollective.testSynergy    (false));
     record(TestPowersLogician  .testConcentrate(false));
     record(TestPowersLogician  .testIntegrity  (false));
+    record(TestPowersLogician  .testStrike     (false));
     record(TestPowersTekPriest .testDrones     (false));
     record(TestPowersTekPriest .testStasis     (false));
+    record(TestPowersTekPriest .testAssemble   (false));
     record(TestPowersShaper    .testBonds      (false));
     record(TestPowersShaper    .testCamo       (false));
     record(TestPowersShaper    .testRegen      (false));
