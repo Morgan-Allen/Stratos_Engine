@@ -41,13 +41,19 @@ public class TekPriest {
   ) {
     
     float hackChance(Actor using, Actor subject) {
-      if (subject.type() == GameContent.DRONE) return 1;
       
-      float challenge = 0;
-      if (subject.type() == GameContent.TRIPOD ) challenge = 0.5f;
-      if (subject.type() == GameContent.CRANIAL) challenge = 1.0f;
+      float challenge = 0, skill = 0;
+      if (subject.type() == GameContent.DRONE  ) challenge = 0.33f;
+      if (subject.type() == GameContent.TRIPOD ) challenge = 0.66f;
+      if (subject.type() == GameContent.CRANIAL) challenge = 1.00f;
       
-      float skill = using.traits.levelOf(SKILL_PRAY) / MAX_SKILL_LEVEL;
+      if (using != null) {
+        skill = using.traits.levelOf(SKILL_PRAY) / MAX_SKILL_LEVEL;
+      }
+      else {
+        skill = 0.33f;
+      }
+      
       float chance = Nums.clamp(skill + 1 - challenge, 0, 1);
       return chance;
     }
@@ -87,8 +93,6 @@ public class TekPriest {
         if (! subject.type().isConstruct()) return false;
         
         Actor affects = (Actor) subject;
-        if (affects.base() == using.base()) return false;
-        
         Actor master = affects.traits.bondedWith(BOND_MASTER);
         if (master != null) return false;
         
@@ -135,6 +139,30 @@ public class TekPriest {
       Area map = using.map();
       map.ephemera.addGhostFromModel(subject, FX_MODEL, 1, 0.5f, 1);
     }
+    
+    
+    public boolean canRulerUse(Base ruler, Target subject) {
+      if (! super.canRulerUse(ruler, subject)) return false;
+      if (! subject.type().isConstruct()) return false;
+      
+      Actor affects = (Actor) subject;
+      if (affects.base() == ruler.base()) return false;
+      
+      return false;
+    }
+    
+    
+    public void applyFromRuler(Base ruler, Target subject) {
+      super.applyFromRuler(ruler, subject);
+      
+      Actor affects = (Actor) subject;
+      float chance = hackChance(null, affects);
+      
+      if (Rand.num() < chance) {
+        affects.wipeEmployment();
+        affects.assignBase(ruler.base());
+      }
+    }
   };
   static {
     DRONE_UPLINK.attachMedia(
@@ -147,7 +175,7 @@ public class TekPriest {
       TARGET_SELF | TARGET_OTHERS | SOURCE_TRAINED,
       Task.NO_HARM, MEDIUM_POWER
     );
-    DRONE_UPLINK.setCosting(200, MEDIUM_AP_COST, NO_TIRING, LONG_RANGE);
+    DRONE_UPLINK.setCosting(300, MEDIUM_AP_COST, NO_TIRING, LONG_RANGE);
     DRONE_UPLINK.setMinLevel(1);
   }
   

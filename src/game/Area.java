@@ -392,6 +392,11 @@ public class Area implements Session.Saveable {
   }
   
   
+  public int ticksPerSecond() {
+    return ticksPS;
+  }
+  
+  
   public float timeInUpdate() {
     return (numUpdates % ticksPS) * 1f / ticksPS;
   }

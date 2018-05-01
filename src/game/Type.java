@@ -293,11 +293,13 @@ public class Type extends Index.Entry implements Session.Saveable {
   
   
   public boolean isAnimal() {
-    return category == IS_ANIMAL_ACT;
+    //  TODO:  Create a separate category for non-organics...
+    return category == IS_ANIMAL_ACT && ((ActorType) this).organic;
   }
   
   
   public boolean isConstruct() {
+    //  TODO:  Create a separate category for non-organics...
     return category == IS_ANIMAL_ACT && ! ((ActorType) this).organic;
   }
   

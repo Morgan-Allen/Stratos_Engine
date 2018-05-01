@@ -780,6 +780,11 @@ public class GameContent {
     );
     SCHOOL_LOG.foundationModel = FOUNDATIONS[4];
     
+    SCHOOL_LOG.workerTypes.setWith(Logician.LOGICIAN, 2);
+    SCHOOL_LOG.rulerPowers = new ActorTechnique[] {
+      Logician.CONCENTRATION, Logician.INTEGRITY
+    };
+    
     SCHOOL_COL.name = "Collective School";
     SCHOOL_COL.model = CutoutModel.fromImage(
       GameContent.class, "collective_school_model",
@@ -806,6 +811,11 @@ public class GameContent {
     );
     SCHOOL_SHA.foundationModel = FOUNDATIONS[4];
     
+    SCHOOL_SHA.workerTypes.setWith(Shaper.SHAPER, 2);
+    SCHOOL_SHA.rulerPowers = new ActorTechnique[] {
+      Shaper.CAMOUFLAGE, Shaper.REGENERATE
+    };
+    
     SCHOOL_TEK.name = "Tek Priest School";
     SCHOOL_TEK.model = CutoutModel.fromImage(
       GameContent.class, "tek_priest_school_model",
@@ -824,6 +834,7 @@ public class GameContent {
       "media/Buildings/school_spacer.png", 4, 2
     );
     SCHOOL_SPA.foundationModel = FOUNDATIONS[4];
+    
     
     for (BuildType t : PSI_SCHOOL_BUILDINGS) {
       t.tint = TINT_RELIGIOUS;

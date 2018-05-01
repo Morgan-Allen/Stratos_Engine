@@ -260,6 +260,11 @@ public class ActorHealth {
   }
   
   
+  public boolean hasCondition(Trait trait) {
+    return conditionFor(trait) != null;
+  }
+  
+  
   public void addCondition(Active source, Trait trait, float duration) {
     Area map = actor.map();
     float time = map.time() + map.timeInUpdate();
@@ -267,9 +272,16 @@ public class ActorHealth {
     Condition c = conditionFor(trait);
     if (c == null) conditions.add(c = new Condition());
     
-    c.source = source;
-    c.basis = trait;
+    c.source     = source;
+    c.basis      = trait;
     c.expireTime = time + duration;
+  }
+  
+  
+  public void clearConditions(Trait trait) {
+    for (Condition c : conditions) {
+      if (c.basis == trait) conditions.remove(c);
+    }
   }
   
   
@@ -368,6 +380,12 @@ public class ActorHealth {
     if (actor.reports()) I.say(this+" DIED: "+cause);
     state = STATE_DEAD;
     actor.assignTask(null, actor);
+  }
+  
+  
+  public void setAsAlive(String cause) {
+    if (actor.reports()) I.say(this+" REVIVED: "+cause);
+    state = STATE_OKAY;
   }
   
   
