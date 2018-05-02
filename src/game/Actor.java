@@ -599,7 +599,7 @@ public class Actor extends Element implements
     Good weapon = type().weaponType;
     int amount = type().meleeDamage;
     if (weapon != null) {
-      amount = weapon.meleeDamage;
+      amount = Nums.max(amount, weapon.meleeDamage);
       amount += outfit.carried(weapon);
     }
     amount += traits.levelOf(STAT_DAMAGE);
@@ -611,7 +611,7 @@ public class Actor extends Element implements
     Good weapon = type().weaponType;
     int amount = type().rangeDamage;
     if (weapon != null) {
-      amount = weapon.rangeDamage;
+      amount = Nums.max(amount, weapon.rangeDamage);
       amount += outfit.carried(weapon);
     }
     amount += traits.levelOf(STAT_DAMAGE);
@@ -623,7 +623,7 @@ public class Actor extends Element implements
     Good armour = type().armourType;
     int amount = type().armourClass;
     if (armour != null) {
-      amount = armour.armourClass;
+      amount = Nums.max(amount, armour.armourClass);
       amount += outfit.carried(armour);
     }
     amount += traits.levelOf(STAT_ARMOUR);
@@ -635,7 +635,7 @@ public class Actor extends Element implements
     Good armour = type().armourType;
     int amount = type().shieldBonus;
     if (armour != null) {
-      amount = armour.shieldBonus;
+      amount = Nums.max(amount, armour.shieldBonus);
       amount += outfit.carried(armour);
     }
     amount += traits.levelOf(STAT_SHIELD);

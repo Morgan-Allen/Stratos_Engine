@@ -54,18 +54,12 @@ public class Trooper {
     TROOPER.armourType   = BODY_ARMOUR;
     TROOPER.useItemTypes = StockExGoods.ALL_SOLD;
     
-    //  TODO:  These should be removed.  Information from weapon/armour-types
-    //  supercedes this data.
-    TROOPER.meleeDamage = 4;
-    TROOPER.rangeDamage = 10;
-    TROOPER.rangeDist   = 4;
-    TROOPER.armourClass = 8;
-    
-    TROOPER.maxHealth    = 20;
-    TROOPER.moveSpeed    = 80;
+    TROOPER.meleeDamage =  4;
+    TROOPER.maxHealth   = 20;
+    TROOPER.moveSpeed   = 80;
     
     TROOPER.coreSkills.setWith(
-      SKILL_SIGHT, 10,
+      SKILL_SIGHT, 8 ,
       SKILL_PILOT, 7 ,
       SKILL_MELEE, 6 ,
       SKILL_EVADE, 4 ,
@@ -78,7 +72,6 @@ public class Trooper {
       TRAIT_BRAVERY  , 70,
       TRAIT_CURIOSITY, 25
     );
-    //TROOPER.initTraits.setWith(SKILL_MELEE, 4, SKILL_RANGE, 6, SKILL_EVADE, 2);
   }
   
 }

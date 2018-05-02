@@ -450,7 +450,7 @@ public class Task implements Session.Saveable {
   /**  Pathing and focus-related methods:
     */
   public static boolean hasTaskFocus(Target t, JOB type, Active except) {
-    if (t.focused().empty()) return false;
+    if (t == null || t.focused().empty()) return false;
     for (Active a : t.focused()) {
       if (a != except && a.jobType() == type) return true;
     }

@@ -100,7 +100,13 @@ public class TaskCombat extends Task {
   
   
   public static float attackPower(Type t) {
-    float power = Nums.max(t.meleeDamage, t.rangeDamage) + t.armourClass;
+    Good w = t.weaponType;
+    Good a = t.armourType;
+    int melee  = w == null ? t.meleeDamage : w.meleeDamage;
+    int range  = w == null ? t.rangeDamage : w.rangeDamage;
+    int armour = a == null ? t.armourClass : w.armourClass;
+    
+    float power = Nums.max(melee, range) + armour;
     power /= (TOP_DAMAGE / 2) + (TOP_ARMOUR / 2);
     power *= t.maxHealth * 1f / AVG_MAX_HEALTH;
     return power;
@@ -112,7 +118,7 @@ public class TaskCombat extends Task {
       Actor a = (Actor) f;
       if (! a.health.active()) return 0;
       float power = attackPower(a.type());
-      power *= 1 - ((a.health.injury() + a.health.hunger()) / a.type().maxHealth);
+      power *= 1 - a.health.hurtLevel();
       return power;
     }
     else {
@@ -316,13 +322,10 @@ public class TaskCombat extends Task {
       return null;
     }
     
-    float rangeMissile = active.type().rangeDist;
+    float meleeDamage  = ((Element) active).meleeDamage();
+    float rangeDamage  = ((Element) active).rangeDamage();
+    float rangeMissile = ((Element) active).attackRange();
     float maxRange     = Nums.max(RANGE_MELEE, rangeMissile);
-    
-    Pick <AreaTile> pick = new Pick();
-    
-    //  TODO:  It would be helpful if tiles were in strictly ascending order
-    //  by distance?
     
     boolean report = false;
     if (report) {
@@ -333,19 +336,26 @@ public class TaskCombat extends Task {
       I.say("  Target at:     "+target.at() );
     }
     
+    Pick <AreaTile> pick = new Pick();
     for (AreaTile t : inRange) {
       if (Task.hasTaskFocus(t, jobType, active)) continue;
       
-      float dist = Area.distance(target, t);
-      if (report) I.say("  "+t+" dist: "+dist);
+      float distT = Area.distance(target, t);
       
-      if (dist > maxRange) continue;
+      if (distT > maxRange) continue;
       
       float rating = 0;
-      if      (dist < RANGE_MELEE ) rating += active.type().meleeDamage;
-      else if (dist < rangeMissile) rating += active.type().rangeDamage;
+      if      (distT < RANGE_MELEE ) rating = Nums.max(rating, meleeDamage);
+      else if (distT < rangeMissile) rating = Nums.max(rating, rangeDamage);
+      
+      float distA = Area.distancePenalty(t, active);
+      rating *= distA;
+
+      if (report) I.say("  "+t+" distT: "+I.shorten(distT, 1)+", rating: "+rating);
       pick.compare(t, rating);
     }
+    
+    if (report) I.say("  Final pick: "+pick.result()+", rating: "+pick.bestRating());
     
     if (pick.empty()) return null;
     return pick.result();
@@ -383,9 +393,11 @@ public class TaskCombat extends Task {
       return currentTask;
     }
     
+    
     boolean needsConfig = true;
     AreaTile t = updateStandPoint(active, target, currentTask, jobType);
-    if (t == null) t = updateStandPoint(active, target, null, jobType);
+    if (t == null && currentTask != null) t = updateStandPoint(active, target, null, jobType);
+    if (t == null) return null;
     
     boolean standWall = t          .pathType() == Type.PATH_WALLS;
     boolean targWall  = target.at().pathType() == Type.PATH_WALLS;
@@ -544,8 +556,8 @@ public class TaskCombat extends Task {
 
 
   float actionRange() {
-    if (attackMode == ATTACK_MELEE) return 1.5f;
-    else return Nums.max(1.5f, ((Element) active).attackRange());
+    if (attackMode == ATTACK_MELEE) return RANGE_MELEE;
+    else return Nums.max(RANGE_MELEE, ((Element) active).attackRange());
   }
   
   
@@ -565,8 +577,6 @@ public class TaskCombat extends Task {
   
   protected void onTarget(Target other) {
     active.performAttack(primary, attackMode == ATTACK_MELEE);
-    
-    ///I.say("PERFORMING ATTACK VS. "+primary);
     
     if (primary.type().isActor() && ! beaten(primary)) {
       Task next = TaskCombat.configCombat(active, primary, origin, null, type);

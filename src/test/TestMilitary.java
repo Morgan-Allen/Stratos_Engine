@@ -49,6 +49,15 @@ public class TestMilitary extends LogicTest {
     ActorUtils.fillWorkVacancies(fort2);
     AreaPlanning.placeStructure(WALKWAY, baseC, true, 2, 9, 30, 1);
     
+    {
+      Actor troop = fort1.workers().first();
+      I.say("\nReporting stats for "+troop);
+      I.say("  Melee damage:   "+troop.meleeDamage());
+      I.say("  Range damage:   "+troop.rangeDamage());
+      I.say("  Range distance: "+troop.attackRange());
+      I.say("  Armour class:   "+troop.armourClass());
+    }
+    
     for (int n = 8; n-- > 0;) {
       Building house = (Building) HOLDING.generate();
       house.enterMap(map, 2 + (n * 3), 7, 1, baseC);
@@ -61,10 +70,12 @@ public class TestMilitary extends LogicTest {
     MissionSecure defence = null;
     MissionStrike offence = null;
     Mission enemies = new MissionStrike(awayC);
-    for (int n = 3; n-- > 0;) {
+    Batch <Actor> enemyRecruits = new Batch();
+    for (int n = 2; n-- > 0;) {
       Actor fights = (Actor) Trooper.TROOPER.generate();
       fights.assignBase(awayC);
       enemies.toggleRecruit(fights, true);
+      enemyRecruits.add(fights);
     }
     
     boolean recruited = false;
@@ -106,7 +117,7 @@ public class TestMilitary extends LogicTest {
       
       if (! homeWin) {
         boolean survivors = false;
-        for (Actor w : enemies.recruits()) {
+        for (Actor w : enemyRecruits) {
           if (w.health.alive()) survivors = true;
         }
         homeWin = ! survivors;
@@ -179,6 +190,8 @@ public class TestMilitary extends LogicTest {
         String keyL = a.ID()+"_"+skill+"_L";
         record.put(keyL, a.traits.levelOf(skill));
       }
+      String keyC = a.ID()+"_"+a.type()+"_L";
+      record.put(keyC, (float) a.traits.classLevel());
     }
     return record;
   }
@@ -189,12 +202,18 @@ public class TestMilitary extends LogicTest {
     
     I.say("\nReporting experience gained.");
     for (Actor a : actors) {
+
+      String keyC = a.ID()+"_"+a.type()+"_L";
+      int oldCL = (int) (float) (Float) init.get(keyC);
+      int newCL = a.traits.classLevel();
+      I.say("  "+a+" (level "+oldCL+" -> "+newCL+")");
+      
       for (Trait skill : skills) {
         String keyL = a.ID()+"_"+skill+"_L";
         float startS = (Float) init.get(keyL);
         float endS   = (Float) ends.get(keyL);
         if (endS <= startS) continue;
-        I.say("  "+a+" "+skill+": "+startS+" -> "+endS);
+        I.say("    "+skill+": "+startS+" -> "+endS);
       }
     }
   }
