@@ -361,6 +361,8 @@ public class Task implements Session.Saveable {
         }
       }
       else if (mobile) {
+        this.contactState = PROG_CLOSING;
+        
         Pathing from     = Task.pathOrigin(asActor);
         Pathing inside   = asActor.inside();
         Pathing ahead    = nextOnPath();

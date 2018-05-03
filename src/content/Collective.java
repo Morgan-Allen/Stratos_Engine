@@ -192,7 +192,7 @@ public class Collective {
   };
   static {
     SYNERGY.attachMedia(
-      Collective.class, "media/GUI/Powers/power_shield_harmonics.png",
+      Collective.class, "media/GUI/Powers/power_synergy.png",
       "Provides passive bonuses to diplomacy skills and health recovery.",
       AnimNames.PSY_QUICK
     );

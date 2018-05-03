@@ -127,7 +127,7 @@ public class Shaper {
   };
   static {
     PHEREMONE_BOND.attachMedia(
-      Shaper.class, "media/GUI/Powers/power_drone_uplink.png",
+      Shaper.class, "media/GUI/Powers/pheremone_bond.png",
       "Allows animals to be tamed in service of the caster, with a chance to "+
       "affect other relationships.",
       AnimNames.PSY_QUICK
@@ -267,7 +267,7 @@ public class Shaper {
   };
   static {
     REGENERATE.attachMedia(
-      Shaper.class, "media/GUI/Powers/power_camouflage.png",
+      Shaper.class, "media/GUI/Powers/power_regenerate.png",
       "Regenerates the subject's health over "+REGEN_DURATION+" seconds. "+
       "Can be used to revive the recently dead.  Must target organics.",
       AnimNames.PSY_QUICK

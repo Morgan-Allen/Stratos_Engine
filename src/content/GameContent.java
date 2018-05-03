@@ -571,10 +571,11 @@ public class GameContent {
       PSI_SCHOOL_BUILDINGS
     ),
     RULER_BUILT[] = {
-      BASTION, TROOPER_LODGE, SCHOOL_COL,
-      ECOLOGIST_STATION, PHYSICIAN_STATION, ENGINEER_STATION,
+      BASTION,
+      TROOPER_LODGE, ECOLOGIST_STATION, PHYSICIAN_STATION, ENGINEER_STATION,
       CANTINA, SUPPLY_DEPOT, STOCK_EXCHANGE,
       NURSERY, HARVESTER, EXCAVATOR,
+      SCHOOL_COL, SCHOOL_LOG, SCHOOL_TEK, SCHOOL_SHA
     }
   ;
   static {
@@ -784,6 +785,7 @@ public class GameContent {
     SCHOOL_LOG.rulerPowers = new ActorTechnique[] {
       Logician.CONCENTRATION, Logician.INTEGRITY
     };
+    SCHOOL_LOG.opposites = new BuildType[] { SCHOOL_SHA };
     
     SCHOOL_COL.name = "Collective School";
     SCHOOL_COL.model = CutoutModel.fromImage(
@@ -796,6 +798,7 @@ public class GameContent {
     SCHOOL_COL.rulerPowers = new ActorTechnique[] {
       Collective.PSY_HEAL, Collective.SHIELD_HARMONICS
     };
+    SCHOOL_COL.opposites = new BuildType[] { SCHOOL_TEK };
     
     SCHOOL_LEN.name = "LENSR School";
     SCHOOL_LEN.model = CutoutModel.fromImage(
@@ -815,6 +818,7 @@ public class GameContent {
     SCHOOL_SHA.rulerPowers = new ActorTechnique[] {
       Shaper.CAMOUFLAGE, Shaper.REGENERATE
     };
+    SCHOOL_SHA.opposites = new BuildType[] { SCHOOL_LOG };
     
     SCHOOL_TEK.name = "Tek Priest School";
     SCHOOL_TEK.model = CutoutModel.fromImage(
@@ -827,6 +831,7 @@ public class GameContent {
     SCHOOL_TEK.rulerPowers = new ActorTechnique[] {
       TekPriest.STASIS_FIELD, TekPriest.REASSEMBLY
     };
+    SCHOOL_TEK.opposites = new BuildType[] { SCHOOL_COL };
     
     SCHOOL_SPA.name = "Spacer School";
     SCHOOL_SPA.model = CutoutModel.fromImage(

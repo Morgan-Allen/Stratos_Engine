@@ -70,7 +70,6 @@ public class TekPriest {
     }
     
     int numDrones(Actor using) {
-      ///I.say("?");      
       int num = 0;
       for (Actor a : using.traits.allBondedWith(BOND_SERVANT)) {
         if (a.type().isConstruct()) num += 1;
@@ -86,7 +85,6 @@ public class TekPriest {
       }
       return pick.result();
     }
-    
     
     public boolean canActorUse(Actor using, Target subject) {
       if (subject == using) {

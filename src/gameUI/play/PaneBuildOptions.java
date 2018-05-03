@@ -62,6 +62,7 @@ public class PaneBuildOptions extends DetailPane {
   
   
   private void beginInstallTask(Type type) {
+    
     placed = (Element) type.generate();
     final Area area = UI.area;
     final Base base = UI.base;

@@ -91,6 +91,9 @@ public class PlaneFX extends SFX {
     String image,
     float initSize, float spin, float growth, boolean tilted, boolean vivid
   ) {
+    if (! Assets.exists(image)) {
+      I.say("WARNING- NO SUCH IMAGE FILE: "+image);
+    }
     final Model m = new Model(modelName, modelClass);
     m.imageName = image   ;
     m.initSize  = initSize;

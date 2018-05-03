@@ -23,11 +23,13 @@ public class BuildType extends Type {
   public int featureAmount = AVG_SERVICE_GIVE;
   public int updateTime    = AVG_UPDATE_GAP;
   public int maxVisitors   = AVG_MAX_VISITORS;
-  
+
   public int maxUpgrades = 0;
-  public BuildType upgradeTiers[] = NO_TIERS;
-  public BuildType allUpgrades[] = NO_UPGRADES;
-  public BuildType needsAsUpgrade[] = {};
+  public BuildType needsToBuild  [] = NO_PREREQS;
+  public BuildType opposites     [] = NO_PREREQS;
+  public BuildType upgradeTiers  [] = NO_TIERS;
+  public BuildType allUpgrades   [] = NO_UPGRADES;
+  public BuildType needsAsUpgrade[] = NO_UPGRADES;
   public ActorType vesselTemplate = null;
   
   public int residentClasses[] = {};
@@ -51,8 +53,12 @@ public class BuildType extends Type {
   public int gatherRange = AVG_GATHER_RANGE;
   public int maxDeliverRange = MAX_TRADER_RANGE;
   
+
   
   
+  public BuildType(Class baseClass, String ID, int category) {
+    super(baseClass, ID, category);
+  }
 
 
   public void setUpgradeTiers(BuildType... tiers) {
@@ -69,9 +75,31 @@ public class BuildType extends Type {
     this.features = features;
   }
   
-  
-  public BuildType(Class baseClass, String ID, int category) {
-    super(baseClass, ID, category);
+
+  public boolean rulerCanBuild(Base ruler, Area map) {
+    if (! super.rulerCanBuild(ruler, map)) return false;
+    
+    //  TODO:  This will be too slow on large maps.  Use build-levels instead.
+    
+    boolean hasNeeds[] = new boolean[needsToBuild.length];
+    boolean hasOpp = false;
+    
+    for (Building b : map.buildings()) {
+      int i = 0;
+      for (BuildType n : needsToBuild) {
+        if (n == b.type()) hasNeeds[i] = true;
+        i++;
+      }
+      if (Visit.arrayIncludes(opposites, b.type())) {
+        hasOpp = true;
+        break;
+      }
+    }
+    
+    for (boolean b : hasNeeds) if (! b) return false;
+    if (hasOpp) return false;
+    
+    return true;
   }
   
   

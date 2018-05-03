@@ -531,6 +531,7 @@ public class GameConstants {
     AMBIENCE_MAX =  20
   ;
   final static BuildType
+    NO_PREREQS [] = new BuildType[0],
     NO_UPGRADES[] = new BuildType[0],
     NO_TIERS   [] = new BuildType[0],
     NO_NEEDS   [] = new BuildType[0]
