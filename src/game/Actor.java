@@ -785,6 +785,15 @@ public class Actor extends Element implements
   }
   
   
+  public void renderSelection(Rendering rendering, boolean hovered) {
+    if (indoors() || ! onMap()) return;
+    final Vec3D viewPos = renderedPosition(null);
+    Selection.renderSimpleCircle(
+      this, viewPos, rendering, Colour.transparency(hovered ? 0.5f : 0.5f)
+    );
+  }
+  
+  
   public boolean setSelected(PlayUI UI) {
     UI.setDetailPane(new PaneActor (UI, this));
     return true;

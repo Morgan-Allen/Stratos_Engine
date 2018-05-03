@@ -1,12 +1,11 @@
 
 
 package game;
-import gameUI.play.*;
-import graphics.common.Viewport;
-import util.*;
-import static game.Area.*;
 import static game.GameConstants.*;
 import static util.TileConstants.*;
+import graphics.common.*;
+import gameUI.play.*;
+import util.*;
 
 
 
@@ -291,8 +290,13 @@ public class AreaTile implements Pathing, Selection.Focus {
   public boolean testSelection(PlayUI UI, Base base, Viewport port) {
     return false;
   }
-
-
+  
+  
+  public void renderSelection(Rendering rendering, boolean hovered) {
+    return;
+  }
+  
+  
   public boolean setSelected(PlayUI UI) {
     return false;
   }

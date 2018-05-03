@@ -838,6 +838,14 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   }
   
   
+  public void renderSelection(Rendering rendering, boolean hovered) {
+    Box2D area = area();
+    Selection.renderSelectSquare(
+      this, area, rendering, Colour.transparency(hovered ? 0.25f : 0.25f)
+    );
+  }
+  
+  
   public Sprite sprite() {
     BuildType type = type();
     ModelAsset foundM = type.foundationModel;

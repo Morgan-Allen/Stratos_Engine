@@ -526,6 +526,11 @@ public abstract class Mission implements
   }
   
   
+  public void renderSelection(Rendering rendering, boolean hovered) {
+    return;
+  }
+  
+  
   public boolean setSelected(PlayUI UI) {
     UI.setDetailPane(new PaneMission(UI, this));
     return true;

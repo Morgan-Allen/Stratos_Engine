@@ -692,12 +692,17 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   
   
   public boolean testSelection(PlayUI UI, Base base, Viewport port) {
-    float height = type.deep;
-    float radius = 1.5f * Nums.max(type.wide, type.high) / 2;
+    float height = height();
+    float radius = radius();
     float selRad = (height + radius) / 2;
     Vec3D selPos = trackPosition();
     if (! port.mouseIntersects(selPos, selRad, UI)) return false;
     return true;
+  }
+  
+  
+  public void renderSelection(Rendering rendering, boolean hovered) {
+    return;
   }
 
 

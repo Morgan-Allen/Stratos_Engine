@@ -237,6 +237,10 @@ public class PlayUI extends HUD implements UIConstants {
   }
   
   
+  public void renderWorldFX() {
+    selection.renderWorldFX(rendering);
+  }
+  
   
   public void renderHUD(Rendering rendering) {
     if (cursorGDX == null) try {
