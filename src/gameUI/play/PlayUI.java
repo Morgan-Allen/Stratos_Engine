@@ -73,6 +73,7 @@ public class PlayUI extends HUD implements UIConstants {
   
   Cursor cursor;
   com.badlogic.gdx.graphics.Cursor cursorGDX = null;
+  Tooltips tooltips;
   
   
   
@@ -135,6 +136,9 @@ public class PlayUI extends HUD implements UIConstants {
     cursor = new Cursor(this, DEFAULT_CURSOR);
     cursor.alignToArea(0, 0, CURSOR_SIZE, CURSOR_SIZE);
     cursor.attachTo(this);
+    
+    this.tooltips = new Tooltips(this, UIConstants.INFO_FONT);
+    tooltips.attachTo(this);
   }
   
   

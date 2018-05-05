@@ -55,7 +55,20 @@ public class BuildingForFaith extends Building {
     return null;
   }
   
+  
+  public boolean canUsePower(ActorTechnique power) {
+    boolean supervised = false;
+    for (Actor a : workers()) {
+      if (a.onMap() && a.health.alive()) supervised = true;
+    }
+    return supervised;
+  }
+  
 }
+
+
+
+
 
 
 

@@ -68,7 +68,7 @@ public interface UIConstants {
     MESSAGE_PANE_WIDE = 500,
     MESSAGE_PANE_HIGH = 200,
     OPT_BUTTON_SIZE   = 40 ,
-    OPT_MARGIN        = 2  ,
+    OPT_MARGIN        = 10 ,
     
     INFO_PANEL_WIDE   = 300,
     SCROLLBAR_WIDE    =  15,

@@ -980,7 +980,9 @@ public class Base implements Session.Saveable, Trader {
       return all;
     }
     for (Building b : map.buildings) if (b.base() == this) {
-      for (ActorTechnique t : b.rulerPowers()) all.include(t);
+      for (ActorTechnique t : b.rulerPowers()) if (b.canUsePower(t)) {
+        all.include(t);
+      }
     }
     return all;
   }

@@ -55,6 +55,12 @@ public class AreaFog {
     s.loadByteArray(oldVals);
     s.loadByteArray(maxVals);
     flagMap.loadState(s);
+    
+    for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
+      byte oldMax = maxVals[c.x][c.y];
+      byte val = fogVals[c.x][c.y];
+      viewVals[c.x][c.y] = ((val * 2f) + (oldMax * 1f)) / (3 * MAX_FOG);
+    }
   }
   
   
@@ -104,7 +110,6 @@ public class AreaFog {
       
       viewVals[c.x][c.y] = ((val * 2f) + (oldMax * 1f)) / (3 * MAX_FOG);
     }
-    
   }
   
   

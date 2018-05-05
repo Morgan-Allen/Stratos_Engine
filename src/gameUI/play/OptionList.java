@@ -5,11 +5,11 @@
   */
 package gameUI.play;
 import game.*;
+import static game.GameConstants.*;
 import graphics.common.*;
 import graphics.widgets.*;
 import gameUI.misc.*;
 import util.*;
-import static game.GameConstants.*;
 
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Texture;
@@ -84,13 +84,29 @@ public class OptionList extends UIGroup implements UIConstants {
     });
     
     for (ActorTechnique t : base.rulerPowers()) {
-      options.add(new PowerButton(BUI, t, base));
+      final UIGroup option = new UIGroup(BUI);
+      
+      final Button button;
+      button = new PowerButton(BUI, t, base);
+      button.alignAcross(0, 1);
+      button.alignDown  (0, 1);
+      button.attachTo(option);
+      
+      final int cost = t.costCash;
+      final BorderedLabel costLabel = new BorderedLabel(BUI);
+      costLabel.attachTo(option);
+      costLabel.alignHorizontal(0.5f, 0, 0);
+      costLabel.alignBottom(0, 0);
+      costLabel.text.scale = SMALL_FONT_SIZE;
+      costLabel.setMessage("CR"+cost, false, 0.5f);
+      
+      options.add(option);
     }
     
     final int sizeB = OPT_BUTTON_SIZE, spaceB = sizeB + OPT_MARGIN;
     int sumWide = options.size() * spaceB, across = 0;
     for (UINode option : options) {
-      option.alignToArea(across - (sumWide / 2), 0, sizeB, sizeB);
+      option.alignToArea(across - (sumWide / 2), 10, sizeB, sizeB);
       option.attachTo(this);
       across += spaceB;
     }
@@ -159,14 +175,16 @@ public class OptionList extends UIGroup implements UIConstants {
     PowerButton(PlayUI UI, ActorTechnique power, Base base) {
       super(
         UI, power.uniqueID()+"_button",
-        power.icon, Button.CIRCLE_LIT, power.info
+        power.icon, Button.CIRCLE_LIT, power.name+": "+power.info
       );
       this.power = power;
       this.base  = base ;
     }
     
     protected void updateState() {
-      this.enabled = base.funds() >= power.costCash;
+      this.enabled = true;
+      enabled &= base.funds() >= power.costCash;
+      //  TODO:  Require that the temple be staffed first...
       super.updateState();
     }
     

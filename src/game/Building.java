@@ -789,6 +789,11 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   }
   
   
+  public boolean canUsePower(ActorTechnique t) {
+    return true;
+  }
+  
+  
   public Series <Good> shopItems() {
     Batch <Good> items = new Batch();
     
