@@ -81,7 +81,7 @@ public class TaskDialog extends Task {
     for (Active a : assessed) {
       if (! a.mobile()) continue;
       if (((Actor) a).maxSightLevel(actor.base()) <= 0) continue;
-      pick.compare(a, dialogRating(actor, (Actor) a, casual));
+      pick.compare(a, dialogRating(actor, (Actor) a, casual, false));
     }
     if (pick.empty()) return null;
     Actor with = (Actor) pick.result();
@@ -99,8 +99,9 @@ public class TaskDialog extends Task {
     */
   //  TODO:  Consider chatting with animals, if you have the right knowledge?
   
-  
-  static float dialogRating(Actor actor, Actor with, boolean casual) {
+  static float dialogRating(
+    Actor actor, Actor with, boolean casual, boolean begun
+  ) {
     //
     //  Basic sanity-checks first-
     if (with == actor || with.indoors()) return 0;
@@ -134,6 +135,7 @@ public class TaskDialog extends Task {
     if (! TaskCombat.allied(actor, with)) talkRating /= 2;
     talkRating *= 1 + (actor.traits.bondLevel(with) / 2);
     talkRating *= ROUTINE;
+    busyRating = Nums.max(busyRating, begun ? 0 : IDLE);
     return (busyRating < talkRating) ? talkRating : 0;
   }
   
@@ -141,11 +143,11 @@ public class TaskDialog extends Task {
   protected float successPriority() {
     Actor actor = (Actor) active;
     
-    float rating = dialogRating(actor, with, casual) / ROUTINE;
+    float rating = dialogRating(actor, with, casual, false) / ROUTINE;
     if (rating <= 0) return -1;
     
     //  TODO:  Include effects of curiosity if this is a brand new actor and/or
-    //  belongs to an unfamiliar tribe... (!!!)
+    //  belongs to an unfamiliar tribe...
     
     //  TODO:  And include effects of ambient danger...
     
@@ -176,7 +178,7 @@ public class TaskDialog extends Task {
     
     Actor actor = (Actor) active;
     Mission mission = contact ? (Mission) origin : null;
-    float rating = dialogRating(actor, with, casual);
+    float rating = dialogRating(actor, with, casual, true);
     
     if (began && rating > 0 && talksWith(with) != actor) {
       TaskDialog response = new TaskDialog(with, actor, false);
@@ -193,7 +195,7 @@ public class TaskDialog extends Task {
       mission.terms.sendTerms(with.base());
     }
     
-    if (rating >= IDLE && talksWith(with) == actor) {
+    if (rating > 0 && talksWith(with) == actor) {
       configTask(origin, null, with, JOB.DIALOG, 1);
     }
     else {
