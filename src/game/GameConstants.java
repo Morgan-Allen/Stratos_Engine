@@ -148,9 +148,8 @@ public class GameConstants {
     //
     //  Building-update, commerce and manufacture-
     AVG_UPDATE_GAP   = 60  ,  //  seconds between updates
-    AVG_CRAFT_TIME   = YEAR_LENGTH / 6,
-    FAST_CRAFT_TIME  = AVG_CRAFT_TIME / 2,
-    LONG_CRAFT_TIME  = (int) (AVG_CRAFT_TIME * 1.5f),
+    GOOD_CRAFT_TIME  = YEAR_LENGTH / 6,
+    GEAR_CRAFT_TIME  = DAY_LENGTH / 2,
     AVG_MAX_STOCK    = 10  ,
     MAX_TRADER_RANGE = 100 ,
     MAX_SHOP_RANGE   = 50  ,

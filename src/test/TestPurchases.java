@@ -109,6 +109,7 @@ public class TestPurchases extends LogicTest {
       
       if (collectOkay && usageOkay && ! testOkay) {
         I.say("\nPURCHASES TEST CONCLUDED SUCCESSFULLY!");
+        I.say("  Time: "+map.time());
         testOkay = true;
         if (! graphics) return true;
       }
@@ -121,6 +122,7 @@ public class TestPurchases extends LogicTest {
     I.say("  Potion okay:  "+potionOkay );
     I.say("  Usage okay:   "+usageOkay  );
     I.say("  Final inventory: "+buys.inventory());
+    I.say("  Time: "+map.time());
     
     return false;
   }

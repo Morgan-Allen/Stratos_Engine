@@ -288,8 +288,8 @@ public class BaseCouncil {
     //  For now, we'll assume that the value of lives is calculated on an
     //  entirely cynical economic basis:
     float value = 0;
-    value += AVG_GOOD_VALUE * (LIFESPAN_LENGTH / 2f) / AVG_CRAFT_TIME;
-    value += AVG_TAX_VALUE  * (LIFESPAN_LENGTH / 2f) / TAX_INTERVAL  ;
+    value += AVG_GOOD_VALUE * (LIFESPAN_LENGTH / 2f) / GOOD_CRAFT_TIME;
+    value += AVG_TAX_VALUE  * (LIFESPAN_LENGTH / 2f) / TAX_INTERVAL;
     return value;
   }
   

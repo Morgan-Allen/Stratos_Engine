@@ -700,10 +700,10 @@ public class GameContent {
     ENGINEER_STATION.maxHealth = 120;
     ENGINEER_STATION.maxStock  = 3;
     ENGINEER_STATION.recipes = new Recipe[] {
-      new Recipe(PLASTICS           , SKILL_CRAFT, AVG_CRAFT_TIME, CARBONS),
-      new Recipe(PARTS              , SKILL_CRAFT, AVG_CRAFT_TIME, ORES   ),
-      new Recipe(Trooper.BLASTER    , SKILL_CRAFT, AVG_CRAFT_TIME, ORES   ),
-      new Recipe(Trooper.BODY_ARMOUR, SKILL_CRAFT, AVG_CRAFT_TIME, ORES   ),
+      new Recipe(PLASTICS           , SKILL_CRAFT, GOOD_CRAFT_TIME, CARBONS),
+      new Recipe(PARTS              , SKILL_CRAFT, GOOD_CRAFT_TIME, ORES   ),
+      new Recipe(Trooper.BLASTER    , SKILL_CRAFT, GEAR_CRAFT_TIME, ORES   ),
+      new Recipe(Trooper.BODY_ARMOUR, SKILL_CRAFT, GEAR_CRAFT_TIME, ORES   ),
     };
     ENGINEER_STATION.buildsWith = new Good[] { PLASTICS, PARTS };
     
@@ -723,7 +723,7 @@ public class GameContent {
     PHYSICIAN_STATION.maxHealth = 100;
     PHYSICIAN_STATION.maxStock  = 3;
     PHYSICIAN_STATION.recipes = new Recipe[] {
-      new Recipe(MEDICINE, SKILL_CRAFT, AVG_CRAFT_TIME, GREENS)
+      new Recipe(MEDICINE, SKILL_CRAFT, GOOD_CRAFT_TIME, GREENS)
     };
     PHYSICIAN_STATION.setFeatures(HEALTHCARE, IS_SICKBAY);
     PHYSICIAN_STATION.featureAmount = 20;
@@ -740,13 +740,13 @@ public class GameContent {
     
     STOCK_EXCHANGE.setDimensions(3, 3, 1, THIN_MARGIN);
     STOCK_EXCHANGE.setBuildMaterials(PLASTICS, 4, PARTS, 2);
-    STOCK_EXCHANGE.workerTypes.setWith(Vassals.VENDOR, 1);
+    STOCK_EXCHANGE.workerTypes.setWith(Vassals.VENDOR, 2);
     STOCK_EXCHANGE.needed    = MARKET_GOODS;
     STOCK_EXCHANGE.features  = new Good[] { IS_VENDOR };
     STOCK_EXCHANGE.maxHealth = 100;
     STOCK_EXCHANGE.shopItems = StockExGoods.ALL_SOLD;
     STOCK_EXCHANGE.recipes = new Recipe[] {
-      new Recipe(StockExGoods.MEDIKIT, SKILL_CRAFT, FAST_CRAFT_TIME, MEDICINE)
+      new Recipe(StockExGoods.MEDIKIT, SKILL_CRAFT, GEAR_CRAFT_TIME, MEDICINE)
     };
     
     SUPPLY_DEPOT.name = "Supply Depot";
