@@ -42,6 +42,7 @@ public class Actor extends Element implements
   private Task reaction;
   
   private Series <Active> seen = new List();
+  private Series <Actor> considered = new List();
   private float fearLevel;
   private List <Active> backup = new List();
   
@@ -49,7 +50,8 @@ public class Actor extends Element implements
   private boolean wasIndoors = true;
   private Vec3D lastPosition  = new Vec3D();
   private Vec3D exactPosition = new Vec3D();
-  Actor attached = null, attachTo = null;
+  private Actor attached = null, attachTo = null;
+  private float hideRoll = -1;
   
   final public ActorHealth health = initHealth();
   final public ActorTraits traits = initTraits();
@@ -84,6 +86,7 @@ public class Actor extends Element implements
     reaction  = (Task) s.loadObject();
     
     s.loadObjects(seen);
+    s.loadObjects(considered);
     fearLevel = s.loadFloat();
     s.loadObjects(backup);
     
@@ -94,6 +97,7 @@ public class Actor extends Element implements
     
     attached = (Actor) s.loadObject();
     attachTo = (Actor) s.loadObject();
+    hideRoll = s.loadFloat();
     
     health.loadState(s);
     traits.loadState(s);
@@ -117,6 +121,7 @@ public class Actor extends Element implements
     s.saveObject(reaction);
     
     s.saveObjects(seen);
+    s.saveObjects(considered);
     s.saveFloat(fearLevel);
     s.saveObjects(backup);
     
@@ -127,6 +132,7 @@ public class Actor extends Element implements
     
     s.saveObject(attached);
     s.saveObject(attachTo);
+    s.saveFloat(hideRoll);
     
     health.saveState(s);
     traits.saveState(s);
@@ -259,6 +265,8 @@ public class Actor extends Element implements
         assignReaction(null);
       }
       else if (onMap() && (task == null || ! task.checkAndUpdateTask())) {
+        hideRoll = Rand.num();
+        updateConsidered();
         beginNextBehaviour();
       }
       //
@@ -659,6 +667,15 @@ public class Actor extends Element implements
   }
   
   
+  public float hideLevel() {
+    int mode = task == null ? MOVE_NORMAL : task.motionMode();
+    float hide = traits.levelOf(SKILL_EVADE) / MAX_SKILL_LEVEL;
+    if (mode == MOVE_SNEAK) hide += HIDE_EVADE_BONUS / 100f;
+    hide = Nums.clamp(hide + (hideRoll / 2), 0, 1);
+    return hide;
+  }
+  
+  
   public float moveSpeed() {
     int mode = task == null ? MOVE_NORMAL : task.motionMode();
     float speed = type().moveSpeed * 1f / AVG_MOVE_SPEED;
@@ -711,11 +728,68 @@ public class Actor extends Element implements
     float noticeRange = sightRange();
     if (mission != null && mission.active()) noticeRange += AVG_FILE;
     seen = map.activeInRange(at(), noticeRange);
+    seen = filterToNotice(seen, noticeRange, -1);
+  }
+  
+  
+  void updateConsidered() {
+    int max = AVG_MAX_NOTICE;
+    considered = (Series) filterToNotice((Series) map.actors(), -1, max);
+  }
+  
+  
+  Series <Active> filterToNotice(
+    Series <Active> around, float noticeRange, int maxNotice
+  ) {
+    Batch <Active> filtered = new Batch();
+    AreaFog fog = map.fogMap(base(), true);
+    
+    for (Active a : around) {
+      
+      float dist = Area.distance(this, a);
+      float sight = 1, hide = 0;
+      
+      if (noticeRange > 0) {
+        sight = 1 - (dist / noticeRange);
+      }
+      else if (a.base() != base()) {
+        sight = fog.sightLevel(a.at());
+      }
+      if (a.mobile()) {
+        Actor m = (Actor) a;
+        hide = m.hideLevel();
+      }
+      
+      if (sight - hide > 0) {
+        filtered.add(a);
+      }
+    }
+    
+    if (maxNotice > 0 && filtered.size() > maxNotice) {
+      Batch <Active> culled = new Batch();
+      float cullRatio = maxNotice * 1f / filtered.size();
+      int segmentSize = filtered.size() / Nums.ceil(1f / cullRatio);
+      
+      int index = Rand.index(segmentSize);
+      for (Active a : filtered) {
+        float modulusFraction = (index % segmentSize) * 1f / segmentSize;
+        if (modulusFraction < cullRatio) culled.add(a);
+        index++;
+      }
+      filtered = culled;
+    }
+    
+    return filtered;
   }
   
   
   public Series <Active> seen() {
     return seen;
+  }
+  
+  
+  public Series <Actor> considered() {
+    return considered;
   }
   
   

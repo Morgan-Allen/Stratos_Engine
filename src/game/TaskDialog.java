@@ -47,7 +47,7 @@ public class TaskDialog extends Task {
   /**  External factory methods-
     */
   static TaskDialog nextContactDialog(Actor actor) {
-    Series <Active> others = (Series) actor.map().actors();
+    Series <Active> others = (Series) actor.considered();
     return nextDialog(actor, others, false);
   }
   
@@ -80,7 +80,6 @@ public class TaskDialog extends Task {
     Pick <Active> pick = new Pick(0);
     for (Active a : assessed) {
       if (! a.mobile()) continue;
-      if (((Actor) a).maxSightLevel(actor.base()) <= 0) continue;
       pick.compare(a, dialogRating(actor, (Actor) a, casual, false));
     }
     if (pick.empty()) return null;

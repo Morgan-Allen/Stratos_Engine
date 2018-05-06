@@ -57,7 +57,7 @@ public class ActorAsPerson extends Actor {
     
     //
     //  If you're seriously hungry/beat/tired, try going home:
-    //  TODO:  Work this in as an emergency reaction.  It's a bit of a hack
+    //  TODO:  Work this in as an emergency reaction?  It's a bit of a hack
     //  here.
     
     Building rests = TaskResting.findRestVenue(this, map);
@@ -119,7 +119,7 @@ public class ActorAsPerson extends Actor {
       choice.add(TaskResting .nextRelaxing (this));
       choice.add(TaskResting .nextResting  (this, rests));
       choice.add(TaskPurchase.nextPurchase (this));
-      choice.add(selectTechniqueUse(false, (Series) map.actors()));
+      choice.add(selectTechniqueUse(false, (Series) considered()));
       
       if (work() != null && ((Element) work()).complete()) {
         choice.add(work().selectActorBehaviour(this));
@@ -169,7 +169,6 @@ public class ActorAsPerson extends Actor {
     
     class Reaction { ActorTechnique used; Target subject; float rating; }
     Pick <Reaction> pick = new Pick(0);
-    AreaFog fog = map().fogMap(base(), true);
     
     boolean talk = assessed.size() > 1 && false;
     if (talk) {
@@ -177,8 +176,6 @@ public class ActorAsPerson extends Actor {
     }
     
     for (Active other : assessed) {
-      if (fog.sightLevel(other.at()) <= 0) continue;
-      
       for (ActorTechnique used : traits.known()) {
         if (used.canActorUse(this, other)) {
           Reaction r = new Reaction();

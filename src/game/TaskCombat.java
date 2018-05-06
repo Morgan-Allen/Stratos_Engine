@@ -175,7 +175,7 @@ public class TaskCombat extends Task {
   
   
   static TaskCombat nextDefending(Active actor) {
-    Series <Active> others = (Series) actor.map().actors();
+    Series <Active> others = (Series) ((Actor) actor).considered();
     return nextReaction(actor, null, null, true, others);
   }
   
@@ -198,8 +198,6 @@ public class TaskCombat extends Task {
     };
     
     for (Active other : others) {
-      if (((Element) other).maxSightLevel(actor.base()) == 0) continue;
-      
       float priority = attackPriority(actor, (Element) other, true, defends);
       if (priority <= 0) continue;
       

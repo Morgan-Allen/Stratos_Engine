@@ -72,6 +72,7 @@ public class TekPriest {
     int numDrones(Actor using) {
       int num = 0;
       for (Actor a : using.traits.allBondedWith(BOND_SERVANT)) {
+        if (! a.health.active()) continue;
         if (a.type().isConstruct()) num += 1;
       }
       return num;

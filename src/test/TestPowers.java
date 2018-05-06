@@ -12,6 +12,13 @@ import util.*;
 public class TestPowers extends LogicTest {
   
   
+  public static void main(String args[]) {
+    TestPowersCollective.main(args);
+    TestPowersLogician  .main(args);
+    TestPowersTekPriest .main(args);
+    TestPowersShaper    .main(args);
+  }
+  
   boolean actorPowerTest(boolean graphics, String title, ActorTechnique power) {
     return powerTest(graphics, title, power, false);
   }

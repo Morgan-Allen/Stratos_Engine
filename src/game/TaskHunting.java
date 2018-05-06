@@ -59,9 +59,7 @@ public class TaskHunting extends Task {
     Pick <Actor> forHunt = new Pick();
     boolean forMeat = store != null && ! Visit.empty(meatTypes);
     
-    for (Actor a : actor.map().actors()) {
-      if (a.maxSightLevel(actor.base()) == 0) continue;
-      
+    for (Actor a : actor.considered()) {
       float dist = Area.distance(actor, a);
       if (dist > MAX_EXPLORE_DIST) continue;
       

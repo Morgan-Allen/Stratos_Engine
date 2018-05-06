@@ -206,7 +206,8 @@ public class TestMilitary extends LogicTest {
       String keyC = a.ID()+"_"+a.type()+"_L";
       int oldCL = (int) (float) (Float) init.get(keyC);
       int newCL = a.traits.classLevel();
-      I.say("  "+a+" (level "+oldCL+" -> "+newCL+")");
+      float prog = a.traits.classLevelProgress();
+      I.say("  "+a+" (level "+oldCL+" -> "+newCL+" +"+I.percent(prog)+")");
       
       for (Trait skill : skills) {
         String keyL = a.ID()+"_"+skill+"_L";

@@ -54,14 +54,14 @@ public class TestWorld extends LogicTest {
       
       for (Good g : vassal.needLevels().keys()) {
         if (vassal.inventory(g) > 1) {
-          I.say("\nCity did not consume goods over time!");
+          I.say("\nWORLD-EVENTS TESTING FAILED- City did not consume goods over time!");
           return false;
         }
       }
       for (Good g : vassal.prodLevels().keys()) {
         float supply = vassal.prodLevel(g);
         if (vassal.inventory(g) < supply - 1) {
-          I.say("\nCity did not generate goods over time!");
+          I.say("\nWORLD-EVENTS TESTING FAILED- City did not generate goods over time!");
           return false;
         }
       }
@@ -87,11 +87,11 @@ public class TestWorld extends LogicTest {
       
       float endP = lord.prestige(), endL = vassal.loyalty(lord);
       if (Nums.abs(endP - AVG_P) >= Nums.abs(initPrestige - AVG_P)) {
-        I.say("\nCity prestige did not decay over time!");
+        I.say("\nWORLD-EVENTS TESTING FAILED- City prestige did not decay over time!");
         return false;
       }
       if (Nums.abs(endL - AVG_L) >= Nums.abs(initLoyalty  - AVG_L)) {
-        I.say("\nCity loyalty did not decay over time!");
+        I.say("\nWORLD-EVENTS TESTING FAILED- City loyalty did not decay over time!");
         return false;
       }
     }
@@ -104,15 +104,15 @@ public class TestWorld extends LogicTest {
       float newPower = pair[0].armyPower();
       
       if (newPower >= oldPower) {
-        I.say("\nInvasion inflicted no casualties!");
+        I.say("\nWORLD-EVENTS TESTING FAILED- Invasion inflicted no casualties!");
         return false;
       }
       if (! pair[0].isVassalOf(pair[1])) {
-        I.say("\nInvasion did not impose vassal status!");
+        I.say("\nWORLD-EVENTS TESTING FAILED- Invasion did not impose vassal status!");
         return false;
       }
       if (pair[0].loyalty(pair[1]) >= Base.LOY_CIVIL) {
-        I.say("\nInvasion did not sour relations!");
+        I.say("\nWORLD-EVENTS TESTING FAILED- Invasion did not sour relations!");
         return false;
       }
     }
@@ -125,7 +125,7 @@ public class TestWorld extends LogicTest {
       runCompleteDialog(from, goes);
       
       if (from.posture(goes) != Base.POSTURE.ALLY) {
-        I.say("\nDialog did not create ally!");
+        I.say("\nWORLD-EVENTS TESTING FAILED- Dialog did not create ally!");
         return false;
       }
     }
@@ -155,11 +155,11 @@ public class TestWorld extends LogicTest {
       
       Series <Actor> heirs = mainC.council.allMembersWithRole(Role.HEIR);
       if (heirs.empty()) {
-        I.say("\nNo heirs produced!");
+        I.say("\nWORLD-EVENTS TESTING FAILED- No heirs produced!");
         return false;
       }
       if (monarch.health.alive() || queen.health.alive()) {
-        I.say("\nParents still alive!");
+        I.say("\nWORLD-EVENTS TESTING FAILED- Parents still alive!");
         return false;
       }
     }
@@ -172,11 +172,11 @@ public class TestWorld extends LogicTest {
       runCompleteInvasion(from, goes);
       
       if (! goes.isEnemyOf(from)) {
-        I.say("\nBarbarian invasion did not prompt correct posture!");
+        I.say("\nWORLD-EVENTS TESTING FAILED- Barbarian invasion did not prompt correct posture!");
         return false;
       }
       if (Base.suppliesDue(goes, from).size() > 0) {
-        I.say("\nBarbarian invasion should not impose tribute!");
+        I.say("\nWORLD-EVENTS TESTING FAILED- Barbarian invasion should not impose tribute!");
         return false;
       }
     }
@@ -195,26 +195,26 @@ public class TestWorld extends LogicTest {
       Base.setPosture(capital, lord, Base.POSTURE.VASSAL, true);
       
       if (capital != weak.capitalLord()) {
-        I.say("\nDid not calculate capital correctly!");
+        I.say("\nWORLD-EVENTS TESTING FAILED- Did not calculate capital correctly!");
         return false;
       }
       
       runCompleteInvasion(strong, weak);
       
       if (lord.isLordOf(weak)) {
-        I.say("\nInvasion of vassal did not revoke lord's claim!");
+        I.say("\nWORLD-EVENTS TESTING FAILED- Invasion of vassal did not revoke lord's claim!");
         return false;
       }
       if (! weak.isVassalOf(strong)) {
-        I.say("\nInvasion of vassal did not impose vassal status!");
+        I.say("\nWORLD-EVENTS TESTING FAILED- Invasion of vassal did not impose vassal status!");
         return false;
       }
       if (! capital.isEnemyOf(strong)) {
-        I.say("\nInvasion of vassal did not provoke war!");
+        I.say("\nWORLD-EVENTS TESTING FAILED- Invasion of vassal did not provoke war!");
         return false;
       }
       if (capital.loyalty(strong) >= Base.LOY_CIVIL) {
-        I.say("\nInvasion of vassal did not sour relations with capital!");
+        I.say("\nWORLD-EVENTS TESTING FAILED- Invasion of vassal did not sour relations with capital!");
         return false;
       }
     }
@@ -236,15 +236,15 @@ public class TestWorld extends LogicTest {
       }
       
       if (vassal.isLoyalVassalOf(lord)) {
-        I.say("\nDefiant vassal did not rebel!");
+        I.say("\nWORLD-EVENTS TESTING FAILED- Defiant vassal did not rebel!");
         return false;
       }
       if (vassal.isVassalOf(lord)) {
-        I.say("\nCity in rebellion did not break relations!");
+        I.say("\nWORLD-EVENTS TESTING FAILED- City in rebellion did not break relations!");
         return false;
       }
       if (lord.prestige() >= initPrestige) {
-        I.say("\nLord's prestige did not suffer from rebellion!");
+        I.say("\nWORLD-EVENTS TESTING FAILED- Lord's prestige did not suffer from rebellion!");
       }
     }
     
@@ -265,7 +265,7 @@ public class TestWorld extends LogicTest {
       runCompleteInvasion(lord, vassal);
       
       if (! vassal.isLoyalVassalOf(lord)) {
-        I.say("\nRevolt suppression did not occur!");
+        I.say("\nWORLD-EVENTS TESTING FAILED- Revolt suppression did not occur!");
         return false;
       }
     }
@@ -287,7 +287,7 @@ public class TestWorld extends LogicTest {
       
       float tributeSent = Base.suppliesDue(vassal, lord, SPYCE);
       if (tributeSent < 5) {
-        I.say("\nInsufficient tribute dispatched!");
+        I.say("\nWORLD-EVENTS TESTING FAILED- Insufficient tribute dispatched!");
         return false;
       }
     }
@@ -365,15 +365,15 @@ public class TestWorld extends LogicTest {
         I.say("  "+d.goes()+": "+d.appeal());
       }
       if (D1.appeal() <= D3.appeal()) {
-        I.say("\nSimilar relations should boost appeal of alliance!");
+        I.say("\nWORLD-EVENTS TESTING FAILED- Similar relations should boost appeal of alliance!");
         return false;
       }
       if (D2.appeal() <= D1.appeal()) {
-        I.say("\nTrade-potential should boost appeal of alliance!");
+        I.say("\nWORLD-EVENTS TESTING FAILED- Trade-potential should boost appeal of alliance!");
         return false;
       }
       if (D4.appeal() >= D3.appeal()) {
-        I.say("\nMutual enmity should lower appeal of alliance!");
+        I.say("\nWORLD-EVENTS TESTING FAILED- Mutual enmity should lower appeal of alliance!");
         return false;
       }
       /*

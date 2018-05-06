@@ -62,6 +62,7 @@ public class GameConstants {
     AVG_MOVE_UNIT    = 150 ,  //  percent of tiles per distance-unit
     RUN_MOVE_SPEED   = 250 ,
     HIDE_MOVE_SPEED  = 75  ,
+    HIDE_EVADE_BONUS = 50  ,
     //
     //  Growth and crops-
     SCAN_PERIOD      = DAY_LENGTH * 1,
@@ -183,6 +184,7 @@ public class GameConstants {
     TOP_DAMAGE       = 10  ,
     TOP_ARMOUR       = 10  ,
     AVG_SIGHT        = 6   ,
+    AVG_MAX_NOTICE   = 12  ,
     AVG_RANGE        = 3   ,
     MAX_RANGE        = 6   ,
     MAX_CASUALTIES   = 50  ,  //  percent of total force before retreat

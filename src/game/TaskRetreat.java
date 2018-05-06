@@ -11,6 +11,8 @@ import util.*;
 public class TaskRetreat extends Task {
   
   
+  /**  Data fields, construction and save/load methods-
+    */
   Pathing hides;
   float priorityBonus = 0;
   
@@ -36,7 +38,8 @@ public class TaskRetreat extends Task {
   
   
   
-  
+  /**  Utility method for calculating fear-levels...
+    */
   static float fearLevel(Actor actor, List <Active> storeBackup) {
     float dangerSum = 0, allySum = 0;
     Batch <Active> aware = new Batch();
@@ -83,6 +86,9 @@ public class TaskRetreat extends Task {
   }
   
   
+  
+  /**  External factory methods-
+    */
   static TaskRetreat configRetreat(Actor actor, Pathing hides, float priority) {
     Area map = actor.map;
     if (! map.world.settings.toggleRetreat) return null;
@@ -124,6 +130,9 @@ public class TaskRetreat extends Task {
   }
   
   
+  
+  /**  Evaluating task-priority-
+    */
   protected float successChance() {
     //  TODO:  Rate your chance of escape based on speed relative to other
     //  actors.
@@ -141,8 +150,11 @@ public class TaskRetreat extends Task {
   public boolean emergency() {
     return true;
   }
-
-
+  
+  
+  
+  /**  Actual behaviour-execution-
+    */
   int motionMode() {
     return Actor.MOVE_RUN;
   }
@@ -168,6 +180,7 @@ public class TaskRetreat extends Task {
   }
   
 }
+
 
 
 

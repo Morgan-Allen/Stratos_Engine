@@ -61,7 +61,7 @@ public class TaskFirstAid extends Task {
     Area map = actor.map();
     Pick <Actor> pick = new Pick(0);
     
-    for (Actor other : map.actors()) {
+    for (Actor other : actor.considered()) {
       float rating = rateAid(actor, other, false);
       pick.compare(other, rating);
     }
