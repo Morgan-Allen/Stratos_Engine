@@ -189,11 +189,29 @@ public abstract class ActorTechnique extends Trait {
     }
     
     
-    public float priority() {
+    protected float successPriority() {
+      Actor actor = (Actor) active;
+      rating = used.rateUse(actor, target);
       return rating * PARAMOUNT * 1f / ROUTINE;
     }
     
     
+    protected float successChance() {
+      Actor actor = (Actor) active;
+      AreaDanger dangerMap = actor.map().dangerMap(actor.base(), true);
+      AreaTile around = actor.at();
+      
+      float danger = dangerMap.fuzzyLevel(around.x, around.y);
+      float power = TaskCombat.attackPower(actor);
+      return power / (power + danger);
+    }
+    
+    
+    protected float failCostPriority() {
+      return PARAMOUNT;
+    }
+
+
     public float harmLevel() {
       return used.harmLevel;
     }

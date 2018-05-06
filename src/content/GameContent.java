@@ -397,7 +397,7 @@ public class GameContent {
     ENFORCER.armourClass = 6;
     ENFORCER.maxHealth   = 16;
     ENFORCER.moveSpeed   = 100;
-    ENFORCER.initTraits.setWith(SKILL_MELEE, 2, SKILL_SIGHT, 5, SKILL_EVADE, 3);
+    ENFORCER.initTraits.setWith(SKILL_MELEE, 4, SKILL_SIGHT, 10, SKILL_EVADE, 6);
     
     RUNNER.name = "Runner";
     RUNNER.attachCostume(GameContent.class, "runner_skin.gif");
@@ -407,7 +407,9 @@ public class GameContent {
     RUNNER.armourClass = 6;
     RUNNER.maxHealth   = 12;
     RUNNER.moveSpeed   = 125;
-    RUNNER.initTraits.setWith(SKILL_SIGHT, 5, SKILL_EVADE, 4);
+    RUNNER.initTraits.setWith(SKILL_SIGHT, 10, SKILL_EVADE, 8);
+    
+    
     
     KOMMANDO.name = "Kommando";
     KOMMANDO.attachCostume(GameContent.class, "kommando_skin.gif");
@@ -416,8 +418,21 @@ public class GameContent {
     KOMMANDO.armourClass = 5;
     KOMMANDO.maxHealth   = 25;
     KOMMANDO.moveSpeed   = 125;
-    KOMMANDO.initTraits.setWith(SKILL_MELEE, 7, SKILL_EVADE, 5);
     
+    KOMMANDO.coreSkills.setWith(
+      SKILL_MELEE, 10,
+      SKILL_SIGHT, 7 ,
+      SKILL_EVADE, 7 ,
+      SKILL_CRAFT, 4 ,
+      SKILL_SPEAK, 3 ,
+      SKILL_LABOR, 3
+    );
+    KOMMANDO.initTraits.setWith(
+      TRAIT_EMPATHY  , 40,
+      TRAIT_DILIGENCE, 40,
+      TRAIT_BRAVERY  , 85,
+      TRAIT_CURIOSITY, 15
+    );
     
     
     ECOLOGIST.name = "Ecologist";

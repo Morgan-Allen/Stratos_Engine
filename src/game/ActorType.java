@@ -65,6 +65,13 @@ public class ActorType extends Type {
     a.health.setSexData(sex);
     a.health.setHunger(Rand.num() - 0.5f);
     
+    
+    //  TODO:  Vary this more, especially per class...
+    for (Trait t : ALL_ATTRIBUTES) {
+      float value = MAX_SKILL_LEVEL / 2f;
+      a.traits.setLevel(t, value);
+    }
+    
     for (Trait t : ALL_SKILLS) {
       float value = initTraits.valueFor(t) * 1f;
       if (value > 0) value += Rand.index(INIT_SKILL_RANGE + 1);

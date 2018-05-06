@@ -14,7 +14,7 @@ public class TestPurchases extends LogicTest {
   
   
   public static void main(String args[]) {
-    testPurchases(true);
+    testPurchases(false);
   }
   
 
@@ -120,6 +120,7 @@ public class TestPurchases extends LogicTest {
     I.say("  Collect okay: "+collectOkay);
     I.say("  Potion okay:  "+potionOkay );
     I.say("  Usage okay:   "+usageOkay  );
+    I.say("  Final inventory: "+buys.inventory());
     
     return false;
   }

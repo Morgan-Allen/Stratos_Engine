@@ -166,8 +166,10 @@ public class ActorAsPerson extends Actor {
   
   
   Task selectTechniqueUse(boolean reaction, Series <Active> assessed) {
+    
     class Reaction { ActorTechnique used; Target subject; float rating; }
     Pick <Reaction> pick = new Pick(0);
+    AreaFog fog = map().fogMap(base(), true);
     
     boolean talk = assessed.size() > 1 && false;
     if (talk) {
@@ -175,6 +177,8 @@ public class ActorAsPerson extends Actor {
     }
     
     for (Active other : assessed) {
+      if (fog.sightLevel(other.at()) <= 0) continue;
+      
       for (ActorTechnique used : traits.known()) {
         if (used.canActorUse(this, other)) {
           Reaction r = new Reaction();

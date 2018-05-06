@@ -122,7 +122,7 @@ public class TestBridging extends LogicTest {
     //  current status-
     
     if (! toBuild.empty()) {
-      I.say("\nNOT ALL STRUCTURES WERE ACCESSIBLE!");
+      I.say("\nBRIDGING TEST FAILED- NOT ALL STRUCTURES WERE ACCESSIBLE!");
       I.say("  Buildings are: ");
       for (Building b : map.buildings()) {
         I.say("  "+b+" at: "+b.at()+", entrances:");
@@ -223,7 +223,7 @@ public class TestBridging extends LogicTest {
     Element above    = map.above(t);
     
     if (pathOK != backOK || (pathOK && backOK) != mapsOK) {
-      I.say("\nMISMATCH IN PATHING OBSERVED AT "+t);
+      I.say("\nBRIDGING TEST FAILED- MISMATCH IN PATHING OBSERVED AT "+t);
       I.say("  Path type:   "+t.pathType());
       I.say("  Above:       "+above);
       I.say("  Build level: "+(above == null ? 0 : above.buildLevel()));

@@ -595,7 +595,7 @@ public class LogicTest {
     for (Good g : b.map().world.goodTypes()) {
       float amount   = b.inventory(g);
       float demand   = b.stockLimit(g);
-      float consumes = homeCons.valueFor(g);
+      float consumes = homeCons == null ? 0 : homeCons.valueFor(g);
       if (amount == 0 && demand <= 0 && consumes <= 0) continue;
       
       demand += consumes;

@@ -15,8 +15,9 @@ public class BuildingForTrade extends Building implements Trader {
   Tally <Good> needLevel = new Tally();
   
   Base tradePartner = null;
-  boolean exports  = true ;
-  boolean tradeOff = false;
+  boolean freeMarket = false;
+  boolean exports    = true ;
+  boolean tradeOff   = false;
   Good needed[] = NO_GOODS, produced[] = NO_GOODS;
   
   
@@ -33,8 +34,9 @@ public class BuildingForTrade extends Building implements Trader {
     s.loadTally(needLevel);
     
     tradePartner = (Base) s.loadObject();
-    exports = s.loadBool();
-    tradeOff = s.loadBool();
+    freeMarket = s.loadBool();
+    exports    = s.loadBool();
+    tradeOff   = s.loadBool();
   }
   
   
@@ -45,6 +47,7 @@ public class BuildingForTrade extends Building implements Trader {
     s.saveTally(needLevel);
     
     s.saveObject(tradePartner);
+    s.saveBool(freeMarket);
     s.saveBool(exports);
     s.saveBool(tradeOff);
   }
@@ -85,15 +88,52 @@ public class BuildingForTrade extends Building implements Trader {
   void updateOnPeriod(int period) {
     super.updateOnPeriod(period);
     
+    if (freeMarket) {
+      updateDemandsLocally();
+    }
+    
     Batch <Good> impB = new Batch(), expB = new Batch();
     for (Good g : map.world.goodTypes) {
-      float need   = needLevel  .valueFor(g);
+      float need   = needLevel.valueFor(g);
       float accept = prodLevel.valueFor(g);
       if (need   > 0) impB.add(g);
       if (accept > 0) expB.add(g);
     }
     produced = impB.toArray(Good.class);
     needed   = expB.toArray(Good.class);
+  }
+  
+  
+  void updateDemandsLocally() {
+    float maxDist = type().maxDeliverRange;
+    
+    //  TODO:  Scale down to maximum cargo capacity!
+    
+    needLevel.clear();
+    prodLevel.clear();
+    
+    for (Building b : map().buildings()) if (b.base() == base()) {
+      if (b.type().isTradeBuilding()) continue;
+      
+      float dist = Area.distance(this, b);
+      if (dist > maxDist) continue;
+      if (! map.pathCache.pathConnects(this, b, true, false)) continue;
+      
+      for (Good g : b.produced()) {
+        float amount = b.maxStock(g);
+        needLevel.add(amount, g);
+      }
+      for (Good g : b.needed()) {
+        float amount = b.maxStock(g);
+        prodLevel.add(amount, g);
+      }
+      
+      Tally <Good> homeUse = b.homeUsed();
+      if (homeUse != null) for (Good g : homeUse.keys()) {
+        float amount = homeUse.valueFor(g);
+        prodLevel.add(amount, g);
+      }
+    }
   }
   
   

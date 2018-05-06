@@ -127,15 +127,17 @@ public class GameConstants {
     INIT_PERS_RANGE  = 50,  //  percent variation in personality traits
     MAX_SKILL_LEVEL  = 10,
     MAX_CLASS_LEVEL  = 10,
-    BASE_CLASS_XP    = 5 ,
+    CLASS_HP_BONUS[] = { 0, 25, 45, 65, 85, 105, 125, 145, 165, 180 }, // as %
+    TOUGH_HP_RANGE   = 10,  //  as absolute bonus
     ALL_LEVELS_SUM   = SKILL_XP_TOTAL[10],
-    MAX_TRAIN_TIME   = (YEAR_LENGTH * 10) / 3,
-    BASE_LEVEL_XP    = MAX_TRAIN_TIME / ALL_LEVELS_SUM,
+    MAX_TRAIN_TIME   = (YEAR_LENGTH * 10) / 3,  // ~7000
+    BASE_LEVEL_XP    = MAX_TRAIN_TIME / ALL_LEVELS_SUM,  // ~140
     MAX_SKILL_XP     = BASE_LEVEL_XP * ALL_LEVELS_SUM,
+    BASE_CLASS_XP    = BASE_LEVEL_XP * 3,
     CRAFT_XP_PERCENT = 100 ,
-    FARM_XP_PERCENT  = 400 ,
+    FARM_XP_PERCENT  = 300 ,
     GATHR_XP_PERCENT = 200 ,
-    BUILD_XP_PERCENT = 800 ,
+    BUILD_XP_PERCENT = 600 ,
     FIGHT_XP_PERCENT = 3200,
     TRAIN_XP_PERCENT = 50  ,
     //
@@ -400,7 +402,7 @@ public class GameConstants {
     */
   final public static Good
     
-    //  TODO:  Use Traits for this instead...
+    //  TODO:  Use Traits for this instead!
     
     //  Note- 'void' is used to mark foundations for clearing during
     //  construction, and as a default build-material.
@@ -424,6 +426,14 @@ public class GameConstants {
     IS_GATE    = new Good("Is Gate"     , -1 ),
     IS_REFUGE  = new Good("Is Refuge"   , -1 ),
     IS_SICKBAY = new Good("Is Sickbay"  , -1 ),
+    
+    //  TODO:  Add these in...
+    /*
+    IS_HEALER   = NULL,
+    IS_EXPLORER = NULL,
+    IS_HUNTER   = NULL,
+    IS_DEFENDER = NULL,
+    //*/
     
     DIVERSION  = new Good("Diversion"   , -1 ),
     EDUCATION  = new Good("Education"   , -1 ),

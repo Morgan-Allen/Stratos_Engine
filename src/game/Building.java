@@ -481,7 +481,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   
   
   public Tally <Good> homeUsed() {
-    return new Tally();
+    return null;
   }
   
   

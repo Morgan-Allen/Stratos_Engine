@@ -405,7 +405,11 @@ public class ActorHealth {
   
   public float maxHealth() {
     if (maxHP == -1) {
+      int classLevel = actor.traits.classLevel();
+      float tough = actor.traits.levelOf(TRAIT_TOUGH) / MAX_SKILL_LEVEL;
       maxHP =  actor.type().maxHealth;
+      maxHP *= 1 + (CLASS_HP_BONUS[classLevel] / 100f);
+      maxHP = Nums.max(2, maxHP + ((tough - 0.5f) * TOUGH_HP_RANGE));
       maxHP += actor.traits.levelOf(STAT_HEALTH);
     }
     return maxHP;
