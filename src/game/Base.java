@@ -68,7 +68,7 @@ public class Base implements Session.Saveable, Trader {
   int tint = CITY_COLOR;
   
   final public World world;
-  final public World.Locale locale;
+  final public WorldLocale locale;
   
   GOVERNMENT government = GOVERNMENT.FEUDAL;
   float prestige = PRESTIGE_AVG;
@@ -104,12 +104,12 @@ public class Base implements Session.Saveable, Trader {
   
   
   
-  public Base(World world, World.Locale locale) {
+  public Base(World world, WorldLocale locale) {
     this(world, locale, "Base???");
   }
   
   
-  public Base(World world, World.Locale locale, String name) {
+  public Base(World world, WorldLocale locale, String name) {
     if (world  == null) I.complain("CANNOT PASS NULL WORLD:  "+name);
     if (locale == null) I.complain("CANNOT PASS NULL LOCALE: "+name);
     

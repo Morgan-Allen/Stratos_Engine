@@ -5,12 +5,10 @@ package start;
 import game.*;
 import gameUI.play.*;
 import graphics.common.*;
-import graphics.widgets.*;
-import util.*;
 
 
 
-public abstract class AreaScenario implements Session.Saveable {
+public abstract class Scenario implements Session.Saveable {
   
   
   MainGame game;
@@ -23,12 +21,12 @@ public abstract class AreaScenario implements Session.Saveable {
   PlayUI UI;
   
   
-  protected AreaScenario() {
+  protected Scenario() {
     return;
   }
   
   
-  public AreaScenario(Session s) throws Exception {
+  public Scenario(Session s) throws Exception {
     s.cacheInstance(this);
     world = (World) s.loadObject();
     area  = (Area ) s.loadObject();

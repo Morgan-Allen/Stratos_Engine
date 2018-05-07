@@ -16,19 +16,6 @@ public class World implements Session.Saveable {
     int moveMode;
   }
   
-  
-  public static class Locale {
-    
-    float mapX, mapY;
-    Table <Locale, Route> routes = new Table();
-    
-    String label;
-    
-    public float mapX() { return mapX; }
-    public float mapY() { return mapY; }
-    public String toString() { return label; }
-  }
-  
   public static class Journey {
     
     Base from;
@@ -72,7 +59,7 @@ public class World implements Session.Saveable {
   int time = 0;
   final public WorldCalendar calendar = new WorldCalendar(this);
   
-  List <Locale > locales  = new List();
+  List <WorldLocale > locales  = new List();
   List <Base   > bases    = new List();
   List <Journey> journeys = new List();
   List <Event  > history  = new List();
@@ -118,13 +105,13 @@ public class World implements Session.Saveable {
     time = s.loadInt();
     
     for (int n = s.loadInt(); n-- > 0;) {
-      Locale l = new Locale();
+      WorldLocale l = new WorldLocale();
       l.mapX = s.loadFloat();
       l.mapY = s.loadFloat();
       locales.add(l);
     }
-    for (Locale l : locales) for (int d = s.loadInt(); d-- > 0;) {
-      Locale with = locales.atIndex(s.loadInt());
+    for (WorldLocale l : locales) for (int d = s.loadInt(); d-- > 0;) {
+      WorldLocale with = locales.atIndex(s.loadInt());
       Route route = new Route();
       route.distance = s.loadInt();
       route.moveMode = s.loadInt();
@@ -176,13 +163,13 @@ public class World implements Session.Saveable {
     s.saveInt(time);
     
     s.saveInt(locales.size());
-    for (Locale l : locales) {
+    for (WorldLocale l : locales) {
       s.saveFloat(l.mapX);
       s.saveFloat(l.mapY);
     }
-    for (Locale l : locales) {
+    for (WorldLocale l : locales) {
       s.saveInt(l.routes.size());
-      for (Locale d : l.routes.keySet()) {
+      for (WorldLocale d : l.routes.keySet()) {
         s.saveInt(locales.indexOf(d));
         Route route = l.routes.get(d);
         s.saveInt(route.distance);
@@ -230,7 +217,7 @@ public class World implements Session.Saveable {
   
   /**  Managing Cities and Locales:
     */
-  public static void setupRoute(Locale a, Locale b, int distance, int moveMode) {
+  public static void setupRoute(WorldLocale a, WorldLocale b, int distance, int moveMode) {
     Route route = new Route();
     route.distance = distance;
     route.moveMode = moveMode;
@@ -239,8 +226,8 @@ public class World implements Session.Saveable {
   }
   
   
-  public Locale addLocale(float mapX, float mapY, String label) {
-    Locale l = new Locale();
+  public WorldLocale addLocale(float mapX, float mapY, String label) {
+    WorldLocale l = new WorldLocale();
     l.mapX  = mapX;
     l.mapY  = mapY;
     l.label = label;
@@ -249,23 +236,29 @@ public class World implements Session.Saveable {
   }
   
   
-  public Locale addLocale(float mapX, float mapY) {
+  public WorldLocale addLocale(float mapX, float mapY) {
     return addLocale(mapX, mapY, "Locale at "+mapX+"|"+mapY);
   }
   
   
-  public static Vec2D mapCoords(Base c) {
-    return new Vec2D(c.locale.mapX, c.locale.mapY);
+  public static Vec2D mapCoords(Base b) {
+    return new Vec2D(b.locale.mapX, b.locale.mapY);
   }
   
   
-  public void addBases(Base... cities) {
-    Visit.appendTo(this.bases, cities);
+  public void addBases(Base... bases) {
+    Visit.appendTo(this.bases, bases);
   }
   
   
   public Base baseNamed(String n) {
-    for (Base c : bases) if (c.name.equals(n)) return c;
+    for (Base b : bases) if (b.name.equals(n)) return b;
+    return null;
+  }
+  
+  
+  public Base baseAt(WorldLocale l) {
+    for (Base b : bases) if (b.locale == l) return b;
     return null;
   }
   

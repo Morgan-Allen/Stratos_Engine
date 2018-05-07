@@ -11,6 +11,7 @@ import util.*;
 
 public class MainGame implements Playable {
   
+  
   final static int
     DO_PLAY      = -1,
     DO_SAVE      =  0,
@@ -22,7 +23,7 @@ public class MainGame implements Playable {
   static MainGame current;
   int nextOp = DO_PLAY;
   
-  AreaScenario scenario;
+  Scenario scenario;
   
   
   
@@ -35,14 +36,14 @@ public class MainGame implements Playable {
   }
   
   
-  public static void playScenario(AreaScenario s) {
+  public static void playScenario(Scenario s) {
     mainGame();
     current.scenario = s;
     current.nextOp   = DO_LOAD;
   }
   
   
-  public static AreaScenario currentScenario() {
+  public static Scenario currentScenario() {
     if (current == null || current.scenario == null) return null;
     return current.scenario;
   }
@@ -76,7 +77,7 @@ public class MainGame implements Playable {
   protected boolean loadScenario(String savePath) {
     if (Assets.exists(savePath)) try {
       Session s = Session.loadSession(savePath, true);
-      AreaScenario loaded = (AreaScenario) s.loaded()[0];
+      Scenario loaded = (Scenario) s.loaded()[0];
       scenario = loaded;
       scenario.afterLoading(this);
       

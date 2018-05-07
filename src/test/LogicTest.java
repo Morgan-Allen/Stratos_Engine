@@ -19,7 +19,7 @@ public class LogicTest {
     int size, Good goods[], boolean genTerrain, Terrain... gradient
   ) {
     World  world  = new World(goods);
-    Locale locale = world.addLocale(5, 5);
+    WorldLocale locale = world.addLocale(5, 5);
     Base   base   = new Base(world, locale, "Test City");
     Area   map    = null;
     

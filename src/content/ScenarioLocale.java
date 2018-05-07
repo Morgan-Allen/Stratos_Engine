@@ -10,18 +10,51 @@ import static content.GameContent.*;
 
 
 
-public class ScenarioBlankMap extends Scenario {
+public class ScenarioLocale extends Scenario {
   
+  
+  static class NestConfig {
+    BuildType nestType;
+    Tally <ActorType> spawnTypes;
+    int spawnInterval;
+    boolean doRaids;
+    boolean doContact;
+  }
+  
+  static class SiteConfig {
+    Faction belongs;
+    NestConfig nest;
+    int minCount, maxCount;
+    int dirX, dirY;
+    float areaNeed;
+    List <SiteConfig> children = new List();
+  }
+  
+  static class LocaleConfig {
+    WorldLocale locale;
+    int mapSize;
+    Terrain gradient[];
+    List <SiteConfig> sites = new List();
+  }
+  
+  
+  Faction faction;
+  LocaleConfig config;
+  
+  String savePath = "saves/save_locale.str";
   
   List <BuildingForNest> nests = new List();
   
   
-  public ScenarioBlankMap() {
+  
+  public ScenarioLocale(Faction faction, LocaleConfig config) {
     super();
+    this.faction = faction;
+    this.config  = config ;
   }
   
   
-  public ScenarioBlankMap(Session s) throws Exception {
+  public ScenarioLocale(Session s) throws Exception {
     super(s);
     s.loadObjects(nests);
   }
@@ -35,55 +68,38 @@ public class ScenarioBlankMap extends Scenario {
   
   
   protected String savePath() {
-    return "saves/Test_Blank_Map.str";
+    return savePath;
   }
   
   
   protected World createWorld() {
-    World world = new World(ALL_GOODS);
-    world.assignTypes(
-      ALL_BUILDINGS,
-      ALL_SHIPS(),
-      ALL_CITIZENS(),
-      ALL_SOLDIERS(),
-      ALL_NOBLES()
-    );
-    world.assignMedia(
-      World.KEY_ATTACK_FLAG , FLAG_STRIKE ,
-      World.KEY_EXPLORE_FLAG, FLAG_RECON  ,
-      World.KEY_DEFEND_FLAG , FLAG_SECURE ,
-      World.KEY_CONTACT_FLAG, FLAG_CONTACT
-    );
-    return world;
+    return GameContent.setupDefaultWorld();
   }
   
   
   protected Area createArea(World world) {
     
-    final int MAP_SIZE = 64;
-    final Terrain GRADIENT[] = { JUNGLE, MEADOW, DESERT };
+    int mapSize = config.mapSize;
+    Terrain gradient[] = config.gradient;
     
     WorldLocale locale = world.addLocale(5, 5, "Test Area");
-    Area map = AreaTerrain.generateTerrain(world, locale, MAP_SIZE, 0, GRADIENT);
+    Area map = AreaTerrain.generateTerrain(world, locale, mapSize, 0, gradient);
     AreaTerrain.populateFixtures(map);
     return map;
   }
   
   
   protected Base createBase(Area stage, World world) {
-    WorldLocale homeworld = world.addLocale(1, 1, "Homeworld");
-    Base patron = new Base(world, homeworld);
-    patron.setName("Homeworld Base");
     
+    Base patron = world.baseAt(faction.homeland());
     Base landing = new Base(world, stage.locale);
     landing.setName("Player Landing");
     landing.setHomeland(patron);
     landing.assignBuildTypes(RULER_BUILT);
-    
+
     stage.addBase(landing);
-    world.addBases(patron, landing);
+    world.addBases(landing);
     
-    World.setupRoute(homeworld, stage.locale, 12, Type.MOVE_AIR);
     Base.setPosture(patron, landing, Base.POSTURE.VASSAL, true);
     patron.updateOffmapTraders();
     
@@ -92,7 +108,7 @@ public class ScenarioBlankMap extends Scenario {
   
   
   protected void configScenario(World world, Area stage, Base base) {
-    
+
     Building bastion = (Building) BASTION.generate();
     int w = bastion.type().wide, h = bastion.type().high;
     AreaTile ideal = stage.tileAt(16, 16);
@@ -108,6 +124,11 @@ public class ScenarioBlankMap extends Scenario {
       float dist = Area.distance(sited, ideal);
       pickLanding.compare(t, 0 - dist);
     }
+    
+    
+    
+    
+    /*
     
     //
     //  And insert the Bastion at the appropriate site:
@@ -133,7 +154,6 @@ public class ScenarioBlankMap extends Scenario {
       bastion.addInventory(15, PARTS   );
       depot.needLevels().set(CARBS, 20);
     }
-    
     
     //  TODO:
     //  Ideally, you want to place the lairs in sectors where you don't find
@@ -174,6 +194,8 @@ public class ScenarioBlankMap extends Scenario {
     }
     
     Base.setPosture(base, stage.locals, Base.POSTURE.ENEMY, true);
+    //*/
+    return;
   }
   
   

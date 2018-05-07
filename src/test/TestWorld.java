@@ -403,7 +403,7 @@ public class TestWorld extends LogicTest {
     };
     
     for (int n = 0; n < 4; n++) {
-      Locale l = world.addLocale(
+      WorldLocale l = world.addLocale(
         2 + (2 * TileConstants.T_X[n * 2]),
         2 + (2 * TileConstants.T_Y[n * 2])
       );

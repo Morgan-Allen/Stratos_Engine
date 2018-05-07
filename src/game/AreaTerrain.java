@@ -169,7 +169,7 @@ public class AreaTerrain implements TileConstants {
   /**  Initial terrain setup-
     */
   public static Area generateTerrain(
-    World world, World.Locale locale, int size, int maxHigh, Terrain... gradient
+    World world, WorldLocale locale, int size, int maxHigh, Terrain... gradient
   ) {
     Area map = new Area(world, locale);
     map.performSetup(size, gradient);
