@@ -2,9 +2,6 @@
 
 package content;
 import game.*;
-import game.GameConstants.Target;
-import game.GameConstants.Trait;
-
 import static game.GameConstants.*;
 import static game.ActorTechnique.*;
 import static game.ActorTraits.*;
@@ -14,7 +11,7 @@ import util.*;
 
 
 
-public class TekPriest {
+public class SchoolTekPriest {
   
   
   final static String
@@ -36,7 +33,7 @@ public class TekPriest {
     ASSEMBLE_DURATION = 20
   ;
   final static PlaneFX.Model FX_MODEL = PlaneFX.imageModel(
-    "tek_fx_model", TekPriest.class,
+    "tek_fx_model", SchoolTekPriest.class,
     "media/SFX/tek_priest_psy.png", 0.5f, 0, 0.25f, true, true
   );
   
@@ -172,7 +169,7 @@ public class TekPriest {
   };
   static {
     DRONE_UPLINK.attachMedia(
-      TekPriest.class, "media/GUI/Powers/power_drone_uplink.png",
+      SchoolTekPriest.class, "media/GUI/Powers/power_drone_uplink.png",
       "Allows Drone minions to be controlled and/or hijacked, with a chance "+
       "to affect more powerful Artilects.",
       AnimNames.PSY_QUICK
@@ -246,7 +243,7 @@ public class TekPriest {
   };
   static {
     STASIS_FIELD.attachMedia(
-      TekPriest.class, "media/GUI/Powers/power_stasis_field.png",
+      SchoolTekPriest.class, "media/GUI/Powers/power_stasis_field.png",
       "Reduces the target's combat stats and slows all action for "+
       STASIS_DURATION+" seconds.",
       AnimNames.PSY_QUICK
@@ -322,7 +319,7 @@ public class TekPriest {
   };
   static {
     REASSEMBLY.attachMedia(
-      TekPriest.class, "media/GUI/Powers/power_reassembly.png",
+      SchoolTekPriest.class, "media/GUI/Powers/power_reassembly.png",
       "Regenerates the health of artilects or vehicles over "+
       ASSEMBLE_DURATION+" seconds.",
       AnimNames.PSY_QUICK
@@ -343,7 +340,7 @@ public class TekPriest {
   };
   static {
     TEK_PRIEST.name = "Tek Priest";
-    TEK_PRIEST.attachCostume(TekPriest.class, "tek_priest_skin.gif");
+    TEK_PRIEST.attachCostume(SchoolTekPriest.class, "tek_priest_skin.gif");
     
     TEK_PRIEST.maxHealth   = 12;
     TEK_PRIEST.meleeDamage = 0;

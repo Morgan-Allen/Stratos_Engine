@@ -1,10 +1,11 @@
 
 
 package test;
-import game.*;
 import static game.GameConstants.*;
+import game.*;
 import static content.GameContent.*;
-import content.*;
+import static content.SchoolShaper.*;
+//import content.*;
 import util.*;
 
 
@@ -37,7 +38,7 @@ public class TestPowersShaper {
       }
       
       boolean verifyEffect(Target subject, Actor caster) {
-        caster.traits.setClassLevel(Shaper.MAX_BEASTS_CL);
+        caster.traits.setClassLevel(MAX_BEASTS_CL);
         
         Actor master = toCharm.traits.bondedWith(ActorTraits.BOND_MASTER);
         if (master != caster) return false;
@@ -45,7 +46,7 @@ public class TestPowersShaper {
         return true;
       }
     };
-    return test.actorPowerTest(graphics, "PHEREMONE BOND", Shaper.PHEREMONE_BOND);
+    return test.actorPowerTest(graphics, "PHEREMONE BOND", PHEREMONE_BOND);
   }
   
   
@@ -56,7 +57,7 @@ public class TestPowersShaper {
     TestPowers.TestCondition test = new TestPowers.TestCondition(
       SCHOOL_SHA, ECOLOGIST, Tally.with(SKILL_EVADE, 1)
     );
-    return test.rulerPowerTest(graphics, "CAMOUFLAGE", Shaper.CAMOUFLAGE);
+    return test.rulerPowerTest(graphics, "CAMOUFLAGE", CAMOUFLAGE);
   }
   
   
@@ -80,7 +81,7 @@ public class TestPowersShaper {
         return true;
       }
     };
-    return test.rulerPowerTest(graphics, "REGENERATE", Shaper.REGENERATE);
+    return test.rulerPowerTest(graphics, "REGENERATE", REGENERATE);
   }
   
 }

@@ -11,7 +11,7 @@ import util.*;
 
 
 
-public class Collective {
+public class SchoolCollective {
   
   
   final static String
@@ -34,7 +34,7 @@ public class Collective {
     SYNERGY_GROUP_MULT     = 30
   ;
   final static PlaneFX.Model FX_MODEL = PlaneFX.imageModel(
-    "col_fx_model", Collective.class,
+    "col_fx_model", SchoolCollective.class,
     "media/SFX/collective_psy.png", 0.5f, 0, 0.25f, true, true
   );
   
@@ -100,7 +100,7 @@ public class Collective {
   };
   static {
     PSY_HEAL.attachMedia(
-      Collective.class, "media/GUI/Powers/power_psy_heal.png",
+      SchoolCollective.class, "media/GUI/Powers/power_psy_heal.png",
       "Heals the subject for up to "+PSY_HEAL_AMOUNT+" damage.",
       AnimNames.LOOK
     );
@@ -146,7 +146,7 @@ public class Collective {
   };
   static {
     SHIELD_HARMONICS.attachMedia(
-      Collective.class, "media/GUI/Powers/power_shield_harmonics.png",
+      SchoolCollective.class, "media/GUI/Powers/power_shield_harmonics.png",
       "Boosts target shields by "+HARMONICS_SHIELD_BONUS+" and provides a "+
       "mild bonus to defensive skills for "+HARMONICS_DURATION+" seconds.",
       AnimNames.PSY_QUICK
@@ -192,7 +192,7 @@ public class Collective {
   };
   static {
     SYNERGY.attachMedia(
-      Collective.class, "media/GUI/Powers/power_synergy.png",
+      SchoolCollective.class, "media/GUI/Powers/power_synergy.png",
       "Provides passive bonuses to diplomacy skills and health recovery.",
       AnimNames.PSY_QUICK
     );
@@ -214,7 +214,7 @@ public class Collective {
   };
   static {
     COLLECTIVE.name = "Collective";
-    COLLECTIVE.attachCostume(Collective.class, "collective_skin.gif");
+    COLLECTIVE.attachCostume(SchoolCollective.class, "collective_skin.gif");
     
     COLLECTIVE.maxHealth   = 12;
     COLLECTIVE.meleeDamage = 0;

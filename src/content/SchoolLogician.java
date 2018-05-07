@@ -1,17 +1,17 @@
 
 
 package content;
-import game.*;
-import game.Task.JOB;
 import static game.GameConstants.*;
 import static game.ActorTechnique.*;
+import game.*;
+import game.Task.JOB;
 import graphics.common.*;
 import graphics.sfx.*;
 import util.*;
 
 
 
-public class Logician {
+public class SchoolLogician {
   
   
   final static String
@@ -36,7 +36,7 @@ public class Logician {
     INTEG_DURATION  = 40 
   ;
   final static PlaneFX.Model FX_MODEL = PlaneFX.imageModel(
-    "log_fx_model", Logician.class,
+    "log_fx_model", SchoolLogician.class,
     "media/SFX/logician_psy.png", 0.5f, 0, 0.25f, true, true
   );
   
@@ -92,7 +92,7 @@ public class Logician {
   };
   static {
     CONCENTRATION.attachMedia(
-      Logician.class, "media/GUI/Powers/power_concentration.png",
+      SchoolLogician.class, "media/GUI/Powers/power_concentration.png",
       "Provides a modest long-term bonus to most skills and boosts Diligence,"+
       " at the cost of morale and fatigue.  Subject must stay awake.",
       AnimNames.PSY_QUICK
@@ -163,7 +163,7 @@ public class Logician {
   };
   static {
     INTEGRITY.attachMedia(
-      Logician.class, "media/GUI/Powers/power_integrity.png",
+      SchoolLogician.class, "media/GUI/Powers/power_integrity.png",
       "Temporarily boosts the subject's physical health and armour class.",
       AnimNames.PSY_QUICK
     );
@@ -227,7 +227,7 @@ public class Logician {
   };
   static {
     NERVE_STRIKE.attachMedia(
-      Logician.class, "media/GUI/Powers/power_nerve_strike.png",
+      SchoolLogician.class, "media/GUI/Powers/power_nerve_strike.png",
       "A debilitating close-range attack that inflicts nonlethal damage on "+
       "organic targets.",
       AnimNames.STRIKE
@@ -250,7 +250,7 @@ public class Logician {
   };
   static {
     LOGICIAN.name = "Logician";
-    LOGICIAN.attachCostume(Logician.class, "logician_skin.gif");
+    LOGICIAN.attachCostume(SchoolLogician.class, "logician_skin.gif");
     
     LOGICIAN.maxHealth   = 18;
     LOGICIAN.meleeDamage = 6;

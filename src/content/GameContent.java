@@ -796,9 +796,9 @@ public class GameContent {
     );
     SCHOOL_LOG.foundationModel = FOUNDATIONS[4];
     
-    SCHOOL_LOG.workerTypes.setWith(Logician.LOGICIAN, 2);
+    SCHOOL_LOG.workerTypes.setWith(SchoolLogician.LOGICIAN, 2);
     SCHOOL_LOG.rulerPowers = new ActorTechnique[] {
-      Logician.CONCENTRATION, Logician.INTEGRITY
+      SchoolLogician.CONCENTRATION, SchoolLogician.INTEGRITY
     };
     SCHOOL_LOG.opposites = new BuildType[] { SCHOOL_SHA };
     
@@ -809,9 +809,9 @@ public class GameContent {
     );
     SCHOOL_COL.foundationModel = FOUNDATIONS[4];
     
-    SCHOOL_COL.workerTypes.setWith(Collective.COLLECTIVE, 2);
+    SCHOOL_COL.workerTypes.setWith(SchoolCollective.COLLECTIVE, 2);
     SCHOOL_COL.rulerPowers = new ActorTechnique[] {
-      Collective.PSY_HEAL, Collective.SHIELD_HARMONICS
+      SchoolCollective.PSY_HEAL, SchoolCollective.SHIELD_HARMONICS
     };
     SCHOOL_COL.opposites = new BuildType[] { SCHOOL_TEK };
     
@@ -829,9 +829,9 @@ public class GameContent {
     );
     SCHOOL_SHA.foundationModel = FOUNDATIONS[4];
     
-    SCHOOL_SHA.workerTypes.setWith(Shaper.SHAPER, 2);
+    SCHOOL_SHA.workerTypes.setWith(SchoolShaper.SHAPER, 2);
     SCHOOL_SHA.rulerPowers = new ActorTechnique[] {
-      Shaper.CAMOUFLAGE, Shaper.REGENERATE
+      SchoolShaper.CAMOUFLAGE, SchoolShaper.REGENERATE
     };
     SCHOOL_SHA.opposites = new BuildType[] { SCHOOL_LOG };
     
@@ -842,9 +842,9 @@ public class GameContent {
     );
     SCHOOL_TEK.foundationModel = FOUNDATIONS[4];
     
-    SCHOOL_TEK.workerTypes.setWith(TekPriest.TEK_PRIEST, 2);
+    SCHOOL_TEK.workerTypes.setWith(SchoolTekPriest.TEK_PRIEST, 2);
     SCHOOL_TEK.rulerPowers = new ActorTechnique[] {
-      TekPriest.STASIS_FIELD, TekPriest.REASSEMBLY
+      SchoolTekPriest.STASIS_FIELD, SchoolTekPriest.REASSEMBLY
     };
     SCHOOL_TEK.opposites = new BuildType[] { SCHOOL_COL };
     

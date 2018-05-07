@@ -1,10 +1,10 @@
 
 
 package test;
-import game.*;
 import static game.GameConstants.*;
+import game.*;
 import static content.GameContent.*;
-import content.*;
+import static content.SchoolTekPriest.*;
 import util.*;
 
 
@@ -38,7 +38,7 @@ public class TestPowersTekPriest {
       
       boolean verifyEffect(Target subject, Actor caster) {
         
-        caster.traits.setClassLevel(TekPriest.MAX_DRONES_CL);
+        caster.traits.setClassLevel(MAX_DRONES_CL);
         
         if (toCharm.base() != caster.base()) return false;
         
@@ -50,10 +50,10 @@ public class TestPowersTekPriest {
           if (a.type().isConstruct()) numDrones += 1;
         }
         
-        return numDrones == TekPriest.MAX_DRONES;
+        return numDrones == MAX_DRONES;
       }
     };
-    return test.actorPowerTest(graphics, "DRONE UPLINK", TekPriest.DRONE_UPLINK);
+    return test.actorPowerTest(graphics, "DRONE UPLINK", DRONE_UPLINK);
   }
   
   
@@ -61,7 +61,7 @@ public class TestPowersTekPriest {
     TestPowers.TestCondition test = new TestPowers.TestCondition(
       SCHOOL_TEK, ECOLOGIST, Tally.with(SKILL_EVADE, -1, STAT_SPEED, -1)
     );
-    return test.rulerPowerTest(graphics, "STASIS FIELD", TekPriest.STASIS_FIELD);
+    return test.rulerPowerTest(graphics, "STASIS FIELD", STASIS_FIELD);
   }
   
   
@@ -85,7 +85,7 @@ public class TestPowersTekPriest {
         return true;
       }
     };
-    return test.rulerPowerTest(graphics, "REASSEMBLY", TekPriest.REASSEMBLY);
+    return test.rulerPowerTest(graphics, "REASSEMBLY", REASSEMBLY);
   }
   
 }

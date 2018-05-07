@@ -4,6 +4,7 @@ package test;
 import static game.GameConstants.*;
 import game.*;
 import static content.GameContent.*;
+import static content.SchoolLogician.*;
 import content.*;
 import util.*;
 
@@ -23,7 +24,7 @@ public class TestPowersLogician {
     TestPowers.TestCondition test = new TestPowers.TestCondition(
       SCHOOL_LOG, ECOLOGIST, Tally.with(TRAIT_DILIGENCE, 1, SKILL_WRITE, 1)
     );
-    return test.rulerPowerTest(graphics, "CONCENTRATION", Logician.CONCENTRATION);
+    return test.rulerPowerTest(graphics, "CONCENTRATION", CONCENTRATION);
   }
   
   
@@ -43,7 +44,7 @@ public class TestPowersLogician {
       boolean verifyEffect(Target subject, Actor caster) {
         Actor affects = (Actor) subject;
         if (! boostHP) {
-          boostHP = affects.health.maxHealth() >= initHP + Logician.INTEG_HEALTH;
+          boostHP = affects.health.maxHealth() >= initHP + INTEG_HEALTH;
           if (! boostHP) return false;
         }
         if (super.verifyEffect(subject, caster)) {
@@ -53,7 +54,7 @@ public class TestPowersLogician {
         return false;
       }
     };
-    return test.rulerPowerTest(graphics, "INTEGRITY", Logician.INTEGRITY);
+    return test.rulerPowerTest(graphics, "INTEGRITY", INTEGRITY);
   }
   
   
@@ -77,7 +78,7 @@ public class TestPowersLogician {
         Actor strikes = (Actor) subject;
         
         caster.traits.setClassLevel(MAX_CLASS_LEVEL);
-        int minTire = Logician.NERVE_DAMAGE - 1;
+        int minTire = NERVE_DAMAGE - 1;
         
         if (strikes.health.active() && ! Task.inCombat(caster)) {
           Task combat = TaskCombat.configHunting(caster, strikes);
@@ -101,7 +102,7 @@ public class TestPowersLogician {
         }
         //*/
         
-        if (! caster.health.hasCondition(Logician.INTEGRITY_CONDITION)) {
+        if (! caster.health.hasCondition(INTEGRITY_CONDITION)) {
           return false;
         }
         if (strikes.health.fatigue() < minTire) {
@@ -110,7 +111,7 @@ public class TestPowersLogician {
         return true;
       }
     };
-    return test.actorPowerTest(graphics, "NERVE STRIKE", Logician.NERVE_STRIKE);
+    return test.actorPowerTest(graphics, "NERVE STRIKE", NERVE_STRIKE);
   }
   
 }

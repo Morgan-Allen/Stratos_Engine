@@ -12,7 +12,7 @@ import util.*;
 
 
 
-public class Shaper {
+public class SchoolShaper {
   
   
   final static String
@@ -35,7 +35,7 @@ public class Shaper {
     REGEN_DURATION  = 40
   ;
   final static PlaneFX.Model FX_MODEL = PlaneFX.imageModel(
-    "sha_fx_model", Shaper.class,
+    "sha_fx_model", SchoolShaper.class,
     "media/SFX/shaper_psy.png", 0.5f, 0, 0.25f, true, true
   );
   
@@ -127,7 +127,7 @@ public class Shaper {
   };
   static {
     PHEREMONE_BOND.attachMedia(
-      Shaper.class, "media/GUI/Powers/pheremone_bond.png",
+      SchoolShaper.class, "media/GUI/Powers/pheremone_bond.png",
       "Allows animals to be tamed in service of the caster, with a chance to "+
       "affect other relationships.",
       AnimNames.PSY_QUICK
@@ -204,7 +204,7 @@ public class Shaper {
   };
   static {
     CAMOUFLAGE.attachMedia(
-      Shaper.class, "media/GUI/Powers/power_camouflage.png",
+      SchoolShaper.class, "media/GUI/Powers/power_camouflage.png",
       "Conceals an organic target from attack as long as they do not engage "+
       "enemies.",
       AnimNames.PSY_QUICK
@@ -267,7 +267,7 @@ public class Shaper {
   };
   static {
     REGENERATE.attachMedia(
-      Shaper.class, "media/GUI/Powers/power_regenerate.png",
+      SchoolShaper.class, "media/GUI/Powers/power_regenerate.png",
       "Regenerates the subject's health over "+REGEN_DURATION+" seconds. "+
       "Can be used to revive the recently dead.  Must target organics.",
       AnimNames.PSY_QUICK
@@ -288,7 +288,7 @@ public class Shaper {
   };
   static {
     SHAPER.name = "Shaper";
-    SHAPER.attachCostume(Shaper.class, "shaper_skin.gif");
+    SHAPER.attachCostume(SchoolShaper.class, "shaper_skin.gif");
     
     SHAPER.maxHealth   = 15;
     SHAPER.meleeDamage = 4;

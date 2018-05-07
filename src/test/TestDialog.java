@@ -30,7 +30,7 @@ public class TestDialog extends LogicTest {
     
     
     Actor sideA = (Actor) Trooper.TROOPER.generate();
-    Actor sideB = (Actor) Collective.COLLECTIVE.generate();
+    Actor sideB = (Actor) SchoolCollective.COLLECTIVE.generate();
     
     sideA.enterMap(map, 2, 2, 1, base);
     sideB.enterMap(map, 5, 5, 1, base);
