@@ -22,6 +22,17 @@ public class WorldCalendar {
   }
   
   
+  void loadState(Session s) throws Exception {
+    return;
+  }
+  
+  
+  void saveState(Session s) throws Exception {
+    return;
+  }
+  
+  
+  
   public int currentDay() {
     return world.time % DAY_LENGTH;
   }

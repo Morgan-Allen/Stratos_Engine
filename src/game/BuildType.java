@@ -46,12 +46,15 @@ public class BuildType extends Type {
   public Good   needed    [] = NO_GOODS;
   public Good   produced  [] = NO_GOODS;
   public int    maxStock     = AVG_MAX_STOCK;
+  
   public Tally <ActorType> workerTypes = new Tally();
+  int nestSpawnInterval = DAY_LENGTH;
   
   public Type gatherFlag = null;
   public int claimMargin = -1;
   public int gatherRange = AVG_GATHER_RANGE;
   public int maxDeliverRange = MAX_TRADER_RANGE;
+
   
 
   

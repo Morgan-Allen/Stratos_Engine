@@ -135,6 +135,7 @@ public class GameContent {
   }
   
   
+  
   final public static Terrain
     MEADOW = new Terrain("Meadow", "terr_meadow", 5),
     JUNGLE = new Terrain("Jungle", "terr_jungle", 4),
@@ -1089,45 +1090,6 @@ public class GameContent {
   
   
   
-  /**  Default geography:
-    */
-  static World setupDefaultWorld() {
-    World world = new World(ALL_GOODS);
-    Base  cityA = new Base(world, world.addLocale(1, 1, "Elysium Sector"));
-    Base  cityB = new Base(world, world.addLocale(3, 3, "Pavonis Sector"));
-    world.assignTypes(ALL_BUILDINGS, ALL_SHIPS(), ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES());
-    
-    cityA.setName("Elysium Base");
-    cityA.setTradeLevel(PARTS   , 0, 5 );
-    cityA.setTradeLevel(MEDICINE, 0, 10);
-    //cityA.initTradeLevels(
-    //  PARTS   , 5f ,
-    //  MEDICINE, 10f
-    //);
-    cityA.initBuildLevels(
-      TROOPER_LODGE, 2f ,
-      HOLDING      , 10f
-    );
-    world.addBases(cityA);
-    
-    cityB.setName("Pavonis Base");
-    cityB.setTradeLevel(CARBS, 0, 5 );
-    cityB.setTradeLevel(ORES , 0, 10);
-    //cityB.initTradeLevels(
-    //  CARBS, 5f ,
-    //  ORES , 10f
-    //);
-    cityA.initBuildLevels(
-      TROOPER_LODGE, 0.75f,
-      HOLDING      , 5f
-    );
-    world.addBases(cityB);
-    
-    World.setupRoute(cityA.locale, cityB.locale, AVG_CITY_DIST / 2, MOVE_LAND);
-    world.setMapSize(10, 10);
-    
-    return world;
-  }
   
 }
 

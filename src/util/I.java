@@ -4,7 +4,6 @@
   *  for now, feel free to poke around for non-commercial purposes.
   */
 package util;
-
 import java.awt.*;
 import java.awt.image.*;
 import javax.swing.*;

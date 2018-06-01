@@ -17,7 +17,7 @@ public class BuildingForNest extends Building {
   int spawnCountdown = 0;
   int maxResidents   = -1;
   boolean doRaids = false;
-
+  
   Building parent = null;
   Mission activeMission = null;
   

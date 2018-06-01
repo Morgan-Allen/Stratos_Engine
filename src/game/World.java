@@ -58,11 +58,12 @@ public class World implements Session.Saveable {
   
   int time = 0;
   final public WorldCalendar calendar = new WorldCalendar(this);
+  final List <WorldScenario> scenarios = new List();
   
-  List <WorldLocale > locales  = new List();
-  List <Base   > bases    = new List();
-  List <Journey> journeys = new List();
-  List <Event  > history  = new List();
+  List <WorldLocale> locales  = new List();
+  List <Base       > bases    = new List();
+  List <Journey    > journeys = new List();
+  List <Event      > history  = new List();
   
   //  Only used for graphical reference...
   int mapWide = 10, mapHigh = 10;
@@ -103,21 +104,10 @@ public class World implements Session.Saveable {
     nobleTypes   = (ActorType[]) s.loadObjectArray(ActorType.class);
     
     time = s.loadInt();
+    calendar.loadState(s);
     
-    for (int n = s.loadInt(); n-- > 0;) {
-      WorldLocale l = new WorldLocale();
-      l.mapX = s.loadFloat();
-      l.mapY = s.loadFloat();
-      locales.add(l);
-    }
-    for (WorldLocale l : locales) for (int d = s.loadInt(); d-- > 0;) {
-      WorldLocale with = locales.atIndex(s.loadInt());
-      Route route = new Route();
-      route.distance = s.loadInt();
-      route.moveMode = s.loadInt();
-      l.routes.put(with, route);
-    }
-    
+    s.loadObjects(scenarios);
+    s.loadObjects(locales);
     s.loadObjects(bases);
     
     for (int n = s.loadInt(); n-- > 0;) {
@@ -161,22 +151,10 @@ public class World implements Session.Saveable {
     s.saveObjectArray(nobleTypes  );
     
     s.saveInt(time);
+    calendar.saveState(s);
     
-    s.saveInt(locales.size());
-    for (WorldLocale l : locales) {
-      s.saveFloat(l.mapX);
-      s.saveFloat(l.mapY);
-    }
-    for (WorldLocale l : locales) {
-      s.saveInt(l.routes.size());
-      for (WorldLocale d : l.routes.keySet()) {
-        s.saveInt(locales.indexOf(d));
-        Route route = l.routes.get(d);
-        s.saveInt(route.distance);
-        s.saveInt(route.moveMode);
-      }
-    }
-    
+    s.saveObjects(scenarios);
+    s.saveObjects(locales);
     s.saveObjects(bases);
     
     s.saveInt(journeys.size());
@@ -271,6 +249,25 @@ public class World implements Session.Saveable {
   
   public Series <Base> bases() {
     return bases;
+  }
+  
+  
+  
+  /**  Managing Scenarios-
+    */
+  public void addScenario(WorldScenario scenario) {
+    scenarios.add(scenario);
+  }
+  
+  
+  public WorldScenario scenarioFor(WorldLocale locale) {
+    for (WorldScenario s : scenarios) if (s.locale == locale) return s;
+    return null;
+  }
+  
+  
+  public Series <WorldScenario> scenarios() {
+    return scenarios;
   }
   
   

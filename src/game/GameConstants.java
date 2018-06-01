@@ -435,6 +435,8 @@ public class GameConstants {
     IS_HUNTER   = NULL,
     IS_DEFENDER = NULL,
     //*/
+    DOES_RAIDS   = new Good("Does Raids"  , -1),
+    DOES_CONTACT = new Good("Does Contact", -1),
     
     DIVERSION  = new Good("Diversion"   , -1 ),
     EDUCATION  = new Good("Education"   , -1 ),

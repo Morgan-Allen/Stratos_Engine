@@ -3,6 +3,7 @@
 
 package start;
 import content.*;
+import game.*;
 import util.*;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
@@ -16,11 +17,26 @@ public class DesktopLauncher {
   public final static int
     DEFAULT_WIDTH  = 1200,
     DEFAULT_HEIGHT = 720,
-    DEFAULT_HERTZ  = 60;
+    DEFAULT_HERTZ  = 60
+  ;
   
   
   public static void main(String[] arg) {
-    launchScenario(new ScenarioBlankMap());
+    
+    World world = GameWorld.setupDefaultWorld();
+    WorldScenario s = world.scenarios().first();
+    
+    Base homeland = world.baseNamed("Homeland Base");
+    List <BuildType> buildings = new List();
+    List <Actor> staff = new List();
+    Visit.appendTo(buildings, GameContent.RULER_BUILT);
+    
+    s.setPlayerLanding(
+      GameWorld.FACTION_SETTLERS, 5000,
+      homeland, buildings, staff
+    );
+    
+    launchScenario(s);
   }
   
   
