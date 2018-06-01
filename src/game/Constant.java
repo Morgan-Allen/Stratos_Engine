@@ -10,6 +10,7 @@ public class Constant extends Index.Entry implements Session.Saveable {
   
   
   final public static int
+    IS_STORY       = -300,
     IS_MEDIA       = -200,
     IS_TRAIT       = -100,
     IS_TERRAIN     =  0,

@@ -4,6 +4,7 @@ package game;
 import start.*;
 import static game.GameConstants.*;
 import util.*;
+import java.lang.reflect.*;
 
 
 
@@ -13,7 +14,119 @@ import util.*;
 public class WorldScenario extends Scenario {
   
   
-  /**  Config-classes and related factory methods-
+  
+  /**  Data fields, construction and save/load methods-
+    */
+  final public static int
+    COMPLETE_NONE    = -1,
+    COMPLETE_FAILED  =  0,
+    COMPLETE_SUCCESS =  1
+  ;
+  
+  World initWorld;
+  WorldLocale locale;
+  AreaConfig config;
+  
+  Faction landFaction;
+  int landFunds = 0;
+  Base landHomeland = null;
+  List <BuildType> landBuilt  = new List();
+  List <Actor    > landStaff  = new List();
+  List <Objective> objectives = new List();
+  
+  List <BuildingForNest> nests = new List();
+  
+  String savePath = "saves/save_locale.str";
+  
+  
+  
+  public WorldScenario(AreaConfig config, World world, WorldLocale locale) {
+    super();
+    this.initWorld = world ;
+    this.locale    = locale;
+    this.config    = config;
+  }
+  
+  
+  public WorldScenario(Session s) throws Exception {
+    super(s);
+    
+    initWorld = (World) s.loadObject();
+    locale    = (WorldLocale) s.loadObject();
+    config    = loadAreaConfig(s);
+    
+    landFaction  = (Faction) s.loadObject();
+    landFunds    = s.loadInt();
+    landHomeland = (Base) s.loadObject();
+    s.loadObjects(landBuilt );
+    s.loadObjects(landStaff );
+    s.loadObjects(objectives);
+    
+    s.loadObjects(nests);
+    
+    savePath = s.loadString();
+  }
+  
+  
+  public void saveState(Session s) throws Exception {
+    super.saveState(s);
+    
+    s.saveObject(initWorld);
+    s.saveObject(locale);
+    saveAreaConfig(config, s);
+    
+    s.saveObject(landFaction);
+    s.saveInt(landFunds);
+    s.saveObject(landHomeland);
+    s.saveObjects(landBuilt );
+    s.saveObjects(landStaff );
+    s.saveObjects(objectives);
+    
+    s.saveObjects(nests);
+    
+    s.saveString(savePath);
+  }
+  
+  
+  
+  /**  Initialising area-information:
+    */
+  public static class AreaConfig {
+    int mapSize;
+    Terrain gradient[];
+    List <SiteConfig> sites = new List();
+  }
+  
+  public static AreaConfig areaConfig(
+    int mapSize,
+    Terrain gradient[],
+    SiteConfig... sites
+  ) {
+    AreaConfig c = new AreaConfig();
+    c.mapSize = mapSize;
+    c.gradient = gradient;
+    for (SiteConfig s : sites) c.sites.add(s);
+    return c;
+  }
+  
+  static AreaConfig loadAreaConfig(Session s) throws Exception {
+    AreaConfig c = new AreaConfig();
+    c.mapSize = s.loadInt();
+    c.gradient = (Terrain[]) s.loadObjectArray(Terrain.class);
+    for (int n = s.loadInt(); n-- > 0;) c.sites.add(loadSiteConfig(s));
+    return c;
+  }
+  
+  static void saveAreaConfig(AreaConfig c, Session s) throws Exception {
+    s.saveInt(c.mapSize);
+    s.saveObjectArray(c.gradient);
+    s.saveInt(c.sites.size());
+    for (SiteConfig site : c.sites) saveSiteConfig(site, s);
+  }
+  
+  
+  
+  /**  Initialising site-information:
     */
   public static class SiteConfig {
     Faction belongs;
@@ -60,112 +173,31 @@ public class WorldScenario extends Scenario {
     for (SiteConfig site : c.children) saveSiteConfig(site, s);
   }
   
-  
-  public static class AreaConfig {
-    int mapSize;
-    Terrain gradient[];
-    List <SiteConfig> sites = new List();
-  }
-  
-  public static AreaConfig areaConfig(
-    int mapSize,
-    Terrain gradient[],
-    SiteConfig... sites
-  ) {
-    AreaConfig c = new AreaConfig();
-    c.mapSize = mapSize;
-    c.gradient = gradient;
-    for (SiteConfig s : sites) c.sites.add(s);
-    return c;
-  }
-  
-  static AreaConfig loadAreaConfig(Session s) throws Exception {
-    AreaConfig c = new AreaConfig();
-    c.mapSize = s.loadInt();
-    c.gradient = (Terrain[]) s.loadObjectArray(Terrain.class);
-    for (int n = s.loadInt(); n-- > 0;) c.sites.add(loadSiteConfig(s));
-    return c;
-  }
-  
-  static void saveAreaConfig(AreaConfig c, Session s) throws Exception {
-    s.saveInt(c.mapSize);
-    s.saveObjectArray(c.gradient);
-    s.saveInt(c.sites.size());
-    for (SiteConfig site : c.sites) saveSiteConfig(site, s);
-  }
-  
-  
-  
-  
-  /**  Data fields, construction and save/load methods-
+
+  /**  Supplemental setup methods that allow for player-entry and objectives-
     */
-  final public static int
-    COMPLETE_NONE    = -1,
-    COMPLETE_FAILED  =  0,
-    COMPLETE_SUCCESS =  1
-  ;
-  
-  World initWorld;
-  WorldLocale locale;
-  AreaConfig config;
-  
-  Faction landFaction;
-  int landFunds = 0;
-  Base landHomeland = null;
-  List <BuildType> landBuilt = new List();
-  List <Actor    > landStaff = new List();
-  
-  String savePath = "saves/save_locale.str";
-  
-  List <BuildingForNest> nests = new List();
-  
-  
-  
-  public WorldScenario(AreaConfig config, World world, WorldLocale locale) {
-    super();
-    this.initWorld = world ;
-    this.locale    = locale;
-    this.config    = config;
+  public static class Objective extends Constant {
+    
+    String description;
+    Method checkMethod;
+    
+    public Objective(
+      Class baseClass, String ID, String description, String checkMethod
+    ) {
+      super(baseClass, ID, IS_STORY);
+      this.description = description;
+      try { this.checkMethod = baseClass.getDeclaredMethod(checkMethod); }
+      catch (Exception e) { this.checkMethod = null; }
+    }
+    
+    protected int checkCompletion(WorldScenario scenario) {
+      if (checkMethod == null) return COMPLETE_NONE;
+      try { return (Integer) checkMethod.invoke(scenario); }
+      catch (Exception e) { return COMPLETE_NONE; }
+    }
   }
   
   
-  public WorldScenario(Session s) throws Exception {
-    super(s);
-    
-    initWorld = (World) s.loadObject();
-    locale    = (WorldLocale) s.loadObject();
-    config    = loadAreaConfig(s);
-    
-    landFaction  = (Faction) s.loadObject();
-    landFunds    = s.loadInt();
-    landHomeland = (Base) s.loadObject();
-    s.loadObjects(landBuilt);
-    s.loadObjects(landStaff);
-    
-    s.loadObjects(nests);
-  }
-  
-  
-  public void saveState(Session s) throws Exception {
-    super.saveState(s);
-    
-    s.saveObject(initWorld);
-    s.saveObject(locale);
-    saveAreaConfig(config, s);
-    
-    s.saveObject(landFaction);
-    s.saveInt(landFunds);
-    s.saveObject(landHomeland);
-    s.saveObjects(landBuilt);
-    s.saveObjects(landStaff);
-    
-    s.saveObjects(nests);
-  }
-  
-  
-  
-  /**  Supplemental setup methods that allow for player-entry:
-    */
   public void setPlayerLanding(
     Faction faction, int funds, Base homeland,
     Series <BuildType> buildings, Series <Actor> staff
@@ -177,6 +209,12 @@ public class WorldScenario extends Scenario {
     landStaff.clear();
     Visit.appendTo(landBuilt, buildings);
     Visit.appendTo(landStaff, staff);
+  }
+  
+  
+  public void assignObjectives(Objective... objectives) {
+    this.objectives.clear();
+    Visit.appendTo(this.objectives, objectives);
   }
   
   
@@ -324,26 +362,30 @@ public class WorldScenario extends Scenario {
   }
   
   
-  protected int checkCompletion() {
-    return COMPLETE_NONE;
-  }
-  
-  
   public void updateScenario() {
     super.updateScenario();
     
-    int check = checkCompletion();
-    if (check != COMPLETE_NONE) {
-      //  TODO:  Exit to screen or give option to continue...
-      I.say("SCENARIO COMPLETE! "+this);
+    int checkState = COMPLETE_NONE;
+    boolean allObjects = true;
+    
+    for (Objective o : objectives) {
+      int check = o.checkCompletion(this);
+      if (check == COMPLETE_FAILED ) checkState = COMPLETE_FAILED;
+      if (check != COMPLETE_SUCCESS) allObjects = false;
     }
+    if (allObjects) checkState = COMPLETE_SUCCESS;
+    
+    if (checkState != COMPLETE_NONE) {
+      //  TODO:  Exit to main screen or give option to continue!
+      I.say("\nSCENARIO COMPLETE! "+this);
+      I.say("  RESULT: "+checkState);
+      MainGame.playScenario(null);
+    }
+    
   }
   
   
 }
-
-
-
 
 
 

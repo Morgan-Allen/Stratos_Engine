@@ -20,10 +20,18 @@ public class ScenarioSectorA extends WorldScenario {
       64, new Terrain[] { MEADOW, JUNGLE, DESERT },
       SITE_A
     );
+  final static Objective
+    MAIN_OBJECTIVE = new Objective(
+      ScenarioSectorA.class, "main_ob_SA",
+      "Destroy all ruins on the map.",
+      "checkMainObjective"
+    );
+  
   
   
   protected ScenarioSectorA(World world, WorldLocale locale) {
     super(AREA_A, world, locale);
+    assignObjectives(MAIN_OBJECTIVE);
   }
   
   
@@ -37,9 +45,7 @@ public class ScenarioSectorA extends WorldScenario {
   }
   
   
-
-  
-  protected int checkCompletion() {
+  protected int checkMainObjective() {
     boolean allRazed = false;
     
     for (Building b : nests()) {
@@ -49,8 +55,6 @@ public class ScenarioSectorA extends WorldScenario {
     if (allRazed) return COMPLETE_SUCCESS;
     return COMPLETE_NONE;
   }
-  
-  
   
 }
 
