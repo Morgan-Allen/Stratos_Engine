@@ -1062,6 +1062,7 @@ public class GameContent {
   }
   
   
+  
   final public static BuildType
     RUINS_LAIR = new BuildType(BuildingForNest.class, "nest_ruins_lair", IS_NEST_BLD),
     
@@ -1072,7 +1073,6 @@ public class GameContent {
     ALL_NESTS[] = { RUINS_LAIR };
   
   static {
-    //*
     RUINS_LAIR.modelVariants = CutoutModel.fromImages(
       GameContent.class, "model_ruins",
       "media/Lairs/", 3, 1, false,
@@ -1080,7 +1080,6 @@ public class GameContent {
       "ruins_b.png",
       "ruins_c.png"
     );
-    //*/
     RUINS_LAIR.name = "Ruins";
     RUINS_LAIR.tint = TINT_LITE_INDUSTRIAL;
     RUINS_LAIR.setDimensions(3, 3, 1, THIN_MARGIN);
@@ -1088,10 +1087,11 @@ public class GameContent {
     RUINS_LAIR.maxHealth = 300;
   }
   
-  
-  
-  
 }
+
+
+
+
 
 
 

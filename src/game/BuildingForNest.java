@@ -12,11 +12,12 @@ public class BuildingForNest extends Building {
   
   /**  Data fields, construction and save/load methods-
     */
-  Tally <ActorType> spawnChances = new Tally();
   int spawnInterval  = DAY_LENGTH;
-  int spawnCountdown = 0;
+  Tally <ActorType> spawnChances = new Tally();
+  int spawnCountdown =  0;
   int maxResidents   = -1;
-  boolean doRaids = false;
+  boolean doRaids   = false;
+  boolean doContact = false;
   
   Building parent = null;
   Mission activeMission = null;
@@ -25,7 +26,11 @@ public class BuildingForNest extends Building {
   
   public BuildingForNest(BuildType type) {
     super(type);
-    maxResidents = type.maxResidents;
+    maxResidents  = type.maxResidents;
+    spawnInterval = type.nestSpawnInterval;
+    spawnChances.add(type.workerTypes);
+    doRaids   = type.hasFeature(DOES_RAIDS);
+    doContact = type.hasFeature(DOES_CONTACT);
   }
   
   
@@ -33,10 +38,11 @@ public class BuildingForNest extends Building {
     super(s);
     
     s.loadTally(spawnChances);
-    spawnInterval = s.loadInt();
+    spawnInterval  = s.loadInt();
     spawnCountdown = s.loadInt();
-    maxResidents = s.loadInt();
-    doRaids = s.loadBool();
+    maxResidents   = s.loadInt();
+    doRaids   = s.loadBool();
+    doContact = s.loadBool();
     
     parent = (Building) s.loadObject();
     activeMission = (Mission) s.loadObject();
@@ -47,10 +53,11 @@ public class BuildingForNest extends Building {
     super.saveState(s);
     
     s.saveTally(spawnChances);
-    s.saveInt(spawnInterval);
+    s.saveInt(spawnInterval );
     s.saveInt(spawnCountdown);
-    s.saveInt(maxResidents);
-    s.saveBool(doRaids);
+    s.saveInt(maxResidents  );
+    s.saveBool(doRaids  );
+    s.saveBool(doContact);
     
     s.saveObject(parent);
     s.saveObject(activeMission);

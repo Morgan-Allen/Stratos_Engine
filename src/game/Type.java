@@ -253,6 +253,11 @@ public class Type extends Constant {
   }
   
   
+  public boolean isNestBuilding() {
+    return category == IS_NEST_BLD;
+  }
+  
+  
   public boolean hasFeature(Good feature) {
     return Visit.arrayIncludes(features, feature);
   }

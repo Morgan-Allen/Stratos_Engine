@@ -9,10 +9,7 @@ import java.lang.reflect.*;
 
 
 
-
-
 public class WorldScenario extends Scenario {
-  
   
   
   /**  Data fields, construction and save/load methods-
@@ -34,7 +31,7 @@ public class WorldScenario extends Scenario {
   List <Actor    > landStaff  = new List();
   List <Objective> objectives = new List();
   
-  List <BuildingForNest> nests = new List();
+  List <Building> nests = new List();
   
   String savePath = "saves/save_locale.str";
   
@@ -179,15 +176,20 @@ public class WorldScenario extends Scenario {
   public static class Objective extends Constant {
     
     String description;
+    
+    Class baseClass;
     Method checkMethod;
     
     public Objective(
       Class baseClass, String ID, String description, String checkMethod
     ) {
-      super(baseClass, ID, IS_STORY);
-      this.description = description;
+      super(null, ID, IS_STORY);
+      
+      this.baseClass = baseClass;
       try { this.checkMethod = baseClass.getDeclaredMethod(checkMethod); }
       catch (Exception e) { this.checkMethod = null; }
+      
+      this.description = description;
     }
     
     protected int checkCompletion(WorldScenario scenario) {
@@ -289,7 +291,7 @@ public class WorldScenario extends Scenario {
     if (landing != null) {
       SiteConfig landSite = siteConfig(landFaction, null, 0, 0);
       for (BuildType b : landBuilt) siteConfig(landSite, b, 1, 1);
-      bastion = placeSite(landSite, stage, landing);
+      bastion = placeSite(landSite, stage, landing, null);
     }
     
     if (bastion != null) {
@@ -328,30 +330,35 @@ public class WorldScenario extends Scenario {
     
     for (SiteConfig site : config.sites) if (options.size() > 0) {
       SiteOption o = options.removeFirst();
-      placeSite(site, stage, o.at);
+      placeSite(site, stage, o.at, null);
     }
   }
   
   
-  protected Building placeSite(SiteConfig site, Area stage, AreaTile at) {
-    
+  protected Building placeSite(
+    SiteConfig site, Area stage, AreaTile at, Building parent
+  ) {
     int numB = Rand.range(site.minCount, site.maxCount);
-    Building placed = null;
+    Building placed = null, firstKid = null;
     
     if (site.siteType != null) while (numB-- > 0) {
-      BuildingForNest nest = (BuildingForNest) site.siteType.generate();
-      AreaTile goes = ActorUtils.findEntryPoint(nest, stage, at, MAX_PLACE_RANGE);
-      nest.enterMap(stage, goes.x, goes.y, 1, stage.locals);
-      //  TODO:  Set up spawn-arguments!
-      //nest.assignSpawnParameters(DAY_LENGTH * 3, 2, false, spawnArgs);
-      if (placed == null) placed = nest;
-      nests.add(nest);
+      placed = (Building) site.siteType.generate();
+      AreaTile goes = ActorUtils.findEntryPoint(placed, stage, at, MAX_PLACE_RANGE);
+      placed.enterMap(stage, goes.x, goes.y, 1, stage.locals);
+      
+      if (site.siteType.isNestBuilding()) {
+        BuildingForNest nest = (BuildingForNest) placed;
+        nest.parent = parent;
+      }
+      
+      nests.add(placed);
     }
     
-    for (SiteConfig kid : site.children) {
-      Building kidB = placeSite(kid, stage, at);
-      if (placed == null) placed = kidB;
+    for (SiteConfig kidSite : site.children) {
+      Building kid = placeSite(kidSite, stage, at, placed);
+      if (firstKid == null) firstKid = kid;
     }
+    if (placed == null) placed = firstKid;
     
     return placed;
   }

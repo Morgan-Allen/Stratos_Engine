@@ -4,16 +4,26 @@ package content;
 import game.*;
 import static game.GameConstants.*;
 import static content.GameContent.*;
+import util.*;
 
 
 
 public class ScenarioSectorA extends WorldScenario {
   
   
+  final static BuildType
+    LAIR_A = new BuildType(BuildingForNest.class, "lair_AA", Type.IS_NEST_BLD)
+  ;
+  static {
+    LAIR_A.initFromTemplate(RUINS_LAIR);
+    LAIR_A.workerTypes = Tally.with(DRONE, 2, TRIPOD, 1);
+    LAIR_A.setFeatures(DOES_RAIDS);
+  }
+  
   final static SiteConfig
     SITE_A = WorldScenario.siteConfig(
       GameWorld.FACTION_ARTILECTS,
-      GameContent.RUINS_LAIR, 1, 1
+      LAIR_A, 1, 1
     );
   final static AreaConfig
     AREA_A = WorldScenario.areaConfig(

@@ -78,6 +78,23 @@ public class BuildType extends Type {
     this.features = features;
   }
   
+  
+  public void initFromTemplate(BuildType other) {
+    
+    this.model = other.model;
+    this.modelVariants = other.modelVariants;
+    this.name = other.name;
+    this.tint = other.tint;
+    
+    this.setDimensions(other.wide, other.high, other.deep, other.clearMargin);
+    this.claimMargin = other.claimMargin;
+    this.builtFrom   = other.builtFrom;
+    this.builtAmount = other.builtAmount;
+    this.maxHealth   = other.maxHealth;
+    this.armourClass = other.armourClass;
+  }
+  
+  
 
   public boolean rulerCanBuild(Base ruler, Area map) {
     if (! super.rulerCanBuild(ruler, map)) return false;
