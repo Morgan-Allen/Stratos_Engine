@@ -14,12 +14,6 @@ public class WorldScenario extends Scenario {
   
   /**  Data fields, construction and save/load methods-
     */
-  final public static int
-    COMPLETE_NONE    = -1,
-    COMPLETE_FAILED  =  0,
-    COMPLETE_SUCCESS =  1
-  ;
-  
   World initWorld;
   WorldLocale locale;
   AreaConfig config;
@@ -173,33 +167,6 @@ public class WorldScenario extends Scenario {
 
   /**  Supplemental setup methods that allow for player-entry and objectives-
     */
-  public static class Objective extends Constant {
-    
-    String description;
-    
-    Class baseClass;
-    Method checkMethod;
-    
-    public Objective(
-      Class baseClass, String ID, String description, String checkMethod
-    ) {
-      super(null, ID, IS_STORY);
-      
-      this.baseClass = baseClass;
-      try { this.checkMethod = baseClass.getDeclaredMethod(checkMethod); }
-      catch (Exception e) { this.checkMethod = null; }
-      
-      this.description = description;
-    }
-    
-    protected int checkCompletion(WorldScenario scenario) {
-      if (checkMethod == null) return COMPLETE_NONE;
-      try { return (Integer) checkMethod.invoke(scenario); }
-      catch (Exception e) { return COMPLETE_NONE; }
-    }
-  }
-  
-  
   public void setPlayerLanding(
     Faction faction, int funds, Base homeland,
     Series <Actor> staff, BuildType... buildings
@@ -216,6 +183,11 @@ public class WorldScenario extends Scenario {
   public void assignObjectives(Objective... objectives) {
     this.objectives.clear();
     Visit.appendTo(this.objectives, objectives);
+  }
+  
+  
+  public Series <Objective> objectives() {
+    return objectives;
   }
   
   

@@ -117,7 +117,7 @@ public class PlayUI extends HUD implements UIConstants {
     
     reminders = new ReminderListing(this);
     reminders.alignHorizontal(20, 0);
-    reminders.alignVertical(40, 40);
+    reminders.alignVertical(0, 0);
     reminders.attachTo(detailArea);
     
     optionList = new OptionList(this);

@@ -6,6 +6,7 @@
 package gameUI.play;
 import gameUI.misc.*;
 import graphics.widgets.*;
+import start.*;
 import game.*;
 import util.*;
 
@@ -49,7 +50,9 @@ public class ReminderListing extends UIGroup {
   
   
   private Entry entryThatRefers(Object refers) {
-    for (Entry e : entries) if (e.refers == refers) return e;
+    for (Entry e : entries) {
+      if (e.refers == refers) return e;
+    }
     return null;
   }
   
@@ -67,6 +70,9 @@ public class ReminderListing extends UIGroup {
     Entry entry = null;
     if (refers instanceof Mission) {
       entry = new MissionReminder(UI, (Mission) refers);
+    }
+    if (refers instanceof Scenario.Objective) {
+      entry = new ObjectiveReminder(UI, (Scenario.Objective) refers);
     }
     /*
     if (refers instanceof MessagePane) {
@@ -107,8 +113,12 @@ public class ReminderListing extends UIGroup {
     //  Include all currently ongoing missions and any special messages:
     List <Object> needShow = new List <Object> ();
     final Base played = UI.base;
+    Scenario scenario = MainGame.currentScenario();
     //final float currentTime = played.world.time();
     
+    for (Scenario.Objective objective : scenario.objectives()) {
+      needShow.add(objective);
+    }
     for (final Mission mission : played.missions()) {
       needShow.add(mission);
     }

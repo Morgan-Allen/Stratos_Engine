@@ -5,6 +5,8 @@ package start;
 import game.*;
 import gameUI.play.*;
 import graphics.common.*;
+import util.*;
+import java.lang.reflect.Method;
 
 
 
@@ -82,6 +84,9 @@ public abstract class Scenario implements Session.Saveable {
   }
   
   
+  
+  /**  Regular update and access methods-
+    */
   public void updateScenario() {
     area.update(PlayLoop.UPDATES_PER_SECOND);
   }
@@ -92,6 +97,55 @@ public abstract class Scenario implements Session.Saveable {
   public World world() { return world; }
   
   
+  
+  /**  Defining and evaluating objectives-
+    */
+  final public static int
+    COMPLETE_NONE    = -1,
+    COMPLETE_FAILED  =  0,
+    COMPLETE_SUCCESS =  1
+  ;
+
+  public static class Objective extends Constant {
+    
+    String description;
+    
+    Class baseClass;
+    Method checkMethod;
+    
+    
+    public Objective(
+      Class baseClass, String ID, String description, String checkMethod
+    ) {
+      super(null, ID, IS_STORY);
+      
+      this.baseClass = baseClass;
+      try { this.checkMethod = baseClass.getDeclaredMethod(checkMethod); }
+      catch (Exception e) { this.checkMethod = null; }
+      
+      this.description = description;
+    }
+    
+    public int checkCompletion(Scenario scenario) {
+      if (checkMethod == null) return COMPLETE_NONE;
+      try { return (Integer) checkMethod.invoke(scenario); }
+      catch (Exception e) { return COMPLETE_NONE; }
+    }
+    
+    public String description() {
+      return description;
+    }
+  }
+  
+  
+  public Series <Objective> objectives() {
+    return new Batch();
+  }
+  
+  
+  
+  /**  Graphical, UI and debug methods-
+    */
   public void renderVisuals(Rendering rendering) {
     area.renderStage(rendering, base);
   }

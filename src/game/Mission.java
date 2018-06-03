@@ -486,6 +486,8 @@ public abstract class Mission implements
   
   public void renderFlag(Rendering rendering) {
     if (flag == null) {
+      I.say("?");
+      
       Type type = flagMedia();
       if (type == null || type.model == null) {
         flag   = null;

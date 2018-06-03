@@ -318,7 +318,7 @@ public class TaskBuilding extends Task {
     
     actor.traits.gainXP(skill, 1 * BUILD_XP_PERCENT / 100f);
     
-    puts = Nums.min(puts, amountGot);
+    puts = Nums.min(puts, Nums.min(amountGot, amountGap));
     puts = b.incMaterialLevel(material, puts) - oldM;
     
     //  NOTE:  This is important for avoiding rare loop-conditions with very
