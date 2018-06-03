@@ -11,5 +11,5 @@ public interface PlayTask {
   
   void doTask(PlayUI UI);
   
-  Texture cursor();
+  ImageAsset cursor();
 }

@@ -94,7 +94,7 @@ public class PaneBuildOptions extends DetailPane {
         }
       }
       
-      public Texture cursor() {
+      public ImageAsset cursor() {
         return null;
       }
     };

@@ -253,8 +253,8 @@ public class PlayUI extends HUD implements UIConstants {
     }
     catch (Exception e) { I.report(e); }
     
-    Texture cursorTex = currentTask == null ? null : currentTask.cursor();
-    if (cursorTex == null) cursorTex = DEFAULT_CURSOR.asTexture();
+    ImageAsset cursorTex = currentTask == null ? null : currentTask.cursor();
+    if (cursorTex == null) cursorTex = DEFAULT_CURSOR;
     cursor.setBaseTexture(cursorTex);
     
     if (currentTask != null) {

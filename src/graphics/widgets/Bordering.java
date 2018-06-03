@@ -15,7 +15,8 @@ import graphics.common.*;
 public class Bordering extends UIGroup {
   
   
-  final Texture borderTex;
+  //final Texture borderTex;
+  final ImageAsset borderTex;
   final public UIGroup inside;
   public int
     left   = 10, right = 10,
@@ -27,7 +28,7 @@ public class Bordering extends UIGroup {
   
   public Bordering(HUD UI, ImageAsset tex) {
     super(UI);
-    this.borderTex = tex.asTexture();
+    this.borderTex = tex;
     this.inside = new UIGroup(UI);
     inside.attachTo(this);
   }
@@ -92,7 +93,7 @@ public class Bordering extends UIGroup {
       pass, bounds,
       left, right, top, bottom,
       leftU, rightU, bottomV, topV,
-      borderTex, Colour.transparency(absAlpha)
+      borderTex.asTexture(), Colour.transparency(absAlpha)
     );
     super.render(pass);
   }

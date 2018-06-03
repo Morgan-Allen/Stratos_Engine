@@ -158,8 +158,8 @@ public class OptionList extends UIGroup implements UIConstants {
           }
         }
         
-        public Texture cursor() {
-          return canUse ? texture : ILLEGAL_ACTION_IMG.asTexture();
+        public ImageAsset cursor() {
+          return canUse ? texture : ILLEGAL_ACTION_IMG;
         }
       };
       BUI.assignTask(task);
@@ -205,8 +205,8 @@ public class OptionList extends UIGroup implements UIConstants {
           }
         }
         
-        public Texture cursor() {
-          return canUse ? texture : ILLEGAL_ACTION_IMG.asTexture();
+        public ImageAsset cursor() {
+          return canUse ? texture : ILLEGAL_ACTION_IMG;
         }
       };
       BUI.assignTask(task);

@@ -33,7 +33,7 @@ public class Button extends Image {
     );
   
   
-  protected Texture   highlit;
+  protected ImageAsset highlit;
   protected String    info   ;
   protected Clickable links  ;
   
@@ -48,26 +48,12 @@ public class Button extends Image {
   public Button(
     HUD UI, String widgetID, ImageAsset norm, String infoS
   ) {
-    this(UI, widgetID, norm.asTexture(), DEFAULT_LIT.asTexture(), infoS);
+    this(UI, widgetID, norm, DEFAULT_LIT, infoS);
   }
   
-
+  
   public Button(
     HUD UI, String widgetID, ImageAsset norm, ImageAsset lit, String infoS
-  ) {
-    this(UI, widgetID, norm.asTexture(), lit.asTexture(), infoS);
-  }
-  
-  
-  public Button(
-    HUD UI, String widgetID, Texture norm, String infoS
-  ) {
-    this(UI, widgetID, norm, DEFAULT_LIT.asTexture(), infoS);
-  }
-  
-  
-  public Button(
-    HUD UI, String widgetID, Texture norm, Texture lit, String infoS
   ) {
     super(UI, norm);
     setWidgetID(widgetID);
@@ -82,7 +68,7 @@ public class Button extends Image {
   }
   
   
-  public void setHighlight(Texture h) {
+  public void setHighlight(ImageAsset h) {
     this.highlit = h;
   }
   
@@ -147,15 +133,15 @@ public class Button extends Image {
     super.render(pass);
     if (! enabled) return;
     if (toggled()) {
-      super.renderTex(highlit, absAlpha, pass);
+      super.renderTex(highlit.asTexture(), absAlpha, pass);
     }
     else if (amPressed() || amDragged() || amClicked()) {
-      super.renderTex(highlit, pressLit * absAlpha, pass);
+      super.renderTex(highlit.asTexture(), pressLit * absAlpha, pass);
     }
     else if (amHovered()) {
       float alpha = absAlpha * hoverLit;
       alpha *= Nums.clamp(UI.timeHovered() / DEFAULT_FADE_TIME, 0, 1);
-      super.renderTex(highlit, alpha, pass);
+      super.renderTex(highlit.asTexture(), alpha, pass);
     }
   }
 }

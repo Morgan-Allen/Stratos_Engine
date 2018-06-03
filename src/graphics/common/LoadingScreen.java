@@ -36,12 +36,14 @@ public class LoadingScreen extends HUD {
   
   public void renderHUD(Rendering rendering) {
     if (! initDone) {
-      final Image blankImage = new Image(this, this.backImage);
+      final Image blankImage = new Image(this, Image.SOLID_WHITE);
+      blankImage.setCustomTexture(ImageAsset.getTexture(this.backImage));
       blankImage.alignToFill();
       blankImage.stretch = true;
       blankImage.attachTo(this);
       
-      final Image titleImage = new Image(this, this.titleImage);
+      final Image titleImage = new Image(this, Image.SOLID_WHITE);
+      titleImage.setCustomTexture(ImageAsset.getTexture(this.titleImage));
       titleImage.alignToCentre();
       titleImage.expandToTexSize(1, true);
       titleImage.lockToPixels = true;

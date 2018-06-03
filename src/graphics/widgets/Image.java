@@ -35,35 +35,32 @@ public class Image extends UINode {
     blocksSelect = false,
     enabled      = true ;
   
-  protected Texture texture;
-  protected Texture greyOut = TRANSLUCENT_GREY.asTexture();
+  protected ImageAsset texture;
+  protected Texture customTex;
+  protected ImageAsset greyOut = TRANSLUCENT_GREY;
   protected Batch <Texture> overlaid = null;
   
   
-  public Image(HUD UI, String imagePath) {
-    super(UI);
-    texture = ImageAsset.getTexture(imagePath);
-  }
   
   
-  public Image(HUD myHUD, ImageAsset tex) {
-    this(myHUD, tex.asTexture());
-  }
-  
-  
-  public Image(HUD myHUD, Texture t) {
+  public Image(HUD myHUD, ImageAsset t) {
     super(myHUD);
     this.texture = t;
   }
   
   
-  public void setBaseTexture(Texture t) {
+  public void setBaseTexture(ImageAsset t) {
     this.texture = t;
   }
   
   
+  public void setCustomTexture(Texture t) {
+    this.customTex = t;
+  }
+  
+  
   public void setDisabledOverlay(ImageAsset g) {
-    this.greyOut = g.asTexture();
+    this.greyOut = g;
   }
   
   
@@ -79,18 +76,18 @@ public class Image extends UINode {
   
   
   public int texWide() {
-    return texture.getWidth();
+    return texture.asTexture().getWidth();
   }
   
   
   public int texHigh() {
-    return texture.getHeight();
+    return texture.asTexture().getHeight();
   }
   
   
   public void expandToTexSize(float scale, boolean centre) {
-    absBound.xdim(texture.getWidth()  * scale);
-    absBound.ydim(texture.getHeight() * scale);
+    absBound.xdim(texWide() * scale);
+    absBound.ydim(texHigh() * scale);
     if (centre) {
       absBound.xpos(absBound.xpos() - absBound.xdim() / 2);
       absBound.ypos(absBound.ypos() - absBound.ydim() / 2);
@@ -110,16 +107,23 @@ public class Image extends UINode {
     float x, float y, float wide, float high, Box2D bounds
   ) {
     final float
-      texWide = texture.getWidth (),
-      texHigh = texture.getHeight(),
+      texWide = texWide(),
+      texHigh = texHigh(),
       scale   = Nums.min(wide / texWide, high / texHigh);
     bounds.set(x, y, texWide * scale, texHigh * scale);
   }
   
   
   protected void render(WidgetsPass pass) {
-    renderTex(texture, absAlpha, pass);
-    if (! enabled) renderTex(greyOut, absAlpha, pass);
+    if (customTex != null) {
+      renderTex(customTex, absAlpha, pass);
+    }
+    else {
+      renderTex(texture.asTexture(), absAlpha, pass);
+    }
+    if (! enabled) {
+      renderTex(greyOut.asTexture(), absAlpha, pass);
+    }
     if (overlaid != null) for (Texture t : overlaid) {
       renderTex(t, absAlpha, pass);
     }

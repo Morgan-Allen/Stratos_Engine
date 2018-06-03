@@ -28,13 +28,14 @@ public class MissionReminder extends ReminderListing.Entry {
     
     final Composite portrait = m.portrait();
     final Button button = new Button(
-      BUI, m.fullName(),
-      portrait.texture(), Button.CIRCLE_LIT.asTexture(), m.fullName()
+      BUI, m.fullName(), Image.SOLID_WHITE, Button.CIRCLE_LIT, m.fullName()
     ) {
       protected void whenClicked() {
         PlayUI.pushSelection(m);
       }
     };
+    button.setCustomTexture(portrait.texture());
+    
     button.alignVertical  (0, 0);
     button.alignHorizontal(0, 0);
     button.attachTo(this);

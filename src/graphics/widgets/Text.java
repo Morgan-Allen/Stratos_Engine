@@ -211,7 +211,7 @@ public class Text extends UIGroup implements Description {
     *  to indent other elements, or both.
     */
   public static Button insert(
-    Texture texGraphic, int wide, int high,
+    ImageAsset texGraphic, int wide, int high,
     final Clickable link, boolean asBullet, Description d
   ) {
     if (texGraphic == null || ! (d instanceof Text)) return null;
@@ -223,7 +223,7 @@ public class Text extends UIGroup implements Description {
   
   
   public static Image insert(
-    Texture texGraphic, int wide, int high, boolean asBullet, Description d
+    ImageAsset texGraphic, int wide, int high, boolean asBullet, Description d
   ) {
     if (texGraphic == null || ! (d instanceof Text)) return null;
     final HUD UI = ((Text) d).UI;
@@ -233,10 +233,11 @@ public class Text extends UIGroup implements Description {
   
   
   public static Image insert(
-    Texture texGraphic, int maxWide, boolean asBullet, Description d
+    ImageAsset texGraphic, int maxWide, boolean asBullet, Description d
   ) {
     if (texGraphic == null || ! (d instanceof Text)) return null;
-    int w = texGraphic.getWidth(), h = texGraphic.getHeight();
+    Texture t = texGraphic.asTexture();
+    int w = t.getWidth(), h = t.getHeight();
     if (w > maxWide) {
       final float scale = maxWide * 1f / w;
       w *= scale;
@@ -274,7 +275,7 @@ public class Text extends UIGroup implements Description {
   
   
   public static void cancelBullet(Description d) {
-    insert(Image.SOLID_WHITE.asTexture(), 0, 0, true, d);
+    insert(Image.SOLID_WHITE, 0, 0, true, d);
   }
   
   

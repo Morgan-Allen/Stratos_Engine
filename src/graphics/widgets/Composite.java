@@ -189,10 +189,10 @@ public class Composite {
   
   
   public Image delayedImage(HUD UI, final String widgetID) {
+    final Composite comp = this;
     final Image image = new Image(UI, Image.SOLID_WHITE) {
       protected void render(WidgetsPass pass) {
-        this.texture = texture();
-        super.render(pass);
+        renderTex(comp.texture(), absAlpha, pass);
       }
     };
     image.setWidgetID(widgetID);
