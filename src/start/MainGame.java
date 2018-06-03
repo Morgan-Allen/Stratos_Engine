@@ -38,8 +38,8 @@ public class MainGame implements Playable {
   
   public static void playScenario(Scenario s) {
     mainGame();
+    current.scenario = null;
     current.scenario = s;
-    current.nextOp   = DO_LOAD;
   }
   
   
@@ -74,26 +74,20 @@ public class MainGame implements Playable {
   }
   
   
-  protected boolean loadScenario(String savePath) {
+  public static Scenario loadScenario(String savePath) {
     if (Assets.exists(savePath)) try {
       Session s = Session.loadSession(savePath, true);
       Scenario loaded = (Scenario) s.loaded()[0];
-      scenario = loaded;
-      scenario.afterLoading(this);
-      
+      loaded.afterLoading(mainGame());
       I.say("Scenario loading done");
-      return true;
+      return loaded;
     }
     catch (Exception e) { I.report(e); }
-    
-    scenario.initScenario(this);
-    
-    I.say("Scenario setup done");
-    return true;
+    return null;
   }
   
   
-  protected boolean saveScenario() {
+  public static boolean saveScenario(Scenario scenario) {
     if (scenario != null) try {
       I.say("\nWill save game...");
       long initTime = I.getTime();
@@ -112,6 +106,7 @@ public class MainGame implements Playable {
     */
   public void beginGameSetup() {
     //  TODO:  Set up main menu and other auxiliary data.
+    return;
   }
   
   
@@ -165,16 +160,18 @@ public class MainGame implements Playable {
   
   public boolean shouldExitLoop() {
     if (nextOp == DO_SAVE_EXIT) {
-      return saveScenario();
+      return saveScenario(scenario);
     }
     if (nextOp == DO_SAVE) {
-      saveScenario();
+      saveScenario(scenario);
     }
     if (nextOp == DO_RESTART) {
       restartScenario();
     }
     if (nextOp == DO_LOAD && scenario != null) {
-      loadScenario(scenario.savePath());
+      String savePath = scenario.savePath();
+      scenario = null;
+      scenario = loadScenario(savePath);
     }
     nextOp = DO_PLAY;
     return false;

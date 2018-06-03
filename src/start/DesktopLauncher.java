@@ -23,29 +23,34 @@ public class DesktopLauncher {
   
   public static void main(String[] arg) {
     
-    World world = GameWorld.setupDefaultWorld();
-    WorldScenario s = world.scenarios().first();
+    //Assets.callsVerbose = true;
+    //Assets.extraVerbose = true;
+    //PlayLoop.verbose    = true;
     
-    Base homeland = world.baseNamed("Homeland Base");
-    List <BuildType> buildings = new List();
-    List <Actor> staff = new List();
-    Visit.appendTo(buildings, GameContent.RULER_BUILT);
+    String savePath = "test_scenario.str";
+    Scenario s = MainGame.loadScenario(savePath);
     
-    s.setPlayerLanding(
-      GameWorld.FACTION_SETTLERS, 5000,
-      homeland, buildings, staff
-    );
+    if (s == null) {
+      World world = GameWorld.setupDefaultWorld();
+      WorldScenario init = world.scenarios().first();
+      
+      Base homeland = world.baseNamed("Homeland Base");
+      List <Actor> staff = new List();
+      
+      init.setPlayerLanding(
+        GameWorld.FACTION_SETTLERS, 5000,
+        homeland, GameContent.RULER_BUILT, staff
+      );
+      init.assignSavePath(savePath);
+      
+      s = init;
+    }
     
     launchScenario(s);
   }
   
   
   public static void launchScenario(Scenario s) {
-    
-    //Assets.callsVerbose = true;
-    //Assets.extraVerbose = true;
-    //PlayLoop.verbose    = true;
-    
     new LwjglApplication(new PlayLoop(), getConfig());
     MainGame.playScenario(s);
   }

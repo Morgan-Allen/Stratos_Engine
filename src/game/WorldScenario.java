@@ -27,8 +27,8 @@ public class WorldScenario extends Scenario {
   Faction landFaction;
   int landFunds = 0;
   Base landHomeland = null;
-  List <BuildType> landBuilt  = new List();
-  List <Actor    > landStaff  = new List();
+  BuildType landBuilt[] = {};
+  List <Actor> landStaff = new List();
   List <Objective> objectives = new List();
   
   List <Building> nests = new List();
@@ -55,8 +55,8 @@ public class WorldScenario extends Scenario {
     landFaction  = (Faction) s.loadObject();
     landFunds    = s.loadInt();
     landHomeland = (Base) s.loadObject();
-    s.loadObjects(landBuilt );
-    s.loadObjects(landStaff );
+    landBuilt    = (BuildType[]) s.loadObjectArray(BuildType.class);
+    s.loadObjects(landStaff);
     s.loadObjects(objectives);
     
     s.loadObjects(nests);
@@ -75,8 +75,8 @@ public class WorldScenario extends Scenario {
     s.saveObject(landFaction);
     s.saveInt(landFunds);
     s.saveObject(landHomeland);
-    s.saveObjects(landBuilt );
-    s.saveObjects(landStaff );
+    s.saveObjectArray(landBuilt);
+    s.saveObjects(landStaff);
     s.saveObjects(objectives);
     
     s.saveObjects(nests);
@@ -202,14 +202,13 @@ public class WorldScenario extends Scenario {
   
   public void setPlayerLanding(
     Faction faction, int funds, Base homeland,
-    Series <BuildType> buildings, Series <Actor> staff
+    BuildType[] buildings, Series <Actor> staff
   ) {
     this.landFaction  = faction;
     this.landFunds    = funds;
     this.landHomeland = homeland;
-    landBuilt.clear();
+    this.landBuilt    = buildings;
     landStaff.clear();
-    Visit.appendTo(landBuilt, buildings);
     Visit.appendTo(landStaff, staff);
   }
   
@@ -255,7 +254,7 @@ public class WorldScenario extends Scenario {
     landing.setName("Player Landing");
     landing.initFunds(landFunds);
     landing.setHomeland(landHomeland);
-    landing.assignBuildTypes(landFaction.buildTypes());
+    landing.assignBuildTypes(landBuilt);
     
     stage.addBase(landing);
     world.addBases(landing);
