@@ -1,5 +1,7 @@
 
+
 package game;
+import graphics.common.*;
 
 
 
@@ -7,12 +9,19 @@ public class Faction extends Constant {
   
   
   String name;
-  WorldLocale homeland;
-  BuildType buildTypes[];
+  Colour colour;
+  
+  WorldLocale homeland = null;
+  BuildType buildTypes[] = {};
   
   
-  public Faction(Class baseClass, String ID) {
+  public Faction(
+    Class baseClass, String ID,
+    String name, BuildType... buildTypes
+  ) {
     super(baseClass, ID, IS_TRAIT);
+    this.name = name;
+    this.buildTypes = buildTypes;
   }
   
   

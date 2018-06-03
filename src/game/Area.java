@@ -663,6 +663,7 @@ public class Area implements Session.Saveable {
   
   
   public AreaFog fogMap(Base base, boolean init) {
+    if (base == null) return null;
     AreaFog fog = fogMaps.get(base);
     if (fog == null && init) {
       fog = new AreaFog(base, this);

@@ -18,7 +18,7 @@ public abstract class Scenario implements Session.Saveable {
   Area  area  = null;
   Base  base  = null;
   
-  PlayUI UI;
+  private PlayUI UI;
   
   
   protected Scenario() {
@@ -31,8 +31,8 @@ public abstract class Scenario implements Session.Saveable {
     world = (World) s.loadObject();
     area  = (Area ) s.loadObject();
     base  = (Base ) s.loadObject();
-    UI = new PlayUI(PlayLoop.rendering());
-    UI.loadState(s);
+    //UI = new PlayUI(PlayLoop.rendering());
+    //UI.loadState(s);
   }
   
   
@@ -40,7 +40,7 @@ public abstract class Scenario implements Session.Saveable {
     s.saveObject(world);
     s.saveObject(area );
     s.saveObject(base );
-    UI.saveState(s);
+    //UI.saveState(s);
   }
   
   
@@ -58,9 +58,6 @@ public abstract class Scenario implements Session.Saveable {
     world = createWorld();
     area  = createArea(world);
     base  = createBase(area, world);
-    UI    = new PlayUI(PlayLoop.rendering());
-    
-    UI.assignParameters(area, base);
     configScenario(world, area, base);
     
     setupDone = true;
@@ -101,6 +98,11 @@ public abstract class Scenario implements Session.Saveable {
   
   
   public PlayUI playUI() {
+    if (UI == null) {
+      UI = new PlayUI(PlayLoop.rendering());
+      UI.assignParameters(area, base);
+      UI.setLookPoint(base.headquarters());
+    }
     return UI;
   }
 }

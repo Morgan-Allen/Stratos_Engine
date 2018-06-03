@@ -202,7 +202,7 @@ public class WorldScenario extends Scenario {
   
   public void setPlayerLanding(
     Faction faction, int funds, Base homeland,
-    BuildType[] buildings, Series <Actor> staff
+    Series <Actor> staff, BuildType... buildings
   ) {
     this.landFaction  = faction;
     this.landFunds    = funds;
@@ -254,7 +254,7 @@ public class WorldScenario extends Scenario {
     landing.setName("Player Landing");
     landing.initFunds(landFunds);
     landing.setHomeland(landHomeland);
-    landing.assignBuildTypes(landBuilt);
+    landing.assignBuildTypes(landFaction.buildTypes());
     
     stage.addBase(landing);
     world.addBases(landing);
@@ -290,7 +290,7 @@ public class WorldScenario extends Scenario {
     if (landing != null) {
       SiteConfig landSite = siteConfig(landFaction, null, 0, 0);
       for (BuildType b : landBuilt) siteConfig(landSite, b, 1, 1);
-      bastion = placeSite(landSite, stage, landing, null);
+      bastion = placeSite(landSite, stage, landing, null, base);
     }
     
     if (bastion != null) {
@@ -305,6 +305,7 @@ public class WorldScenario extends Scenario {
           bastion.setWorker(a, true);
         }
       }
+      base.setHeadquarters(bastion);
     }
     
     class SiteOption { AreaTile at; float rating; }
@@ -329,13 +330,13 @@ public class WorldScenario extends Scenario {
     
     for (SiteConfig site : config.sites) if (options.size() > 0) {
       SiteOption o = options.removeFirst();
-      placeSite(site, stage, o.at, null);
+      placeSite(site, stage, o.at, null, stage.locals);
     }
   }
   
   
   protected Building placeSite(
-    SiteConfig site, Area stage, AreaTile at, Building parent
+    SiteConfig site, Area stage, AreaTile at, Building parent, Base base
   ) {
     int numB = Rand.range(site.minCount, site.maxCount);
     Building placed = null, firstKid = null;
@@ -343,7 +344,7 @@ public class WorldScenario extends Scenario {
     if (site.siteType != null) while (numB-- > 0) {
       placed = (Building) site.siteType.generate();
       AreaTile goes = ActorUtils.findEntryPoint(placed, stage, at, MAX_PLACE_RANGE);
-      placed.enterMap(stage, goes.x, goes.y, 1, stage.locals);
+      placed.enterMap(stage, goes.x, goes.y, 1, base);
       
       if (site.siteType.isNestBuilding()) {
         BuildingForNest nest = (BuildingForNest) placed;
@@ -354,7 +355,7 @@ public class WorldScenario extends Scenario {
     }
     
     for (SiteConfig kidSite : site.children) {
-      Building kid = placeSite(kidSite, stage, at, placed);
+      Building kid = placeSite(kidSite, stage, at, placed, base);
       if (firstKid == null) firstKid = kid;
     }
     if (placed == null) placed = firstKid;

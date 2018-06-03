@@ -31,19 +31,25 @@ public class DesktopLauncher {
     Scenario s = MainGame.loadScenario(savePath);
     
     if (s == null) {
+      I.say("\nGenerating scenario from start...");
+      
       World world = GameWorld.setupDefaultWorld();
       WorldScenario init = world.scenarios().first();
       
-      Base homeland = world.baseNamed("Homeland Base");
+      Base homeland = world.baseNamed("Homeworld Base");
       List <Actor> staff = new List();
       
       init.setPlayerLanding(
         GameWorld.FACTION_SETTLERS, 5000,
-        homeland, GameContent.RULER_BUILT, staff
+        homeland, staff, GameContent.BASTION
       );
       init.assignSavePath(savePath);
+      init.initScenario(MainGame.mainGame());
       
       s = init;
+    }
+    else {
+      I.say("\nLoaded scenario from file...");
     }
     
     launchScenario(s);

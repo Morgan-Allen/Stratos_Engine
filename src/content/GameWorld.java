@@ -12,15 +12,21 @@ import util.*;
 
 public class GameWorld {
   
-  
-  final public static Faction
-    FACTION_SETTLERS  = new Faction(GameContent.class, "faction_settlers" ),
-    FACTION_ANIMALS   = new Faction(GameContent.class, "faction_animals"  ),
-    FACTION_ARTILECTS = new Faction(GameContent.class, "faction_artilects")
-  ;
-  
+  //
   //  TODO:  You need to assign default technologies here, and possibly other
-  //  bonuses!
+  //  bonuses.
+  final public static Faction
+    FACTION_SETTLERS  = new Faction(
+      GameWorld.class, "faction_settlers" , "Settlers",
+      GameContent.RULER_BUILT
+    ),
+    FACTION_ANIMALS   = new Faction(
+      GameWorld.class, "faction_animals"  , "Animals"
+    ),
+    FACTION_ARTILECTS = new Faction(
+      GameWorld.class, "faction_artilects", "Artilects"
+    )
+  ;
   
   
   /**  Default geography:
