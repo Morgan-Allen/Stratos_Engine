@@ -655,6 +655,9 @@ public class GameContent {
     ENFORCER_BLOC.features = new Good[] { IS_ADMIN };
     ENFORCER_BLOC.maxHealth = 200;
     
+    
+    //  TODO:  Just use the Native Hut for this...?
+    
     KOMMANDO_REDOUBT.name = "Kommando Redoubt";
     KOMMANDO_REDOUBT.tint = TINT_MILITARY;
     KOMMANDO_REDOUBT.model = CutoutModel.fromImage(
@@ -776,15 +779,16 @@ public class GameContent {
     
     AIRFIELD.setDimensions(6, 6, 1, WIDE_MARGIN);
     AIRFIELD.setBuildMaterials(PLASTICS, 3, PARTS, 5);
-    AIRFIELD.dockPoints  = new Coord[] { new Coord(2, 0) };
-    AIRFIELD.features    = new Good[] { IS_DOCK };
-    AIRFIELD.maxHealth   = 155;
-    AIRFIELD.maxUpgrades = 4;
+    AIRFIELD.setNeedsToBuild(SUPPLY_DEPOT);
     
     UPGRADE_DROPSHIP.name = "Dropship Upgrade";
     UPGRADE_DROPSHIP.setBuildMaterials(PLASTICS, 3, PARTS, 7);
     UPGRADE_DROPSHIP.vesselTemplate = Vassals.DROPSHIP;
     
+    AIRFIELD.dockPoints  = new Coord[] { new Coord(2, 0) };
+    AIRFIELD.features    = new Good[] { IS_DOCK };
+    AIRFIELD.maxHealth   = 155;
+    AIRFIELD.maxUpgrades = 4;
     AIRFIELD.allUpgrades = new BuildType[]{ UPGRADE_DROPSHIP };
     
     //
@@ -884,37 +888,43 @@ public class GameContent {
     
     SHIELD_WALL.name = "Shield Wall";
     SHIELD_WALL.modelVariants = WALL_MODELS[0];
-    
     SHIELD_WALL.tint = TINT_LITE_MILITARY;
-    SHIELD_WALL.pathing = PATH_WALLS;
-    SHIELD_WALL.isWall  = true;
+
     SHIELD_WALL.setDimensions(1, 1, 2);
     SHIELD_WALL.setBuildMaterials(PARTS, 1);
+    SHIELD_WALL.setNeedsToBuild(TROOPER_LODGE);
+    
+    SHIELD_WALL.pathing = PATH_WALLS;
+    SHIELD_WALL.isWall  = true;
     SHIELD_WALL.maxHealth = 20;
     SHIELD_WALL.rulerBuilt = false;
     SHIELD_WALL.buildOnWater = true;
     
     BLAST_DOOR.name = "Blast Door";
     BLAST_DOOR.modelVariants = WALL_MODELS[1];
-    
     BLAST_DOOR.tint = TINT_MILITARY;
-    BLAST_DOOR.pathing = PATH_WALLS;
-    BLAST_DOOR.isWall  = true;
+    
     BLAST_DOOR.setDimensions(2, 2, 2);
     BLAST_DOOR.setBuildMaterials(PARTS, 5);
+    BLAST_DOOR.setNeedsToBuild(TROOPER_LODGE);
+    
     BLAST_DOOR.setFeatures(IS_GATE);
+    BLAST_DOOR.pathing = PATH_WALLS;
+    BLAST_DOOR.isWall  = true;
     BLAST_DOOR.maxHealth  = 110;
     BLAST_DOOR.rulerBuilt = false;
     
     TURRET.name = "Turret";
     TURRET.modelVariants = WALL_MODELS[2];
-    
     TURRET.tint = TINT_MILITARY;
-    TURRET.pathing = PATH_BLOCK;
-    TURRET.isWall  = true;
+    
     TURRET.setDimensions(2, 2, 3);
     TURRET.setBuildMaterials(PARTS, 5);
+    TURRET.setNeedsToBuild(TROOPER_LODGE);
+
     TURRET.setFeatures(IS_TOWER, IS_TURRET);
+    TURRET.pathing = PATH_BLOCK;
+    TURRET.isWall  = true;
     TURRET.rangeDamage = 8;
     TURRET.rangeDist   = 6;
     TURRET.armourClass = 0;
@@ -978,6 +988,8 @@ public class GameContent {
     
     CANTINA.setDimensions(3, 3, 1, THIN_MARGIN);
     CANTINA.setBuildMaterials(PLASTICS, 5, PARTS, 2);
+    CANTINA.setNeedsToBuild(STOCK_EXCHANGE);
+    
     CANTINA.setFeatures(DIVERSION, IS_REFUGE);
     CANTINA.featureAmount = 15;
     CANTINA.maxHealth = 60;
@@ -994,6 +1006,8 @@ public class GameContent {
     
     NURSERY.setDimensions(2, 2, 1, THIN_MARGIN);
     NURSERY.setBuildMaterials(PLASTICS, 3, PARTS, 1);
+    NURSERY.setNeedsToBuild(ECOLOGIST_STATION);
+    
     NURSERY.workerTypes.setWith(Vassals.PYON, 1);
     NURSERY.gatherFlag  = IS_CROP;
     NURSERY.claimMargin = 4;
@@ -1015,6 +1029,8 @@ public class GameContent {
     
     HARVESTER.setDimensions(3, 3, 1, THIN_MARGIN);
     HARVESTER.setBuildMaterials(PLASTICS, 5, PARTS, 2);
+    HARVESTER.setNeedsToBuild(ECOLOGIST_STATION);
+    
     HARVESTER.workerTypes.setWith(Vassals.PYON, 1);
     HARVESTER.gatherFlag = IS_TREE;
     HARVESTER.maxStock   = 10;
@@ -1034,6 +1050,8 @@ public class GameContent {
     
     EXCAVATOR.setDimensions(4, 4, 1, THIN_MARGIN);
     EXCAVATOR.setBuildMaterials(PLASTICS, 2, PARTS, 5);
+    EXCAVATOR.setNeedsToBuild(ENGINEER_STATION);
+    
     EXCAVATOR.workerTypes.setWith(Vassals.PYON, 2);
     EXCAVATOR.gatherFlag = IS_STONE;
     EXCAVATOR.maxStock   = 25;

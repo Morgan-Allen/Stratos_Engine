@@ -62,6 +62,22 @@ public class BuildType extends Type {
   public BuildType(Class baseClass, String ID, int category) {
     super(baseClass, ID, category);
   }
+  
+  
+  public void initFromTemplate(BuildType other) {
+    
+    this.model = other.model;
+    this.modelVariants = other.modelVariants;
+    this.name = other.name;
+    this.tint = other.tint;
+    
+    this.setDimensions(other.wide, other.high, other.deep, other.clearMargin);
+    this.claimMargin = other.claimMargin;
+    this.builtFrom   = other.builtFrom;
+    this.builtAmount = other.builtAmount;
+    this.maxHealth   = other.maxHealth;
+    this.armourClass = other.armourClass;
+  }
 
 
   public void setUpgradeTiers(BuildType... tiers) {
@@ -79,19 +95,8 @@ public class BuildType extends Type {
   }
   
   
-  public void initFromTemplate(BuildType other) {
-    
-    this.model = other.model;
-    this.modelVariants = other.modelVariants;
-    this.name = other.name;
-    this.tint = other.tint;
-    
-    this.setDimensions(other.wide, other.high, other.deep, other.clearMargin);
-    this.claimMargin = other.claimMargin;
-    this.builtFrom   = other.builtFrom;
-    this.builtAmount = other.builtAmount;
-    this.maxHealth   = other.maxHealth;
-    this.armourClass = other.armourClass;
+  public void setNeedsToBuild(BuildType... needs) {
+    this.needsToBuild = needs;
   }
   
   
