@@ -17,23 +17,15 @@ public class PaneBuilding extends DetailPane {
   
   
   public PaneBuilding(HUD UI, Building venue) {
-    super(UI, venue);
+    super(UI, venue, "(STAFF)", "(GOODS)", "(BUILD)");
     this.built = venue;
   }
   
   
-  protected void updateState() {
+  protected void updateText(Text text) {
     
-    this.text.setText("");
-    final Description d = this.text;
-    
-    BuildType type = built.type();
-    boolean controls = built.base() == PlayUI.playerBase();
-    World world = built.map().world;
-    Base base = built.base();
-    
-    d.append(""+built.toString());
-    d.append("\n");
+    text.setText("");
+    final Description d = text;
     
     d.append("\nHP: ");
     final int
@@ -41,9 +33,19 @@ public class PaneBuilding extends DetailPane {
       HP    = (int) (maxHP * built.buildLevel())
     ;
     d.append(HP+"/"+maxHP);
-    //d.append("\nDamage: "+venue.structure.damage());
-    //d.append("\nArmour: "+venue.structure.armour());
-    //d.append("\nCredits: "+venue.stocks.credits ());
+    
+    if (inCategory("(STAFF)")) describeStaff(d);
+    if (inCategory("(GOODS)")) describeGoods(d);
+    if (inCategory("(BUILD)")) describeBuild(d);
+  }
+  
+  
+  void describeStaff(Description d) {
+    
+    boolean controls = built.base() == PlayUI.playerBase();
+    BuildType type = built.type();
+    World world = built.map().world;
+    Base base = built.base();
     
     for (final ActorType w : type.workerTypes.keys()) {
       int num = built.numWorkers(w), max = built.maxWorkers(w);
@@ -51,7 +53,7 @@ public class PaneBuilding extends DetailPane {
       
       d.append("\n\n"+w.name+": ("+num+"/"+max+")");
       
-      if (num < max && w.socialClass >= CLASS_SOLDIER) {
+      if (num < max && w.socialClass >= CLASS_SOLDIER && controls) {
         d.append("\n  ");
         Object hireCheck = ActorUtils.hireCheck(w, built, true);
         if (hireCheck == MIGRATE.OKAY) {
@@ -115,6 +117,22 @@ public class PaneBuilding extends DetailPane {
       }
     }
     
+    Batch <Element> visiting = new Batch();
+    for (Actor i : built.allInside()) {
+      if (i.work() == built || i.home() == built) continue;
+      visiting.include(i);
+    }
+    if (! visiting.empty()) {
+      d.append("\n\nVisitors:");
+      for (Element i : visiting) {
+        d.appendAll("\n  ", i);
+      }
+    }
+    
+  }
+  
+  
+  void describeGoods(Description d) {
     
     if (built instanceof BuildingForTrade) {
       final BuildingForTrade t = (BuildingForTrade) built;
@@ -175,7 +193,11 @@ public class PaneBuilding extends DetailPane {
         }
       }
     }
-    
+  }
+  
+  
+  void describeBuild(Description d) {
+    boolean controls = built.base() == PlayUI.playerBase();
     
     BuildType upgrades[] = built.type().allUpgrades;
     if (controls && ! Visit.empty(upgrades)) {
@@ -212,11 +234,6 @@ public class PaneBuilding extends DetailPane {
       }
     }
     
-    d.append("\n\nVisitors:");
-    for (Element i : built.allInside()) {
-      d.appendAll("\n  ", i);
-    }
-    
     if (controls) {
       d.append("\n\n");
       d.append(new Description.Link("DEMOLISH") {
@@ -228,12 +245,18 @@ public class PaneBuilding extends DetailPane {
         }
       });
     }
-    
-    super.updateState();
   }
   
   
 }
+
+
+
+
+
+
+
+
 
 
 

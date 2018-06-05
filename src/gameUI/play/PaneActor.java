@@ -16,23 +16,28 @@ public class PaneActor extends DetailPane {
   
   
   public PaneActor(HUD UI, Actor actor) {
-    super(UI, actor);
+    super(UI, actor, "(STATUS)", "(SKILLS)", "(PSYCH)");
     this.actor = actor;
   }
   
-  
-  protected void updateState() {
-    
-    this.text.setText("");
-    final Description d = this.text;
+  protected void updateText(Text text) {
+    text.setText("");
+    final Description d = text;
     
     int classLevel = actor.traits.classLevel();
-    int fullXP = actor.traits.classLevelFullXP() * 100;
+    int fullXP = actor.traits.classLevelFullXP();
     int XP = (int) (actor.traits.classLevelProgress() * fullXP);
     
-    d.append(""+actor.fullName()+" (Level "+classLevel+" "+actor.type()+")");
+    d.append("  Level "+classLevel+" "+actor.type());
     d.append("\n  XP: "+XP+"/"+fullXP);
     d.append("\n");
+    
+    if (inCategory("(STATUS)")) describeStatus(d);
+    if (inCategory("(SKILLS)")) describeSkills(d);
+    if (inCategory("(PSYCH)" )) describePsych (d);
+  }
+  
+  protected void describeStatus(Description d) {
     
     int maxHP = actor.type().maxHealth;
     float hurt = actor.health.injury();
@@ -62,9 +67,10 @@ public class PaneActor extends DetailPane {
     else for (Good g : carried.keys()) {
       d.appendAll("\n    ", I.shorten(carried.valueFor(g), 1), " ", g);
     }
-    
+  }
+  
+  protected void describeSkills(Description d) {
     if (actor.type().isPerson()) {
-      d.append("\n");
       d.append("\n  Skills:");
       
       int skillI = 0;
@@ -81,7 +87,11 @@ public class PaneActor extends DetailPane {
         Text.appendColour(I.padToLength(t.name, 6)+": ", c, d);
         Text.appendColour(I.padToLength(""+level, 2)   , c, d);
       }
-      
+    }
+  }
+  
+  protected void describePsych(Description d) {
+    if (actor.type().isPerson()) {
       d.append("\n  Traits:");
       for (Trait t : ALL_PERSONALITY) {
         int level = (int) (actor.traits.levelOf(t) * 100);
@@ -98,9 +108,8 @@ public class PaneActor extends DetailPane {
         Text.appendColour(I.padToLength(level+"%", 5)  , c, d);
       }
     }
-    
-    super.updateState();
   }
+  
 }
 
 

@@ -6,7 +6,7 @@ import util.*;
 
 
 
-public class BuildingForGovern extends Building {
+public class BuildingForGovern extends BuildingForTrade {
   
   
   /**  Data fields, construction and save/load methods-
@@ -44,6 +44,7 @@ public class BuildingForGovern extends Building {
     
     if (actor.type().isCommoner()) {
       //  TODO:  THIS IS AN UGLY HACK AND SHOULD BE FIXED ASAP!
+      
       if (actor.traits.levelOf(SKILL_WRITE) > 0) {
         Task taxing = TaskAssessTax.nextAssessment(actor, this, 100);
         if (taxing != null) return taxing;
@@ -53,6 +54,9 @@ public class BuildingForGovern extends Building {
       }
       
       else {
+        Task delivery = TaskDelivery.pickNextDelivery(actor, this, 0, produced());
+        if (delivery != null) return delivery;
+        
         Task building = TaskBuilding.nextBuildingTask(this, actor);
         if (building != null) return building;
         

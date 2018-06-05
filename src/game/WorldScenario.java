@@ -22,6 +22,7 @@ public class WorldScenario extends Scenario {
   int landFunds = 0;
   Base landHomeland = null;
   BuildType landBuilt[] = {};
+  Tally <Good> landGoods = new Tally();
   List <Actor> landStaff = new List();
   List <Objective> objectives = new List();
   
@@ -50,6 +51,7 @@ public class WorldScenario extends Scenario {
     landFunds    = s.loadInt();
     landHomeland = (Base) s.loadObject();
     landBuilt    = (BuildType[]) s.loadObjectArray(BuildType.class);
+    s.loadTally(landGoods);
     s.loadObjects(landStaff);
     s.loadObjects(objectives);
     
@@ -70,6 +72,7 @@ public class WorldScenario extends Scenario {
     s.saveInt(landFunds);
     s.saveObject(landHomeland);
     s.saveObjectArray(landBuilt);
+    s.saveTally(landGoods);
     s.saveObjects(landStaff);
     s.saveObjects(objectives);
     
@@ -169,12 +172,14 @@ public class WorldScenario extends Scenario {
     */
   public void setPlayerLanding(
     Faction faction, int funds, Base homeland,
-    Series <Actor> staff, BuildType... buildings
+    Series <Actor> staff, Tally <Good> goods, BuildType... buildings
   ) {
     this.landFaction  = faction;
     this.landFunds    = funds;
     this.landHomeland = homeland;
     this.landBuilt    = buildings;
+    landGoods.clear();
+    landGoods.add(goods);
     landStaff.clear();
     Visit.appendTo(landStaff, staff);
   }
@@ -266,7 +271,23 @@ public class WorldScenario extends Scenario {
     }
     
     if (bastion != null) {
+      base.setHeadquarters(bastion);
       AreaTile goes = bastion.centre();
+      
+      if (! landGoods.empty()) {
+        bastion.inventory().clear();
+        bastion.inventory().add(landGoods);
+        if (bastion instanceof Trader) {
+          Trader t = (Trader) bastion;
+          t.needLevels().clear();
+          t.needLevels().add(landGoods);
+        }
+      }
+      else for (Good g : bastion.needed()) {
+        float need = bastion.demandFor(g);
+        bastion.setInventory(g, need);
+      }
+      
       if (landStaff == null || landStaff.empty()) {
         ActorUtils.fillWorkVacancies(bastion);
       }
@@ -277,9 +298,11 @@ public class WorldScenario extends Scenario {
           bastion.setWorker(a, true);
         }
       }
-      base.setHeadquarters(bastion);
     }
     
+    
+    //
+    //  Then look for suitable sites to place other buildings-
     class SiteOption { AreaTile at; float rating; }
     List <SiteOption> options = new List <SiteOption> () {
       protected float queuePriority(SiteOption r) {

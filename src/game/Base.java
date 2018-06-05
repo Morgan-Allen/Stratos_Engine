@@ -237,11 +237,6 @@ public class Base implements Session.Saveable, Trader {
     if (moveMode != Type.MOVE_AIR && moveMode != route.moveMode) return -100;
     
     return route.distance;
-    /*
-    float dx = locale.mapX - other.locale.mapX;
-    float dy = locale.mapY - other.locale.mapY;
-    return (int) Nums.sqrt((dx * dx) + (dy * dy));
-    //*/
   }
   
   

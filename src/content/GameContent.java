@@ -517,7 +517,6 @@ public class GameContent {
     BASTION           = new BuildType(BuildingForGovern.class , "venue_bastion"  , IS_GOVERN_BLD ),
     BASTION_L2        = new BuildType(BuildingForGovern.class , "venue_bastion_2", IS_UPGRADE    ),
     BASTION_L3        = new BuildType(BuildingForGovern.class , "venue_bastion_3", IS_UPGRADE    ),
-    ENFORCER_BLOC     = new BuildType(BuildingForGovern.class , "venue_enforcer" , IS_GOVERN_BLD ),
     
     //  TODO:  Make the enforcer bloc a turret-building?
     //  TODO:  Attach placement-mechanics for walls.
@@ -526,6 +525,7 @@ public class GameContent {
     TURRET            = new BuildType(BuildingForWalls.class  , "type_turret"    , IS_WALLS_BLD  ),
     
     TROOPER_LODGE     = new BuildType(BuildingForArmy.class   , "venue_trooper"  , IS_ARMY_BLD   ),
+    ENFORCER_BLOC     = new BuildType(BuildingForArmy.class   , "venue_enforcer" , IS_ARMY_BLD   ),
     //  TODO:  Add the Runner Market for assassinations and contraband.
     //  TODO:  Kommando redoubt is just here for behaviour-testing at the moment...
     KOMMANDO_REDOUBT  = new BuildType(BuildingForHunt.class  , "venue_kommando"  , IS_HUNTS_BLD  ),
@@ -611,7 +611,7 @@ public class GameContent {
     BASTION.residentClasses = new int[] { CLASS_NOBLE };
     BASTION.maxResidents = 2;
     BASTION.buildsWith   = new Good[] { PLASTICS, PARTS };
-    BASTION.needed       = new Good[] { CARBS, GREENS, PLASTICS, PARTS };
+    BASTION.needed       = new Good[] { CARBS, PROTEIN, PLASTICS, PARTS };
     BASTION.maxStock     = 10;
     BASTION.setFeatures(IS_HOUSING, IS_REFUGE, IS_ADMIN);
     BASTION.uniqueBuilding = true;
