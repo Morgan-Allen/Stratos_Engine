@@ -23,7 +23,8 @@ public class BuildType extends Type {
   public int featureAmount = AVG_SERVICE_GIVE;
   public int updateTime    = AVG_UPDATE_GAP;
   public int maxVisitors   = AVG_MAX_VISITORS;
-
+  public int serviceCharge = 0;
+  
   public int maxUpgrades = 0;
   public BuildType needsToBuild  [] = NO_PREREQS;
   public BuildType opposites     [] = NO_PREREQS;
