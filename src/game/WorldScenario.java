@@ -18,14 +18,8 @@ public class WorldScenario extends Scenario {
   WorldLocale locale;
   AreaConfig config;
   
-  Faction landFaction;
-  int landFunds = 0;
-  Base landHomeland = null;
-  BuildType landBuilt[] = {};
-  Tally <Good> landGoods = new Tally();
-  List <Actor> landStaff = new List();
+  Expedition expedition = null;
   List <Objective> objectives = new List();
-  
   List <Building> nests = new List();
   
   String savePath = "saves/save_locale.str";
@@ -47,14 +41,8 @@ public class WorldScenario extends Scenario {
     locale    = (WorldLocale) s.loadObject();
     config    = loadAreaConfig(s);
     
-    landFaction  = (Faction) s.loadObject();
-    landFunds    = s.loadInt();
-    landHomeland = (Base) s.loadObject();
-    landBuilt    = (BuildType[]) s.loadObjectArray(BuildType.class);
-    s.loadTally(landGoods);
-    s.loadObjects(landStaff);
+    expedition = (Expedition) s.loadObject();
     s.loadObjects(objectives);
-    
     s.loadObjects(nests);
     
     savePath = s.loadString();
@@ -68,17 +56,21 @@ public class WorldScenario extends Scenario {
     s.saveObject(locale);
     saveAreaConfig(config, s);
     
-    s.saveObject(landFaction);
-    s.saveInt(landFunds);
-    s.saveObject(landHomeland);
-    s.saveObjectArray(landBuilt);
-    s.saveTally(landGoods);
-    s.saveObjects(landStaff);
+    s.saveObject(expedition);
     s.saveObjects(objectives);
-    
     s.saveObjects(nests);
     
     s.saveString(savePath);
+  }
+  
+  
+  public World world() {
+    return initWorld;
+  }
+  
+  
+  public WorldLocale locale() {
+    return locale;
   }
   
   
@@ -167,21 +159,12 @@ public class WorldScenario extends Scenario {
     for (SiteConfig site : c.children) saveSiteConfig(site, s);
   }
   
-
+  
+  
   /**  Supplemental setup methods that allow for player-entry and objectives-
     */
-  public void setPlayerLanding(
-    Faction faction, int funds, Base homeland,
-    Series <Actor> staff, Tally <Good> goods, BuildType... buildings
-  ) {
-    this.landFaction  = faction;
-    this.landFunds    = funds;
-    this.landHomeland = homeland;
-    this.landBuilt    = buildings;
-    landGoods.clear();
-    landGoods.add(goods);
-    landStaff.clear();
-    Visit.appendTo(landStaff, staff);
+  public void assignExpedition(Expedition e) {
+    this.expedition = e;
   }
   
   
@@ -227,17 +210,19 @@ public class WorldScenario extends Scenario {
   
   protected Base createBase(Area stage, World world) {
     
+    Base homeland = expedition.homeland;
     Base landing = new Base(world, stage.locale);
+    
     landing.setName("Player Landing");
-    landing.initFunds(landFunds);
-    landing.setHomeland(landHomeland);
-    landing.assignBuildTypes(landFaction.buildTypes());
+    landing.initFunds(expedition.funds);
+    landing.setHomeland(homeland);
+    landing.assignBuildTypes(expedition.faction.buildTypes());
     
     stage.addBase(landing);
     world.addBases(landing);
     
-    Base.setPosture(landHomeland, landing, Base.POSTURE.VASSAL, true);
-    landHomeland.updateOffmapTraders();
+    Base.setPosture(homeland, landing, Base.POSTURE.VASSAL, true);
+    homeland.updateOffmapTraders();
     
     return landing;
   }
@@ -265,8 +250,8 @@ public class WorldScenario extends Scenario {
     AreaTile landing = pickLanding.result();
     
     if (landing != null) {
-      SiteConfig landSite = siteConfig(landFaction, null, 0, 0);
-      for (BuildType b : landBuilt) siteConfig(landSite, b, 1, 1);
+      SiteConfig landSite = siteConfig(expedition.faction, null, 0, 0);
+      for (BuildType b : expedition.built) siteConfig(landSite, b, 1, 1);
       bastion = placeSite(landSite, stage, landing, null, base);
     }
     
@@ -274,13 +259,13 @@ public class WorldScenario extends Scenario {
       base.setHeadquarters(bastion);
       AreaTile goes = bastion.centre();
       
-      if (! landGoods.empty()) {
+      if (! expedition.goods.empty()) {
         bastion.inventory().clear();
-        bastion.inventory().add(landGoods);
+        bastion.inventory().add(expedition.goods);
         if (bastion instanceof Trader) {
           Trader t = (Trader) bastion;
           t.needLevels().clear();
-          t.needLevels().add(landGoods);
+          t.needLevels().add(expedition.goods);
         }
       }
       else for (Good g : bastion.needed()) {
@@ -288,10 +273,9 @@ public class WorldScenario extends Scenario {
         bastion.setInventory(g, need);
       }
       
-      if (landStaff == null || landStaff.empty()) {
-        ActorUtils.fillWorkVacancies(bastion);
-      }
-      else for (Actor a : landStaff) {
+      ActorUtils.fillWorkVacancies(bastion);
+      
+      for (Actor a : expedition.staff()) {
         a.enterMap(stage, goes.x, goes.y, 1, base);
         a.setInside(bastion, true);
         if (bastion.numWorkers(a.type()) < bastion.maxWorkers(a.type())) {
@@ -299,7 +283,6 @@ public class WorldScenario extends Scenario {
         }
       }
     }
-    
     
     //
     //  Then look for suitable sites to place other buildings-

@@ -351,6 +351,74 @@ public class ActorAsPerson extends Actor {
       }
     };
   }
+  
+  
+  
+  /**  Graphical methods...
+    */
+  //  TODO:  Restore this!
+  /*
+  private static Composite faceComposite(Human c) {
+    
+    final String key = ""+c.hashCode();
+    final Composite cached = Composite.fromCache(key);
+    if (cached != null) return cached;
+    
+    final boolean report = mediaVerbose && I.talkAbout == c;
+    if (report) {
+      I.say("\nGetting new face composite for "+c+" (key "+key+")");
+    }
+    
+    final int PS = SelectionPane.PORTRAIT_SIZE;
+    final Composite composite = Composite.withSize(PS, PS, key);
+    composite.layer(PORTRAIT_BASE);
+    
+    final int bloodID = raceID(c);
+    final boolean male = c.traits.male();
+    final int ageStage = c.health.agingStage();
+    
+    if (report) {
+      I.say("  Blood/male/age-stage: "+bloodID+" "+male+" "+ageStage);
+    }
+    
+    int faceOff[], bloodOff[] = RACE_FACE_OFFSETS[bloodID];
+    if (ageStage == 0) {
+      faceOff = CHILD_FACE_OFF;
+    }
+    else {
+      int looks = (int) c.traits.traitLevel(HANDSOME) + 2 - ageStage;
+      if (looks > 0) faceOff = male ? M_HOT_FACE_OFF : F_HOT_FACE_OFF;
+      else if (looks == 0) faceOff = male ? M_AVG_FACE_OFF : F_AVG_FACE_OFF;
+      else faceOff = ELDER_FACE_OFF;
+    }
+    
+    final int UV[] = new int[] {
+      0 + (faceOff[0] + bloodOff[0]),
+      5 - (faceOff[1] + bloodOff[1])
+    };
+    composite.layerFromGrid(BASE_FACES, UV[0], UV[1], 6, 6);
+    
+    if (ageStage > ActorHealth.AGE_JUVENILE) {
+      final int hairGene = c.traits.geneValue("hair", 4);
+      
+      int hairID = BLACK_HAIR_INDEX;
+      if (hairGene > RACE_TONE_SHADES[bloodID]) {
+        hairID = BLACK_HAIR_INDEX - hairGene;
+      }
+      if (ageStage >= ActorHealth.AGE_SENIOR && hairGene > 1) {
+        hairID = WHITE_HAIR_INDEX;
+      }
+      int fringeOff[] = (male ? M_HAIR_OFF : F_HAIR_OFF)[hairID];
+      composite.layerFromGrid(BASE_FACES, fringeOff[0], fringeOff[1], 6, 6);
+      
+      ImageAsset portrait = c.career.vocation().portraitFor(c);
+      if (portrait == null) portrait = c.career.birth().portraitFor(c);
+      composite.layerFromGrid(portrait, 0, 0, 1, 1);
+    }
+    
+    return composite;
+  }
+  //*/
 }
 
 

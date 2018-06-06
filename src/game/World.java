@@ -247,6 +247,11 @@ public class World implements Session.Saveable {
   }
   
   
+  public Series <WorldLocale> locales() {
+    return locales;
+  }
+  
+  
   public Series <Base> bases() {
     return bases;
   }

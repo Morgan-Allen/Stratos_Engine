@@ -6,6 +6,7 @@ import static game.GameConstants.*;
 import gameUI.play.*;
 import graphics.common.*;
 import graphics.sfx.*;
+import graphics.widgets.Composite;
 import test.LogicTest;
 import util.*;
 
@@ -965,6 +966,22 @@ public class Actor extends Element implements
       return s;
     }
   }
+  
+  
+  public Composite portrait() {
+    final String key = "actor_"+this.hashCode();
+    final Composite cached = Composite.fromCache(key);
+    if (cached != null) return cached;
+    
+    //final int size = SelectionPane.PORTRAIT_SIZE;
+    final int size = 40;
+    
+    Type type = type();
+    if (type == null) return Composite.withSize(size, size, key);
+    
+    return Composite.withImage(type.icon, key);
+  }
+  
 }
 
 

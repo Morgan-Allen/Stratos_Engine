@@ -64,6 +64,13 @@ public class Carousel extends UIGroup {
     else spinAngle += spinRate * (spinDiff > 0 ? 1 : -1);
     super.render(pass);
   }
+  
+  
+  public void clearEntries() {
+    for (UINode e : entries) e.detach();
+    refers.clear();
+    entries.clear();
+  }
 
 
   public void addEntryFor(Object ref, UINode entry) {

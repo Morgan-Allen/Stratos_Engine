@@ -49,7 +49,7 @@ public abstract class Scenario implements Session.Saveable {
   
   /**  Initial setup methods-
     */
-  protected void initScenario(MainGame game) {
+  public void initScenario(MainGame game) {
     setupDone = false;
     this.game = game;
     

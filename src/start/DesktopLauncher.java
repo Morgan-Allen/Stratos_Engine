@@ -42,12 +42,12 @@ public class DesktopLauncher {
       
       Base homeland = world.baseNamed("Homeworld Base");
       Tally <Good> goods = Tally.with(PARTS, 20, PLASTICS, 20, CARBS, 20);
-      List <Actor> staff = new List();
       
-      init.setPlayerLanding(
-        GameWorld.FACTION_SETTLERS, 5000,
-        homeland, staff, goods, GameContent.BASTION
-      );
+      Expedition e = new Expedition();
+      e.configAssets(GameWorld.FACTION_SETTLERS, 5000, goods, GameContent.BASTION);
+      e.configTravel(homeland, init.locale());
+      
+      init.assignExpedition(e);
       init.assignSavePath(savePath);
       init.initScenario(MainGame.mainGame());
       
