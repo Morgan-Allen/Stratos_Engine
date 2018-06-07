@@ -19,6 +19,7 @@ public abstract class ViewTest extends Scenario {
   static void beginRenderTest(ViewTest t, int mapSize, String savePath) {
     t.mapSize = mapSize;
     t.savePath = savePath;
+    t.initScenario(MainGame.mainGame());
     DesktopLauncher.launchScenario(t, null);
   }
   

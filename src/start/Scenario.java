@@ -92,7 +92,7 @@ public abstract class Scenario implements Session.Saveable {
   
   
   public Base  base () { return base ; }
-  public Area  stage() { return area ; }
+  public Area  area () { return area ; }
   public World world() { return world; }
   
   

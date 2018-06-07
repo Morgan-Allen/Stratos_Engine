@@ -393,6 +393,7 @@ public class Actor extends Element implements
   
   
   public void setExactLocation(Vec3D location, Area map, boolean jump) {
+    
     AreaTile goes = map.tileAt(location.x, location.y);
     setLocation(goes, map);
     
@@ -921,12 +922,10 @@ public class Actor extends Element implements
     boolean contact = task != null && task.inContact();
     if (contact) goes = task.faceTarget().exactPosition(null);
     Vec2D angleVec = new Vec2D(goes.x - from.x, goes.y - from.y);
-    if (angleVec.length() > 0) s.rotation = angleVec.toAngle();
-    
     
     if (contact) {
       float animProg = task.actionProgress();
-      updateSprite(s, task.animName(), animProg, true);
+      updateSprite(s, task.animName(), angleVec, animProg, true);
     }
     else {
       final float ANIM_MULT = 1.66f;
@@ -936,7 +935,7 @@ public class Actor extends Element implements
       String animName = AnimNames.MOVE;
       if (mode == MOVE_RUN  ) animName = AnimNames.MOVE_FAST;
       if (mode == MOVE_SNEAK) animName = AnimNames.MOVE_SNEAK;
-      updateSprite(s, animName, animProg, true);
+      updateSprite(s, animName, angleVec, animProg, true);
     }
     super.renderElement(rendering, base);
     
@@ -958,8 +957,9 @@ public class Actor extends Element implements
   
   
   protected void updateSprite(
-    Sprite s, String animName, float animProg, boolean loop
+    Sprite s, String animName, Vec2D angleVec, float animProg, boolean loop
   ) {
+    if (angleVec.length() > 0) s.rotation = angleVec.toAngle();
     s.setAnimation(animName, animProg % 1, loop);
   }
   
