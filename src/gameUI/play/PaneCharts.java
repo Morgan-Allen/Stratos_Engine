@@ -2,7 +2,7 @@
 
 package gameUI.play;
 import game.*;
-import static game.GameConstants.*;
+import graphics.widgets.*;
 import util.*;
 
 
@@ -19,19 +19,20 @@ public class PaneCharts extends DetailPane {
   }
   
   
-  protected void updateState() {
+  protected void updateText(Text text) {
+    
+    text.setText("");
+    final Description d = text;
+    
     final Area area = UI.area;
     final Base base = UI.base;
     
-    this.text.setText("");
-    final Description d = this.text;
     d.append("\nSector Charts: ");
     
     d.append("\n\n  <Under construction!>");
     
     //  TODO:  Fill this in...
     
-    super.updateState();
   }
   
 

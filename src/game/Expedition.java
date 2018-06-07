@@ -95,11 +95,11 @@ public class Expedition implements Session.Saveable {
     Faction faction, int funds,
     Tally <Good> goods, BuildType... buildings
   ) {
-    this.faction  = faction;
-    this.funds    = funds;
-    this.built    = buildings;
-    goods.clear();
-    goods.add(goods);
+    this.faction = faction;
+    this.funds   = funds;
+    this.built   = buildings;
+    this.goods.clear();
+    this.goods.add(goods);
   }
   
   
@@ -114,10 +114,7 @@ public class Expedition implements Session.Saveable {
     staff.toggleMember(a, on);
   }
   
-  
-  
 }
-
 
 
 

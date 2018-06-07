@@ -16,7 +16,7 @@ public class LaunchWithMap {
     String savePath = "saves/test_scenario.str";
     
     if (! MainGame.loadGameState(savePath)) {
-      I.say("\nGenerating scenario from start...");
+      I.say("\nGenerating scenario from scratch...");
       
       World world = GameWorld.setupDefaultWorld();
       world.assignSavePath(savePath);
