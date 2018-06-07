@@ -126,14 +126,14 @@ public final class PlayLoop implements ApplicationListener {
   public void render() {
     gdxThread = Thread.currentThread();
     if (! shouldLoop) {
-      if (verbose) I.say("should not be looping...");
+      //if (verbose) I.say("should not be looping...");
       return;
     }
     
     final boolean okay = advanceLoop();
     
     if (! okay) {
-      if (verbose) I.say("Loop does not want to advance!");
+      //if (verbose) I.say("Loop does not want to advance!");
       exitLoop();
     }
   }
@@ -157,10 +157,12 @@ public final class PlayLoop implements ApplicationListener {
     PlayLoop.numFrameUpdates = 0;
     PlayLoop.gameSpeed       = 1.0f;
     
+    /*
     if (verbose) {
       I.say("ASSIGNED NEW PLAYABLE: "+scenario);
       I.reportStackTrace();
     }
+    //*/
     
     if (! initDone) {
       initDone = true;
@@ -186,7 +188,7 @@ public final class PlayLoop implements ApplicationListener {
   
   
   public static void exitLoop() {
-    if (verbose) I.say("EXITING PLAY LOOP");
+    //if (verbose) I.say("EXITING PLAY LOOP");
     shouldLoop = false;
     Gdx.app.exit();
   }
@@ -227,18 +229,22 @@ public final class PlayLoop implements ApplicationListener {
     float worldTime = (numStateUpdates + frameTime) / UPDATES_PER_SECOND;
     rendering.updateViews(worldTime, frameTime);
     
+    /*
     if (verbose) {
-      I.say("\nAdvancing play loop, time: "+time);
-      I.say("  Last frame/last update: "+lastFrame+"/"+lastUpdate);
-      I.say("  Frame/update gap: "+frameGap+"/"+updateGap);
-      I.say("  FRAME/UPDATE INTERVAL: "+FRAME_INTERVAL+"/"+UPDATE_INTERVAL);
+      //I.say("Advancing play loop, time: "+time);
+      //I.say("  Last frame/last update: "+lastFrame+"/"+lastUpdate);
+      //I.say("  Frame/update gap: "+frameGap+"/"+updateGap);
+      //I.say("  FRAME/UPDATE INTERVAL: "+FRAME_INTERVAL+"/"+UPDATE_INTERVAL);
     }
+    //*/
     
     if (Assets.loadProgress() < 1) {
+      /*
       if (verbose) {
         I.say("  Loading assets!");
         I.say("  Loading progress: "+Assets.loadProgress());
       }
+      //*/
       
       Assets.advanceAssetLoading(FRAME_INTERVAL - (SLEEP_MARGIN * 2));
       
@@ -248,19 +254,21 @@ public final class PlayLoop implements ApplicationListener {
     }
     
     if (loopChanged) {
-      if (verbose) I.say("  Loop changed!  Will return");
+      //if (verbose) I.say("  Loop changed!  Will return");
       return true;
     }
     if (playing != null && playing.loadProgress() < 1) {
       
+      /*
       if (verbose) {
         I.say("  Loading simulation: "+playing);
         //I.say("  Is loading?         "+playing.isLoading());
         I.say("  Loading progress:   "+playing.loadProgress());
       }
+      //*/
       
       if (playing.shouldExitLoop()) {
-        if (verbose) I.say("  Exiting loop!  Will return");
+        //if (verbose) I.say("  Exiting loop!  Will return");
         return false;
       }
       
@@ -281,11 +289,13 @@ public final class PlayLoop implements ApplicationListener {
     //  I get occasional flicker problems otherwise.  Still seems wasteful,
     //  mind...
     if (loopChanged) {
-      if (verbose) I.say("  Loop changed!  Will return");
+      //if (verbose) I.say("  Loop changed!  Will return");
       return true;
     }
     if (frameGap >= FRAME_INTERVAL || true) {
-      if (verbose) I.say("  Rendering graphics.");
+      //if (verbose) I.say("  Rendering graphics.");
+      
+      long init = timeMS();
       
       if (playing != null) {
         playing.renderVisuals(rendering);
@@ -301,6 +311,13 @@ public final class PlayLoop implements ApplicationListener {
       rendering.renderUI(UI);
       KeyInput.updateInputs();
       
+      long after = timeMS();
+      
+      if (verbose) {
+        I.say("Time since last render: "+(time - lastFrame));
+        I.add("ms, took: "+(after - init));
+      }
+      
       lastFrame = time;
       numFrameUpdates++;
       
@@ -315,19 +332,30 @@ public final class PlayLoop implements ApplicationListener {
         (1 + (FRAME_INTERVAL / UPDATE_INTERVAL))
       );
       if (playing.shouldExitLoop()) {
-        if (verbose) I.say("  Exiting loop!  Will return");
+        //if (verbose) I.say("  Exiting loop!  Will return");
         return false;
       }
       
-      if (verbose) I.say("  No. of updates: "+numUpdates);
+      //if (verbose) I.say("  No. of updates: "+numUpdates);
+      
       if (! freeze) for (int n = numUpdates; n-- > 0;) {
         
         if (loopChanged) {
-          if (verbose) I.say("  Loop changed!  Will return");
+          //if (verbose) I.say("  Loop changed!  Will return");
           return true;
         }
-        if (verbose) I.say("  Updating simulation.");
+        
+        //if (verbose) I.say("  Updating simulation.");
+        long init = timeMS();
+        
         playing.updateGameState();
+        
+        long after = timeMS();
+        
+        if (verbose) {
+          I.say("Update took "+(after - init)+" MS.");
+        }
+        
         numStateUpdates++;
         lastUpdate += UPDATE_INTERVAL;
       }

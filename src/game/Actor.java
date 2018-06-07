@@ -913,6 +913,8 @@ public class Actor extends Element implements
     float alpha = Rendering.frameAlpha(), rem = 1 - alpha;
     float offX = (t.wide - 1) / 2f, offY = (t.high - 1) / 2f;
     
+    ///I.say("Update: "+map.numUpdates+", alpha: "+alpha);
+    
     s.position.set(
       (from.x * rem) + (goes.x * alpha) + offX,
       (from.y * rem) + (goes.y * alpha) + offY,
