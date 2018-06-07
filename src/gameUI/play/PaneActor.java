@@ -58,6 +58,7 @@ public class PaneActor extends DetailPane {
     d.append("\n");
     d.appendAll("\n  Works at:  ", actor.work());
     d.appendAll("\n  Lives at:  ", actor.home());
+    d.appendAll("\n  Mission:   ", actor.mission());
     d.appendAll("\n  Currently: ", actor.task());
     d.appendAll("\n  Urgency:   ", I.percent(priority));
     

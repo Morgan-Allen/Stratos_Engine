@@ -193,6 +193,7 @@ public class Vassals {
     
     DROPSHIP.organic    = false;
     DROPSHIP.moveMode   = Type.MOVE_AIR;
+    DROPSHIP.moveSpeed  = 250;
     DROPSHIP.maxHealth  = 150;
     DROPSHIP.carryLimit = 120;
     DROPSHIP.setDimensions(4, 4, 2, Type.WIDE_MARGIN);

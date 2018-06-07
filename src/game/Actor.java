@@ -44,6 +44,8 @@ public class Actor extends Element implements
   
   private Series <Active> seen = new List();
   private Series <Actor> considered = new List();
+  
+  private Pathing haven;
   private float fearLevel;
   private List <Active> backup = new List();
   
@@ -88,6 +90,7 @@ public class Actor extends Element implements
     
     s.loadObjects(seen);
     s.loadObjects(considered);
+    
     fearLevel = s.loadFloat();
     s.loadObjects(backup);
     
@@ -167,6 +170,7 @@ public class Actor extends Element implements
     
     map.actors.remove(this);
     if (type().isVessel()) map.vessels.remove(this);
+    if (task != null) task.onMapExit();
     
     super.exitMap(map);
   }
@@ -231,6 +235,7 @@ public class Actor extends Element implements
   /**  Regular updates-
     */
   void update() {
+    
     //
     //  Some checks to assist in case of blockage, and refreshing position-
     lastPosition.setTo(exactPosition);
@@ -324,6 +329,11 @@ public class Actor extends Element implements
   
   void updateReactions() {
     return;
+  }
+  
+  
+  Pathing updateHaven() {
+    return null;
   }
   
   
@@ -736,6 +746,7 @@ public class Actor extends Element implements
   void updateConsidered() {
     int max = AVG_MAX_NOTICE;
     considered = (Series) filterToNotice((Series) map.actors(), -1, max);
+    haven = updateHaven();
   }
   
   
@@ -791,6 +802,11 @@ public class Actor extends Element implements
   
   public Series <Actor> considered() {
     return considered;
+  }
+  
+  
+  public Pathing haven() {
+    return haven;
   }
   
   

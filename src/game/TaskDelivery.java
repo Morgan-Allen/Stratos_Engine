@@ -145,7 +145,7 @@ public class TaskDelivery extends Task {
       
       //  TODO:  Iterate over suitable building-types here.
       Building goes = findNearestDemanding(null, made, maxRange, from);
-      if (goes == null) continue;
+      if (goes == null || goes == from) continue;
       
       int demand = Nums.round(goes.demandFor(made), 1, true);
       amount = Nums.min(amount, 10    );

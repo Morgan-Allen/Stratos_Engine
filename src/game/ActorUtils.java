@@ -160,13 +160,13 @@ public class ActorUtils {
         if (space <= 0) continue;
         
         float fitness = 0, sumWeights = 0;
-        for (Trait skill : t.initTraits.keys()) {
-          float level = t.initTraits.valueFor(skill);
-          fitness += migrant.traits.levelOf(skill) / level;
+        for (Trait skill : t.coreSkills.keys()) {
+          float level = t.coreSkills.valueFor(skill);
+          fitness += migrant.traits.levelOf(skill);
           sumWeights += level;
         }
         fitness /= Nums.max(1, sumWeights);
-        if (fitness <= 0.5f) continue;
+        if (fitness <= 0.25f) continue;
         
         float near = Area.distancePenalty(from, b);
         Opening o = new Opening();

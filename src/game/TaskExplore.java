@@ -70,11 +70,15 @@ public class TaskExplore extends Task {
   protected float successPriority() {
     Actor actor = (Actor) active;
     
-    float curiosity = (actor.traits.levelOf(TRAIT_CURIOSITY) + 2) / 2;
-    float bravery   = (actor.traits.levelOf(TRAIT_BRAVERY  ) + 2) / 2;
+    if (I.talkAbout == actor) {
+      //I.say("??");
+    }
     
-    float priority = ROUTINE;
-    priority *= (curiosity + bravery + 1) / 2f;
+    float curiosity = (actor.traits.levelOf(TRAIT_CURIOSITY) + 1) / 2;
+    float bravery   = (actor.traits.levelOf(TRAIT_BRAVERY  ) + 1) / 2;
+    
+    float priority = CASUAL;
+    priority *= (curiosity + bravery + 1) / 3f;
     return priority;
   }
   
@@ -82,7 +86,8 @@ public class TaskExplore extends Task {
   protected float successChance() {
     Actor actor = (Actor) active;
     float skill = 0;
-    skill += actor.type().sightRange * 0.5f / AVG_SIGHT;
+    skill += actor.traits.levelOf(SKILL_SIGHT) / MAX_SKILL_LEVEL;
+    skill *= actor.type().sightRange * 0.5f / AVG_SIGHT;
     skill += actor.type().moveSpeed  * 0.5f / AVG_MOVE_SPEED;
     float chance = Nums.clamp((skill + 0.5f) / 2, 0, 1);
     return chance;
@@ -90,15 +95,23 @@ public class TaskExplore extends Task {
   
   
   protected float failCostPriority() {
+    
     Actor actor = (Actor) active;
     AreaTile around = target.at();
+    Pathing haven = actor.haven();
+    float power = TaskCombat.attackPower(actor);
     
     AreaDanger dangerMap = actor.map().dangerMap(actor.base(), true);
     float danger = dangerMap.fuzzyLevel(around.x, around.y);
-    if (danger <= 0) return 0;
+    danger /= danger + power;
     
-    float power = TaskCombat.attackPower(actor);
-    return (danger / (danger + power)) * PARAMOUNT;
+    if (haven != null && target != null) {
+      float dist = Area.distance(target, haven);
+      danger += dist / MAX_EXPLORE_DIST;
+    }
+    
+    if (danger <= 0) return 0;
+    return danger * PARAMOUNT;
   }
   
   

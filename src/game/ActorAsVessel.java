@@ -134,8 +134,6 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
         else {
           Area map = map();
           Base partner = trading.tradeGoes.base();
-          
-          
           /*
           return TaskDelivery.pickNextDelivery(
             actor, this, this, MAX_TRADER_RANGE, 1, map().world.goodTypes()
@@ -413,9 +411,10 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
       removeFootprint();
       entrance = null;
     }
+    this.landsAt  = null;
     this.dockedAt = null;
-    this.landed = false;
-    this.flying = true;
+    this.landed   = false;
+    this.flying   = true;
   }
   
   

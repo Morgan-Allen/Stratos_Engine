@@ -3,8 +3,8 @@
 package game;
 import util.*;
 import static game.Task.*;
-import static game.ActorTraits.*;
 import static game.GameConstants.*;
+import static game.ActorTraits.*;
 
 
 
@@ -57,13 +57,11 @@ public class ActorAsPerson extends Actor {
     
     //
     //  If you're seriously hungry/beat/tired, try going home:
-    //  TODO:  Work this in as an emergency reaction?  It's a bit of a hack
-    //  here.
-    
-    Building rests = TaskResting.findRestVenue(this, map);
-    float needRest = TaskResting.restUrgency(this, rests);
+    //  TODO:  Make this an emergency reaction?
+    Pathing haven = haven();
+    float needRest = TaskResting.restUrgency(this, haven());
     if (idle() && needRest > Rand.num() + 0.5f) {
-      assignTask(TaskResting.nextResting(this, rests), this);
+      assignTask(TaskResting.nextResting(this, haven), this);
     }
     
     //
@@ -117,7 +115,7 @@ public class ActorAsPerson extends Actor {
       choice.add(TaskWander  .nextWandering(this));
       choice.add(TaskFirstAid.nextFirstAid (this));
       choice.add(TaskResting .nextRelaxing (this));
-      choice.add(TaskResting .nextResting  (this, rests));
+      choice.add(TaskResting .nextResting  (this));
       choice.add(TaskPurchase.nextPurchase (this));
       choice.add(selectTechniqueUse(false, (Series) considered()));
       
@@ -202,6 +200,11 @@ public class ActorAsPerson extends Actor {
     Reaction r = pick.result();
     if (talk) I.say("  PICKED: "+r.used+" -> "+r.subject+": "+r.rating);
     return r.used.useFor(this, r.subject);
+  }
+  
+  
+  Pathing updateHaven() {
+    return TaskResting.findRestVenue(this, map);
   }
   
   
