@@ -37,7 +37,6 @@ public class MainScreen extends HUD {
   
   MenuPane menuView;
   int menuState = MENU_INIT;
-  World verse = null;
   
   UIGroup displayArea;
   PlanetDisplay display;
@@ -57,11 +56,6 @@ public class MainScreen extends HUD {
     infoArea.alignVertical  (0, 0);
     infoArea.alignHorizontal(0, 0);
     infoArea.attachTo(this);
-    
-    menuView = new MainMenu(this);
-    menuView.alignVertical(MARGIN * 2, MARGIN * 2);
-    menuView.alignLeft(MARGIN, MENU_PANEL_WIDE);
-    menuView.attachTo(this);
     
     final int
       dispInX = MENU_PANEL_WIDE + (MARGIN * 2),
@@ -89,26 +83,17 @@ public class MainScreen extends HUD {
     crewDisplay = new CrewDisplay(this);
     crewDisplay.alignToMatch(worldsDisplay);
     crewDisplay.attachTo(this);
+    
+    menuView = new MainMenu(this);
+    menuView.alignVertical(MARGIN * 2, MARGIN * 2);
+    menuView.alignLeft(MARGIN, MENU_PANEL_WIDE);
+    menuView.attachTo(this);
   }
   
   
   
   /**  Regular queries and update methods-
     */
-  public static MainScreen current() {
-    final HUD current = PlayLoop.currentUI();
-    if (current instanceof MainScreen) return (MainScreen) current;
-    return null;
-  }
-  
-  
-  public static World currentVerse() {
-    final MainScreen screen = current();
-    if (screen == null) return null;
-    return screen.verse;
-  }
-  
-  
   protected void updateState() {
     PlayLoop.rendering().backColour = Colour.BLACK;
     
@@ -123,10 +108,6 @@ public class MainScreen extends HUD {
       display.showLabels   = false;
       worldsDisplay.hidden = true ;
       crewDisplay.hidden   = true ;
-      verse                = null ;
-    }
-    else if (verse == null) {
-      verse = GameWorld.setupDefaultWorld();
     }
     
     super.updateState();

@@ -22,8 +22,6 @@ public class WorldScenario extends Scenario {
   List <Objective> objectives = new List();
   List <Building> nests = new List();
   
-  String savePath = "saves/save_locale.str";
-  
   
   
   public WorldScenario(AreaConfig config, World world, WorldLocale locale) {
@@ -44,8 +42,6 @@ public class WorldScenario extends Scenario {
     expedition = (Expedition) s.loadObject();
     s.loadObjects(objectives);
     s.loadObjects(nests);
-    
-    savePath = s.loadString();
   }
   
   
@@ -59,8 +55,6 @@ public class WorldScenario extends Scenario {
     s.saveObject(expedition);
     s.saveObjects(objectives);
     s.saveObjects(nests);
-    
-    s.saveString(savePath);
   }
   
   
@@ -179,19 +173,9 @@ public class WorldScenario extends Scenario {
   }
   
   
-  public void assignSavePath(String savePath) {
-    this.savePath = savePath;
-  }
-  
-  
   
   /**  Internal setup methods for when the scenario is activated-
     */
-  protected String savePath() {
-    return savePath;
-  }
-  
-  
   protected World createWorld() {
     return initWorld;
   }
@@ -361,10 +345,14 @@ public class WorldScenario extends Scenario {
     if (allObjects) checkState = COMPLETE_SUCCESS;
     
     if (checkState != COMPLETE_NONE) {
-      //  TODO:  Exit to main screen or give option to continue!
+      //
+      //  TODO:  Give visual dialog to let user exit to main screen or continue.
+      //  TODO:  If they exit to the main screen, you should have a bonus to
+      //  your next expedition based on the last sector's resources, et cetera.
+      
       I.say("\nSCENARIO COMPLETE! "+this);
       I.say("  RESULT: "+checkState);
-      MainGame.playScenario(null);
+      MainGame.playScenario(null, initWorld);
     }
     
   }

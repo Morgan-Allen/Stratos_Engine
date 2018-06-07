@@ -12,36 +12,24 @@ import util.*;
 
 public class SavesListPane extends MenuPane {
   
-  
-  final String prefix;
 
   
   public SavesListPane(HUD UI) {
-    this(UI, null);
-  }
-  
-  
-  public SavesListPane(HUD UI, String prefixFilter) {
     super(UI, MainScreen.MENU_SAVES_LIST);
-    this.prefix = prefixFilter;
   }
   
   
   protected void fillListing(List <UINode> listing) {
-    final String saves[] = prefix == null ?
-      SaveUtils.latestSaves()     :
-      SaveUtils.savedFiles(prefix);
+    final String saves[] = SaveUtils.latestSaves();
     
     listing.add(createTextItem("Saved Games:", 1.2f, null, 1));
     
     for (final String path : saves) {
-      final String titlePath;
-      if (prefix == null) titlePath = SaveUtils.prefixFor(path);
-      else                titlePath = SaveUtils.suffixFor(path);
       
-      listing.add(createTextButton("  "+titlePath, 1, new Description.Link() {
+      listing.add(createTextButton("  "+path, 1, new Description.Link() {
         public void whenClicked(Object context) {
-          SaveUtils.loadGame(path, true);
+          String fullPath = SaveUtils.fullSavePath(path, "");
+          MainGame.loadGameState(fullPath);
         }
       }));
     }

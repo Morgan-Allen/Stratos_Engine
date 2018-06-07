@@ -2,6 +2,7 @@
 
 package start;
 import game.*;
+import gameUI.main.*;
 import gameUI.play.*;
 import graphics.common.*;
 import graphics.widgets.*;
@@ -23,7 +24,17 @@ public class MainGame implements Playable {
   static MainGame current;
   int nextOp = DO_PLAY;
   
+  
+  MainScreen mainScreen;
+  PlayUI playUI;
+  
+  World world;
   Scenario scenario;
+  
+  
+  MainGame() {
+    return;
+  }
   
   
   
@@ -36,16 +47,24 @@ public class MainGame implements Playable {
   }
   
   
-  public static void playScenario(Scenario s) {
+  public static void playScenario(Scenario s, World w) {
     mainGame();
     current.scenario = null;
+    current.world    = null;
     current.scenario = s;
+    current.world    = w;
   }
   
   
   public static Scenario currentScenario() {
-    if (current == null || current.scenario == null) return null;
+    if (current == null) return null;
     return current.scenario;
+  }
+  
+  
+  public static World currentWorld() {
+    if (current == null) return null;
+    return current.world;
   }
   
   
@@ -61,19 +80,65 @@ public class MainGame implements Playable {
   }
   
   
+  public static MainScreen mainScreen() {
+    if (current == null) return null;
+    return current.mainScreen;
+  }
+  
+  
   public static PlayUI playUI() {
     if (currentScenario() == null) return null;
     return current.scenario.playUI();
   }
   
   
-  protected boolean restartScenario() {
+  public static boolean restartScenario() {
     if (current == null || current.scenario == null) return false;
-    current.scenario.initScenario(this);
+    current.scenario.initScenario(mainGame());
     return true;
   }
   
   
+  public static boolean loadGameState(String savePath) {
+    if (Assets.exists(savePath)) try {
+      Session s = Session.loadSession(savePath, true);
+      Scenario scenario = (Scenario) s.loaded()[0];
+      World    world    = (World   ) s.loaded()[1];
+      
+      scenario.afterLoading(mainGame());
+      
+      current.scenario = scenario;
+      current.world    = world   ;
+      
+      I.say("Scenario loading done");
+      return true;
+    }
+    catch (Exception e) { I.report(e); }
+    return false;
+  }
+  
+  
+  public static boolean saveGameState() {
+    try {
+      I.say("\nWill save game...");
+      
+      long initTime = I.getTime();
+      Scenario scenario = current.scenario;
+      World    world    = current.world   ;
+      
+      String savePath = world.savePath();
+      Session.saveSession(savePath, scenario, world);
+      
+      long timeSpent = I.getTime() - initTime;
+      I.say("  Saving done: "+timeSpent+" ms.");
+      return true;
+    }
+    catch (Exception e) { I.report(e); }
+    return false;
+  }
+  
+  
+  /*
   public static Scenario loadScenario(String savePath) {
     if (Assets.exists(savePath)) try {
       Session s = Session.loadSession(savePath, true);
@@ -99,21 +164,18 @@ public class MainGame implements Playable {
     catch (Exception e) { I.report(e); }
     return false;
   }
+  //*/
   
   
   
   /**  PlayLoop implementation-
     */
-  public void beginGameSetup() {
-    //  TODO:  Set up main menu and other auxiliary data.
-    return;
-  }
-  
-  
   public void updateGameState() {
     if (scenario == null) {
+      return;
     }
     else if (scenario.loadProgress() < 1) {
+      return;
     }
     else {
       scenario.updateScenario();
@@ -123,8 +185,10 @@ public class MainGame implements Playable {
   
   public void renderVisuals(Rendering rendering) {
     if (scenario == null) {
+      return;
     }
     else if (scenario.loadProgress() < 1) {
+      return;
     }
     else {
       scenario.renderVisuals(rendering);
@@ -142,12 +206,12 @@ public class MainGame implements Playable {
   }
   
   
-  public HUD UI(boolean loading) {
-    if (loading) {
-      return null;
+  public HUD UI() {
+    if (mainScreen == null) {
+      mainScreen = new MainScreen(PlayLoop.rendering());
     }
-    else if (scenario == null) {
-      return null;
+    if (scenario == null) {
+      return mainScreen;
     }
     else if (scenario.loadProgress() < 1) {
       return null;
@@ -160,25 +224,22 @@ public class MainGame implements Playable {
   
   public boolean shouldExitLoop() {
     if (nextOp == DO_SAVE_EXIT) {
-      return saveScenario(scenario);
+      if (saveGameState()) return true;
     }
     if (nextOp == DO_SAVE) {
-      saveScenario(scenario);
+      saveGameState();
     }
     if (nextOp == DO_RESTART) {
       restartScenario();
     }
     if (nextOp == DO_LOAD && scenario != null) {
-      String savePath = scenario.savePath();
+      String savePath = world.savePath();
       scenario = null;
-      scenario = loadScenario(savePath);
+      world    = null;
+      loadGameState(savePath);
+      if (scenario != null) world = scenario.world();
     }
     nextOp = DO_PLAY;
-    return false;
-  }
-  
-  
-  public boolean isLoading() {
     return false;
   }
   

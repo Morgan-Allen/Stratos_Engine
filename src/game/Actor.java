@@ -977,8 +977,9 @@ public class Actor extends Element implements
     final int size = 40;
     
     Type type = type();
-    if (type == null) return Composite.withSize(size, size, key);
-    
+    if (type == null || type.icon == null) {
+      return Composite.withSize(size, size, key);
+    }
     return Composite.withImage(type.icon, key);
   }
   

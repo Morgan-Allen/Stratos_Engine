@@ -118,7 +118,7 @@ public class AreaFlagging {
     */
   public AreaTile pickDistantPoint(Target near, int maxRange, float randomness) {
     
-    boolean report = I.talkAbout == near;
+    boolean report = I.talkAbout == near && false;
     if (report) I.say("\nGETTING TILE TO LOOK AT...");
     
     AreaTile from = near.at();

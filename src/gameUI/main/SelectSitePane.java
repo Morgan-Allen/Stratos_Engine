@@ -8,6 +8,7 @@ import game.*;
 import gameUI.misc.*;
 import graphics.common.*;
 import graphics.widgets.*;
+import start.MainGame;
 import util.*;
 
 
@@ -76,7 +77,7 @@ public class SelectSitePane extends MenuPane {
   protected void updateState() {
     super.updateState();
     
-    final MainScreen screen = MainScreen.current();
+    final MainScreen screen = MainGame.mainScreen();
     screen.display.showLabels   = true ;
     screen.display.showWeather  = false;
     screen.worldsDisplay.hidden = false;
@@ -90,7 +91,7 @@ public class SelectSitePane extends MenuPane {
   /**  Handling homeworld selection-
     */
   private void selectHomeworld(WorldLocale homeworld) {
-    final MainScreen screen = MainScreen.current();
+    final MainScreen screen = MainGame.mainScreen();
     screen.worldsDisplay.setSelection(homeworld);
     expedition.setHomeland(world.baseAt(homeworld));
     //homeworld.whenClicked(null);
@@ -107,7 +108,7 @@ public class SelectSitePane extends MenuPane {
   /**  Handling landing selection-
     */
   private void selectLanding(WorldLocale landing) {
-    final MainScreen screen = MainScreen.current();
+    final MainScreen screen = MainGame.mainScreen();
     screen.display.setSelection(landing.name(), true);
     expedition.setLanding(landing);
     //landing.whenClicked(null);
@@ -137,7 +138,11 @@ public class SelectSitePane extends MenuPane {
   
   
   protected void navigateBack() {
-    MainScreen.current().clearInfoPane();
+    final MainScreen screen = MainGame.mainScreen();
+    screen.clearInfoPane();
+    screen.worldsDisplay.clearEntries();
+    screen.crewDisplay.clearDisplay();
+    
     super.navigateBack();
   }
 }

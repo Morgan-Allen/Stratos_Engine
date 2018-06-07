@@ -118,10 +118,10 @@ public class Image extends UINode {
     if (customTex != null) {
       renderTex(customTex, absAlpha, pass);
     }
-    else {
+    else if (texture != null) {
       renderTex(texture.asTexture(), absAlpha, pass);
     }
-    if (! enabled) {
+    if (greyOut != null && ! enabled) {
       renderTex(greyOut.asTexture(), absAlpha, pass);
     }
     if (overlaid != null) for (Texture t : overlaid) {

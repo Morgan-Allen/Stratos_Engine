@@ -62,7 +62,7 @@ public class MainMenu extends MenuPane implements UIConstants {
   
   
   public void enterNewGameFlow() {
-    World world = MainScreen.currentVerse();
+    World world = MainGame.currentWorld();
     final SelectSitePane sitePane = new SelectSitePane(UI);
     sitePane.assignWorld(world);
     ChartUtils.updateWorldsCarousel(screen.worldsDisplay, screen, world);

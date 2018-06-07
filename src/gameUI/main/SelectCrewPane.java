@@ -6,7 +6,9 @@
 package gameUI.main;
 import start.*;
 import content.*;
+import static content.GameContent.*;
 import game.*;
+import static game.GameConstants.*;
 import gameUI.misc.*;
 import graphics.common.*;
 import graphics.widgets.*;
@@ -100,7 +102,7 @@ public class SelectCrewPane extends MenuPane {
   
   
   protected void updateState() {
-    final MainScreen screen = MainScreen.current();
+    final MainScreen screen = MainGame.mainScreen();
     screen.display.showLabels   = true ;
     screen.display.showWeather  = false;
     screen.worldsDisplay.hidden = true ;
@@ -177,18 +179,28 @@ public class SelectCrewPane extends MenuPane {
   
   
   private void pushNextPane() {
-    String prefix = SaveUtils.uniqueVariant(expedition.leader().fullName());
-    final World verse = MainScreen.currentVerse();
-    //expedition.setTitleGranted(Expedition.TITLE_KNIGHTED);
+    navigateToRoot();
     
-    WorldScenario hook = verse.scenarioFor(expedition.landing());
+    String savePath = LaunchWithGlobe.SAVE_PATH;
+    final World world = MainGame.currentWorld();
+    world.assignSavePath(savePath);
+    
+    WorldScenario hook = world.scenarioFor(expedition.landing());
     if (hook == null) return;
     
+    //  TODO:  You need a separate pane to specify these items!
+    if (true) {
+      Tally <Good> goods = Tally.with(PARTS, 20, PLASTICS, 20, CARBS, 20);
+      expedition.configAssets(
+        GameWorld.FACTION_SETTLERS,
+        5000, goods, GameContent.BASTION
+      );
+    }
+    
     hook.assignExpedition(expedition);
-    hook.assignSavePath(prefix);
     hook.initScenario(MainGame.mainGame());
     
-    MainGame.playScenario(hook);
+    MainGame.playScenario(hook, world);
   }
   
   
@@ -197,11 +209,6 @@ public class SelectCrewPane extends MenuPane {
   }
   
 }
-
-
-
-
-
 
 
 

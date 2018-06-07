@@ -58,7 +58,7 @@ public final class PlayLoop implements ApplicationListener {
     */
   public static HUD currentUI() {
     if (playing == null) return null;
-    return playing.UI(playing.isLoading());
+    return playing.UI();
   }
   
   public static Rendering rendering() {
@@ -252,23 +252,27 @@ public final class PlayLoop implements ApplicationListener {
       return true;
     }
     if (playing != null && playing.loadProgress() < 1) {
+      
       if (verbose) {
         I.say("  Loading simulation: "+playing);
-        I.say("  Is loading?         "+playing.isLoading());
+        //I.say("  Is loading?         "+playing.isLoading());
         I.say("  Loading progress:   "+playing.loadProgress());
       }
+      
       if (playing.shouldExitLoop()) {
         if (verbose) I.say("  Exiting loop!  Will return");
         return false;
       }
       
+      /*
       if (! playing.isLoading()) {
         if (verbose) I.say("  Beginning simulation setup...");
         playing.beginGameSetup();
       }
+      //*/
       
       rendering.renderDisplay(FRAMES_PER_SECOND);
-      rendering.renderUI(playing.UI(true));
+      rendering.renderUI(playing.UI());
       lastUpdate = lastFrame = time;
       return true;
     }
@@ -287,7 +291,7 @@ public final class PlayLoop implements ApplicationListener {
         playing.renderVisuals(rendering);
       }
       
-      final HUD UI = playing == null ? null : playing.UI(false);
+      final HUD UI = playing == null ? null : playing.UI();
       if (UI != null) {
         UI.updateInput();
         UI.renderWorldFX();

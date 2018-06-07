@@ -60,7 +60,7 @@ public class CrewDisplay extends UIGroup {
     final int HALF_B = BOX_HEIGHT / 2;
     int count;
     
-    for (Image pic : crewPics) pic.detach();
+    clearDisplay();
     
     if (e.leader() != null) {
       final Image pic = portraitFor(e.leader());
@@ -80,6 +80,11 @@ public class CrewDisplay extends UIGroup {
       pic.attachTo(crewBox);
       crewPics.add(pic);
     }
+  }
+  
+  
+  protected void clearDisplay() {
+    for (Image pic : crewPics) pic.detach();
   }
   
   

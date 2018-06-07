@@ -72,7 +72,6 @@ public abstract class Scenario implements Session.Saveable {
   }
   
   
-  protected abstract String savePath();
   protected abstract World createWorld();
   protected abstract Area createArea(World world);
   protected abstract Base createBase(Area map, World world);

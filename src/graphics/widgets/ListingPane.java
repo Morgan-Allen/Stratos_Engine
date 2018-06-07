@@ -9,11 +9,6 @@ import util.*;
 
 
 
-//  TODO:  Implement header and footer views, plus scrolling.
-//  And maybe a horizontal layout?  With centering?
-
-
-
 public abstract class ListingPane extends UIGroup {
   
   
@@ -94,7 +89,15 @@ public abstract class ListingPane extends UIGroup {
     final UINode parent = parent();
     detach();
     before.attachTo(parent);
-    before = null;
+  }
+  
+  
+  protected void navigateToRoot() {
+    ListingPane pane = this;
+    while (pane.before != null) {
+      pane.navigateBack();
+      pane = pane.before;
+    }
   }
   
   

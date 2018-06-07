@@ -114,7 +114,7 @@ public abstract class UINode {
   }
   
   
-  public  UINode parent() {
+  public UINode parent() {
     return parent;
   }
   
