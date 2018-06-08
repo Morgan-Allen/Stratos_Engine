@@ -524,17 +524,18 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   void updateFlight() {
     if (! type().isAirship()) return;
     
+    
+    float landsDist = Area.distance(this, landsAt);
+    
     float targetHeight = MAX_HEIGHT;
-    if (jobFocus() == landsAt && Area.distance(this, landsAt) < DESCENT_RANGE) {
+    if (jobFocus() == landsAt && landsDist < DESCENT_RANGE) {
       targetHeight = 0;
     }
-    
-    //I.say("Height is: "+flyHeight+"/"+targetHeight);
-    //I.add("  Pos: "+this.exactPosition(null));
     
     float maxChange = MAX_HEIGHT * 1f / (map.ticksPS * DESCENT_TIME);
     float diff = targetHeight - flyHeight;
     diff = Nums.clamp(diff, 0 - maxChange, maxChange);
+    
     flyHeight = Nums.clamp(flyHeight + diff, 0, MAX_HEIGHT);
     
     Vec3D pos = this.exactPosition(null);

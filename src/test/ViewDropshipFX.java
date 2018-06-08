@@ -5,6 +5,9 @@ package test;
 import content.Vassals;
 import game.*;
 import game.Task.JOB;
+import graphics.common.Rendering;
+
+import util.*;
 
 
 
@@ -17,6 +20,8 @@ public class ViewDropshipFX extends ViewTest {
   
   
   ActorAsVessel ship;
+  int counter = 0;
+  Vec3D oldPos = new Vec3D(), newPos = new Vec3D();
   
   
   protected void configScenario(World world, Area map, Base base) {
@@ -30,14 +35,33 @@ public class ViewDropshipFX extends ViewTest {
     Task landing = ship.targetTask(ship.landsAt(), 10, JOB.VISITING, ship);
     ship.assignTask(landing, ship);
     
-    playUI().setLookPoint(map.tileAt(8, 8));
+    oldPos = ship.exactPosition(oldPos);
+    
+    ///playUI().setLookPoint(map.tileAt(8, 8));
   }
   
   
   public void updateScenario() {
     super.updateScenario();
   }
+  
+  
+  public void renderVisuals(Rendering rendering) {
+    //ship.renderElement(rendering, base());
+    super.renderVisuals(rendering);
+  }
+  
+  
+  
 }
+
+
+
+
+
+
+
+
 
 
 

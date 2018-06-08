@@ -154,6 +154,7 @@ public class PlayUI extends HUD implements UIConstants {
   
   
   public void setLookPoint(GameConstants.Target point) {
+    if (point == null) return;
     rendering.view.lookedAt.setTo(point.exactPosition(null));
   }
   

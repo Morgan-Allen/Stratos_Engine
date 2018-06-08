@@ -29,7 +29,7 @@ public class MainGame implements Playable {
   
   /**  Static setup methods for convenience-
     */
-  static MainGame mainGame() {
+  public static MainGame mainGame() {
     if (current != null) return current;
     PlayLoop.setupAndLoop(current = new MainGame());
     return current;

@@ -368,11 +368,15 @@ public class Task implements Session.Saveable {
         Pathing ahead    = nextOnPath();
         Vec3D   actorPos = asActor .exactPosition(null);
         Vec3D   aheadPos = ahead   .exactPosition(null);
-        Vec3D   diff     = aheadPos.sub(actorPos, null);
+        Vec3D   diff     = aheadPos.sub(actorPos, null); diff.z = 0;
         float   dist     = diff.length();
         boolean jump     = ! (from.isTile() && ahead.isTile());
         
+        //I.say("Updating motion...");
+        
         if (jump) {
+          //I.say("  Jumped ahead to "+aheadPos);
+          
           asActor.setExactLocation(aheadPos, map, true);
           if (! from .isTile()) asActor.setInside(inside, false);
           if (! ahead.isTile()) asActor.setInside(ahead , true );
@@ -383,6 +387,8 @@ public class Task implements Session.Saveable {
           float distMoved = Nums.min(dist, motion);
           actorPos.x += distMoved * diff.x;
           actorPos.y += distMoved * diff.y;
+          
+          //I.say("  -> "+distMoved+", diff: "+diff);
           
           motion -= distMoved;
           asActor.setExactLocation(actorPos, map, false);

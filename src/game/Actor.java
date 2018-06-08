@@ -261,6 +261,7 @@ public class Actor extends Element implements
       if (home    != null && onMap()) home   .actorUpdates(this);
       if (work    != null && onMap()) work   .actorUpdates(this);
       if (mission != null && onMap()) mission.actorUpdates(this);
+      
       if (onMap() && reaction != null && ! reaction.checkAndUpdateTask()) {
         assignReaction(null);
       }
@@ -269,6 +270,7 @@ public class Actor extends Element implements
         updateConsidered();
         beginNextBehaviour();
       }
+      
       //
       //  And update anything you're carrying-
       if (attached != null && onMap()) {
