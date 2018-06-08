@@ -50,8 +50,8 @@ public class ViewCombatFX extends ViewTest {
     enemy.assignTask(combatE, fights);
     
     
-    PlayUI.pushSelection(fights);
-    playUI().tracking.zoomNow(fights.trackPosition());
+    //PlayUI.pushSelection(fights);
+    //playUI().tracking.zoomNow(fights.trackPosition());
   }
   
   

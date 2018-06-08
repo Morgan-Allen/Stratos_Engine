@@ -100,20 +100,34 @@ public class MissionContact extends Mission {
     if (focus == null) return null;
     
     BaseCouncil council = focus.council;
+    Area area = focus.activeMap();
+    
+    Pick <Actor> pick = new Pick();
     
     Actor monarch = council.memberWithRole(Role.MONARCH);
-    if (monarch != null && monarch.onMap()) return monarch;
+    if (monarch != null && monarch.onMap()) pick.compare(monarch, 3);
     
     Actor minister = council.memberWithRole(Role.PRIME_MINISTER);
-    if (minister != null && monarch.onMap()) return monarch;
+    if (minister != null && monarch.onMap()) pick.compare(minister, 2);
     
     Actor consort = council.memberWithRole(Role.CONSORT);
-    if (consort != null && consort.onMap()) return consort;
+    if (consort != null && consort.onMap()) pick.compare(consort, 2);
     
-    return null;
+    if (area != null && pick.empty()) for (Actor a : area.actors) {
+      if (a.base() != focus) continue;
+      float rating = 1f;
+      if (a.type().socialClass == CLASS_COMMON) rating /= 2;
+      rating *= Area.distance(parent.transitTile, a);
+      rating *= 0.5f + Rand.num();
+      pick.compare(a, rating);
+    }
+    
+    return pick.result();
   }
   
 }
+
+
 
 
 

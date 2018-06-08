@@ -20,7 +20,7 @@ public abstract class ViewTest extends Scenario {
     t.mapSize = mapSize;
     t.savePath = savePath;
     t.initScenario(MainGame.mainGame());
-    DesktopLauncher.launchScenario(t);
+    DesktopLauncher.launchScenario(t, null);
   }
   
   protected World createWorld() {

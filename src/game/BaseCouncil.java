@@ -604,12 +604,12 @@ public class BaseCouncil {
       
       if (! (
         other.isLordOf(base) ||
-        other.isAllyOf(base)
+        other.isAllyOf(base) ||
+        other.isVassalOf(base)
       )) {
         MissionAssessment DA = dialogAssessment(base, other, true);
         choices.add(DA);
       }
-      
     }
     return choices;
   }

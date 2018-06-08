@@ -874,10 +874,9 @@ public class Building extends Element implements Pathing, Employer, Carrier {
       h.fog = s.fog;
       h.colour = Colour.BLUE;
       h.hurtLevel = 1 - buildLevel();
-      h.size = type().maxHealth;
+      h.size = (type().wide + type().high) * 30 / 2f;
       h.position.setTo(s.position);
-      h.position.z += type().deep + 0.5f;
-      //h.position.z -= (type().wide - 1) / 2f;
+      h.position.z += type().deep + 0.25f;
       h.readyFor(rendering);
     }
   }

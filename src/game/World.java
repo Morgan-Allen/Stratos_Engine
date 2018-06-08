@@ -69,11 +69,13 @@ public class World implements Session.Saveable {
   int mapWide = 10, mapHigh = 10;
   Table <String, Type> mediaTypes = new Table();
   
+  String savePath = "saves/save_locale.str";
+  
+  
   
   public World(Good goodTypes[]) {
     this.goodTypes  = goodTypes ;
   }
-  
   
   public void assignTypes(
     BuildType builds[], ActorType ships[],
@@ -86,9 +88,16 @@ public class World implements Session.Saveable {
     this.nobleTypes   = nobles  ;
   }
   
-  
   public void assignMedia(Object... args) {
     mediaTypes = Table.make(args);
+  }
+  
+  public void assignSavePath(String savePath) {
+    this.savePath = savePath;
+  }
+  
+  public String savePath() {
+    return savePath;
   }
   
   
@@ -137,6 +146,8 @@ public class World implements Session.Saveable {
       Type type = (Type) s.loadObject();
       mediaTypes.put(key, type);
     }
+    
+    savePath = s.loadString();
   }
   
   
@@ -182,6 +193,8 @@ public class World implements Session.Saveable {
       s.saveString(key);
       s.saveObject(mediaTypes.get(key));
     }
+    
+    s.saveString(savePath);
   }
   
   
@@ -204,18 +217,19 @@ public class World implements Session.Saveable {
   }
   
   
-  public WorldLocale addLocale(float mapX, float mapY, String label) {
+  public WorldLocale addLocale(float mapX, float mapY, String label, boolean homeland) {
     WorldLocale l = new WorldLocale();
     l.mapX  = mapX;
     l.mapY  = mapY;
     l.label = label;
+    l.homeland = homeland;
     this.locales.add(l);
     return l;
   }
   
   
   public WorldLocale addLocale(float mapX, float mapY) {
-    return addLocale(mapX, mapY, "Locale at "+mapX+"|"+mapY);
+    return addLocale(mapX, mapY, "Locale at "+mapX+"|"+mapY, false);
   }
   
   
@@ -244,6 +258,11 @@ public class World implements Session.Saveable {
   public Area activeBaseMap() {
     for (Base c : bases) if (c.activeMap() != null) return c.activeMap();
     return null;
+  }
+  
+  
+  public Series <WorldLocale> locales() {
+    return locales;
   }
   
   

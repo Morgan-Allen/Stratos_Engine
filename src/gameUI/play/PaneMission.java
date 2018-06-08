@@ -19,13 +19,13 @@ public class PaneMission extends DetailPane {
     this.mission = subject;
   }
   
-  
-  protected void updateState() {
+
+  protected void updateText(Text text) {
+    
+    text.setText("");
+    final Description d = text;
     
     Base base = mission.base();
-    
-    this.text.setText("");
-    final Description d = this.text;
     
     d.append(mission.fullName());
     
@@ -61,8 +61,6 @@ public class PaneMission extends DetailPane {
         }
       });
     }
-    
-    super.updateState();
   }
   
   

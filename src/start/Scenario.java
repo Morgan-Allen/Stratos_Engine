@@ -49,7 +49,7 @@ public abstract class Scenario implements Session.Saveable {
   
   /**  Initial setup methods-
     */
-  protected void initScenario(MainGame game) {
+  public void initScenario(MainGame game) {
     setupDone = false;
     this.game = game;
     
@@ -72,7 +72,6 @@ public abstract class Scenario implements Session.Saveable {
   }
   
   
-  protected abstract String savePath();
   protected abstract World createWorld();
   protected abstract Area createArea(World world);
   protected abstract Base createBase(Area map, World world);
@@ -93,7 +92,7 @@ public abstract class Scenario implements Session.Saveable {
   
   
   public Base  base () { return base ; }
-  public Area  stage() { return area ; }
+  public Area  area () { return area ; }
   public World world() { return world; }
   
   

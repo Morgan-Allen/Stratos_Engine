@@ -10,10 +10,12 @@ import util.*;
 
 public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   
-  
-  
   static int
-    MAX_HEIGHT = 3, DESCENT_RANGE = 4, DESCENT_TIME = 5;
+    MAX_HEIGHT    = 3,
+    DOOR_HEIGHT   = 1,
+    DESCENT_RANGE = 4,
+    DESCENT_TIME  = 5
+  ;
   
   
   /**  Data fields, construction and save/load methods-
@@ -134,8 +136,6 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
         else {
           Area map = map();
           Base partner = trading.tradeGoes.base();
-          
-          
           /*
           return TaskDelivery.pickNextDelivery(
             actor, this, this, MAX_TRADER_RANGE, 1, map().world.goodTypes()
@@ -413,9 +413,10 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
       removeFootprint();
       entrance = null;
     }
+    this.landsAt  = null;
     this.dockedAt = null;
-    this.landed = false;
-    this.flying = true;
+    this.landed   = false;
+    this.flying   = true;
   }
   
   
@@ -524,7 +525,6 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   void updateFlight() {
     if (! type().isAirship()) return;
     
-    
     float landsDist = Area.distance(this, landsAt);
     
     float targetHeight = MAX_HEIGHT;
@@ -532,7 +532,9 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
       targetHeight = 0;
     }
     
-    float maxChange = MAX_HEIGHT * 1f / (map.ticksPS * DESCENT_TIME);
+    
+    float descTime  = DESCENT_TIME * 1f / moveSpeed();
+    float maxChange = MAX_HEIGHT * 1f / (map.ticksPS * descTime);
     float diff = targetHeight - flyHeight;
     diff = Nums.clamp(diff, 0 - maxChange, maxChange);
     
@@ -549,25 +551,24 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   
   
   protected void updateSprite(
-    Sprite s, String animName, float animProg, boolean loop
+    Sprite s, String animName, Vec2D angleVec, float animProg, boolean loop
   ) {
     if (type().isAirship()) {
-      float prog = 1f - (flyHeight / MAX_HEIGHT);
-      s.setAnimation("descend", Nums.clamp(prog, 0, 1), loop);
+      
+      angleVec.scale(-1);
+      if (angleVec.length() > 0) s.rotation = angleVec.toAngle();
+      
+      float prog = 1f - (flyHeight / DOOR_HEIGHT);
+      prog = Nums.clamp(prog, 0, 1);
+      s.setAnimation("descend", prog, loop);
     }
     else {
-      super.updateSprite(s, animName, animProg, loop);
+      super.updateSprite(s, animName, angleVec, animProg, loop);
     }
   }
   
   
 }
-
-
-
-
-
-
 
 
 

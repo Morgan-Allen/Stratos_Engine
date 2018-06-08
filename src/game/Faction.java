@@ -32,4 +32,9 @@ public class Faction extends Constant {
   public BuildType[] buildTypes() {
     return buildTypes;
   }
+  
+  
+  public String toString() {
+    return name;
+  }
 }

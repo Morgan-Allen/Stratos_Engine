@@ -12,12 +12,10 @@ import graphics.widgets.*;
 
 public interface Playable {
   
-  void beginGameSetup();
   void updateGameState();
   void renderVisuals(Rendering rendering);
-  HUD UI(boolean loading);
+  HUD UI();
   
-  boolean isLoading();
   float loadProgress();
   boolean shouldExitLoop();
   boolean wipeAssetsOnExit();

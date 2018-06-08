@@ -1,12 +1,7 @@
 
 
-
 package start;
-
-import content.*;
-import static content.GameContent.*;
 import game.*;
-import static game.GameConstants.*;
 import util.*;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
@@ -25,45 +20,15 @@ public class DesktopLauncher {
   ;
   
   
-  public static void main(String[] arg) {
-    
-    //Assets.callsVerbose = true;
-    //Assets.extraVerbose = true;
-    //PlayLoop.verbose    = true;
-    
-    String savePath = "saves/test_scenario.str";
-    Scenario s = MainGame.loadScenario(savePath);
-    
-    if (s == null) {
-      I.say("\nGenerating scenario from start...");
-      
-      World world = GameWorld.setupDefaultWorld();
-      WorldScenario init = world.scenarios().first();
-      
-      Base homeland = world.baseNamed("Homeworld Base");
-      Tally <Good> goods = Tally.with(PARTS, 20, PLASTICS, 20, CARBS, 20);
-      List <Actor> staff = new List();
-      
-      init.setPlayerLanding(
-        GameWorld.FACTION_SETTLERS, 5000,
-        homeland, staff, goods, GameContent.BASTION
-      );
-      init.assignSavePath(savePath);
-      init.initScenario(MainGame.mainGame());
-      
-      s = init;
-    }
-    else {
-      I.say("\nLoaded scenario from file...");
-    }
-    
-    launchScenario(s);
+  public static void launchScenario(Scenario s, World w) {
+    new LwjglApplication(new PlayLoop(), getConfig());
+    MainGame.playScenario(s, w);
   }
   
   
-  public static void launchScenario(Scenario s) {
+  public static void launchGame(MainGame game) {
     new LwjglApplication(new PlayLoop(), getConfig());
-    MainGame.playScenario(s);
+    MainGame.playScenario(game.scenario, game.world);
   }
   
   

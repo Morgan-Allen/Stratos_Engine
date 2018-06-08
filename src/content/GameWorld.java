@@ -48,7 +48,7 @@ public class GameWorld {
       World.KEY_CONTACT_FLAG, FLAG_CONTACT
     );
     
-    WorldLocale home = world.addLocale(1, 1, "Homeworld");
+    WorldLocale home = world.addLocale(1, 1, "Homeworld", true);
     Base homeBase = new Base(world, home);
     
     homeBase.setName("Homeworld Base");
@@ -65,7 +65,7 @@ public class GameWorld {
     world.addBases(homeBase);
     
     
-    WorldLocale sectorA = world.addLocale(5, 5, "Sector A");
+    WorldLocale sectorA = world.addLocale(5, 5, "Sector A", false);
     World.setupRoute(home, sectorA, AVG_CITY_DIST / 2, MOVE_LAND);
     
     

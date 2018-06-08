@@ -1,6 +1,5 @@
 
 
-
 package gameUI.play;
 import game.*;
 import static game.GameConstants.*;
@@ -8,7 +7,6 @@ import graphics.common.*;
 import graphics.widgets.*;
 import util.*;
 import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.graphics.Texture;
 
 
 
@@ -25,12 +23,14 @@ public class PaneBuildOptions extends DetailPane {
   }
   
   
-  protected void updateState() {
+  protected void updateText(Text text) {
+    
+    text.setText("");
+    final Description d = text;
+    
     final Area area = UI.area;
     final Base base = UI.base;
     
-    this.text.setText("");
-    final Description d = this.text;
     d.append("\nBuilding Types: ");
     
     for (final Type type : UI.base.buildTypes()) {
@@ -56,8 +56,6 @@ public class PaneBuildOptions extends DetailPane {
       d.append(cashCost+" credits");
       d.append(")");
     }
-    
-    super.updateState();
   }
   
   
@@ -68,6 +66,7 @@ public class PaneBuildOptions extends DetailPane {
     final Base base = UI.base;
     
     final PlayTask task = new PlayTask() {
+      
       public void doTask(PlayUI UI) {
         final AreaTile puts = UI.selection.hoverTile();
         //final Account reasons = new Account();
@@ -101,13 +100,4 @@ public class PaneBuildOptions extends DetailPane {
     UI.assignTask(task);
   }
   
-  
 }
-
-
-
-
-
-
-
-

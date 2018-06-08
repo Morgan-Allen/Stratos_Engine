@@ -2,7 +2,7 @@
 
 package gameUI.play;
 import game.*;
-import static game.GameConstants.*;
+import graphics.widgets.*;
 import util.*;
 
 
@@ -19,12 +19,14 @@ public class PaneRoster extends DetailPane {
   }
   
   
-  protected void updateState() {
+  protected void updateText(Text text) {
+    
+    text.setText("");
+    final Description d = text;
+    
     final Area area = UI.area;
     final Base base = UI.base;
     
-    this.text.setText("");
-    final Description d = this.text;
     d.append("\nPersonnel Roster: ");
     
     //  TODO:  Use portraits for this, and/or arrange in a simple grid order.
@@ -44,8 +46,6 @@ public class PaneRoster extends DetailPane {
         d.appendAll("\n    ", a);
       }
     }
-    
-    super.updateState();
   }
   
   

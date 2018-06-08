@@ -145,7 +145,7 @@ public class ActorUtils {
   }
   
   
-  static void findWork(Area map, Actor migrant) {
+  public static void findWork(Area map, Actor migrant) {
     
     class Opening { Building b; ActorType position; }
     AreaTile from = migrant.at();
@@ -160,13 +160,13 @@ public class ActorUtils {
         if (space <= 0) continue;
         
         float fitness = 0, sumWeights = 0;
-        for (Trait skill : t.initTraits.keys()) {
-          float level = t.initTraits.valueFor(skill);
-          fitness += migrant.traits.levelOf(skill) / level;
+        for (Trait skill : t.coreSkills.keys()) {
+          float level = t.coreSkills.valueFor(skill);
+          fitness += migrant.traits.levelOf(skill);
           sumWeights += level;
         }
         fitness /= Nums.max(1, sumWeights);
-        if (fitness <= 0.5f) continue;
+        if (fitness <= 0.25f) continue;
         
         float near = Area.distancePenalty(from, b);
         Opening o = new Opening();
@@ -186,7 +186,7 @@ public class ActorUtils {
   }
   
   
-  static void findHome(Area map, final Actor migrant) {
+  public static void findHome(Area map, final Actor migrant) {
     
     //  Each citizen prompts the search based on proximity to their place of
     //  work, proximity to needed services, and safety of the location (they
@@ -274,10 +274,14 @@ public class ActorUtils {
   }
   
   
-  static AreaTile findEntryPoint(
+  public static AreaTile findEntryPoint(
     final Element enters, final Area map,
     final Target from, final int maxRange
   ) {
+    if (enters.onMap()) {
+      I.complain("\nCANNOT FIND ENTRY POINT FOR OBJECT ALREADY ON MAP! "+enters);
+    }
+    
     final Vars.Ref <AreaTile> result = new Vars.Ref();
     final AreaTile temp[] = new AreaTile[9];
     

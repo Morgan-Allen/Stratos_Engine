@@ -3,6 +3,7 @@
 package gameUI.play;
 import game.*;
 import static game.GameConstants.*;
+import graphics.widgets.*;
 import util.*;
 
 
@@ -18,18 +19,17 @@ public class PaneMarkets extends DetailPane {
     this.UI = UI;
   }
   
-  
-  protected void updateState() {
+
+  protected void updateText(Text text) {
+    text.setText("");
+    final Description d = text;
+    
     final Area  area  = UI.area;
     final World world = UI.base.world;
     final Base  base  = UI.base;
     final Base  home  = base.homeland();
     
-    this.text.setText("");
-    final Description d = this.text;
     d.append("\nMarket Goods:          Buy / Sell");
-    
-    
     //  TODO:  It might help to set import/export options from here?
     
     for (Good g : base.world.goodTypes()) {
@@ -86,8 +86,6 @@ public class PaneMarkets extends DetailPane {
         d.appendAll(" (ETA "+ETA+")");
       }
     }
-    
-    super.updateState();
   }
 }
 

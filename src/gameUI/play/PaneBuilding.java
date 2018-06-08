@@ -17,7 +17,7 @@ public class PaneBuilding extends DetailPane {
   
   
   public PaneBuilding(HUD UI, Building venue) {
-    super(UI, venue, "(STAFF)", "(GOODS)", "(BUILD)");
+    super(UI, venue, "(STAFF)", "(GOODS)", "(UPGRADE)");
     this.built = venue;
   }
   
@@ -34,9 +34,9 @@ public class PaneBuilding extends DetailPane {
     ;
     d.append(HP+"/"+maxHP);
     
-    if (inCategory("(STAFF)")) describeStaff(d);
-    if (inCategory("(GOODS)")) describeGoods(d);
-    if (inCategory("(BUILD)")) describeBuild(d);
+    if (inCategory("(STAFF)"  )) describeStaff  (d);
+    if (inCategory("(GOODS)"  )) describeGoods  (d);
+    if (inCategory("(UPGRADE)")) describeUpgrade(d);
   }
   
   
@@ -196,7 +196,7 @@ public class PaneBuilding extends DetailPane {
   }
   
   
-  void describeBuild(Description d) {
+  void describeUpgrade(Description d) {
     boolean controls = built.base() == PlayUI.playerBase();
     
     BuildType upgrades[] = built.type().allUpgrades;

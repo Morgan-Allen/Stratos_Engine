@@ -74,15 +74,23 @@ public class TaskResting extends Task {
     if (pickV.empty()) return null;
     
     Building goes = pickV.result();
-    return TaskResting.nextResting(actor, goes);
+
+    TaskResting t = new TaskResting(actor);
+    return (TaskResting) t.configTask(null, goes, null, JOB.RESTING, 10);
   }
   
   
-  public static TaskResting nextResting(Actor actor, Pathing rests) {
-    if (actor == null || rests == null) return null;
+  public static TaskResting nextResting(Actor actor) {
+    if (actor == null) return null;
+    return nextResting(actor, actor.haven());
+  }
+  
+  
+  public static TaskResting nextResting(Actor actor, Pathing haven) {
+    if (actor == null || haven == null) return null;
     
     TaskResting t = new TaskResting(actor);
-    return (TaskResting) t.configTask(null, rests, null, JOB.RESTING, 10);
+    return (TaskResting) t.configTask(null, haven, null, JOB.RESTING, 10);
   }
   
   

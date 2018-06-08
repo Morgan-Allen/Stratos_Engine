@@ -130,7 +130,7 @@ public class Task implements Session.Saveable {
   
   public void saveState(Session s) throws Exception {
     
-    s.saveObject(active );
+    s.saveObject(active);
     s.saveObject(origin);
     s.saveInt(type.ordinal());
     s.saveFloat(ticksSpent);
@@ -252,6 +252,7 @@ public class Task implements Session.Saveable {
   
   
   public float priority() {
+    
     if (priorityEval == NO_PRIORITY) {
       float
         chance  = successChance(),
@@ -445,6 +446,15 @@ public class Task implements Session.Saveable {
   
   protected boolean updateOnArrival(Base goes, World.Journey journey) {
     return false;
+  }
+  
+  
+  protected void onMapExit() {
+    toggleFocus(false);
+    path      = null;
+    pathIndex = -1  ;
+    target    = null;
+    visits    = null;
   }
   
   

@@ -2,6 +2,7 @@
 
 package game;
 import game.World.Route;
+import graphics.common.*;
 import util.*;
 
 
@@ -14,12 +15,10 @@ public class WorldLocale implements Session.Saveable {
   
   float mapX, mapY;
   Table <WorldLocale, Route> routes = new Table();
+  boolean homeland = false;
   
   String label;
-  
-  public float mapX() { return mapX; }
-  public float mapY() { return mapY; }
-  public String toString() { return label; }
+  ImageAsset planetImage;
   
   
   
@@ -40,6 +39,8 @@ public class WorldLocale implements Session.Saveable {
       route.moveMode = s.loadInt();
       routes.put(with, route);
     }
+    
+    label = s.loadString();
   }
   
   
@@ -55,9 +56,31 @@ public class WorldLocale implements Session.Saveable {
       s.saveInt(route.distance);
       s.saveInt(route.moveMode);
     }
+    
+    s.saveString(label);
+  }
+  
+  public float mapX() { return mapX; }
+  public float mapY() { return mapY; }
+  public boolean homeland() { return homeland; }
+  
+  
+  
+  /**  Graphical, debug and interface methods-
+    */
+  public String name() {
+    return label;
   }
   
   
+  public String toString() {
+    return label;
+  }
+  
+  
+  public ImageAsset planetImage() {
+    return planetImage;
+  }
 }
 
 
