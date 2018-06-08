@@ -32,7 +32,7 @@ public class TestTrading extends LogicTest {
     World.setupRoute(baseC.locale, awayC.locale, 1, Type.MOVE_LAND);
     Base.setPosture(baseC, awayC, Base.POSTURE.VASSAL, true);
     
-    Tally <Good> supplies = new Tally().setWith(GREENS, 10, SPYCE, 5);
+    Tally <Good> supplies = new Tally().setWith(GREENS, 10, PSALT, 5);
     Base.setSuppliesDue(awayC, baseC, supplies);
     
     awayC.setTradeLevel(MEDICINE, 50, 0 );
@@ -42,7 +42,7 @@ public class TestTrading extends LogicTest {
     awayC.initInventory(
       GREENS    ,  35,
       ORES      ,  20,
-      SPYCE     ,  10
+      PSALT     ,  10
     );
     
     //  Send parts and medicine.
@@ -74,7 +74,7 @@ public class TestTrading extends LogicTest {
     post2.setID("(Gets Supplies)");
     post2.setNeedLevels(false,
       GREENS    , 15,
-      SPYCE     , 5
+      PSALT     , 5
     );
     
     Building kiln = (Building) ENGINEER_STATION.generate();
@@ -110,7 +110,7 @@ public class TestTrading extends LogicTest {
       
       if (! supplyOkay) {
         boolean check = true;
-        check &= post2.inventory(SPYCE ) >= 5 ;
+        check &= post2.inventory(PSALT ) >= 5 ;
         check &= post2.inventory(GREENS) >= 15;
         supplyOkay = check;
       }
@@ -200,7 +200,7 @@ public class TestTrading extends LogicTest {
   
   
   static void reportOnMap(Base a, Base b, boolean okay) {
-    final Good GOODS[] = { ORES, PARTS, MEDICINE, GREENS, SPYCE };
+    final Good GOODS[] = { ORES, PARTS, MEDICINE, GREENS, PSALT };
     
     I.say("\nGoods report:");
     for (Good g : GOODS) {

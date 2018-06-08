@@ -78,7 +78,7 @@ public class TestVessels extends LogicTest {
     Base.setPosture(homeC, awayC, Base.POSTURE.TRADING, true);
     homeC.setHomeland(awayC);
     
-    Tally <Good> supplies = new Tally().setWith(GREENS, 10, SPYCE, 5);
+    Tally <Good> supplies = new Tally().setWith(GREENS, 10, PSALT, 5);
     Base.setSuppliesDue(awayC, homeC, supplies);
     
     awayC.setTradeLevel(GREENS  ,  0, 50);

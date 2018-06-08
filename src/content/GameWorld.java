@@ -28,6 +28,32 @@ public class GameWorld {
     )
   ;
   
+  /*
+    PLANET_ASRA_NOVI = new Sector(
+      Verse.class, "Asra Novi", WORLDS_DIR+"asra_novi.png", FACTION_SUHAIL,
+      "Asra Novi is a heavily-terraformed 'desert oasis' world noted for its "+
+      "expertise in ecology and botanical science, together with polyamorous "+
+      "traditions and luxury exports.",
+  
+    PLANET_PAREM_V = new Sector(
+      Verse.class, "Parem V", WORLDS_DIR+"parem_v.png", FACTION_PROCYON,
+      "Parem V was one of the first-settled systems in the known quadrant, "+
+      "and though dour and repressive, remains host to numerous machine-"+
+      "cults and revered arcane relics.",
+    
+    PLANET_HALIBAN = new Sector(
+      Verse.class, "Haliban", WORLDS_DIR+"haliban.png", FACTION_ALTAIR,
+      "Noted for it's spartan regimen and stern justice, Haliban's early "+
+      "defection to the Calivor Republic have earned it several foes- and a "+
+      "crucial role in quadrant defence strategy.",
+    
+    PLANET_AXIS_NOVENA = new Sector(
+      Verse.class, "Axis Novena", WORLDS_DIR+"axis_novena.png", FACTION_TAYGETA,
+      "Aided by it's low gravity and thin atmosphere, Axis Novena became the "+
+      "centre of a large shipping industry and trade network- along with "+
+      "rampant smuggling and black-market tech research.",
+  //*/
+  
   
   /**  Default geography:
     */
@@ -48,6 +74,8 @@ public class GameWorld {
       World.KEY_CONTACT_FLAG, FLAG_CONTACT
     );
     
+    //  TODO:  Replace these with the named homeworlds!
+    
     WorldLocale home = world.addLocale(1, 1, "Homeworld", true);
     Base homeBase = new Base(world, home);
     
@@ -65,8 +93,8 @@ public class GameWorld {
     world.addBases(homeBase);
     
     
-    WorldLocale sectorA = world.addLocale(5, 5, "Sector A", false);
-    World.setupRoute(home, sectorA, AVG_CITY_DIST / 2, MOVE_LAND);
+    WorldLocale sectorA = world.addLocale(5, 5, "Elysium Sector", false);
+    World.setupRoute(home, sectorA, AVG_CITY_DIST / 2, MOVE_AIR);
     
     
     world.addScenario(new ScenarioSectorA(world, sectorA));
@@ -75,7 +103,6 @@ public class GameWorld {
   }
   
 }
-
 
 
 

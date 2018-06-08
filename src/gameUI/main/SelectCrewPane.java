@@ -39,12 +39,21 @@ public class SelectCrewPane extends MenuPane {
       Trooper.TROOPER,
       GameContent.ECOLOGIST,
       GameContent.ENGINEER,
-      GameContent.PHYSICIAN,
-      SchoolLogician.LOGICIAN,
-      SchoolCollective.COLLECTIVE,
-      SchoolShaper.SHAPER,
-      SchoolTekPriest.TEK_PRIEST
+      GameContent.PHYSICIAN
     };
+  }
+  
+  Good[] COLONIST_GOODS() {
+    return new Good[] {
+      GameContent.CARBS,
+      GameContent.PROTEIN,
+      GameContent.PARTS,
+      GameContent.PLASTICS
+    };
+  }
+  
+  int maxFunds() {
+    return 5000;
   }
   
   int maxColonists() {
@@ -93,6 +102,38 @@ public class SelectCrewPane extends MenuPane {
       "headstart in establishing defences or trade.",
       0.75f, Colour.LITE_GREY, 3
     ));
+    
+    /*
+    Good goods[] = COLONIST_GOODS();
+    for (final Good g : goods) {
+      
+      final UIGroup counter = new UIGroup(UI);
+      final Text label = new Text(UI, UIConstants.INFO_FONT);
+      colonLabels[labelIndex++] = label;
+      label.scale = 0.75f;
+      label.setText(g.name);
+      label.setToLineSize();
+      label.alignAcross(0, 0.5f);
+      label.attachTo(counter);
+      
+      TextButton plus = new TextButton(UI, " + ", 1) {
+        protected void whenClicked() { incGoods(g, 1); }
+        protected boolean enabled() { return canIncGoods(g, 1); }
+      };
+      plus.alignAcross(0.5f, 0.65f);
+      plus.attachTo(counter);
+      
+      TextButton minus = new TextButton(UI, " - ", 1) {
+        protected void whenClicked() { incGoods(g, -1); }
+        protected boolean enabled() { return canIncGoods(g, -1); }
+      };
+      minus.alignAcross(0.65f, 0.8f);
+      minus.attachTo(counter);
+      
+      counter.alignTop(0, 15);
+      listing.add(counter);
+    }
+    //*/
     
     listing.add(new TextButton(UI, "  Begin Game", 1) {
       protected void whenClicked() { pushNextPane(); }
@@ -167,6 +208,23 @@ public class SelectCrewPane extends MenuPane {
   private int numColonists() {
     return expedition.staff().size();
   }
+  
+  
+  /*
+  private void incGoods(Good g, int inc) {
+    expedition.goods().add(inc, g);
+    expedition.incFunds(g.price * inc * -1);
+  }
+  
+  
+  private boolean canIncGoods(Good g, int inc) {
+    int amount = (int) expedition.goods().valueFor(g);
+    if (inc > 0 && expedition.funds() < g.price) return false;
+    if (inc > 0 && amount > 20) return false;
+    if (inc < 0 && amount <= 0) return false;
+    return true;
+  }
+  //*/
   
   
   

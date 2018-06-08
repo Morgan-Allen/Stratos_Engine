@@ -277,7 +277,7 @@ public class TestWorld extends LogicTest {
       Base vassal = pair[0], lord = pair[1];
       World world = vassal.world;
       setPosture(vassal, lord, POSTURE.LORD, true);
-      setSuppliesDue(vassal, lord, new Tally().setWith(SPYCE, 10));
+      setSuppliesDue(vassal, lord, new Tally().setWith(PSALT, 10));
       vassal.council.setTypeAI(BaseCouncil.AI_COMPLIANT);
       
       int time = 0;
@@ -285,7 +285,7 @@ public class TestWorld extends LogicTest {
         world.updateWithTime(time++);
       }
       
-      float tributeSent = Base.suppliesDue(vassal, lord, SPYCE);
+      float tributeSent = Base.suppliesDue(vassal, lord, PSALT);
       if (tributeSent < 5) {
         I.say("\nWORLD-EVENTS TESTING FAILED- Insufficient tribute dispatched!");
         return false;
