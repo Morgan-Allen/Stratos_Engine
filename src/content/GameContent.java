@@ -86,11 +86,12 @@ public class GameContent {
     
     CARBS      = new Good("Carbs"       , 10 ),
     GREENS     = new Good("Greens"      , 12 ),
-    PROTEIN    = new Good("Protein"     , 35 ),
     
     CARBONS    = new Good("Carbons"     , 10 ),
     ORES       = new Good("Ores"        , 10 ),
-    SPYCE      = new Good("Spyce"       , 50 ),
+    
+    PROTEIN    = new Good("Protein"     , 35 ),
+    PSALT      = new Good("Psalt"       , 50 ),
     
     PLASTICS   = new Good("Plastics"    , 30 ),
     PARTS      = new Good("Parts"       , 50 ),
@@ -106,7 +107,7 @@ public class GameContent {
     
     ALL_GOODS[] = new Good[] {
       CASH,
-      CARBS, GREENS, PROTEIN, CARBONS, ORES, SPYCE,
+      CARBS, GREENS, PROTEIN, CARBONS, ORES, PSALT,
       PLASTICS, PARTS, SOMA, MEDICINE
     };
   
