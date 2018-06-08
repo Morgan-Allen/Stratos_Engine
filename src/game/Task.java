@@ -78,6 +78,7 @@ public class Task implements Session.Saveable {
   Employer origin;
   
   JOB   type       = JOB.NONE;
+  float lastTicks  = 0;
   float ticksSpent = 0;
   int   maxTime    = 20;
   
@@ -180,6 +181,7 @@ public class Task implements Session.Saveable {
     
     this.origin     = origin ;
     this.type       = jobType;
+    this.lastTicks  = 0      ;
     this.ticksSpent = 0      ;
     this.maxTime    = maxTime;
     this.visits     = visits ;
@@ -251,21 +253,18 @@ public class Task implements Session.Saveable {
   
   public float priority() {
     if (priorityEval == NO_PRIORITY) {
-      
       float
         chance  = successChance(),
         success = successPriority(),
         failure = failCostPriority(),
         reward  = rewardPriority()
       ;
-      
       if (active.mobile()) {
         Actor actor = (Actor) active;
         float bravery = (actor.traits.levelOf(TRAIT_BRAVERY) + 1) / 2;
         failure *= (1.5f - bravery);
         chance = Nums.clamp(chance + ((bravery - 0.5f) / 2), 0, 1);
       }
-      
       priorityEval = (chance * (success + reward)) - ((1 - chance) * failure);
     }
     return Nums.max(0, priorityEval);
@@ -533,6 +532,7 @@ public class Task implements Session.Saveable {
     int maxTicks = map.ticksPS * Nums.max(1, maxTime);
     int contact  = maxTicks / 2;
     
+    lastTicks   = ticksSpent;
     ticksSpent += tickProgress;
     
     if (oldProgress <= contact && ticksSpent > contact) {
@@ -547,14 +547,6 @@ public class Task implements Session.Saveable {
     else {
       return contactState = PROG_CONTACT;
     }
-  }
-  
-  
-  float actionProgress() {
-    Area map = active.map();
-    if (map == null) return -1;
-    int maxTicks = map.ticksPS * Nums.max(1, maxTime);
-    return Nums.clamp(ticksSpent / maxTicks, 0, 1);
   }
   
   
@@ -722,6 +714,19 @@ public class Task implements Session.Saveable {
     Object subject = visits == null ? target : visits;
     if (subject == null) return type.name();
     else return type.name()+": "+subject;
+  }
+  
+  
+  float animProgress(float alpha) {
+    Area map = active.map();
+    if (map == null) return -1;
+    int maxTicks = map.ticksPS * Nums.max(1, maxTime);
+    
+    float prog = (
+      (lastTicks  * (1 - alpha)) +
+      (ticksSpent *      alpha )
+    ) / maxTicks;
+    return prog;
   }
   
   

@@ -160,6 +160,12 @@ public class AreaFog {
     fogOver.updateVals(renderTime, viewVals);
     fogOver.registerFor(rendering);
   }
+  
+  
+  public float displayedFog(float x, float y, Object client) {
+    if (fogOver == null) return 1;
+    return fogOver.sampleAt(x, y, client);
+  }
 }
 
 

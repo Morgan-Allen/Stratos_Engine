@@ -908,9 +908,8 @@ public class Actor extends Element implements
     Vec2D angleVec = new Vec2D(goes.x - from.x, goes.y - from.y);
     if (angleVec.length() > 0) s.rotation = angleVec.toAngle();
     
-    
     if (contact) {
-      float animProg = task.actionProgress();
+      float animProg = task.animProgress(alpha);
       updateSprite(s, task.animName(), animProg, true);
     }
     else {
@@ -927,15 +926,20 @@ public class Actor extends Element implements
     
     
     //  Add a health-bar for general display
+    
+    //boolean report = I.talkAbout == this;
+    
     Healthbar h = new Healthbar();
-    h.fog = s.fog;
-    h.colour = Colour.BLUE;
-    h.size = 30;
+    h.fog       = s.fog;
+    h.colour    = Colour.BLUE;
+    h.size      = 30;
     h.hurtLevel = (health.injury() + health.hunger()) / health.maxHealth();
     h.tireLevel = health.fatigue() / health.maxHealth();
     h.position.setTo(s.position);
     h.position.z += type().deep + 0.1f;
     h.readyFor(rendering);
+    
+    //if (report) I.say("Bar fog: "+h.fog);
     
     //  TODO:  Add a chat-bar in cases of conversation, to represent how
     //  persuaded/converted/loyal a subject is.
@@ -946,6 +950,15 @@ public class Actor extends Element implements
     Sprite s, String animName, float animProg, boolean loop
   ) {
     s.setAnimation(animName, animProg % 1, loop);
+  }
+  
+  
+  protected float renderedFog(Base base) {
+    if (base == this.base()) return 1;
+    Sprite s = sprite();
+    AreaFog fog = map.fogMap(base, false);
+    if (fog == null || s == null) return 0;
+    return fog.displayedFog(s.position.x, s.position.y, this);
   }
   
   

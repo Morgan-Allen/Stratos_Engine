@@ -750,7 +750,10 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   
   
   protected float renderedFog(Base base) {
-    return ((sightLevel(base) * 2) + maxSightLevel(base)) / 3;
+    if (base == this.base) return 1;
+    AreaFog fog = map.fogMap(base, false);
+    if (fog == null) return 0;
+    return fog.displayedFog(at.x + 0.5f, at.y + 0.5f, this);
   }
   
   
