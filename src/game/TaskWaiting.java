@@ -26,14 +26,14 @@ public class TaskWaiting extends Task {
   ;
   
   
-  final Building venue;
+  final Pathing venue;
   final int type;
   
   private Session.Saveable worksOn = null;
   private float beginTime = -1;
   
   
-  private TaskWaiting(Actor actor, Building supervised, int stayType) {
+  private TaskWaiting(Actor actor, Pathing supervised, int stayType) {
     super(actor);
     this.venue = supervised;
     this.type  = stayType  ;
@@ -42,7 +42,7 @@ public class TaskWaiting extends Task {
   
   public TaskWaiting(Session s) throws Exception {
     super(s);
-    this.venue     = (Building) s.loadObject();
+    this.venue     = (Pathing) s.loadObject();
     this.type      = s.loadInt();
     this.beginTime = s.loadFloat();
     this.worksOn   = s.loadObject();
@@ -62,15 +62,15 @@ public class TaskWaiting extends Task {
   /**  Factory methods-
     */
   public static TaskWaiting configWaiting(Actor actor, Building venue) {
-    return configWaiting(actor, venue, TYPE_OVERSIGHT);
+    return configWaiting(actor, venue, TYPE_OVERSIGHT, venue);
   }
   
   
   public static TaskWaiting configWaiting(
-    Actor actor, Building venue, int stayType
+    Actor actor, Pathing venue, int stayType, Employer e
   ) {
     TaskWaiting task = new TaskWaiting(actor, venue, stayType);
-    return (TaskWaiting) task.configTask(venue, venue, null, JOB.WAITING, 10);
+    return (TaskWaiting) task.configTask(e, venue, null, JOB.WAITING, 10);
   }
   
   

@@ -284,7 +284,9 @@ public class BuildingForHome extends Building {
     //
     //  Non-adults don't do much-
     if (! actor.health.adult()) {
-      return TaskWaiting.configWaiting(actor, this, TaskWaiting.TYPE_DOMESTIC);
+      return TaskWaiting.configWaiting(
+        actor, this, TaskWaiting.TYPE_DOMESTIC, this
+      );
     }
     //
     //  But non-nobles have work to do-

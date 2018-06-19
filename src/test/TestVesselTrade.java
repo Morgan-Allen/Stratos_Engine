@@ -13,7 +13,7 @@ import util.*;
 //  TODO:  Add the crew check down further in the suite?
 
 
-public class TestVessels extends LogicTest {
+public class TestVesselTrade extends LogicTest {
   
   
   public static void main(String args[]) {
@@ -25,33 +25,32 @@ public class TestVessels extends LogicTest {
   }
   
   
-  
   static boolean testForeignToLand(boolean graphics) {
-    TestVessels test = new TestVessels();
+    TestVesselTrade test = new TestVesselTrade();
     return test.vesselTest(false, false, true, "FOREIGN TO LAND VESSEL", graphics);
   }
   
   
   static boolean testForeignToDock(boolean graphics) {
-    TestVessels test = new TestVessels();
+    TestVesselTrade test = new TestVesselTrade();
     return test.vesselTest(false, true, true, "FOREIGN TO DOCK VESSEL", graphics);
   }
   
   
   static boolean testDockToForeign(boolean graphics) {
-    TestVessels test = new TestVessels();
+    TestVesselTrade test = new TestVesselTrade();
     return test.vesselTest(true, false, true, "DOCK TO FOREIGN VESSEL", graphics);
   }
   
   
   static boolean testForeignSpawn(boolean graphics) {
-    TestVessels test = new TestVessels();
+    TestVesselTrade test = new TestVesselTrade();
     return test.vesselTest(false, false, false, "FOREIGN VESSEL SPAWN", graphics);
   }
   
   
   static boolean testLocalSpawn(boolean graphics) {
-    TestVessels test = new TestVessels();
+    TestVesselTrade test = new TestVesselTrade();
     return test.vesselTest(true, false, false, "LOCAL VESSEL SPAWN", graphics);
   }
   
@@ -198,7 +197,7 @@ public class TestVessels extends LogicTest {
     ActorAsVessel ship = null;
     
     while (map.time() < RUN_TIME || graphics) {
-      runLoop(homeC, 1, graphics, "saves/test_vessels.str");
+      runLoop(homeC, 1, graphics, "saves/test_vessel_trade.str");
       
       if (createShip) {
         spawnDone = true;

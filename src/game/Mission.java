@@ -34,7 +34,7 @@ public abstract class Mission implements
   List <Actor> recruits = new List();
   List <Actor> envoys   = new List();
   final public MissionRewards rewards = new MissionRewards(this);
-  final public MissionTerms terms = new MissionTerms(this);
+  final public MissionTerms   terms   = new MissionTerms  (this);
   
   boolean active;
   boolean complete;
@@ -43,7 +43,7 @@ public abstract class Mission implements
   
   Base localBase;
   AreaTile transitTile;
-  ActorAsVessel transitShip;
+  ActorAsVessel transport;
   int arriveTime = -1;
   
   
@@ -84,7 +84,7 @@ public abstract class Mission implements
     
     localBase   = (Base) s.loadObject();
     transitTile = Area.loadTile(map, s);
-    transitShip = (ActorAsVessel) s.loadObject();
+    transport = (ActorAsVessel) s.loadObject();
     arriveTime  = s.loadInt();
   }
   
@@ -111,13 +111,13 @@ public abstract class Mission implements
     
     s.saveObject(localBase);
     Area.saveTile(transitTile, map, s);
-    s.saveObject(transitShip);
+    s.saveObject(transport);
     s.saveInt(arriveTime);
   }
   
   
   
-  /**  Regular updates and internal events-
+  /**  Setting up recruits, envoys, transit and objectives (foci)-
     */
   public void toggleRecruit(Actor a, boolean is) {
     this.recruits.toggleMember(a, is);
@@ -136,6 +136,13 @@ public abstract class Mission implements
   }
   
   
+  public void assignTransport(ActorAsVessel transport) {
+    if (this.transport != null) toggleRecruit(this.transport, false);
+    this.transport = transport;
+    if (transport != null) toggleRecruit(transport, true);
+  }
+  
+  
   public void setLocalFocus(Target focus) {
     this.localFocus = focus;
   }
@@ -146,6 +153,9 @@ public abstract class Mission implements
   }
   
   
+  
+  /**  Regular updates and internal events-
+    */
   //  TODO:  The local-base has to be assigned along with the focus, I think-
   //  because actors might be assessing the mission before it's begun.
   
@@ -158,49 +168,69 @@ public abstract class Mission implements
   
   void update() {
     
-    World world  = homeBase.world;
-    Area  map    = localMap();
-    Base  offmap = offmapBase();
-    
-    boolean valid = recruits.size() > 0 && active, allHome = true;
-    boolean allDeparting = valid, allReturning = valid;
-    
-    for (Actor a : recruits) {
-      if (! readyForTransit(a, JOB.DEPARTING)) allDeparting = false;
-      if (! readyForTransit(a, JOB.RETURNING)) allReturning = false;
-      if (a.map() != homeBase.activeMap()    ) allHome      = false;
-      if (world.onJourney(a)) allHome = false;
-    }
+    Area    map      = localMap();
+    Base    offmap   = offmapBase();
+    boolean valid    = recruits.size() > 0 && active;
+    boolean complete = valid && complete();
     
     if (transitTile == null && map != null && offmap != null) {
       transitTile = findTransitPoint(map, localBase, offmap, Type.MOVE_LAND, 1);
     }
-    if (allDeparting && ! complete()) {
+    if ((! complete) && readyToDepart()) {
       beginJourney(localBase, worldFocus());
     }
-    if (allReturning && complete()) {
+    if (complete && readyToReturn()) {
       beginJourney(localBase, homeBase());
     }
-    if (allHome && complete()) {
+    if (complete && recruitsAllHome()) {
       disbandMission();
     }
   }
   
   
+  boolean readyToDepart() {
+    for (Actor a : recruits) {
+      if (a == transport) continue;
+      if (! readyForTransit(a, JOB.DEPARTING)) return false;
+    }
+    return true;
+  }
+  
+  
+  boolean readyToReturn() {
+    for (Actor a : recruits) {
+      if (a == transport) continue;
+      if (! readyForTransit(a, JOB.RETURNING)) return false;
+    }
+    return true;
+  }
+  
+  
+  boolean recruitsAllHome() {
+    for (Actor a : recruits) {
+      if (a.map() != homeBase.activeMap() && a.offmapBase() != homeBase) {
+        return false;
+      }
+    }
+    return true;
+  }
+  
+  
   void beginJourney(Base from, Base goes) {
-    
-    //  TODO:  Consider carefully who should be embarking- maybe only the
-    //  journey, or maybe only the ship- and remember that actors who go on a
-    //  journey handle their entry independently.
     
     World world = homeBase.world;
     List <Journeys> going = new List();
-    Visit.appendTo(going, recruits);
-    going.add(this);
-    
     World.Journey journey;
     int moveMode = Type.MOVE_LAND;
-    if (transitShip != null) moveMode = transitShip.type().moveMode;
+    
+    if (transport != null) {
+      going.add(transport);
+      moveMode = transport.type().moveMode;
+    }
+    else {
+      Visit.appendTo(going, recruits);
+    }
+    going.add(this);
     journey = world.beginJourney(from, goes, moveMode, going);
     
     //I.say(this+" beginning journey from "+from+" to "+goes);
@@ -227,10 +257,9 @@ public abstract class Mission implements
   
   
   public void onArrival(Base goes, World.Journey journey) {
+    
     this.localBase  = goes;
     this.arriveTime = goes.world.time();
-    
-    //I.say(this+" arrived at "+goes);
     
     if (goes.activeMap() == null) {
       if (goes == homeBase) {
@@ -249,15 +278,12 @@ public abstract class Mission implements
   
   
   public Task selectActorBehaviour(Actor actor) {
-    Pathing exits = transitPoint(actor);
     
-    //  TODO:  Ponder how to handle the ship later...
-    /*
-    if (actor == transitShip) {
-      return actor.targetTask(transitShip.landing(), 5, JOB.WAITING, this);
+    if (actor == transport) {
+      return TaskTransport.nextTransport(transport, this);
     }
-    //*/
     
+    Pathing exits = transitPoint(actor);
     if (complete()) {
       if (exits != null && ! onHomeMap()) {
         return actor.targetTask(exits, 0, Task.JOB.RETURNING, this);
@@ -277,7 +303,7 @@ public abstract class Mission implements
   
   
   public void actorTargets(Actor actor, Target other) {
-    boolean leaves = actor == transitShip || ! haveTransport();
+    boolean leaves = actor == transport || ! haveTransport();
     
     if (actor.jobType() == JOB.RETURNING) {
       if (leaves) actor.exitMap(actor.map());
@@ -347,15 +373,14 @@ public abstract class Mission implements
   
   
   public Pathing transitPoint(Actor actor) {
-    if (actor == transitShip) return transitTile;
+    if (transport != null) return transport;
     if (transitTile != null) return transitTile;
-    if (transitShip != null) return transitShip;
     return null;
   }
   
   
   public boolean haveTransport() {
-    return transitShip != null;
+    return transport != null;
   }
   
   
@@ -363,7 +388,7 @@ public abstract class Mission implements
     if (localBase  == null) return false;
     if (localMap() == null) return true;
     if (a.jobType() != type) return false;
-    if (haveTransport()) return a.inside() == transitShip;
+    if (haveTransport()) return a.inside() == transport;
     return ! a.onMap();
   }
   

@@ -48,7 +48,9 @@ public class BuildingForFaith extends Building {
   public Task selectActorBehaviour(Actor actor) {
     
     if (! supervised(false)) {
-      Task sup = TaskWaiting.configWaiting(actor, this, TaskWaiting.TYPE_OVERSIGHT);
+      Task sup = TaskWaiting.configWaiting(
+        actor, this, TaskWaiting.TYPE_OVERSIGHT, this
+      );
       if (sup != null) return sup;
     }
     

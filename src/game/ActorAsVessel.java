@@ -89,9 +89,14 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   void beginNextBehaviour() {
     assignTask(null, this);
     
+    if (idle() && mission() != null && mission().active()) {
+      assignTask(TaskTransport.nextTransport(this, mission()), this);
+    }
+    
     if (idle() && work() != null && ((Element) work()).complete()) {
       assignTask(work().selectActorBehaviour(this), this);
     }
+    
     if (idle()) {
       assignTask(TaskResting.nextResting(this, home()), this);
     }
@@ -134,8 +139,8 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
           return TaskRetreat.configRetreat(actor, this, Task.PARAMOUNT);
         }
         else {
-          Area map = map();
           Base partner = trading.tradeGoes.base();
+          Area map = map();
           /*
           return TaskDelivery.pickNextDelivery(
             actor, this, this, MAX_TRADER_RANGE, 1, map().world.goodTypes()
@@ -145,6 +150,11 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
             this, actor, partner, false, map
           );
         }
+      }
+      if (task() instanceof TaskTransport) {
+        return TaskWaiting.configWaiting(
+          actor, this, TaskWaiting.TYPE_OVERSIGHT, this
+        );
       }
     }
     
@@ -526,12 +536,10 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
     if (! type().isAirship()) return;
     
     float landsDist = Area.distance(this, landsAt);
-    
     float targetHeight = MAX_HEIGHT;
     if (jobFocus() == landsAt && landsDist < DESCENT_RANGE) {
       targetHeight = 0;
     }
-    
     
     float descTime  = DESCENT_TIME * 1f / moveSpeed();
     float maxChange = MAX_HEIGHT * 1f / (map.ticksPS * descTime);

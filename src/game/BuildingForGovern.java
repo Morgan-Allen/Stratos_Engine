@@ -71,7 +71,9 @@ public class BuildingForGovern extends BuildingForTrade {
     }
     
     if (actor.type().isNoble()) {
-      return TaskWaiting.configWaiting(actor, this, TaskWaiting.TYPE_VIP_STAY);
+      return TaskWaiting.configWaiting(
+        actor, this, TaskWaiting.TYPE_VIP_STAY, this
+      );
     }
     
     return null;

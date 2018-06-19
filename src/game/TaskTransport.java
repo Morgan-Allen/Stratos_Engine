@@ -1,0 +1,123 @@
+
+
+
+package game;
+import static game.GameConstants.*;
+
+
+
+public class TaskTransport extends Task {
+  
+  
+  ActorAsVessel vessel;
+  Mission mission;
+  boolean departed = false;
+  
+  
+  TaskTransport(ActorAsVessel actor, Mission mission) {
+    super(actor);
+    this.vessel  = actor;
+    this.mission = mission;
+  }
+  
+  public TaskTransport(Session s) throws Exception {
+    super(s);
+    vessel   = (ActorAsVessel) active;
+    mission  = (Mission) s.loadObject();
+    departed = s.loadBool();
+  }
+  
+  public void saveState(Session s) throws Exception {
+    super.saveState(s);
+    s.saveObject(mission);
+    s.saveBool(departed);
+  }
+  
+  
+  
+  
+  static TaskTransport nextTransport(ActorAsVessel actor, Mission mission) {
+    TaskTransport task = new TaskTransport(actor, mission);
+    AreaTile goes = actor.landsAt();
+    task.configTask(actor, null, goes, JOB.WAITING, 1);
+    if (! task.pathValid()) return null;
+    return task;
+  }
+
+  
+  public void beginFromOffmap(Base from) {
+    World world = mission.homeBase.world;
+    Base home = mission.homeBase(), away = mission.worldFocus();
+    world.beginJourney(home, away, vessel.type().moveMode, vessel);
+  }
+  
+  
+  protected void onTarget(Target target) {
+    
+    World world = mission.homeBase.world;
+    Base home = mission.homeBase(), away = mission.worldFocus();
+    
+    if (type == JOB.DEPARTING) {
+      world.beginJourney(home, away, vessel.type().moveMode, vessel);
+      return;
+    }
+    
+    if (type == JOB.RETURNING) {
+      world.beginJourney(away, home, vessel.type().moveMode, vessel);
+      return;
+    }
+
+    if (mission.readyToDepart()) {
+      AreaTile transit = ActorUtils.findTransitPoint(
+        vessel.map(), home, away, vessel
+      );
+      configTask(origin, null, transit, JOB.DEPARTING, 0);
+      return;
+    }
+    
+    if (mission.readyToReturn()) {
+      AreaTile transit = ActorUtils.findTransitPoint(
+        vessel.map(), away, home, vessel
+      );
+      configTask(origin, null, transit, JOB.RETURNING, 0);
+      return;
+    }
+    
+    if (type == JOB.DOCKING) {
+      vessel.doLanding(vessel.landsAt);
+    }
+    
+    if (type == JOB.DOCKING || type == JOB.WAITING) {
+      configTask(origin, null, target, JOB.WAITING, 1);
+    }
+    
+  }
+  
+
+  
+  boolean doingLanding(Base local) {
+    return local.activeMap() != null && active.type().isAirship();
+  }
+  
+  
+  protected boolean updateOnArrival(Base goes, World.Journey journey) {
+    //
+    //  If we're arriving at a base with an active map, then we proceed to
+    //  whatever landing-site the vessel was able to find...
+    if (doingLanding(goes)) {
+      AreaTile docks = vessel.landsAt();
+      configTask(origin, null, docks, JOB.DOCKING, 1);
+      return true;
+    }
+    //
+    //  In the event of arriving at an off-map base, then in principle the
+    //  mission itself should handle any extra resolution required...
+    return true;
+  }
+  
+  
+}
+
+
+
+

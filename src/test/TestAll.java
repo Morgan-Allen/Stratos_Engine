@@ -42,11 +42,11 @@ public class TestAll {
     record(TestDialog   .testDialog   (false));
     record(TestWorld    .testWorld    (false));
     
-    record(TestVessels.testForeignToLand(false));
-    record(TestVessels.testForeignToDock(false));
-    record(TestVessels.testDockToForeign(false));
-    record(TestVessels.testForeignSpawn (false));
-    record(TestVessels.testLocalSpawn   (false));
+    record(TestVesselTrade.testForeignToLand(false));
+    record(TestVesselTrade.testForeignToDock(false));
+    record(TestVesselTrade.testDockToForeign(false));
+    record(TestVesselTrade.testForeignSpawn (false));
+    record(TestVesselTrade.testLocalSpawn   (false));
     
     record(TestBounties.testAttackBuildingMission(false));
     record(TestBounties.testAttackActorMission   (false));
