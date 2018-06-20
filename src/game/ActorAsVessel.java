@@ -89,12 +89,15 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   void beginNextBehaviour() {
     assignTask(null, this);
     
-    if (idle() && mission() != null && mission().active()) {
-      assignTask(mission().selectActorBehaviour(this), this);
+    Mission mission = mission();
+    Employer work = work();
+    
+    if (idle() && mission != null && mission.active()) {
+      assignTask(mission.selectActorBehaviour(this), this);
     }
     
-    if (idle() && work() != null && ((Element) work()).complete()) {
-      assignTask(work().selectActorBehaviour(this), this);
+    if (idle() && work != null && ((Element) work).complete()) {
+      assignTask(work.selectActorBehaviour(this), this);
     }
     
     if (idle()) {
@@ -355,11 +358,15 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   public void onDeparture(Base goes, World.Journey journey) {
     //
     //  If you're departing from a foreign base, scoop up your crew and any
-    //  passengers-
+    //  passengers or mission teammates-
     Base offmap = offmapBase();
+    Mission mission = mission();
     if (offmap != null && ! onMap()) {
       for (Actor a : crew) if (a.offmapBase() == offmap) {
         a.setInside(this, true);
+      }
+      if (mission != null) for (Actor a : mission.recruits()) {
+        if (a != this) a.setInside(this, true);
       }
       for (Actor a : allInside()) if (a.offmapBase() == offmap) {
         offmap.toggleVisitor(a, false);

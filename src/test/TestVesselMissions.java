@@ -14,8 +14,8 @@ public class TestVesselMissions extends LogicTest {
   
   
   public static void main(String args[]) {
-    //testForeignToRaid(true);
-    testRaidToForeign(true);
+    testForeignToRaid(false);
+    testRaidToForeign(false);
   }
   
   
@@ -139,7 +139,6 @@ public class TestVesselMissions extends LogicTest {
       runLoop(base, 1, graphics, "saves/test_vessel_missions.str");
       
       if (fromLocal) {
-        //   TODO:  You need to test for a different sequence here...
         
         if (! shipDepart) {
           if (! ship.onMap() && world.journeyFor(ship) != null) {

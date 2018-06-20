@@ -191,7 +191,7 @@ public class Task implements Session.Saveable {
     
     updatePathing();
     
-    if (Visit.empty(path)) {
+    if (! pathValid()) {
       return null;
     }
     if (activeNow) {
@@ -202,6 +202,12 @@ public class Task implements Session.Saveable {
   
   
   boolean pathValid() {
+    if (visits != null && active.mobile()) {
+      if (((Actor) active).inside() == visits) return true;
+    }
+    if (target != null && checkTargetContact(target)) {
+      return true;
+    }
     return path != null;
   }
   

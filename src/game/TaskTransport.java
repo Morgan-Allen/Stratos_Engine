@@ -11,6 +11,7 @@ public class TaskTransport extends Task {
   
   ActorAsVessel vessel;
   Mission mission;
+  boolean returned;
   
   
   TaskTransport(ActorAsVessel actor, Mission mission) {
@@ -23,11 +24,13 @@ public class TaskTransport extends Task {
     super(s);
     vessel   = (ActorAsVessel) active;
     mission  = (Mission) s.loadObject();
+    returned = s.loadBool();
   }
   
   public void saveState(Session s) throws Exception {
     super.saveState(s);
     s.saveObject(mission);
+    s.saveBool(returned);
   }
   
   
@@ -52,6 +55,10 @@ public class TaskTransport extends Task {
   protected void onTarget(Target target) {
     
     Base home = mission.homeBase(), away = mission.worldFocus();
+
+    if (mission.complete() && vessel.map() == home.activeMap()) {
+      returned = true;
+    }
     
     if (type == JOB.DEPARTING) {
       mission.beginJourney(home, away);
@@ -64,8 +71,8 @@ public class TaskTransport extends Task {
       vessel.exitMap(vessel.map());
       return;
     }
-
-    if (mission.readyToDepart()) {
+    
+    if (mission.readyToDepart() && ! returned) {
       AreaTile transit = ActorUtils.findTransitPoint(
         vessel.map(), home, away, vessel
       );
@@ -74,7 +81,7 @@ public class TaskTransport extends Task {
       return;
     }
     
-    if (mission.readyToReturn()) {
+    if (mission.readyToReturn() && ! returned) {
       AreaTile transit = ActorUtils.findTransitPoint(
         vessel.map(), away, home, vessel
       );
@@ -84,10 +91,13 @@ public class TaskTransport extends Task {
     }
     
     if (type == JOB.DOCKING || type == JOB.WAITING) {
-      if (! vessel.landed()) vessel.doLanding(vessel.landsAt());
-      configTask(origin, null, target, JOB.WAITING, 1);
+      if (! vessel.landed()) {
+        vessel.doLanding(vessel.landsAt());
+      }
+      if (! returned) {
+        configTask(origin, null, target, JOB.WAITING, 1);
+      }
     }
-    
   }
   
 

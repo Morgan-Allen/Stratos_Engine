@@ -70,6 +70,7 @@ public class TaskTrading extends Task {
       ActorAsVessel ship = (ActorAsVessel) trading;
       AreaTile docks = ship.landsAt();
       task.configTask(origin, null, docks, JOB.DOCKING, 10);
+      if (! task.pathValid()) return null;
     }
     else {
       task.configTravel(from, from, JOB.TRADING, origin, false);
