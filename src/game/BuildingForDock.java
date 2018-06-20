@@ -148,7 +148,7 @@ public class BuildingForDock extends Building {
       hasVessel = true;
     }
     if (hasUpgrade && dockPoint != null && ! hasVessel) {
-      advanceShipConstruction(template, dockPoint);
+      advanceShipConstruction(template, dockPoint, 1);
     }
     
     for (TradeProxy proxy : tradeProxies) {
@@ -184,10 +184,12 @@ public class BuildingForDock extends Building {
   }
   
   
-  void advanceShipConstruction(BuildType template, AreaTile point) {
+  public void advanceShipConstruction(
+    BuildType template, AreaTile point, float buildLevel
+  ) {
     ActorAsVessel ship = (ActorAsVessel) template.vesselTemplate.generate();
     setWorker(ship, true);
-    ship.enterMap(map, point.x, point.y, 1, base());
+    ship.enterMap(map, point.x, point.y, buildLevel, base());
     ship.doLanding(point);
   }
   
