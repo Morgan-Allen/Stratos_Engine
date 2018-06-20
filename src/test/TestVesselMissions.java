@@ -20,7 +20,29 @@ public class TestVesselMissions extends LogicTest {
   
   
   static boolean testForeignToRaid(boolean graphics) {
-    TestVesselMissions test = new TestVesselMissions();
+    
+    //  TODO:  The troopers seem to be attacking the bastion in a strange
+    //  formation?  Find out why.
+    
+    //  TODO:  Also, resident actors should maybe be defending more actively?
+    
+    TestVesselMissions test = new TestVesselMissions() {
+      
+      Mission generateMission(Base base, Base rival) {
+        Mission raid = new MissionStrike(rival);
+        raid.setWorldFocus(base);
+        for (int n = 8; n-- > 0;) {
+          Actor joins = (Actor) Trooper.TROOPER.generate();
+          joins.assignBase(rival);
+          raid.toggleRecruit(joins, true);
+        }
+        return raid;
+      }
+      
+      boolean checkCompletion(Mission mission, Base base, Building centre) {
+        return centre.destroyed();
+      }
+    };
     return test.vesselTest("FOREIGN TO RAID", graphics);
   }
   
@@ -29,6 +51,7 @@ public class TestVesselMissions extends LogicTest {
     //return test.vesselTest("RAID TO FOREIGN", graphics);
     return false;
   }
+  
   
   
   
@@ -56,32 +79,20 @@ public class TestVesselMissions extends LogicTest {
     Base.setPosture(base, rival, Base.POSTURE.ENEMY, true);
     
     
-    MissionStrike raid = new MissionStrike(rival);
-    
+    Mission mission = generateMission(base, rival);
     ActorAsVessel ship = (ActorAsVessel) Vassals.DROPSHIP.generate();
     ship.assignBase(rival);
-    raid.assignTransport(ship);
+    for (Actor a : mission.recruits()) a.setInside(ship, true);
+    mission.assignTransport(ship);
+    mission.beginMission(rival);
     
-    for (int n = 8; n-- > 0;) {
-      Actor joins = (Actor) Trooper.TROOPER.generate();
-      joins.assignBase(rival);
-      joins.setInside(ship, true);
-      raid.toggleRecruit(joins, true);
-    }
-    
-    raid.setWorldFocus(base);
-    raid.beginMission(rival);
-    
-    
-    //  TODO:  The troopers seem to be attacking the bastion in a strange
-    //  formation?  Find out why.
     
     
     final int RUN_TIME = YEAR_LENGTH;
-    boolean shipArrive = false;
-    boolean raidDone   = false;
-    boolean crewReturn = false;
-    boolean testOkay   = false;
+    boolean shipArrive  = false;
+    boolean missionDone = false;
+    boolean crewReturn  = false;
+    boolean testOkay    = false;
     
     while (map.time() < RUN_TIME || graphics) {
       runLoop(base, 1, graphics, "saves/test_vessel_missions.str");
@@ -90,20 +101,20 @@ public class TestVesselMissions extends LogicTest {
         if (ship.onMap() && ship.map() == map) {
           shipArrive = true;
         }
-        for (Actor a : raid.recruits()) {
+        for (Actor a : mission.recruits()) {
           if (a.offmapBase() != null) shipArrive = false;
         }
       }
       
-      if (shipArrive && ! raidDone) {
-        if (centre.destroyed()) {
-          raidDone = true;
+      if (shipArrive && ! missionDone) {
+        if (checkCompletion(mission, base, centre)) {
+          missionDone = true;
         }
       }
       
-      if (raidDone && ! crewReturn) {
+      if (missionDone && ! crewReturn) {
         boolean allBack = true;
-        for (Actor a : raid.recruits()) {
+        for (Actor a : mission.recruits()) {
           if (a.offmapBase() != rival) allBack = false;
         }
         if (ship.offmapBase() != rival) allBack = false;
@@ -121,15 +132,20 @@ public class TestVesselMissions extends LogicTest {
     
     
     I.say("\n"+title+" TEST FAILED!");
-    I.say("  Ship arrive: "+shipArrive);
-    I.say("  Raid done:   "+raidDone  );
-    I.say("  Crew return: "+crewReturn);
+    I.say("  Ship arrive: "+shipArrive );
+    I.say("  Raid done:   "+missionDone);
+    I.say("  Crew return: "+crewReturn );
     
     return false;
   }
   
   
-  void generateMission() {
+  Mission generateMission(Base base, Base rival) {
+    return null;
+  }
+  
+  boolean checkCompletion(Mission mission, Base base, Building centre) {
+    return false;
   }
   
   
