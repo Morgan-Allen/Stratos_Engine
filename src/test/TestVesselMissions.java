@@ -90,6 +90,9 @@ public class TestVesselMissions extends LogicTest {
         if (ship.onMap() && ship.map() == map) {
           shipArrive = true;
         }
+        for (Actor a : raid.recruits()) {
+          if (a.offmapBase() != null) shipArrive = false;
+        }
       }
       
       if (shipArrive && ! raidDone) {
@@ -97,9 +100,6 @@ public class TestVesselMissions extends LogicTest {
           raidDone = true;
         }
       }
-      
-      //  TODO:  This is being satisfied too quickly.  The troopers aren't even
-      //  being taken aboard as passengers!
       
       if (raidDone && ! crewReturn) {
         boolean allBack = true;

@@ -326,7 +326,6 @@ public class World implements Session.Saveable {
     
     for (Journeys g : going) {
       g.onDeparture(goes, j);
-      if (g.isActor()) from.toggleVisitor((Actor) g, false);
     }
     
     if (reports(j)) {
@@ -348,7 +347,6 @@ public class World implements Session.Saveable {
   
   public boolean completeJourney(Journey j) {
     journeys.remove(j);
-    Base goes = j.goes;
     
     if (reports(j)) {
       I.say("\nCompleted journey: "+j.from+" to "+j.goes);
@@ -357,9 +355,6 @@ public class World implements Session.Saveable {
     }
     
     for (Journeys g : j.going) {
-      if (goes.activeMap() == null && g.isActor()) {
-        goes.toggleVisitor((Actor) g, true);
-      }
       g.onArrival(j.goes, j);
     }
     return true;

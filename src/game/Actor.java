@@ -587,12 +587,18 @@ public class Actor extends Element implements
   /**  Handling migration and off-map tasks-
     */
   public void onArrival(Base goes, World.Journey journey) {
-    if (goes.activeMap() != null) {
+    
+    if (goes.activeMap() != null && inside() == null) {
       AreaTile entry = ActorUtils.findTransitPoint(
         goes.activeMap(), goes, journey.from, this
       );
       enterMap(goes.activeMap(), entry.x, entry.y, 1, base());
     }
+    
+    if (goes.activeMap() == null) {
+      goes.toggleVisitor(this, true);
+    }
+    
     if (task != null && ! task.updateOnArrival(goes, journey)) {
       assignTask(null, this);
     }
@@ -600,6 +606,9 @@ public class Actor extends Element implements
   
   
   public void onDeparture(Base goes, World.Journey journey) {
+    if (goes.activeMap() == null) {
+      goes.toggleVisitor(this, false);
+    }
     return;
   }
   
