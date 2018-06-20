@@ -622,7 +622,7 @@ public class Base implements Session.Saveable, Trader {
     //  TODO:  Cache this?
     float sum = 0;
     for (BuildType t : buildLevel.keys()) {
-      if (t.isArmyOrWallsBuilding()) {
+      if (t.isMilitaryBuilding()) {
         float l = buildLevel.valueFor(t);
         for (ActorType w : t.workerTypes.keys()) {
           float maxW = t.workerTypes.valueFor(w);
@@ -680,7 +680,7 @@ public class Base implements Session.Saveable, Trader {
   
   /**  Regular updates-
     */
-  void updateCity() {
+  void updateBase() {
     final int UPDATE_GAP = map == null ? DAY_LENGTH : 10;
     boolean updateStats = world.time % UPDATE_GAP == 0;
     boolean activeMap   = map != null;

@@ -188,7 +188,7 @@ public class MissionStrike extends Mission {
         if (TaskCombat.attackPower((Actor) e) <= 0) return null;
       }
       if (e.type().isBuilding()) {
-        if (! e.type().isArmyOrWallsBuilding()) return null;
+        if (! e.type().isMilitaryBuilding()) return null;
       }
       
       if (checkPathing) {

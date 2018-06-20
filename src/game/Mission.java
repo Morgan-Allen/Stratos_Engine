@@ -172,14 +172,15 @@ public abstract class Mission implements
     Base    offmap   = offmapBase();
     boolean valid    = recruits.size() > 0 && active;
     boolean complete = valid && complete();
+    boolean moveSelf = transport == null || ! transport.onMap();
     
     if (transitTile == null && map != null && offmap != null) {
       transitTile = findTransitPoint(map, localBase, offmap, Type.MOVE_LAND, 1);
     }
-    if ((! complete) && readyToDepart()) {
+    if ((! complete) && moveSelf && readyToDepart()) {
       beginJourney(localBase, worldFocus());
     }
-    if (complete && readyToReturn()) {
+    if (complete && moveSelf && readyToReturn()) {
       beginJourney(localBase, homeBase());
     }
     if (complete && recruitsAllHome()) {
@@ -284,14 +285,25 @@ public abstract class Mission implements
     }
     
     Pathing exits = transitPoint(actor);
+    
     if (complete()) {
       if (exits != null && ! onHomeMap()) {
-        return actor.targetTask(exits, 0, Task.JOB.RETURNING, this);
+        if (exits == transport) {
+          return actor.visitTask(exits, 0, JOB.RETURNING, this);
+        }
+        else {
+          return actor.targetTask(exits, 0, JOB.RETURNING, this);
+        }
       }
     }
     else {
       if (onWrongMap() && exits != null) {
-        return actor.targetTask(exits, 0, Task.JOB.DEPARTING, this);
+        if (exits == transport) {
+          return actor.visitTask(exits, 0, JOB.DEPARTING, this);
+        }
+        else {
+          return actor.targetTask(exits, 0, JOB.DEPARTING, this);
+        }
       }
       else {
         return nextLocalMapBehaviour(actor);

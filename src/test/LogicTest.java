@@ -20,7 +20,7 @@ public class LogicTest {
   ) {
     World       world  = new World(goods);
     WorldLocale locale = world.addLocale(5, 5);
-    Base        base   = new Base(world, locale, "Test City");
+    Base        base   = new Base(world, locale, "Test Base");
     Area        map    = null;
     
     if (! genTerrain) {
@@ -530,6 +530,11 @@ public class LogicTest {
         }
         report.append("\n  Crew:");
         for (Actor w : v.crew()) {
+          report.append("\n    "+w+" ("+w.jobType()+")");
+        }
+        report.append("\n  Passengers:");
+        for (Actor w : v.allInside()) {
+          if (w.work() == v) continue;
           report.append("\n    "+w+" ("+w.jobType()+")");
         }
       }

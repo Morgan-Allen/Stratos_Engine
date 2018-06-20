@@ -90,7 +90,7 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
     assignTask(null, this);
     
     if (idle() && mission() != null && mission().active()) {
-      assignTask(TaskTransport.nextTransport(this, mission()), this);
+      assignTask(mission().selectActorBehaviour(this), this);
     }
     
     if (idle() && work() != null && ((Element) work()).complete()) {
@@ -263,7 +263,7 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   public AreaTile findLandingPoint(Area map, Base visits, Task task) {
     
     //  TODO:  Use the cargo-profile for the trading-task to rate the viability
-    //  of different landing-sites.
+    //  of different landing-sites?
     
     //
     //  First, see where we're supposed to be getting close to:
@@ -273,6 +273,13 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
       TaskTrading trading = (TaskTrading) task;
       if (trading.tradeGoes instanceof Target) {
         from = (Target) trading.tradeGoes;
+      }
+    }
+    
+    if (task instanceof TaskTransport) {
+      TaskTransport transport = (TaskTransport) task;
+      if (transport.mission.localFocus() != null) {
+        from = transport.mission.localFocus();
       }
     }
     
@@ -411,6 +418,7 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
     //  Eject any unathorised visitors...
     for (Actor actor : inside) {
       if (actor == pilot || crew.includes(actor)) continue;
+      if (actor.mission() == mission()) continue;
       actor.setInside(this, false);
       actor.setLocation(entrance, map);
     }

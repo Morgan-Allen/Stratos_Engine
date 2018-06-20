@@ -248,8 +248,12 @@ public class Type extends Constant {
   }
   
   
-  public boolean isArmyOrWallsBuilding() {
-    return category == IS_ARMY_BLD || category == IS_WALLS_BLD;
+  public boolean isMilitaryBuilding() {
+    return
+      category == IS_ARMY_BLD  ||
+      category == IS_WALLS_BLD ||
+      category == IS_GOVERN_BLD
+    ;
   }
   
   

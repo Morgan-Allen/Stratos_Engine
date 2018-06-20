@@ -350,6 +350,12 @@ public class World implements Session.Saveable {
     journeys.remove(j);
     Base goes = j.goes;
     
+    if (reports(j)) {
+      I.say("\nCompleted journey: "+j.from+" to "+j.goes);
+      I.say("  Embarked: "+j.going);
+      I.say("  Time: "+time+", arrival: "+j.arriveTime);
+    }
+    
     for (Journeys g : j.going) {
       if (goes.activeMap() == null && g.isActor()) {
         goes.toggleVisitor((Actor) g, true);
@@ -450,19 +456,14 @@ public class World implements Session.Saveable {
     
     Area active = activeBaseMap();
     if (active != null) {
-      active.locals.updateCity();
+      active.locals.updateBase();
     }
     for (Base city : bases) {
-      city.updateCity();
+      city.updateBase();
     }
     
     for (Journey j : journeys) {
       if (time >= j.arriveTime) {
-        if (reports(j)) {
-          I.say("\nCompleted journey: "+j.from+" to "+j.goes);
-          I.say("  Embarked: "+j.going);
-          I.say("  Time: "+time+", arrival: "+j.arriveTime);
-        }
         completeJourney(j);
       }
     }

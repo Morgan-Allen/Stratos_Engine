@@ -14,8 +14,8 @@ public class TestVesselMissions extends LogicTest {
   
   
   public static void main(String args[]) {
-    testForeignToRaid(false);
-    testRaidToForeign(false);
+    testForeignToRaid(true);
+    testRaidToForeign(true);
   }
   
   
@@ -40,13 +40,16 @@ public class TestVesselMissions extends LogicTest {
     World world = base.world;
     Area  map   = base.activeMap();
     
+    world.settings.toggleFog     = false;
+    world.settings.toggleMigrate = false;
+    
     Building centre = (Building) BASTION.generate();
     centre.enterMap(map, 10, 10, 1, base);
     ActorUtils.fillWorkVacancies(centre);
     
     
     WorldLocale rivalAt = world.addLocale(4, 4);
-    Base rival = new Base(world, rivalAt);
+    Base rival = new Base(world, rivalAt, "Rival Base");
     world.addBases(rival);
     
     World.setupRoute(rival.locale, base.locale, 1, Type.MOVE_AIR);
@@ -62,6 +65,7 @@ public class TestVesselMissions extends LogicTest {
     for (int n = 8; n-- > 0;) {
       Actor joins = (Actor) Trooper.TROOPER.generate();
       joins.assignBase(rival);
+      joins.setInside(ship, true);
       raid.toggleRecruit(joins, true);
     }
     
@@ -69,8 +73,8 @@ public class TestVesselMissions extends LogicTest {
     raid.beginMission(rival);
     
     
-    //  TODO:  You need to ensure that an actual ship is used to deliver these
-    //  troops, and to retrieve them later.
+    //  TODO:  The troopers seem to be attacking the bastion in a strange
+    //  formation?  Find out why.
     
     
     final int RUN_TIME = YEAR_LENGTH;
@@ -94,12 +98,18 @@ public class TestVesselMissions extends LogicTest {
         }
       }
       
+      //  TODO:  This is being satisfied too quickly.  The troopers aren't even
+      //  being taken aboard as passengers!
+      
       if (raidDone && ! crewReturn) {
         boolean allBack = true;
         for (Actor a : raid.recruits()) {
           if (a.offmapBase() != rival) allBack = false;
         }
         if (ship.offmapBase() != rival) allBack = false;
+        if (allBack) {
+          crewReturn = true;
+        }
       }
       
       if (crewReturn && ! testOkay) {

@@ -11,7 +11,6 @@ public class TaskTransport extends Task {
   
   ActorAsVessel vessel;
   Mission mission;
-  boolean departed = false;
   
   
   TaskTransport(ActorAsVessel actor, Mission mission) {
@@ -24,13 +23,11 @@ public class TaskTransport extends Task {
     super(s);
     vessel   = (ActorAsVessel) active;
     mission  = (Mission) s.loadObject();
-    departed = s.loadBool();
   }
   
   public void saveState(Session s) throws Exception {
     super.saveState(s);
     s.saveObject(mission);
-    s.saveBool(departed);
   }
   
   
@@ -39,7 +36,7 @@ public class TaskTransport extends Task {
   static TaskTransport nextTransport(ActorAsVessel actor, Mission mission) {
     TaskTransport task = new TaskTransport(actor, mission);
     AreaTile goes = actor.landsAt();
-    task.configTask(actor, null, goes, JOB.WAITING, 1);
+    task.configTask(actor, null, goes, JOB.DOCKING, 1);
     if (! task.pathValid()) return null;
     return task;
   }
@@ -54,16 +51,17 @@ public class TaskTransport extends Task {
   
   protected void onTarget(Target target) {
     
-    World world = mission.homeBase.world;
     Base home = mission.homeBase(), away = mission.worldFocus();
     
     if (type == JOB.DEPARTING) {
-      world.beginJourney(home, away, vessel.type().moveMode, vessel);
+      mission.beginJourney(home, away);
+      vessel.exitMap(vessel.map());
       return;
     }
     
     if (type == JOB.RETURNING) {
-      world.beginJourney(away, home, vessel.type().moveMode, vessel);
+      mission.beginJourney(away, home);
+      vessel.exitMap(vessel.map());
       return;
     }
 
@@ -72,6 +70,7 @@ public class TaskTransport extends Task {
         vessel.map(), home, away, vessel
       );
       configTask(origin, null, transit, JOB.DEPARTING, 0);
+      vessel.doTakeoff(vessel.landsAt());
       return;
     }
     
@@ -80,14 +79,12 @@ public class TaskTransport extends Task {
         vessel.map(), away, home, vessel
       );
       configTask(origin, null, transit, JOB.RETURNING, 0);
+      vessel.doTakeoff(vessel.landsAt());
       return;
     }
     
-    if (type == JOB.DOCKING) {
-      vessel.doLanding(vessel.landsAt);
-    }
-    
     if (type == JOB.DOCKING || type == JOB.WAITING) {
+      if (! vessel.landed()) vessel.doLanding(vessel.landsAt());
       configTask(origin, null, target, JOB.WAITING, 1);
     }
     

@@ -241,11 +241,11 @@ public class TaskTrading extends Task {
     //  foreign city:
     else if (type == JOB.DEPARTING && ! didImport) {
       from.world.beginJourney(from, goes, moveMode, actor);
-      actor.exitMap(actor.map);
+      actor.exitMap(actor.map());
     }
     else if (type == JOB.DEPARTING && didImport) {
       from.world.beginJourney(goes, from, moveMode, actor);
-      actor.exitMap(actor.map);
+      actor.exitMap(actor.map());
     }
   }
   
