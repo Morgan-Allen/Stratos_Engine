@@ -14,8 +14,12 @@ public class TestVesselMissions extends LogicTest {
   
   
   public static void main(String args[]) {
+    
     testForeignToRaid(false);
     testRaidToForeign(false);
+    
+    //  TODO:  Now add tests for dialogue missions, and possibly for recon,
+    //  security, etc.?
   }
   
   

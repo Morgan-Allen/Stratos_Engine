@@ -108,7 +108,7 @@ public class MissionTerms {
       if (focus == null) focus = ((Element) mission.localFocus()).base();
       this.accepted = true;
       
-      BaseEvents.imposeTerms(focus, mission.homeBase(), mission);
+      WorldEvents.imposeTerms(focus, mission.homeBase(), mission);
       mission.setMissionComplete(true);
     }
     else {

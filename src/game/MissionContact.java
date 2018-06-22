@@ -52,7 +52,7 @@ public class MissionContact extends Mission {
   
   
   void handleOffmapArrival(Base goes, World.Journey journey) {
-    BaseEvents.handleDialog(this, goes, journey);
+    WorldEvents.handleDialog(this, goes, journey);
   }
   
   

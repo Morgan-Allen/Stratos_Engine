@@ -239,7 +239,7 @@ public abstract class Mission implements
     
     if (from.activeMap() == null) {
       if (from == homeBase) {
-        BaseEvents.handleDeparture(this, from, goes);
+        WorldEvents.handleDeparture(this, from, goes);
       }
       else {
         handleOffmapDeparture(from, journey);
@@ -264,7 +264,7 @@ public abstract class Mission implements
     
     if (goes.activeMap() == null) {
       if (goes == homeBase) {
-        BaseEvents.handleReturn(this, goes, journey);
+        WorldEvents.handleReturn(this, goes, journey);
       }
       else {
         handleOffmapArrival(goes, journey);
