@@ -17,6 +17,9 @@ public class ActorBonds {
     BOND_SERVANT = 1 << 5,
     BOND_ANY     = 0
   ;
+  final static int
+    BOND_UPDATE_TIME = GameConstants.DAY_LENGTH
+  ;
   
   
   static class Bond {
@@ -34,6 +37,8 @@ public class ActorBonds {
   private List <Bond> bonds = new List();
   private Base guestBase;
   private Base baseLoyal;
+  int updateCounter = 0;
+  
   
   
   ActorBonds(Actor actor) {
@@ -52,6 +57,7 @@ public class ActorBonds {
     }
     guestBase = (Base) s.loadObject();
     baseLoyal = (Base) s.loadObject();
+    updateCounter = s.loadInt();
   }
   
   
@@ -65,6 +71,7 @@ public class ActorBonds {
     }
     s.saveObject(guestBase);
     s.saveObject(baseLoyal);
+    s.saveInt(updateCounter);
   }
   
   
@@ -72,12 +79,37 @@ public class ActorBonds {
   /**  Regular updates-
     */
   public void updateBonds() {
-    //
-    //  Update all relations-
-    float tick = 1f / actor.map().ticksPS;
+    int updateLimit = BOND_UPDATE_TIME * actor.map().ticksPerSecond();
+    if (updateCounter++ >= updateLimit) {
+      updateCounter = 0;
+      for (Bond b : bonds) {
+        b.novelty += BOND_UPDATE_TIME * 1f / BOND_NOVEL_TIME;
+        b.novelty = Nums.clamp(b.novelty, 0, 1);
+      }
+      makeLoyaltyCheck();
+    }
+  }
+  
+  
+  public void makeLoyaltyCheck() {
+    
+    Tally <Base> loyalties = new Tally();
+    Pick <Base> toJoin = new Pick();
+    Base current = baseLoyal();
+    float stubborn = actor.traits.levelOf(TRAIT_DILIGENCE) / 2f;
+    
     for (Bond b : bonds) {
-      b.novelty += tick / BOND_NOVEL_TIME;
-      b.novelty = Nums.clamp(b.novelty, 0, 1);
+      loyalties.add(b.level, b.with.bonds.baseLoyal());
+    }
+    
+    for (Base b : loyalties.keys()) {
+      float rating = loyalties.valueFor(b);
+      if (b == current) rating *= 1 + stubborn;
+      toJoin.compare(b, rating);
+    }
+    
+    if (toJoin.result() != current) {
+      assignBaseLoyal(toJoin.result());
     }
   }
   
@@ -96,6 +128,7 @@ public class ActorBonds {
   
   
   public void assignBaseLoyal(Base base) {
+    if (base == actor.base()) base = null;
     this.baseLoyal = base;
   }
   

@@ -172,6 +172,8 @@ public class GameConstants {
     DIALOG_LENGTH    = SHIFT_LENGTH / 2,
     CHAT_BOND        = 10,
     MAX_CHAT_BOND    = 35,  //  bonding over conversation
+    GIFT_BOND        = 20,
+    MAX_GIFT_BOND    = 65,  //  bonding over significant gifts
     SAVE_BOND        = 45,
     MAX_SAVE_BOND    = 100, //  bonding over life/death situations
     AVG_NUM_BONDS    = 5,
