@@ -894,7 +894,7 @@ public class Base implements Session.Saveable, Trader {
         ActorType forShip = (ActorType) world.shipTypes[0];
         trader = (ActorAsVessel) forShip.generate();
         trader.assignBase(this);
-        trader.assignGuestBase(b);
+        trader.bonds.assignGuestBase(b);
         trader.setBuildLevel(1);
         traders.add(trader);
         toggleVisitor(trader, true);

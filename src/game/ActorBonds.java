@@ -31,7 +31,9 @@ public class ActorBonds {
   
   final Actor actor;
   
-  List <Bond> bonds = new List();
+  private List <Bond> bonds = new List();
+  private Base guestBase;
+  private Base baseLoyal;
   
   
   ActorBonds(Actor actor) {
@@ -48,6 +50,8 @@ public class ActorBonds {
       b.properties = s.loadInt();
       bonds.add(b);
     }
+    guestBase = (Base) s.loadObject();
+    baseLoyal = (Base) s.loadObject();
   }
   
   
@@ -59,6 +63,8 @@ public class ActorBonds {
       s.saveFloat(b.novelty);
       s.saveInt(b.properties);
     }
+    s.saveObject(guestBase);
+    s.saveObject(baseLoyal);
   }
   
   
@@ -75,6 +81,29 @@ public class ActorBonds {
     }
   }
   
+  
+
+  /**  Supplementary base-allegiance settings-
+    */
+  public void assignGuestBase(Base city) {
+    this.guestBase = city;
+  }
+  
+  
+  public Base guestBase() {
+    return guestBase;
+  }
+  
+  
+  public void assignBaseLoyal(Base base) {
+    this.baseLoyal = base;
+  }
+  
+  
+  public Base baseLoyal() {
+    if (baseLoyal == null) return actor.base();
+    return baseLoyal;
+  }
   
   
   

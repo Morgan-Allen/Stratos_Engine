@@ -45,12 +45,22 @@ public class MissionForContact extends Mission {
   
   void beginJourney(Base from, Base goes) {
     super.beginJourney(from, goes);
-    for (Actor a : recruits) a.assignGuestBase(null);
+    
+    //  TODO:  Do this at the start/end of the mission.
+    
+    for (Actor a : recruits) {
+      a.bonds.assignGuestBase(null);
+    }
   }
   
 
   public void onArrival(Base goes, World.Journey journey) {
-    if (goes != homeBase()) for (Actor a : recruits) a.assignGuestBase(goes);
+    
+    //  TODO:  Do this at the start/end of the mission.
+    
+    if (goes != homeBase()) for (Actor a : recruits) {
+      a.bonds.assignGuestBase(goes);
+    }
     super.onArrival(goes, journey);
   }
   

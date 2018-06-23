@@ -86,7 +86,7 @@ public class TestSubversion extends LogicTest {
       if (madeContact && ! hasSympathy) {
         boolean anySympathy = false;
         for (Actor a : mainHut.workers()) {
-          if (a.baseLoyal() == base) anySympathy = true;
+          if (a.bonds.baseLoyal() == base) anySympathy = true;
         }
         hasSympathy = anySympathy;
       }
