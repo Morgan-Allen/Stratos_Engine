@@ -107,9 +107,51 @@ public class ActorBonds {
       if (b == current) rating *= 1 + stubborn;
       toJoin.compare(b, rating);
     }
+    Base joins = toJoin.result();
     
-    if (toJoin.result() != current) {
-      assignBaseLoyal(toJoin.result());
+    if (joins != current) {
+      assignBaseLoyal(joins);
+      
+      checkBuildingLoyalty(actor.work());
+      checkBuildingLoyalty(actor.home());
+    }
+  }
+  
+  
+  public static void checkBuildingLoyalty(Employer e) {
+    
+    if (! (e instanceof Building)) return;
+    Building building = (Building) e;
+    
+    
+    Tally <Base> loyalties = new Tally();
+    Pick <Base> toJoin = new Pick();
+    Base current = building.base();
+    float stubborn = 0.5f;
+    
+    for (Actor a : building.workers()) {
+      loyalties.add(1, a.bonds.baseLoyal());
+    }
+    for (Actor a : building.residents()) if (a.work() != building) {
+      loyalties.add(1, a.bonds.baseLoyal());
+    }
+    
+    for (Base b : loyalties.keys()) {
+      float rating = loyalties.valueFor(b);
+      if (b == current) rating *= 1 + stubborn;
+      toJoin.compare(b, rating);
+    }
+    Base joins = toJoin.result();
+    
+    
+    if (joins != current) {
+      for (Actor a : building.workers()) if (a.base() != joins) {
+        building.setWorker(a, false);
+      }
+      for (Actor a : building.residents()) if (a.base() != joins) {
+        building.setResident(a, false);
+      }
+      building.assignBase(joins);
     }
   }
   

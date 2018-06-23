@@ -37,7 +37,7 @@ public class TestSubversion extends LogicTest {
     centre.enterMap(map, 2, 2, 1, base);
     ActorUtils.fillWorkVacancies(centre);
     
-    MissionForContact currentContact = null;
+    MissionForContact contact = null;
     
     
     final int RUN_TIME = DAY_LENGTH;
@@ -64,12 +64,15 @@ public class TestSubversion extends LogicTest {
     while (map.time() < RUN_TIME || graphics) {
       test.runLoop(base, 1, graphics, "saves/test_subversion.str");
       
-      //  TODO:  Fill this in.
-      /*
-      while (currentContact == null || currentContact.complete()) {
-        //  Initialise the contact mission...
+      while (contact == null || contact.complete()) {
+        contact = new MissionForContact(base);
+        for (Actor a : centre.workers()) {
+          contact.toggleRecruit(a, true);
+          if (a.type().isNoble()) contact.toggleEnvoy(a, true);
+        }
+        contact.setLocalFocus(mainHut);
+        contact.beginMission(base);
       }
-      //*/
       
       if (! madeContact) {
         boolean allTalked = true;
