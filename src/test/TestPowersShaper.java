@@ -1,11 +1,10 @@
 
 
 package test;
-import static game.GameConstants.*;
 import game.*;
+import static game.GameConstants.*;
 import static content.GameContent.*;
 import static content.SchoolShaper.*;
-//import content.*;
 import util.*;
 
 
@@ -40,7 +39,7 @@ public class TestPowersShaper {
       boolean verifyEffect(Target subject, Actor caster) {
         caster.traits.setClassLevel(MAX_BEASTS_CL);
         
-        Actor master = toCharm.traits.bondedWith(ActorTraits.BOND_MASTER);
+        Actor master = toCharm.bonds.bondedWith(ActorBonds.BOND_MASTER);
         if (master != caster) return false;
         
         return true;

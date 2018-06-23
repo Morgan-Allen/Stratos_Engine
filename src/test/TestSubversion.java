@@ -13,7 +13,7 @@ public class TestSubversion extends LogicTest {
   
   
   public static void main(String args[]) {
-    testSubversion(true);
+    testSubversion(false);
   }
   
   
@@ -47,18 +47,35 @@ public class TestSubversion extends LogicTest {
     boolean testOkay    = false;
     
     
+    //  TODO:  Okay.  So what do I need to implement?
+    
+    //  Joint-activities at the end of dialogue (scouting, hunting, repair/aid,
+    //  intros, dining, gifting.)
+    
+    //  The possibility of becoming a sympathiser if your relations with
+    //  another base are stronger than with your own.  (Or if the other side
+    //  has leverage on you or just looks 'strong' enough.)
+    
+    //  The possibility of individuals or buildings converting to your base if
+    //  outside 'sympathies' are strong enough.
+    
+    
+    
     while (map.time() < RUN_TIME || graphics) {
       test.runLoop(base, 1, graphics, "saves/test_subversion.str");
       
+      //  TODO:  Fill this in.
+      /*
       while (currentContact == null || currentContact.complete()) {
         //  Initialise the contact mission...
       }
+      //*/
       
       if (! madeContact) {
         boolean allTalked = true;
         for (Actor a : mainHut.workers()) {
           boolean talked = false;
-          for (Actor w : a.traits.allBondedWith(ActorTraits.BOND_ANY)) {
+          for (Actor w : a.bonds.allBondedWith(ActorBonds.BOND_ANY)) {
             if (w.base() == base) talked = true;
           }
           if (! talked) allTalked = false;

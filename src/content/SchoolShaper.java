@@ -5,7 +5,7 @@ import game.*;
 import game.Task.JOB;
 import static game.GameConstants.*;
 import static game.ActorTechnique.*;
-import static game.ActorTraits.*;
+import static game.ActorBonds.*;
 import graphics.common.*;
 import graphics.sfx.*;
 import util.*;
@@ -66,7 +66,7 @@ public class SchoolShaper {
     
     int numBeasts(Actor using) {
       int num = 0;
-      for (Actor a : using.traits.allBondedWith(BOND_SERVANT)) {
+      for (Actor a : using.bonds.allBondedWith(BOND_SERVANT)) {
         if (a.type().isAnimal()) num += 1;
       }
       return num;
@@ -81,13 +81,13 @@ public class SchoolShaper {
       }
       else if (affects.type().isPerson()) {
         if (affects.inEmergency() || using.inEmergency()) return false;
-        if (affects.traits.bondNovelty(using) < 1) return false;
+        if (affects.bonds.bondNovelty(using) < 1) return false;
       }
       else {
         return false;
       }
       
-      Actor master = affects.traits.bondedWith(BOND_MASTER);
+      Actor master = affects.bonds.bondedWith(BOND_MASTER);
       if (master != null) return false;
       
       return true;
@@ -108,15 +108,15 @@ public class SchoolShaper {
         if (Rand.num() < chance) {
           affects.wipeEmployment();
           affects.assignBase(using.base());
-          ActorTraits.setBond(using, affects, BOND_MASTER, BOND_SERVANT, 1);
+          ActorBonds.setBond(using, affects, BOND_MASTER, BOND_SERVANT, 1);
         }
       }
       if (affects.type().isPerson()) {
         if (Rand.num() < chance) {
           float boost = Rand.num() * BOND_PERSON_MAX / 100f;
-          affects.traits.incBond(using, boost, 1);
+          affects.bonds.incBond(using, boost, 1);
         }
-        affects.traits.incNovelty(using, BOND_NOVELTY / 100f);
+        affects.bonds.incNovelty(using, BOND_NOVELTY / 100f);
       }
       
       dispenseXP(using, 1, SKILL_PRAY);

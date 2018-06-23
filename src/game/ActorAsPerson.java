@@ -4,7 +4,7 @@ package game;
 import util.*;
 import static game.Task.*;
 import static game.GameConstants.*;
-import static game.ActorTraits.*;
+import static game.ActorBonds.*;
 
 
 
@@ -303,7 +303,7 @@ public class ActorAsPerson extends Actor {
       public void completePregnancy(Building venue, boolean onMap) {
         
         ActorAsPerson child  = (ActorAsPerson) type().childType().generate();
-        ActorAsPerson father = (ActorAsPerson) traits.bondedWith(BOND_MARRIED);
+        ActorAsPerson father = (ActorAsPerson) bonds.bondedWith(BOND_MARRIED);
         setBond(actor , child, BOND_PARENT, BOND_CHILD, 0.5f);
         setBond(father, child, BOND_PARENT, BOND_CHILD, 0.5f);
         pregnancy = 0;

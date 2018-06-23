@@ -5,6 +5,7 @@ import game.*;
 import static game.GameConstants.*;
 import static game.ActorTechnique.*;
 import static game.ActorTraits.*;
+import static game.ActorBonds.*;
 import graphics.common.*;
 import graphics.sfx.*;
 import util.*;
@@ -68,7 +69,7 @@ public class SchoolTekPriest {
     
     int numDrones(Actor using) {
       int num = 0;
-      for (Actor a : using.traits.allBondedWith(BOND_SERVANT)) {
+      for (Actor a : using.bonds.allBondedWith(BOND_SERVANT)) {
         if (! a.health.active()) continue;
         if (a.type().isConstruct()) num += 1;
       }
@@ -77,7 +78,7 @@ public class SchoolTekPriest {
     
     Actor weakestDrone(Actor using) {
       Pick <Actor> pick = new Pick();
-      for (Actor a : using.traits.allBondedWith(BOND_SERVANT)) {
+      for (Actor a : using.bonds.allBondedWith(BOND_SERVANT)) {
         if (! a.type().isConstruct()) continue;
         pick.compare(a, 0 - TaskCombat.attackPower(a));
       }
@@ -94,7 +95,7 @@ public class SchoolTekPriest {
         if (! subject.type().isConstruct()) return false;
         
         Actor affects = (Actor) subject;
-        Actor master = affects.traits.bondedWith(BOND_MASTER);
+        Actor master = affects.bonds.bondedWith(BOND_MASTER);
         if (master != null) return false;
         
         return true;
@@ -117,7 +118,7 @@ public class SchoolTekPriest {
         drone.enterMap(map, at.x, at.y, 1, using.base());
         drone.setInside(using.inside(), true);
         
-        ActorTraits.setBond(using, drone, BOND_MASTER, BOND_SERVANT, 1);
+        ActorBonds.setBond(using, drone, BOND_MASTER, BOND_SERVANT, 1);
       }
       else {
         Actor affects = (Actor) subject;
@@ -126,7 +127,7 @@ public class SchoolTekPriest {
         if (Rand.num() < chance) {
           affects.wipeEmployment();
           affects.assignBase(using.base());
-          ActorTraits.setBond(using, affects, BOND_MASTER, BOND_SERVANT, 1);
+          ActorBonds.setBond(using, affects, BOND_MASTER, BOND_SERVANT, 1);
         }
         
         while (numDrones(using) > maxDrones(using)) {

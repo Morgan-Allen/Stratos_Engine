@@ -63,8 +63,8 @@ public class TestDialog extends LogicTest {
       
       if (talkOkay && ! noveltyOkay) {
         noveltyOkay = false;
-        noveltyOkay |= sideA.traits.bondNovelty(sideB) <= 0;
-        noveltyOkay |= sideB.traits.bondNovelty(sideA) <= 0;
+        noveltyOkay |= sideA.bonds.bondNovelty(sideB) <= 0;
+        noveltyOkay |= sideB.bonds.bondNovelty(sideA) <= 0;
       }
       
       if (talkOkay && talkEnds && noveltyOkay && ! testOkay) {

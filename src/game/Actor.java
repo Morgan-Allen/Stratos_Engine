@@ -59,10 +59,12 @@ public class Actor extends Element implements
   
   final public ActorHealth health = initHealth();
   final public ActorTraits traits = initTraits();
+  final public ActorBonds  bonds  = initBonds ();
   final public ActorOutfit outfit = initOutfit();
   
   ActorHealth initHealth() { return new ActorHealth(this); }
   ActorTraits initTraits() { return new ActorTraits(this); }
+  ActorBonds  initBonds () { return new ActorBonds (this); }
   ActorOutfit initOutfit() { return new ActorOutfit(this); }
   
   
@@ -107,6 +109,7 @@ public class Actor extends Element implements
     
     health.loadState(s);
     traits.loadState(s);
+    bonds .loadState(s);
     outfit.loadState(s);
   }
   
@@ -143,6 +146,7 @@ public class Actor extends Element implements
     
     health.saveState(s);
     traits.saveState(s);
+    bonds .saveState(s);
     outfit.saveState(s);
   }
   
@@ -305,6 +309,7 @@ public class Actor extends Element implements
     //
     //  And update health-state and life-cycle-
     if (onMap()) traits.updateTraits();
+    if (onMap()) bonds.updateBonds();
     if (onMap()) health.updateHealth(map());
     if (onMap()) health.checkHealthState();
     if (onMap() && health.alive()) health.updateLifeCycle(base(), true);

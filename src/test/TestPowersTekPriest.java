@@ -42,11 +42,11 @@ public class TestPowersTekPriest {
         
         if (toCharm.base() != caster.base()) return false;
         
-        Actor master = toCharm.traits.bondedWith(ActorTraits.BOND_MASTER);
+        Actor master = toCharm.bonds.bondedWith(ActorBonds.BOND_MASTER);
         if (master != caster) return false;
         
         int numDrones = 0;
-        for (Actor a : caster.traits.allBondedWith(ActorTraits.BOND_SERVANT)) {
+        for (Actor a : caster.bonds.allBondedWith(ActorBonds.BOND_SERVANT)) {
           if (a.type().isConstruct()) numDrones += 1;
         }
         

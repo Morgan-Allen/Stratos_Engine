@@ -127,12 +127,12 @@ public class TaskDialog extends Task {
     //  If that check passes, assess the novelty of these actors relative to
     //  eachother, tweak for a few other factors, and return if that seems more
     //  important than what the other actor is currently doing.
-    float noveltyFrom = actor.traits.bondNovelty(with);
-    float noveltyBack = with.traits.bondNovelty(actor);
+    float noveltyFrom = actor.bonds.bondNovelty(with );
+    float noveltyBack = with .bonds.bondNovelty(actor);
     float talkRating  = Nums.min(noveltyFrom, noveltyBack);
     
     if (! TaskCombat.allied(actor, with)) talkRating /= 2;
-    talkRating *= 1 + (actor.traits.bondLevel(with) / 2);
+    talkRating *= 1 + (actor.bonds.bondLevel(with) / 2);
     talkRating *= ROUTINE;
     busyRating = Nums.max(busyRating, begun ? 0 : IDLE);
     return (busyRating < talkRating) ? talkRating : 0;
@@ -153,11 +153,11 @@ public class TaskDialog extends Task {
     float empathy = actor.traits.levelOf(TRAIT_EMPATHY);
     float priority = contact ? ROUTINE : CASUAL;
     
-    if (actor.traits.hasBond(with)) {
-      priority *= 1 + (actor.traits.bondLevel(with) / 2);
+    if (actor.bonds.hasBond(with)) {
+      priority *= 1 + (actor.bonds.bondLevel(with) / 2);
     }
     else if (! contact) {
-      priority *= actor.traits.solitude();
+      priority *= actor.bonds.solitude();
     }
     
     return (1 + (empathy / 2)) * priority;
@@ -187,8 +187,8 @@ public class TaskDialog extends Task {
     
     float talkInc = 1f / DIALOG_LENGTH;
     float maxBond = MAX_CHAT_BOND / 100f;
-    with.traits.incBond(actor, talkInc * CHAT_BOND / 100f, maxBond);
-    with.traits.incNovelty(actor, 0 - talkInc);
+    with.bonds.incBond(actor, talkInc * CHAT_BOND / 100f, maxBond);
+    with.bonds.incNovelty(actor, 0 - talkInc);
     
     if (contact && ! mission.terms.sent()) {
       mission.terms.sendTerms(with.base());
@@ -198,7 +198,7 @@ public class TaskDialog extends Task {
       configTask(origin, null, with, JOB.DIALOG, 1);
     }
     else {
-      actor.traits.incNovelty(with, -1);
+      actor.bonds.incNovelty(with, -1);
     }
   }
 

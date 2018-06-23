@@ -2,9 +2,7 @@
 
 package test;
 import game.*;
-import static game.GameConstants.*;
-import static game.ActorTraits.*;
-import static game.ActorAsPerson.*;
+import static game.ActorBonds.*;
 import static game.Base.*;
 import static game.BaseCouncil.*;
 import static content.GameContent.*;
@@ -127,7 +125,7 @@ public class TestDiplomacy extends LogicTest {
       
       if (offerAccepted && ! termsOkay) {
         boolean termsFilled = true;
-        termsFilled &= monarch.traits.hasBondType(bride, BOND_MARRIED);
+        termsFilled &= monarch.bonds.hasBondType(bride, BOND_MARRIED);
         termsFilled &= baseC.isAllyOf(awayC);
         termsOkay = termsFilled;
       }

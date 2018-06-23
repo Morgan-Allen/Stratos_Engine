@@ -2,7 +2,7 @@
 
 package game;
 import util.*;
-import static game.ActorTraits.*;
+import static game.ActorBonds.*;
 import static game.Base.*;
 import static game.BaseCouncil.*;
 import static game.GameConstants.*;

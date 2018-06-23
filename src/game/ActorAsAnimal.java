@@ -81,7 +81,7 @@ public class ActorAsAnimal extends Actor {
     }
     //
     //  If you have a master, keep them safe:
-    Actor master = traits.bondedWith(ActorTraits.BOND_MASTER);
+    Actor master = bonds.bondedWith(ActorBonds.BOND_MASTER);
     if (idle() && master != null) {
       Task patrol = TaskPatrol.protectionFor(this, master, null);
       assignTask(patrol, this);

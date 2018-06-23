@@ -2,7 +2,7 @@
 
 package test;
 import game.*;
-import static game.ActorTraits.*;
+import static game.ActorBonds.*;
 import static game.GameConstants.*;
 import static game.BaseCouncil.*;
 import static game.AreaPlanning.*;
@@ -70,7 +70,7 @@ public class TestLifeCycle extends LogicTest {
     consort.health.setAgeYears(AVG_RETIREMENT / 3);
     oldKing.health.setSexData(SEX_MALE  );
     consort.health.setSexData(SEX_FEMALE);
-    ActorTraits.setBond(oldKing, consort, BOND_MARRIED, BOND_MARRIED, 0.5f);
+    ActorBonds.setBond(oldKing, consort, BOND_MARRIED, BOND_MARRIED, 0.5f);
     council.toggleMember(oldKing, Role.MONARCH, true);
     
     palace.setResident(oldKing, true);
@@ -158,7 +158,7 @@ public class TestLifeCycle extends LogicTest {
         for (Actor a : map.actors()) {
           if (a.health.child() && a.health.alive() && ! originalPop.includes(a)) {
             if (! births.includes(a)) {
-              Series <Actor> parents = a.traits.allBondedWith(BOND_PARENT);
+              Series <Actor> parents = a.bonds.allBondedWith(BOND_PARENT);
               I.say("  Born: "+a+", parents: "+parents);
               
               if (parents.includes(oldKing)) {
@@ -207,7 +207,7 @@ public class TestLifeCycle extends LogicTest {
         boolean isHeir = true;
         isHeir &= newKing != null;
         isHeir &= newKing != oldKing;
-        isHeir &= oldKing.traits.hasBondType(newKing, BOND_CHILD);
+        isHeir &= oldKing.bonds.hasBondType(newKing, BOND_CHILD);
         succession = isHeir;
       }
       
@@ -234,7 +234,7 @@ public class TestLifeCycle extends LogicTest {
     I.say("  Old king:     "+oldKing);
     I.say("  Heir born:    "+heirBorn);
     I.say("  Alive:        "+oldKing.health.alive());
-    I.say("  Children:     "+oldKing.traits.allBondedWith(BOND_CHILD));
+    I.say("  Children:     "+oldKing.bonds.allBondedWith(BOND_CHILD));
     I.say("  Current king: "+council.memberWithRole(Role.MONARCH));
     
     return testOkay;
