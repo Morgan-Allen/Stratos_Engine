@@ -36,6 +36,7 @@ public class Actor extends Element implements
   private Employer work;
   private Building home;
   private Base     guestBase;
+  private Base     baseLoyal;
   private Mission  mission;
   private Base     offmap;
   
@@ -82,6 +83,7 @@ public class Actor extends Element implements
     work      = (Employer) s.loadObject();
     home      = (Building) s.loadObject();
     guestBase = (Base    ) s.loadObject();
+    baseLoyal = (Base    ) s.loadObject();
     mission   = (Mission ) s.loadObject();
     offmap    = (Base    ) s.loadObject();
     
@@ -118,6 +120,7 @@ public class Actor extends Element implements
     s.saveObject(work     );
     s.saveObject(home     );
     s.saveObject(guestBase);
+    s.saveObject(baseLoyal);
     s.saveObject(mission  );
     s.saveObject(offmap   );
     
@@ -191,11 +194,6 @@ public class Actor extends Element implements
   }
   
   
-  public void assignGuestBase(Base city) {
-    this.guestBase = city;
-  }
-  
-  
   public boolean onMap(Area map) {
     return map != null && map == this.map;
   }
@@ -228,6 +226,27 @@ public class Actor extends Element implements
   
   public Base offmapBase() {
     return offmap;
+  }
+  
+  
+  public void assignGuestBase(Base city) {
+    this.guestBase = city;
+  }
+  
+  
+  public Base guestBase() {
+    return guestBase;
+  }
+  
+  
+  public void assignBaseLoyal(Base base) {
+    this.baseLoyal = base;
+  }
+  
+  
+  public Base baseLoyal() {
+    if (baseLoyal == null) return base();
+    return baseLoyal;
   }
   
   
@@ -615,11 +634,6 @@ public class Actor extends Element implements
   
   public boolean isActor() {
     return true;
-  }
-  
-  
-  public Base guestBase() {
-    return guestBase;
   }
   
   

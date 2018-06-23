@@ -70,10 +70,14 @@ public class MissionContact extends Mission {
     AreaTile stands    = MissionSecure.standingPointRanks(actor, this, camp);
     
     if (onAwayMap && haveTerms && isEnvoy && ! terms.sent()) {
-      Actor offersTerms = findOfferRecipient(this);
+      Actor offersTerms = findTalkSubject(this, actor, true);
       Task dialog = TaskDialog.contactDialogFor(actor, offersTerms, this);
       if (dialog != null) return dialog;
     }
+    
+    Actor chatsWith = findTalkSubject(this, actor, false);
+    Task chatting = TaskDialog.contactDialogFor(actor, chatsWith, this);
+    if (chatting != null) return chatting;
     
     TaskCombat taskC = (Task.inCombat(actor) || isEnvoy) ? null :
       TaskCombat.nextReaction(actor, stands, this, true, actor.seen())
@@ -88,37 +92,53 @@ public class MissionContact extends Mission {
   
 
   public boolean allowsFocus(Object newFocus) {
-    //  TODO:  Fill this in...
+    if (newFocus instanceof Building) return true;
+    if (newFocus instanceof Actor   ) return true;
     return false;
   }
   
   
-  static Actor findOfferRecipient(Mission parent) {
-    
-    Base focus = parent.worldFocus();
-    if (focus == null) focus = ((Element) parent.localFocus()).base();
-    if (focus == null) return null;
-    
-    BaseCouncil council = focus.council;
-    Area area = focus.activeMap();
+  static Actor findTalkSubject(Mission parent, Actor talks, boolean official) {
     
     Pick <Actor> pick = new Pick();
+    Series <Actor> looksAt = null;
+    Base focusBase = null;
+
+    if (official) {
+      Base focus = parent.worldFocus();
+      BaseCouncil council = focus.council;
+      Area area = focus.activeMap();
+      
+      Actor monarch = council.memberWithRole(Role.MONARCH);
+      if (monarch != null && monarch.onMap()) pick.compare(monarch, 3);
+      
+      Actor minister = council.memberWithRole(Role.PRIME_MINISTER);
+      if (minister != null && monarch.onMap()) pick.compare(minister, 2);
+      
+      Actor consort = council.memberWithRole(Role.CONSORT);
+      if (consort != null && consort.onMap()) pick.compare(consort, 2);
+      
+      looksAt = area.actors();
+      focusBase = focus;
+    }
+    else if (parent.localFocus() instanceof Building) {
+      Building focus = (Building) parent.localFocus();
+      looksAt = focus.workers();
+      focusBase = focus.base();
+    }
+    else if (parent.localFocus() instanceof Actor) {
+      Actor focus = (Actor) parent.localFocus();
+      looksAt = new Batch(focus);
+      focusBase = focus.base();
+    }
     
-    Actor monarch = council.memberWithRole(Role.MONARCH);
-    if (monarch != null && monarch.onMap()) pick.compare(monarch, 3);
-    
-    Actor minister = council.memberWithRole(Role.PRIME_MINISTER);
-    if (minister != null && monarch.onMap()) pick.compare(minister, 2);
-    
-    Actor consort = council.memberWithRole(Role.CONSORT);
-    if (consort != null && consort.onMap()) pick.compare(consort, 2);
-    
-    if (area != null && pick.empty()) for (Actor a : area.actors) {
-      if (a.base() != focus) continue;
+    if (looksAt != null) for (Actor a : looksAt) {
+      if (a.base() != focusBase) continue;
       float rating = 1f;
       if (a.type().socialClass == CLASS_COMMON) rating /= 2;
       rating *= Area.distance(parent.transitTile, a);
       rating *= 0.5f + Rand.num();
+      rating *= TaskDialog.dialogRating(a, talks, false, false);
       pick.compare(a, rating);
     }
     
@@ -126,14 +146,5 @@ public class MissionContact extends Mission {
   }
   
 }
-
-
-
-
-
-
-
-
-
 
 

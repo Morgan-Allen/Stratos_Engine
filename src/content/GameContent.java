@@ -1088,6 +1088,7 @@ public class GameContent {
     //  TODO:  Add Animal Nests.
     
     //  TODO:  Add Native Huts.
+    NATIVE_HUT = new BuildType(BuildingForNest.class, "nest_native_hut", IS_NEST_BLD),
     
     ALL_NESTS[] = { RUINS_LAIR };
   
@@ -1101,9 +1102,26 @@ public class GameContent {
     );
     RUINS_LAIR.name = "Ruins";
     RUINS_LAIR.tint = TINT_LITE_INDUSTRIAL;
+    
     RUINS_LAIR.setDimensions(3, 3, 1, THIN_MARGIN);
     RUINS_LAIR.setBuildMaterials(VOID, 10);
-    RUINS_LAIR.maxHealth = 300;
+    RUINS_LAIR.maxHealth = 575;
+    
+    
+    ModelAsset HUT_MODELS[][] = CutoutModel.fromImageGrid(
+      GameContent.class, "model_huts",
+      "media/Lairs/all_native_huts.png", 3, 3,
+      3, 1, false
+    );
+    
+    NATIVE_HUT.modelVariants = HUT_MODELS[0];
+    NATIVE_HUT.name = "Native Hut";
+    NATIVE_HUT.tint = TINT_LITE_INDUSTRIAL;
+    
+    NATIVE_HUT.setDimensions(3, 3, 1, THIN_MARGIN);
+    NATIVE_HUT.setBuildMaterials(VOID, 10);
+    NATIVE_HUT.maxHealth = 275;
+    
   }
   
 }

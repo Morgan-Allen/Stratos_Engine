@@ -43,6 +43,8 @@ public class TestDialog extends LogicTest {
     
     final int RUN_TIME = DAY_LENGTH;
     
+    //  TODO:  Test gift-giving too?  And/or joint activities?
+    
     
     while (map.time() < RUN_TIME || graphics) {
       test.runLoop(base, 1, graphics, "saves/test_dialog.str");

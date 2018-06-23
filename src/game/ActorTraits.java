@@ -17,7 +17,8 @@ public class ActorTraits {
     BOND_PARENT  = 1 << 2,
     BOND_MARRIED = 1 << 3,
     BOND_MASTER  = 1 << 4,
-    BOND_SERVANT = 1 << 5
+    BOND_SERVANT = 1 << 5,
+    BOND_ANY     = 0
   ;
   
   static class Level {
@@ -347,7 +348,8 @@ public class ActorTraits {
   public Series <Actor> allBondedWith(int type) {
     Batch <Actor> all = new Batch();
     for (Bond b : bonds) {
-      if ((b.properties & type) != 0) all.add(b.with);
+      if (type != BOND_ANY && (b.properties & type) == 0) continue;
+      all.add(b.with);
     }
     return all;
   }
@@ -363,11 +365,6 @@ public class ActorTraits {
   }
   
 }
-
-
-
-
-
 
 
 

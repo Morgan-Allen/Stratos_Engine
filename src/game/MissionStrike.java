@@ -95,7 +95,7 @@ public class MissionStrike extends Mission {
     AreaTile stands    = MissionSecure.standingPointRanks(actor, this, camp);
     
     if (haveTerms && isEnvoy && ! terms.sent()) {
-      Actor offersTerms = MissionContact.findOfferRecipient(this);
+      Actor offersTerms = MissionContact.findTalkSubject(this, actor, true);
       Task t = actor.targetTask(offersTerms, 1, Task.JOB.DIALOG, this);
       if (t != null) return t;
     }
