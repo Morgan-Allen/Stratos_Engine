@@ -1083,16 +1083,23 @@ public class GameContent {
   
   
   final public static BuildType
-    RUINS_LAIR = new BuildType(BuildingForNest.class, "nest_ruins_lair", IS_NEST_BLD),
+    RUINS_LAIR    = new BuildType(BuildingForNest.class, "nest_ruins_lair", IS_NEST_BLD),
+    ALL_RUINS[] = { RUINS_LAIR },
     
-    //  TODO:  Add Animal Nests.
+    QUDU_NEST     = new BuildType(BuildingForNest.class, "nest_qudu"      , IS_NEST_BLD),
+    VAREEN_NEST   = new BuildType(BuildingForNest.class, "nest_vareen"    , IS_NEST_BLD),
+    MICOVORE_NEST = new BuildType(BuildingForNest.class, "nest_micovore"  , IS_NEST_BLD),
+    YAMAGUR_NEST  = new BuildType(BuildingForNest.class, "nest_yamagur"   , IS_NEST_BLD),
+    ALL_NESTS[] = { QUDU_NEST, VAREEN_NEST, MICOVORE_NEST, YAMAGUR_NEST },
     
-    //  TODO:  Add Native Huts.
-    NATIVE_HUT = new BuildType(BuildingForNest.class, "nest_native_hut", IS_NEST_BLD),
-    
-    ALL_NESTS[] = { RUINS_LAIR };
+    FOREST_HUT    = new BuildType(BuildingForNest.class, "nest_forest_hut", IS_NEST_BLD),
+    DESERT_HUT    = new BuildType(BuildingForNest.class, "nest_desert_hut", IS_NEST_BLD),
+    WASTES_HUT    = new BuildType(BuildingForNest.class, "nest_wastes_hut", IS_NEST_BLD),
+    ALL_HUTS[]  = { FOREST_HUT, DESERT_HUT, WASTES_HUT }
+  ;
   
   static {
+    
     RUINS_LAIR.modelVariants = CutoutModel.fromImages(
       GameContent.class, "model_ruins",
       "media/Lairs/", 3, 1, false,
@@ -1103,9 +1110,54 @@ public class GameContent {
     RUINS_LAIR.name = "Ruins";
     RUINS_LAIR.tint = TINT_LITE_INDUSTRIAL;
     
-    RUINS_LAIR.setDimensions(3, 3, 1, THIN_MARGIN);
-    RUINS_LAIR.setBuildMaterials(VOID, 10);
-    RUINS_LAIR.maxHealth = 575;
+    for (BuildType type : ALL_RUINS) {
+      type.setDimensions(3, 3, 1, THIN_MARGIN);
+      type.setBuildMaterials(VOID, 10);
+      type.maxHealth = 575;
+    }
+    
+    
+    ModelAsset NEST_MODELS[] = CutoutModel.fromImages(
+      GameContent.class, "model_nests",
+      "media/Lairs/", 3, 1, false,
+      "nest_qudu.png",
+      "nest_vareen.png",
+      "nest_micovore.png",
+      "nest_yamagur.png"
+    );
+    
+    QUDU_NEST.model = NEST_MODELS[0];
+    QUDU_NEST.name = "Qudu Nest";
+    QUDU_NEST.tint = TINT_LITE_INDUSTRIAL;
+    
+    QUDU_NEST.setDimensions(2, 2, 1);
+    QUDU_NEST.setBuildMaterials(VOID, 4);
+    QUDU_NEST.maxHealth = 225;
+    
+    VAREEN_NEST.model = NEST_MODELS[1];
+    VAREEN_NEST.name = "Vareen Nest";
+    VAREEN_NEST.tint = TINT_LITE_INDUSTRIAL;
+    
+    VAREEN_NEST.setDimensions(3, 3, 2);
+    VAREEN_NEST.setBuildMaterials(VOID, 6);
+    VAREEN_NEST.maxHealth = 325;
+    
+    MICOVORE_NEST.model = NEST_MODELS[2];
+    MICOVORE_NEST.name = "Micovore Nest";
+    MICOVORE_NEST.tint = TINT_LITE_INDUSTRIAL;
+    
+    MICOVORE_NEST.setDimensions(3, 3, 1);
+    MICOVORE_NEST.setBuildMaterials(VOID, 5);
+    MICOVORE_NEST.maxHealth = 275;
+    
+    YAMAGUR_NEST.model = NEST_MODELS[3];
+    YAMAGUR_NEST.name = "Yamagur Nest";
+    YAMAGUR_NEST.tint = TINT_LITE_INDUSTRIAL;
+    
+    YAMAGUR_NEST.setDimensions(4, 4, 2);
+    YAMAGUR_NEST.setBuildMaterials(VOID, 8);
+    YAMAGUR_NEST.maxHealth = 400;
+    
     
     
     ModelAsset HUT_MODELS[][] = CutoutModel.fromImageGrid(
@@ -1114,20 +1166,28 @@ public class GameContent {
       3, 1, false
     );
     
-    NATIVE_HUT.modelVariants = HUT_MODELS[0];
-    NATIVE_HUT.name = "Native Hut";
-    NATIVE_HUT.tint = TINT_LITE_INDUSTRIAL;
+    FOREST_HUT.modelVariants = HUT_MODELS[0];
+    FOREST_HUT.name = "Native Hut";
+    FOREST_HUT.tint = TINT_LITE_INDUSTRIAL;
     
-    NATIVE_HUT.setDimensions(3, 3, 1, THIN_MARGIN);
-    NATIVE_HUT.setBuildMaterials(VOID, 10);
-    NATIVE_HUT.maxHealth = 275;
+    DESERT_HUT.modelVariants = HUT_MODELS[1];
+    DESERT_HUT.name = "Desert Hut";
+    DESERT_HUT.tint = TINT_LITE_INDUSTRIAL;
+    
+    WASTES_HUT.modelVariants = HUT_MODELS[2];
+    WASTES_HUT.name = "Wastes Hut";
+    WASTES_HUT.tint = TINT_LITE_INDUSTRIAL;
+    
+    for (BuildType type : ALL_NESTS) {
+      type.setDimensions(3, 3, 1, THIN_MARGIN);
+      type.setBuildMaterials(VOID, 10);
+      type.maxHealth = 275;
+    }
     
   }
   
+  
 }
-
-
-
 
 
 

@@ -29,7 +29,7 @@ public class TestSubversion extends LogicTest {
     world.settings.toggleFatigue = false;
     
     
-    Building mainHut = (Building) NATIVE_HUT.generate();
+    Building mainHut = (Building) FOREST_HUT.generate();
     mainHut.enterMap(map, 27, 27, 1, map.locals);
     ActorUtils.fillWorkVacancies(mainHut);
     
