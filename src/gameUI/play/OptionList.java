@@ -68,7 +68,7 @@ public class OptionList extends UIGroup implements UIConstants {
       "Destroy or raze subject"
     ) {
       Mission initMission() {
-        Mission m = new MissionStrike(base);
+        Mission m = new MissionForStrike(base);
         return m;
       }
     });
@@ -78,7 +78,7 @@ public class OptionList extends UIGroup implements UIConstants {
       "Explore area"
     ) {
       Mission initMission() {
-        Mission m = new MissionRecon(base);
+        Mission m = new MissionForRecon(base);
         return m;
       }
     });

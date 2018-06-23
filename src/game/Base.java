@@ -700,7 +700,7 @@ public class Base implements Session.Saveable, Trader {
       float armyPower = 0;
       for (Building b : map.buildings()) if (b.base() == this) {
         if (b.type().category == Type.IS_ARMY_BLD) {
-          armyPower += MissionStrike.powerSum(b.workers(), map);
+          armyPower += MissionForStrike.powerSum(b.workers(), map);
         }
       }
       this.armyPower = armyPower;
@@ -747,7 +747,7 @@ public class Base implements Session.Saveable, Trader {
         population = Nums.min(idealPop, population + popRegen);
       }
       for (Mission f : missions) {
-        idealArmy -= MissionStrike.powerSum(f.recruits(), null);
+        idealArmy -= MissionForStrike.powerSum(f.recruits(), null);
       }
       if (idealArmy < 0) {
         idealArmy = 0;

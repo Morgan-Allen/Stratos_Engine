@@ -618,16 +618,16 @@ public class BaseCouncil {
   public Mission spawnFormation(MissionAssessment IA) {
     
     Mission force = null;
-    if (IA.objective == OBJECTIVE_STRIKE ) force = new MissionStrike (base);
-    if (IA.objective == OBJECTIVE_SECURE ) force = new MissionSecure (base);
-    if (IA.objective == OBJECTIVE_RECON  ) force = new MissionRecon  (base);
-    if (IA.objective == OBJECTIVE_CONTACT) force = new MissionContact(base);
+    if (IA.objective == OBJECTIVE_STRIKE ) force = new MissionForStrike (base);
+    if (IA.objective == OBJECTIVE_SECURE ) force = new MissionForSecure (base);
+    if (IA.objective == OBJECTIVE_RECON  ) force = new MissionForRecon  (base);
+    if (IA.objective == OBJECTIVE_CONTACT) force = new MissionForContact(base);
     if (force == null) return null;
     
     Type soldier = (Type) Visit.first(base.world.soldierTypes);
     Type noble   = (Type) Visit.first(base.world.nobleTypes  );
     
-    while (MissionStrike.powerSum(force.recruits(), null) < base.armyPower() / 2) {
+    while (MissionForStrike.powerSum(force.recruits(), null) < base.armyPower() / 2) {
       Actor fights = (Actor) soldier.generate();
       fights.assignBase(IA.fromC);
       force.toggleRecruit(fights, true);

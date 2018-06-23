@@ -9,7 +9,7 @@ import util.*;
 
 
 
-public class MissionSecure extends Mission {
+public class MissionForSecure extends Mission {
   
   
   final static int
@@ -26,12 +26,12 @@ public class MissionSecure extends Mission {
   
   
   
-  public MissionSecure(Base belongs) {
+  public MissionForSecure(Base belongs) {
     super(OBJECTIVE_SECURE, belongs);
   }
   
   
-  public MissionSecure(Session s) throws Exception {
+  public MissionForSecure(Session s) throws Exception {
     super(s);
     
     guardPeriod = s.loadInt();
@@ -184,7 +184,7 @@ public class MissionSecure extends Mission {
   }
   
   
-  static AreaTile standingPointPatrol(Actor member, MissionSecure parent) {
+  static AreaTile standingPointPatrol(Actor member, MissionForSecure parent) {
     
     int span = SHIFT_LENGTH;
     int numRecruits = Nums.max(1, parent.recruits.size());
@@ -257,7 +257,7 @@ public class MissionSecure extends Mission {
   
   
   
-  static void updateGuardPoints(final MissionSecure parent) {
+  static void updateGuardPoints(final MissionForSecure parent) {
     
     //
     //  First, check to see if an update is due:

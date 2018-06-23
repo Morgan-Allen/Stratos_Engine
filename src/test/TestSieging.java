@@ -86,7 +86,7 @@ public class TestSieging extends LogicTest {
       home.enterMap(map, 17, 10 + (n * 3), 1, baseC);
     }
     
-    MissionSecure guarding = new MissionSecure(baseC);
+    MissionForSecure guarding = new MissionForSecure(baseC);
     for (Actor w : fort.workers()) guarding.toggleRecruit(w, true);
     guarding.setLocalFocus(tower);
     guarding.setGuardPeriod(DAY_LENGTH, true);

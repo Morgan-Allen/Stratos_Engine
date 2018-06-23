@@ -8,15 +8,15 @@ import util.*;
 
 
 
-public class MissionContact extends Mission {
+public class MissionForContact extends Mission {
   
   
-  public MissionContact(Base belongs) {
+  public MissionForContact(Base belongs) {
     super(OBJECTIVE_CONTACT, belongs);
   }
   
   
-  public MissionContact(Session s) throws Exception {
+  public MissionForContact(Session s) throws Exception {
     super(s);
   }
   
@@ -30,6 +30,10 @@ public class MissionContact extends Mission {
     super.update();
     //
     //  Update current victory-conditions...
+    
+    //  TODO:  You need different criteria here if your target is a building or
+    //  actor...
+    
     if (terms.accepted()) {
       setMissionComplete(true);
     }
@@ -67,7 +71,7 @@ public class MissionContact extends Mission {
     boolean  onAwayMap = ! onHomeMap();
     boolean  isEnvoy   = envoys.includes(actor);
     Pathing  camp      = transitPoint(actor);
-    AreaTile stands    = MissionSecure.standingPointRanks(actor, this, camp);
+    AreaTile stands    = MissionForSecure.standingPointRanks(actor, this, camp);
     
     if (onAwayMap && haveTerms && isEnvoy && ! terms.sent()) {
       Actor offersTerms = findTalkSubject(this, actor, true);
@@ -78,6 +82,10 @@ public class MissionContact extends Mission {
     Actor chatsWith = findTalkSubject(this, actor, false);
     Task chatting = TaskDialog.contactDialogFor(actor, chatsWith, this);
     if (chatting != null) return chatting;
+    
+    
+    //  TODO:  Local missions may not have a camp-point.  How does that work
+    //  then, exactly?
     
     TaskCombat taskC = (Task.inCombat(actor) || isEnvoy) ? null :
       TaskCombat.nextReaction(actor, stands, this, true, actor.seen())

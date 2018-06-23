@@ -136,7 +136,7 @@ public class BuildingForNest extends Building {
       }
       
       if (! pick.empty()) {
-        activeMission = new MissionStrike(base());
+        activeMission = new MissionForStrike(base());
         activeMission.setLocalFocus(pick.result());
         for (Actor a : residents()) activeMission.toggleRecruit(a, true);
         activeMission.beginMission(base());

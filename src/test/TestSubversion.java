@@ -37,7 +37,7 @@ public class TestSubversion extends LogicTest {
     centre.enterMap(map, 2, 2, 1, base);
     ActorUtils.fillWorkVacancies(centre);
     
-    MissionContact currentContact = null;
+    MissionForContact currentContact = null;
     
     
     final int RUN_TIME = DAY_LENGTH;

@@ -457,7 +457,7 @@ public class TestWorld extends LogicTest {
           Base home = force.base();
           if (j.goes() == home) continue;
           
-          float power = MissionStrike.powerSum(force.recruits(), null);
+          float power = MissionForStrike.powerSum(force.recruits(), null);
           if (power < home.idealArmyPower() / 6) {
             I.say("\n"+home+" is fighting with inadequate forces:");
             I.say("  Formation power: "+power);

@@ -35,7 +35,7 @@ public class TestVesselMissions extends LogicTest {
       Mission generateMission(Base base, Base rival) {
         Base.setPosture(base, rival, Base.POSTURE.ENEMY, true);
         
-        Mission raid = new MissionStrike(rival);
+        Mission raid = new MissionForStrike(rival);
         raid.setWorldFocus(base);
         for (int n = 8; n-- > 0;) {
           Actor joins = (Actor) Trooper.TROOPER.generate();
@@ -59,7 +59,7 @@ public class TestVesselMissions extends LogicTest {
         Base base = centre.base();
         Base.setPosture(base, rival, Base.POSTURE.ENEMY, true);
         
-        Mission raid = new MissionStrike(base);
+        Mission raid = new MissionForStrike(base);
         raid.setWorldFocus(rival);
         raid.terms.assignTerms(Base.POSTURE.VASSAL, null, null, null);
         for (Actor a : barracks.workers()) raid.toggleRecruit(a, true);

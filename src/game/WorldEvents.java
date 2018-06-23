@@ -26,7 +26,7 @@ public class WorldEvents {
     Mission mission, Base from, Base goes
   ) {
     Base belongs = mission.base();
-    belongs.incArmyPower(0 - MissionStrike.powerSum(mission.recruits(), null));
+    belongs.incArmyPower(0 - MissionForStrike.powerSum(mission.recruits(), null));
   }
   
   
@@ -47,7 +47,7 @@ public class WorldEvents {
     BaseCouncil.MissionAssessment IA = new BaseCouncil.MissionAssessment();
     IA.fromC     = from;
     IA.goesC     = goes;
-    IA.fromPower = MissionStrike.powerSum(mission) / POP_PER_CITIZEN;
+    IA.fromPower = MissionForStrike.powerSum(mission) / POP_PER_CITIZEN;
     IA.goesPower = goes.armyPower() / POP_PER_CITIZEN;
     from.council.calculateChances(IA, true);
     
@@ -154,7 +154,7 @@ public class WorldEvents {
   static void handleReturn(
     Mission mission, Base goes, World.Journey journey
   ) {
-    goes.incArmyPower(MissionStrike.powerSum(mission.recruits(), null));
+    goes.incArmyPower(MissionForStrike.powerSum(mission.recruits(), null));
     mission.disbandMission();
   }
   

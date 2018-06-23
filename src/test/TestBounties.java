@@ -38,7 +38,7 @@ public class TestBounties extends LogicTest {
         nest.enterMap(map, 20, 20, 1, map.locals);
         
         Mission mission;
-        mission = new MissionStrike(base);
+        mission = new MissionForStrike(base);
         mission.setLocalFocus(nest);
         return mission;
       }
@@ -61,7 +61,7 @@ public class TestBounties extends LogicTest {
         creature.takeDamage(creature.health.maxHealth() * 0.7f);
         creature.health.incBleed(-1000);
         
-        MissionStrike mission = new MissionStrike(base);
+        MissionForStrike mission = new MissionForStrike(base);
         mission.setLocalFocus(creature);
         return mission;
       }
@@ -82,7 +82,7 @@ public class TestBounties extends LogicTest {
       Mission setupMission(Area map, Base base) {
         AreaTile looks = map.tileAt(20, 20);
         
-        MissionRecon mission = new MissionRecon(base);
+        MissionForRecon mission = new MissionForRecon(base);
         mission.setLocalFocus(looks);
         mission.setExploreRange(RANGE);
         return mission;
@@ -110,7 +110,7 @@ public class TestBounties extends LogicTest {
     TestBounties test = new TestBounties() {
       
       Building guarded;
-      MissionSecure mission;
+      MissionForSecure mission;
       
       Actor threat;
       boolean triedAttack;
@@ -128,7 +128,7 @@ public class TestBounties extends LogicTest {
         threat.enterMap(map, 30, 30, 1, map.locals);
         threat.takeDamage(threat.health.maxHealth() * 0.7f);
         
-        mission = new MissionSecure(base);
+        mission = new MissionForSecure(base);
         mission.setLocalFocus(guarded);
         return mission;
       }

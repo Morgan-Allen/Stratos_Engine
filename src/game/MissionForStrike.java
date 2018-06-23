@@ -7,7 +7,7 @@ import util.*;
 
 
 
-public class MissionStrike extends Mission {
+public class MissionForStrike extends Mission {
   
   final static Object
     LOSS    = new Object(),
@@ -17,12 +17,12 @@ public class MissionStrike extends Mission {
   List <Actor> casualties = new List();
   
   
-  public MissionStrike(Base belongs) {
+  public MissionForStrike(Base belongs) {
     super(OBJECTIVE_STRIKE, belongs);
   }
   
   
-  public MissionStrike(Session s) throws Exception {
+  public MissionForStrike(Session s) throws Exception {
     super(s);
     s.loadObjects(casualties);
   }
@@ -92,10 +92,10 @@ public class MissionStrike extends Mission {
     boolean  haveTerms = terms.hasTerms() && ! envoys.empty();
     boolean  isEnvoy   = envoys.includes(actor);
     Pathing  camp      = transitPoint(actor);
-    AreaTile stands    = MissionSecure.standingPointRanks(actor, this, camp);
+    AreaTile stands    = MissionForSecure.standingPointRanks(actor, this, camp);
     
     if (haveTerms && isEnvoy && ! terms.sent()) {
-      Actor offersTerms = MissionContact.findTalkSubject(this, actor, true);
+      Actor offersTerms = MissionForContact.findTalkSubject(this, actor, true);
       Task t = actor.targetTask(offersTerms, 1, Task.JOB.DIALOG, this);
       if (t != null) return t;
     }

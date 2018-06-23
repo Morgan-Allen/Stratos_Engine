@@ -67,9 +67,9 @@ public class TestMilitary extends LogicTest {
     float initLoyalty  = awayC.loyalty(baseC);
     int numHome = 0, numTroops = 0;
     
-    MissionSecure defence = null;
-    MissionStrike offence = null;
-    Mission enemies = new MissionStrike(awayC);
+    MissionForSecure defence = null;
+    MissionForStrike offence = null;
+    Mission enemies = new MissionForStrike(awayC);
     Batch <Actor> enemyRecruits = new Batch();
     for (int n = 2; n-- > 0;) {
       Actor fights = (Actor) Trooper.TROOPER.generate();
@@ -93,7 +93,7 @@ public class TestMilitary extends LogicTest {
       test.runLoop(baseC, 10, graphics, "saves/test_military.tlt");
       
       if (! recruited) {
-        defence = new MissionSecure(baseC);
+        defence = new MissionForSecure(baseC);
         for (Actor w : fort1.workers()) defence.toggleRecruit(w, true);
         for (Actor w : fort2.workers()) defence.toggleRecruit(w, true);
         defence.setLocalFocus(map.tileAt(25, 25));
@@ -128,7 +128,7 @@ public class TestMilitary extends LogicTest {
       }
       
       if (homeWin && ! invading) {
-        offence = new MissionStrike(baseC);
+        offence = new MissionForStrike(baseC);
         for (Actor w : fort1.workers()) offence.toggleRecruit(w, true);
         for (Actor w : fort2.workers()) offence.toggleRecruit(w, true);
         offence.setWorldFocus(awayC);

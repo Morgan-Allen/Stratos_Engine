@@ -6,18 +6,18 @@ import game.World.Journey;
 
 
 
-public class MissionRecon extends Mission {
+public class MissionForRecon extends Mission {
   
   
   int exploreRange = AVG_EXPLORE_DIST;
   
   
-  public MissionRecon(Base belongs) {
+  public MissionForRecon(Base belongs) {
     super(OBJECTIVE_RECON, belongs);
   }
   
   
-  public MissionRecon(Session s) throws Exception {
+  public MissionForRecon(Session s) throws Exception {
     super(s);
     exploreRange = s.loadInt();
   }
