@@ -37,11 +37,13 @@ public class TestSubversion extends LogicTest {
     centre.enterMap(map, 2, 2, 1, base);
     ActorUtils.fillWorkVacancies(centre);
     
+    Good giftGoods[] = { GREENS, PARTS };
     MissionForContact contact = null;
     
     
     final int RUN_TIME = DAY_LENGTH;
     boolean madeContact = false;
+    boolean gaveGifts   = false;
     boolean hasSympathy = false;
     boolean homeConvert = false;
     boolean testOkay    = false;
@@ -49,43 +51,23 @@ public class TestSubversion extends LogicTest {
     
     //  TODO:  Okay.  So what do I need to implement?
     
-    //  Gifting is complicated, especially if you allow for on-to-off-map cases.
+    //  Make sure gifting works, first of all.
     
-    /*
-    Giving a gift is easy enough, even if it's from yourself.  Taking one on is
-    harder.  But I think it can be done.
+    //  Secondly, revise how much favour with the other tribe you need to gain
+    //  in order to get them to switch sides.  (Loyalty to leader + threshold,
+    //  which for bases without a leader is zero, say?  Might even be easier
+    //  if they actively hate their leader.)
     
-    Put the tests in place first.  You already have a TestDiplomacy class, so
-    just add the appropriate checks there.  For TestSubversion, you just need
-    to do the same thing- check that gifts are delivered and clap your hands
-    accordingly.
-    
-    Do a TaskDialog assessment per usual, and segue into Gifting if a target is
-    found and you can find a suitable present.
-    
-    In the case of a MissionContact, you can extract a Gifting behaviour
-    directly, targeted at the settlement- that will end immediately once the
-    actor has picked up gift-materials.  Keep gifting as a to-do item and end
-    once you arrive off-world and/or the mission completes.
-    
-    //*/
-    
-    
-    
-    //  Joint-activities at the end of dialogue (scouting, hunting, repair/aid,
-    //  intros, dining, gifting.)
-    
-    
-    //  Base the probability of conversion on local rather than global factors.
-    
-    //  Loyalty to one's leader, vs. loyalty to one's people?  (And if you have
-    //  no leader, that's zero by default.)  Hmm.  Maybe.
-    
-    
+    //  Relative danger-levels count as well.  Settlements close to yours will
+    //  be more likely to switch.
     
     
     while (map.time() < RUN_TIME || graphics) {
       test.runLoop(base, 1, graphics, "saves/test_subversion.str");
+      
+      for (Good g : giftGoods) if (centre.inventory(g) < 10) {
+        centre.addInventory(5, g);
+      }
       
       while (contact == null || contact.complete()) {
         contact = new MissionForContact(base);
@@ -96,10 +78,6 @@ public class TestSubversion extends LogicTest {
         }
         contact.setLocalFocus(mainHut);
         contact.beginMission(base);
-      }
-      
-      if (centre.inventory(GREENS) < 10) {
-        centre.addInventory(1, GREENS);
       }
       
       if (! madeContact) {
@@ -115,7 +93,11 @@ public class TestSubversion extends LogicTest {
         madeContact = allTalked && anyTalked;
       }
       
-      if (madeContact && ! hasSympathy) {
+      if (! gaveGifts) {
+        gaveGifts = mainHut.inventory(PARTS) > 0;
+      }
+      
+      if (madeContact && gaveGifts && ! hasSympathy) {
         boolean anySympathy = false;
         for (Actor a : mainHut.workers()) {
           if (a.bonds.baseLoyal() == base) anySympathy = true;
@@ -136,6 +118,7 @@ public class TestSubversion extends LogicTest {
     
     I.say("\nSUBVERSION TEST FAILED!");
     I.say("  Made contact: "+madeContact);
+    I.say("  Gave gifts:   "+gaveGifts  );
     I.say("  Has sympathy: "+hasSympathy);
     I.say("  Home convert: "+homeConvert);
 

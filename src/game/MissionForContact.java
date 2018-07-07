@@ -126,6 +126,9 @@ public class MissionForContact extends Mission {
     //  TODO:  Local missions may not have a camp-point.  How does that work
     //  then, exactly?
     
+    //  TODO:  You may need to find another way to keep the envoys busy while
+    //  talking is not possible.
+    
     TaskCombat taskC = (Task.inCombat(actor) || isEnvoy) ? null :
       TaskCombat.nextReaction(actor, stands, this, true, actor.seen())
     ;

@@ -2,6 +2,7 @@
 
 package test;
 import game.*;
+import static game.GameConstants.*;
 import static game.ActorBonds.*;
 import static game.Base.*;
 import static game.BaseCouncil.*;
@@ -21,6 +22,9 @@ public class TestDiplomacy extends LogicTest {
   
   static boolean testDiplomacy(boolean graphics) {
     LogicTest test = new TestDiplomacy();
+    
+    //
+    //  Set up the structure of the world-
     
     World world = new World(ALL_GOODS);
     Base  baseC = new Base(world, world.addLocale(2, 2));
@@ -47,6 +51,9 @@ public class TestDiplomacy extends LogicTest {
     world.settings.toggleHunger  = false;
     world.settings.toggleFatigue = false;
     
+    //
+    //  Place local structures on the map-
+    
     AreaPlanning.placeStructure(SHIELD_WALL, baseC, true, 7, 7, 12, 12);
     AreaPlanning.markDemolish(map, true, 8, 8, 10, 10);
     AreaPlanning.placeStructure(WALKWAY, baseC, true, 12, 20, 1, 12);
@@ -55,7 +62,7 @@ public class TestDiplomacy extends LogicTest {
     gate.setFacing(TileConstants.N);
     gate.enterMap(map, 12, 18, 1, baseC);
     
-    Building palace = (Building) BASTION.generate();
+    BuildingForGovern palace = (BuildingForGovern) BASTION.generate();
     BaseCouncil council = baseC.council;
     palace.enterMap(map, 10, 10, 1, baseC);
     
@@ -74,6 +81,16 @@ public class TestDiplomacy extends LogicTest {
     
     ActorUtils.fillAllWorkVacancies(map);
     
+    //
+    //  Set up trade dynamics-
+    
+    Good giftGood = PSALT;
+    awayC.setInventory(PSALT, 10);
+    palace.setNeedLevels(false, PSALT, 10);
+    neutC.setTradeLevel(PSALT, 10, 0);
+    
+    //
+    //  Begin the mission from the foreign base-
     
     Mission escort;
     escort = new MissionForContact(awayC);
@@ -91,17 +108,21 @@ public class TestDiplomacy extends LogicTest {
       e.assignBase(awayC);
     }
     
-    
     escort.terms.assignTerms(Base.POSTURE.ALLY, null, bride, null);
     escort.setWorldFocus(baseC);
     escort.beginMission(awayC);
     
+    //
+    //  Begin the simulation-
+    
     boolean escortArrived  = false;
+    boolean giftGiven      = false;
     boolean offerGiven     = false;
     boolean offerAccepted  = false;
     boolean termsOkay      = false;
     boolean escortDeparted = false;
     boolean escortSent     = false;
+    boolean giftAwayGiven  = false;
     boolean termsAwayGiven = false;
     boolean termsAwayOkay  = false;
     boolean escortReturned = false;
@@ -114,11 +135,15 @@ public class TestDiplomacy extends LogicTest {
         escortArrived = escort.localMap() == map;
       }
       
+      if (escortArrived && ! giftGiven) {
+        giftGiven = palace.inventory(giftGood) > 0;
+      }
+      
       if (escortArrived && ! offerGiven) {
         offerGiven = council.petitions().includes(escort);
       }
       
-      if (offerGiven && ! offerAccepted) {
+      if (giftGiven && offerGiven && ! offerAccepted) {
         council.acceptTerms(escort);
         offerAccepted = true;
       }
@@ -144,11 +169,19 @@ public class TestDiplomacy extends LogicTest {
         escortSent = true;
       }
       
+      if (escortSent && ! giftAwayGiven) {
+        boolean gotGift = false;
+        for (Actor a : neutC.council.members()) {
+          if (a.outfit.carried(giftGood) > 0) gotGift = true;
+        }
+        giftAwayGiven = gotGift;
+      }
+      
       if (escortSent && ! termsAwayGiven) {
         termsAwayGiven = neutC.council.petitions().includes(escort);
       }
       
-      if (termsAwayGiven && ! termsAwayOkay) {
+      if (giftAwayGiven && termsAwayGiven && ! termsAwayOkay) {
         neutC.council.acceptTerms(escort);
         termsAwayOkay = true;
       }
@@ -169,11 +202,13 @@ public class TestDiplomacy extends LogicTest {
     
     I.say("\nDIPLOMACY TEST FAILED!");
     I.say("  Escort arrived:   "+escortArrived );
+    I.say("  Gift given:       "+giftGiven     );
     I.say("  Offer given:      "+offerGiven    );
     I.say("  Offer accepted:   "+offerAccepted );
     I.say("  Terms okay:       "+termsOkay     );
     I.say("  Escort departed:  "+escortDeparted);
     I.say("  Escort sent:      "+escortSent    );
+    I.say("  Gift away given:  "+giftAwayGiven );
     I.say("  Terms away given: "+termsAwayGiven);
     I.say("  Terms away okay:  "+termsAwayOkay );
     I.say("  Escort returned:  "+escortReturned);

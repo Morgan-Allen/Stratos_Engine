@@ -1238,6 +1238,9 @@ public class GameContent {
       type.setBuildMaterials(VOID, 10);
       type.maxHealth = 275;
       type.workerTypes = Tally.with(HUNTER, 2, GATHERER, 2);
+      
+      type.needed   = new Good[] { PARTS, PLASTICS };
+      type.maxStock = 5;
     }
     
   }

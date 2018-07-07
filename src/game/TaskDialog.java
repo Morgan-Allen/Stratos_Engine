@@ -7,9 +7,6 @@ import util.*;
 
 
 
-//  TODO:  Consider chatting with animals, if you have the right knowledge?
-
-
 public class TaskDialog extends Task {
   
   
