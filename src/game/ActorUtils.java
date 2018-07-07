@@ -351,8 +351,13 @@ public class ActorUtils {
       type.initAsMigrant((ActorAsPerson) actor);
     }
     
-    if (resident) b.setResident(actor, true);
-    else          b.setWorker  (actor, true);
+    if (resident) {
+      b.setResident(actor, true);
+    }
+    else {
+      b.setWorker(actor, true);
+      if (b.allowsResidence(actor)) b.setResident(actor, true);
+    }
     
     if (b.complete()) {
       actor.enterMap(b.map, at.x, at.y, 1, b.base());

@@ -110,7 +110,8 @@ public class MissionForContact extends Mission {
     Pathing  camp      = transitPoint(actor);
     AreaTile stands    = MissionForSecure.standingPointRanks(actor, this, camp);
     
-    if (onAwayMap && haveTerms && isEnvoy && ! terms.sent()) {
+    //if (onAwayMap && haveTerms && isEnvoy && ! terms.sent()) {
+    if (isEnvoy) {
       Actor offersTerms = findTalkSubject(this, actor, true);
       TaskDialog dialog = TaskDialog.contactDialogFor(actor, offersTerms, this);
       TaskGifting gifts = TaskGifting.nextGiftingFor(actor, dialog);
@@ -158,8 +159,8 @@ public class MissionForContact extends Mission {
     Pick <Actor> pick = new Pick();
     Series <Actor> looksAt = null;
     Base focusBase = null;
-
-    if (official) {
+    
+    if (official && parent.worldFocus() != null) {
       Base focus = parent.worldFocus();
       BaseCouncil council = focus.council;
       Area area = focus.activeMap();

@@ -41,13 +41,12 @@ public class TestSubversion extends LogicTest {
     MissionForContact contact = null;
     
     
-    final int RUN_TIME = DAY_LENGTH;
+    final int RUN_TIME = YEAR_LENGTH / 2;
     boolean madeContact = false;
     boolean gaveGifts   = false;
     boolean hasSympathy = false;
     boolean homeConvert = false;
     boolean testOkay    = false;
-    
     
     //  TODO:  Okay.  So what do I need to implement?
     
@@ -70,6 +69,9 @@ public class TestSubversion extends LogicTest {
       }
       
       while (contact == null || contact.complete()) {
+        
+        I.say("Starting new contact mission, old mission: "+contact);
+        
         contact = new MissionForContact(base);
         for (Actor a : centre.workers()) {
           if (a.type().isCommoner()) continue;
@@ -94,7 +96,14 @@ public class TestSubversion extends LogicTest {
       }
       
       if (! gaveGifts) {
-        gaveGifts = mainHut.inventory(PARTS) > 0;
+        boolean anyGot = false;
+        for (Good g : giftGoods) {
+          if (mainHut.inventory(g) > 0) anyGot = true;
+          for (Actor a : mainHut.residents()) {
+            if (a.outfit.carried(g) > 0) anyGot = true;
+          }
+        }
+        gaveGifts = anyGot;
       }
       
       if (madeContact && gaveGifts && ! hasSympathy) {
@@ -125,15 +134,24 @@ public class TestSubversion extends LogicTest {
     for (Actor a : map.actors()) if (a.base() == map.locals) {
       I.say("\nBonds for "+a+" ("+a.base()+")");
       for (Actor o : a.bonds.allBondedWith(0)) {
-        I.say("\n  "+o+": "+a.bonds.bondLevel(o));
+        String name = I.padToLength(o.fullName(), 10);
+        String bond = I.shorten(a.bonds.bondLevel  (o), 2);
+        String news = I.shorten(a.bonds.bondNovelty(o), 2);
+        I.say("  "+name+": "+bond+" (N="+news+")");
       }
+      I.say("  Carries: "+a.inventory());
       a.bonds.makeLoyaltyCheck();
     }
+    
+    I.say("\nMain hut: "+mainHut+" ("+mainHut.base()+")");
     
     return false;
   }
   
 }
+
+
+
 
 
 

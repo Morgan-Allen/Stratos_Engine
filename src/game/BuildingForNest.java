@@ -145,6 +145,12 @@ public class BuildingForNest extends Building {
   }
   
   
+  public boolean allowsResidence(Actor actor) {
+    if (actor.work() == this) return true;
+    return false;
+  }
+
+
   public Task selectActorBehaviour(Actor actor) {
     if (Area.distance(actor, this) > MAX_WANDER_RANGE) {
       Task waits = TaskWaiting.configWaiting(actor, this);

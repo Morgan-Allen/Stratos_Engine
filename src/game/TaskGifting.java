@@ -54,8 +54,15 @@ public class TaskGifting extends TaskDialog {
     if (gifted == null) return null;
     
     TaskGifting task = new TaskGifting(actor, dialog.with, true);
-    task.gifted   = gifted;
-    task.store    = store;
+    task.gifted = gifted;
+    task.store  = store;
+    
+    if (store != actor) {
+      task.configTask(dialog.origin, (Pathing) store, null, JOB.COLLECTING, 1);
+    }
+    else {
+      task.configTask(dialog.origin, null, dialog.with, JOB.DIALOG, 1);
+    }
     return task;
   }
   
