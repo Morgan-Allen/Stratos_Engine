@@ -113,30 +113,21 @@ public class MissionForSecure extends Mission {
     }
   }
   
-
-  void beginJourney(Base from, Base goes) {
-    super.beginJourney(from, goes);
-    
-    //  TODO:  Do this at the start/end of the mission.
-    
-    for (Actor a : recruits) {
-      a.bonds.assignGuestBase(null);
-    }
-    
-    guardPoints.clear();
-    lastUpdateTime = -1;
+  
+  public void toggleRecruit(Actor a, boolean is) {
+    //
+    //  We need to ensure that recruits are recognised as guests of the other
+    //  base...
+    Base goes = worldFocus();
+    if (goes != homeBase()) a.bonds.assignGuestBase(is ? goes : null);
+    super.toggleRecruit(a, is);
   }
   
 
-  public void onArrival(Base goes, World.Journey journey) {
-    
-    //  TODO:  Do this at the start/end of the mission.
-    
-    if (goes != homeBase()) for (Actor a : recruits) {
-      a.bonds.assignGuestBase(goes);
-    }
-    
-    super.onArrival(goes, journey);
+  void beginJourney(Base from, Base goes) {
+    super.beginJourney(from, goes);
+    guardPoints.clear();
+    lastUpdateTime = -1;
   }
   
   

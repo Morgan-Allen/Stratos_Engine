@@ -102,6 +102,8 @@ public class ActorBonds {
       loyalties.add(b.level, b.with.bonds.baseLoyal());
     }
     
+    //  TODO:  Divide by average?  What's the real threshold here?
+    
     for (Base b : loyalties.keys()) {
       float rating = loyalties.valueFor(b);
       if (b == current) rating *= 1 + stubborn;

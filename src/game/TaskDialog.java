@@ -7,6 +7,9 @@ import util.*;
 
 
 
+//  TODO:  Consider chatting with animals, if you have the right knowledge?
+
+
 public class TaskDialog extends Task {
   
   
@@ -18,7 +21,7 @@ public class TaskDialog extends Task {
   boolean contact;
   
   
-  public TaskDialog(Actor actor, Actor with, boolean began) {
+  TaskDialog(Actor actor, Actor with, boolean began) {
     super(actor);
     this.with = with;
     this.began = began;
@@ -27,7 +30,7 @@ public class TaskDialog extends Task {
   
   public TaskDialog(Session s) throws Exception {
     super(s);
-    this.with = (Actor) s.loadObject();
+    this.with    = (Actor) s.loadObject();
     this.began   = s.loadBool();
     this.casual  = s.loadBool();
     this.contact = s.loadBool();
@@ -48,28 +51,19 @@ public class TaskDialog extends Task {
     */
   static TaskDialog nextContactDialog(Actor actor) {
     Series <Active> others = (Series) actor.considered();
-    return nextDialog(actor, others, false);
+    return nextDialog(actor, others, false, null);
   }
   
   
   static TaskDialog nextCasualDialog(Actor actor) {
     Series <Active> others = (Series) actor.seen();
-    return nextDialog(actor, others, true);
-  }
-  
-  
-  static TaskDialog contactDialogFor(Actor actor, Actor with, Mission mission) {
-    if (! actor.map().world.settings.toggleDialog) return null;
-    
-    TaskDialog dialog = new TaskDialog(actor, with, true);
-    dialog.configTask(mission, null, with, JOB.DIALOG, 1);
-    dialog.contact = true;
-    return dialog.pathValid() ? dialog : null;
+    return nextDialog(actor, others, true, null);
   }
   
   
   static TaskDialog nextDialog(
-    Actor actor, Series <Active> assessed, boolean casual
+    Actor actor, Series <Active> assessed,
+    boolean casual, Mission mission
   ) {
     if (! actor.map().world.settings.toggleDialog) return null;
     //
@@ -87,8 +81,20 @@ public class TaskDialog extends Task {
     //
     //  Then configure and return...
     TaskDialog dialog = new TaskDialog(actor, with, true);
-    dialog.configTask(null, null, with, JOB.DIALOG, 1);
-    dialog.casual = true;
+    dialog.casual = casual;
+    dialog.configTask(mission, null, with, JOB.DIALOG, 1);
+    if (! dialog.pathValid()) return null;
+    return dialog;
+  }
+  
+  
+  static TaskDialog contactDialogFor(Actor actor, Actor with, Mission mission) {
+    if (! actor.map().world.settings.toggleDialog) return null;
+    
+    TaskDialog dialog = new TaskDialog(actor, with, true);
+    dialog.configTask(mission, null, with, JOB.DIALOG, 1);
+    dialog.contact = true;
+    
     return dialog.pathValid() ? dialog : null;
   }
   
@@ -96,8 +102,6 @@ public class TaskDialog extends Task {
   
   /**  Priority-evaluation-
     */
-  //  TODO:  Consider chatting with animals, if you have the right knowledge?
-  
   static float dialogRating(
     Actor actor, Actor with, boolean casual, boolean begun
   ) {
@@ -169,44 +173,53 @@ public class TaskDialog extends Task {
     return ((TaskDialog) other.task()).with;
   }
   
-  
-  
+
+
   /**  Behaviour-execution-
     */
   protected void onTarget(Target target) {
-    
     Actor actor = (Actor) active;
-    Mission mission = contact ? (Mission) origin : null;
-    float rating = dialogRating(actor, with, casual, true);
     
-    if (began && rating > 0 && talksWith(with) != actor) {
-      TaskDialog response = new TaskDialog(with, actor, false);
-      response.configTask(null, visits, actor, JOB.DIALOG, 1);
-      if (response.pathValid()) with.assignTask(response, this);
-    }
-    
-    float talkInc = 1f / DIALOG_LENGTH;
-    float maxBond = MAX_CHAT_BOND / 100f;
-    with.bonds.incBond(actor, talkInc * CHAT_BOND / 100f, maxBond);
-    with.bonds.incNovelty(actor, 0 - talkInc);
-    
-    if (contact && ! mission.terms.sent()) {
-      mission.terms.sendTerms(with.base());
-    }
-    
-    if (rating > 0 && talksWith(with) == actor) {
-      configTask(origin, null, with, JOB.DIALOG, 1);
-    }
-    else {
-      actor.bonds.incNovelty(with, -1);
+    if (type == JOB.DIALOG) {
+      Mission mission = contact ? (Mission) origin : null;
+      float rating = dialogRating(actor, with, casual, true);
+      
+      if (began && rating > 0 && talksWith(with) != actor) {
+        TaskDialog response = new TaskDialog(with, actor, false);
+        response.configTask(null, visits, actor, JOB.DIALOG, 1);
+        if (response.pathValid()) with.assignTask(response, this);
+      }
+      
+      float talkInc = 1f / DIALOG_LENGTH;
+      float maxBond = MAX_CHAT_BOND / 100f;
+      with.bonds.incBond(actor, talkInc * CHAT_BOND / 100f, maxBond);
+      with.bonds.incNovelty(actor, 0 - talkInc);
+      
+      if (contact && ! mission.terms.sent()) {
+        mission.terms.sendTerms(with.base());
+      }
+      if (rating > 0 && talksWith(with) == actor) {
+        configTask(origin, null, with, JOB.DIALOG, 1);
+      }
+      else {
+        actor.bonds.incNovelty(with, -1);
+      }
     }
   }
 
 
   float actionRange() {
+    if (talksWith(with) != active) return AVG_SIGHT;
     return 2;
   }
   
+  
+  /*
+  void inviteToActivity(Actor suggests, Actor other) {
+    //
+    //  TODO:  Work this out...
+  }
+  //*/
   
   
   
@@ -218,6 +231,7 @@ public class TaskDialog extends Task {
   
   
 }
+
 
 
 

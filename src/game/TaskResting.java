@@ -2,8 +2,6 @@
 
 package game;
 import static game.GameConstants.*;
-
-import game.GameConstants.Pathing;
 import util.*;
 
 
@@ -134,6 +132,7 @@ public class TaskResting extends Task {
     */
   protected void onVisit(Pathing visits) {
     Actor actor = (Actor) active;
+    
     if (actor.health.hunger() >= 1f / HUNGER_REGEN) {
       Batch <Good> menu = menuAt(visits, actor);
       boolean adult = actor.health.adult();
@@ -148,6 +147,17 @@ public class TaskResting extends Task {
         actor.health.liftHunger(eats / FOOD_UNIT_PER_HP);
       }
     }
+    
+    if (visits instanceof Building) {
+      Building b = (Building) visits;
+      for (Good g : b.needed()) {
+        float carries = actor.outfit.carried(g);
+        if (carries > 0) {
+          actor.outfit.setCarried(g, 0);
+          b.addInventory(carries, g);
+        }
+      }
+    }
   }
   
   
@@ -158,9 +168,5 @@ public class TaskResting extends Task {
     }
   }
 }
-
-
-
-
 
 

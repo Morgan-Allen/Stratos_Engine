@@ -1081,6 +1081,61 @@ public class GameContent {
   }
   
   
+
+  
+
+  final public static HumanType
+    HUNTER   = new HumanType("actor_hunter"    , CLASS_COMMON ),
+    GATHERER = new HumanType("actor_gatherer", CLASS_COMMON )
+  ;
+  
+  static {
+    HUNTER.name = "Hunter";
+    HUNTER.attachCostume(GameContent.class, "native_skin.gif");
+    
+    HUNTER.meleeDamage = 4;
+    HUNTER.rangeDamage = 8;
+    HUNTER.armourClass = 2;
+    HUNTER.maxHealth   = 16;
+    HUNTER.moveSpeed   = 125;
+    
+    HUNTER.coreSkills.setWith(
+      SKILL_SPEAK , 2 ,
+      SKILL_CRAFT , 7 ,
+      SKILL_SIGHT , 8 ,
+      SKILL_MELEE , 6 
+    );
+    HUNTER.initTraits.setWith(
+      TRAIT_EMPATHY  , 50,
+      TRAIT_DILIGENCE, 50,
+      TRAIT_BRAVERY  , 65,
+      TRAIT_CURIOSITY, 25
+    );
+    
+    
+    GATHERER.name = "Gatherer";
+    GATHERER.attachCostume(GameContent.class, "native_skin.gif");
+    
+    GATHERER.meleeDamage = 4;
+    GATHERER.rangeDamage = 8;
+    GATHERER.armourClass = 2;
+    GATHERER.maxHealth   = 16;
+    GATHERER.moveSpeed   = 125;
+    
+    GATHERER.coreSkills.setWith(
+      SKILL_SPEAK , 2 ,
+      SKILL_CRAFT , 7 ,
+      SKILL_FARM  , 8 ,
+      SKILL_LABOR , 6 
+    );
+    GATHERER.initTraits.setWith(
+      TRAIT_EMPATHY  , 65,
+      TRAIT_DILIGENCE, 55,
+      TRAIT_BRAVERY  , 35,
+      TRAIT_CURIOSITY, 25
+    );
+  }
+  
   
   final public static BuildType
     RUINS_LAIR    = new BuildType(BuildingForNest.class, "nest_ruins_lair", IS_NEST_BLD),
@@ -1178,10 +1233,11 @@ public class GameContent {
     WASTES_HUT.name = "Wastes Hut";
     WASTES_HUT.tint = TINT_LITE_INDUSTRIAL;
     
-    for (BuildType type : ALL_NESTS) {
+    for (BuildType type : ALL_HUTS) {
       type.setDimensions(3, 3, 1, THIN_MARGIN);
       type.setBuildMaterials(VOID, 10);
       type.maxHealth = 275;
+      type.workerTypes = Tally.with(HUNTER, 2, GATHERER, 2);
     }
     
   }

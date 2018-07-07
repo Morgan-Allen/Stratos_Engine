@@ -29,49 +29,76 @@ public class MissionForContact extends Mission {
   void update() {
     super.update();
     //
-    //  Update current victory-conditions...
-    
-    //  TODO:  You need different criteria here if your target is a building or
-    //  actor...
-    
-    if (terms.accepted()) {
-      setMissionComplete(true);
+    //  If you're delivering terms, just check for either acceptance or
+    //  rejection-
+    if (terms.hasTerms()) {
+      if (terms.accepted()) {
+        setMissionComplete(true);
+      }
+      if (terms.rejected()) {
+        setMissionComplete(false);
+      }
     }
-    if (terms.rejected()) {
-      setMissionComplete(false);
+    //
+    //  If your focus is an actor, check whether they're converted-
+    if (localFocus() instanceof Actor) {
+      Actor focus = (Actor) localFocus();
+      if (focus.bonds.baseLoyal() == homeBase()) {
+        setMissionComplete(true);
+      }
+      if (focus.health.dead()) {
+        setMissionComplete(false);
+      }
+    }
+    //
+    //  And if your focus is a building, check whether that's switched-
+    if (localFocus() instanceof Building) {
+      Building focus = (Building) localFocus();
+      if (focus.base() == homeBase()) {
+        setMissionComplete(true);
+      }
+      if (focus.destroyed()) {
+        setMissionComplete(false);
+      }
     }
   }
   
   
-  void beginJourney(Base from, Base goes) {
-    super.beginJourney(from, goes);
-    
-    //  TODO:  Do this at the start/end of the mission.
-    
-    for (Actor a : recruits) {
-      a.bonds.assignGuestBase(null);
-    }
+  public void toggleRecruit(Actor a, boolean is) {
+    //
+    //  We need to ensure that recruits are recognised as guests of the other
+    //  base...
+    Base goes = worldFocus();
+    if (goes != homeBase()) a.bonds.assignGuestBase(is ? goes : null);
+    super.toggleRecruit(a, is);
   }
-  
 
-  public void onArrival(Base goes, World.Journey journey) {
-    
-    //  TODO:  Do this at the start/end of the mission.
-    
-    if (goes != homeBase()) for (Actor a : recruits) {
-      a.bonds.assignGuestBase(goes);
-    }
-    super.onArrival(goes, journey);
-  }
-  
-  
+
   void handleOffmapArrival(Base goes, World.Journey journey) {
+    TaskGifting.performMisionDelivery(this);
     WorldEvents.handleDialog(this, goes, journey);
   }
   
   
   void handleOffmapDeparture(Base from, Journey journey) {
-    return;
+    TaskGifting.performMissionPickup(this);
+  }
+  
+  
+  public Task selectActorBehaviour(Actor actor) {
+    //
+    //  If we haven't embarked on a journey yet, envoys may first have to pick
+    //  up a gift for whoever they're meeting.  (Not talking- just the pickup.)
+    boolean isEnvoy = envoys.includes(actor);
+    if (onWrongMap() && isEnvoy && actor.todo(TaskGifting.class) == null) {
+      Actor offersTerms = findTalkSubject(this, actor, true);
+      TaskDialog dialog = TaskDialog.contactDialogFor(actor, offersTerms, this);
+      TaskGifting gifts = TaskGifting.nextGiftingFor(actor, dialog);
+      if (gifts != null) return gifts;
+    }
+    //
+    //  Otherwise, proceed as usual-
+    return super.selectActorBehaviour(actor);
   }
 
 
@@ -85,7 +112,9 @@ public class MissionForContact extends Mission {
     
     if (onAwayMap && haveTerms && isEnvoy && ! terms.sent()) {
       Actor offersTerms = findTalkSubject(this, actor, true);
-      Task dialog = TaskDialog.contactDialogFor(actor, offersTerms, this);
+      TaskDialog dialog = TaskDialog.contactDialogFor(actor, offersTerms, this);
+      TaskGifting gifts = TaskGifting.nextGiftingFor(actor, dialog);
+      if (gifts  != null) return gifts ;
       if (dialog != null) return dialog;
     }
     
@@ -113,6 +142,11 @@ public class MissionForContact extends Mission {
     if (newFocus instanceof Building) return true;
     if (newFocus instanceof Actor   ) return true;
     return false;
+  }
+  
+  
+  static Task nextGiftPickup(Mission parent, Actor talks, Series <Actor> gets) {
+    return null;
   }
   
   

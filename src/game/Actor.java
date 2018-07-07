@@ -457,6 +457,11 @@ public class Actor extends Element implements
   }
   
   
+  public Task todo(Class taskClass) {
+    return null;
+  }
+  
+  
   public Task task() {
     return task;
   }

@@ -49,15 +49,38 @@ public class TestSubversion extends LogicTest {
     
     //  TODO:  Okay.  So what do I need to implement?
     
+    //  Gifting is complicated, especially if you allow for on-to-off-map cases.
+    
+    /*
+    Giving a gift is easy enough, even if it's from yourself.  Taking one on is
+    harder.  But I think it can be done.
+    
+    Put the tests in place first.  You already have a TestDiplomacy class, so
+    just add the appropriate checks there.  For TestSubversion, you just need
+    to do the same thing- check that gifts are delivered and clap your hands
+    accordingly.
+    
+    Do a TaskDialog assessment per usual, and segue into Gifting if a target is
+    found and you can find a suitable present.
+    
+    In the case of a MissionContact, you can extract a Gifting behaviour
+    directly, targeted at the settlement- that will end immediately once the
+    actor has picked up gift-materials.  Keep gifting as a to-do item and end
+    once you arrive off-world and/or the mission completes.
+    
+    //*/
+    
+    
+    
     //  Joint-activities at the end of dialogue (scouting, hunting, repair/aid,
     //  intros, dining, gifting.)
     
-    //  The possibility of becoming a sympathiser if your relations with
-    //  another base are stronger than with your own.  (Or if the other side
-    //  has leverage on you or just looks 'strong' enough.)
     
-    //  The possibility of individuals or buildings converting to your base if
-    //  outside 'sympathies' are strong enough.
+    //  Base the probability of conversion on local rather than global factors.
+    
+    //  Loyalty to one's leader, vs. loyalty to one's people?  (And if you have
+    //  no leader, that's zero by default.)  Hmm.  Maybe.
+    
     
     
     
@@ -67,23 +90,29 @@ public class TestSubversion extends LogicTest {
       while (contact == null || contact.complete()) {
         contact = new MissionForContact(base);
         for (Actor a : centre.workers()) {
+          if (a.type().isCommoner()) continue;
           contact.toggleRecruit(a, true);
-          if (a.type().isNoble()) contact.toggleEnvoy(a, true);
+          contact.toggleEnvoy(a, true);
         }
         contact.setLocalFocus(mainHut);
         contact.beginMission(base);
       }
       
+      if (centre.inventory(GREENS) < 10) {
+        centre.addInventory(1, GREENS);
+      }
+      
       if (! madeContact) {
-        boolean allTalked = true;
+        boolean allTalked = true, anyTalked = false;
         for (Actor a : mainHut.workers()) {
           boolean talked = false;
           for (Actor w : a.bonds.allBondedWith(ActorBonds.BOND_ANY)) {
             if (w.base() == base) talked = true;
           }
           if (! talked) allTalked = false;
+          else anyTalked = true;
         }
-        madeContact = allTalked;
+        madeContact = allTalked && anyTalked;
       }
       
       if (madeContact && ! hasSympathy) {
@@ -109,6 +138,14 @@ public class TestSubversion extends LogicTest {
     I.say("  Made contact: "+madeContact);
     I.say("  Has sympathy: "+hasSympathy);
     I.say("  Home convert: "+homeConvert);
+
+    for (Actor a : map.actors()) if (a.base() == map.locals) {
+      I.say("\nBonds for "+a+" ("+a.base()+")");
+      for (Actor o : a.bonds.allBondedWith(0)) {
+        I.say("\n  "+o+": "+a.bonds.bondLevel(o));
+      }
+      a.bonds.makeLoyaltyCheck();
+    }
     
     return false;
   }

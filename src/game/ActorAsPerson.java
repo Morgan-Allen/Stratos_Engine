@@ -219,6 +219,12 @@ public class ActorAsPerson extends Actor {
   }
   
   
+  public Task todo(Class taskClass) {
+    for (Task t : todo) if (t.getClass() == taskClass) return t;
+    return null;
+  }
+  
+  
   public void assignTask(Task task, Object source) {
     
     //  If the new task is an emergency, don't keep the old task.
