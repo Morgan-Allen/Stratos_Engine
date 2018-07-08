@@ -27,6 +27,7 @@ public class TestSubversion extends LogicTest {
     world.settings.toggleFog     = false;
     world.settings.toggleHunger  = false;
     world.settings.toggleFatigue = false;
+    map.locals.setName("Locals");
     
     
     Building mainHut = (Building) FOREST_HUT.generate();
@@ -69,9 +70,6 @@ public class TestSubversion extends LogicTest {
       }
       
       while (contact == null || contact.complete()) {
-        
-        I.say("Starting new contact mission, old mission: "+contact);
-        
         contact = new MissionForContact(base);
         for (Actor a : centre.workers()) {
           if (a.type().isCommoner()) continue;
@@ -139,12 +137,14 @@ public class TestSubversion extends LogicTest {
   
   
   private static void reportLoyalties(Building focus, Series <Actor> eval) {
+    
     I.say("\nMain focus: "+focus+" ("+focus.base()+")");
+    I.say("  Carries: "+focus.inventory());
     
     for (Actor a : eval) {
       I.say("\nBonds for "+a+" ("+a.bonds.baseLoyal()+")");
       for (Actor o : a.bonds.allBondedWith(0)) {
-        String name = I.padToLength(o.fullName(), 10);
+        String name = I.padToLength(I.shorten(o.fullName(), 15), 15);
         String bond = I.shorten(a.bonds.bondLevel  (o), 2);
         String news = I.shorten(a.bonds.bondNovelty(o), 2);
         I.say("  "+name+": "+bond+" (N="+news+")");

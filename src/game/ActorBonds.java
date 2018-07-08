@@ -94,7 +94,7 @@ public class ActorBonds {
   public void makeLoyaltyCheck() {
     
     Tally <Base> loyalties = new Tally();
-    Pick <Base> toJoin = new Pick();
+    Pick <Base> toJoin = new Pick(0);
     Base current = baseLoyal();
     float stubborn = actor.traits.levelOf(TRAIT_DILIGENCE) / 2f;
     
@@ -111,8 +111,10 @@ public class ActorBonds {
     }
     Base joins = toJoin.result();
     
-    if (joins != current) {
+    if (joins != current && joins != null) {
       assignBaseLoyal(joins);
+      
+      I.say(actor+" has become sympathiser for "+joins+"!");
       
       checkBuildingLoyalty(actor.work());
       checkBuildingLoyalty(actor.home());
@@ -125,9 +127,8 @@ public class ActorBonds {
     if (! (e instanceof Building)) return;
     Building building = (Building) e;
     
-    
     Tally <Base> loyalties = new Tally();
-    Pick <Base> toJoin = new Pick();
+    Pick <Base> toJoin = new Pick(0);
     Base current = building.base();
     float stubborn = 0.5f;
     
@@ -145,8 +146,10 @@ public class ActorBonds {
     }
     Base joins = toJoin.result();
     
-    
-    if (joins != current) {
+    if (joins != current && joins != null) {
+      
+      I.say(building+" has defected to "+joins+"!");
+      
       for (Actor a : building.workers()) if (a.base() != joins) {
         if (a.bonds.baseLoyal() == joins) a.assignBase(joins);
         else building.setWorker(a, false);
