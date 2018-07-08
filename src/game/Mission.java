@@ -24,22 +24,28 @@ public abstract class Mission implements
     OBJECTIVE_RECON   = 3,
     OBJECTIVE_CONTACT = 4
   ;
+  final static int
+    STAGE_INIT     = -1,
+    STAGE_BEGUN    =  0,
+    STAGE_DEPARTED =  1,
+    STAGE_RETURNED =  4,
+    STAGE_DISBAND  =  5
+  ;
   
   final public int objective;
   final Base homeBase;
   
   private Base worldFocus;
   private Target localFocus;
+  private int stage = STAGE_INIT;
+  boolean complete = false;
+  boolean success  = false;
+  boolean failure  = false;
   
   List <Actor> recruits = new List();
   List <Actor> envoys   = new List();
   final public MissionRewards rewards = new MissionRewards(this);
   final public MissionTerms   terms   = new MissionTerms  (this);
-  
-  boolean active;
-  boolean complete;
-  boolean success;
-  boolean failure;
   
   Base localBase;
   AreaTile transitTile;
@@ -71,20 +77,19 @@ public abstract class Mission implements
     Area map = (Area) s.loadObject();
     worldFocus = (Base) s.loadObject();
     localFocus = Area.loadTarget(map, s);
+    stage    = s.loadInt();
+    complete = s.loadBool();
+    success  = s.loadBool();
+    failure  = s.loadBool();
     
     s.loadObjects(recruits);
     s.loadObjects(envoys);
     rewards.loadState(s);
     terms.loadState(s);
     
-    active   = s.loadBool();
-    complete = s.loadBool();
-    success  = s.loadBool();
-    failure  = s.loadBool();
-    
     localBase   = (Base) s.loadObject();
     transitTile = Area.loadTile(map, s);
-    transport = (ActorAsVessel) s.loadObject();
+    transport   = (ActorAsVessel) s.loadObject();
     arriveTime  = s.loadInt();
   }
   
@@ -98,16 +103,15 @@ public abstract class Mission implements
     s.saveObject(map);
     s.saveObject(worldFocus);
     Area.saveTarget(localFocus, map, s);
+    s.saveInt(stage);
+    s.saveBool(complete);
+    s.saveBool(success);
+    s.saveBool(failure);
     
     s.saveObjects(recruits);
     s.saveObjects(envoys);
     rewards.saveState(s);
     terms.saveState(s);
-    
-    s.saveBool(active  );
-    s.saveBool(complete);
-    s.saveBool(success );
-    s.saveBool(failure );
     
     s.saveObject(localBase);
     Area.saveTile(transitTile, map, s);
@@ -161,16 +165,16 @@ public abstract class Mission implements
   
   public void beginMission(Base localBase) {
     homeBase.missions.toggleMember(this, true);
-    this.active    = true;
+    this.stage = STAGE_BEGUN;
+    //this.active    = true;
     this.localBase = localBase;
   }
   
   
   void update() {
-    
     Area    map      = localMap();
     Base    offmap   = offmapBase();
-    boolean valid    = recruits.size() > 0 && active;
+    boolean valid    = recruits.size() > 0 && active();
     boolean complete = valid && complete();
     boolean moveSelf = transport == null || ! transport.onMap();
     
@@ -237,13 +241,12 @@ public abstract class Mission implements
     //I.say(this+" beginning journey from "+from+" to "+goes);
     //I.say("  ETA: "+world.arriveTime(this));
     
-    if (from.activeMap() == null) {
-      if (from == homeBase) {
-        WorldEvents.handleDeparture(this, from, goes);
-      }
-      else {
-        handleOffmapDeparture(from, journey);
-      }
+    if (from == homeBase) stage = STAGE_DEPARTED;
+    if (goes == homeBase) stage = STAGE_RETURNED;
+    
+    if (from.isOffmap()) {
+      if (from == homeBase) WorldEvents.handleDeparture(this, from, goes);
+      handleOffmapDeparture(from, journey);
     }
     
     this.localBase   = null;
@@ -262,13 +265,9 @@ public abstract class Mission implements
     this.localBase  = goes;
     this.arriveTime = goes.world.time();
     
-    if (goes.activeMap() == null) {
-      if (goes == homeBase) {
-        WorldEvents.handleReturn(this, goes, journey);
-      }
-      else {
-        handleOffmapArrival(goes, journey);
-      }
+    if (goes.isOffmap()) {
+      handleOffmapArrival(goes, journey);
+      if (goes == homeBase) WorldEvents.handleReturn(this, goes, journey);
     }
   }
   
@@ -336,7 +335,7 @@ public abstract class Mission implements
   public void disbandMission() {
     rewards.dispenseRewards();
     homeBase.missions.toggleMember(this, false);
-    this.active = false;
+    this.stage = STAGE_DISBAND;
     for (Actor r : recruits) toggleRecruit(r, false);
   }
   
@@ -415,8 +414,28 @@ public abstract class Mission implements
   }
   
   
+  public boolean isRecruit(Actor a) {
+    return recruits.includes(a);
+  }
+  
+  
+  public boolean isEnvoy(Actor a) {
+    return envoys.includes(a);
+  }
+  
+  
   public boolean active() {
-    return active;
+    return stage >= STAGE_BEGUN && stage < STAGE_DISBAND;
+  }
+  
+  
+  public boolean departed() {
+    return stage >= STAGE_DEPARTED;
+  }
+  
+  
+  public boolean returned() {
+    return stage >= STAGE_RETURNED;
   }
   
   
@@ -427,6 +446,11 @@ public abstract class Mission implements
   
   public Base base() {
     return homeBase;
+  }
+  
+  
+  public boolean goesOffmap() {
+    return worldFocus != null && worldFocus.isOffmap();
   }
   
   

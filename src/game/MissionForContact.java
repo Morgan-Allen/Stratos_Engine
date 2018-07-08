@@ -64,24 +64,31 @@ public class MissionForContact extends Mission {
   }
   
   
-  public void toggleRecruit(Actor a, boolean is) {
-    //
-    //  We need to ensure that recruits are recognised as guests of the other
-    //  base...
+  public void beginMission(Base localBase) {
+    super.beginMission(localBase);
     Base goes = worldFocus();
-    if (goes != homeBase()) a.bonds.assignGuestBase(is ? goes : null);
-    super.toggleRecruit(a, is);
+    for (Actor a : recruits()) a.bonds.assignGuestBase(goes);
   }
-
-
-  void handleOffmapArrival(Base goes, World.Journey journey) {
-    TaskGifting.performMisionDelivery(this);
-    WorldEvents.handleDialog(this, goes, journey);
+  
+  
+  public void disbandMission() {
+    for (Actor a : recruits()) a.bonds.assignGuestBase(null);
+    super.disbandMission();
   }
   
   
   void handleOffmapDeparture(Base from, Journey journey) {
-    TaskGifting.performMissionPickup(this);
+    if (from == homeBase()) {
+      TaskGifting.performMissionPickup(this);
+    }
+  }
+  
+  
+  void handleOffmapArrival(Base goes, World.Journey journey) {
+    if (goes == worldFocus()) {
+      TaskGifting.performMisionDelivery(this);
+      WorldEvents.handleDialog(this, goes, journey);
+    }
   }
   
   
@@ -89,11 +96,12 @@ public class MissionForContact extends Mission {
     //
     //  If we haven't embarked on a journey yet, envoys may first have to pick
     //  up a gift for whoever they're meeting.  (Not talking- just the pickup.)
-    boolean isEnvoy = envoys.includes(actor);
-    if (onWrongMap() && isEnvoy && actor.todo(TaskGifting.class) == null) {
-      Actor offersTerms = findTalkSubject(this, actor, true);
-      TaskDialog dialog = TaskDialog.contactDialogFor(actor, offersTerms, this);
-      TaskGifting gifts = TaskGifting.nextGiftingFor(actor, dialog);
+    if (
+      goesOffmap() && ! departed() && isEnvoy(actor) &&
+      actor.todo(TaskGifting.class) == null
+    ) {
+      Actor offersTerms = findTalkSubject(this, actor, true, false);
+      TaskGifting gifts = TaskGifting.nextGiftingFor(actor, offersTerms, this);
       if (gifts != null) return gifts;
     }
     //
@@ -104,22 +112,22 @@ public class MissionForContact extends Mission {
 
   public Task nextLocalMapBehaviour(Actor actor) {
     
-    boolean  haveTerms = terms.hasTerms();
-    boolean  onAwayMap = ! onHomeMap();
-    boolean  isEnvoy   = envoys.includes(actor);
+    //boolean  haveTerms = terms.hasTerms();
+    //boolean  onAwayMap = ! onHomeMap();
+    boolean  isEnvoy   = isEnvoy(actor);
     Pathing  camp      = transitPoint(actor);
     AreaTile stands    = MissionForSecure.standingPointRanks(actor, this, camp);
     
     //if (onAwayMap && haveTerms && isEnvoy && ! terms.sent()) {
     if (isEnvoy) {
-      Actor offersTerms = findTalkSubject(this, actor, true);
-      TaskDialog dialog = TaskDialog.contactDialogFor(actor, offersTerms, this);
-      TaskGifting gifts = TaskGifting.nextGiftingFor(actor, dialog);
+      Actor offersTerms = findTalkSubject(this, actor, true, true);
+      TaskDialog  dialog = TaskDialog .contactDialogFor(actor, offersTerms, this);
+      TaskGifting gifts  = TaskGifting.nextGiftingFor  (actor, offersTerms, this);
       if (gifts  != null) return gifts ;
       if (dialog != null) return dialog;
     }
     
-    Actor chatsWith = findTalkSubject(this, actor, false);
+    Actor chatsWith = findTalkSubject(this, actor, false, true);
     Task chatting = TaskDialog.contactDialogFor(actor, chatsWith, this);
     if (chatting != null) return chatting;
     
@@ -154,9 +162,22 @@ public class MissionForContact extends Mission {
   }
   
   
-  static Actor findTalkSubject(Mission parent, Actor talks, boolean official) {
+  static Actor findTalkSubject(
+    final Mission parent, final Actor talks,
+    final boolean official, final boolean localOnly
+  ) {
     
-    Pick <Actor> pick = new Pick();
+    final Pick <Actor> pick = new Pick <Actor> () {
+      public void compare(Actor a, float rating) {
+        if (a == null) return;
+        if (a.map() != parent.localMap() && localOnly) return;
+        if (a.type().socialClass == CLASS_COMMON) rating /= 2;
+        rating *= 0.5f + Rand.num();
+        rating *= TaskDialog.dialogRating(a, talks, false, false) / Task.ROUTINE;
+        super.compare(a, rating);
+      }
+    };
+    
     Series <Actor> looksAt = null;
     Base focusBase = null;
     
@@ -166,15 +187,15 @@ public class MissionForContact extends Mission {
       Area area = focus.activeMap();
       
       Actor monarch = council.memberWithRole(Role.MONARCH);
-      if (monarch != null && monarch.onMap()) pick.compare(monarch, 3);
+      pick.compare(monarch, 3);
       
       Actor minister = council.memberWithRole(Role.PRIME_MINISTER);
-      if (minister != null && monarch.onMap()) pick.compare(minister, 2);
+      pick.compare(minister, 2);
       
       Actor consort = council.memberWithRole(Role.CONSORT);
-      if (consort != null && consort.onMap()) pick.compare(consort, 2);
+      pick.compare(consort, 2);
       
-      looksAt = area.actors();
+      looksAt = area == null ? null : area.actors();
       focusBase = focus;
     }
     else if (parent.localFocus() instanceof Building) {
@@ -190,11 +211,7 @@ public class MissionForContact extends Mission {
     
     if (looksAt != null) for (Actor a : looksAt) {
       if (a.base() != focusBase) continue;
-      float rating = 1f;
-      if (a.type().socialClass == CLASS_COMMON) rating /= 2;
-      rating *= Area.distance(parent.transitTile, a);
-      rating *= 0.5f + Rand.num();
-      rating *= TaskDialog.dialogRating(a, talks, false, false);
+      float rating = Area.distancePenalty(parent.transitTile, a);
       pick.compare(a, rating);
     }
     

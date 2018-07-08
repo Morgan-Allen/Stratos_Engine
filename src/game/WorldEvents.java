@@ -174,6 +174,9 @@ public class WorldEvents {
   
   
   static void arrangeMarriage(Base city, Base other, Actor marries) {
+    if (city == null || other == null) return;
+    if (marries == null || marries.health.dead()) return;
+    
     Actor monarch = city.council.memberWithRole(Role.MONARCH);
     if (monarch == null || monarch.health.dead()) return;
     

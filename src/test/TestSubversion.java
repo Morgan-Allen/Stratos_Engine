@@ -39,6 +39,8 @@ public class TestSubversion extends LogicTest {
     
     Good giftGoods[] = { GREENS, PARTS };
     MissionForContact contact = null;
+    Batch <Actor> eval = new Batch();
+    Visit.appendTo(eval, mainHut.workers());
     
     
     final int RUN_TIME = YEAR_LENGTH / 2;
@@ -49,8 +51,6 @@ public class TestSubversion extends LogicTest {
     boolean testOkay    = false;
     
     //  TODO:  Okay.  So what do I need to implement?
-    
-    //  Make sure gifting works, first of all.
     
     //  Secondly, revise how much favour with the other tribe you need to gain
     //  in order to get them to switch sides.  (Loyalty to leader + threshold,
@@ -121,6 +121,7 @@ public class TestSubversion extends LogicTest {
       if (homeConvert && ! testOkay) {
         testOkay = true;
         I.say("\nSUBVERSION TEST CONCLUDED SUCCESSFULLY!");
+        reportLoyalties(mainHut, eval);
         if (! graphics) return true;
       }
     }
@@ -130,9 +131,18 @@ public class TestSubversion extends LogicTest {
     I.say("  Gave gifts:   "+gaveGifts  );
     I.say("  Has sympathy: "+hasSympathy);
     I.say("  Home convert: "+homeConvert);
-
-    for (Actor a : map.actors()) if (a.base() == map.locals) {
-      I.say("\nBonds for "+a+" ("+a.base()+")");
+    
+    reportLoyalties(mainHut, eval);
+    
+    return false;
+  }
+  
+  
+  private static void reportLoyalties(Building focus, Series <Actor> eval) {
+    I.say("\nMain focus: "+focus+" ("+focus.base()+")");
+    
+    for (Actor a : eval) {
+      I.say("\nBonds for "+a+" ("+a.bonds.baseLoyal()+")");
       for (Actor o : a.bonds.allBondedWith(0)) {
         String name = I.padToLength(o.fullName(), 10);
         String bond = I.shorten(a.bonds.bondLevel  (o), 2);
@@ -140,18 +150,11 @@ public class TestSubversion extends LogicTest {
         I.say("  "+name+": "+bond+" (N="+news+")");
       }
       I.say("  Carries: "+a.inventory());
-      a.bonds.makeLoyaltyCheck();
+      ///a.bonds.makeLoyaltyCheck();
     }
-    
-    I.say("\nMain hut: "+mainHut+" ("+mainHut.base()+")");
-    
-    return false;
   }
   
 }
-
-
-
 
 
 

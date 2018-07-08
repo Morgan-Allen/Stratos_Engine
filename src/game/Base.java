@@ -229,6 +229,11 @@ public class Base implements Session.Saveable, Trader {
   }
   
   
+  public boolean isOffmap() {
+    return map == null;
+  }
+  
+  
   public float distance(Base other, int moveMode) {
     if (other.locale == this.locale) return 0;
     Route route = locale.routes.get(other.locale);
@@ -931,8 +936,9 @@ public class Base implements Session.Saveable, Trader {
   public void toggleVisitor(Actor visitor, boolean is) {
     
     Base offmap = visitor.offmapBase();
-    if (offmap == this &&   is) return;
     if (offmap != this && ! is) return;
+    if (offmap == this &&   is) return;
+    if (offmap != null &&   is) offmap.toggleVisitor(visitor, false);
     
     visitors.toggleMember(visitor, is);
     visitor.setOffmap(is ? this : null);

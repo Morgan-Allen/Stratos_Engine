@@ -77,7 +77,9 @@ public class MissionForStrike extends Mission {
   
   
   void handleOffmapArrival(Base goes, World.Journey journey) {
-    WorldEvents.handleInvasion(this, goes, journey);
+    if (goes == worldFocus()) {
+      WorldEvents.handleInvasion(this, goes, journey);
+    }
   }
   
   
@@ -90,12 +92,12 @@ public class MissionForStrike extends Mission {
     if (localFocus() == null) return null;
     
     boolean  haveTerms = terms.hasTerms() && ! envoys.empty();
-    boolean  isEnvoy   = envoys.includes(actor);
+    boolean  isEnvoy   = isEnvoy(actor);
     Pathing  camp      = transitPoint(actor);
     AreaTile stands    = MissionForSecure.standingPointRanks(actor, this, camp);
     
     if (haveTerms && isEnvoy && ! terms.sent()) {
-      Actor offersTerms = MissionForContact.findTalkSubject(this, actor, true);
+      Actor offersTerms = MissionForContact.findTalkSubject(this, actor, true, true);
       Task t = actor.targetTask(offersTerms, 1, Task.JOB.DIALOG, this);
       if (t != null) return t;
     }

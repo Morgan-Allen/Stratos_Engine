@@ -148,10 +148,12 @@ public class ActorBonds {
     
     if (joins != current) {
       for (Actor a : building.workers()) if (a.base() != joins) {
-        building.setWorker(a, false);
+        if (a.bonds.baseLoyal() == joins) a.assignBase(joins);
+        else building.setWorker(a, false);
       }
       for (Actor a : building.residents()) if (a.base() != joins) {
-        building.setResident(a, false);
+        if (a.bonds.baseLoyal() == joins) a.assignBase(joins);
+        else building.setResident(a, false);
       }
       building.assignBase(joins);
     }

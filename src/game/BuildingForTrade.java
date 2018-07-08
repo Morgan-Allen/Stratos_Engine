@@ -61,6 +61,7 @@ public class BuildingForTrade extends Building implements Trader {
     if (matchStock) for (Good g : prodLevel.keys()) {
       setInventory(g, Nums.abs(prodLevel.valueFor(g)));
     }
+    updateDemandTypes();
   }
   
   
@@ -69,6 +70,7 @@ public class BuildingForTrade extends Building implements Trader {
     if (matchStock) for (Good g : needLevel.keys()) {
       setInventory(g, Nums.abs(needLevel.valueFor(g)));
     }
+    updateDemandTypes();
   }
   
   
@@ -91,20 +93,24 @@ public class BuildingForTrade extends Building implements Trader {
     if (freeMarket) {
       updateDemandsLocally();
     }
-    
-    Batch <Good> impB = new Batch(), expB = new Batch();
-    for (Good g : map.world.goodTypes) {
-      float need   = needLevel.valueFor(g);
-      float accept = prodLevel.valueFor(g);
-      if (need   > 0) impB.add(g);
-      if (accept > 0) expB.add(g);
-    }
-    produced = impB.toArray(Good.class);
-    needed   = expB.toArray(Good.class);
+    updateDemandTypes();
   }
   
   
-  void updateDemandsLocally() {
+  private void updateDemandTypes() {
+    Batch <Good> needB = new Batch(), prodB = new Batch();
+    for (Good g : map.world.goodTypes) {
+      float need   = needLevel.valueFor(g);
+      float accept = prodLevel.valueFor(g);
+      if (need   > 0) needB.add(g);
+      if (accept > 0) prodB.add(g);
+    }
+    needed   = needB.toArray(Good.class);
+    produced = prodB.toArray(Good.class);
+  }
+  
+  
+  private void updateDemandsLocally() {
     float maxDist = type().maxDeliverRange;
     
     //  TODO:  Scale down to maximum cargo capacity!

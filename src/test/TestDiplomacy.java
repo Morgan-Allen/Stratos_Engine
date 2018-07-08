@@ -80,6 +80,7 @@ public class TestDiplomacy extends LogicTest {
     garrison.enterMap(map, 12, 1, 1, baseC);
     
     ActorUtils.fillAllWorkVacancies(map);
+    baseC.setHeadquarters(palace);
     
     //
     //  Set up trade dynamics-
@@ -88,6 +89,18 @@ public class TestDiplomacy extends LogicTest {
     awayC.setInventory(PSALT, 10);
     palace.setNeedLevels(false, PSALT, 10);
     neutC.setTradeLevel(PSALT, 10, 0);
+    
+    //  TODO:  You need a method for staffing these positions automagically!
+    
+    ActorAsPerson awayBoss = (ActorAsPerson) Nobles.NOBLE.generate();
+    awayBoss.assignBase(awayC);
+    awayC.council.toggleMember(awayBoss, Role.MONARCH, true);
+    awayC.toggleVisitor(awayBoss, true);
+    
+    ActorAsPerson neutBoss = (ActorAsPerson) Nobles.NOBLE.generate();
+    neutBoss.assignBase(neutC);
+    neutC.council.toggleMember(neutBoss, Role.MONARCH, true);
+    neutC.toggleVisitor(neutBoss, true);
     
     //
     //  Begin the mission from the foreign base-
@@ -136,7 +149,12 @@ public class TestDiplomacy extends LogicTest {
       }
       
       if (escortArrived && ! giftGiven) {
-        giftGiven = palace.inventory(giftGood) > 0;
+        boolean anyGot = false;
+        if (palace.inventory(giftGood) > 0) anyGot = true;
+        for (Actor a : palace.residents()) {
+          if (a.outfit.carried(giftGood) > 0) anyGot = true;
+        }
+        giftGiven = anyGot;
       }
       
       if (escortArrived && ! offerGiven) {
@@ -166,6 +184,7 @@ public class TestDiplomacy extends LogicTest {
         escort.toggleEnvoy(minister, true);
         escort.setWorldFocus(neutC);
         escort.beginMission(baseC);
+        palace.setInventory(giftGood, 10);
         escortSent = true;
       }
       
@@ -216,10 +235,6 @@ public class TestDiplomacy extends LogicTest {
   }
   
 }
-
-
-
-
 
 
 

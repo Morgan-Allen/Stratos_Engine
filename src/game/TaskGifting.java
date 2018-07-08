@@ -38,9 +38,17 @@ public class TaskGifting extends TaskDialog {
   /**  Initial config and factory methods, plus mission-support-
     */
   static TaskGifting nextGiftingFor(Actor actor, TaskDialog dialog) {
+    if (dialog == null) return null;
+    Mission mission = (Mission) I.cast(dialog.origin, Mission.class);
+    return nextGiftingFor(actor, dialog.with, mission);
+  }
+  
+  
+  static TaskGifting nextGiftingFor(Actor actor, Actor with, Mission mission) {
+    
     Carrier store = null;
     
-    if (dialog.origin instanceof Mission) {
+    if (mission != null) {
       store = actor.base().headquarters();
     }
     if (store == null) {
@@ -50,19 +58,21 @@ public class TaskGifting extends TaskDialog {
       store = actor;
     }
     
-    Good gifted = nextGiftPickup(actor, dialog.with, store);
+    Good gifted = nextGiftPickup(actor, with, store);
     if (gifted == null) return null;
     
-    TaskGifting task = new TaskGifting(actor, dialog.with, true);
+    TaskGifting task = new TaskGifting(actor, with, true);
     task.gifted = gifted;
     task.store  = store;
     
     if (store != actor) {
-      task.configTask(dialog.origin, (Pathing) store, null, JOB.COLLECTING, 1);
+      task.configTask(mission, (Pathing) store, null, JOB.COLLECTING, 1);
     }
     else {
-      task.configTask(dialog.origin, null, dialog.with, JOB.DIALOG, 1);
+      task.configTask(mission, null, with, JOB.DIALOG, 1);
     }
+    
+    if (! task.pathValid()) return null;
     return task;
   }
   
@@ -73,15 +83,16 @@ public class TaskGifting extends TaskDialog {
     Pick <Good> pickGift = new Pick();
     Building home = gets.home();
     Base away = gets.offmapBase();
+    float minAmount = store == gives ? 1 : 2;
     
     if (home != null) for (Good g : home.needed()) {
-      if (store.inventory().valueFor(g) < 2) continue;
+      if (store.inventory().valueFor(g) < minAmount) continue;
       float rating = home.demandFor(g) * g.price;
       pickGift.compare(g, rating);
     }
     
     if (away != null) for (Good g : away.needLevels().keys()) {
-      if (store.inventory().valueFor(g) < 2) continue;
+      if (store.inventory().valueFor(g) < minAmount) continue;
       float rating = away.needLevel(g) * g.price;
       pickGift.compare(g, rating);
     }
@@ -91,13 +102,14 @@ public class TaskGifting extends TaskDialog {
   
   
   static void performMissionPickup(Mission mission) {
-    Base home = mission.homeBase();
-    
-    for (Actor a : mission.recruits) {
-      Actor receives = MissionForContact.findTalkSubject(mission, a, true);
-      Good gift = nextGiftPickup(a, receives, home);
-      home.inventory().add(-1, gift);
-      a.outfit.incCarried(gift, 1);
+    for (Actor a : mission.envoys()) {
+      Base  home = mission.homeBase();
+      Actor gets = MissionForContact.findTalkSubject(mission, a, true, false);
+      Good  gift = nextGiftPickup(a, gets, home);
+      if (gift != null) {
+        home.inventory().add(-1, gift);
+        a.outfit.incCarried(gift, 1);
+      }
     }
   }
   

@@ -56,7 +56,7 @@ public class TaskCombat extends Task {
   /**  Utility methods for determining hostility, power, et cetera:
     */
   public static POSTURE postureFor(Element a, Element b) {
-    Base CA = a.base (), CB = b.base ();
+    Base CA = a.base     (), CB = b.base     ();
     Base GA = a.guestBase(), GB = b.guestBase();
     if (CA == CB              ) return POSTURE.ALLY;
     if (GA != null && GA == GB) return POSTURE.ALLY;
