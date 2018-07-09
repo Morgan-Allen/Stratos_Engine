@@ -7,7 +7,7 @@ import util.*;
 
 
 
-//  TODO:  Have this extend Constant instead.
+//  TODO:  Have this extend Constant instead?
 
 
 public class WorldLocale implements Session.Saveable {

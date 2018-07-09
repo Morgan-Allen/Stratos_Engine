@@ -34,8 +34,6 @@ public class BaseEvents {
       return;
     }
     
-    //Pick <Trouble> pickTrouble = new Pick();
-    
     List  <Trouble> trouble = new List ();
     Pick  <Trouble> pick    = new Pick ();
     Tally <Faction> powers  = new Tally();

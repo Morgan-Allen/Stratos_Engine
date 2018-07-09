@@ -3,6 +3,10 @@
 package game;
 import static game.GameConstants.*;
 import static game.World.*;
+
+import game.GameConstants.Good;
+import game.GameConstants.Trader;
+
 import static game.BaseRelations.*;
 import util.*;
 
@@ -23,6 +27,7 @@ public class Base implements Session.Saveable, Trader, BaseEvents.Trouble {
   
   final public World world;
   final public WorldLocale locale;
+  final public Faction faction;
   
   GOVERNMENT government = GOVERNMENT.FEUDAL;
   
@@ -49,18 +54,20 @@ public class Base implements Session.Saveable, Trader, BaseEvents.Trouble {
   
   
   
-  public Base(World world, WorldLocale locale) {
-    this(world, locale, "Base???");
+  public Base(World world, WorldLocale locale, Faction faction) {
+    this(world, locale, faction, "Base???");
   }
   
   
-  public Base(World world, WorldLocale locale, String name) {
+  public Base(World world, WorldLocale locale, Faction faction, String name) {
     if (world  == null) I.complain("CANNOT PASS NULL WORLD:  "+name);
     if (locale == null) I.complain("CANNOT PASS NULL LOCALE: "+name);
     
-    this.world  = world ;
-    this.locale = locale;
-    this.name   = name  ;
+    this.world   = world  ;
+    this.locale  = locale ;
+    this.faction = faction;
+    
+    this.name = name;
   }
   
   
@@ -69,8 +76,9 @@ public class Base implements Session.Saveable, Trader, BaseEvents.Trouble {
     
     name = s.loadString();
     
-    world = (World) s.loadObject();
-    locale = world.locales.atIndex(s.loadInt());
+    world   = (World) s.loadObject();
+    locale  = (WorldLocale) s.loadObject();
+    faction = (Faction) s.loadObject();
     
     government = GOVERNMENT.values()[s.loadInt()];
     s.loadObjects(buildTypes);
@@ -98,7 +106,8 @@ public class Base implements Session.Saveable, Trader, BaseEvents.Trouble {
     s.saveString(name);
     
     s.saveObject(world);
-    s.saveInt(world.locales.indexOf(locale));
+    s.saveObject(locale);
+    s.saveObject(faction);
     
     s.saveInt(government.ordinal());
     s.saveObjects(buildTypes);
@@ -499,13 +508,55 @@ public class Base implements Session.Saveable, Trader, BaseEvents.Trouble {
   
   
   
+  /**  Boilerplate interface methods-
+    */
+  public Tally <Good> inventory () { return trading.inventory (); }
+  public Tally <Good> needLevels() { return trading.needLevels(); }
+  public Tally <Good> prodLevels() { return trading.prodLevels(); }
+  
+  public float shopPrice(Good good, Task purchase) {
+    return trading.shopPrice(good, purchase);
+  }
+  
+  public float importPrice(Good g, Base sells) {
+    return trading.importPrice(g, sells);
+  }
+  
+  public float exportPrice(Good g, Base buys) {
+    return trading.exportPrice(g, buys);
+  }
+  
+  public boolean allowExport(Good g, Trader buys) {
+    return trading.allowExport(g, buys);
+  }
+  
+  
+  
+  /**  Generating trouble...
+    */
+  public Faction faction() {
+    return faction;
+  }
+  
+  
+  public float troublePower() {
+    return armyPower;
+  }
+  
+  
+  public void generateTrouble(Area activeMap, float factionPower) {
+    //  TODO:  Fill this in!
+  }
+  
+
+
   /**  Graphical, debug and interface methods-
     */
   public String name() {
     return name;
   }
-  
-  
+
+
   public void setName(String name) {
     this.name = name;
   }

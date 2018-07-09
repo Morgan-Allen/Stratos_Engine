@@ -195,7 +195,7 @@ public class WorldScenario extends Scenario {
   protected Base createBase(Area stage, World world) {
     
     Base homeland = expedition.homeland;
-    Base landing = new Base(world, stage.locale);
+    Base landing = new Base(world, stage.locale, expedition.faction);
     
     landing.setName("Player Landing");
     landing.initFunds(expedition.funds);

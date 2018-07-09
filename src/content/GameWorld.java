@@ -77,7 +77,7 @@ public class GameWorld {
     //  TODO:  Replace these with the named homeworlds!
     
     WorldLocale home = world.addLocale(1, 1, "Homeworld", true);
-    Base homeBase = new Base(world, home);
+    Base homeBase = new Base(world, home, FACTION_SETTLERS);
     
     homeBase.setName("Homeworld Base");
     homeBase.trading.setTradeLevel(PARTS   , 0, 5 );

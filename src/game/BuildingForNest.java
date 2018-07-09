@@ -92,6 +92,25 @@ public class BuildingForNest extends Building implements BaseEvents.Trouble {
   
   
   
+  /**  Generating trouble...
+    */
+  public Faction faction() {
+    return base().faction;
+  }
+  
+  
+  public float troublePower() {
+    //  TODO:  Adjust this.
+    return 4;
+  }
+  
+  
+  public void generateTrouble(Area activeMap, float factionPower) {
+    // TODO:  Fill this in...
+  }
+  
+  
+  
   /**  Regular updates and behaviour scripting-
     */
   public void performSpawning() {
@@ -143,8 +162,8 @@ public class BuildingForNest extends Building implements BaseEvents.Trouble {
       }
     }
   }
-  
-  
+
+
   public boolean allowsResidence(Actor actor) {
     if (actor.work() == this) return true;
     return false;
