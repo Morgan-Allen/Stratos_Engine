@@ -199,13 +199,13 @@ public class WorldScenario extends Scenario {
     
     landing.setName("Player Landing");
     landing.initFunds(expedition.funds);
-    landing.setHomeland(homeland);
+    landing.relations.setHomeland(homeland);
     landing.assignBuildTypes(expedition.faction.buildTypes());
     
     stage.addBase(landing);
     world.addBases(landing);
     
-    Base.setPosture(homeland, landing, Base.POSTURE.VASSAL, true);
+    BaseRelations.setPosture(homeland, landing, BaseRelations.POSTURE.VASSAL, true);
     homeland.updateOffmapTraders();
     
     return landing;

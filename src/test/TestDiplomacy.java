@@ -4,7 +4,7 @@ package test;
 import game.*;
 import static game.GameConstants.*;
 import static game.ActorBonds.*;
-import static game.Base.*;
+import static game.BaseRelations.*;
 import static game.BaseCouncil.*;
 import static content.GameContent.*;
 import content.*;
@@ -121,7 +121,7 @@ public class TestDiplomacy extends LogicTest {
       e.assignBase(awayC);
     }
     
-    escort.terms.assignTerms(Base.POSTURE.ALLY, null, bride, null);
+    escort.terms.assignTerms(POSTURE.ALLY, null, bride, null);
     escort.setWorldFocus(baseC);
     escort.beginMission(awayC);
     
@@ -169,7 +169,7 @@ public class TestDiplomacy extends LogicTest {
       if (offerAccepted && ! termsOkay) {
         boolean termsFilled = true;
         termsFilled &= monarch.bonds.hasBondType(bride, BOND_MARRIED);
-        termsFilled &= baseC.isAllyOf(awayC);
+        termsFilled &= baseC.relations.isAllyOf(awayC);
         termsOkay = termsFilled;
       }
       

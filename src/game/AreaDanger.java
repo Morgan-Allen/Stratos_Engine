@@ -55,7 +55,7 @@ public class AreaDanger {
       float danger = 0;
       
       if (at.size() > 0) for (Active a : at) {
-        if (! base.isEnemyOf(a.base())) continue;
+        if (! base.relations.isEnemyOf(a.base())) continue;
         float power = TaskCombat.attackPower((Element) a);
         danger += power;
       }

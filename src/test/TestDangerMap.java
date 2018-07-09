@@ -35,7 +35,7 @@ public class TestDangerMap extends LogicTest {
     
     
     AreaTile centre = map.tileAt(map.size() / 2, map.size() / 2);
-    Base.setPosture(base, map.locals, Base.POSTURE.ENEMY, true);
+    BaseRelations.setPosture(base, map.locals, BaseRelations.POSTURE.ENEMY, true);
     
     for (int n = NUM_THREATS; n-- > 0;) {
       Type type = Rand.yes() ? TRIPOD : DRONE;
@@ -52,7 +52,7 @@ public class TestDangerMap extends LogicTest {
       float actualSums[][] = new float[gridRes][gridRes];
       
       for (Actor a : map.actors()) {
-        if (! base.isEnemyOf(a.base())) continue;
+        if (! base.relations.isEnemyOf(a.base())) continue;
         
         float power = TaskCombat.attackPower(a);
         int gX = a.at().x / FLAG_RES, gY = a.at().y / FLAG_RES;

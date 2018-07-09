@@ -3,7 +3,7 @@
 package game;
 import util.*;
 import static game.ActorBonds.*;
-import static game.Base.*;
+import static game.BaseRelations.*;
 import static game.BaseCouncil.*;
 import static game.GameConstants.*;
 
@@ -83,7 +83,7 @@ public class WorldEvents {
     world.recordEvent("attacked", from, goes);
     enterHostility(goes, from, victory, 1);
     
-    if (victory && from.government != GOVERNMENT.BARBARIAN) {
+    if (victory && from.government != Base.GOVERNMENT.BARBARIAN) {
       imposeTerms(goes, from, mission);
     }
     if (victory) {
@@ -96,7 +96,7 @@ public class WorldEvents {
     //  Either way, report the final outcome:
     if (report) {
       I.say("  Adjusted loss: "+fromLost+"/"+goesLost);
-      I.say("  "+from+" now: "+goes.posture(from)+" of "+goes);
+      I.say("  "+from+" now: "+goes.relations.posture(from)+" of "+goes);
     }
   }
   
@@ -168,8 +168,8 @@ public class WorldEvents {
   ) {
     if (upon == null || from == null || mission == null) return;
     setPosture(from, upon, mission.terms.postureDemand, true);
-    setSuppliesDue (upon, from, mission.terms.tributeDemand );
-    arrangeMarriage(upon, from, mission.terms.marriageDemand);
+    Base.setSuppliesDue(upon, from, mission.terms.tributeDemand );
+    arrangeMarriage    (upon, from, mission.terms.marriageDemand);
   }
   
   
@@ -198,16 +198,17 @@ public class WorldEvents {
     if (victor == null || losing == null || mission == null) return;
     
     boolean report = false;
-    float initVP = victor.prestige(), initLP = losing.prestige();
+    float initVP = victor.relations.prestige();
+    float initLP = losing.relations.prestige();
     
-    losing.toggleRebellion(victor, false);
+    losing.relations.toggleRebellion(victor, false);
     incPrestige(victor, PRES_VICTORY_GAIN);
     incPrestige(losing, PRES_DEFEAT_LOSS );
     
     if (report) {
       I.say(victor+" prevailed over "+losing+"!!!");
-      I.say(victor+" Prestige: "+initVP+" -> "+victor.prestige());
-      I.say(losing+" Prestige: "+initLP+" -> "+losing.prestige());
+      I.say(victor+" Prestige: "+initVP+" -> "+victor.relations.prestige());
+      I.say(losing+" Prestige: "+initLP+" -> "+losing.relations.prestige());
     }
     
     mission.setMissionComplete(mission.base() == victor);
@@ -225,7 +226,8 @@ public class WorldEvents {
     
     //  TODO:  It should ideally take time for the news of a given assault to
     //  reach more distant cities?
-    enterHostility(defends.currentLord(), attacks, victory, weight / 2);
+    Base lord = defends.relations.currentLord();
+    enterHostility(lord, attacks, victory, weight / 2);
   }
 }
 

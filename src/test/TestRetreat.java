@@ -30,7 +30,7 @@ public class TestRetreat extends LogicTest {
     Base enemyBase = new Base(world, map.locale, "Enemy Base");
     enemyBase.attachMap(map);
     map.addBase(enemyBase);
-    Base.setPosture(base, enemyBase, POSTURE.ENEMY, true);
+    BaseRelations.setPosture(base, enemyBase, BaseRelations.POSTURE.ENEMY, true);
     
     world.settings.toggleFatigue = false;
     world.settings.toggleInjury  = false;

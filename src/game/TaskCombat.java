@@ -2,7 +2,7 @@
 
 package game;
 import static game.GameConstants.*;
-import static game.Base.*;
+import static game.BaseRelations.*;
 import static game.Area.*;
 import graphics.common.*;
 import util.*;
@@ -62,7 +62,7 @@ public class TaskCombat extends Task {
     if (GA != null && GA == GB) return POSTURE.ALLY;
     if (GB != null && CA == GB) return POSTURE.ALLY;
     if (GA != null && GA == CB) return POSTURE.ALLY;
-    return CA.posture(CB);
+    return CA.relations.posture(CB);
   }
   
   

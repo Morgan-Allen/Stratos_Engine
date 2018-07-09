@@ -44,7 +44,7 @@ public class TestSieging extends LogicTest {
     awayC.council.setTypeAI(BaseCouncil.AI_OFF);
     
     World.setupRoute(baseC.locale, awayC.locale, 1, Type.MOVE_LAND);
-    Base.setPosture(baseC, awayC, Base.POSTURE.ENEMY, true);
+    BaseRelations.setPosture(baseC, awayC, BaseRelations.POSTURE.ENEMY, true);
     
     
     AreaPlanning.placeStructure(SHIELD_WALL, baseC, true, 4, 4, 20, 20);
@@ -97,8 +97,8 @@ public class TestSieging extends LogicTest {
     store.enterMap(map, 12, 14, 1, baseC);
     store.setInventory(MEDICINE, 10);
     
-    float initPrestige = awayC.prestige();
-    float initLoyalty  = baseC.loyalty(awayC);
+    float initPrestige = awayC.relations.prestige();
+    float initLoyalty  = baseC.relations.loyalty(awayC);
     Table <Actor, AreaTile> initPatrolPoints = new Table();
     Mission enemy = null;
     Tally <Good> tribute = null;
@@ -256,7 +256,7 @@ public class TestSieging extends LogicTest {
       }
       
       if (standsOkay && ! victorious) {
-        if (baseC.isVassalOf(awayC)) {
+        if (baseC.relations.isVassalOf(awayC)) {
           victorious = true;
           store.addInventory(tribute);
           store.prodLevels().add(tribute);
@@ -279,12 +279,12 @@ public class TestSieging extends LogicTest {
           break;
         }
         
-        if (awayC.prestige() <= initPrestige) {
+        if (awayC.relations.prestige() <= initPrestige) {
           I.say("\nPrestige should be boosted by conquest!");
           break;
         }
         
-        if (baseC.loyalty(awayC) >= initLoyalty) {
+        if (baseC.relations.loyalty(awayC) >= initLoyalty) {
           I.say("\nLoyalty should be reduced by conquest!");
           break;
         }

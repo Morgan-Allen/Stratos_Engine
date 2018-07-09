@@ -3,6 +3,7 @@
 package game;
 import static game.GameConstants.*;
 import static game.World.*;
+import static game.BaseRelations.*;
 import util.*;
 
 
@@ -15,53 +16,6 @@ public class Base implements Session.Saveable, Trader, BaseEvents.Trouble {
   public static enum GOVERNMENT {  //  TODO:  Move into the Council class.
     IMPERIAL, FEUDAL, BARBARIAN, REPUBLIC
   }
-  public static enum POSTURE {
-    ENEMY  ,
-    ALLY   ,
-    VASSAL ,
-    LORD   ,
-    NEUTRAL,
-    TRADING,
-  };
-  final public static float
-    LOY_DEVOTED  =  1.0F,
-    LOY_FRIENDLY =  0.5F,
-    LOY_CIVIL    =  0.0F,
-    LOY_STRAINED = -0.5F,
-    LOY_NEMESIS  = -1.0F,
-    LOYALTIES[]  = { 1f, 0.5f, 0, -0.5f, -1 }
-  ;
-  final static String LOYALTY_DESC[] = {
-    "Devoted", "Friendly", "Civil", "Strained", "Nemesis"
-  };
-  final public static float
-    LOY_ATTACK_PENALTY  = -0.25f,
-    LOY_CONQUER_PENALTY = -0.50f,
-    LOY_REBEL_PENALTY   = -0.25f,
-    LOY_TRIBUTE_BONUS   =  0.05f,
-    LOY_FADEOUT_TIME    =  AVG_TRIBUTE_YEARS * YEAR_LENGTH * 2,
-    
-    PRESTIGE_MAX        =  100,
-    PRESTIGE_AVG        =  50,
-    PRESTIGE_MIN        =  0,
-    
-    PRES_VICTORY_GAIN   =  25,
-    PRES_DEFEAT_LOSS    = -15,
-    PRES_REBEL_LOSS     = -10,
-    PRES_FADEOUT_TIME   =  AVG_TRIBUTE_YEARS * YEAR_LENGTH * 2
-  ;
-  
-  public static class Relation {
-    Base    with;
-    POSTURE posture;
-    float   loyalty;
-    
-    int madeVassalDate = -1;
-    int lastRebelDate  = -1;
-    
-    Tally <Good> suppliesDue  = new Tally();
-    Tally <Good> suppliesSent = new Tally();
-  }
   
   
   String name = "City";
@@ -71,11 +25,10 @@ public class Base implements Session.Saveable, Trader, BaseEvents.Trouble {
   final public WorldLocale locale;
   
   GOVERNMENT government = GOVERNMENT.FEUDAL;
-  float prestige = PRESTIGE_AVG;
-  final public BaseCouncil council = new BaseCouncil(this);
-  final Table <Base, Relation> relations = new Table();
   
-  Base homeland = null;
+  final public BaseCouncil   council   = new BaseCouncil  (this);
+  final public BaseRelations relations = new BaseRelations(this);
+  
   Building headquarters = null;
   
   private int   currentFunds = 0;
@@ -128,21 +81,9 @@ public class Base implements Session.Saveable, Trader, BaseEvents.Trouble {
     locale = world.locales.atIndex(s.loadInt());
     
     government = GOVERNMENT.values()[s.loadInt()];
-    prestige = s.loadFloat();
     council.loadState(s);
-    for (int n = s.loadInt(); n-- > 0;) {
-      Relation r = new Relation();
-      r.with    = (Base) s.loadObject();
-      r.posture = POSTURE.values()[s.loadInt()];
-      r.loyalty = s.loadFloat();
-      r.madeVassalDate = s.loadInt();
-      r.lastRebelDate  = s.loadInt();
-      s.loadTally(r.suppliesDue );
-      s.loadTally(r.suppliesSent);
-      relations.put(r.with, r);
-    }
+    relations.loadState(s);
     
-    homeland = (Base) s.loadObject();
     headquarters = (Building) s.loadObject();
     
     currentFunds = s.loadInt();
@@ -176,20 +117,9 @@ public class Base implements Session.Saveable, Trader, BaseEvents.Trouble {
     s.saveInt(world.locales.indexOf(locale));
     
     s.saveInt(government.ordinal());
-    s.saveFloat(prestige);
     council.saveState(s);
-    s.saveInt(relations.size());
-    for (Relation r : relations.values()) {
-      s.saveObject(r.with);
-      s.saveInt(r.posture.ordinal());
-      s.saveFloat(r.loyalty);
-      s.saveInt(r.madeVassalDate);
-      s.saveInt(r.lastRebelDate );
-      s.saveTally(r.suppliesDue );
-      s.saveTally(r.suppliesSent);
-    }
+    relations.saveState(s);
     
-    s.saveObject(homeland);
     s.saveObject(headquarters);
     
     s.saveInt(currentFunds);
@@ -312,169 +242,6 @@ public class Base implements Session.Saveable, Trader, BaseEvents.Trouble {
   }
   
   
-  public void setHomeland(Base homeland) {
-    this.homeland = homeland;
-  }
-  
-  
-  public Base homeland() {
-    return homeland;
-  }
-  
-  
-  Relation relationWith(Base other) {
-    if (other == null) return null;
-    Relation r = relations.get(other);
-    if (r == null) {
-      relations.put(other, r = new Relation());
-      r.with    = other;
-      r.posture = POSTURE.NEUTRAL;
-      r.loyalty = LOY_CIVIL;
-    }
-    return r;
-  }
-  
-  
-  public POSTURE posture(Base other) {
-    if (other == null) return null;
-    return relationWith(other).posture;
-  }
-  
-  
-  public float loyalty(Base other) {
-    if (other == null) return 0;
-    if (other == this) return 1;
-    return relationWith(other).loyalty;
-  }
-  
-  
-  public static void setPosture(Base a, Base b, POSTURE p, boolean symmetric) {
-    if (p == null) p = POSTURE.NEUTRAL;
-    //
-    //  You cannot have more than one Lord at a time, so break relations with
-    //  any former master-
-    if (p == POSTURE.LORD) {
-      Base formerLord = a.currentLord();
-      if (formerLord == b) return;
-      if (formerLord != null) setPosture(a, formerLord, POSTURE.NEUTRAL, true);
-      a.relationWith(b).madeVassalDate = a.world.time;
-    }
-    
-    a.relationWith(b).posture = p;
-    
-    //
-    //  If you're enforcing symmetry, make sure the appropriate posture is
-    //  reflected in the other city-
-    if (symmetric) {
-      POSTURE reverse = POSTURE.NEUTRAL;
-      if (p == POSTURE.TRADING) reverse = POSTURE.TRADING;
-      if (p == POSTURE.VASSAL ) reverse = POSTURE.LORD  ;
-      if (p == POSTURE.LORD   ) reverse = POSTURE.VASSAL;
-      if (p == POSTURE.ALLY   ) reverse = POSTURE.ALLY  ;
-      if (p == POSTURE.ENEMY  ) reverse = POSTURE.ENEMY ;
-      setPosture(b, a, reverse, false);
-    }
-  }
-  
-  
-  public void toggleRebellion(Base lord, boolean is) {
-    Relation r = relationWith(lord);
-    if (r.posture != POSTURE.LORD) return;
-    
-    if (is) {
-      r.lastRebelDate = world.time;
-      r.suppliesSent.clear();
-      incLoyalty(lord, this, LOY_REBEL_PENALTY / 2);
-    }
-    else {
-      r.lastRebelDate = -1;
-    }
-  }
-  
-  
-  public boolean isVassalOf(Base o) { return posture(o) == POSTURE.LORD  ; }
-  public boolean isLordOf  (Base o) { return posture(o) == POSTURE.VASSAL; }
-  public boolean isEnemyOf (Base o) { return posture(o) == POSTURE.ENEMY ; }
-  public boolean isAllyOf  (Base o) { return posture(o) == POSTURE.ALLY  ; }
-  
-  
-  public static void incLoyalty(Base a, Base b, float inc) {
-    Relation r = a.relationWith(b);
-    float loyalty = Nums.clamp(r.loyalty + inc, -1, 1);
-    r.loyalty = loyalty;
-  }
-  
-  
-  public void initPrestige(float level) {
-    this.prestige = level;
-  }
-  
-  
-  public float prestige() {
-    return prestige;
-  }
-  
-  
-  public static void incPrestige(Base c, float inc) {
-    c.prestige = Nums.clamp(c.prestige + inc, PRESTIGE_MIN, PRESTIGE_MAX);
-  }
-  
-  
-  public Base currentLord() {
-    for (Relation r : relations.values()) {
-      if (r.posture == POSTURE.LORD) return r.with;
-    }
-    return null;
-  }
-  
-  
-  public Base capitalLord() {
-    Base c = this;
-    while (true) {
-      Base l = c.currentLord();
-      if (l == null) return c;
-      else c = l;
-    }
-  }
-  
-  
-  public boolean isVassalOfSameLord(Base o) {
-    Base lord = capitalLord();
-    return lord != null && o.capitalLord() == lord;
-  }
-  
-  
-  public boolean isLoyalVassalOf(Base o) {
-    Relation r = relationWith(o);
-    if (r == null || r.posture != POSTURE.LORD) return false;
-    return r.lastRebelDate == -1;
-  }
-  
-  
-  public Series <Base> relationsWith() {
-    Batch <Base> all = new Batch();
-    for (Base c : relations.keySet()) all.add(c);
-    return all;
-  }
-  
-  
-  public Series <Base> vassalsInRevolt() {
-    Batch <Base> all = new Batch();
-    for (Relation r : relations.values()) {
-      if (r.with.yearsSinceRevolt(this) > 0) all.add(r.with);
-    }
-    return all;
-  }
-  
-  
-  public float yearsSinceRevolt(Base lord) {
-    Relation r = relationWith(lord);
-    if (r.posture != POSTURE.LORD         ) return -1;
-    if (r == null || r.lastRebelDate == -1) return -1;
-    return (world.time - r.lastRebelDate) * 1f / YEAR_LENGTH;
-  }
-  
-  
   
   /**  Setting and accessing tribute and trade levels-
     */
@@ -527,26 +294,26 @@ public class Base implements Session.Saveable, Trader, BaseEvents.Trouble {
   
   public static void setSuppliesDue(Base a, Base b, Tally <Good> suppliesDue) {
     if (suppliesDue == null) suppliesDue = new Tally();
-    Relation r = a.relationWith(b);
+    Relation r = a.relations.relationWith(b);
     r.suppliesDue = suppliesDue;
   }
   
   
   public static Tally <Good> suppliesDue(Base a, Base b) {
-    Relation r = a.relationWith(b);
+    Relation r = a.relations.relationWith(b);
     if (r == null) return new Tally();
     return r.suppliesDue;
   }
   
   
   public static float goodsSent(Base a, Base b, Good g) {
-    Relation r = a.relationWith(b);
+    Relation r = a.relations.relationWith(b);
     return r == null ? 0 : r.suppliesSent.valueFor(g);
   }
   
   
   public static float suppliesDue(Base a, Base b, Good g) {
-    Relation r = a.relationWith(b);
+    Relation r = a.relations.relationWith(b);
     return r == null ? 0 : r.suppliesDue.valueFor(g);
   }
   
@@ -568,7 +335,7 @@ public class Base implements Session.Saveable, Trader, BaseEvents.Trouble {
   
   
   public boolean allowExport(Good g, Trader buys) {
-    if (buys.base().homeland() == this) return true;
+    if (buys.base().relations.homeland() == this) return true;
     if (Base.suppliesDue(this, buys.base(), g) > 0) return true;
     return prodLevel.valueFor(g) > 0;
   }
@@ -586,7 +353,7 @@ public class Base implements Session.Saveable, Trader, BaseEvents.Trouble {
   //  Buying from where goods are abundant imposes a lower price.
   
   float scarcityMultiple(Base other, Good g) {
-    if (other != this.homeland) return 1.0f;
+    if (other != this.relations.homeland()) return 1.0f;
     float mult = 1.0f;
     float needS = other.needLevel(g);
     float prodS = other.prodLevel(g);
@@ -689,7 +456,7 @@ public class Base implements Session.Saveable, Trader, BaseEvents.Trouble {
     final int UPDATE_GAP = map == null ? DAY_LENGTH : 10;
     boolean updateStats = world.time % UPDATE_GAP == 0;
     boolean activeMap   = map != null;
-    Base    lord        = currentLord();
+    Base    lord        = relations.currentLord();
     //
     //  Local player-owned cities (i.e, with their own map), must derive their
     //  vitual statistics from that small-scale city map:
@@ -773,13 +540,13 @@ public class Base implements Session.Saveable, Trader, BaseEvents.Trouble {
       
       //  TODO:  Move this to the Council class?
       
-      if (isLoyalVassalOf(lord)) {
+      if (relations.isLoyalVassalOf(lord)) {
         if (council.considerRevolt(lord, UPDATE_GAP)) {
-          toggleRebellion(lord, true);
+          relations.toggleRebellion(lord, true);
         }
         //  TODO:  You may have to generate caravans to visit player cities...
         else if (lord.map == null) {
-          Relation r = relationWith(lord);
+          Relation r = relations.relationWith(lord);
           for (Good g : r.suppliesDue.keys()) {
             float sent = r.suppliesDue.valueFor(g) * usageInc * 1.1f;
             r.suppliesSent.add(sent, g);
@@ -792,13 +559,13 @@ public class Base implements Session.Saveable, Trader, BaseEvents.Trouble {
     //  defaults over time:
     if (updateStats) {
       float presDrift = UPDATE_GAP * PRESTIGE_AVG * 1f / PRES_FADEOUT_TIME;
-      float presDiff = PRESTIGE_AVG - prestige;
+      float presDiff = PRESTIGE_AVG - relations.prestige;
       if (Nums.abs(presDiff) > presDrift) {
         presDiff = presDrift * (presDiff > 0 ? 1 : -1);
       }
-      prestige += presDiff;
+      relations.prestige += presDiff;
       
-      for (Relation r : relations.values()) {
+      for (Relation r : relations.relations()) {
         float diff = LOY_CIVIL - r.loyalty;
         diff *= DAY_LENGTH * 1f / LOY_FADEOUT_TIME;
         r.loyalty += diff;
@@ -809,8 +576,8 @@ public class Base implements Session.Saveable, Trader, BaseEvents.Trouble {
     //  lord (with the possibility of entering a state of revolt if those are
     //  failed.)
     if (world.time % YEAR_LENGTH == 0) {
-      if (isLoyalVassalOf(lord)) {
-        Relation r = relationWith(lord);
+      if (relations.isLoyalVassalOf(lord)) {
+        Relation r = relations.relationWith(lord);
         int timeAsVassal = world.time - r.madeVassalDate;
         boolean failedSupply = false, doCheck = timeAsVassal >= YEAR_LENGTH;
         
@@ -822,7 +589,7 @@ public class Base implements Session.Saveable, Trader, BaseEvents.Trouble {
         r.suppliesSent.clear();
         
         if (failedSupply) {
-          toggleRebellion(lord, true);
+          relations.toggleRebellion(lord, true);
         }
         else {
           incLoyalty(lord, this, LOY_TRIBUTE_BONUS);
@@ -830,14 +597,14 @@ public class Base implements Session.Saveable, Trader, BaseEvents.Trouble {
       }
       //
       //  Wipe the slate clean for all other relations:
-      for (Relation r : relations.values()) if (r.with != lord) {
+      for (Relation r : relations.relations()) if (r.with != lord) {
         r.suppliesSent.clear();
       }
       //
       //  And, finally, lose prestige based on any vassals in recent revolt-
       //  and if the time gone exceeds a certain threshold, end vassal status.
-      for (Base revolts : vassalsInRevolt()) {
-        float years = revolts.yearsSinceRevolt(this);
+      for (Base revolts : relations.vassalsInRevolt()) {
+        float years = revolts.relations.yearsSinceRevolt(this);
         float maxT = AVG_TRIBUTE_YEARS, timeMult = (maxT - years) / maxT;
         
         if (years < AVG_TRIBUTE_YEARS) {
@@ -878,7 +645,7 @@ public class Base implements Session.Saveable, Trader, BaseEvents.Trouble {
     
     for (Base b : world.bases) {
       
-      POSTURE p = this.posture(b);
+      POSTURE p = this.relations.posture(b);
       boolean shouldTrade =
         p != POSTURE.NEUTRAL &&
         p != POSTURE.ENEMY   &&

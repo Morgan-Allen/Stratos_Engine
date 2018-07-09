@@ -6,7 +6,7 @@ import util.*;
 import content.*;
 import game.*;
 import static game.ActorBonds.*;
-import static game.Base.*;
+import static game.BaseRelations.*;
 import static game.BaseCouncil.*;
 import static game.GameConstants.*;
 import static game.World.*;
@@ -40,11 +40,11 @@ public class TestWorld extends LogicTest {
         vassal.setInventory(g, demand);
       }
       
-      float AVG_P = Base.PRESTIGE_AVG, AVG_L = Base.LOY_CIVIL;
+      float AVG_P = PRESTIGE_AVG, AVG_L = LOY_CIVIL;
       float initPrestige = AVG_P + ((Rand.yes() ? 1 : -1) * 10);
       float initLoyalty  = AVG_L + ((Rand.yes() ? 1 : -1) / 2f);
-      lord.initPrestige(initPrestige);
-      Base.incLoyalty(vassal, lord, initLoyalty);
+      lord.relations.initPrestige(initPrestige);
+      incLoyalty(vassal, lord, initLoyalty);
       
       int time = 0;
       while (time < YEAR_LENGTH) {
@@ -84,7 +84,7 @@ public class TestWorld extends LogicTest {
       }
       //*/
       
-      float endP = lord.prestige(), endL = vassal.loyalty(lord);
+      float endP = lord.relations.prestige(), endL = vassal.relations.loyalty(lord);
       if (Nums.abs(endP - AVG_P) >= Nums.abs(initPrestige - AVG_P)) {
         I.say("\nWORLD-EVENTS TESTING FAILED- City prestige did not decay over time!");
         return false;
@@ -106,11 +106,11 @@ public class TestWorld extends LogicTest {
         I.say("\nWORLD-EVENTS TESTING FAILED- Invasion inflicted no casualties!");
         return false;
       }
-      if (! pair[0].isVassalOf(pair[1])) {
+      if (! pair[0].relations.isVassalOf(pair[1])) {
         I.say("\nWORLD-EVENTS TESTING FAILED- Invasion did not impose vassal status!");
         return false;
       }
-      if (pair[0].loyalty(pair[1]) >= Base.LOY_CIVIL) {
+      if (pair[0].relations.loyalty(pair[1]) >= LOY_CIVIL) {
         I.say("\nWORLD-EVENTS TESTING FAILED- Invasion did not sour relations!");
         return false;
       }
@@ -123,7 +123,7 @@ public class TestWorld extends LogicTest {
       goes.council.setTypeAI(BaseCouncil.AI_PACIFIST);
       runCompleteDialog(from, goes);
       
-      if (from.posture(goes) != Base.POSTURE.ALLY) {
+      if (from.relations.posture(goes) != POSTURE.ALLY) {
         I.say("\nWORLD-EVENTS TESTING FAILED- Dialog did not create ally!");
         return false;
       }
@@ -170,7 +170,7 @@ public class TestWorld extends LogicTest {
       from.setGovernment(Base.GOVERNMENT.BARBARIAN);
       runCompleteInvasion(from, goes);
       
-      if (! goes.isEnemyOf(from)) {
+      if (! goes.relations.isEnemyOf(from)) {
         I.say("\nWORLD-EVENTS TESTING FAILED- Barbarian invasion did not prompt correct posture!");
         return false;
       }
@@ -188,31 +188,31 @@ public class TestWorld extends LogicTest {
       
       Base lord = new Base(world, world.addLocale(0, 1));
       world.addBases(lord);
-      Base.setPosture(lord, weak, Base.POSTURE.VASSAL, true);
+      setPosture(lord, weak, POSTURE.VASSAL, true);
       Base capital = new Base(world, world.addLocale(1, 1));
       world.addBases(capital);
-      Base.setPosture(capital, lord, Base.POSTURE.VASSAL, true);
+      setPosture(capital, lord, POSTURE.VASSAL, true);
       
-      if (capital != weak.capitalLord()) {
+      if (capital != weak.relations.capitalLord()) {
         I.say("\nWORLD-EVENTS TESTING FAILED- Did not calculate capital correctly!");
         return false;
       }
       
       runCompleteInvasion(strong, weak);
       
-      if (lord.isLordOf(weak)) {
+      if (lord.relations.isLordOf(weak)) {
         I.say("\nWORLD-EVENTS TESTING FAILED- Invasion of vassal did not revoke lord's claim!");
         return false;
       }
-      if (! weak.isVassalOf(strong)) {
+      if (! weak.relations.isVassalOf(strong)) {
         I.say("\nWORLD-EVENTS TESTING FAILED- Invasion of vassal did not impose vassal status!");
         return false;
       }
-      if (! capital.isEnemyOf(strong)) {
+      if (! capital.relations.isEnemyOf(strong)) {
         I.say("\nWORLD-EVENTS TESTING FAILED- Invasion of vassal did not provoke war!");
         return false;
       }
-      if (capital.loyalty(strong) >= Base.LOY_CIVIL) {
+      if (capital.relations.loyalty(strong) >= LOY_CIVIL) {
         I.say("\nWORLD-EVENTS TESTING FAILED- Invasion of vassal did not sour relations with capital!");
         return false;
       }
@@ -227,22 +227,22 @@ public class TestWorld extends LogicTest {
       setPosture(vassal, lord, POSTURE.LORD, true);
       vassal.council.setTypeAI(BaseCouncil.AI_DEFIANT);
       
-      float initPrestige = lord.prestige();
+      float initPrestige = lord.relations.prestige();
       
       int time = 0;
       while (time < YEAR_LENGTH * (AVG_TRIBUTE_YEARS + 1)) {
         world.updateWithTime(time++);
       }
       
-      if (vassal.isLoyalVassalOf(lord)) {
+      if (vassal.relations.isLoyalVassalOf(lord)) {
         I.say("\nWORLD-EVENTS TESTING FAILED- Defiant vassal did not rebel!");
         return false;
       }
-      if (vassal.isVassalOf(lord)) {
+      if (vassal.relations.isVassalOf(lord)) {
         I.say("\nWORLD-EVENTS TESTING FAILED- City in rebellion did not break relations!");
         return false;
       }
-      if (lord.prestige() >= initPrestige) {
+      if (lord.relations.prestige() >= initPrestige) {
         I.say("\nWORLD-EVENTS TESTING FAILED- Lord's prestige did not suffer from rebellion!");
       }
     }
@@ -256,14 +256,14 @@ public class TestWorld extends LogicTest {
       vassal.council.setTypeAI(BaseCouncil.AI_DEFIANT);
       
       int time = 0;
-      while (vassal.isLoyalVassalOf(lord)) {
+      while (vassal.relations.isLoyalVassalOf(lord)) {
         world.updateWithTime(time++);
       }
       vassal.council.setTypeAI(BaseCouncil.AI_OFF);
 
       runCompleteInvasion(lord, vassal);
       
-      if (! vassal.isLoyalVassalOf(lord)) {
+      if (! vassal.relations.isLoyalVassalOf(lord)) {
         I.say("\nWORLD-EVENTS TESTING FAILED- Revolt suppression did not occur!");
         return false;
       }
@@ -276,7 +276,7 @@ public class TestWorld extends LogicTest {
       Base vassal = pair[0], lord = pair[1];
       World world = vassal.world;
       setPosture(vassal, lord, POSTURE.LORD, true);
-      setSuppliesDue(vassal, lord, new Tally().setWith(PSALT, 10));
+      Base.setSuppliesDue(vassal, lord, new Tally().setWith(PSALT, 10));
       vassal.council.setTypeAI(BaseCouncil.AI_COMPLIANT);
       
       int time = 0;
@@ -493,8 +493,8 @@ public class TestWorld extends LogicTest {
         boolean hasEmpire = true;
         for (Base o : world.bases()) {
           if (o == mapCity || o == c) continue;
-          if (o.capitalLord() != c) hasEmpire = false;
-          if (o.isAllyOf(c)) timeWithAllies += timeStep;
+          if (o.relations.capitalLord() != c) hasEmpire = false;
+          if (o.relations.isAllyOf(c)) timeWithAllies += timeStep;
         }
         empireExists |= hasEmpire;
       }
@@ -595,8 +595,8 @@ public class TestWorld extends LogicTest {
     int numLords = 0;
     
     for (Base o : city.world.bases()) {
-      POSTURE p = city.posture(o);
-      POSTURE i = o.posture(city);
+      POSTURE p = city.relations.posture(o);
+      POSTURE i = o.relations.posture(city);
       if (p == POSTURE.LORD) numLords++;
       if (p == POSTURE.VASSAL  && i != POSTURE.LORD   ) return false;
       if (p == POSTURE.LORD    && i != POSTURE.VASSAL ) return false;
@@ -616,14 +616,14 @@ public class TestWorld extends LogicTest {
       I.say("  "+c+":");
       I.say("    Pop:    "+c.population()+" / "+c.idealPopulation());
       I.say("    Arm:    "+c.armyPower ()+" / "+c.idealArmyPower ());
-      I.say("    Prs:    "+c.prestige());
+      I.say("    Prs:    "+c.relations.prestige());
       I.say("    Need:   "+c.needLevels());
       I.say("    Accept: "+c.prodLevels());
       I.say("    Bld:    "+c.buildLevel());
       I.say("    Inv:    "+c.inventory());
       I.say("    Relations-");
       for (Base o : world.bases()) if (o != c) {
-        I.add(" "+o+": "+c.posture(o)+" "+c.loyalty(o));
+        I.add(" "+o+": "+c.relations.posture(o)+" "+c.relations.loyalty(o));
       }
     }
   }

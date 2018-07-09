@@ -27,7 +27,7 @@ public class PaneMarkets extends DetailPane {
     final Area  area  = UI.area;
     final World world = UI.base.world;
     final Base  base  = UI.base;
-    final Base  home  = base.homeland();
+    final Base  home  = base.relations.homeland();
     
     d.append("\nMarket Goods:          Buy / Sell");
     //  TODO:  It might help to set import/export options from here?

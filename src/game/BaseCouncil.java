@@ -5,7 +5,7 @@ import util.*;
 import static game.GameConstants.*;
 import static game.Mission.*;
 import static game.ActorBonds.*;
-import static game.Base.*;
+import static game.BaseRelations.*;
 
 
 
@@ -338,7 +338,7 @@ public class BaseCouncil {
     //  victory can intimidate opponents.)
     float bravery = membersTraitAvg(TRAIT_BRAVERY);
     float chance = 0, lossA = 0, lossD = 0, presDiff = 0, wallDiff;
-    presDiff = (a.fromC.prestige - a.goesC.prestige) / PRESTIGE_MAX;
+    presDiff = (a.fromC.relations.prestige - a.goesC.relations.prestige) / PRESTIGE_MAX;
     wallDiff = a.goesC.wallsLevel() > 0 ? 1 : 0;
     chance   = a.fromPower / (a.fromPower + a.goesPower);
     chance   = chance + (presDiff / 4);
@@ -378,9 +378,9 @@ public class BaseCouncil {
     angerValue /= 4 * POP_PER_CITIZEN;
     //
     //  And account for pre-existing hostility/loyalty:
-    Relation r       = a.fromC.relationWith(a.goesC);
-    boolean isLord   = a.goesC.isLordOf    (a.fromC);
-    boolean isVassal = a.goesC.isVassalOf  (a.fromC);
+    Relation r       = a.fromC.relations.relationWith(a.goesC);
+    boolean isLord   = a.goesC.relations.isLordOf    (a.fromC);
+    boolean isVassal = a.goesC.relations.isVassalOf  (a.fromC);
     a.hateBonus   = Nums.min(0, 0 - r.loyalty) * angerValue;
     a.lovePenalty = Nums.max(0, 0 + r.loyalty) * angerValue;
     a.hateBonus   *= 1 - (compassion / 2);
@@ -450,9 +450,9 @@ public class BaseCouncil {
     //  TODO:  Merge this with the assessment code below.
     
     float synergyVal = 0, dot = 0, count = 0;
-    for (Base c : goes.relationsWith()) {
-      float valueF = from.loyalty(c);
-      float valueG = goes.loyalty(c);
+    for (Base c : goes.relations.relationsWith()) {
+      float valueF = from.relations.loyalty(c);
+      float valueG = goes.relations.loyalty(c);
       synergyVal += dot = valueF * valueG;
       count += (Nums.abs(dot) + 1) / 2;
     }
@@ -523,9 +523,9 @@ public class BaseCouncil {
     
     //I.say("\nGetting synergy between "+from+" and "+goes);
     float synergyVal = 0, dot = 0, count = 0;
-    for (Base c : goes.relationsWith()) {
-      float valueF = from.loyalty(c);
-      float valueG = goes.loyalty(c);
+    for (Base c : goes.relations.relationsWith()) {
+      float valueF = from.relations.loyalty(c);
+      float valueG = goes.relations.loyalty(c);
       //I.say("  "+c+": "+valueF+" * "+valueG);
       if (valueF == -100 || valueG == -100) continue;
       synergyVal += dot = valueF * valueG;
@@ -560,7 +560,7 @@ public class BaseCouncil {
     }
     
     float relationsVal = 0;
-    relationsVal = (goes.loyalty(from) + from.loyalty(goes)) / 2;
+    relationsVal = (goes.relations.loyalty(from) + from.relations.loyalty(goes)) / 2;
     
     MA.benefits += tradeVal;
     MA.benefits += powerVal;
@@ -595,17 +595,17 @@ public class BaseCouncil {
       if (distance < 0) continue;
       
       if (! (
-        other.isLoyalVassalOf(base) ||
-        other.isVassalOfSameLord(base)
+        other.relations.isLoyalVassalOf(base) ||
+        other.relations.isVassalOfSameLord(base)
       )) {
         MissionAssessment IA = invasionAssessment(base, other, 0.5f, true);
         choices.add(IA);
       }
       
       if (! (
-        other.isLordOf(base) ||
-        other.isAllyOf(base) ||
-        other.isVassalOf(base)
+        other.relations.isLordOf(base) ||
+        other.relations.isAllyOf(base) ||
+        other.relations.isVassalOf(base)
       )) {
         MissionAssessment DA = dialogAssessment(base, other, true);
         choices.add(DA);
@@ -633,7 +633,7 @@ public class BaseCouncil {
       force.toggleRecruit(fights, true);
     }
     
-    if (base.government == GOVERNMENT.BARBARIAN) {
+    if (base.government == Base.GOVERNMENT.BARBARIAN) {
       //  Only non-barbarian governments will set up permanent command-fx or
       //  attempt diplomacy...
     }

@@ -5,6 +5,7 @@ import content.*;
 import static content.GameContent.*;
 import game.*;
 import static game.GameConstants.*;
+import static game.BaseRelations.*;
 import util.*;
 
 
@@ -33,7 +34,7 @@ public class TestVesselMissions extends LogicTest {
     TestVesselMissions test = new TestVesselMissions() {
       
       Mission generateMission(Base base, Base rival) {
-        Base.setPosture(base, rival, Base.POSTURE.ENEMY, true);
+        setPosture(base, rival, POSTURE.ENEMY, true);
         
         Mission raid = new MissionForStrike(rival);
         raid.setWorldFocus(base);
@@ -57,11 +58,11 @@ public class TestVesselMissions extends LogicTest {
       
       Mission generateMission(Building centre, Building barracks, Base rival) {
         Base base = centre.base();
-        Base.setPosture(base, rival, Base.POSTURE.ENEMY, true);
+        setPosture(base, rival, POSTURE.ENEMY, true);
         
         Mission raid = new MissionForStrike(base);
         raid.setWorldFocus(rival);
-        raid.terms.assignTerms(Base.POSTURE.VASSAL, null, null, null);
+        raid.terms.assignTerms(POSTURE.VASSAL, null, null, null);
         for (Actor a : barracks.workers()) raid.toggleRecruit(a, true);
         
         return raid;
@@ -69,7 +70,7 @@ public class TestVesselMissions extends LogicTest {
       
       boolean checkCompletion(Mission mission, Base base, Building centre) {
         Base away = mission.worldFocus();
-        if (! away.isVassalOf(base)) return false;
+        if (! away.relations.isVassalOf(base)) return false;
         return true;
       }
     };

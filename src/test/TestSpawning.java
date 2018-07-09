@@ -36,7 +36,7 @@ public class TestSpawning extends LogicTest {
     Building toRaze = (Building) ENFORCER_BLOC.generate();
     toRaze.enterMap(map, 6, 6, 1, base);
     
-    Base.setPosture(base, map.locals, Base.POSTURE.ENEMY, true);
+    BaseRelations.setPosture(base, map.locals, BaseRelations.POSTURE.ENEMY, true);
     world.settings.toggleFog = false;
     
     boolean spawnDone   = false;

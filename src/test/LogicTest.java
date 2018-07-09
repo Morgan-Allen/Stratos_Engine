@@ -304,7 +304,7 @@ public class LogicTest {
     }
     
     for (Base city : world.bases()) {
-      Base lord = city.currentLord();
+      Base lord = city.relations.currentLord();
       int x = (int) city.locale.mapX() * 2, y = (int) city.locale.mapY() * 2;
       for (Coord c : Visit.grid(x, y, 2, 2, 1)) graphic[c.x][c.y] = city.tint();
       if (lord != null) graphic[x + 1][y] = lord.tint();
@@ -449,12 +449,12 @@ public class LogicTest {
     
     report.append("\n  Population: "+c.population());
     report.append("\n  Military: "+c.armyPower());
-    report.append("\n  Prestige: "+c.prestige());
+    report.append("\n  Prestige: "+c.relations.prestige());
     
     List <String> borderRep = new List();
     for (Base other : c.world.bases()) if (other != c) {
-      Base.POSTURE r = c.posture(other);
-      float loyalty = c.loyalty(other);
+      BaseRelations.POSTURE r = c.relations.posture(other);
+      float loyalty = c.relations.loyalty(other);
       borderRep.add("\n  "+other+": "+r+", "+Base.descLoyalty(loyalty));
     }
     if (! borderRep.empty()) {

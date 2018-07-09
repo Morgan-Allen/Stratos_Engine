@@ -237,9 +237,9 @@ public class BuildingForTrade extends Building implements Trader {
       targets.add(tradePartner);
     }
     else for (Base c : world.bases) {
-      if (c.activeMap() == map ) continue;
-      if (c == homeCity        ) continue;
-      if (c.isEnemyOf(homeCity)) continue;
+      if (c.activeMap() == map) continue;
+      if (c == homeCity       ) continue;
+      if (c.relations.isEnemyOf(homeCity)   ) continue;
       if (c.distance(homeCity, moveMode) < 0) continue;
       targets.add(c);
     }
@@ -266,10 +266,10 @@ public class BuildingForTrade extends Building implements Trader {
         }
       }
       
-      if (homeCity.isVassalOf(c)) {
+      if (homeCity.relations.isVassalOf(c)) {
         rating *= 2.5f;
       }
-      if (homeCity.isLordOf(c)) {
+      if (homeCity.relations.isLordOf(c)) {
         rating *= 1.5f;
       }
       if (rating > 0) {

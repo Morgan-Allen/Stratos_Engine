@@ -74,8 +74,8 @@ public class TestVesselTrade extends LogicTest {
     awayC.setName("(Away City)");
     
     World.setupRoute(homeC.locale, awayC.locale, 10, Type.MOVE_AIR);
-    Base.setPosture(homeC, awayC, Base.POSTURE.TRADING, true);
-    homeC.setHomeland(awayC);
+    BaseRelations.setPosture(homeC, awayC, BaseRelations.POSTURE.TRADING, true);
+    homeC.relations.setHomeland(awayC);
     
     Tally <Good> supplies = new Tally().setWith(GREENS, 10, PSALT, 5);
     Base.setSuppliesDue(awayC, homeC, supplies);

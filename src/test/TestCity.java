@@ -31,10 +31,10 @@ public class TestCity extends LogicTest {
     Base homeland = new Base(world, world.addLocale(8, 8));
     homeland.setName("Homeland");
     world.addBases(homeland);
-    base.setHomeland(homeland);
+    base.relations.setHomeland(homeland);
     
     World.setupRoute(base.locale, homeland.locale, 3, Type.MOVE_AIR);
-    Base.setPosture(base, homeland, Base.POSTURE.VASSAL, true);
+    BaseRelations.setPosture(base, homeland, BaseRelations.POSTURE.VASSAL, true);
     
     world.settings.toggleFog = false;
     

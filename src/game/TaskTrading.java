@@ -1,8 +1,9 @@
 
 
 package game;
-import static game.ActorUtils.*;
 import static game.GameConstants.*;
+import static game.ActorUtils.*;
+import static game.BaseRelations.*;
 import util.*;
 
 
@@ -343,9 +344,9 @@ public class TaskTrading extends Task {
     
     Base fromB = from.base(), goesB = goes.base();
     boolean paymentDue = fromB != goesB;
-    boolean tributeDue = fromB.isLoyalVassalOf(goesB);
+    boolean tributeDue = fromB.relations.isLoyalVassalOf(goesB);
     boolean fromFlex   = flexibleGoods(from, tradeFrom, tradeGoes);
-    Base.Relation relation = fromB.relationWith(goesB);
+    Relation relation = fromB.relations.relationWith(goesB);
     
     Tally <Good> stock = from.inventory();
     float totalGets = 0, totalPays = 0;
@@ -398,8 +399,8 @@ public class TaskTrading extends Task {
     
     if (c != c.base()) return false;
     Base land = c.base();
-    if (land == from) return land == goes.base().homeland();
-    if (land == goes) return land == from.base().homeland();
+    if (land == from) return land == goes.base().relations.homeland();
+    if (land == goes) return land == from.base().relations.homeland();
     return false;
   }
   
@@ -414,7 +415,7 @@ public class TaskTrading extends Task {
   }
   
   
-  float tributeQuantityRemaining(Base.Relation r, Good good) {
+  float tributeQuantityRemaining(Relation r, Good good) {
     if (r == null) return 0;
     float demand = r.suppliesDue .valueFor(good);
     float paid   = r.suppliesSent.valueFor(good);
@@ -440,8 +441,8 @@ public class TaskTrading extends Task {
     boolean goesFlex = flexibleGoods(goes, from, goes);
     if (cityOnly && ! (fromCity || goesCity)) return cargo;
     
-    Base.Relation fromR = goes.base().relationWith(from.base());
-    Base.Relation goesR = from.base().relationWith(goes.base());
+    Relation fromR = goes.base().relations.relationWith(from.base());
+    Relation goesR = from.base().relations.relationWith(goes.base());
     
     for (Good good : world.goodTypes) {
       if (good == CASH || ! from.allowExport(good, goes)) continue;

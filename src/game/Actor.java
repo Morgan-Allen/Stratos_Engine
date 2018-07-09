@@ -1,14 +1,16 @@
 
 
 package game;
-import static game.Task.*;
 import static game.GameConstants.*;
+import static game.Task.*;
+import static game.BaseRelations.*;
+import util.*;
+
 import gameUI.play.*;
 import graphics.common.*;
 import graphics.sfx.*;
 import graphics.widgets.Composite;
 import test.LogicTest;
-import util.*;
 
 
 
@@ -866,11 +868,11 @@ public class Actor extends Element implements
     
     String from = "";
     if (map != null && player != null && base() != null) {
-      Base.POSTURE p = player.posture(base());
-      if (p == Base.POSTURE.ENEMY ) from = " (E)";
-      if (p == Base.POSTURE.ALLY  ) from = " (A)";
-      if (p == Base.POSTURE.VASSAL) from = " (V)";
-      if (p == Base.POSTURE.LORD  ) from = " (L)";
+      POSTURE p = player.relations.posture(base());
+      if (p == POSTURE.ENEMY ) from = " (E)";
+      if (p == POSTURE.ALLY  ) from = " (A)";
+      if (p == POSTURE.VASSAL) from = " (V)";
+      if (p == POSTURE.LORD  ) from = " (L)";
     }
     return type().name+" "+ID+from;
   }

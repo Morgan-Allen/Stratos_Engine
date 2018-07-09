@@ -2,7 +2,7 @@
 
 package game;
 import static game.GameConstants.*;
-import static game.Base.*;
+import static game.BaseRelations.*;
 import util.*;
 
 
@@ -12,9 +12,9 @@ public class MissionTerms {
   
   final Mission mission;
   
-  Base.POSTURE postureDemand  = null;
-  Mission      actionDemand   = null;
-  Actor        marriageDemand = null;
+  POSTURE postureDemand  = null;
+  Mission actionDemand   = null;
+  Actor   marriageDemand = null;
   Tally <Good> tributeDemand  = new Tally();
   
   int timeTermsSent = -1;
@@ -28,9 +28,9 @@ public class MissionTerms {
   
   
   void loadState(Session s) throws Exception {
-    postureDemand  = (Base.POSTURE) s.loadEnum(Base.POSTURE.values());
-    actionDemand   = (Mission     ) s.loadObject();
-    marriageDemand = (Actor       ) s.loadObject();
+    postureDemand  = (POSTURE) s.loadEnum(POSTURE.values());
+    actionDemand   = (Mission) s.loadObject();
+    marriageDemand = (Actor  ) s.loadObject();
     s.loadTally(tributeDemand);
     
     timeTermsSent = s.loadInt();
@@ -53,7 +53,7 @@ public class MissionTerms {
 
   
   public void assignTerms(
-    Base.POSTURE posture,
+    POSTURE posture,
     Mission actionTaken,
     Actor toMarry,
     Tally <Good> tribute

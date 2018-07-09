@@ -64,7 +64,7 @@ public class TaskResting extends Task {
       float rating = 1.0f;
       rating *= Area.distancePenalty(dist);
       rating *= b.type().featureAmount;
-      rating *= (actor.base().loyalty(b.base()) + 1) / 2;
+      rating *= (actor.base().relations.loyalty(b.base()) + 1) / 2;
       rating *= Rand.num();
       pickV.compare(b, rating);
     }
