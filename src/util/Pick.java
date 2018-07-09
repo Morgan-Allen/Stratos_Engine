@@ -39,7 +39,7 @@ public class Pick <T> {
   
   
   public void clear() {
-    picked = null;
+    picked     = null;
     bestRating = Float.NEGATIVE_INFINITY;
   }
   

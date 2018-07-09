@@ -7,7 +7,7 @@ import util.*;
 
 
 
-public class Base implements Session.Saveable, Trader {
+public class Base implements Session.Saveable, Trader, BaseEvents.Trouble {
   
   
   /**  Data fields, construction and save/load methods-

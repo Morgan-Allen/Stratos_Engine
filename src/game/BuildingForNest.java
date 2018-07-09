@@ -7,7 +7,7 @@ import util.*;
 
 
 
-public class BuildingForNest extends Building {
+public class BuildingForNest extends Building implements BaseEvents.Trouble {
   
   
   /**  Data fields, construction and save/load methods-
