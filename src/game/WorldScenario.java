@@ -206,7 +206,7 @@ public class WorldScenario extends Scenario {
     world.addBases(landing);
     
     BaseRelations.setPosture(homeland, landing, BaseRelations.POSTURE.VASSAL, true);
-    homeland.updateOffmapTraders();
+    homeland.trading.updateOffmapTraders();
     
     return landing;
   }

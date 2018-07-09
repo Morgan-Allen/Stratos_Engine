@@ -49,7 +49,7 @@ public class PaneBuilding extends DetailPane {
     
     for (final ActorType w : type.workerTypes.keys()) {
       int num = built.numWorkers(w), max = built.maxWorkers(w);
-      int cost = base.hireCost(w);
+      int cost = base.trading.hireCost(w);
       
       d.append("\n\n"+w.name+": ("+num+"/"+max+")");
       

@@ -93,16 +93,16 @@ public class ActorUtils {
     Actor migrant = checkOnly ? null : (Actor) jobType.generate();
     Base homeland = goes.relations.homeland();
     
-    int cost = payHireCost ? goes.hireCost(jobType) : 0;
+    int cost = payHireCost ? goes.trading.hireCost(jobType) : 0;
     if (goes.funds() < cost) return MIGRATE.NO_FUNDS;
 
     if (employs.onMap()) {
       if (world.settings.toggleShipping) {
         if (homeland == null) return MIGRATE.NO_HOMELAND;
-        if (homeland.traderFor(goes) == null) return MIGRATE.NO_TRANSPORT;
+        if (homeland.trading.traderFor(goes) == null) return MIGRATE.NO_TRANSPORT;
         if (checkOnly) return MIGRATE.OKAY;
         
-        homeland.addMigrant(migrant);
+        homeland.trading.addMigrant(migrant);
       }
       else if (world.settings.toggleEasyMigrate) {
         if (checkOnly) return MIGRATE.OKAY;

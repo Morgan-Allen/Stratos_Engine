@@ -80,8 +80,8 @@ public class GameWorld {
     Base homeBase = new Base(world, home);
     
     homeBase.setName("Homeworld Base");
-    homeBase.setTradeLevel(PARTS   , 0, 5 );
-    homeBase.setTradeLevel(MEDICINE, 0, 10);
+    homeBase.trading.setTradeLevel(PARTS   , 0, 5 );
+    homeBase.trading.setTradeLevel(MEDICINE, 0, 10);
     //cityA.initTradeLevels(
     //  PARTS   , 5f ,
     //  MEDICINE, 10f

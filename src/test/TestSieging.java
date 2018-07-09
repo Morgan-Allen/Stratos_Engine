@@ -269,7 +269,7 @@ public class TestSieging extends LogicTest {
         boolean allSent = true;
         for (Good g : tribute.keys()) {
           float need = tribute.valueFor(g);
-          float sent = Base.goodsSent(baseC, awayC, g);
+          float sent = BaseTrading.goodsSent(baseC, awayC, g);
           if (sent < need) allSent = false;
         }
         tributePaid = allSent;

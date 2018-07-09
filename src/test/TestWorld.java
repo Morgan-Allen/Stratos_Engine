@@ -32,12 +32,12 @@ public class TestWorld extends LogicTest {
       Base vassal = pair[0], lord = pair[1];
       World world = vassal.world;
       
-      vassal.setTradeLevel(CARBS   , 0, 10);
-      vassal.setTradeLevel(MEDICINE, 5, 0 );
+      vassal.trading.setTradeLevel(CARBS   , 0, 10);
+      vassal.trading.setTradeLevel(MEDICINE, 5, 0 );
       //vassal.initTradeLevels(CARBS, 10f, MEDICINE, -5f);
       for (Good g : vassal.needLevels().keys()) {
-        float demand = vassal.needLevel(g);
-        vassal.setInventory(g, demand);
+        float demand = vassal.trading.needLevel(g);
+        vassal.trading.setInventory(g, demand);
       }
       
       float AVG_P = PRESTIGE_AVG, AVG_L = LOY_CIVIL;
@@ -52,14 +52,14 @@ public class TestWorld extends LogicTest {
       }
       
       for (Good g : vassal.needLevels().keys()) {
-        if (vassal.inventory(g) > 1) {
+        if (vassal.trading.inventory(g) > 1) {
           I.say("\nWORLD-EVENTS TESTING FAILED- City did not consume goods over time!");
           return false;
         }
       }
       for (Good g : vassal.prodLevels().keys()) {
-        float supply = vassal.prodLevel(g);
-        if (vassal.inventory(g) < supply - 1) {
+        float supply = vassal.trading.prodLevel(g);
+        if (vassal.trading.inventory(g) < supply - 1) {
           I.say("\nWORLD-EVENTS TESTING FAILED- City did not generate goods over time!");
           return false;
         }
@@ -174,7 +174,7 @@ public class TestWorld extends LogicTest {
         I.say("\nWORLD-EVENTS TESTING FAILED- Barbarian invasion did not prompt correct posture!");
         return false;
       }
-      if (Base.suppliesDue(goes, from).size() > 0) {
+      if (BaseTrading.suppliesDue(goes, from).size() > 0) {
         I.say("\nWORLD-EVENTS TESTING FAILED- Barbarian invasion should not impose tribute!");
         return false;
       }
@@ -276,7 +276,7 @@ public class TestWorld extends LogicTest {
       Base vassal = pair[0], lord = pair[1];
       World world = vassal.world;
       setPosture(vassal, lord, POSTURE.LORD, true);
-      Base.setSuppliesDue(vassal, lord, new Tally().setWith(PSALT, 10));
+      BaseTrading.setSuppliesDue(vassal, lord, new Tally().setWith(PSALT, 10));
       vassal.council.setTypeAI(BaseCouncil.AI_COMPLIANT);
       
       int time = 0;
@@ -284,7 +284,7 @@ public class TestWorld extends LogicTest {
         world.updateWithTime(time++);
       }
       
-      float tributeSent = Base.suppliesDue(vassal, lord, PSALT);
+      float tributeSent = BaseTrading.suppliesDue(vassal, lord, PSALT);
       if (tributeSent < 5) {
         I.say("\nWORLD-EVENTS TESTING FAILED- Insufficient tribute dispatched!");
         return false;
@@ -339,10 +339,10 @@ public class TestWorld extends LogicTest {
       Base main = from[0];
       
       //  Establish trade-options with city 3...
-      main   .setTradeLevel(GREENS, 0, 5);
-      main   .setTradeLevel(PARTS , 0, 5);
-      from[2].setTradeLevel(GREENS, 5, 0);
-      from[2].setTradeLevel(PARTS , 5, 0);
+      main   .trading.setTradeLevel(GREENS, 0, 5);
+      main   .trading.setTradeLevel(PARTS , 0, 5);
+      from[2].trading.setTradeLevel(GREENS, 5, 0);
+      from[2].trading.setTradeLevel(PARTS , 5, 0);
       //main   .initTradeLevels(GREENS,  5, PARTS,  5);
       //from[2].initTradeLevels(GREENS, -5, PARTS, -5);
       
@@ -413,8 +413,8 @@ public class TestWorld extends LogicTest {
       for (Good g : goods) {
         float amount = (Rand.num() - 0.5f) * 10;
         amount = Nums.round(amount, 2, amount >= 0);
-        if (amount > 0) city.setTradeLevel(g, amount, 0);
-        else city.setTradeLevel(g, 0, 0 - amount);
+        if (amount > 0) city.trading.setTradeLevel(g, amount, 0);
+        else city.trading.setTradeLevel(g, 0, 0 - amount);
       }
       city.initBuildLevels(
         TROOPER_LODGE, 2f + Rand.index(3),

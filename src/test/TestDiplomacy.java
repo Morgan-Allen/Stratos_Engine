@@ -86,9 +86,9 @@ public class TestDiplomacy extends LogicTest {
     //  Set up trade dynamics-
     
     Good giftGood = PSALT;
-    awayC.setInventory(PSALT, 10);
+    awayC.trading.setInventory(PSALT, 10);
     palace.setNeedLevels(false, PSALT, 10);
-    neutC.setTradeLevel(PSALT, 10, 0);
+    neutC.trading.setTradeLevel(PSALT, 10, 0);
     
     //  TODO:  You need a method for staffing these positions automagically!
     

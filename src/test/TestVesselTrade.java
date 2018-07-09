@@ -78,12 +78,12 @@ public class TestVesselTrade extends LogicTest {
     homeC.relations.setHomeland(awayC);
     
     Tally <Good> supplies = new Tally().setWith(GREENS, 10, PSALT, 5);
-    Base.setSuppliesDue(awayC, homeC, supplies);
+    BaseTrading.setSuppliesDue(awayC, homeC, supplies);
     
-    awayC.setTradeLevel(GREENS  ,  0, 50);
-    awayC.setTradeLevel(MEDICINE,  0, 20);
-    awayC.setTradeLevel(ORES    , 30,  0);
-    awayC.initInventory(GREENS, 100, MEDICINE, 40);
+    awayC.trading.setTradeLevel(GREENS  ,  0, 50);
+    awayC.trading.setTradeLevel(MEDICINE,  0, 20);
+    awayC.trading.setTradeLevel(ORES    , 30,  0);
+    awayC.trading.initInventory(GREENS, 100, MEDICINE, 40);
     
     Area map = new Area(world, homeC.locale, homeC);
     map.performSetup(10, new Terrain[0]);
@@ -123,7 +123,7 @@ public class TestVesselTrade extends LogicTest {
       Actor migrant = (Actor) ECOLOGIST.generate();
       migrant.type().initAsMigrant((ActorAsPerson) migrant);
       migrant.assignBase(homeC);
-      awayC.addMigrant(migrant);
+      awayC.trading.addMigrant(migrant);
       migrants.add(migrant);
     }
     
@@ -212,7 +212,7 @@ public class TestVesselTrade extends LogicTest {
           }
         }
         else {
-          for (ActorAsVessel v : awayC.traders()) if (v.guestBase() == homeC) {
+          for (ActorAsVessel v : awayC.trading.traders()) if (v.guestBase() == homeC) {
             hasShip = true;
             spawned = v;
           }

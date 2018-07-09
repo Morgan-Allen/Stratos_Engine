@@ -299,7 +299,8 @@ public class BaseCouncil {
     //  The value of tribute is calculated based on relative supply/demand
     //  levels for a particular good:
     float value = 1;
-    float need = city.needLevel(good), prod = city.prodLevel(good);
+    float need = city.trading.needLevel(good);
+    float prod = city.trading.prodLevel(good);
     if (need + prod == 0) return 0;
     value *= 4 * need / (need + prod + AVG_MAX_STOCK);
     value *= good.price * perYear * AVG_TRIBUTE_YEARS;
@@ -314,10 +315,10 @@ public class BaseCouncil {
     //  plenty of-
     Tally <Good> tribute = new Tally();
     for (Good g : base.world.goodTypes) {
-      float prodVal = 5 + a.goesC.inventory(g);
-      prodVal      += 0 + a.goesC.prodLevel(g);  //  Use prod-level!
-      float consVal = 0 + a.fromC.needLevel(g);
-      consVal      -= 5 + a.fromC.inventory(g);
+      float prodVal = 5 + a.goesC.trading.inventory(g);
+      prodVal      += 0 + a.goesC.trading.prodLevel(g);  //  Use prod-level!
+      float consVal = 0 + a.fromC.trading.needLevel(g);
+      consVal      -= 5 + a.fromC.trading.inventory(g);
       
       float grabVal = (prodVal + consVal) / 2f;
       if (grabVal <= 0) continue;
@@ -460,7 +461,7 @@ public class BaseCouncil {
     
     float tradeVal = 0;
     for (Good g : base.world.goodTypes) {
-      float perYear = from.prodLevel(g);
+      float perYear = from.trading.prodLevel(g);
       if (perYear <= 0) continue;
       tradeVal += tributeValue(g, perYear, base);
     }
@@ -536,11 +537,11 @@ public class BaseCouncil {
     
     float tradeVal = 0;
     for (Good g : base.world.goodTypes) {
-      float exports = from.prodLevel(g);
+      float exports = from.trading.prodLevel(g);
       if (exports > 0) {
         tradeVal += tributeValue(g, exports, goes);
       }
-      float imports = goes.needLevel(g);
+      float imports = goes.trading.needLevel(g);
       if (imports > 0) {
         tradeVal += tributeValue(g, exports, from);
       }

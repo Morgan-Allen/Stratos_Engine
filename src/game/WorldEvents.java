@@ -168,8 +168,8 @@ public class WorldEvents {
   ) {
     if (upon == null || from == null || mission == null) return;
     setPosture(from, upon, mission.terms.postureDemand, true);
-    Base.setSuppliesDue(upon, from, mission.terms.tributeDemand );
-    arrangeMarriage    (upon, from, mission.terms.marriageDemand);
+    BaseTrading.setSuppliesDue(upon, from, mission.terms.tributeDemand );
+    arrangeMarriage           (upon, from, mission.terms.marriageDemand);
   }
   
   

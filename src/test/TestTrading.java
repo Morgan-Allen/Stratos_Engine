@@ -33,13 +33,13 @@ public class TestTrading extends LogicTest {
     BaseRelations.setPosture(baseC, awayC, BaseRelations.POSTURE.VASSAL, true);
     
     Tally <Good> supplies = new Tally().setWith(GREENS, 10, PSALT, 5);
-    Base.setSuppliesDue(awayC, baseC, supplies);
+    BaseTrading.setSuppliesDue(awayC, baseC, supplies);
     
-    awayC.setTradeLevel(MEDICINE, 50, 0 );
-    awayC.setTradeLevel(PARTS   , 50, 0 );
-    awayC.setTradeLevel(GREENS  , 0 , 50);
-    awayC.setTradeLevel(ORES    , 0 , 50);
-    awayC.initInventory(
+    awayC.trading.setTradeLevel(MEDICINE, 50, 0 );
+    awayC.trading.setTradeLevel(PARTS   , 50, 0 );
+    awayC.trading.setTradeLevel(GREENS  , 0 , 50);
+    awayC.trading.setTradeLevel(ORES    , 0 , 50);
+    awayC.trading.initInventory(
       GREENS    ,  35,
       ORES      ,  20,
       PSALT     ,  10
@@ -102,8 +102,8 @@ public class TestTrading extends LogicTest {
       
       if (! tradeOkay) {
         boolean check = true;
-        check &= Base.goodsSent(baseC, awayC, PARTS   ) > 1;
-        check &= Base.goodsSent(baseC, awayC, MEDICINE) > 1;
+        check &= BaseTrading.goodsSent(baseC, awayC, PARTS   ) > 1;
+        check &= BaseTrading.goodsSent(baseC, awayC, MEDICINE) > 1;
         check &= baseC.funds() > 0;
         tradeOkay = check;
       }
@@ -171,9 +171,9 @@ public class TestTrading extends LogicTest {
     float projectedFunds = initFunds;
     
     for (Good g : ALL_GOODS) {
-      float sent = Base.goodsSent  (cityA, cityB, g);
-      float got  = Base.goodsSent  (cityB, cityA, g);
-      float free = Base.suppliesDue(cityB, cityA, g);
+      float sent = BaseTrading.goodsSent  (cityA, cityB, g);
+      float got  = BaseTrading.goodsSent  (cityB, cityA, g);
+      float free = BaseTrading.suppliesDue(cityB, cityA, g);
       if (sent == 0 && got == 0 && free == 0) continue;
       
       float priceSent = cityA.exportPrice(g, cityB);
@@ -204,9 +204,9 @@ public class TestTrading extends LogicTest {
     
     I.say("\nGoods report:");
     for (Good g : GOODS) {
-      I.say("  Made "+g+": "+a.totalMade(g));
-      I.add("  Sent "+Base.goodsSent(a, b, g));
-      I.add("  Got " +Base.goodsSent(b, a, g));
+      I.say("  Made "+g+": "+a.trading.totalMade(g));
+      I.add("  Sent "+BaseTrading.goodsSent(a, b, g));
+      I.add("  Got " +BaseTrading.goodsSent(b, a, g));
     }
     I.say("  Current funds: "+a.funds());
     I.say("  Current time:  "+a.world.time());

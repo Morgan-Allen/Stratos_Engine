@@ -269,8 +269,8 @@ public class TaskTrading extends Task {
       Base goes = visits.base();
       //  TODO:  Screen migrants based on base of destination?  To be safe?...
       ActorAsVessel ship = (ActorAsVessel) active;
-      for (Actor a : goes.migrants) {
-        goes.removeMigrant(a);
+      for (Actor a : goes.trading.migrants()) {
+        goes.trading.removeMigrant(a);
         a.setInside(ship, true);
       }
     }

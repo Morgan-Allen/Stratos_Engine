@@ -124,7 +124,7 @@ public class TestCity extends LogicTest {
       for (Building b : map.buildings()) if (b.base() == base) {
         for (ActorType job : b.type().workerTypes.keys()) {
           int num = b.numWorkers(job), max = b.maxWorkers(job);
-          boolean canHire = base.hireCost(job) <= base.funds();
+          boolean canHire = base.trading.hireCost(job) <= base.funds();
           if (job.socialClass != CLASS_COMMON && num < max && canHire) {
             ActorUtils.generateMigrant(job, b, true);
           }
@@ -250,11 +250,11 @@ public class TestCity extends LogicTest {
     }
     I.say("\nTotal goods produced:");
     for (Good g : goods) {
-      I.say("  "+g+": "+base.totalMade(g));
+      I.say("  "+g+": "+base.trading.totalMade(g));
     }
     I.say("\nTotal goods consumed:");
     for (Good g : goods) {
-      I.say("  "+g+": "+base.totalUsed(g));
+      I.say("  "+g+": "+base.trading.totalUsed(g));
     }
   }
   

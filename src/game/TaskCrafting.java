@@ -57,8 +57,8 @@ public class TaskCrafting extends Task {
       ItemOrder fills = null;
       Good made = recipe.made;
       boolean standardGood = Visit.arrayIncludes(venue.produced(), made);
-      float supply = venue.base().inventory(made) + 0;
-      float demand = venue.base().needLevel(made) + 1;
+      float supply = venue.base().trading.inventory(made) + 0;
+      float demand = venue.base().trading.needLevel(made) + 1;
       float amount = venue.inventory(made);
       float limit  = venue.stockLimit(made);
       float rating = 2.0f - Nums.clamp(supply / demand, 0, 1);
@@ -164,7 +164,7 @@ public class TaskCrafting extends Task {
     else {
       order.progress = progress + progInc;
     }
-    venue.base().makeTotals.add(progInc, recipe.made);
+    venue.base().trading.makeTotals.add(progInc, recipe.made);
     
     if (++timeSpent < DAY_LENGTH && ! didUnit) {
       Task next = TaskCrafting.nextCraftingTask(actor, venue);

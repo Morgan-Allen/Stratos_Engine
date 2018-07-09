@@ -93,7 +93,7 @@ public class TaskGifting extends TaskDialog {
     
     if (away != null) for (Good g : away.needLevels().keys()) {
       if (store.inventory().valueFor(g) < minAmount) continue;
-      float rating = away.needLevel(g) * g.price;
+      float rating = away.trading.needLevel(g) * g.price;
       pickGift.compare(g, rating);
     }
     

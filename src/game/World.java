@@ -399,8 +399,8 @@ public class World implements Session.Saveable {
     }
     
     Base offmap = going.offmapBase();
-    if (offmap != null && offmap.migrants().includes(going)) {
-      ActorAsVessel t = offmap.traderFor(going.base());
+    if (offmap != null && offmap.trading.migrants().includes(going)) {
+      ActorAsVessel t = offmap.trading.traderFor(going.base());
       j = t == null ? null : journeyFor(t);
       
       if (j != null && j.goes == offmap) {

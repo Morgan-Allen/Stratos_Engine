@@ -242,7 +242,7 @@ public class BuildingForHome extends Building {
       float used      = maxTierStock(cons, tier) * conLevel;
       float amount    = Nums.max(0, oldAmount - used);
       setInventory(cons, amount);
-      base().usedTotals.add(oldAmount - amount, cons);
+      base().trading.usedTotals.add(oldAmount - amount, cons);
     }
   }
   
@@ -254,7 +254,7 @@ public class BuildingForHome extends Building {
     taxLevel *= TIER_VALUES[tierID] / 100f;
     taxLevel *= type().updateTime * 1f / TAX_INTERVAL;
     addInventory(taxLevel, CASH);
-    base().makeTotals.add(taxLevel, CASH);
+    base().trading.makeTotals.add(taxLevel, CASH);
   }
   
   

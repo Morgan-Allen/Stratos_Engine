@@ -36,11 +36,11 @@ public class PaneMarkets extends DetailPane {
       if (g == CASH) continue;
       
       int amount  = (int) base.inventory().valueFor(g);
-      int needs   = (int) base.needLevel(g);
-      int produce = (int) base.prodLevel(g);
+      int needs   = (int) base.trading.needLevel(g);
+      int produce = (int) base.trading.prodLevel(g);
       
-      float made = base.totalMade(g);
-      float used = base.totalUsed(g);
+      float made = base.trading.totalMade(g);
+      float used = base.trading.totalUsed(g);
       
       d.append("\n  "+I.padToLength(g.name, 10)+": ");
       d.append(I.padToLength(amount+"/"+needs, 9));
@@ -68,7 +68,7 @@ public class PaneMarkets extends DetailPane {
       //  Import/export allowance!
     }
     
-    ActorAsVessel trader = home == null ? null : home.traderFor(base);
+    ActorAsVessel trader = home == null ? null : home.trading.traderFor(base);
     if (trader != null) {
       Base offmap = trader.offmapBase();
       int ETA = world.arriveTime(trader, base);

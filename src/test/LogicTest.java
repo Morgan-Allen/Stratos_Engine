@@ -464,9 +464,9 @@ public class LogicTest {
     
     List <String> goodRep = new List();
     for (Good g : c.world.goodTypes()) {
-      float amount = c.inventory(g);
-      float need   = c.needLevel(g);
-      float accept = c.prodLevel(g);
+      float amount = c.trading.inventory(g);
+      float need   = c.trading.needLevel(g);
+      float accept = c.trading.prodLevel(g);
       //float demand = c.tradeLevel.valueFor(g);
       if (amount == 0 && need == 0 && accept == 0) continue;
       
