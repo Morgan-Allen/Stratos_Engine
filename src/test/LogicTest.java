@@ -16,11 +16,12 @@ public class LogicTest {
   /**  Initial setup utilities:
     */
   protected static Base setupTestBase(
-    int size, Good goods[], boolean genTerrain, Terrain... gradient
+    Faction faction, Good goods[],
+    int size, boolean genTerrain, Terrain... gradient
   ) {
     World       world  = new World(goods);
     WorldLocale locale = world.addLocale(5, 5);
-    Base        base   = new Base(world, locale, "Test Base");
+    Base        base   = new Base(world, locale, faction, "Test Base");
     Area        map    = null;
     
     if (! genTerrain) {
@@ -40,10 +41,11 @@ public class LogicTest {
   
   
   protected static Base setupTestBase(
-    byte layout[][], byte elevation[][], Good goods[], Terrain... gradient
+    Faction faction, Good goods[],
+    byte layout[][], byte elevation[][], Terrain... gradient
   ) {
     int wide = layout.length, high = layout[0].length;
-    Base base = setupTestBase(Nums.max(wide, high), goods, false, gradient);
+    Base base = setupTestBase(faction, goods, Nums.max(wide, high), false, gradient);
     Area map = base.activeMap();
     
     for (AreaTile t : map.allTiles()) {

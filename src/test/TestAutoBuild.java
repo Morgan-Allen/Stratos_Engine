@@ -2,9 +2,9 @@
 
 
 package test;
-import content.*;
 import game.*;
 import static content.GameContent.*;
+import static content.GameWorld.*;
 import static game.GameConstants.*;
 import util.*;
 
@@ -21,7 +21,7 @@ public class TestAutoBuild extends LogicTest {
   static boolean testAutoBuild(boolean graphics) {
     LogicTest test = new TestAutoBuild();
     
-    Base base = setupTestBase(16, ALL_GOODS, false);
+    Base base = setupTestBase(FACTION_SETTLERS, ALL_GOODS, 16, false);
     Area map = base.activeMap();
     World world = map.world;
     world.settings.toggleFog         = false;

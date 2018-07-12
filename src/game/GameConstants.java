@@ -403,6 +403,12 @@ public class GameConstants {
   
   /**  Economic constants-
     */
+  final public static Faction
+    FACTION_NEUTRAL = new Faction(
+      GameConstants.class, "faction_neutral", "Neutral"
+    );
+  
+  
   final public static Good
     
     //  TODO:  Use Traits for this instead!

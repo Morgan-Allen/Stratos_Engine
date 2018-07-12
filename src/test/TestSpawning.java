@@ -4,6 +4,7 @@ package test;
 import game.*;
 import util.*;
 import static content.GameContent.*;
+import static content.GameWorld.FACTION_SETTLERS;
 import static game.GameConstants.*;
 
 
@@ -19,7 +20,7 @@ public class TestSpawning extends LogicTest {
   static boolean testSpawning(boolean graphics) {
     LogicTest test = new TestSpawning();
     
-    Base base = setupTestBase(32, ALL_GOODS, true, JUNGLE, MEADOW);
+    Base base = setupTestBase(FACTION_SETTLERS, ALL_GOODS, 32, true, JUNGLE, MEADOW);
     Area map = base.activeMap();
     World world = map.world;
     

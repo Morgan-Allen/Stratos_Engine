@@ -4,6 +4,7 @@
 package test;
 import game.*;
 import static game.GameConstants.*;
+import static content.GameWorld.*;
 import static content.GameContent.*;
 
 
@@ -29,7 +30,9 @@ public class TestBlankMap extends LogicTest {
     test.attachBuildMenu(BUILD_MENUS, BUILD_MENU_NAMES);
     
     Base base = loadCity(null, filename);
-    if (base == null) base = setupTestBase(32, ALL_GOODS, true, MEADOW, JUNGLE);
+    if (base == null) base = setupTestBase(
+      FACTION_SETTLERS, ALL_GOODS, 32, true, MEADOW, JUNGLE
+    );
     
     while (true) {
       test.runLoop(base, 10, true, filename);

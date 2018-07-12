@@ -5,6 +5,7 @@ package test;
 import game.*;
 import util.*;
 import static content.GameContent.*;
+import static content.GameWorld.FACTION_SETTLERS;
 import static game.GameConstants.*;
 import static game.BuildingForGather.*;
 
@@ -25,7 +26,7 @@ public class TestFarming extends LogicTest {
   static boolean testFarming(boolean graphics) {
     LogicTest test = new TestFarming();
 
-    Base base = setupTestBase(20, ALL_GOODS, true, DESERT, MEADOW, JUNGLE);
+    Base base = setupTestBase(FACTION_SETTLERS, ALL_GOODS, 20, true, DESERT, MEADOW, JUNGLE);
     Area map = base.activeMap();
     World world = map.world;
     world.settings.toggleFog     = false;

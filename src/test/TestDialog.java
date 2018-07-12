@@ -6,6 +6,7 @@ import static game.GameConstants.*;
 import static game.Task.*;
 import content.*;
 import static content.GameContent.*;
+import static content.GameWorld.FACTION_SETTLERS;
 import util.*;
 
 
@@ -21,7 +22,7 @@ public class TestDialog extends LogicTest {
   static boolean testDialog(boolean graphics) {
     LogicTest test = new TestDialog();
     
-    Base base = setupTestBase(16, ALL_GOODS, false);
+    Base base = setupTestBase(FACTION_SETTLERS, ALL_GOODS, 16, false);
     Area map = base.activeMap();
     World world = map.world;
     world.settings.toggleFog     = false;

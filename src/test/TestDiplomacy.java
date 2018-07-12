@@ -6,8 +6,9 @@ import static game.GameConstants.*;
 import static game.ActorBonds.*;
 import static game.BaseRelations.*;
 import static game.BaseCouncil.*;
-import static content.GameContent.*;
 import content.*;
+import static content.GameContent.*;
+import static content.GameWorld.*;
 import util.*;
 
 
@@ -27,9 +28,9 @@ public class TestDiplomacy extends LogicTest {
     //  Set up the structure of the world-
     
     World world = new World(ALL_GOODS);
-    Base  baseC = new Base(world, world.addLocale(2, 2));
-    Base  awayC = new Base(world, world.addLocale(2, 3));
-    Base  neutC = new Base(world, world.addLocale(3, 2));
+    Base  baseC = new Base(world, world.addLocale(2, 2), FACTION_SETTLERS);
+    Base  awayC = new Base(world, world.addLocale(2, 3), FACTION_SETTLERS);
+    Base  neutC = new Base(world, world.addLocale(3, 2), FACTION_SETTLERS);
     Area  map   = AreaTerrain.generateTerrain(
       baseC, 32, 0, MEADOW, JUNGLE
     );

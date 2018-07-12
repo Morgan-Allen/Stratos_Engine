@@ -5,6 +5,7 @@ package test;
 import game.*;
 import util.*;
 import static content.GameContent.*;
+import static content.GameWorld.FACTION_SETTLERS;
 
 
 
@@ -18,7 +19,7 @@ public class TestDemands extends LogicTest {
   
   static boolean testDemands(boolean graphics) {
     
-    Base base = setupTestBase(32, ALL_GOODS, false);
+    Base base = setupTestBase(FACTION_SETTLERS, ALL_GOODS, 32, false);
     Area map = base.activeMap();
     World world = map.world;
     AreaDemands demands = new AreaDemands(map, "AAA");

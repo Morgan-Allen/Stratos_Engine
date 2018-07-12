@@ -5,6 +5,7 @@ package test;
 import game.*;
 import util.*;
 import static content.GameContent.*;
+import static content.GameWorld.FACTION_SETTLERS;
 
 
 
@@ -19,7 +20,7 @@ public class TestForests extends LogicTest {
   static boolean testForests(boolean graphics) {
     LogicTest test = new TestForests();
 
-    Base base = setupTestBase(32, ALL_GOODS, true, JUNGLE, MEADOW);
+    Base base = setupTestBase(FACTION_SETTLERS, ALL_GOODS, 32, true, JUNGLE, MEADOW);
     Area map = base.activeMap();
     World world = map.world;
     world.settings.toggleFog = false;

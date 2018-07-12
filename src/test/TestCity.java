@@ -5,6 +5,7 @@ package test;
 import util.*;
 import game.*;
 import static content.GameContent.*;
+import static content.GameWorld.*;
 import static game.GameConstants.*;
 import static game.Task.*;
 
@@ -21,14 +22,14 @@ public class TestCity extends LogicTest {
   static boolean testCity(boolean graphics) {
     LogicTest test = new TestCity();
     
-    Base base = setupTestBase(32, ALL_GOODS, false);
+    Base base = setupTestBase(FACTION_SETTLERS, ALL_GOODS, 32, false);
     Area map = base.activeMap();
     World world = map.world;
     world.assignTypes(
       ALL_BUILDINGS, ALL_SHIPS(), ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES()
     );
     
-    Base homeland = new Base(world, world.addLocale(8, 8));
+    Base homeland = new Base(world, world.addLocale(8, 8), FACTION_SETTLERS);
     homeland.setName("Homeland");
     world.addBases(homeland);
     base.relations.setHomeland(homeland);

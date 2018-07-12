@@ -5,8 +5,9 @@ package test;
 import game.*;
 import static game.GameConstants.*;
 import static game.World.*;
-import static content.GameContent.*;
 import content.*;
+import static content.GameContent.*;
+import static content.GameWorld.*;
 import util.*;
 
 
@@ -66,8 +67,8 @@ public class TestVesselTrade extends LogicTest {
       ALL_BUILDINGS, ALL_SHIPS(), ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES()
     );
     
-    Base  homeC = new Base(world, world.addLocale(2, 2));
-    Base  awayC = new Base(world, world.addLocale(3, 3));
+    Base  homeC = new Base(world, world.addLocale(2, 2), FACTION_SETTLERS);
+    Base  awayC = new Base(world, world.addLocale(3, 3), FACTION_SETTLERS);
     world.addBases(homeC, awayC);
     awayC.council.setTypeAI(BaseCouncil.AI_OFF);
     homeC.setName("(Home City)");

@@ -4,8 +4,9 @@
 package test;
 import game.*;
 import util.*;
-import static content.GameContent.*;
 import static game.GameConstants.*;
+import static content.GameContent.*;
+import static content.GameWorld.*;
 
 
 
@@ -20,7 +21,7 @@ public class TestEcology extends LogicTest {
   static void testAnimals(boolean graphics) {
     LogicTest test = new TestEcology();
     
-    Base base = setupTestBase(64, ALL_GOODS, true, JUNGLE, MEADOW);
+    Base base = setupTestBase(FACTION_SETTLERS, ALL_GOODS, 32, true, JUNGLE, MEADOW);
     Area map = base.activeMap();
     World world = map.world;
     

@@ -5,6 +5,7 @@ import game.*;
 import content.*;
 import util.*;
 import static content.GameContent.*;
+import static content.GameWorld.FACTION_SETTLERS;
 import static game.GameConstants.*;
 
 
@@ -21,8 +22,8 @@ public class TestMilitary extends LogicTest {
     LogicTest test = new TestMilitary();
     
     World world = new World(ALL_GOODS);
-    Base  baseC = new Base(world, world.addLocale(2, 2));
-    Base  awayC = new Base(world, world.addLocale(3, 3));
+    Base  baseC = new Base(world, world.addLocale(2, 2), FACTION_SETTLERS);
+    Base  awayC = new Base(world, world.addLocale(3, 3), FACTION_SETTLERS);
     Area  map   = AreaTerrain.generateTerrain(
       baseC, 32, 0, MEADOW, JUNGLE
     );

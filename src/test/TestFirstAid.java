@@ -4,6 +4,8 @@ package test;
 import game.*;
 import static game.GameConstants.*;
 import static content.GameContent.*;
+import static content.GameWorld.FACTION_SETTLERS;
+
 import util.*;
 
 
@@ -20,7 +22,7 @@ public class TestFirstAid extends LogicTest {
   static boolean testFirstAid(boolean graphics) {
     LogicTest test = new TestFirstAid();
     
-    Base base = setupTestBase(16, ALL_GOODS, false);
+    Base base = setupTestBase(FACTION_SETTLERS, ALL_GOODS, 32, false);
     Area map = base.activeMap();
     World world = map.world;
     world.settings.toggleFog    = false;

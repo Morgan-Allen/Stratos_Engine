@@ -5,6 +5,7 @@ package test;
 import game.*;
 import static game.GameConstants.*;
 import static content.GameContent.*;
+import static content.GameWorld.FACTION_SETTLERS;
 import util.*;
 
 
@@ -20,7 +21,7 @@ public class TestExploring extends LogicTest {
   static boolean testExploring(boolean graphics) {
     LogicTest test = new TestExploring();
     
-    Base base = setupTestBase(32, ALL_GOODS, true, JUNGLE, MEADOW);
+    Base base = setupTestBase(FACTION_SETTLERS, ALL_GOODS, 32, true, JUNGLE, MEADOW);
     Area map = base.activeMap();
     World world = map.world;
     

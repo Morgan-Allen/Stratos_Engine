@@ -4,6 +4,7 @@ package test;
 import game.*;
 import util.*;
 import static content.GameContent.*;
+import static content.GameWorld.FACTION_SETTLERS;
 import static game.AreaPathCache.*;
 
 
@@ -50,7 +51,7 @@ public class TestPathCache extends LogicTest {
       { 1, 1, 1, 1, 1, 1, 1, 1 },
     };
     int miniSize = 8;
-    Base miniBase = setupTestBase(miniSize, ALL_GOODS, false, ALL_TERRAINS);
+    Base miniBase = setupTestBase(FACTION_SETTLERS, ALL_GOODS, miniSize, false, ALL_TERRAINS);
     Area miniMap = miniBase.activeMap();
     
     for (Coord c : Visit.grid(0, 0, miniSize, miniSize, 1)) {
@@ -128,7 +129,7 @@ public class TestPathCache extends LogicTest {
     //
     //  Now, set up a larger map for testing of connections between
     //  more distant zones:
-    Base base = setupTestBase(128, ALL_GOODS, false, ALL_TERRAINS);
+    Base base = setupTestBase(FACTION_SETTLERS, ALL_GOODS, 128, false, ALL_TERRAINS);
     Area map = base.activeMap();
     World world = map.world;
     world.settings.toggleFog = false;

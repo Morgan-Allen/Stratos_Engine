@@ -5,6 +5,7 @@ import game.*;
 import game.Task.JOB;
 import util.*;
 import static content.GameContent.*;
+import static content.GameWorld.FACTION_SETTLERS;
 import static game.GameConstants.*;
 
 
@@ -167,7 +168,7 @@ public class TestBounties extends LogicTest {
   
   boolean bountyTest(boolean graphics, String title) {
     
-    Base base = LogicTest.setupTestBase(32, ALL_GOODS, false);
+    Base base = LogicTest.setupTestBase(FACTION_SETTLERS, ALL_GOODS, 32, false);
     base.setName("Client Base");
     Area map = base.activeMap();
     

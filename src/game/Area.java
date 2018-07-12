@@ -60,7 +60,7 @@ public class Area implements Session.Saveable {
   public Area(World world, WorldLocale locale, Base... cities) {
     this.world = world;
     this.locale = locale;
-    this.locals = new Base(world, locale, "Locals: "+locale);
+    this.locals = new Base(world, locale, FACTION_NEUTRAL, "Locals: "+locale);
     
     locals.setGovernment(Base.GOVERNMENT.BARBARIAN);
     locals.council.setTypeAI(BaseCouncil.AI_OFF);

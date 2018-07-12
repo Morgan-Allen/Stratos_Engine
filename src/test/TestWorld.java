@@ -11,6 +11,7 @@ import static game.BaseCouncil.*;
 import static game.GameConstants.*;
 import static game.World.*;
 import static content.GameContent.*;
+import static content.GameWorld.*;
 
 
 
@@ -186,10 +187,10 @@ public class TestWorld extends LogicTest {
       Base weak = pair[0], strong = pair[1];
       World world = strong.world;
       
-      Base lord = new Base(world, world.addLocale(0, 1));
+      Base lord = new Base(world, world.addLocale(0, 1), FACTION_SETTLERS);
       world.addBases(lord);
       setPosture(lord, weak, POSTURE.VASSAL, true);
-      Base capital = new Base(world, world.addLocale(1, 1));
+      Base capital = new Base(world, world.addLocale(1, 1), FACTION_SETTLERS);
       world.addBases(capital);
       setPosture(capital, lord, POSTURE.VASSAL, true);
       
@@ -313,10 +314,10 @@ public class TestWorld extends LogicTest {
       };
       
       for (int i = from.length; i-- > 0;) {
-        from[i] = new Base(world, world.addLocale(0, i), "From_"+i);
+        from[i] = new Base(world, world.addLocale(0, i), FACTION_SETTLERS, "From_"+i);
       }
       for (int i = goes.length; i-- > 0;) {
-        goes[i] = new Base(world, world.addLocale(1, i), "Goes_"+i);
+        goes[i] = new Base(world, world.addLocale(1, i), FACTION_SETTLERS, "Goes_"+i);
       }
       world.addBases(from);
       world.addBases(goes);
@@ -406,7 +407,7 @@ public class TestWorld extends LogicTest {
         2 + (2 * TileConstants.T_X[n * 2]),
         2 + (2 * TileConstants.T_Y[n * 2])
       );
-      Base city = new Base(world, l);
+      Base city = new Base(world, l, FACTION_SETTLERS);
       city.setName(names[n]);
       city.setTint(tints[n]);
       
@@ -434,7 +435,7 @@ public class TestWorld extends LogicTest {
     //
     //  Note:  This map is initialised purely to meet the requirements of the
     //  visual debugger...
-    Base mapCity = new Base(world, world.addLocale(0, 0));
+    Base mapCity = new Base(world, world.addLocale(0, 0), FACTION_SETTLERS);
     Area map = new Area(world, mapCity.locale, mapCity);
     map.performSetup(8, new Terrain[0]);
     world.settings.worldView    = true;
@@ -545,8 +546,8 @@ public class TestWorld extends LogicTest {
     world.assignTypes(
       ALL_BUILDINGS, ALL_SHIPS(), ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES()
     );
-    Base a = new Base(world, world.addLocale(0, 0));
-    Base b = new Base(world, world.addLocale(1, 0));
+    Base a = new Base(world, world.addLocale(0, 0), FACTION_SETTLERS);
+    Base b = new Base(world, world.addLocale(1, 0), FACTION_SETTLERS);
     a.setName("Victim City" );
     b.setName("Invader City");
     world.addBases(a, b);

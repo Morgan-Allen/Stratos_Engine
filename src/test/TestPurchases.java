@@ -7,6 +7,7 @@ import util.*;
 import static game.GameConstants.*;
 import content.*;
 import static content.GameContent.*;
+import static content.GameWorld.FACTION_SETTLERS;
 
 
 
@@ -21,7 +22,7 @@ public class TestPurchases extends LogicTest {
   static boolean testPurchases(boolean graphics) {
     TestPurchases test = new TestPurchases();
     
-    Base base = LogicTest.setupTestBase(16, ALL_GOODS, false);
+    Base base = LogicTest.setupTestBase(FACTION_SETTLERS, ALL_GOODS, 16, false);
     Area map = base.activeMap();
     World world = map.world;
     

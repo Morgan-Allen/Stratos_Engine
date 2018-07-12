@@ -5,6 +5,8 @@ import game.*;
 import static game.GameConstants.*;
 import static game.Area.*;
 import static content.GameContent.*;
+import static content.GameWorld.FACTION_SETTLERS;
+
 import util.*;
 
 
@@ -26,7 +28,7 @@ public class TestDangerMap extends LogicTest {
     final int MAP_SIZE = 32;
     final int gridRes = MAP_SIZE / FLAG_RES;
     
-    Base base = setupTestBase(MAP_SIZE, ALL_GOODS, false);
+    Base base = setupTestBase(FACTION_SETTLERS, ALL_GOODS, MAP_SIZE, false);
     Area map = base.activeMap();
     World world = base.world;
     

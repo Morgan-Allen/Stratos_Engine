@@ -1,11 +1,12 @@
 
 
 package test;
-import content.*;
-import static content.GameContent.*;
 import game.*;
 import static game.GameConstants.*;
 import static game.BaseRelations.*;
+import content.*;
+import static content.GameContent.*;
+import static content.GameWorld.*;
 import util.*;
 
 
@@ -84,7 +85,7 @@ public class TestVesselMissions extends LogicTest {
     boolean fromLocal, String title, boolean graphics
   ) {
     
-    Base  base  = LogicTest.setupTestBase(32, ALL_GOODS, false, ALL_TERRAINS);
+    Base  base  = LogicTest.setupTestBase(FACTION_SETTLERS, ALL_GOODS, 32, false, ALL_TERRAINS);
     World world = base.world;
     Area  map   = base.activeMap();
     
@@ -93,7 +94,7 @@ public class TestVesselMissions extends LogicTest {
     
     
     WorldLocale rivalAt = world.addLocale(4, 4);
-    Base rival = new Base(world, rivalAt, "Rival Base");
+    Base rival = new Base(world, rivalAt, FACTION_SETTLERS, "Rival Base");
     world.addBases(rival);
     World.setupRoute(rival.locale, base.locale, 1, Type.MOVE_AIR);
     

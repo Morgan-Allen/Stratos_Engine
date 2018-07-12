@@ -4,6 +4,8 @@ package test;
 import game.*;
 import static game.GameConstants.*;
 import static content.GameContent.*;
+import static content.GameWorld.FACTION_SETTLERS;
+
 import util.*;
 
 
@@ -30,7 +32,8 @@ public class TestPowers extends LogicTest {
   boolean powerTest(
     boolean graphics, String title, ActorTechnique power, boolean guildCasts
   ) {
-    Base base = LogicTest.setupTestBase(32, ALL_GOODS, false);
+    
+    Base base = LogicTest.setupTestBase(FACTION_SETTLERS, ALL_GOODS, 32, false);
     base.setName("Client Base");
     Area map = base.activeMap();
     
