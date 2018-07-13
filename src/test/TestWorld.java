@@ -168,7 +168,7 @@ public class TestWorld extends LogicTest {
     {
       Base pair[] = configWeakStrongCityPair();
       Base goes = pair[0], from = pair[1];
-      from.setGovernment(Base.GOVERNMENT.BARBARIAN);
+      from.council.setGovernment(GOVERNMENT.BARBARIAN);
       runCompleteInvasion(from, goes);
       
       if (! goes.relations.isEnemyOf(from)) {

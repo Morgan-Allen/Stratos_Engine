@@ -9,7 +9,7 @@ import static game.GameConstants.*;
 
 
 
-public class WorldEvents {
+public class MissionUtils {
   
   
   /**  Rendering, debug and interface methods-
@@ -83,7 +83,7 @@ public class WorldEvents {
     world.recordEvent("attacked", from, goes);
     enterHostility(goes, from, victory, 1);
     
-    if (victory && from.government != Base.GOVERNMENT.BARBARIAN) {
+    if (victory && from.council.government != GOVERNMENT.BARBARIAN) {
       imposeTerms(goes, from, mission);
     }
     if (victory) {

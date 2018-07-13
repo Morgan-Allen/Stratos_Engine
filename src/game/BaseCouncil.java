@@ -23,6 +23,10 @@ public class BaseCouncil {
     AI_WARLIKE   =  4
   ;
   
+  public static enum GOVERNMENT {
+    IMPERIAL, FEUDAL, BARBARIAN, REPUBLIC
+  }
+  
   public static enum Role {
     MONARCH          ,
     CONSORT          ,
@@ -37,6 +41,8 @@ public class BaseCouncil {
   
   
   final Base base;
+  
+  GOVERNMENT government = GOVERNMENT.FEUDAL;
   private int typeAI = AI_NORMAL;
   
   private List <Actor> members = new List();
@@ -52,6 +58,7 @@ public class BaseCouncil {
   
   
   void loadState(Session s) throws Exception {
+    government = GOVERNMENT.values()[s.loadInt()];
     typeAI = s.loadInt();
     
     for (int n = s.loadInt(); n-- > 0;) {
@@ -66,6 +73,7 @@ public class BaseCouncil {
   
   
   void saveState(Session s) throws Exception {
+    s.saveInt(government.ordinal());
     s.saveInt(typeAI);
     
     s.saveInt(members.size());
@@ -81,6 +89,16 @@ public class BaseCouncil {
   
   /**  Toggle membership of the council and handling personality-effects-
     */
+  public void setGovernment(GOVERNMENT g) {
+    this.government = g;
+  }
+  
+  
+  public GOVERNMENT government() {
+    return government;
+  }
+  
+  
   public void setTypeAI(int typeAI) {
     this.typeAI = typeAI;
   }
@@ -634,7 +652,7 @@ public class BaseCouncil {
       force.toggleRecruit(fights, true);
     }
     
-    if (base.government == Base.GOVERNMENT.BARBARIAN) {
+    if (government == GOVERNMENT.BARBARIAN) {
       //  Only non-barbarian governments will set up permanent command-fx or
       //  attempt diplomacy...
     }

@@ -110,6 +110,7 @@ public class WorldScenario extends Scenario {
     */
   public static class SiteConfig {
     Faction belongs;
+    boolean isBase;
     BuildType siteType;
     int minCount, maxCount;
     List <SiteConfig> children = new List();
@@ -290,8 +291,20 @@ public class WorldScenario extends Scenario {
     
     options.queueSort();
     
+    
+    //  TODO:  You're not necessarily using the Locals as your owning base here-
+    //  the site itself might be configuring a fresh base in association with
+    //  a given faction.
+    
     for (SiteConfig site : config.sites) if (options.size() > 0) {
       SiteOption o = options.removeFirst();
+      
+      Base siteBase = stage.firstBaseFor(site.belongs);
+      if (site.isBase || siteBase == null) {
+        siteBase = new Base(world, stage.locale, site.belongs);
+        stage.addBase(siteBase);
+      }
+      
       placeSite(site, stage, o.at, null, stage.locals);
     }
   }
@@ -307,12 +320,6 @@ public class WorldScenario extends Scenario {
       placed = (Building) site.siteType.generate();
       AreaTile goes = ActorUtils.findEntryPoint(placed, stage, at, MAX_PLACE_RANGE);
       placed.enterMap(stage, goes.x, goes.y, 1, base);
-      
-      if (site.siteType.isNestBuilding()) {
-        BuildingForNest nest = (BuildingForNest) placed;
-        nest.parent = parent;
-      }
-      
       nests.add(placed);
     }
     

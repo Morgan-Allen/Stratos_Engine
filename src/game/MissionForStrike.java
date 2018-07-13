@@ -52,14 +52,14 @@ public class MissionForStrike extends Mission {
         Object update = updateTacticalTarget(focus);
         
         if (update == LOSS) {
-          WorldEvents.enterHostility(sieges, home, false, 1);
-          WorldEvents.signalVictory(sieges, home, this);
+          MissionUtils.enterHostility(sieges, home, false, 1);
+          MissionUtils.signalVictory(sieges, home, this);
           setMissionComplete(false);
         }
         else if (update == VICTORY) {
-          WorldEvents.enterHostility(sieges, home, true, 1);
-          WorldEvents.imposeTerms(sieges, home, this);
-          WorldEvents.signalVictory(home, sieges, this);
+          MissionUtils.enterHostility(sieges, home, true, 1);
+          MissionUtils.imposeTerms(sieges, home, this);
+          MissionUtils.signalVictory(home, sieges, this);
           setMissionComplete(true);
         }
         else {
@@ -78,7 +78,7 @@ public class MissionForStrike extends Mission {
   
   void handleOffmapArrival(Base goes, World.Journey journey) {
     if (goes == worldFocus()) {
-      WorldEvents.handleInvasion(this, goes, journey);
+      MissionUtils.handleInvasion(this, goes, journey);
     }
   }
   

@@ -153,7 +153,7 @@ public class MissionForSecure extends Mission {
   
   
   void handleOffmapArrival(Base goes, World.Journey journey) {
-    WorldEvents.handleGarrison(this, goes, journey);
+    MissionUtils.handleGarrison(this, goes, journey);
   }
   
   

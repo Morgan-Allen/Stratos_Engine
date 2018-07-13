@@ -245,7 +245,7 @@ public abstract class Mission implements
     if (goes == homeBase) stage = STAGE_RETURNED;
     
     if (from.isOffmap()) {
-      if (from == homeBase) WorldEvents.handleDeparture(this, from, goes);
+      if (from == homeBase) MissionUtils.handleDeparture(this, from, goes);
       handleOffmapDeparture(from, journey);
     }
     
@@ -267,7 +267,7 @@ public abstract class Mission implements
     
     if (goes.isOffmap()) {
       handleOffmapArrival(goes, journey);
-      if (goes == homeBase) WorldEvents.handleReturn(this, goes, journey);
+      if (goes == homeBase) MissionUtils.handleReturn(this, goes, journey);
     }
   }
   

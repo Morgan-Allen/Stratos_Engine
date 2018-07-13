@@ -87,7 +87,7 @@ public class MissionForContact extends Mission {
   void handleOffmapArrival(Base goes, World.Journey journey) {
     if (goes == worldFocus()) {
       TaskGifting.performMisionDelivery(this);
-      WorldEvents.handleDialog(this, goes, journey);
+      MissionUtils.handleDialog(this, goes, journey);
     }
   }
   

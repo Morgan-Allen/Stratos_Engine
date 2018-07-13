@@ -3,10 +3,6 @@
 package game;
 import static game.GameConstants.*;
 import static game.World.*;
-
-import game.GameConstants.Good;
-import game.GameConstants.Trader;
-
 import static game.BaseRelations.*;
 import util.*;
 
@@ -17,19 +13,12 @@ public class Base implements Session.Saveable, Trader, BaseEvents.Trouble {
   
   /**  Data fields, construction and save/load methods-
     */
-  public static enum GOVERNMENT {  //  TODO:  Move into the Council class.
-    IMPERIAL, FEUDAL, BARBARIAN, REPUBLIC
-  }
-  
-  
   String name = "City";
   int tint = CITY_COLOR;
   
   final public World world;
   final public WorldLocale locale;
   final public Faction faction;
-  
-  GOVERNMENT government = GOVERNMENT.FEUDAL;
   
   final public BaseCouncil   council   = new BaseCouncil  (this);
   final public BaseRelations relations = new BaseRelations(this);
@@ -80,7 +69,6 @@ public class Base implements Session.Saveable, Trader, BaseEvents.Trouble {
     locale  = (WorldLocale) s.loadObject();
     faction = (Faction) s.loadObject();
     
-    government = GOVERNMENT.values()[s.loadInt()];
     s.loadObjects(buildTypes);
     
     council  .loadState(s);
@@ -109,7 +97,6 @@ public class Base implements Session.Saveable, Trader, BaseEvents.Trouble {
     s.saveObject(locale);
     s.saveObject(faction);
     
-    s.saveInt(government.ordinal());
     s.saveObjects(buildTypes);
     
     council  .saveState(s);
@@ -208,16 +195,6 @@ public class Base implements Session.Saveable, Trader, BaseEvents.Trouble {
   
   /**  Setting up basic relations-
     */
-  public void setGovernment(GOVERNMENT g) {
-    this.government = g;
-  }
-  
-  
-  public GOVERNMENT government() {
-    return government;
-  }
-  
-  
   public void setHeadquarters(Building headquarters) {
     this.headquarters = headquarters;
   }
