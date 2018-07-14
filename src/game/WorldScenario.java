@@ -117,10 +117,11 @@ public class WorldScenario extends Scenario {
   }
   
   public static SiteConfig siteConfig(
-    Faction faction, BuildType type, int minCount, int maxCount
+    Faction faction, boolean isBase, BuildType type, int minCount, int maxCount
   ) {
     SiteConfig c = new SiteConfig();
     c.belongs  = faction;
+    c.isBase   = isBase;
     c.siteType = type;
     c.minCount = minCount;
     c.maxCount = maxCount;
@@ -130,7 +131,7 @@ public class WorldScenario extends Scenario {
   public static SiteConfig siteConfig(
     SiteConfig parent, BuildType type, int minCount, int maxCount
   ) {
-    SiteConfig c = siteConfig(parent.belongs, type, minCount, maxCount);
+    SiteConfig c = siteConfig(parent.belongs, false, type, minCount, maxCount);
     parent.children.add(c);
     return c;
   }
@@ -235,7 +236,7 @@ public class WorldScenario extends Scenario {
     AreaTile landing = pickLanding.result();
     
     if (landing != null) {
-      SiteConfig landSite = siteConfig(expedition.faction, null, 0, 0);
+      SiteConfig landSite = siteConfig(expedition.faction, false, null, 0, 0);
       for (BuildType b : expedition.built) siteConfig(landSite, b, 1, 1);
       bastion = placeSite(landSite, stage, landing, null, base);
     }
@@ -291,10 +292,6 @@ public class WorldScenario extends Scenario {
     
     options.queueSort();
     
-    
-    //  TODO:  You're not necessarily using the Locals as your owning base here-
-    //  the site itself might be configuring a fresh base in association with
-    //  a given faction.
     
     for (SiteConfig site : config.sites) if (options.size() > 0) {
       SiteOption o = options.removeFirst();

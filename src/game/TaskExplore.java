@@ -49,7 +49,7 @@ public class TaskExplore extends Task {
   
   static TaskExplore configExploration(Actor actor, Target from, int range) {
     Area     map  = actor.map;
-    AreaFog  fog  = map.fogMap(actor.base(), true);
+    AreaFog  fog  = map.fogMap(actor);
     AreaTile goes = fog.pickRandomFogPoint(from, range);
     if (goes == null) return null;
     goes = AreaTile.nearestOpenTile(goes, map);
@@ -101,7 +101,7 @@ public class TaskExplore extends Task {
     Pathing haven = actor.haven();
     float power = TaskCombat.attackPower(actor);
     
-    AreaDanger dangerMap = actor.map().dangerMap(actor.base(), true);
+    AreaDanger dangerMap = actor.map().dangerMap(actor);
     float danger = dangerMap.fuzzyLevel(around.x, around.y);
     danger /= danger + power;
     
@@ -128,7 +128,7 @@ public class TaskExplore extends Task {
   protected void onTarget(Target target) {
     Actor   actor = (Actor) this.active;
     Area    map   = actor.map();
-    AreaFog fog   = map.fogMap(actor.base(), true);
+    AreaFog fog   = map.fogMap(actor);
     
     fog.liftFog(target.at(), actor.sightRange() * 2);
     

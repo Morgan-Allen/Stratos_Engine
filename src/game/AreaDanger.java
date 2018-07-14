@@ -10,7 +10,7 @@ import util.*;
 public class AreaDanger {
   
   
-  final Base base;
+  final Faction base;
   final Area map;
   float baseValues[][];
   float fuzzValues[][];
@@ -18,7 +18,7 @@ public class AreaDanger {
   
   
   
-  AreaDanger(Base base, Area map) {
+  AreaDanger(Faction base, Area map) {
     this.base = base;
     this.map  = map;
   }

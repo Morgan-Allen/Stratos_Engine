@@ -91,7 +91,7 @@ public class TestBounties extends LogicTest {
       
       boolean checkVictory(Area map, Base base, Object focus) {
         AreaTile looks = (AreaTile) focus;
-        AreaFog fog = map.fogMap(base, true);
+        AreaFog fog = map.fogMap(base.faction(), true);
         int r = RANGE;
         boolean allSeen = true;
         

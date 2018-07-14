@@ -16,7 +16,7 @@ public class AreaFog {
     */
   final static int MAX_FOG = 100;
   
-  final Base base;
+  final Faction base;
   final Area map;
   
   byte fogVals[][];
@@ -29,7 +29,7 @@ public class AreaFog {
   
   
   
-  AreaFog(Base base, Area map) {
+  AreaFog(Faction base, Area map) {
     this.base = base;
     this.map  = map;
   }

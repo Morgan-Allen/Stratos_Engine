@@ -288,7 +288,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
     }
     
     if (base() != map.locals) {
-      AreaFog fog = map.fogMap(base(), true);
+      AreaFog fog = map.fogMap(this);
       float fogLift = sightRange() + (radius() / 2);
       fog.liftFog(centre(), fogLift);
     }
@@ -759,7 +759,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   
   
   private float sightLevel(boolean max, Base views) {
-    AreaFog fog = map.fogMap(views, false);
+    AreaFog fog = map.fogMap(views.faction(), false);
     if (fog == null) return 1;
     
     AreaTile at = at();

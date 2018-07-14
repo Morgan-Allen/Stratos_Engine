@@ -131,7 +131,7 @@ public class LogicTest {
   void updateAreaView(Area map, Base base) {
     configGraphic(map.size(), map.size());
     
-    AreaDanger dangerMap = map.dangerMap(base, false);
+    AreaDanger dangerMap = map.dangerMap(base.faction(), false);
     
     for (AreaTile at : map.allTiles()) {
       int fill = BLANK_COLOR;
@@ -272,7 +272,7 @@ public class LogicTest {
   
   
   private void updateCityFogLayer(Area map, Base base) {
-    AreaFog fogMap = map.fogMap(base, false);
+    AreaFog fogMap = map.fogMap(base.faction(), false);
     if (fogMap == null) return;
     
     for (AreaTile t : map.allTiles()) {

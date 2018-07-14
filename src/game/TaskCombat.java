@@ -480,7 +480,7 @@ public class TaskCombat extends Task {
     float fear  = actor.fearLevel();
     Series <Active> backup = actor.backup();
     
-    AreaDanger dangerMap = actor.map().dangerMap(actor.base(), true);
+    AreaDanger dangerMap = actor.map().dangerMap(actor);
     AreaTile around = actor.at();
     
     float danger = dangerMap.fuzzyLevel(around.x, around.y);

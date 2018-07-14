@@ -739,13 +739,13 @@ public class Actor extends Element implements
     AreaTile from = centre();
     
     if (base() != map.locals) {
-      AreaFog fog = map.fogMap(base(), true);
+      AreaFog fog = map.fogMap(this);
       float range = sightRange();
       if (fog != null) fog.liftFog(from, range);
     }
     
-    if (guestBase() != map.locals) {
-      AreaFog fog = map.fogMap(guestBase(), true);
+    if (guestBase() != map.locals && guestBase() != base()) {
+      AreaFog fog = map.fogMap(this);
       float range = sightRange();
       if (fog != null) fog.liftFog(from, range);
     }
@@ -768,7 +768,7 @@ public class Actor extends Element implements
     Series <Active> around, float noticeRange, int maxNotice
   ) {
     Batch <Active> filtered = new Batch();
-    AreaFog fog = map.fogMap(base(), true);
+    AreaFog fog = map.fogMap(this);
     
     for (Active a : around) {
       
@@ -993,10 +993,10 @@ public class Actor extends Element implements
   }
   
   
-  protected float renderedFog(Base base) {
-    if (base == this.base()) return 1;
+  protected float renderedFog(Base views) {
+    if (views == this.base()) return 1;
     Sprite s = sprite();
-    AreaFog fog = map.fogMap(base, false);
+    AreaFog fog = map.fogMap(views.faction(), false);
     if (fog == null || s == null) return 0;
     return fog.displayedFog(s.position.x, s.position.y, this);
   }

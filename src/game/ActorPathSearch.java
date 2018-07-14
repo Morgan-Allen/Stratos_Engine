@@ -27,7 +27,7 @@ public class ActorPathSearch extends Search <Pathing> {
     this(w.map, init, dest, -1);
     
     this.client = w;
-    this.danger = map.dangerMap(client.base(), false);
+    this.danger = map.dangerMap(client);
     this.flight = w.type().moveMode == Type.MOVE_AIR;
     
     ActorType type = w.type();
@@ -52,7 +52,7 @@ public class ActorPathSearch extends Search <Pathing> {
   
   public void setStealthy(boolean yes) {
     stealthy = yes;
-    if (yes && client != null) fog = map.fogMap(client.base(), false);
+    if (yes && client != null) fog = map.fogMap(client);
     else fog = null;
   }
   

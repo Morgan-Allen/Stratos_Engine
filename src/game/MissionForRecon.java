@@ -48,7 +48,7 @@ public class MissionForRecon extends Mission {
       //  In the case of local exploration, check for fulfillment:
       else if (localFocus() instanceof AreaTile) {
         Area     map   = localBase.activeMap();
-        AreaFog  fog   = map.fogMap(homeBase(), true);
+        AreaFog  fog   = map.fogMap(homeBase().faction(), true);
         AreaTile looks = (AreaTile) localFocus();
         int r = (int) exploreRange;
         boolean allSeen = true;

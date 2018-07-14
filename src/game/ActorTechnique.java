@@ -198,7 +198,7 @@ public abstract class ActorTechnique extends Trait {
     
     protected float successChance() {
       Actor actor = (Actor) active;
-      AreaDanger dangerMap = actor.map().dangerMap(actor.base(), true);
+      AreaDanger dangerMap = actor.map().dangerMap(actor);
       AreaTile around = actor.at();
       
       float danger = dangerMap.fuzzyLevel(around.x, around.y);

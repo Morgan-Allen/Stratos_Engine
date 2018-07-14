@@ -34,7 +34,7 @@ public class ActorUtils {
     boolean land = moveMode == Type.MOVE_LAND;
     
     if (land) {
-      AreaTile current = map.transitPoints.get(with);
+      AreaTile current = map.transitPoints.get(with.locale);
       if (current != null && ! map.blocked(current.x, current.y)) return current;
     }
     
@@ -59,7 +59,7 @@ public class ActorUtils {
     }
     
     AreaTile point = pick.result();
-    map.transitPoints.put(with, point);
+    map.transitPoints.put(with.locale, point);
     return point;
   }
   

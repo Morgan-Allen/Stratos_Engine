@@ -34,7 +34,7 @@ public class TestExploring extends LogicTest {
     lodge.enterMap(map, 4, 4, 1, base);
     ActorUtils.fillWorkVacancies(lodge);
     
-    AreaFog fog = map.fogMap(base, true);
+    AreaFog fog = map.fogMap(base.faction(), true);
     int tilesSeen = 0, tilesOpen = 0;
     boolean exploreOkay = false;
     boolean testOkay    = false;

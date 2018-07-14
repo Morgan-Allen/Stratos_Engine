@@ -537,7 +537,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
     */
   public float sightLevel(Base views) {
     if (map == null) return 0;
-    AreaFog fog = map.fogMap(views, false);
+    AreaFog fog = map.fogMap(views.faction(), false);
     if (fog == null) return 1;
     AreaTile from = (type.wide == 1 && type.high == 1) ? at : centre();
     return fog.sightLevel(from);
@@ -546,7 +546,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   
   public float maxSightLevel(Base views) {
     if (map == null) return 0;
-    AreaFog fog = map.fogMap(views, false);
+    AreaFog fog = map.fogMap(views.faction(), false);
     if (fog == null) return 1;
     AreaTile from = (type.wide == 1 && type.high == 1) ? at : centre();
     return fog.maxSightLevel(from);
@@ -749,9 +749,9 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
-  protected float renderedFog(Base base) {
-    if (base == this.base) return 1;
-    AreaFog fog = map.fogMap(base, false);
+  protected float renderedFog(Base views) {
+    if (views == this.base) return 1;
+    AreaFog fog = map.fogMap(views.faction(), false);
     if (fog == null) return 0;
     return fog.displayedFog(at.x + 0.5f, at.y + 0.5f, this);
   }

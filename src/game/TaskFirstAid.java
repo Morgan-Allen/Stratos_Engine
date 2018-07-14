@@ -155,7 +155,7 @@ public class TaskFirstAid extends Task {
     Actor actor = (Actor) active;
     AreaTile around = target.at();
     
-    AreaDanger dangerMap = actor.map().dangerMap(actor.base(), true);
+    AreaDanger dangerMap = actor.map().dangerMap(actor);
     float danger = dangerMap.fuzzyLevel(around.x, around.y);
     if (danger <= 0) return 0;
     

@@ -39,9 +39,9 @@ public class Area implements Session.Saveable {
   final public AreaPathCache pathCache = new AreaPathCache(this);
   float lightLevel;
   
-  Table <Base, AreaFog   > fogMaps       = new Table();
-  Table <Base, AreaDanger> dangerMaps    = new Table();
-  Table <Base, AreaTile  > transitPoints = new Table();
+  Table <Faction, AreaFog   > fogMaps    = new Table();
+  Table <Faction, AreaDanger> dangerMaps = new Table();
+  Table <WorldLocale, AreaTile> transitPoints = new Table();
   
   Table <Type, AreaFlagging> flagging = new Table();
   Table <String, AreaDemands> demands = new Table();
@@ -99,7 +99,7 @@ public class Area implements Session.Saveable {
     lightLevel = s.loadFloat();
     
     for (int n = s.loadInt(); n-- > 0;) {
-      Base with = (Base) s.loadObject();
+      Faction with = (Faction) s.loadObject();
       AreaFog fog = new AreaFog(with, this);
       fog.performSetup(size);
       fog.loadState(s);
@@ -107,7 +107,7 @@ public class Area implements Session.Saveable {
     }
     
     for (int n = s.loadInt(); n-- > 0;) {
-      Base with = (Base) s.loadObject();
+      Faction with = (Faction) s.loadObject();
       AreaDanger danger = new AreaDanger(with, this);
       danger.performSetup(flagSize);
       danger.loadState(s);
@@ -115,7 +115,7 @@ public class Area implements Session.Saveable {
     }
     
     for (int n = s.loadInt(); n-- > 0;) {
-      Base with = (Base) s.loadObject();
+      WorldLocale with = (WorldLocale) s.loadObject();
       AreaTile point = loadTile(this, s);
       transitPoints.put(with, point);
     }
@@ -173,21 +173,21 @@ public class Area implements Session.Saveable {
     s.saveFloat(lightLevel);
     
     s.saveInt(fogMaps.size());
-    for (Base b : fogMaps.keySet()) {
+    for (Faction b : fogMaps.keySet()) {
       s.saveObject(b);
       AreaFog fog = fogMaps.get(b);
       fog.saveState(s);
     }
     
     s.saveInt(dangerMaps.size());
-    for (Base b : dangerMaps.keySet()) {
+    for (Faction b : dangerMaps.keySet()) {
       s.saveObject(b);
       AreaDanger danger = dangerMaps.get(b);
       danger.saveState(s);
     }
     
     s.saveInt(transitPoints.size());
-    for (Base c : transitPoints.keySet()) {
+    for (WorldLocale c : transitPoints.keySet()) {
       s.saveObject(c);
       saveTile(transitPoints.get(c), this, s);
     }
@@ -247,8 +247,8 @@ public class Area implements Session.Saveable {
     pathCache.performSetup(size);
     
     for (Base b : bases) {
-      fogMap(b, true);
-      dangerMap(b, true);
+      fogMap   (b.faction(), true);
+      dangerMap(b.faction(), true);
     }
   }
   
@@ -669,7 +669,17 @@ public class Area implements Session.Saveable {
   }
   
   
-  public AreaFog fogMap(Base base, boolean init) {
+  public AreaFog fogMap(Element e) {
+    return fogMap(e.base().faction(), true);
+  }
+  
+  
+  public AreaDanger dangerMap(Element e) {
+    return dangerMap(e.base().faction(), true);
+  }
+  
+  
+  public AreaFog fogMap(Faction base, boolean init) {
     if (base == null) return null;
     AreaFog fog = fogMaps.get(base);
     if (fog == null && init) {
@@ -681,7 +691,7 @@ public class Area implements Session.Saveable {
   }
   
   
-  public AreaDanger dangerMap(Base base, boolean init) {
+  public AreaDanger dangerMap(Faction base, boolean init) {
     AreaDanger danger = dangerMaps.get(base);
     if (danger == null && init) {
       danger = new AreaDanger(base, this);
@@ -752,7 +762,7 @@ public class Area implements Session.Saveable {
       I.say("Displayed "+chunksShown+" chunks out of "+totalChunks);
     }
     
-    AreaFog fog = fogMap(playing, false);
+    AreaFog fog = fogMap(playing.faction(), false);
     if (fog != null) fog.renderFor(renderTime, rendering);
     
     for (Ephemera.Ghost ghost : ephemera.visibleFor(rendering, playing, renderTime)) {

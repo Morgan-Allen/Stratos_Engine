@@ -61,7 +61,7 @@ public class TestDangerMap extends LogicTest {
         expectSums[gX][gY] += power;
       }
       
-      AreaDanger danger = map.dangerMap(base, false);
+      AreaDanger danger = map.dangerMap(base.faction(), false);
       boolean checkMapLevels = true;
       List <Coord> discrepancies = new List();
       

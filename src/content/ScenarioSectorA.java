@@ -22,7 +22,7 @@ public class ScenarioSectorA extends WorldScenario {
   
   final static SiteConfig
     SITE_A = WorldScenario.siteConfig(
-      GameWorld.FACTION_ARTILECTS,
+      GameWorld.FACTION_ARTILECTS, false,
       LAIR_A, 1, 1
     );
   final static AreaConfig

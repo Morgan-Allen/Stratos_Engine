@@ -32,7 +32,9 @@ public class TestSpawning extends LogicTest {
     
     BuildingForNest nest = (BuildingForNest) RUINS_LAIR.generate();
     nest.enterMap(map, 24, 24, 1, map.locals);
+    //  TODO:  You need to arrange for some other system here!
     nest.assignSpawnParameters(DAY_LENGTH, totalToSpawn, true, spawnArgs);
+    
     
     Building toRaze = (Building) ENFORCER_BLOC.generate();
     toRaze.enterMap(map, 6, 6, 1, base);
