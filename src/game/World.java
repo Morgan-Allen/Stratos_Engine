@@ -60,6 +60,9 @@ public class World implements Session.Saveable {
   final public WorldCalendar calendar = new WorldCalendar(this);
   final List <WorldScenario> scenarios = new List();
   
+  Table <Faction, BaseCouncil> councils = new Table();
+  Faction playerFaction = null;
+  
   List <WorldLocale> locales  = new List();
   List <Base       > bases    = new List();
   List <Journey    > journeys = new List();
@@ -69,6 +72,7 @@ public class World implements Session.Saveable {
   int mapWide = 10, mapHigh = 10;
   Table <String, Type> mediaTypes = new Table();
   
+  //  Only used to save & load...
   String savePath = "saves/save_locale.str";
   
   
@@ -116,6 +120,15 @@ public class World implements Session.Saveable {
     calendar.loadState(s);
     
     s.loadObjects(scenarios);
+    
+    for (int n = s.loadInt(); n-- > 0;) {
+      Faction f = (Faction) s.loadObject();
+      BaseCouncil c = new BaseCouncil(f, this);
+      c.loadState(s);
+      councils.put(f, c);
+    }
+    playerFaction = (Faction) s.loadObject();
+    
     s.loadObjects(locales);
     s.loadObjects(bases);
     
@@ -165,6 +178,14 @@ public class World implements Session.Saveable {
     calendar.saveState(s);
     
     s.saveObjects(scenarios);
+    
+    s.saveInt(councils.size());
+    for (Faction f : councils.keySet()) {
+      s.saveObject(f);
+      councils.get(f).saveState(s);
+    }
+    s.saveObject(playerFaction);
+    
     s.saveObjects(locales);
     s.saveObjects(bases);
     
@@ -206,7 +227,7 @@ public class World implements Session.Saveable {
   
   
   
-  /**  Managing Cities and Locales:
+  /**  Managing Factions, Bases and Locales:
     */
   public static void setupRoute(WorldLocale a, WorldLocale b, int distance, int moveMode) {
     Route route = new Route();
@@ -268,6 +289,18 @@ public class World implements Session.Saveable {
   
   public Series <Base> bases() {
     return bases;
+  }
+  
+  
+  public void setPlayerFaction(Faction f) {
+    this.playerFaction = f;
+  }
+  
+  
+  public BaseCouncil factionCouncil(Faction f) {
+    BaseCouncil match = councils.get(f);
+    if (match == null) councils.put(f, match = new BaseCouncil(f, this));
+    return match;
   }
   
   
@@ -461,6 +494,12 @@ public class World implements Session.Saveable {
       if (time >= j.arriveTime) {
         completeJourney(j);
       }
+    }
+    
+    for (Faction f : councils.keySet()) {
+      BaseCouncil c = councils.get(f);
+      boolean played = playerFaction == f;
+      c.updateCouncil(played);
     }
   }
   

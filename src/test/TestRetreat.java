@@ -9,7 +9,7 @@ import static game.Base.*;
 import static game.Task.*;
 import static game.GameConstants.*;
 import static content.GameContent.*;
-import static content.GameWorld.FACTION_SETTLERS;
+import static content.GameWorld.*;
 
 
 
@@ -24,14 +24,17 @@ public class TestRetreat extends LogicTest {
   static boolean testRetreat(boolean graphics) {
     TestRetreat test = new TestRetreat();
     
-    Base base = LogicTest.setupTestBase(FACTION_SETTLERS, ALL_GOODS, 32, false);
+    Base base = LogicTest.setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, 32, false);
     Area map = base.activeMap();
     World world = base.world;
     
-    Base enemyBase = new Base(world, map.locale, FACTION_SETTLERS, "Enemy Base");
+    Base enemyBase = new Base(world, map.locale, FACTION_SETTLERS_B, "Enemy Base");
     enemyBase.attachMap(map);
     map.addBase(enemyBase);
-    BaseRelations.setPosture(base, enemyBase, BaseRelations.POSTURE.ENEMY, true);
+    BaseRelations.setPosture(
+      base.faction(), enemyBase.faction(),
+      BaseRelations.POSTURE.ENEMY, world
+    );
     
     world.settings.toggleFatigue = false;
     world.settings.toggleInjury  = false;

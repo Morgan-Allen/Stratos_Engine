@@ -91,7 +91,7 @@ public class ActorUtils {
     if (! employs.complete()) return MIGRATE.NOT_COMPLETE;
     
     Actor migrant = checkOnly ? null : (Actor) jobType.generate();
-    Base homeland = goes.relations.homeland();
+    Base homeland = goes.council().homeland();
     
     int cost = payHireCost ? goes.trading.hireCost(jobType) : 0;
     if (goes.funds() < cost) return MIGRATE.NO_FUNDS;

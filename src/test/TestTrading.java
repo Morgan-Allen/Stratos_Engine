@@ -23,15 +23,17 @@ public class TestTrading extends LogicTest {
     LogicTest test = new TestTrading();
     
     World world = new World(ALL_GOODS);
-    Base  baseC = new Base(world, world.addLocale(2, 2), FACTION_SETTLERS);
-    Base  awayC = new Base(world, world.addLocale(3, 3), FACTION_SETTLERS);
+    Base  baseC = new Base(world, world.addLocale(2, 2), FACTION_SETTLERS_A);
+    Base  awayC = new Base(world, world.addLocale(3, 3), FACTION_SETTLERS_B);
     world.addBases(baseC, awayC);
-    awayC.council.setTypeAI(BaseCouncil.AI_OFF);
+    world.setPlayerFaction(FACTION_SETTLERS_A);
+    
+    awayC.council().setTypeAI(BaseCouncil.AI_OFF);
     baseC.setName("(Home City)");
     awayC.setName("(Away City)");
     
     World.setupRoute(baseC.locale, awayC.locale, 1, Type.MOVE_LAND);
-    BaseRelations.setPosture(baseC, awayC, BaseRelations.POSTURE.VASSAL, true);
+    //BaseRelations.setPosture(baseC, awayC, BaseRelations.POSTURE.VASSAL, true);
     
     Tally <Good> supplies = new Tally().setWith(GREENS, 10, PSALT, 5);
     BaseTrading.setSuppliesDue(awayC, baseC, supplies);

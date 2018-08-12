@@ -344,9 +344,9 @@ public class TaskTrading extends Task {
     
     Base fromB = from.base(), goesB = goes.base();
     boolean paymentDue = fromB != goesB;
-    boolean tributeDue = fromB.relations.isLoyalVassalOf(goesB);
+    boolean tributeDue = fromB.isLoyalVassalOf(goesB);
     boolean fromFlex   = flexibleGoods(from, tradeFrom, tradeGoes);
-    Relation relation = fromB.relations.relationWith(goesB);
+    Relation relation  = fromB.relations.relationWith(goesB);
     
     Tally <Good> stock = from.inventory();
     float totalGets = 0, totalPays = 0;
@@ -399,8 +399,8 @@ public class TaskTrading extends Task {
     
     if (c != c.base()) return false;
     Base land = c.base();
-    if (land == from) return land == goes.base().relations.homeland();
-    if (land == goes) return land == from.base().relations.homeland();
+    if (land == from) return land == goes.base().council().homeland();
+    if (land == goes) return land == from.base().council().homeland();
     return false;
   }
   

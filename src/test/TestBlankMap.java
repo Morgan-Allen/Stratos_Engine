@@ -31,7 +31,7 @@ public class TestBlankMap extends LogicTest {
     
     Base base = loadCity(null, filename);
     if (base == null) base = setupTestBase(
-      FACTION_SETTLERS, ALL_GOODS, 32, true, MEADOW, JUNGLE
+      FACTION_SETTLERS_A, ALL_GOODS, 32, true, MEADOW, JUNGLE
     );
     
     while (true) {

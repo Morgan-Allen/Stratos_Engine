@@ -35,7 +35,8 @@ public class TestVesselMissions extends LogicTest {
     TestVesselMissions test = new TestVesselMissions() {
       
       Mission generateMission(Base base, Base rival) {
-        setPosture(base, rival, POSTURE.ENEMY, true);
+        World world = base.world;
+        setPosture(base.faction(), rival.faction(), POSTURE.ENEMY, world);
         
         Mission raid = new MissionForStrike(rival);
         raid.setWorldFocus(base);
@@ -58,8 +59,9 @@ public class TestVesselMissions extends LogicTest {
     TestVesselMissions test = new TestVesselMissions() {
       
       Mission generateMission(Building centre, Building barracks, Base rival) {
+        World world = centre.map().world;
         Base base = centre.base();
-        setPosture(base, rival, POSTURE.ENEMY, true);
+        setPosture(base.faction(), rival.faction(), POSTURE.ENEMY, world);
         
         Mission raid = new MissionForStrike(base);
         raid.setWorldFocus(rival);
@@ -71,7 +73,8 @@ public class TestVesselMissions extends LogicTest {
       
       boolean checkCompletion(Mission mission, Base base, Building centre) {
         Base away = mission.worldFocus();
-        if (! away.relations.isVassalOf(base)) return false;
+        if (away.faction() != base.faction()) return false;
+        //if (! away.relations.isVassalOf(base)) return false;
         return true;
       }
     };
@@ -85,7 +88,9 @@ public class TestVesselMissions extends LogicTest {
     boolean fromLocal, String title, boolean graphics
   ) {
     
-    Base  base  = LogicTest.setupTestBase(FACTION_SETTLERS, ALL_GOODS, 32, false, ALL_TERRAINS);
+    Base  base  = LogicTest.setupTestBase(
+      FACTION_SETTLERS_A, ALL_GOODS, 32, false, ALL_TERRAINS
+    );
     World world = base.world;
     Area  map   = base.activeMap();
     
@@ -94,7 +99,7 @@ public class TestVesselMissions extends LogicTest {
     
     
     WorldLocale rivalAt = world.addLocale(4, 4);
-    Base rival = new Base(world, rivalAt, FACTION_SETTLERS, "Rival Base");
+    Base rival = new Base(world, rivalAt, FACTION_SETTLERS_B, "Rival Base");
     world.addBases(rival);
     World.setupRoute(rival.locale, base.locale, 1, Type.MOVE_AIR);
     

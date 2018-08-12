@@ -5,7 +5,7 @@ package test;
 import game.*;
 import static game.GameConstants.*;
 import static content.GameContent.*;
-import static content.GameWorld.FACTION_SETTLERS;
+import static content.GameWorld.*;
 import util.*;
 
 
@@ -21,7 +21,7 @@ public class TestHunting extends LogicTest {
   static boolean testHunting(boolean graphics) {
     LogicTest test = new TestHunting();
     
-    Base base = setupTestBase(FACTION_SETTLERS, ALL_GOODS, 32, true, JUNGLE, MEADOW);
+    Base base = setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, 32, true, JUNGLE, MEADOW);
     Area map = base.activeMap();
     World world = map.world;
     

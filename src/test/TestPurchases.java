@@ -3,11 +3,11 @@
 
 package test;
 import game.*;
-import util.*;
 import static game.GameConstants.*;
 import content.*;
 import static content.GameContent.*;
-import static content.GameWorld.FACTION_SETTLERS;
+import static content.GameWorld.*;
+import util.*;
 
 
 
@@ -22,7 +22,7 @@ public class TestPurchases extends LogicTest {
   static boolean testPurchases(boolean graphics) {
     TestPurchases test = new TestPurchases();
     
-    Base base = LogicTest.setupTestBase(FACTION_SETTLERS, ALL_GOODS, 16, false);
+    Base base = LogicTest.setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, 16, false);
     Area map = base.activeMap();
     World world = map.world;
     

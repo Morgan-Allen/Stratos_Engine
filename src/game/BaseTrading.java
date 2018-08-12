@@ -12,6 +12,9 @@ public class BaseTrading {
   
   final Base base;
   
+  //  TODO:  Keep a tally of supply obligations here, instead of within
+  //  relations!
+  
   Tally <Good> needLevel = new Tally();
   Tally <Good> prodLevel = new Tally();
   Tally <Good> inventory = new Tally();
@@ -106,7 +109,7 @@ public class BaseTrading {
   
   
   public boolean allowExport(Good g, Trader buys) {
-    if (buys.base().relations.homeland() == base) return true;
+    if (buys.base().council().homeland() == base) return true;
     if (suppliesDue(base, buys.base(), g) > 0) return true;
     return prodLevel.valueFor(g) > 0;
   }
@@ -116,8 +119,6 @@ public class BaseTrading {
     return good.price;
   }
   
-  
-
   
   
   public static void setSuppliesDue(Base a, Base b, Tally <Good> suppliesDue) {
@@ -153,7 +154,7 @@ public class BaseTrading {
   //  Buying from where goods are abundant imposes a lower price.
   
   float scarcityMultiple(Base other, Good g) {
-    if (other != base.relations.homeland()) return 1.0f;
+    if (other != base.council().homeland()) return 1.0f;
     float mult = 1.0f;
     float needS = other.trading.needLevel(g);
     float prodS = other.trading.prodLevel(g);
@@ -213,10 +214,11 @@ public class BaseTrading {
       inventory.set(g, Nums.max(0, amount));
     }
     
-    Base lord = base.relations.currentLord();
+    Faction lord = base.faction();
+    Base capital = base.council().capital();
     boolean tribute = base.relations.isLoyalVassalOf(lord);
     
-    if (tribute && lord.isOffmap()) {
+    if (tribute && capital != null && capital.isOffmap()) {
       Relation r = base.relations.relationWith(lord);
       for (Good g : r.suppliesDue.keys()) {
         float sent = r.suppliesDue.valueFor(g) * usageInc * 1.1f;
@@ -234,7 +236,7 @@ public class BaseTrading {
     
     for (Base b : base.world.bases()) {
       
-      POSTURE p = base.relations.posture(b);
+      POSTURE p = base.relations.posture(b.faction());
       boolean shouldTrade =
         p != POSTURE.NEUTRAL &&
         p != POSTURE.ENEMY   &&

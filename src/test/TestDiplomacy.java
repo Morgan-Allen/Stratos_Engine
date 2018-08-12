@@ -28,9 +28,9 @@ public class TestDiplomacy extends LogicTest {
     //  Set up the structure of the world-
     
     World world = new World(ALL_GOODS);
-    Base  baseC = new Base(world, world.addLocale(2, 2), FACTION_SETTLERS);
-    Base  awayC = new Base(world, world.addLocale(2, 3), FACTION_SETTLERS);
-    Base  neutC = new Base(world, world.addLocale(3, 2), FACTION_SETTLERS);
+    Base  baseC = new Base(world, world.addLocale(2, 2), FACTION_SETTLERS_A);
+    Base  awayC = new Base(world, world.addLocale(2, 3), FACTION_SETTLERS_B);
+    Base  neutC = new Base(world, world.addLocale(3, 2), FACTION_SETTLERS_C);
     Area  map   = AreaTerrain.generateTerrain(
       baseC, 32, 0, MEADOW, JUNGLE
     );
@@ -38,11 +38,12 @@ public class TestDiplomacy extends LogicTest {
       ALL_BUILDINGS, ALL_SHIPS(), ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES()
     );
     world.addBases(baseC, awayC, neutC);
+    world.setPlayerFaction(FACTION_SETTLERS_A);
     baseC.setName("Home City");
     awayC.setName("Away City");
     neutC.setName("Neutral City");
-    awayC.council.setTypeAI(AI_OFF);
-    neutC.council.setTypeAI(AI_OFF);
+    awayC.council().setTypeAI(AI_OFF);
+    neutC.council().setTypeAI(AI_OFF);
     
     World.setupRoute(baseC.locale, awayC.locale, 1, Type.MOVE_LAND);
     World.setupRoute(baseC.locale, neutC.locale, 1, Type.MOVE_LAND);
@@ -64,7 +65,7 @@ public class TestDiplomacy extends LogicTest {
     gate.enterMap(map, 12, 18, 1, baseC);
     
     BuildingForGovern palace = (BuildingForGovern) BASTION.generate();
-    BaseCouncil council = baseC.council;
+    BaseCouncil council = baseC.council();
     palace.enterMap(map, 10, 10, 1, baseC);
     
     ActorAsPerson monarch = (ActorAsPerson) Nobles.NOBLE.generate();
@@ -95,12 +96,12 @@ public class TestDiplomacy extends LogicTest {
     
     ActorAsPerson awayBoss = (ActorAsPerson) Nobles.NOBLE.generate();
     awayBoss.assignBase(awayC);
-    awayC.council.toggleMember(awayBoss, Role.MONARCH, true);
+    awayC.council().toggleMember(awayBoss, Role.MONARCH, true);
     awayC.toggleVisitor(awayBoss, true);
     
     ActorAsPerson neutBoss = (ActorAsPerson) Nobles.NOBLE.generate();
     neutBoss.assignBase(neutC);
-    neutC.council.toggleMember(neutBoss, Role.MONARCH, true);
+    neutC.council().toggleMember(neutBoss, Role.MONARCH, true);
     neutC.toggleVisitor(neutBoss, true);
     
     //
@@ -170,7 +171,7 @@ public class TestDiplomacy extends LogicTest {
       if (offerAccepted && ! termsOkay) {
         boolean termsFilled = true;
         termsFilled &= monarch.bonds.hasBondType(bride, BOND_MARRIED);
-        termsFilled &= baseC.relations.isAllyOf(awayC);
+        termsFilled &= baseC.isAllyOf(awayC);
         termsOkay = termsFilled;
       }
       
@@ -191,18 +192,18 @@ public class TestDiplomacy extends LogicTest {
       
       if (escortSent && ! giftAwayGiven) {
         boolean gotGift = false;
-        for (Actor a : neutC.council.members()) {
+        for (Actor a : neutC.council().members()) {
           if (a.outfit.carried(giftGood) > 0) gotGift = true;
         }
         giftAwayGiven = gotGift;
       }
       
       if (escortSent && ! termsAwayGiven) {
-        termsAwayGiven = neutC.council.petitions().includes(escort);
+        termsAwayGiven = neutC.council().petitions().includes(escort);
       }
       
       if (giftAwayGiven && termsAwayGiven && ! termsAwayOkay) {
-        neutC.council.acceptTerms(escort);
+        neutC.council().acceptTerms(escort);
         termsAwayOkay = true;
       }
       

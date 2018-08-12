@@ -2,8 +2,6 @@
 
 package game;
 import static game.GameConstants.*;
-
-import game.GameConstants.Good;
 import util.*;
 
 
@@ -48,40 +46,54 @@ public class BaseRelations {
   ;
   
   
+  public static interface Postured {
+    Faction faction();
+    BaseRelations relations(World world);
+  }
+  
+  
   public static class Relation {
-    Base    with;
+    
+    Postured with;
     POSTURE posture;
     float   loyalty;
     
     int madeVassalDate = -1;
     int lastRebelDate  = -1;
     
+    //  TODO:  Move these out to base-trading!
+    
     Tally <Good> suppliesDue  = new Tally();
     Tally <Good> suppliesSent = new Tally();
   }
   
   
-  final Base base;
-
-  Base homeland = null;
+  final Object base;
+  final World world;
+  
   float prestige = PRESTIGE_AVG;
-  final Table <Base, Relation> relations = new Table();
+  final Table <Postured, Relation> relations = new Table();
   
   
+  
+  BaseRelations(Faction base, World world) {
+    this.base  = base;
+    this.world = world;
+  }
   
   BaseRelations(Base base) {
-    this.base = base;
+    this.base  = base;
+    this.world = base.world;
   }
   
   
   void loadState(Session s) throws Exception {
     
-    homeland = (Base) s.loadObject();
     prestige = s.loadFloat();
 
     for (int n = s.loadInt(); n-- > 0;) {
       Relation r = new Relation();
-      r.with    = (Base) s.loadObject();
+      r.with    = (Postured) s.loadObject();
       r.posture = POSTURE.values()[s.loadInt()];
       r.loyalty = s.loadFloat();
       r.madeVassalDate = s.loadInt();
@@ -95,7 +107,6 @@ public class BaseRelations {
   
   void saveState(Session s) throws Exception {
     
-    s.saveObject(homeland);
     s.saveFloat(prestige);
 
     s.saveInt(relations.size());
@@ -115,18 +126,7 @@ public class BaseRelations {
   
   /**  Initial setup and general query methods-
     */
-  
-  public void setHomeland(Base homeland) {
-    this.homeland = homeland;
-  }
-  
-  
-  public Base homeland() {
-    return homeland;
-  }
-  
-  
-  Relation relationWith(Base other) {
+  Relation relationWith(Postured other) {
     if (other == null) return null;
     Relation r = relations.get(other);
     if (r == null) {
@@ -139,73 +139,93 @@ public class BaseRelations {
   }
   
   
-  public POSTURE posture(Base other) {
+  public POSTURE posture(Postured other) {
     if (other == null) return null;
     return relationWith(other).posture;
   }
   
   
-  public float loyalty(Base other) {
+  public float loyalty(Postured other) {
     if (other == null) return 0;
     if (other == base) return 1;
     return relationWith(other).loyalty;
   }
   
   
-  public static void setPosture(Base a, Base b, POSTURE p, boolean symmetric) {
+  
+  //  TODO:  All of this has to be considered carefully.  You're setting a
+  //  relationship between two things, one of whom must be a faction.
+  
+  //  There is also the slight problem that factions can't have an attitude
+  //  toward their own bases right now.
+  
+  
+  public static void setPosture(Faction a, Faction b, POSTURE p, World w) {
+    w.factionCouncil(a).relations.setPosture(b, p, true);
+  }
+  
+  
+  public void setPosture(Postured f, POSTURE p, boolean symmetric) {
     if (p == null) p = POSTURE.NEUTRAL;
     //
     //  You cannot have more than one Lord at a time, so break relations with
     //  any former master-
     if (p == POSTURE.LORD) {
-      Base formerLord = a.relations.currentLord();
-      if (formerLord == b) return;
-      if (formerLord != null) setPosture(a, formerLord, POSTURE.NEUTRAL, true);
-      a.relations.relationWith(b).madeVassalDate = a.world.time;
+      Faction oldLord = this.currentLord();
+      if (oldLord == f) return;
+      if (oldLord != null) setPosture(oldLord, POSTURE.NEUTRAL, true);
+      relationWith(f).madeVassalDate = world.time;
     }
-    
-    a.relations.relationWith(b).posture = p;
-    
+    //
+    //  Impose the relation itself-
+    if (p == POSTURE.LORD && base instanceof Base) {
+      ((Base) base).assignFaction(f.faction());
+    }
+    relationWith(f).posture = p;
     //
     //  If you're enforcing symmetry, make sure the appropriate posture is
     //  reflected in the other city-
     if (symmetric) {
       POSTURE reverse = POSTURE.NEUTRAL;
       if (p == POSTURE.TRADING) reverse = POSTURE.TRADING;
-      if (p == POSTURE.VASSAL ) reverse = POSTURE.LORD  ;
-      if (p == POSTURE.LORD   ) reverse = POSTURE.VASSAL;
-      if (p == POSTURE.ALLY   ) reverse = POSTURE.ALLY  ;
-      if (p == POSTURE.ENEMY  ) reverse = POSTURE.ENEMY ;
-      setPosture(b, a, reverse, false);
+      if (p == POSTURE.VASSAL ) reverse = POSTURE.LORD   ;
+      if (p == POSTURE.LORD   ) reverse = POSTURE.VASSAL ;
+      if (p == POSTURE.ALLY   ) reverse = POSTURE.ALLY   ;
+      if (p == POSTURE.ENEMY  ) reverse = POSTURE.ENEMY  ;
+      
+      BaseRelations r = f.relations(world);
+      r.setPosture((Faction) base, reverse, false);
     }
   }
   
   
-  public void toggleRebellion(Base lord, boolean is) {
+  public void incLoyalty(Postured b, float inc) {
+    Relation r = relationWith(b);
+    float loyalty = Nums.clamp(r.loyalty + inc, -1, 1);
+    r.loyalty = loyalty;
+  }
+  
+  
+  public Faction currentLord() {
+    for (Relation r : relations.values()) {
+      if (r.posture == POSTURE.LORD) return (Faction) r.with;
+    }
+    return null;
+  }
+  
+  
+  public void toggleRebellion(Faction lord, boolean is) {
     Relation r = relationWith(lord);
     if (r.posture != POSTURE.LORD) return;
     
     if (is) {
-      r.lastRebelDate = base.world.time();
+      r.lastRebelDate = world.time();
       r.suppliesSent.clear();
-      incLoyalty(lord, base, LOY_REBEL_PENALTY / 2);
+      incLoyalty(lord, LOY_REBEL_PENALTY / 2);
     }
     else {
       r.lastRebelDate = -1;
     }
-  }
-  
-  
-  public boolean isVassalOf(Base o) { return posture(o) == POSTURE.LORD  ; }
-  public boolean isLordOf  (Base o) { return posture(o) == POSTURE.VASSAL; }
-  public boolean isEnemyOf (Base o) { return posture(o) == POSTURE.ENEMY ; }
-  public boolean isAllyOf  (Base o) { return posture(o) == POSTURE.ALLY  ; }
-  
-  
-  public static void incLoyalty(Base a, Base b, float inc) {
-    Relation r = a.relations.relationWith(b);
-    float loyalty = Nums.clamp(r.loyalty + inc, -1, 1);
-    r.loyalty = loyalty;
   }
   
   
@@ -219,14 +239,16 @@ public class BaseRelations {
   }
   
   
-  public static void incPrestige(Base c, float inc) {
-    c.relations.prestige = Nums.clamp(
-      c.relations.prestige + inc,
+  public static void incPrestige(Faction c, float inc, World w) {
+    BaseRelations relations = w.factionCouncil(c).relations;
+    relations.prestige = Nums.clamp(
+      relations.prestige + inc,
       PRESTIGE_MIN, PRESTIGE_MAX
     );
   }
   
   
+  /*
   public Base currentLord() {
     for (Relation r : relations.values()) {
       if (r.posture == POSTURE.LORD) return r.with;
@@ -249,9 +271,10 @@ public class BaseRelations {
     Base lord = capitalLord();
     return lord != null && o.relations.capitalLord() == lord;
   }
+  //*/
   
   
-  public boolean isLoyalVassalOf(Base o) {
+  public boolean isLoyalVassalOf(Faction o) {
     Relation r = relationWith(o);
     if (r == null || r.posture != POSTURE.LORD) return false;
     return r.lastRebelDate == -1;
@@ -263,27 +286,29 @@ public class BaseRelations {
   }
   
   
-  public Series <Base> relationsWith() {
-    Batch <Base> all = new Batch();
-    for (Base c : relations.keySet()) all.add(c);
+  public Series <Faction> relationsWith() {
+    Batch <Faction> all = new Batch();
+    for (Postured c : relations.keySet()) if (c instanceof Faction) {
+      all.add((Faction) c);
+    }
     return all;
   }
   
   
   public Series <Base> vassalsInRevolt() {
     Batch <Base> all = new Batch();
-    for (Relation r : relations.values()) {
-      if (r.with.relations.yearsSinceRevolt(base) > 0) all.add(r.with);
+    for (Base b : world.bases) if (b.faction() == base) {
+      if (b.relations.yearsSinceRevolt(b.faction()) > 0) all.add(b);
     }
     return all;
   }
   
   
-  public float yearsSinceRevolt(Base lord) {
+  public float yearsSinceRevolt(Faction lord) {
     Relation r = relationWith(lord);
     if (r.posture != POSTURE.LORD         ) return -1;
     if (r == null || r.lastRebelDate == -1) return -1;
-    return (base.world.time() - r.lastRebelDate) * 1f / YEAR_LENGTH;
+    return (world.time() - r.lastRebelDate) * 1f / YEAR_LENGTH;
   }
   
   

@@ -49,7 +49,7 @@ public class MissionUtils {
     IA.goesC     = goes;
     IA.fromPower = MissionForStrike.powerSum(mission) / POP_PER_CITIZEN;
     IA.goesPower = goes.armyPower() / POP_PER_CITIZEN;
-    from.council.calculateChances(IA, true);
+    from.council().calculateChances(IA, true);
     
     float chance = IA.winChance, fromLost = 0, goesLost = 0;
     boolean victory = false;
@@ -83,7 +83,7 @@ public class MissionUtils {
     world.recordEvent("attacked", from, goes);
     enterHostility(goes, from, victory, 1);
     
-    if (victory && from.council.government != GOVERNMENT.BARBARIAN) {
+    if (victory && from.council().government != GOVERNMENT.BARBARIAN) {
       imposeTerms(goes, from, mission);
     }
     if (victory) {
@@ -95,8 +95,9 @@ public class MissionUtils {
     //
     //  Either way, report the final outcome:
     if (report) {
+      BaseRelations r = world.factionCouncil(goes.faction()).relations;
       I.say("  Adjusted loss: "+fromLost+"/"+goesLost);
-      I.say("  "+from+" now: "+goes.relations.posture(from)+" of "+goes);
+      I.say("  "+from+" now: "+r.posture(from.faction())+" of "+goes);
     }
   }
   
@@ -167,7 +168,10 @@ public class MissionUtils {
     Base upon, Base from, Mission mission
   ) {
     if (upon == null || from == null || mission == null) return;
-    setPosture(from, upon, mission.terms.postureDemand, true);
+    
+    POSTURE p = mission.terms.postureDemand;
+    upon.relations.setPosture(from.faction(), p, true);
+    
     BaseTrading.setSuppliesDue(upon, from, mission.terms.tributeDemand );
     arrangeMarriage           (upon, from, mission.terms.marriageDemand);
   }
@@ -177,7 +181,7 @@ public class MissionUtils {
     if (city == null || other == null) return;
     if (marries == null || marries.health.dead()) return;
     
-    Actor monarch = city.council.memberWithRole(Role.MONARCH);
+    Actor monarch = city.council().memberWithRole(Role.MONARCH);
     if (monarch == null || monarch.health.dead()) return;
     
     setBond(monarch, marries, BOND_MARRIED, BOND_MARRIED, 0);
@@ -198,12 +202,13 @@ public class MissionUtils {
     if (victor == null || losing == null || mission == null) return;
     
     boolean report = false;
+    World world  = mission.base().world;
     float initVP = victor.relations.prestige();
     float initLP = losing.relations.prestige();
     
-    losing.relations.toggleRebellion(victor, false);
-    incPrestige(victor, PRES_VICTORY_GAIN);
-    incPrestige(losing, PRES_DEFEAT_LOSS );
+    losing.relations.toggleRebellion(victor.faction(), false);
+    incPrestige(victor.faction(), PRES_VICTORY_GAIN, world);
+    incPrestige(losing.faction(), PRES_DEFEAT_LOSS , world);
     
     if (report) {
       I.say(victor+" prevailed over "+losing+"!!!");
@@ -219,17 +224,22 @@ public class MissionUtils {
     Base defends, Base attacks, boolean victory, float weight
   ) {
     if (defends == null) return;
-    
-    setPosture(attacks, defends, POSTURE.ENEMY, true);
-    float hate = (victory ? LOY_CONQUER_PENALTY : LOY_ATTACK_PENALTY) * weight;
-    incLoyalty(defends, attacks, hate);
+    World world = defends.world;
     
     //  TODO:  It should ideally take time for the news of a given assault to
-    //  reach more distant cities?
-    Base lord = defends.relations.currentLord();
-    enterHostility(lord, attacks, victory, weight / 2);
+    //  reach more distant cities...
+    
+    setPosture(attacks.faction(), defends.faction(), POSTURE.ENEMY, world);
+    float hate = (victory ? LOY_CONQUER_PENALTY : LOY_ATTACK_PENALTY) * weight;
+    defends.relations.incLoyalty(attacks.faction(), hate);
   }
 }
+
+
+
+
+
+
 
 
 

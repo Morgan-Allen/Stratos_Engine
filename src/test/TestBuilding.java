@@ -2,11 +2,11 @@
 
 
 package test;
-import util.*;
 import game.*;
 import static content.GameContent.*;
-import static content.GameWorld.FACTION_SETTLERS;
+import static content.GameWorld.*;
 import static game.GameConstants.*;
+import util.*;
 
 
 
@@ -21,7 +21,7 @@ public class TestBuilding extends LogicTest {
   static boolean testBuilding(boolean graphics) {
     LogicTest test = new TestBuilding();
     
-    Base base = setupTestBase(FACTION_SETTLERS, ALL_GOODS, 16, false);
+    Base base = setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, 16, false);
     Area map = base.activeMap();
     World world = map.world;
     world.settings.toggleFog         = false;

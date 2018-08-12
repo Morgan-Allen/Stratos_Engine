@@ -250,7 +250,7 @@ public class SelectCrewPane extends MenuPane {
     if (true) {
       Tally <Good> goods = Tally.with(PARTS, 20, PLASTICS, 20, CARBS, 20);
       expedition.configAssets(
-        GameWorld.FACTION_SETTLERS,
+        GameWorld.FACTION_SETTLERS_A,
         5000, goods, GameContent.BASTION
       );
     }

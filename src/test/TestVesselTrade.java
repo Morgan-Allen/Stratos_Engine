@@ -66,17 +66,21 @@ public class TestVesselTrade extends LogicTest {
     world.assignTypes(
       ALL_BUILDINGS, ALL_SHIPS(), ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES()
     );
-    
-    Base  homeC = new Base(world, world.addLocale(2, 2), FACTION_SETTLERS);
-    Base  awayC = new Base(world, world.addLocale(3, 3), FACTION_SETTLERS);
+    Base  homeC = new Base(world, world.addLocale(2, 2), FACTION_SETTLERS_A);
+    Base  awayC = new Base(world, world.addLocale(3, 3), FACTION_SETTLERS_B);
     world.addBases(homeC, awayC);
-    awayC.council.setTypeAI(BaseCouncil.AI_OFF);
+    world.setPlayerFaction(FACTION_SETTLERS_A);
+    
+    awayC.council().setTypeAI(BaseCouncil.AI_OFF);
     homeC.setName("(Home City)");
     awayC.setName("(Away City)");
     
     World.setupRoute(homeC.locale, awayC.locale, 10, Type.MOVE_AIR);
-    BaseRelations.setPosture(homeC, awayC, BaseRelations.POSTURE.TRADING, true);
-    homeC.relations.setHomeland(awayC);
+    BaseRelations.setPosture(
+      homeC.faction(), awayC.faction(),
+      BaseRelations.POSTURE.TRADING, world
+    );
+    homeC.council().assignHomeland(awayC);
     
     Tally <Good> supplies = new Tally().setWith(GREENS, 10, PSALT, 5);
     BaseTrading.setSuppliesDue(awayC, homeC, supplies);

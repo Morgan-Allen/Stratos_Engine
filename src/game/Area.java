@@ -62,8 +62,8 @@ public class Area implements Session.Saveable {
     this.locale = locale;
     this.locals = new Base(world, locale, FACTION_NEUTRAL, "Locals: "+locale);
     
-    locals.council.setGovernment(BaseCouncil.GOVERNMENT.BARBARIAN);
-    locals.council.setTypeAI(BaseCouncil.AI_OFF);
+    //locals.council().setGovernment(BaseCouncil.GOVERNMENT.BARBARIAN);
+    //locals.council().setTypeAI(BaseCouncil.AI_OFF);
     addBase(locals);
     
     for (Base c : cities) addBase(c);
@@ -283,7 +283,7 @@ public class Area implements Session.Saveable {
   
   public Base firstBaseFor(Faction faction) {
     if (faction == FACTION_NEUTRAL) return locals;
-    for (Base b : bases) if (b.faction == faction) return b;
+    for (Base b : bases) if (b.faction() == faction) return b;
     return null;
   }
   

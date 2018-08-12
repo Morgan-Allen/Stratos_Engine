@@ -184,7 +184,7 @@ public class MissionForStrike extends Mission {
     if (focus instanceof Element) {
       Element e = (Element) focus;
       if (TaskCombat.beaten(e)) return null;
-      if (! homeBase().relations.isEnemyOf(e.base())) return null;
+      if (! homeBase().isEnemyOf(e.base())) return null;
       
       if (e.type().isActor()) {
         if (TaskCombat.attackPower((Actor) e) <= 0) return null;

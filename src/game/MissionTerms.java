@@ -82,7 +82,7 @@ public class MissionTerms {
   
 
   void sendTerms(Base goes) {
-    goes.council.receiveTerms(mission);
+    goes.council().receiveTerms(mission);
     timeTermsSent = goes.world.time;
   }
   

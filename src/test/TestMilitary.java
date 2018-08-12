@@ -5,7 +5,7 @@ import game.*;
 import content.*;
 import util.*;
 import static content.GameContent.*;
-import static content.GameWorld.FACTION_SETTLERS;
+import static content.GameWorld.*;
 import static game.GameConstants.*;
 
 
@@ -22,8 +22,8 @@ public class TestMilitary extends LogicTest {
     LogicTest test = new TestMilitary();
     
     World world = new World(ALL_GOODS);
-    Base  baseC = new Base(world, world.addLocale(2, 2), FACTION_SETTLERS);
-    Base  awayC = new Base(world, world.addLocale(3, 3), FACTION_SETTLERS);
+    Base  baseC = new Base(world, world.addLocale(2, 2), FACTION_SETTLERS_A);
+    Base  awayC = new Base(world, world.addLocale(3, 3), FACTION_SETTLERS_B);
     Area  map   = AreaTerrain.generateTerrain(
       baseC, 32, 0, MEADOW, JUNGLE
     );
@@ -31,14 +31,18 @@ public class TestMilitary extends LogicTest {
       ALL_BUILDINGS, ALL_SHIPS(), ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES()
     );
     world.addBases(baseC, awayC);
+    world.setPlayerFaction(FACTION_SETTLERS_A);
     baseC.setName("Home City");
     awayC.setName("Away City");
-    awayC.council.setTypeAI(BaseCouncil.AI_OFF);
+    awayC.council().setTypeAI(BaseCouncil.AI_OFF);
     
     world.settings.toggleFog = false;
     
     World.setupRoute(baseC.locale, awayC.locale, 1, Type.MOVE_LAND);
-    BaseRelations.setPosture(baseC, awayC, BaseRelations.POSTURE.ENEMY, true);
+    BaseRelations.setPosture(
+      baseC.faction(), awayC.faction(),
+      BaseRelations.POSTURE.ENEMY, world
+    );
     awayC.setArmyPower(0);
     
     
@@ -65,7 +69,7 @@ public class TestMilitary extends LogicTest {
     }
     
     float initPrestige = baseC.relations.prestige();
-    float initLoyalty  = awayC.relations.loyalty(baseC);
+    float initLoyalty  = awayC.relations.loyalty(baseC.faction());
     int numHome = 0, numTroops = 0;
     
     MissionForSecure defence = null;
@@ -87,6 +91,7 @@ public class TestMilitary extends LogicTest {
     boolean backHome  = false;
     
     Trait COMBAT_SKILLS[] = { SKILL_MELEE, SKILL_SIGHT, SKILL_EVADE };
+    Faction HOME_FACTION = FACTION_SETTLERS_A;
     Table initSkills = null;
     Batch <Actor> fromTroops = new Batch();
     
@@ -139,7 +144,7 @@ public class TestMilitary extends LogicTest {
       }
       
       if (invading && ! awayWin) {
-        awayWin = baseC.relations.isLordOf(awayC);
+        awayWin = awayC.faction() == HOME_FACTION;
       }
       
       if (awayWin && ! backHome) {
@@ -156,7 +161,7 @@ public class TestMilitary extends LogicTest {
           break;
         }
         
-        if (awayC.relations.loyalty(baseC) >= initLoyalty) {
+        if (awayC.relations.loyalty(baseC.faction()) >= initLoyalty) {
           I.say("\nLoyalty should be reduced by conquest!");
           break;
         }

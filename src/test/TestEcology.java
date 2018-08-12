@@ -21,7 +21,7 @@ public class TestEcology extends LogicTest {
   static void testAnimals(boolean graphics) {
     LogicTest test = new TestEcology();
     
-    Base base = setupTestBase(FACTION_SETTLERS, ALL_GOODS, 32, true, JUNGLE, MEADOW);
+    Base base = setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, 32, true, JUNGLE, MEADOW);
     Area map = base.activeMap();
     World world = map.world;
     

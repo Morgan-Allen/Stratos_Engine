@@ -5,8 +5,7 @@ import game.*;
 import static game.GameConstants.*;
 import static game.Area.*;
 import static content.GameContent.*;
-import static content.GameWorld.FACTION_SETTLERS;
-
+import static content.GameWorld.*;
 import util.*;
 
 
@@ -28,16 +27,18 @@ public class TestDangerMap extends LogicTest {
     final int MAP_SIZE = 32;
     final int gridRes = MAP_SIZE / FLAG_RES;
     
-    Base base = setupTestBase(FACTION_SETTLERS, ALL_GOODS, MAP_SIZE, false);
+    Base base = setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, MAP_SIZE, false);
     Area map = base.activeMap();
     World world = base.world;
     
     world.settings.toggleFog = false;
     boolean testFail = false;
     
-    
     AreaTile centre = map.tileAt(map.size() / 2, map.size() / 2);
-    BaseRelations.setPosture(base, map.locals, BaseRelations.POSTURE.ENEMY, true);
+    BaseRelations.setPosture(
+      base.faction(), map.locals.faction(),
+      BaseRelations.POSTURE.ENEMY, world
+    );
     
     for (int n = NUM_THREATS; n-- > 0;) {
       Type type = Rand.yes() ? TRIPOD : DRONE;
@@ -54,7 +55,7 @@ public class TestDangerMap extends LogicTest {
       float actualSums[][] = new float[gridRes][gridRes];
       
       for (Actor a : map.actors()) {
-        if (! base.relations.isEnemyOf(a.base())) continue;
+        if (! base.isEnemyOf(a.base())) continue;
         
         float power = TaskCombat.attackPower(a);
         int gX = a.at().x / FLAG_RES, gY = a.at().y / FLAG_RES;

@@ -22,20 +22,20 @@ public class TestCity extends LogicTest {
   static boolean testCity(boolean graphics) {
     LogicTest test = new TestCity();
     
-    Base base = setupTestBase(FACTION_SETTLERS, ALL_GOODS, 32, false);
+    Base base = setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, 32, false);
     Area map = base.activeMap();
     World world = map.world;
     world.assignTypes(
       ALL_BUILDINGS, ALL_SHIPS(), ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES()
     );
     
-    Base homeland = new Base(world, world.addLocale(8, 8), FACTION_SETTLERS);
+    Base homeland = new Base(world, world.addLocale(8, 8), FACTION_SETTLERS_A);
     homeland.setName("Homeland");
     world.addBases(homeland);
-    base.relations.setHomeland(homeland);
+    base.council().assignHomeland(homeland);
     
     World.setupRoute(base.locale, homeland.locale, 3, Type.MOVE_AIR);
-    BaseRelations.setPosture(base, homeland, BaseRelations.POSTURE.VASSAL, true);
+    //BaseRelations.setPosture(base, homeland, BaseRelations.POSTURE.VASSAL, true);
     
     world.settings.toggleFog = false;
     

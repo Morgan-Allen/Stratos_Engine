@@ -183,7 +183,7 @@ public class MissionForContact extends Mission {
     
     if (official && parent.worldFocus() != null) {
       Base focus = parent.worldFocus();
-      BaseCouncil council = focus.council;
+      BaseCouncil council = focus.council();
       Area area = focus.activeMap();
       
       Actor monarch = council.memberWithRole(Role.MONARCH);

@@ -4,7 +4,7 @@ package test;
 import game.*;
 import util.*;
 import static content.GameContent.*;
-import static content.GameWorld.FACTION_SETTLERS;
+import static content.GameWorld.*;
 import static game.GameConstants.*;
 
 
@@ -20,7 +20,7 @@ public class TestSpawning extends LogicTest {
   static boolean testSpawning(boolean graphics) {
     LogicTest test = new TestSpawning();
     
-    Base base = setupTestBase(FACTION_SETTLERS, ALL_GOODS, 32, true, JUNGLE, MEADOW);
+    Base base = setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, 32, true, JUNGLE, MEADOW);
     Area map = base.activeMap();
     World world = map.world;
     
@@ -33,13 +33,16 @@ public class TestSpawning extends LogicTest {
     BuildingForNest nest = (BuildingForNest) RUINS_LAIR.generate();
     nest.enterMap(map, 24, 24, 1, map.locals);
     //  TODO:  You need to arrange for some other system here!
-    nest.assignSpawnParameters(DAY_LENGTH, totalToSpawn, true, spawnArgs);
+    //  nest.assignSpawnParameters(DAY_LENGTH, totalToSpawn, true, spawnArgs);
     
     
     Building toRaze = (Building) ENFORCER_BLOC.generate();
     toRaze.enterMap(map, 6, 6, 1, base);
     
-    BaseRelations.setPosture(base, map.locals, BaseRelations.POSTURE.ENEMY, true);
+    BaseRelations.setPosture(
+      base.faction(), map.locals.faction(),
+      BaseRelations.POSTURE.ENEMY, world
+    );
     world.settings.toggleFog = false;
     
     boolean spawnDone   = false;

@@ -865,10 +865,11 @@ public class Actor extends Element implements
     
     Base player = PlayUI.playerBase();
     if (player == null) player = LogicTest.currentCity();
+    BaseRelations relations = player.council().relations;
     
     String from = "";
     if (map != null && player != null && base() != null) {
-      POSTURE p = player.relations.posture(base());
+      POSTURE p = relations.posture(base().faction());
       if (p == POSTURE.ENEMY ) from = " (E)";
       if (p == POSTURE.ALLY  ) from = " (A)";
       if (p == POSTURE.VASSAL) from = " (V)";

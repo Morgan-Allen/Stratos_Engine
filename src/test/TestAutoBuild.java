@@ -21,7 +21,7 @@ public class TestAutoBuild extends LogicTest {
   static boolean testAutoBuild(boolean graphics) {
     LogicTest test = new TestAutoBuild();
     
-    Base base = setupTestBase(FACTION_SETTLERS, ALL_GOODS, 16, false);
+    Base base = setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, 16, false);
     Area map = base.activeMap();
     World world = map.world;
     world.settings.toggleFog         = false;

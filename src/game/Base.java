@@ -8,19 +8,21 @@ import util.*;
 
 
 
-public class Base implements Session.Saveable, Trader, BaseEvents.Trouble {
+public class Base implements
+  Session.Saveable, Trader, BaseEvents.Trouble, BaseRelations.Postured
+{
   
   
   /**  Data fields, construction and save/load methods-
     */
   String name = "City";
-  int tint = CITY_COLOR;
   
   final public World world;
   final public WorldLocale locale;
-  final public Faction faction;
   
-  final public BaseCouncil   council   = new BaseCouncil  (this);
+  private Faction faction;
+  private BaseCouncil factionCouncil = null;
+  
   final public BaseRelations relations = new BaseRelations(this);
   final public BaseTrading   trading   = new BaseTrading  (this);
   
@@ -71,7 +73,6 @@ public class Base implements Session.Saveable, Trader, BaseEvents.Trouble {
     
     s.loadObjects(buildTypes);
     
-    council  .loadState(s);
     relations.loadState(s);
     trading  .loadState(s);
     
@@ -99,7 +100,6 @@ public class Base implements Session.Saveable, Trader, BaseEvents.Trouble {
     
     s.saveObjects(buildTypes);
     
-    council  .saveState(s);
     relations.saveState(s);
     trading  .saveState(s);
     
@@ -145,6 +145,29 @@ public class Base implements Session.Saveable, Trader, BaseEvents.Trouble {
     if (moveMode != Type.MOVE_AIR && moveMode != route.moveMode) return -100;
     
     return route.distance;
+  }
+  
+  
+  public Faction faction() {
+    return faction;
+  }
+  
+  
+  public BaseRelations relations(World world) {
+    return relations;
+  }
+  
+  
+  void assignFaction(Faction faction) {
+    this.faction = faction;
+    factionCouncil = null;
+  }
+  
+  
+  public BaseCouncil council() {
+    if (factionCouncil != null) return factionCouncil;
+    factionCouncil = world.factionCouncil(faction);
+    return factionCouncil;
   }
   
   
@@ -307,12 +330,10 @@ public class Base implements Session.Saveable, Trader, BaseEvents.Trouble {
     final int UPDATE_GAP = map == null ? DAY_LENGTH : 10;
     boolean updateStats = world.time % UPDATE_GAP == 0;
     boolean activeMap   = map != null;
-    Base    lord        = relations.currentLord();
     //
     //  Local player-owned cities (i.e, with their own map), must derive their
     //  vitual statistics from that small-scale city map:
     if (updateStats && activeMap) {
-      council.updateCouncil(true);
       trading.updateLocalStocks();
       
       int citizens = 0;
@@ -338,7 +359,6 @@ public class Base implements Session.Saveable, Trader, BaseEvents.Trouble {
     //  Foreign off-map cities must update their internal ratings somewhat
     //  differently-
     if (updateStats && ! activeMap) {
-      council.updateCouncil(false);
       trading.updateOffmapStocks(UPDATE_GAP);
       
       float popRegen  = UPDATE_GAP * 1f / (LIFESPAN_LENGTH / 2);
@@ -358,10 +378,9 @@ public class Base implements Session.Saveable, Trader, BaseEvents.Trouble {
         armyPower = Nums.min(idealArmy, armyPower + popRegen);
       }
       
-      //  TODO:  Move this to the Council/Relations class?
-      if (relations.isLoyalVassalOf(lord)) {
-        if (council.considerRevolt(lord, UPDATE_GAP)) {
-          relations.toggleRebellion(lord, true);
+      if (relations.isLoyalVassalOf(faction)) {
+        if (council().considerRevolt(faction, UPDATE_GAP, this)) {
+          relations.toggleRebellion(faction, true);
         }
       }
     }
@@ -387,8 +406,8 @@ public class Base implements Session.Saveable, Trader, BaseEvents.Trouble {
     //  lord (with the possibility of entering a state of revolt if those are
     //  failed.)
     if (world.time % YEAR_LENGTH == 0) {
-      if (relations.isLoyalVassalOf(lord)) {
-        Relation r = relations.relationWith(lord);
+      if (relations.isLoyalVassalOf(faction)) {
+        Relation r = relations.relationWith(faction);
         int timeAsVassal = world.time - r.madeVassalDate;
         boolean failedSupply = false, doCheck = timeAsVassal >= YEAR_LENGTH;
         
@@ -400,31 +419,16 @@ public class Base implements Session.Saveable, Trader, BaseEvents.Trouble {
         r.suppliesSent.clear();
         
         if (failedSupply) {
-          relations.toggleRebellion(lord, true);
+          relations.toggleRebellion(faction, true);
         }
         else {
-          incLoyalty(lord, this, LOY_TRIBUTE_BONUS);
+          faction.relations(world).incLoyalty(this, LOY_TRIBUTE_BONUS);
         }
       }
       //
       //  Wipe the slate clean for all other relations:
-      for (Relation r : relations.relations()) if (r.with != lord) {
+      for (Relation r : relations.relations()) if (r.with != faction) {
         r.suppliesSent.clear();
-      }
-      //
-      //  And, finally, lose prestige based on any vassals in recent revolt-
-      //  and if the time gone exceeds a certain threshold, end vassal status.
-      for (Base revolts : relations.vassalsInRevolt()) {
-        float years = revolts.relations.yearsSinceRevolt(this);
-        float maxT = AVG_TRIBUTE_YEARS, timeMult = (maxT - years) / maxT;
-        
-        if (years < AVG_TRIBUTE_YEARS) {
-          incPrestige(this, PRES_REBEL_LOSS * timeMult);
-          incLoyalty(this, revolts, LOY_REBEL_PENALTY * 0.5f * timeMult);
-        }
-        else {
-          setPosture(this, revolts, POSTURE.ENEMY, true);
-        }
       }
     }
     //
@@ -432,11 +436,7 @@ public class Base implements Session.Saveable, Trader, BaseEvents.Trouble {
     for (Mission f : missions) {
       f.update();
     }
-    for (Actor a : council.members()) {
-      if (a.mission() != null || a.onMap() || a.offmapBase() == this) continue;
-      a.updateOffMap(this);
-    }
-    for (Actor a : visitors) {
+    for (Actor a : visitors) if (! a.onMap()) {
       a.updateOffMap(this);
     }
     //
@@ -511,8 +511,23 @@ public class Base implements Session.Saveable, Trader, BaseEvents.Trouble {
   
   /**  Generating trouble...
     */
-  public Faction faction() {
-    return faction;
+  BaseRelations.POSTURE posture(Base other) {
+    if (other.faction() == this.faction()) {
+      Base capital = council().capital();
+      if (this  == capital) return POSTURE.VASSAL;
+      if (other == capital) return POSTURE.LORD;
+      return POSTURE.ALLY;
+    }
+    return council().relations.posture(other.faction());
+  }
+  
+  public boolean isVassalOf(Base o) { return posture(o) == POSTURE.LORD  ; }
+  public boolean isLordOf  (Base o) { return posture(o) == POSTURE.VASSAL; }
+  public boolean isEnemyOf (Base o) { return posture(o) == POSTURE.ENEMY ; }
+  public boolean isAllyOf  (Base o) { return posture(o) == POSTURE.ALLY  ; }
+  
+  public boolean isLoyalVassalOf(Base o) {
+    return posture(o) == POSTURE.LORD && relations.isLoyalVassalOf(o.faction());
   }
   
   
@@ -540,12 +555,7 @@ public class Base implements Session.Saveable, Trader, BaseEvents.Trouble {
   
   
   public int tint() {
-    return tint;
-  }
-  
-  
-  public void setTint(int tint) {
-    this.tint = tint;
+    return faction.tint();
   }
   
   

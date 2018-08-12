@@ -2,12 +2,11 @@
 
 
 package test;
-import util.*;
 import game.*;
 import static content.GameContent.*;
-import static content.GameWorld.FACTION_SETTLERS;
+import static content.GameWorld.*;
 import static game.GameConstants.*;
-
+import util.*;
 
 
 
@@ -23,7 +22,7 @@ public class TestBridging extends LogicTest {
     LogicTest test = new TestBridging();
     
     Terrain terrTypes[] = { LAKE, MEADOW, JUNGLE };
-    Base base = setupTestBase(FACTION_SETTLERS, ALL_GOODS, 16, false, terrTypes);
+    Base base = setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, 16, false, terrTypes);
     Area map = base.activeMap();
     World world = base.world;
     world.settings.toggleFog     = false;

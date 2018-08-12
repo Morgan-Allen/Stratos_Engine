@@ -35,6 +35,7 @@ public class LogicTest {
     
     world.setMapSize(10, 10);
     world.addBases(base);
+    world.setPlayerFaction(faction);
     
     return base;
   }
@@ -306,10 +307,9 @@ public class LogicTest {
     }
     
     for (Base city : world.bases()) {
-      Base lord = city.relations.currentLord();
       int x = (int) city.locale.mapX() * 2, y = (int) city.locale.mapY() * 2;
       for (Coord c : Visit.grid(x, y, 2, 2, 1)) graphic[c.x][c.y] = city.tint();
-      if (lord != null) graphic[x + 1][y] = lord.tint();
+      graphic[x + 1][y] = city.faction().tint();
     }
     
     try { graphic[hover.x][hover.y] = WHITE_COLOR; }
@@ -455,8 +455,8 @@ public class LogicTest {
     
     List <String> borderRep = new List();
     for (Base other : c.world.bases()) if (other != c) {
-      BaseRelations.POSTURE r = c.relations.posture(other);
-      float loyalty = c.relations.loyalty(other);
+      BaseRelations.POSTURE r = c.council().relations.posture(other.faction());
+      float loyalty = c.council().relations.loyalty(other.faction());
       borderRep.add("\n  "+other+": "+r+", "+Base.descLoyalty(loyalty));
     }
     if (! borderRep.empty()) {

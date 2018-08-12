@@ -40,7 +40,12 @@ public class BaseCouncil {
   };
   
   
-  final Base base;
+  final Faction faction;
+  final World world;
+  final public BaseRelations relations;
+  
+  Base homeland;
+  Base capital;
   
   GOVERNMENT government = GOVERNMENT.FEUDAL;
   private int typeAI = AI_NORMAL;
@@ -52,12 +57,18 @@ public class BaseCouncil {
   
   
   
-  BaseCouncil(Base base) {
-    this.base = base;
+  BaseCouncil(Faction faction, World world) {
+    this.faction = faction;
+    this.world   = world  ;
+    this.relations = new BaseRelations(faction, world);
   }
   
   
   void loadState(Session s) throws Exception {
+    
+    homeland = (Base) s.loadObject();
+    capital   = (Base) s.loadObject();
+    
     government = GOVERNMENT.values()[s.loadInt()];
     typeAI = s.loadInt();
     
@@ -73,6 +84,10 @@ public class BaseCouncil {
   
   
   void saveState(Session s) throws Exception {
+    
+    s.saveObject(homeland);
+    s.saveObject(capital  );
+    
     s.saveInt(government.ordinal());
     s.saveInt(typeAI);
     
@@ -83,6 +98,29 @@ public class BaseCouncil {
     }
     
     s.saveObjects(petitions);
+  }
+  
+  
+  
+  /**  Assigning homeworld and capital-
+    */
+  public Base homeland() {
+    return homeland;
+  }
+  
+  
+  public Base capital() {
+    return capital;
+  }
+  
+  
+  public void assignHomeland(Base home) {
+    this.homeland = home;
+  }
+  
+  
+  public void assignCapital(Base capital) {
+    this.capital = capital;
   }
   
   
@@ -208,7 +246,7 @@ public class BaseCouncil {
   }
   
   
-  void updateCouncil(boolean onMap) {
+  void updateCouncil(boolean playerOwned) {
     //
     //  Check on any current heirs and/or marriage status-
     Actor monarch = memberWithRole(Role.MONARCH);
@@ -253,17 +291,34 @@ public class BaseCouncil {
       }
     }
     //
-    //  We annul any independent decision-making if AI is toggled off-
-    if (typeAI == AI_OFF || onMap) return;
-    //
     //  Once per month, otherwise, evaluate any major independent decisions-
-    if (base.world.time % (DAY_LENGTH / 2) == 0) {
-      updateCouncilAI();
+    if (typeAI != AI_OFF && ! playerOwned) {
+      if (world.time % (DAY_LENGTH / 2) == 0) {
+        for (Base base : world.bases) if (base.faction() == faction) {
+          updateCouncilAI(base);
+        }
+      }
+    }
+    //
+    //  And, finally, lose prestige based on any vassals in recent revolt-
+    //  and if the time gone exceeds a certain threshold, end vassal status.
+    if (world.time % YEAR_LENGTH == 0) {
+      for (Base revolts : relations.vassalsInRevolt()) {
+        float years = revolts.relations.yearsSinceRevolt(faction);
+        float maxT = AVG_TRIBUTE_YEARS, timeMult = (maxT - years) / maxT;
+        if (years < AVG_TRIBUTE_YEARS) {
+          relations.initPrestige(PRES_REBEL_LOSS * timeMult);
+          relations.incLoyalty(revolts, LOY_REBEL_PENALTY * 0.5f * timeMult);
+        }
+        else {
+          relations.setPosture(revolts, POSTURE.ENEMY, true);
+        }
+      }
     }
   }
   
   
-  void updateCouncilAI() {
+  void updateCouncilAI(Base base) {
     //
     //  See if any of the current petitions are worth responding to-
     for (Mission petition : petitions) {
@@ -285,14 +340,14 @@ public class BaseCouncil {
     //
     //  Put together a list of possible missions:
     Pick <MissionAssessment> pickI = new Pick(0);
-    for (MissionAssessment IA : updateMissionChoices()) {
+    for (MissionAssessment IA : updateMissionChoices(base)) {
       pickI.compare(IA, IA.evaluatedAppeal);
     }
     //
     //  And if any have positive appeal, launch the enterprise:
     MissionAssessment IA = pickI.result();
     if (IA != null) {
-      Mission force = spawnFormation(IA);
+      Mission force = spawnFormation(IA, base);
       force.beginMission(base);
     }
   }
@@ -326,7 +381,7 @@ public class BaseCouncil {
   }
   
   
-  Tally <Good> calculateTribute(MissionAssessment a) {
+  Tally <Good> calculateTribute(MissionAssessment a, Base base) {
     //
     //  We establish *reasonable* levels of tribute across a variety of goods,
     //  based on what the attacker is hungry for and the defender seems to have
@@ -397,9 +452,9 @@ public class BaseCouncil {
     angerValue /= 4 * POP_PER_CITIZEN;
     //
     //  And account for pre-existing hostility/loyalty:
-    Relation r       = a.fromC.relations.relationWith(a.goesC);
-    boolean isLord   = a.goesC.relations.isLordOf    (a.fromC);
-    boolean isVassal = a.goesC.relations.isVassalOf  (a.fromC);
+    Relation r       = a.fromC.relations.relationWith(a.goesC.faction());
+    boolean isLord   = a.goesC.isLordOf  (a.fromC);
+    boolean isVassal = a.goesC.isVassalOf(a.fromC);
     a.hateBonus   = Nums.min(0, 0 - r.loyalty) * angerValue;
     a.lovePenalty = Nums.max(0, 0 + r.loyalty) * angerValue;
     a.hateBonus   *= 1 - (compassion / 2);
@@ -432,7 +487,7 @@ public class BaseCouncil {
     MA.goesPower = defend.armyPower()               / POP_PER_CITIZEN;
     
     MA.postureDemand = POSTURE.VASSAL;
-    MA.tributeDemand = calculateTribute(MA);
+    MA.tributeDemand = calculateTribute(MA, attack);
     
     calculateChances(MA, false);
     calculateInvasionAppeal(MA);
@@ -469,7 +524,7 @@ public class BaseCouncil {
     //  TODO:  Merge this with the assessment code below.
     
     float synergyVal = 0, dot = 0, count = 0;
-    for (Base c : goes.relations.relationsWith()) {
+    for (Faction c : goes.relations.relationsWith()) {
       float valueF = from.relations.loyalty(c);
       float valueG = goes.relations.loyalty(c);
       synergyVal += dot = valueF * valueG;
@@ -478,15 +533,15 @@ public class BaseCouncil {
     synergyVal /= Nums.max(1, count);
     
     float tradeVal = 0;
-    for (Good g : base.world.goodTypes) {
+    for (Good g : world.goodTypes) {
       float perYear = from.trading.prodLevel(g);
       if (perYear <= 0) continue;
-      tradeVal += tributeValue(g, perYear, base);
+      tradeVal += tributeValue(g, perYear, goes);
     }
     tradeVal *= AVG_ALLIANCE_YEARS * 1f / AVG_TRIBUTE_YEARS;
     
     float powerVal = from.idealArmyPower() / POP_PER_CITIZEN;
-    powerVal *= casualtyValue(base);
+    powerVal *= casualtyValue(goes);
     powerVal *= AVG_ALLIANCE_YEARS * 1f / AVG_RETIREMENT;
     
     float marriageVal = 0;
@@ -520,10 +575,10 @@ public class BaseCouncil {
     
     //  See if it's possible to arrange a marriage as well.
     
-    Actor monarch = goes.council.memberWithRole(BaseCouncil.Role.MONARCH);
+    Actor monarch = goes.council().memberWithRole(BaseCouncil.Role.MONARCH);
     Pick <Actor> pickM = new Pick();
     
-    for (Actor a : from.council.allMembersWithRole(BaseCouncil.Role.HEIR)) {
+    for (Actor a : from.council().allMembersWithRole(BaseCouncil.Role.HEIR)) {
       Actor spouse = a.bonds.allBondedWith(BOND_MARRIED).first();
       if (spouse != null) continue;
       if (monarch.health.man() == a.health.man()) continue;
@@ -542,7 +597,7 @@ public class BaseCouncil {
     
     //I.say("\nGetting synergy between "+from+" and "+goes);
     float synergyVal = 0, dot = 0, count = 0;
-    for (Base c : goes.relations.relationsWith()) {
+    for (Faction c : goes.relations.relationsWith()) {
       float valueF = from.relations.loyalty(c);
       float valueG = goes.relations.loyalty(c);
       //I.say("  "+c+": "+valueF+" * "+valueG);
@@ -554,7 +609,7 @@ public class BaseCouncil {
     //I.say("  Total value: "+synergyVal);
     
     float tradeVal = 0;
-    for (Good g : base.world.goodTypes) {
+    for (Good g : world.goodTypes) {
       float exports = from.trading.prodLevel(g);
       if (exports > 0) {
         tradeVal += tributeValue(g, exports, goes);
@@ -569,17 +624,19 @@ public class BaseCouncil {
     //I.say("  Trade value: "+tradeVal);
     
     float powerVal = from.idealArmyPower() / POP_PER_CITIZEN;
-    powerVal *= casualtyValue(base);
+    powerVal *= casualtyValue(goes);
     powerVal *= AVG_ALLIANCE_YEARS * 1f / AVG_RETIREMENT;
     
     float marriageCost = 0;
     if (marries != null) {
       marriageCost = casualtyValue(from) * MARRIAGE_VALUE_MULT;
-      marriageCost *= (1 + from.council.membersBondAvg(marries)) / 2;
+      marriageCost *= (1 + from.council().membersBondAvg(marries)) / 2;
     }
     
-    float relationsVal = 0;
-    relationsVal = (goes.relations.loyalty(from) + from.relations.loyalty(goes)) / 2;
+    float relationsVal = (
+      goes.relations.loyalty(from.faction()) +
+      from.relations.loyalty(goes.faction())
+    ) / 2;
     
     MA.benefits += tradeVal;
     MA.benefits += powerVal;
@@ -597,7 +654,7 @@ public class BaseCouncil {
   }
   
   
-  List <MissionAssessment> updateMissionChoices() {
+  List <MissionAssessment> updateMissionChoices(Base base) {
     List <MissionAssessment> choices = new List();
     //
     //  This is something of a hack at the moment, but it helps prevent some
@@ -613,18 +670,15 @@ public class BaseCouncil {
       float distance = base.distance(other, Type.MOVE_LAND);
       if (distance < 0) continue;
       
-      if (! (
-        other.relations.isLoyalVassalOf(base) ||
-        other.relations.isVassalOfSameLord(base)
-      )) {
+      if (other.faction() != base.faction()) {
         MissionAssessment IA = invasionAssessment(base, other, 0.5f, true);
         choices.add(IA);
       }
       
       if (! (
-        other.relations.isLordOf(base) ||
-        other.relations.isAllyOf(base) ||
-        other.relations.isVassalOf(base)
+        other.isLordOf(base) ||
+        other.isAllyOf(base) ||
+        other.isVassalOf(base)
       )) {
         MissionAssessment DA = dialogAssessment(base, other, true);
         choices.add(DA);
@@ -634,7 +688,7 @@ public class BaseCouncil {
   }
   
   
-  public Mission spawnFormation(MissionAssessment IA) {
+  public Mission spawnFormation(MissionAssessment IA, Base base) {
     
     Mission force = null;
     if (IA.objective == OBJECTIVE_STRIKE ) force = new MissionForStrike (base);
@@ -683,17 +737,21 @@ public class BaseCouncil {
   }
   
   
-  boolean considerRevolt(Base lord, int period) {
+  boolean considerRevolt(Faction faction, int period, Base base) {
     if (typeAI == AI_DEFIANT  ) return true ;
     if (typeAI == AI_COMPLIANT) return false;
     if (typeAI == AI_OFF      ) return false;
     
-    MissionAssessment IA = invasionAssessment(base, lord, 0.5f, true);
+    Base capital = base.council().capital;
+    MissionAssessment IA = invasionAssessment(base, capital, 0.5f, true);
     float chance = period * 1f / AVG_TRIBUTE_YEARS;
     return IA.evaluatedAppeal > 0 && Rand.num() < chance;
   }
   
 }
+
+
+
 
 
 

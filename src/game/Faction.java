@@ -1,15 +1,17 @@
 
 
 package game;
+import static game.GameConstants.*;
 import graphics.common.*;
 
 
 
-public class Faction extends Constant {
+public class Faction extends Constant implements BaseRelations.Postured {
   
   
   String name;
   Colour colour;
+  int tint = CITY_COLOR;
   
   WorldLocale homeland = null;
   BuildType buildTypes[] = {};
@@ -33,8 +35,27 @@ public class Faction extends Constant {
     return buildTypes;
   }
   
+  public Faction faction() {
+    return this;
+  }
+  
+  public BaseRelations relations(World world) {
+    return world.factionCouncil(this).relations;
+  }
+  
+  
+  
   
   public String toString() {
     return name;
   }
+  
+  public int tint() {
+    return tint;
+  }
 }
+
+
+
+
+

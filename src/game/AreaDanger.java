@@ -10,7 +10,7 @@ import util.*;
 public class AreaDanger {
   
   
-  final Faction base;
+  final Faction faction;
   final Area map;
   float baseValues[][];
   float fuzzValues[][];
@@ -19,8 +19,8 @@ public class AreaDanger {
   
   
   AreaDanger(Faction base, Area map) {
-    this.base = base;
-    this.map  = map;
+    this.faction = base;
+    this.map = map;
   }
   
   void performSetup(int baseSize) {
@@ -49,13 +49,15 @@ public class AreaDanger {
     
     final float FUZZ_RANGE = AVG_SIGHT * 2;
     maxValue = 0.1f;
+    BaseRelations relations = map.world.factionCouncil(faction).relations;
     
     for (Coord c : Visit.grid(0, 0, map.size(), map.size(), Area.FLAG_RES)) {
       Series <Active> at = map.gridActive(map.tileAt(c));
       float danger = 0;
       
       if (at.size() > 0) for (Active a : at) {
-        if (! base.relations.isEnemyOf(a.base())) continue;
+        BaseRelations.POSTURE p = relations.posture(a.base().faction());
+        if (p != BaseRelations.POSTURE.ENEMY) continue;
         float power = TaskCombat.attackPower((Element) a);
         danger += power;
       }

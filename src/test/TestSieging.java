@@ -2,12 +2,12 @@
 
 package test;
 import game.*;
-import static content.GameContent.*;
-import static content.GameWorld.FACTION_SETTLERS;
 import static game.Area.*;
 import static game.GameConstants.*;
 import static game.Task.*;
 import content.*;
+import static content.GameContent.*;
+import static content.GameWorld.*;
 import util.*;
 
 
@@ -24,8 +24,8 @@ public class TestSieging extends LogicTest {
     LogicTest test = new TestSieging();
     
     World world = new World(ALL_GOODS);
-    Base  baseC = new Base(world, world.addLocale(2, 2), FACTION_SETTLERS);
-    Base  awayC = new Base(world, world.addLocale(3, 3), FACTION_SETTLERS);
+    Base  baseC = new Base(world, world.addLocale(2, 2), FACTION_SETTLERS_A);
+    Base  awayC = new Base(world, world.addLocale(3, 3), FACTION_SETTLERS_B);
     Area  map   = AreaTerrain.generateTerrain(
       baseC, 32, 0, MEADOW, JUNGLE
     );
@@ -35,6 +35,7 @@ public class TestSieging extends LogicTest {
       ALL_BUILDINGS, ALL_SHIPS(), ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES()
     );
     world.addBases(baseC, awayC);
+    world.setPlayerFaction(FACTION_SETTLERS_A);
     
     world.settings.toggleFog     = false;
     world.settings.toggleFatigue = false;
@@ -42,11 +43,13 @@ public class TestSieging extends LogicTest {
     
     
     awayC.initBuildLevels(TROOPER_LODGE, 9, HOLDING, 1);
-    awayC.council.setTypeAI(BaseCouncil.AI_OFF);
+    awayC.council().setTypeAI(BaseCouncil.AI_OFF);
     
     World.setupRoute(baseC.locale, awayC.locale, 1, Type.MOVE_LAND);
-    BaseRelations.setPosture(baseC, awayC, BaseRelations.POSTURE.ENEMY, true);
-    
+    BaseRelations.setPosture(
+      baseC.faction(), awayC.faction(),
+      BaseRelations.POSTURE.ENEMY, world
+    );
     
     AreaPlanning.placeStructure(SHIELD_WALL, baseC, true, 4, 4, 20, 20);
     AreaPlanning.markDemolish(map, true, 6, 6, 16, 16);
@@ -99,7 +102,7 @@ public class TestSieging extends LogicTest {
     store.setInventory(MEDICINE, 10);
     
     float initPrestige = awayC.relations.prestige();
-    float initLoyalty  = baseC.relations.loyalty(awayC);
+    float initLoyalty  = baseC.relations.loyalty(awayC.faction());
     Table <Actor, AreaTile> initPatrolPoints = new Table();
     Mission enemy = null;
     Tally <Good> tribute = null;
@@ -117,6 +120,7 @@ public class TestSieging extends LogicTest {
     
     
     int NUM_T = (int) TROOPER_LODGE.workerTypes.valueFor(Trooper.TROOPER);
+    Faction RIVAL_FACTION = awayC.faction();
     final int RUN_TIME = 1000;
     final int MIN_INVADERS  = NUM_T * 2;
     final int MIN_DEFENDERS = NUM_T - 1;
@@ -156,7 +160,7 @@ public class TestSieging extends LogicTest {
         }
         if (numMoved >= MIN_DEFENDERS) {
           patrolDone = true;
-          awayC.council.setTypeAI(BaseCouncil.AI_WARLIKE);
+          awayC.council().setTypeAI(BaseCouncil.AI_WARLIKE);
         }
       }
       
@@ -257,7 +261,7 @@ public class TestSieging extends LogicTest {
       }
       
       if (standsOkay && ! victorious) {
-        if (baseC.relations.isVassalOf(awayC)) {
+        if (baseC.faction() == RIVAL_FACTION) {
           victorious = true;
           store.addInventory(tribute);
           store.prodLevels().add(tribute);
@@ -285,7 +289,7 @@ public class TestSieging extends LogicTest {
           break;
         }
         
-        if (baseC.relations.loyalty(awayC) >= initLoyalty) {
+        if (baseC.relations.loyalty(awayC.faction()) >= initLoyalty) {
           I.say("\nLoyalty should be reduced by conquest!");
           break;
         }

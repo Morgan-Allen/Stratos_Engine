@@ -15,9 +15,18 @@ public class GameWorld {
   //
   //  TODO:  You need to assign default technologies here, and possibly other
   //  bonuses.
+  
   final public static Faction
-    FACTION_SETTLERS  = new Faction(
-      GameWorld.class, "faction_settlers" , "Settlers",
+    FACTION_SETTLERS_A = new Faction(
+      GameWorld.class, "faction_settlers_A" , "Settlers C",
+      GameContent.RULER_BUILT
+    ),
+    FACTION_SETTLERS_B = new Faction(
+      GameWorld.class, "faction_settlers_B" , "Settlers B",
+      GameContent.RULER_BUILT
+    ),
+    FACTION_SETTLERS_C = new Faction(
+      GameWorld.class, "faction_settlers_C" , "Settlers A",
       GameContent.RULER_BUILT
     ),
     FACTION_ANIMALS   = new Faction(
@@ -74,18 +83,22 @@ public class GameWorld {
       World.KEY_CONTACT_FLAG, FLAG_CONTACT
     );
     
+    world.setPlayerFaction(FACTION_SETTLERS_A);
+    
     //  TODO:  Replace these with the named homeworlds!
     
     WorldLocale home = world.addLocale(1, 1, "Homeworld", true);
-    Base homeBase = new Base(world, home, FACTION_SETTLERS);
+    Base homeBase = new Base(world, home, FACTION_SETTLERS_A);
     
     homeBase.setName("Homeworld Base");
     homeBase.trading.setTradeLevel(PARTS   , 0, 5 );
     homeBase.trading.setTradeLevel(MEDICINE, 0, 10);
+    
     //cityA.initTradeLevels(
     //  PARTS   , 5f ,
     //  MEDICINE, 10f
     //);
+    
     homeBase.initBuildLevels(
       TROOPER_LODGE, 2f ,
       HOLDING      , 10f
