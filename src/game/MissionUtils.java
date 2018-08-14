@@ -45,7 +45,7 @@ public class MissionUtils {
     //  the real event, and report accordingly:
     //  TODO:  Use separate math for the purpose?
     BaseCouncil.MissionAssessment IA = new BaseCouncil.MissionAssessment();
-    IA.fromC     = from;
+    ///IA.fromC     = from;
     IA.goesC     = goes;
     IA.fromPower = MissionForStrike.powerSum(mission) / POP_PER_CITIZEN;
     IA.goesPower = goes.armyPower() / POP_PER_CITIZEN;

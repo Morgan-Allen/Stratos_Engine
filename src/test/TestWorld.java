@@ -563,7 +563,7 @@ public class TestWorld extends LogicTest {
     World world = from.world;
     
     BaseCouncil.MissionAssessment IA = from.council().invasionAssessment(
-      from, goes, 0.5f, false
+      from.armyPower(), goes, false
     );
     Mission force = from.council().spawnFormation(IA, from);
     force.beginMission(from);

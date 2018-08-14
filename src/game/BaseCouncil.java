@@ -222,7 +222,8 @@ public class BaseCouncil {
     */
   public static class MissionAssessment {
     
-    Base fromC, goesC;
+    Base rulesC;
+    Base goesC;
     float fromPower, goesPower;
     
     int objective;
@@ -240,7 +241,7 @@ public class BaseCouncil {
     float costs, benefits;
     float evaluatedAppeal;
     
-    public Base from() { return fromC; }
+    public Base rules() { return rulesC; }
     public Base goes() { return goesC; }
     public float appeal() { return evaluatedAppeal; }
   }
@@ -321,6 +322,7 @@ public class BaseCouncil {
   void updateCouncilAI(Base base) {
     //
     //  See if any of the current petitions are worth responding to-
+    /*
     for (Mission petition : petitions) {
       float appeal = appealOfTerms(
         petition.base(), base,
@@ -350,12 +352,53 @@ public class BaseCouncil {
       Mission force = spawnFormation(IA, base);
       force.beginMission(base);
     }
+    //*/
+  }
+  
+  
+  public MissionAssessment dialogAssessment(
+    Base from, Base goes, boolean random
+  ) {
+    return null;
+  }
+  
+  float appealOfTerms(
+    Base from, Base goes,
+    POSTURE      posture ,
+    Mission      action  ,
+    Actor        marriage,
+    Tally <Good> tribute
+  ) {
+    return -1;
+  }
+  
+  
+  
+  public MissionAssessment invasionAssessment(
+    float attackForce, Base defend, boolean random
+  ) {
+    return null;
+  }
+  
+  void calculateChances(MissionAssessment a, boolean random) {
+    return;
+  }
+  
+
+  public Mission spawnFormation(MissionAssessment IA, Base base) {
+    return null;
+  }
+  
+
+  boolean considerRevolt(Faction faction, int period, Base base) {
+    return false;
   }
   
   
   
   /**  Evaluating the appeal and probability of invading other cities:
     */
+  /*
   float casualtyValue(Base city) {
     //
     //  For now, we'll assume that the value of lives is calculated on an
@@ -381,13 +424,13 @@ public class BaseCouncil {
   }
   
   
-  Tally <Good> calculateTribute(MissionAssessment a, Base base) {
+  Tally <Good> calculateTribute(MissionAssessment a) {
     //
     //  We establish *reasonable* levels of tribute across a variety of goods,
     //  based on what the attacker is hungry for and the defender seems to have
     //  plenty of-
     Tally <Good> tribute = new Tally();
-    for (Good g : base.world.goodTypes) {
+    for (Good g : world.goodTypes) {
       float prodVal = 5 + a.goesC.trading.inventory(g);
       prodVal      += 0 + a.goesC.trading.prodLevel(g);  //  Use prod-level!
       float consVal = 0 + a.fromC.trading.needLevel(g);
@@ -404,6 +447,88 @@ public class BaseCouncil {
   }
   
   
+  
+  Series <MissionAssessment> pickInvadeMissions() {
+    float commitLevel = 0.5f;
+    int maxSplits = 3;
+    
+    List <MissionAssessment> invasions = new List <MissionAssessment> () {
+      protected float queuePriority(MissionAssessment r) {
+        return r.evaluatedAppeal;
+      }
+    };
+    
+    float totalForce = 0;
+    for (Base b : world.bases()) if (b.faction() == faction) {
+      totalForce += b.armyPower() * commitLevel;
+    }
+    for (Base b : world.bases()) {
+      invasions.add(invasionAssessment(totalForce, b, false));
+    }
+    invasions.queueSort();
+    
+    for (int n = 1; n <= maxSplits; n++) {
+      float value = evaluateSplit(invasions, n);
+    }
+    
+    return invasions;
+  }
+  
+  
+  float evaluateSplit(
+    float totalForce, Series <MissionAssessment> assessed, int numSplit
+  ) {
+    
+    float totalDefence = 0;
+    int splitCount = 0;
+    for (MissionAssessment a : assessed) {
+      totalDefence += a.goesC.armyPower() / POP_PER_CITIZEN;
+      if (++splitCount >= numSplit) break;
+    }
+    
+    splitCount = 0;
+    for (MissionAssessment a : assessed) {
+      float force = a.goesC.armyPower() / POP_PER_CITIZEN;
+      float splitForce = totalForce * force / totalDefence;
+      
+      if (++splitCount >= numSplit) break;
+    }
+    
+    return -1;
+  }
+  
+  
+  public MissionAssessment invasionAssessment(
+    float attackForce, Base defend, boolean random
+  ) {
+    MissionAssessment MA = new MissionAssessment();
+    
+    MA.objective = Mission.OBJECTIVE_STRIKE;
+    MA.rulesC    = world.factionCouncil(faction).capital();
+    MA.goesC     = defend;
+    MA.fromPower = attackForce;
+    MA.goesPower = defend.armyPower() / POP_PER_CITIZEN;
+    
+    MA.postureDemand = POSTURE.VASSAL;
+    MA.tributeDemand = calculateTribute(MA);
+    
+    calculateChances(MA, false);
+    calculateInvasionAppeal(MA);
+    
+    if (typeAI == AI_WARLIKE ) MA.costs    = 0;
+    if (typeAI == AI_PACIFIST) MA.benefits = 0;
+    
+    float appeal = 0;
+    appeal += (random ? Rand.avgNums(2) : 0.5f) * MA.benefits;
+    appeal -= (random ? Rand.avgNums(2) : 0.5f) * MA.costs;
+    //appeal /= (MA.benefits + MA.costs) / 2;
+    
+    appeal *= ActorUtils.distanceRating(MA.rulesC, MA.goesC);
+    MA.evaluatedAppeal = appeal;
+    
+    return MA;
+  }
+  
   void calculateChances(MissionAssessment a, boolean random) {
     //
     //  First, we calculate a rule-of-thumb calculation for how likely you are
@@ -412,7 +537,10 @@ public class BaseCouncil {
     //  victory can intimidate opponents.)
     float bravery = membersTraitAvg(TRAIT_BRAVERY);
     float chance = 0, lossA = 0, lossD = 0, presDiff = 0, wallDiff;
-    presDiff = (a.fromC.relations.prestige - a.goesC.relations.prestige) / PRESTIGE_MAX;
+    presDiff = (
+      a.rulesC.council().relations.prestige -
+      a.goesC .council().relations.prestige
+    ) / PRESTIGE_MAX;
     wallDiff = a.goesC.wallsLevel() > 0 ? 1 : 0;
     chance   = a.fromPower / (a.fromPower + a.goesPower);
     chance   = chance + (presDiff / 4);
@@ -436,13 +564,13 @@ public class BaseCouncil {
     //
     //  We calculate the attractiveness of invasion using a relatively
     //  straightforward cost/benefit evaluation:
-    float diligence  = membersTraitAvg(TRAIT_DILIGENCE );
-    float compassion = membersTraitAvg(TRAIT_EMPATHY);
-    float casValueA  = casualtyValue(a.fromC);
+    float diligence  = membersTraitAvg(TRAIT_DILIGENCE);
+    float compassion = membersTraitAvg(TRAIT_EMPATHY  );
+    float casValueA  = casualtyValue(a.rulesC);
     float casValueD  = casualtyValue(a.goesC);
     float tribValue  = 0;
     for (Good g : a.tributeDemand.keys()) {
-      tribValue += tributeValue(g, a.tributeDemand.valueFor(g), a.fromC);
+      tribValue += tributeValue(g, a.tributeDemand.valueFor(g), a.rulesC);
     }
     //
     //  We also weight the value of hostility, roughly speaking, based on the
@@ -452,9 +580,10 @@ public class BaseCouncil {
     angerValue /= 4 * POP_PER_CITIZEN;
     //
     //  And account for pre-existing hostility/loyalty:
-    Relation r       = a.fromC.relations.relationWith(a.goesC.faction());
-    boolean isLord   = a.goesC.isLordOf  (a.fromC);
-    boolean isVassal = a.goesC.isVassalOf(a.fromC);
+    BaseCouncil council = a.rulesC.council();
+    Relation r = council.relations.relationWith(a.goesC.faction());
+    boolean isLord   = a.goesC.isLordOf  (a.rulesC);
+    boolean isVassal = a.goesC.isVassalOf(a.rulesC);
     a.hateBonus   = Nums.min(0, 0 - r.loyalty) * angerValue;
     a.lovePenalty = Nums.max(0, 0 + r.loyalty) * angerValue;
     a.hateBonus   *= 1 - (compassion / 2);
@@ -473,38 +602,6 @@ public class BaseCouncil {
     a.benefits += a.winChance   * a.hateBonus;
   }
   
-  
-  public MissionAssessment invasionAssessment(
-    Base attack, Base defend,
-    float commitLevel, boolean random
-  ) {
-    MissionAssessment MA = new MissionAssessment();
-    
-    MA.objective = Mission.OBJECTIVE_STRIKE;
-    MA.fromC     = attack;
-    MA.goesC     = defend;
-    MA.fromPower = attack.armyPower() * commitLevel / POP_PER_CITIZEN;
-    MA.goesPower = defend.armyPower()               / POP_PER_CITIZEN;
-    
-    MA.postureDemand = POSTURE.VASSAL;
-    MA.tributeDemand = calculateTribute(MA, attack);
-    
-    calculateChances(MA, false);
-    calculateInvasionAppeal(MA);
-    
-    if (typeAI == AI_WARLIKE ) MA.costs    = 0;
-    if (typeAI == AI_PACIFIST) MA.benefits = 0;
-    
-    float appeal = 0;
-    appeal += (random ? Rand.avgNums(2) : 0.5f) * MA.benefits;
-    appeal -= (random ? Rand.avgNums(2) : 0.5f) * MA.costs;
-    //appeal /= (MA.benefits + MA.costs) / 2;
-    
-    appeal *= ActorUtils.distanceRating(MA.fromC, MA.goesC);
-    MA.evaluatedAppeal = appeal;
-    
-    return MA;
-  }
   
   
   
@@ -647,21 +744,33 @@ public class BaseCouncil {
     appeal += (random ? Rand.avgNums(2) : 0.5f) * MA.benefits;
     appeal -= (random ? Rand.avgNums(2) : 0.5f) * MA.costs;
     //appeal /= (MA.benefits + MA.costs) / 2;
-    appeal *= ActorUtils.distanceRating(MA.fromC, MA.goesC);
+    appeal *= ActorUtils.distanceRating(MA.rulesC, MA.goesC);
     MA.evaluatedAppeal = appeal;
     
     return MA;
   }
   
   
-  List <MissionAssessment> updateMissionChoices(Base base) {
+  List <MissionAssessment> updateMissionChoices() {
     List <MissionAssessment> choices = new List();
+    //Base capital = world.factionCouncil(faction).capital();
     //
     //  This is something of a hack at the moment, but it helps prevent some
     //  of the more bitty exchanges...
-    if (base.armyPower() < base.idealArmyPower() / 3) {
-      return choices;
+    
+    float power = factionPower(faction), idealPower = idealFactionPower(faction);
+    
+    if (power >= idealPower / 3) {
+      Series <MissionAssessment> invasions = pickInvadeMissions();
+      Visit.appendTo(choices, invasions);
+      //return choices;
     }
+    
+    
+    for (Base base : world.bases) {
+      if (base.faction() == faction
+    }
+    
     //
     //  TODO:  Allow for multiple levels of force-commitment, since you don't
     //  want your own city to be vulnerable?  And multiple options for terms
@@ -702,7 +811,7 @@ public class BaseCouncil {
     
     while (MissionForStrike.powerSum(force.recruits(), null) < base.armyPower() / 2) {
       Actor fights = (Actor) soldier.generate();
-      fights.assignBase(IA.fromC);
+      fights.assignBase(IA.rulesC);
       force.toggleRecruit(fights, true);
     }
     
@@ -743,10 +852,11 @@ public class BaseCouncil {
     if (typeAI == AI_OFF      ) return false;
     
     Base capital = base.council().capital;
-    MissionAssessment IA = invasionAssessment(base, capital, 0.5f, true);
+    MissionAssessment IA = invasionAssessment(base.armyPower(), capital, true);
     float chance = period * 1f / AVG_TRIBUTE_YEARS;
     return IA.evaluatedAppeal > 0 && Rand.num() < chance;
   }
+  //*/
   
 }
 
