@@ -2,7 +2,7 @@
 
 package game;
 import static game.GameConstants.*;
-import static game.BaseRelations.*;
+import static game.RelationSet.*;
 import static game.Area.*;
 import graphics.common.*;
 import util.*;
@@ -55,45 +55,45 @@ public class TaskCombat extends Task {
   
   /**  Utility methods for determining hostility, power, et cetera:
     */
-  public static POSTURE postureFor(Element a, Element b) {
+  public static int postureFor(Element a, Element b) {
     Base CA = a.base     (), CB = b.base     ();
     Base GA = a.guestBase(), GB = b.guestBase();
-    if (CA == CB              ) return POSTURE.ALLY;
-    if (GA != null && GA == GB) return POSTURE.ALLY;
-    if (GB != null && CA == GB) return POSTURE.ALLY;
-    if (GA != null && GA == CB) return POSTURE.ALLY;
-    return CA.council().relations.posture(CB.faction());
+    if (CA == CB              ) return BOND_ALLY;
+    if (GA != null && GA == GB) return BOND_ALLY;
+    if (GB != null && CA == GB) return BOND_ALLY;
+    if (GA != null && GA == CB) return BOND_ALLY;
+    return CA.council().relations.bondProperties(CB.faction());
   }
   
   
-  public static POSTURE postureFor(Target a, Target b) {
-    if (a == null  || b == null ) return POSTURE.NEUTRAL;
-    if (a.isTile() || b.isTile()) return POSTURE.NEUTRAL;
+  public static int postureFor(Target a, Target b) {
+    if (a == null  || b == null ) return BOND_NEUTRAL;
+    if (a.isTile() || b.isTile()) return BOND_NEUTRAL;
     return postureFor((Element) a, (Element) b);
   }
   
   
   public static boolean allied(Target a, Target b) {
     //  TODO:  Replace?
-    return postureFor(a, b) == POSTURE.ALLY;
+    return postureFor(a, b) == BOND_ALLY;
   }
   
   
   public static boolean hostile(Target a, Target b) {
     //  TODO:  Replace?
-    return postureFor(a, b) == POSTURE.ENEMY;
+    return postureFor(a, b) == BOND_ENEMY;
   }
   
   
   public static float hostility(Target a, Target b) {
-    POSTURE p = postureFor(a, b);
+    int p = postureFor(a, b);
     switch(p) {
-      case ENEMY   : return 1;
-      case ALLY    : return -1;
-      case VASSAL  : return -0.5f;
-      case LORD    : return -1;
-      case NEUTRAL : return 0;
-      case TRADING : return -0.5f;
+      case BOND_ENEMY   : return 1;
+      case BOND_ALLY    : return -1;
+      case BOND_VASSAL  : return -0.5f;
+      case BOND_LORD    : return -1;
+      case BOND_NEUTRAL : return 0;
+      case BOND_TRADING : return -0.5f;
     }
     return 0;
   }

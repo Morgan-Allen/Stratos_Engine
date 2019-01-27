@@ -66,7 +66,7 @@ public class SchoolShaper {
     
     int numBeasts(Actor using) {
       int num = 0;
-      for (Actor a : using.bonds.allBondedWith(BOND_SERVANT)) {
+      for (Focus a : using.bonds.allBondedWith(BOND_SERVANT)) {
         if (a.type().isAnimal()) num += 1;
       }
       return num;
@@ -87,7 +87,7 @@ public class SchoolShaper {
         return false;
       }
       
-      Actor master = affects.bonds.bondedWith(BOND_MASTER);
+      Actor master = (Actor) affects.bonds.bondedWith(BOND_MASTER);
       if (master != null) return false;
       
       return true;

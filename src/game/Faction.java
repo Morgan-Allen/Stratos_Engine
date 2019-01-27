@@ -6,7 +6,7 @@ import graphics.common.*;
 
 
 
-public class Faction extends Constant implements BaseRelations.Postured {
+public class Faction extends Type implements RelationSet.Focus {
   
   
   String name;
@@ -39,7 +39,11 @@ public class Faction extends Constant implements BaseRelations.Postured {
     return this;
   }
   
-  public BaseRelations relations(World world) {
+  public Type type() {
+    return this;
+  }
+  
+  public RelationSet relations(World world) {
     return world.factionCouncil(this).relations;
   }
   

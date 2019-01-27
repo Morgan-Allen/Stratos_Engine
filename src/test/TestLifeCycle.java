@@ -159,7 +159,7 @@ public class TestLifeCycle extends LogicTest {
         for (Actor a : map.actors()) {
           if (a.health.child() && a.health.alive() && ! originalPop.includes(a)) {
             if (! births.includes(a)) {
-              Series <Actor> parents = a.bonds.allBondedWith(BOND_PARENT);
+              Series <Actor> parents = (Series) a.bonds.allBondedWith(BOND_PARENT);
               I.say("  Born: "+a+", parents: "+parents);
               
               if (parents.includes(oldKing)) {

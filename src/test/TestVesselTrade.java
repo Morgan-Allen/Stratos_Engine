@@ -11,8 +11,6 @@ import static content.GameWorld.*;
 import util.*;
 
 
-//  TODO:  Add the crew check down further in the suite?
-
 
 public class TestVesselTrade extends LogicTest {
   
@@ -67,23 +65,25 @@ public class TestVesselTrade extends LogicTest {
       ALL_BUILDINGS, ALL_SHIPS(), ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES()
     );
     Base  homeC = new Base(world, world.addLocale(2, 2), FACTION_SETTLERS_A);
-    Base  awayC = new Base(world, world.addLocale(3, 3), FACTION_SETTLERS_B);
+    Base  awayC = new Base(world, world.addLocale(3, 3), FACTION_SETTLERS_A);
     world.addBases(homeC, awayC);
     world.setPlayerFaction(FACTION_SETTLERS_A);
     
     awayC.council().setTypeAI(BaseCouncil.AI_OFF);
+    awayC.council().assignCapital(homeC);
     homeC.setName("(Home City)");
     awayC.setName("(Away City)");
     
     World.setupRoute(homeC.locale, awayC.locale, 10, Type.MOVE_AIR);
-    BaseRelations.setPosture(
+    FactionRelations.setPosture(
       homeC.faction(), awayC.faction(),
-      BaseRelations.POSTURE.TRADING, world
+      RelationSet.BOND_TRADING, world
     );
     homeC.council().assignHomeland(awayC);
     
     Tally <Good> supplies = new Tally().setWith(GREENS, 10, PSALT, 5);
-    BaseTrading.setSuppliesDue(awayC, homeC, supplies);
+    //BaseTrading.setSuppliesDue(awayC, homeC, supplies);
+    awayC.relations.setSuppliesDue(FACTION_SETTLERS_A, supplies);
     
     awayC.trading.setTradeLevel(GREENS  ,  0, 50);
     awayC.trading.setTradeLevel(MEDICINE,  0, 20);
@@ -319,19 +319,26 @@ public class TestVesselTrade extends LogicTest {
     }
     
     I.say("\n"+title+" TEST FAILED!");
-    I.say("  Spawn done:   "+spawnDone  );
-    I.say("  Ship coming:  "+shipComing );
-    I.say("  Ship arrive:  "+shipArrive );
-    I.say("  Ship landed:  "+shipLanded );
-    I.say("  Ship traded:  "+shipTraded );
-    I.say("  Migrate done: "+migrateDone);
-    I.say("  Cash okay:    "+cashOkay   );
+    I.say("  Spawn done:    "+spawnDone  );
+    I.say("  Ship coming:   "+shipComing );
+    I.say("  Ship arrive:   "+shipArrive );
+    I.say("  Ship landed:   "+shipLanded );
+    I.say("  Ship traded:   "+shipTraded );
+    I.say("  Migrate done:  "+migrateDone);
+    I.say("  Cash okay:     "+cashOkay   );
     I.say("  Cash/estimate: "+totalCash+"/"+cashEstimate);
     
     return false;
   }
   
 }
+
+
+
+
+
+
+
 
 
 

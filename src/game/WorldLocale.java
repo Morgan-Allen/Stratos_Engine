@@ -7,7 +7,7 @@ import util.*;
 
 
 
-//  TODO:  Have this extend Constant instead?
+//  TODO:  Make this a constant!  You can set up a World with a set of locales.
 
 
 public class WorldLocale implements Session.Saveable {

@@ -4,6 +4,8 @@ package test;
 import game.*;
 import static game.GameConstants.*;
 import static game.BaseRelations.*;
+import static game.FactionRelations.*;
+import static game.RelationSet.*;
 import content.*;
 import static content.GameContent.*;
 import static content.GameWorld.*;
@@ -36,7 +38,7 @@ public class TestVesselMissions extends LogicTest {
       
       Mission generateMission(Base base, Base rival) {
         World world = base.world;
-        setPosture(base.faction(), rival.faction(), POSTURE.ENEMY, world);
+        setPosture(base.faction(), rival.faction(), BOND_ENEMY, world);
         
         Mission raid = new MissionForStrike(rival);
         raid.setWorldFocus(base);
@@ -61,11 +63,11 @@ public class TestVesselMissions extends LogicTest {
       Mission generateMission(Building centre, Building barracks, Base rival) {
         World world = centre.map().world;
         Base base = centre.base();
-        setPosture(base.faction(), rival.faction(), POSTURE.ENEMY, world);
+        setPosture(base.faction(), rival.faction(), BOND_ENEMY, world);
         
         Mission raid = new MissionForStrike(base);
         raid.setWorldFocus(rival);
-        raid.terms.assignTerms(POSTURE.VASSAL, null, null, null);
+        raid.terms.assignTerms(BOND_VASSAL, null, null, null);
         for (Actor a : barracks.workers()) raid.toggleRecruit(a, true);
         
         return raid;

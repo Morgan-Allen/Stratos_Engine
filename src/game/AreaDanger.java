@@ -2,6 +2,7 @@
 
 package game;
 import static game.GameConstants.*;
+import static game.RelationSet.*;
 import util.*;
 
 
@@ -49,15 +50,15 @@ public class AreaDanger {
     
     final float FUZZ_RANGE = AVG_SIGHT * 2;
     maxValue = 0.1f;
-    BaseRelations relations = map.world.factionCouncil(faction).relations;
+    RelationSet relations = map.world.factionCouncil(faction).relations;
     
     for (Coord c : Visit.grid(0, 0, map.size(), map.size(), Area.FLAG_RES)) {
       Series <Active> at = map.gridActive(map.tileAt(c));
       float danger = 0;
       
       if (at.size() > 0) for (Active a : at) {
-        BaseRelations.POSTURE p = relations.posture(a.base().faction());
-        if (p != BaseRelations.POSTURE.ENEMY) continue;
+        boolean enemy = relations.hasBondType(a.base().faction(), BOND_ENEMY);
+        if (! enemy) continue;
         float power = TaskCombat.attackPower((Element) a);
         danger += power;
       }

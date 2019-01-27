@@ -2,6 +2,7 @@
 
 package test;
 import static game.GameConstants.*;
+import static game.RelationSet.*;
 import game.*;
 import static content.GameContent.*;
 import static content.SchoolTekPriest.*;
@@ -42,11 +43,11 @@ public class TestPowersTekPriest {
         
         if (toCharm.base() != caster.base()) return false;
         
-        Actor master = toCharm.bonds.bondedWith(ActorBonds.BOND_MASTER);
+        Actor master = (Actor) toCharm.bonds.bondedWith(ActorBonds.BOND_MASTER);
         if (master != caster) return false;
         
         int numDrones = 0;
-        for (Actor a : caster.bonds.allBondedWith(ActorBonds.BOND_SERVANT)) {
+        for (Focus a : caster.bonds.allBondedWith(ActorBonds.BOND_SERVANT)) {
           if (a.type().isConstruct()) numDrones += 1;
         }
         

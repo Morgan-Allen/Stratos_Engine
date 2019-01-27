@@ -35,9 +35,9 @@ public class TestDangerMap extends LogicTest {
     boolean testFail = false;
     
     AreaTile centre = map.tileAt(map.size() / 2, map.size() / 2);
-    BaseRelations.setPosture(
+    FactionRelations.setPosture(
       base.faction(), map.locals.faction(),
-      BaseRelations.POSTURE.ENEMY, world
+      RelationSet.BOND_ENEMY, world
     );
     
     for (int n = NUM_THREATS; n-- > 0;) {

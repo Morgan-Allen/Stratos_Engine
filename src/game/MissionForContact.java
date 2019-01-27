@@ -77,21 +77,6 @@ public class MissionForContact extends Mission {
   }
   
   
-  void handleOffmapDeparture(Base from, Journey journey) {
-    if (from == homeBase()) {
-      TaskGifting.performMissionPickup(this);
-    }
-  }
-  
-  
-  void handleOffmapArrival(Base goes, World.Journey journey) {
-    if (goes == worldFocus()) {
-      TaskGifting.performMisionDelivery(this);
-      MissionUtils.handleDialog(this, goes, journey);
-    }
-  }
-  
-  
   public Task selectActorBehaviour(Actor actor) {
     //
     //  If we haven't embarked on a journey yet, envoys may first have to pick
@@ -217,7 +202,133 @@ public class MissionForContact extends Mission {
     
     return pick.result();
   }
+
+  
+  
+  
+  /**  Utility methods for faction-level decision-making-
+    */
+  void handleOffmapDeparture(Base from, Journey journey) {
+    if (from == homeBase()) {
+      TaskGifting.performMissionPickup(this);
+    }
+  }
+  
+  
+  void handleOffmapArrival(Base goes, World.Journey journey) {
+    if (goes == worldFocus()) {
+      TaskGifting.performMisionDelivery(this);
+      MissionUtils.handleDialog(this, goes, journey);
+    }
+  }
+  
+  
+  /*
+  static Mission configMissionForAI(
+    Faction from, Base launches, Base target, World world
+  ) {
+    
+    MissionForContact mission = new MissionForContact(launches);
+    mission.setWorldFocus(target);
+    
+    
+    
+    /*
+    MissionAssessment MA = new MissionAssessment();
+    
+    MA.objective = Mission.OBJECTIVE_CONTACT;
+    MA.fromC = from;
+    MA.goesC = goes;
+    
+    if (typeAI == AI_WARLIKE) {
+      MA.evaluatedAppeal = -1;
+      return MA;
+    }
+    
+    //  See if it's possible to arrange a marriage as well.
+    
+    Actor monarch = goes.council().memberWithRole(BaseCouncil.Role.MONARCH);
+    Pick <Actor> pickM = new Pick();
+    
+    for (Actor a : from.council().allMembersWithRole(BaseCouncil.Role.HEIR)) {
+      Actor spouse = a.bonds.allBondedWith(BOND_MARRIED).first();
+      if (spouse != null) continue;
+      if (monarch.health.man() == a.health.man()) continue;
+      
+      float rating = 1.0f;
+      if (random) rating += Rand.num() - 0.5f;
+      pickM.compare(a, rating);
+    }
+    Actor marries = pickM.result();
+    
+    MA.postureDemand  = POSTURE.ALLY;
+    MA.marriageDemand = marries;
+    
+    //  Appeal of alliance depends on whether you have a good existing
+    //  relationship and/or share similar enemies.
+    
+    //I.say("\nGetting synergy between "+from+" and "+goes);
+    float synergyVal = 0, dot = 0, count = 0;
+    for (Faction c : goes.relations.relationsWith()) {
+      float valueF = from.relations.loyalty(c);
+      float valueG = goes.relations.loyalty(c);
+      //I.say("  "+c+": "+valueF+" * "+valueG);
+      if (valueF == -100 || valueG == -100) continue;
+      synergyVal += dot = valueF * valueG;
+      count += (Nums.abs(dot) + 1) / 2;
+    }
+    synergyVal /= Nums.max(1, count);
+    //I.say("  Total value: "+synergyVal);
+    
+    float tradeVal = 0;
+    for (Good g : world.goodTypes) {
+      float exports = from.trading.prodLevel(g);
+      if (exports > 0) {
+        tradeVal += tributeValue(g, exports, goes);
+      }
+      float imports = goes.trading.needLevel(g);
+      if (imports > 0) {
+        tradeVal += tributeValue(g, exports, from);
+      }
+    }
+    tradeVal *= AVG_ALLIANCE_YEARS * 1f / AVG_TRIBUTE_YEARS;
+    
+    //I.say("  Trade value: "+tradeVal);
+    
+    float powerVal = from.idealArmyPower() / POP_PER_CITIZEN;
+    powerVal *= casualtyValue(goes);
+    powerVal *= AVG_ALLIANCE_YEARS * 1f / AVG_RETIREMENT;
+    
+    float marriageCost = 0;
+    if (marries != null) {
+      marriageCost = casualtyValue(from) * MARRIAGE_VALUE_MULT;
+      marriageCost *= (1 + from.council().membersBondAvg(marries)) / 2;
+    }
+    
+    float relationsVal = (
+      goes.relations.loyalty(from.faction()) +
+      from.relations.loyalty(goes.faction())
+    ) / 2;
+    
+    MA.benefits += tradeVal;
+    MA.benefits += powerVal;
+    MA.benefits *= 1 + synergyVal + relationsVal;
+    MA.costs    += marriageCost;
+    
+    float appeal = 0;
+    appeal += (random ? Rand.avgNums(2) : 0.5f) * MA.benefits;
+    appeal -= (random ? Rand.avgNums(2) : 0.5f) * MA.costs;
+    //appeal /= (MA.benefits + MA.costs) / 2;
+    appeal *= ActorUtils.distanceRating(MA.rulesC, MA.goesC);
+    MA.evaluatedAppeal = appeal;
+    
+    return MA;
+    //*/
+  //}
   
 }
+
+
+
 
 

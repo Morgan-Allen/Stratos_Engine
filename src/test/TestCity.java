@@ -35,7 +35,7 @@ public class TestCity extends LogicTest {
     base.council().assignHomeland(homeland);
     
     World.setupRoute(base.locale, homeland.locale, 3, Type.MOVE_AIR);
-    //BaseRelations.setPosture(base, homeland, BaseRelations.POSTURE.VASSAL, true);
+    //FactionRelations.setPosture(base, homeland, BaseRelations.POSTURE.VASSAL, true);
     
     world.settings.toggleFog = false;
     

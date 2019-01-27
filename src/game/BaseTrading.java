@@ -2,7 +2,7 @@
 
 package game;
 import static game.GameConstants.*;
-import static game.BaseRelations.*;
+import static game.RelationSet.*;
 import util.*;
 
 
@@ -25,6 +25,13 @@ public class BaseTrading {
   List <ActorAsVessel> traders = new List();
   List <Actor> migrants = new List();
   
+  static class TradeRecord {
+    Base with;
+    Tally <Good> suppliesSent = new Tally();
+  }
+  
+  final Table <Base, TradeRecord> records = new Table();
+  
   
   
   BaseTrading(Base base) {
@@ -41,6 +48,13 @@ public class BaseTrading {
     
     s.loadObjects(traders );
     s.loadObjects(migrants);
+    
+    for (int n = s.loadInt(); n-- > 0;) {
+      TradeRecord r = new TradeRecord();
+      r.with = (Base) s.loadObject();
+      s.loadTally(r.suppliesSent);
+      records.put(r.with, r);
+    }
   }
   
   
@@ -53,6 +67,12 @@ public class BaseTrading {
     
     s.saveObjects(traders );
     s.saveObjects(migrants);
+    
+    s.saveInt(records.size());
+    for (TradeRecord r : records.values()) {
+      s.saveObject(r.with);
+      s.saveTally(r.suppliesSent);
+    }
   }
   
   
@@ -110,7 +130,7 @@ public class BaseTrading {
   
   public boolean allowExport(Good g, Trader buys) {
     if (buys.base().council().homeland() == base) return true;
-    if (suppliesDue(base, buys.base(), g) > 0) return true;
+    if (base.relations.suppliesDue(buys.base(), g) > 0) return true;
     return prodLevel.valueFor(g) > 0;
   }
   
@@ -120,30 +140,21 @@ public class BaseTrading {
   }
   
   
-  
-  public static void setSuppliesDue(Base a, Base b, Tally <Good> suppliesDue) {
-    if (suppliesDue == null) suppliesDue = new Tally();
-    Relation r = a.relations.relationWith(b);
-    r.suppliesDue = suppliesDue;
-  }
-  
-  
-  public static Tally <Good> suppliesDue(Base a, Base b) {
-    Relation r = a.relations.relationWith(b);
-    if (r == null) return new Tally();
-    return r.suppliesDue;
-  }
-  
-  
   public static float goodsSent(Base a, Base b, Good g) {
-    Relation r = a.relations.relationWith(b);
+    TradeRecord r = a.trading.records.get(b);
     return r == null ? 0 : r.suppliesSent.valueFor(g);
   }
   
   
-  public static float suppliesDue(Base a, Base b, Good g) {
-    Relation r = a.relations.relationWith(b);
-    return r == null ? 0 : r.suppliesDue.valueFor(g);
+  public void recordGoodsSent(Base b, Good g, float inc) {
+    TradeRecord r = records.get(b);
+    if (r == null) records.put(b, r = new TradeRecord());
+    r.suppliesSent.add(inc, g);
+  }
+  
+  
+  void wipeRecords(int interval) {
+    records.clear();
   }
   
   
@@ -181,9 +192,9 @@ public class BaseTrading {
   
   
   public void updateLocalStocks() {
-    inventory .clear();
-    needLevel .clear();
-    prodLevel .clear();
+    inventory.clear();
+    needLevel.clear();
+    prodLevel.clear();
     
     for (Building b : base.activeMap().buildings()) if (b.base() == base) {
       for (Good g : base.world.goodTypes()) {
@@ -219,10 +230,13 @@ public class BaseTrading {
     boolean tribute = base.relations.isLoyalVassalOf(lord);
     
     if (tribute && capital != null && capital.isOffmap()) {
-      Relation r = base.relations.relationWith(lord);
-      for (Good g : r.suppliesDue.keys()) {
-        float sent = r.suppliesDue.valueFor(g) * usageInc * 1.1f;
-        r.suppliesSent.add(sent, g);
+      Tally <Good> due = base.relations.suppliesDue;
+      
+      for (Good g : due.keys()) {
+        float sent = due.valueFor(g) * usageInc * 1.1f;
+        recordGoodsSent(capital, g, sent);
+        inventory.add(0 - sent, g);
+        capital.trading.inventory.add(sent, g);
       }
     }
   }
@@ -236,10 +250,10 @@ public class BaseTrading {
     
     for (Base b : base.world.bases()) {
       
-      POSTURE p = base.relations.posture(b.faction());
+      int p = base.posture(b.faction());
       boolean shouldTrade =
-        p != POSTURE.NEUTRAL &&
-        p != POSTURE.ENEMY   &&
+        p != BOND_NEUTRAL &&
+        p != BOND_ENEMY   &&
         b.activeMap() != null
       ;
       

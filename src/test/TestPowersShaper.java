@@ -39,7 +39,7 @@ public class TestPowersShaper {
       boolean verifyEffect(Target subject, Actor caster) {
         caster.traits.setClassLevel(MAX_BEASTS_CL);
         
-        Actor master = toCharm.bonds.bondedWith(ActorBonds.BOND_MASTER);
+        Actor master = (Actor) toCharm.bonds.bondedWith(ActorBonds.BOND_MASTER);
         if (master != caster) return false;
         
         return true;

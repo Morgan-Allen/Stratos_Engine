@@ -3,6 +3,7 @@
 package test;
 import game.*;
 import static game.GameConstants.*;
+import static game.RelationSet.*;
 import static content.GameContent.*;
 import static content.GameWorld.*;
 import util.*;
@@ -85,8 +86,9 @@ public class TestSubversion extends LogicTest {
         boolean allTalked = true, anyTalked = false;
         for (Actor a : mainHut.workers()) {
           boolean talked = false;
-          for (Actor w : a.bonds.allBondedWith(ActorBonds.BOND_ANY)) {
-            if (w.base() == base) talked = true;
+          for (Focus f : a.bonds.allBondedWith(ActorBonds.BOND_ANY)) {
+            if (! f.type().isActor()) continue;
+            if (((Actor) f).base() == base) talked = true;
           }
           if (! talked) allTalked = false;
           else anyTalked = true;
@@ -144,7 +146,9 @@ public class TestSubversion extends LogicTest {
     
     for (Actor a : eval) {
       I.say("\nBonds for "+a+" ("+a.bonds.baseLoyal()+")");
-      for (Actor o : a.bonds.allBondedWith(0)) {
+      for (Focus f : a.bonds.allBondedWith(0)) {
+        if (! f.type().isActor()) continue;
+        Actor o = (Actor) f;
         String name = I.padToLength(I.shorten(o.fullName(), 15), 15);
         String bond = I.shorten(a.bonds.bondLevel  (o), 2);
         String news = I.shorten(a.bonds.bondNovelty(o), 2);

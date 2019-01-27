@@ -3,13 +3,14 @@
 package game;
 import static game.GameConstants.*;
 import static game.World.*;
+import static game.RelationSet.*;
 import static game.BaseRelations.*;
 import util.*;
 
 
 
 public class Base implements
-  Session.Saveable, Trader, BaseEvents.Trouble, BaseRelations.Postured
+  Session.Saveable, Trader, BaseEvents.Trouble, RelationSet.Focus
 {
   
   
@@ -24,7 +25,7 @@ public class Base implements
   private BaseCouncil factionCouncil = null;
   
   final public BaseRelations relations = new BaseRelations(this);
-  final public BaseTrading   trading   = new BaseTrading  (this);
+  final public BaseTrading trading = new BaseTrading(this);
   
   Building headquarters = null;
   private int   currentFunds = 0;
@@ -153,7 +154,7 @@ public class Base implements
   }
   
   
-  public BaseRelations relations(World world) {
+  public RelationSet relations(World world) {
     return relations;
   }
   
@@ -389,47 +390,20 @@ public class Base implements
     //  defaults over time:
     if (updateStats) {
       float presDrift = UPDATE_GAP * PRESTIGE_AVG * 1f / PRES_FADEOUT_TIME;
-      float presDiff = PRESTIGE_AVG - relations.prestige;
+      float presDiff = PRESTIGE_AVG - council().relations.prestige();
       if (Nums.abs(presDiff) > presDrift) {
         presDiff = presDrift * (presDiff > 0 ? 1 : -1);
       }
-      relations.prestige += presDiff;
-      
-      for (Relation r : relations.relations()) {
-        float diff = LOY_CIVIL - r.loyalty;
-        diff *= DAY_LENGTH * 1f / LOY_FADEOUT_TIME;
-        r.loyalty += diff;
-      }
+      council().relations.incPrestige(presDiff);
+      relations.updateRelations(DAY_LENGTH);
     }
     //
     //  And, once per year, tally up any supply obligations to your current
     //  lord (with the possibility of entering a state of revolt if those are
     //  failed.)
     if (world.time % YEAR_LENGTH == 0) {
-      if (relations.isLoyalVassalOf(faction)) {
-        Relation r = relations.relationWith(faction);
-        int timeAsVassal = world.time - r.madeVassalDate;
-        boolean failedSupply = false, doCheck = timeAsVassal >= YEAR_LENGTH;
-        
-        if (doCheck) for (Good g : r.suppliesDue.keys()) {
-          float sent = r.suppliesSent.valueFor(g);
-          float due  = r.suppliesDue .valueFor(g);
-          if (sent < due) failedSupply = true;
-        }
-        r.suppliesSent.clear();
-        
-        if (failedSupply) {
-          relations.toggleRebellion(faction, true);
-        }
-        else {
-          faction.relations(world).incLoyalty(this, LOY_TRIBUTE_BONUS);
-        }
-      }
-      //
-      //  Wipe the slate clean for all other relations:
-      for (Relation r : relations.relations()) if (r.with != faction) {
-        r.suppliesSent.clear();
-      }
+      relations.updateTribute(YEAR_LENGTH);
+      trading.wipeRecords(YEAR_LENGTH);
     }
     //
     //  Update any formations and actors currently active-
@@ -511,23 +485,31 @@ public class Base implements
   
   /**  Generating trouble...
     */
-  BaseRelations.POSTURE posture(Base other) {
+  public int posture(Base other) {
+    if (other == this) {
+      return BOND_ALLY;
+    }
     if (other.faction() == this.faction()) {
       Base capital = council().capital();
-      if (this  == capital) return POSTURE.VASSAL;
-      if (other == capital) return POSTURE.LORD;
-      return POSTURE.ALLY;
+      if (this  == capital) return BOND_VASSAL;
+      if (other == capital) return BOND_LORD;
+      return BOND_ALLY;
     }
-    return council().relations.posture(other.faction());
+    return posture(other.faction());
   }
   
-  public boolean isVassalOf(Base o) { return posture(o) == POSTURE.LORD  ; }
-  public boolean isLordOf  (Base o) { return posture(o) == POSTURE.VASSAL; }
-  public boolean isEnemyOf (Base o) { return posture(o) == POSTURE.ENEMY ; }
-  public boolean isAllyOf  (Base o) { return posture(o) == POSTURE.ALLY  ; }
+  public int posture(Faction other) {
+    return council().relations.bondProperties(other);
+  }
+  
+  public boolean isVassalOf(Base o) { return posture(o) == BOND_LORD  ; }
+  public boolean isLordOf  (Base o) { return posture(o) == BOND_VASSAL; }
+  public boolean isEnemyOf (Base o) { return posture(o) == BOND_ENEMY ; }
+  public boolean isAllyOf  (Base o) { return posture(o) == BOND_ALLY  ; }
+  
   
   public boolean isLoyalVassalOf(Base o) {
-    return posture(o) == POSTURE.LORD && relations.isLoyalVassalOf(o.faction());
+    return (posture(o) == BOND_LORD) && relations.isLoyalVassal();
   }
   
   
@@ -538,6 +520,11 @@ public class Base implements
   
   public void generateTrouble(Area activeMap, float factionPower) {
     //  TODO:  Fill this in!
+  }
+  
+  
+  public Type type() {
+    return faction.type();
   }
   
 
@@ -561,9 +548,9 @@ public class Base implements
   
   public static String descLoyalty(float l) {
     Pick <String> pick = new Pick();
-    for (int i = LOYALTIES.length; i-- > 0;) {
-      float dist = Nums.abs(l - LOYALTIES[i]);
-      pick.compare(LOYALTY_DESC[i], 0 - dist);
+    for (int i = BaseRelations.LOYALTIES.length; i-- > 0;) {
+      float dist = Nums.abs(l - BaseRelations.LOYALTIES[i]);
+      pick.compare(BaseRelations.LOYALTY_DESC[i], 0 - dist);
     }
     return pick.result();
   }
@@ -573,9 +560,6 @@ public class Base implements
     return name;
   }
 }
-
-
-
 
 
 

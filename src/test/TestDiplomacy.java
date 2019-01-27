@@ -123,7 +123,7 @@ public class TestDiplomacy extends LogicTest {
       e.assignBase(awayC);
     }
     
-    escort.terms.assignTerms(POSTURE.ALLY, null, bride, null);
+    escort.terms.assignTerms(BOND_ALLY, null, bride, null);
     escort.setWorldFocus(baseC);
     escort.beginMission(awayC);
     
@@ -181,7 +181,7 @@ public class TestDiplomacy extends LogicTest {
       
       if (escortDeparted && ! escortSent) {
         escort = new MissionForContact(baseC);
-        escort.terms.assignTerms(POSTURE.TRADING, null, null, null);
+        escort.terms.assignTerms(BOND_TRADING, null, null, null);
         for (Actor w : garrison.workers()) escort.toggleRecruit(w, true);
         escort.toggleEnvoy(minister, true);
         escort.setWorldFocus(neutC);

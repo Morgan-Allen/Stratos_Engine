@@ -346,7 +346,9 @@ public class TaskTrading extends Task {
     boolean paymentDue = fromB != goesB;
     boolean tributeDue = fromB.isLoyalVassalOf(goesB);
     boolean fromFlex   = flexibleGoods(from, tradeFrom, tradeGoes);
-    Relation relation  = fromB.relations.relationWith(goesB);
+    
+    //  TODO:  Yeah, it's not clear how this is supposed to work.
+    //Relation relation  = fromB.relations.relationWith(goesB);
     
     Tally <Good> stock = from.inventory();
     float totalGets = 0, totalPays = 0;
@@ -366,13 +368,13 @@ public class TaskTrading extends Task {
       
       float paysFor = amount;
       if (tributeDue) {
-        paysFor -= tributeQuantityRemaining(relation, g);
+        paysFor -= tributeQuantityRemaining(fromB, goesB, g);
         paysFor = Nums.max(0, paysFor);
       }
       
       totalPays += paysFor * priceP;
       totalGets += paysFor * priceG;
-      relation.suppliesSent.add(amount, g);
+      fromB.trading.recordGoodsSent(goesB, g, amount);
     }
     
     if (report && paymentDue) {
@@ -415,12 +417,26 @@ public class TaskTrading extends Task {
   }
   
   
+  static float tributeQuantityRemaining(Base from, Base goes, Good good) {
+    float demand = from.relations.suppliesDue(goes, good);
+    float paid   = BaseTrading.goodsSent(from, goes, good);
+    return Nums.max(0, demand - paid);
+  }
+  
+  
+  static float tributeQuantityRemaining(Trader from, Trader goes, Good good) {
+    return tributeQuantityRemaining(from.base(), goes.base(), good);
+  }
+  
+  
+  /*
   float tributeQuantityRemaining(Relation r, Good good) {
     if (r == null) return 0;
     float demand = r.suppliesDue .valueFor(good);
     float paid   = r.suppliesSent.valueFor(good);
     return Nums.max(0, demand - paid);
   }
+  //*/
   
   
   static Tally <Good> configureCargo(
@@ -441,8 +457,8 @@ public class TaskTrading extends Task {
     boolean goesFlex = flexibleGoods(goes, from, goes);
     if (cityOnly && ! (fromCity || goesCity)) return cargo;
     
-    Relation fromR = goes.base().relations.relationWith(from.base());
-    Relation goesR = from.base().relations.relationWith(goes.base());
+    //Relation fromR = goes.base().relations.relationWith(from.base());
+    //Relation goesR = from.base().relations.relationWith(goes.base());
     
     for (Good good : world.goodTypes) {
       if (good == CASH || ! from.allowExport(good, goes)) continue;
@@ -458,10 +474,14 @@ public class TaskTrading extends Task {
       }
       
       if (fromCity) {
-        needFrom = Nums.max(needFrom, fromR.suppliesDue.valueFor(good));
+        needFrom = Nums.max(needFrom, tributeQuantityRemaining(goes, from, good));
+        //needFrom = Nums.max(needFrom, goes.base().relations.suppliesDue(from.base().faction(), good));
+        //needFrom = Nums.max(needFrom, fromR.suppliesDue.valueFor(good));
       }
       if (goesCity) {
-        needGoes = Nums.max(needGoes, goesR.suppliesDue.valueFor(good));
+        needGoes = Nums.max(needGoes, tributeQuantityRemaining(from, goes, good));
+        //needGoes = Nums.max(needGoes, from.base().relations.suppliesDue(goes.base().faction(), good));
+        //needGoes = Nums.max(needGoes, goesR.suppliesDue.valueFor(good));
       }
       
       float surplus  = amountFrom - needFrom;

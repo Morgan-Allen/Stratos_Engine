@@ -4,10 +4,11 @@
 package test;
 import game.*;
 import content.*;
-import util.*;
+import static game.GameConstants.*;
+import static game.BaseRelations.*;
 import static content.GameContent.*;
 import static content.GameWorld.*;
-import static game.GameConstants.*;
+import util.*;
 
 
 
@@ -24,19 +25,21 @@ public class TestTrading extends LogicTest {
     
     World world = new World(ALL_GOODS);
     Base  baseC = new Base(world, world.addLocale(2, 2), FACTION_SETTLERS_A);
-    Base  awayC = new Base(world, world.addLocale(3, 3), FACTION_SETTLERS_B);
+    Base  awayC = new Base(world, world.addLocale(3, 3), FACTION_SETTLERS_A);
     world.addBases(baseC, awayC);
     world.setPlayerFaction(FACTION_SETTLERS_A);
     
     awayC.council().setTypeAI(BaseCouncil.AI_OFF);
+    awayC.council().assignCapital(baseC);
     baseC.setName("(Home City)");
     awayC.setName("(Away City)");
-    
     World.setupRoute(baseC.locale, awayC.locale, 1, Type.MOVE_LAND);
-    //BaseRelations.setPosture(baseC, awayC, BaseRelations.POSTURE.VASSAL, true);
+    
+    //  Send parts and medicine.
+    //  Get psalt and greens.
     
     Tally <Good> supplies = new Tally().setWith(GREENS, 10, PSALT, 5);
-    BaseTrading.setSuppliesDue(awayC, baseC, supplies);
+    awayC.relations.setSuppliesDue(FACTION_SETTLERS_A, supplies);
     
     awayC.trading.setTradeLevel(MEDICINE, 50, 0 );
     awayC.trading.setTradeLevel(PARTS   , 50, 0 );
@@ -47,9 +50,6 @@ public class TestTrading extends LogicTest {
       ORES      ,  20,
       PSALT     ,  10
     );
-    
-    //  Send parts and medicine.
-    //  Get spyce and greens.
     
     Area map = new Area(world, baseC.locale, baseC);
     map.performSetup(10, new Terrain[0]);
@@ -174,9 +174,10 @@ public class TestTrading extends LogicTest {
     float projectedFunds = initFunds;
     
     for (Good g : ALL_GOODS) {
-      float sent = BaseTrading.goodsSent  (cityA, cityB, g);
-      float got  = BaseTrading.goodsSent  (cityB, cityA, g);
-      float free = BaseTrading.suppliesDue(cityB, cityA, g);
+      float sent = BaseTrading.goodsSent(cityA, cityB, g);
+      float got  = BaseTrading.goodsSent(cityB, cityA, g);
+      float free = cityA.relations.suppliesDue(cityB, g);
+      //float free = BaseTrading.suppliesDue(cityB, cityA, g);
       if (sent == 0 && got == 0 && free == 0) continue;
       
       float priceSent = cityA.exportPrice(g, cityB);

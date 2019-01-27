@@ -4,6 +4,7 @@ package game;
 import util.*;
 import static game.ActorBonds.*;
 import static game.BaseRelations.*;
+import static game.FactionRelations.*;
 import static game.BaseCouncil.*;
 import static game.GameConstants.*;
 
@@ -95,9 +96,9 @@ public class MissionUtils {
     //
     //  Either way, report the final outcome:
     if (report) {
-      BaseRelations r = world.factionCouncil(goes.faction()).relations;
+      RelationSet r = world.factionCouncil(goes.faction()).relations;
       I.say("  Adjusted loss: "+fromLost+"/"+goesLost);
-      I.say("  "+from+" now: "+r.posture(from.faction())+" of "+goes);
+      I.say("  "+from+" now: "+r.bondProperties(from.faction())+" of "+goes);
     }
   }
   
@@ -169,11 +170,11 @@ public class MissionUtils {
   ) {
     if (upon == null || from == null || mission == null) return;
     
-    POSTURE p = mission.terms.postureDemand;
-    upon.relations.setPosture(from.faction(), p, true);
+    int p = mission.terms.postureDemand;
+    upon.relations.setBondType(from.faction(), p);
     
-    BaseTrading.setSuppliesDue(upon, from, mission.terms.tributeDemand );
-    arrangeMarriage           (upon, from, mission.terms.marriageDemand);
+    upon.relations.setSuppliesDue(from.faction(), mission.terms.tributeDemand);
+    arrangeMarriage(upon, from, mission.terms.marriageDemand);
   }
   
   
@@ -202,18 +203,17 @@ public class MissionUtils {
     if (victor == null || losing == null || mission == null) return;
     
     boolean report = false;
-    World world  = mission.base().world;
-    float initVP = victor.relations.prestige();
-    float initLP = losing.relations.prestige();
+    float initVP = victor.council().relations.prestige();
+    float initLP = losing.council().relations.prestige();
     
     losing.relations.toggleRebellion(victor.faction(), false);
-    incPrestige(victor.faction(), PRES_VICTORY_GAIN, world);
-    incPrestige(losing.faction(), PRES_DEFEAT_LOSS , world);
+    victor.council().relations.incPrestige(PRES_VICTORY_GAIN);
+    losing.council().relations.incPrestige(PRES_DEFEAT_LOSS );
     
     if (report) {
       I.say(victor+" prevailed over "+losing+"!!!");
-      I.say(victor+" Prestige: "+initVP+" -> "+victor.relations.prestige());
-      I.say(losing+" Prestige: "+initLP+" -> "+losing.relations.prestige());
+      I.say(victor+" Prestige: "+initVP+" -> "+victor.council().relations.prestige());
+      I.say(losing+" Prestige: "+initLP+" -> "+losing.council().relations.prestige());
     }
     
     mission.setMissionComplete(mission.base() == victor);
@@ -229,17 +229,12 @@ public class MissionUtils {
     //  TODO:  It should ideally take time for the news of a given assault to
     //  reach more distant cities...
     
-    setPosture(attacks.faction(), defends.faction(), POSTURE.ENEMY, world);
+    setPosture(attacks.faction(), defends.faction(), BOND_ENEMY, world);
     float hate = (victory ? LOY_CONQUER_PENALTY : LOY_ATTACK_PENALTY) * weight;
-    defends.relations.incLoyalty(attacks.faction(), hate);
+    defends.relations.incBond(attacks.faction(), hate);
   }
+  
 }
-
-
-
-
-
-
 
 
 

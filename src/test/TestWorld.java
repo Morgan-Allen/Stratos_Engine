@@ -7,6 +7,7 @@ import content.*;
 import game.*;
 import static game.ActorBonds.*;
 import static game.BaseRelations.*;
+import static game.FactionRelations.*;
 import static game.BaseCouncil.*;
 import static game.GameConstants.*;
 import static game.World.*;
@@ -44,8 +45,8 @@ public class TestWorld extends LogicTest {
       float AVG_P = PRESTIGE_AVG, AVG_L = LOY_CIVIL;
       float initPrestige = AVG_P + ((Rand.yes() ? 1 : -1) * 10);
       float initLoyalty  = AVG_L + ((Rand.yes() ? 1 : -1) / 2f);
-      lord.relations.initPrestige(initPrestige);
-      vassal.relations.incLoyalty(lord.faction(), initLoyalty);
+      lord.council().relations.initPrestige(initPrestige);
+      vassal.relations.incBond(lord.faction(), initLoyalty);
       
       int time = 0;
       while (time < YEAR_LENGTH) {
@@ -85,8 +86,8 @@ public class TestWorld extends LogicTest {
       }
       //*/
       
-      float endP = lord.relations.prestige();
-      float endL = vassal.relations.loyalty(lord.faction());
+      float endP = lord.council().relations.prestige();
+      float endL = vassal.relations.bondLevel(lord.faction());
       if (Nums.abs(endP - AVG_P) >= Nums.abs(initPrestige - AVG_P)) {
         I.say("\nWORLD-EVENTS TESTING FAILED- City prestige did not decay over time!");
         return false;
@@ -112,7 +113,7 @@ public class TestWorld extends LogicTest {
         I.say("\nWORLD-EVENTS TESTING FAILED- Invasion did not impose vassal status!");
         return false;
       }
-      if (pair[0].relations.loyalty(pair[1].faction()) >= LOY_CIVIL) {
+      if (pair[0].relations.bondLevel(pair[1].faction()) >= LOY_CIVIL) {
         I.say("\nWORLD-EVENTS TESTING FAILED- Invasion did not sour relations!");
         return false;
       }
@@ -125,7 +126,7 @@ public class TestWorld extends LogicTest {
       goes.council().setTypeAI(BaseCouncil.AI_PACIFIST);
       runCompleteDialog(from, goes);
       
-      if (from.relations.posture(goes.faction()) != POSTURE.ALLY) {
+      if (! from.relations.hasBondType(goes, BOND_ALLY)) {
         I.say("\nWORLD-EVENTS TESTING FAILED- Dialog did not create ally!");
         return false;
       }
@@ -176,7 +177,7 @@ public class TestWorld extends LogicTest {
         I.say("\nWORLD-EVENTS TESTING FAILED- Barbarian invasion did not prompt correct posture!");
         return false;
       }
-      if (BaseTrading.suppliesDue(goes, from).size() > 0) {
+      if (goes.relations.suppliesDue(from.faction()).size() > 0) {
         I.say("\nWORLD-EVENTS TESTING FAILED- Barbarian invasion should not impose tribute!");
         return false;
       }
@@ -190,10 +191,10 @@ public class TestWorld extends LogicTest {
       
       Base lord = new Base(world, world.addLocale(0, 1), FACTION_SETTLERS_A);
       world.addBases(lord);
-      setPosture(lord.faction(), weak.faction(), POSTURE.VASSAL, world);
+      setPosture(lord.faction(), weak.faction(), BOND_VASSAL, world);
       Base capital = new Base(world, world.addLocale(1, 1), FACTION_SETTLERS_B);
       world.addBases(capital);
-      setPosture(capital.faction(), lord.faction(), POSTURE.VASSAL, world);
+      setPosture(capital.faction(), lord.faction(), BOND_VASSAL, world);
       
       if (capital != weak.council().capital()) {
         I.say("\nWORLD-EVENTS TESTING FAILED- Did not calculate capital correctly!");
@@ -214,7 +215,7 @@ public class TestWorld extends LogicTest {
         I.say("\nWORLD-EVENTS TESTING FAILED- Invasion of vassal did not provoke war!");
         return false;
       }
-      if (capital.relations.loyalty(strong.faction()) >= LOY_CIVIL) {
+      if (capital.relations.bondLevel(strong.faction()) >= LOY_CIVIL) {
         I.say("\nWORLD-EVENTS TESTING FAILED- Invasion of vassal did not sour relations with capital!");
         return false;
       }
@@ -226,10 +227,10 @@ public class TestWorld extends LogicTest {
       Base pair[] = configWeakStrongCityPair();
       Base vassal = pair[0], lord = pair[1];
       World world = vassal.world;
-      setPosture(vassal.faction(), lord.faction(), POSTURE.LORD, world);
+      setPosture(vassal.faction(), lord.faction(), BOND_LORD, world);
       vassal.council().setTypeAI(BaseCouncil.AI_DEFIANT);
       
-      float initPrestige = lord.relations.prestige();
+      float initPrestige = lord.council().relations.prestige();
       
       int time = 0;
       while (time < YEAR_LENGTH * (AVG_TRIBUTE_YEARS + 1)) {
@@ -244,7 +245,7 @@ public class TestWorld extends LogicTest {
         I.say("\nWORLD-EVENTS TESTING FAILED- City in rebellion did not break relations!");
         return false;
       }
-      if (lord.relations.prestige() >= initPrestige) {
+      if (lord.council().relations.prestige() >= initPrestige) {
         I.say("\nWORLD-EVENTS TESTING FAILED- Lord's prestige did not suffer from rebellion!");
       }
     }
@@ -254,7 +255,7 @@ public class TestWorld extends LogicTest {
       Base pair[] = configWeakStrongCityPair();
       Base vassal = pair[0], lord = pair[1];
       World world = vassal.world;
-      setPosture(vassal.faction(), lord.faction(), POSTURE.LORD, world);
+      setPosture(vassal.faction(), lord.faction(), BOND_LORD, world);
       vassal.council().setTypeAI(BaseCouncil.AI_DEFIANT);
       
       int time = 0;
@@ -277,8 +278,8 @@ public class TestWorld extends LogicTest {
       Base pair[] = configWeakStrongCityPair();
       Base vassal = pair[0], lord = pair[1];
       World world = vassal.world;
-      setPosture(vassal.faction(), lord.faction(), POSTURE.LORD, world);
-      BaseTrading.setSuppliesDue(vassal, lord, new Tally().setWith(PSALT, 10));
+      setPosture(vassal.faction(), lord.faction(), BOND_LORD, world);
+      vassal.relations.setSuppliesDue(lord.faction(), new Tally().setWith(PSALT, 10));
       vassal.council().setTypeAI(BaseCouncil.AI_COMPLIANT);
       
       int time = 0;
@@ -286,7 +287,7 @@ public class TestWorld extends LogicTest {
         world.updateWithTime(time++);
       }
       
-      float tributeSent = BaseTrading.suppliesDue(vassal, lord, PSALT);
+      float tributeSent = vassal.relations.suppliesDue(lord, PSALT);
       if (tributeSent < 5) {
         I.say("\nWORLD-EVENTS TESTING FAILED- Insufficient tribute dispatched!");
         return false;
@@ -322,8 +323,8 @@ public class TestWorld extends LogicTest {
       
       for (int i = from.length; i-- > 0;) {
         for (int j = goes.length; j-- > 0;) {
-          from[i].relations.incLoyalty(goes[j].faction(), relations[i][j]);
-          goes[j].relations.incLoyalty(from[i].faction(), relations[i][j]);
+          from[i].relations.incBond(goes[j].faction(), relations[i][j]);
+          goes[j].relations.incBond(from[i].faction(), relations[i][j]);
         }
       }
       for (Base c : world.bases()) {
@@ -343,8 +344,8 @@ public class TestWorld extends LogicTest {
       //from[2].initTradeLevels(GREENS, -5, PARTS, -5);
       
       //  Establish enmity with city 5...
-      main   .relations.incLoyalty(from[4].faction(), -0.5f);
-      from[4].relations.incLoyalty(main   .faction(), -0.5f);
+      main   .relations.incBond(from[4].faction(), -0.5f);
+      from[4].relations.incBond(main   .faction(), -0.5f);
       
       //  TODO:  Establish a possible marriage with city 6 and test effects...
       
@@ -563,7 +564,7 @@ public class TestWorld extends LogicTest {
     World world = from.world;
     
     BaseCouncil.MissionAssessment IA = from.council().invasionAssessment(
-      from.armyPower(), goes, false
+      from.armyPower(), from, goes, false
     );
     Mission force = from.council().spawnFormation(IA, from);
     force.beginMission(from);
@@ -595,14 +596,14 @@ public class TestWorld extends LogicTest {
     int numLords = 0;
     
     for (Base o : city.world.bases()) {
-      POSTURE p = city.relations.posture(o.faction());
-      POSTURE i = o.relations.posture(city.faction());
-      if (p == POSTURE.LORD) numLords++;
-      if (p == POSTURE.VASSAL  && i != POSTURE.LORD   ) return false;
-      if (p == POSTURE.LORD    && i != POSTURE.VASSAL ) return false;
-      if (p == POSTURE.ENEMY   && i != POSTURE.ENEMY  ) return false;
-      if (p == POSTURE.ALLY    && i != POSTURE.ALLY   ) return false;
-      if (p == POSTURE.NEUTRAL && i != POSTURE.NEUTRAL) return false;
+      int p = city.posture(o.faction());
+      int i = o.posture(city.faction());
+      if (p == BOND_LORD) numLords++;
+      if (p == BOND_VASSAL  && i != BOND_LORD   ) return false;
+      if (p == BOND_LORD    && i != BOND_VASSAL ) return false;
+      if (p == BOND_ENEMY   && i != BOND_ENEMY  ) return false;
+      if (p == BOND_ALLY    && i != BOND_ALLY   ) return false;
+      if (p == BOND_NEUTRAL && i != BOND_NEUTRAL) return false;
     }
     
     if (numLords > 1) return false;
@@ -616,14 +617,14 @@ public class TestWorld extends LogicTest {
       I.say("  "+c+":");
       I.say("    Pop:    "+c.population()+" / "+c.idealPopulation());
       I.say("    Arm:    "+c.armyPower ()+" / "+c.idealArmyPower ());
-      I.say("    Prs:    "+c.relations.prestige());
+      I.say("    Prs:    "+c.council().relations.prestige());
       I.say("    Need:   "+c.needLevels());
       I.say("    Accept: "+c.prodLevels());
       I.say("    Bld:    "+c.buildLevel());
       I.say("    Inv:    "+c.inventory());
       I.say("    Relations-");
-      for (Faction o : c.relations.relationsWith()) if (o != c.faction()) {
-        I.add(" "+o+": "+c.relations.posture(o)+" "+c.relations.loyalty(o));
+      for (Focus o : c.relations.allBondedWith(0)) {
+        I.add(" "+o+": "+c.relations.bondProperties(o)+" "+c.relations.bondLevel(o));
       }
     }
   }

@@ -31,9 +31,9 @@ public class TestRetreat extends LogicTest {
     Base enemyBase = new Base(world, map.locale, FACTION_SETTLERS_B, "Enemy Base");
     enemyBase.attachMap(map);
     map.addBase(enemyBase);
-    BaseRelations.setPosture(
+    FactionRelations.setPosture(
       base.faction(), enemyBase.faction(),
-      BaseRelations.POSTURE.ENEMY, world
+      RelationSet.BOND_ENEMY, world
     );
     
     world.settings.toggleFatigue = false;

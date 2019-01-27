@@ -12,7 +12,7 @@ public class MissionTerms {
   
   final Mission mission;
   
-  POSTURE postureDemand  = null;
+  int     postureDemand  = -1;
   Mission actionDemand   = null;
   Actor   marriageDemand = null;
   Tally <Good> tributeDemand  = new Tally();
@@ -28,7 +28,7 @@ public class MissionTerms {
   
   
   void loadState(Session s) throws Exception {
-    postureDemand  = (POSTURE) s.loadEnum(POSTURE.values());
+    postureDemand  = s.loadInt();
     actionDemand   = (Mission) s.loadObject();
     marriageDemand = (Actor  ) s.loadObject();
     s.loadTally(tributeDemand);
@@ -40,7 +40,7 @@ public class MissionTerms {
   
   
   void saveState(Session s) throws Exception {
-    s.saveEnum  (postureDemand );
+    s.saveInt   (postureDemand );
     s.saveObject(actionDemand  );
     s.saveObject(marriageDemand);
     s.saveTally (tributeDemand );
@@ -53,7 +53,7 @@ public class MissionTerms {
 
   
   public void assignTerms(
-    POSTURE posture,
+    int posture,
     Mission actionTaken,
     Actor toMarry,
     Tally <Good> tribute
@@ -65,7 +65,7 @@ public class MissionTerms {
   }
   
   
-  public POSTURE      postureDemand () { return postureDemand ; }
+  public int          postureDemand () { return postureDemand ; }
   public Mission      actionDemand  () { return actionDemand  ; }
   public Actor        marriageDemand() { return marriageDemand; }
   public Tally <Good> tributeDemand () { return tributeDemand ; }
@@ -75,7 +75,7 @@ public class MissionTerms {
     boolean haveTerms = false;
     haveTerms |= marriageDemand != null;
     haveTerms |= actionDemand   != null;
-    haveTerms |= postureDemand  != null;
+    haveTerms |= postureDemand  != -1;
     haveTerms |= tributeDemand  != null && ! tributeDemand.empty();
     return haveTerms;
   }

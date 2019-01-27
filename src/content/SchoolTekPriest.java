@@ -69,7 +69,8 @@ public class SchoolTekPriest {
     
     int numDrones(Actor using) {
       int num = 0;
-      for (Actor a : using.bonds.allBondedWith(BOND_SERVANT)) {
+      for (Focus f : using.bonds.allBondedWith(BOND_SERVANT)) {
+        Actor a = (Actor) f;
         if (! a.health.active()) continue;
         if (a.type().isConstruct()) num += 1;
       }
@@ -78,7 +79,8 @@ public class SchoolTekPriest {
     
     Actor weakestDrone(Actor using) {
       Pick <Actor> pick = new Pick();
-      for (Actor a : using.bonds.allBondedWith(BOND_SERVANT)) {
+      for (Focus f : using.bonds.allBondedWith(BOND_SERVANT)) {
+        Actor a = (Actor) f;
         if (! a.type().isConstruct()) continue;
         pick.compare(a, 0 - TaskCombat.attackPower(a));
       }
@@ -95,7 +97,7 @@ public class SchoolTekPriest {
         if (! subject.type().isConstruct()) return false;
         
         Actor affects = (Actor) subject;
-        Actor master = affects.bonds.bondedWith(BOND_MASTER);
+        Actor master = (Actor) affects.bonds.bondedWith(BOND_MASTER);
         if (master != null) return false;
         
         return true;

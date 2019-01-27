@@ -39,9 +39,9 @@ public class TestMilitary extends LogicTest {
     world.settings.toggleFog = false;
     
     World.setupRoute(baseC.locale, awayC.locale, 1, Type.MOVE_LAND);
-    BaseRelations.setPosture(
+    FactionRelations.setPosture(
       baseC.faction(), awayC.faction(),
-      BaseRelations.POSTURE.ENEMY, world
+      RelationSet.BOND_ENEMY, world
     );
     awayC.setArmyPower(0);
     
@@ -68,8 +68,8 @@ public class TestMilitary extends LogicTest {
       house.enterMap(map, 2 + (n * 3), 7, 1, baseC);
     }
     
-    float initPrestige = baseC.relations.prestige();
-    float initLoyalty  = awayC.relations.loyalty(baseC.faction());
+    float initPrestige = baseC.council().relations.prestige();
+    float initLoyalty  = awayC.relations.bondLevel(baseC.faction());
     int numHome = 0, numTroops = 0;
     
     MissionForSecure defence = null;
@@ -138,7 +138,7 @@ public class TestMilitary extends LogicTest {
         for (Actor w : fort1.workers()) offence.toggleRecruit(w, true);
         for (Actor w : fort2.workers()) offence.toggleRecruit(w, true);
         offence.setWorldFocus(awayC);
-        offence.terms.assignTerms(BaseRelations.POSTURE.VASSAL, null, null, null);
+        offence.terms.assignTerms(RelationSet.BOND_VASSAL, null, null, null);
         offence.beginMission(baseC);
         invading = true;
       }
@@ -155,13 +155,13 @@ public class TestMilitary extends LogicTest {
         numTroops = fort1.workers().size() + fort2.workers().size();
         backHome = numTroops > 0 && numHome > (numTroops / 2);
         
-        if (baseC.relations.prestige() <= initPrestige) {
+        if (baseC.council().relations.prestige() <= initPrestige) {
           I.say("\nPrestige should be boosted by conquest!");
-          I.say("  "+baseC+" From "+initPrestige+" -> "+baseC.relations.prestige());
+          I.say("  "+baseC+" From "+initPrestige+" -> "+baseC.council().relations.prestige());
           break;
         }
         
-        if (awayC.relations.loyalty(baseC.faction()) >= initLoyalty) {
+        if (awayC.relations.bondLevel(baseC.faction()) >= initLoyalty) {
           I.say("\nLoyalty should be reduced by conquest!");
           break;
         }

@@ -3,7 +3,7 @@
 package game;
 import static game.GameConstants.*;
 import static game.Task.*;
-import static game.BaseRelations.*;
+import static game.RelationSet.*;
 import util.*;
 
 import gameUI.play.*;
@@ -15,7 +15,7 @@ import test.LogicTest;
 
 
 public class Actor extends Element implements
-  Session.Saveable, Journeys, Active, Carrier
+  Session.Saveable, Journeys, Active, Carrier, RelationSet.Focus
 {
   
   /**  Data fields and setup/initialisation-
@@ -865,15 +865,15 @@ public class Actor extends Element implements
     
     Base player = PlayUI.playerBase();
     if (player == null) player = LogicTest.currentCity();
-    BaseRelations relations = player.council().relations;
+    RelationSet relations = player.council().relations;
     
     String from = "";
     if (map != null && player != null && base() != null) {
-      POSTURE p = relations.posture(base().faction());
-      if (p == POSTURE.ENEMY ) from = " (E)";
-      if (p == POSTURE.ALLY  ) from = " (A)";
-      if (p == POSTURE.VASSAL) from = " (V)";
-      if (p == POSTURE.LORD  ) from = " (L)";
+      int p = relations.bondProperties(base().faction());
+      if (p == BOND_ENEMY ) from = " (E)";
+      if (p == BOND_ALLY  ) from = " (A)";
+      if (p == BOND_VASSAL) from = " (V)";
+      if (p == BOND_LORD  ) from = " (L)";
     }
     return type().name+" "+ID+from;
   }
