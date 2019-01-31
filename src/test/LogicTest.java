@@ -451,12 +451,12 @@ public class LogicTest {
     
     report.append("\n  Population: "+c.population());
     report.append("\n  Military: "+c.armyPower());
-    report.append("\n  Prestige: "+c.council().relations.prestige());
+    report.append("\n  Prestige: "+c.federation().relations.prestige());
     
     List <String> borderRep = new List();
     for (Base other : c.world.bases()) if (other != c) {
-      int r = c.council().relations.bondProperties(other.faction());
-      float loyalty = c.council().relations.bondLevel(other.faction());
+      int r = c.posture(other);
+      float loyalty = c.relations.bondLevel(other.faction());
       borderRep.add("\n  "+other+": "+r+", "+Base.descLoyalty(loyalty));
     }
     if (! borderRep.empty()) {

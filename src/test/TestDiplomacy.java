@@ -4,8 +4,8 @@ package test;
 import game.*;
 import static game.GameConstants.*;
 import static game.ActorBonds.*;
-import static game.BaseRelations.*;
 import static game.BaseCouncil.*;
+import static game.Federation.*;
 import content.*;
 import static content.GameContent.*;
 import static content.GameWorld.*;
@@ -42,8 +42,8 @@ public class TestDiplomacy extends LogicTest {
     baseC.setName("Home City");
     awayC.setName("Away City");
     neutC.setName("Neutral City");
-    awayC.council().setTypeAI(AI_OFF);
-    neutC.council().setTypeAI(AI_OFF);
+    awayC.federation().setTypeAI(AI_OFF);
+    neutC.federation().setTypeAI(AI_OFF);
     
     World.setupRoute(baseC.locale, awayC.locale, 1, Type.MOVE_LAND);
     World.setupRoute(baseC.locale, neutC.locale, 1, Type.MOVE_LAND);
@@ -65,7 +65,7 @@ public class TestDiplomacy extends LogicTest {
     gate.enterMap(map, 12, 18, 1, baseC);
     
     BuildingForGovern palace = (BuildingForGovern) BASTION.generate();
-    BaseCouncil council = baseC.council();
+    BaseCouncil council = baseC.council;
     palace.enterMap(map, 10, 10, 1, baseC);
     
     ActorAsPerson monarch = (ActorAsPerson) Nobles.NOBLE.generate();
@@ -96,12 +96,12 @@ public class TestDiplomacy extends LogicTest {
     
     ActorAsPerson awayBoss = (ActorAsPerson) Nobles.NOBLE.generate();
     awayBoss.assignBase(awayC);
-    awayC.council().toggleMember(awayBoss, Role.MONARCH, true);
+    awayC.council.toggleMember(awayBoss, Role.MONARCH, true);
     awayC.toggleVisitor(awayBoss, true);
     
     ActorAsPerson neutBoss = (ActorAsPerson) Nobles.NOBLE.generate();
     neutBoss.assignBase(neutC);
-    neutC.council().toggleMember(neutBoss, Role.MONARCH, true);
+    neutC.council.toggleMember(neutBoss, Role.MONARCH, true);
     neutC.toggleVisitor(neutBoss, true);
     
     //
@@ -192,18 +192,18 @@ public class TestDiplomacy extends LogicTest {
       
       if (escortSent && ! giftAwayGiven) {
         boolean gotGift = false;
-        for (Actor a : neutC.council().members()) {
+        for (Actor a : neutC.council.members()) {
           if (a.outfit.carried(giftGood) > 0) gotGift = true;
         }
         giftAwayGiven = gotGift;
       }
       
       if (escortSent && ! termsAwayGiven) {
-        termsAwayGiven = neutC.council().petitions().includes(escort);
+        termsAwayGiven = neutC.council.petitions().includes(escort);
       }
       
       if (giftAwayGiven && termsAwayGiven && ! termsAwayOkay) {
-        neutC.council().acceptTerms(escort);
+        neutC.council.acceptTerms(escort);
         termsAwayOkay = true;
       }
       

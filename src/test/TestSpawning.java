@@ -39,7 +39,7 @@ public class TestSpawning extends LogicTest {
     Building toRaze = (Building) ENFORCER_BLOC.generate();
     toRaze.enterMap(map, 6, 6, 1, base);
     
-    FactionRelations.setPosture(
+    Federation.setPosture(
       base.faction(), map.locals.faction(),
       RelationSet.BOND_ENEMY, world
     );

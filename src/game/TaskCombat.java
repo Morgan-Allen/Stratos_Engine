@@ -62,7 +62,7 @@ public class TaskCombat extends Task {
     if (GA != null && GA == GB) return BOND_ALLY;
     if (GB != null && CA == GB) return BOND_ALLY;
     if (GA != null && GA == CB) return BOND_ALLY;
-    return CA.council().relations.bondProperties(CB.faction());
+    return CA.relations.bondProperties(CB);
   }
   
   

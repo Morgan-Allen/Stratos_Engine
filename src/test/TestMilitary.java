@@ -34,12 +34,12 @@ public class TestMilitary extends LogicTest {
     world.setPlayerFaction(FACTION_SETTLERS_A);
     baseC.setName("Home City");
     awayC.setName("Away City");
-    awayC.council().setTypeAI(BaseCouncil.AI_OFF);
+    awayC.federation().setTypeAI(Federation.AI_OFF);
     
     world.settings.toggleFog = false;
     
     World.setupRoute(baseC.locale, awayC.locale, 1, Type.MOVE_LAND);
-    FactionRelations.setPosture(
+    Federation.setPosture(
       baseC.faction(), awayC.faction(),
       RelationSet.BOND_ENEMY, world
     );
@@ -68,7 +68,7 @@ public class TestMilitary extends LogicTest {
       house.enterMap(map, 2 + (n * 3), 7, 1, baseC);
     }
     
-    float initPrestige = baseC.council().relations.prestige();
+    float initPrestige = baseC.federation().relations.prestige();
     float initLoyalty  = awayC.relations.bondLevel(baseC.faction());
     int numHome = 0, numTroops = 0;
     
@@ -155,9 +155,9 @@ public class TestMilitary extends LogicTest {
         numTroops = fort1.workers().size() + fort2.workers().size();
         backHome = numTroops > 0 && numHome > (numTroops / 2);
         
-        if (baseC.council().relations.prestige() <= initPrestige) {
+        if (baseC.federation().relations.prestige() <= initPrestige) {
           I.say("\nPrestige should be boosted by conquest!");
-          I.say("  "+baseC+" From "+initPrestige+" -> "+baseC.council().relations.prestige());
+          I.say("  "+baseC+" From "+initPrestige+" -> "+baseC.federation().relations.prestige());
           break;
         }
         

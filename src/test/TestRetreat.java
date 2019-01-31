@@ -31,7 +31,7 @@ public class TestRetreat extends LogicTest {
     Base enemyBase = new Base(world, map.locale, FACTION_SETTLERS_B, "Enemy Base");
     enemyBase.attachMap(map);
     map.addBase(enemyBase);
-    FactionRelations.setPosture(
+    Federation.setPosture(
       base.faction(), enemyBase.faction(),
       RelationSet.BOND_ENEMY, world
     );

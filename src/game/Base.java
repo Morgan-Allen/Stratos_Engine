@@ -22,8 +22,9 @@ public class Base implements
   final public WorldLocale locale;
   
   private Faction faction;
-  private BaseCouncil factionCouncil = null;
+  private Federation factionCouncil = null;
   
+  final public BaseCouncil council = new BaseCouncil(this);
   final public BaseRelations relations = new BaseRelations(this);
   final public BaseTrading trading = new BaseTrading(this);
   
@@ -68,12 +69,13 @@ public class Base implements
     
     name = s.loadString();
     
-    world   = (World) s.loadObject();
+    world   = (World      ) s.loadObject();
     locale  = (WorldLocale) s.loadObject();
-    faction = (Faction) s.loadObject();
+    faction = (Faction    ) s.loadObject();
     
     s.loadObjects(buildTypes);
     
+    council  .loadState(s);
     relations.loadState(s);
     trading  .loadState(s);
     
@@ -101,6 +103,7 @@ public class Base implements
     
     s.saveObjects(buildTypes);
     
+    council  .saveState(s);
     relations.saveState(s);
     trading  .saveState(s);
     
@@ -161,11 +164,10 @@ public class Base implements
   
   void assignFaction(Faction faction) {
     this.faction = faction;
-    factionCouncil = null;
   }
   
   
-  public BaseCouncil council() {
+  public Federation federation() {
     if (factionCouncil != null) return factionCouncil;
     factionCouncil = world.factionCouncil(faction);
     return factionCouncil;
@@ -331,6 +333,7 @@ public class Base implements
     final int UPDATE_GAP = map == null ? DAY_LENGTH : 10;
     boolean updateStats = world.time % UPDATE_GAP == 0;
     boolean activeMap   = map != null;
+    boolean playerOwns  = faction == world.playerFaction && activeMap;
     //
     //  Local player-owned cities (i.e, with their own map), must derive their
     //  vitual statistics from that small-scale city map:
@@ -380,22 +383,17 @@ public class Base implements
       }
       
       if (relations.isLoyalVassalOf(faction)) {
-        if (council().considerRevolt(faction, UPDATE_GAP, this)) {
+        if (council.considerRevolt(faction, UPDATE_GAP, this)) {
           relations.toggleRebellion(faction, true);
         }
       }
     }
     //
     //  Either way, we allow prestige and loyalty to return gradually to
-    //  defaults over time:
+    //  defaults over time, and update the council-
     if (updateStats) {
-      float presDrift = UPDATE_GAP * PRESTIGE_AVG * 1f / PRES_FADEOUT_TIME;
-      float presDiff = PRESTIGE_AVG - council().relations.prestige();
-      if (Nums.abs(presDiff) > presDrift) {
-        presDiff = presDrift * (presDiff > 0 ? 1 : -1);
-      }
-      council().relations.incPrestige(presDiff);
       relations.updateRelations(DAY_LENGTH);
+      council.updateCouncil(playerOwns);
     }
     //
     //  And, once per year, tally up any supply obligations to your current
@@ -490,7 +488,7 @@ public class Base implements
       return BOND_ALLY;
     }
     if (other.faction() == this.faction()) {
-      Base capital = council().capital();
+      Base capital = federation().capital();
       if (this  == capital) return BOND_VASSAL;
       if (other == capital) return BOND_LORD;
       return BOND_ALLY;
@@ -499,7 +497,8 @@ public class Base implements
   }
   
   public int posture(Faction other) {
-    return council().relations.bondProperties(other);
+    return relations.bondProperties(other);
+    //return council().relations.bondProperties(other);
   }
   
   public boolean isVassalOf(Base o) { return posture(o) == BOND_LORD  ; }

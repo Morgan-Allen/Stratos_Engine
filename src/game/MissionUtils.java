@@ -4,8 +4,8 @@ package game;
 import util.*;
 import static game.ActorBonds.*;
 import static game.BaseRelations.*;
-import static game.FactionRelations.*;
-import static game.BaseCouncil.*;
+import static game.FederationRelations.*;
+import static game.Federation.*;
 import static game.GameConstants.*;
 
 
@@ -44,13 +44,13 @@ public class MissionUtils {
     //
     //  We use the same math that estimates the appeal of invasion to play out
     //  the real event, and report accordingly:
-    //  TODO:  Use separate math for the purpose?
     BaseCouncil.MissionAssessment IA = new BaseCouncil.MissionAssessment();
-    ///IA.fromC     = from;
+    IA.fromC     = from;
     IA.goesC     = goes;
+    IA.rulesC    = from;
     IA.fromPower = MissionForStrike.powerSum(mission) / POP_PER_CITIZEN;
     IA.goesPower = goes.armyPower() / POP_PER_CITIZEN;
-    from.council().calculateChances(IA, true);
+    from.council.calculateChances(IA, true);
     
     float chance = IA.winChance, fromLost = 0, goesLost = 0;
     boolean victory = false;
@@ -84,7 +84,7 @@ public class MissionUtils {
     world.recordEvent("attacked", from, goes);
     enterHostility(goes, from, victory, 1);
     
-    if (victory && from.council().government != GOVERNMENT.BARBARIAN) {
+    if (victory && from.federation().government != GOVERNMENT.BARBARIAN) {
       imposeTerms(goes, from, mission);
     }
     if (victory) {
@@ -182,7 +182,7 @@ public class MissionUtils {
     if (city == null || other == null) return;
     if (marries == null || marries.health.dead()) return;
     
-    Actor monarch = city.council().memberWithRole(Role.MONARCH);
+    Actor monarch = city.council.memberWithRole(BaseCouncil.Role.MONARCH);
     if (monarch == null || monarch.health.dead()) return;
     
     setBond(monarch, marries, BOND_MARRIED, BOND_MARRIED, 0);
@@ -203,17 +203,17 @@ public class MissionUtils {
     if (victor == null || losing == null || mission == null) return;
     
     boolean report = false;
-    float initVP = victor.council().relations.prestige();
-    float initLP = losing.council().relations.prestige();
+    float initVP = victor.federation().relations.prestige();
+    float initLP = losing.federation().relations.prestige();
     
     losing.relations.toggleRebellion(victor.faction(), false);
-    victor.council().relations.incPrestige(PRES_VICTORY_GAIN);
-    losing.council().relations.incPrestige(PRES_DEFEAT_LOSS );
+    victor.federation().relations.incPrestige(PRES_VICTORY_GAIN);
+    losing.federation().relations.incPrestige(PRES_DEFEAT_LOSS );
     
     if (report) {
       I.say(victor+" prevailed over "+losing+"!!!");
-      I.say(victor+" Prestige: "+initVP+" -> "+victor.council().relations.prestige());
-      I.say(losing+" Prestige: "+initLP+" -> "+losing.council().relations.prestige());
+      I.say(victor+" Prestige: "+initVP+" -> "+victor.federation().relations.prestige());
+      I.say(losing+" Prestige: "+initLP+" -> "+losing.federation().relations.prestige());
     }
     
     mission.setMissionComplete(mission.base() == victor);
@@ -229,7 +229,7 @@ public class MissionUtils {
     //  TODO:  It should ideally take time for the news of a given assault to
     //  reach more distant cities...
     
-    setPosture(attacks.faction(), defends.faction(), BOND_ENEMY, world);
+    Federation.setPosture(attacks.faction(), defends.faction(), BOND_ENEMY, world);
     float hate = (victory ? LOY_CONQUER_PENALTY : LOY_ATTACK_PENALTY) * weight;
     defends.relations.incBond(attacks.faction(), hate);
   }

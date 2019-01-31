@@ -32,7 +32,7 @@ public class TestCity extends LogicTest {
     Base homeland = new Base(world, world.addLocale(8, 8), FACTION_SETTLERS_A);
     homeland.setName("Homeland");
     world.addBases(homeland);
-    base.council().assignHomeland(homeland);
+    base.federation().assignHomeland(homeland);
     
     World.setupRoute(base.locale, homeland.locale, 3, Type.MOVE_AIR);
     //FactionRelations.setPosture(base, homeland, BaseRelations.POSTURE.VASSAL, true);

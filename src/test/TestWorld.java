@@ -7,14 +7,16 @@ import content.*;
 import game.*;
 import static game.ActorBonds.*;
 import static game.BaseRelations.*;
-import static game.FactionRelations.*;
-import static game.BaseCouncil.*;
+import static game.FederationRelations.*;
+import static game.Federation.*;
 import static game.GameConstants.*;
 import static game.World.*;
 import static content.GameContent.*;
 import static content.GameWorld.*;
 
 
+
+/*
 
 public class TestWorld extends LogicTest {
   
@@ -85,6 +87,7 @@ public class TestWorld extends LogicTest {
         }
       }
       //*/
+/*
       
       float endP = lord.council().relations.prestige();
       float endL = vassal.relations.bondLevel(lord.faction());
@@ -378,6 +381,7 @@ public class TestWorld extends LogicTest {
         I.say("\nPotential marriage should boost appeal of alliance!");
       }
       //*/
+/*
     }
     
     //
@@ -630,7 +634,7 @@ public class TestWorld extends LogicTest {
   }
   
 }
-
+//*/
 
 
 

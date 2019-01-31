@@ -2,7 +2,7 @@
 
 package game;
 import static game.GameConstants.*;
-import game.BaseCouncil.Role;
+import game.BaseCouncil.*;
 import game.World.Journey;
 import util.*;
 
@@ -168,7 +168,7 @@ public class MissionForContact extends Mission {
     
     if (official && parent.worldFocus() != null) {
       Base focus = parent.worldFocus();
-      BaseCouncil council = focus.council();
+      BaseCouncil council = focus.council;
       Area area = focus.activeMap();
       
       Actor monarch = council.memberWithRole(Role.MONARCH);

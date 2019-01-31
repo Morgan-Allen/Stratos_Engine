@@ -201,7 +201,7 @@ public class WorldScenario extends Scenario {
     
     landing.setName("Player Landing");
     landing.initFunds(expedition.funds);
-    landing.council().assignHomeland(homeland);
+    landing.federation().assignHomeland(homeland);
     landing.assignBuildTypes(expedition.faction.buildTypes());
     
     stage.addBase(landing);

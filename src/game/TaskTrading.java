@@ -401,8 +401,8 @@ public class TaskTrading extends Task {
     
     if (c != c.base()) return false;
     Base land = c.base();
-    if (land == from) return land == goes.base().council().homeland();
-    if (land == goes) return land == from.base().council().homeland();
+    if (land == from) return land == goes.base().federation().homeland();
+    if (land == goes) return land == from.base().federation().homeland();
     return false;
   }
   

@@ -40,7 +40,7 @@ public class TestAll {
     record(TestRetreat  .testRetreat  (false));
     record(TestFirstAid .testFirstAid (false));
     record(TestDialog   .testDialog   (false));
-    record(TestWorld    .testWorld    (false));
+    //record(TestWorld    .testWorld    (false));
     
     record(TestVesselTrade.testForeignToLand(false));
     record(TestVesselTrade.testForeignToDock(false));

@@ -129,7 +129,7 @@ public class BaseTrading {
   
   
   public boolean allowExport(Good g, Trader buys) {
-    if (buys.base().council().homeland() == base) return true;
+    if (buys.base().federation().homeland() == base) return true;
     if (base.relations.suppliesDue(buys.base(), g) > 0) return true;
     return prodLevel.valueFor(g) > 0;
   }
@@ -165,7 +165,7 @@ public class BaseTrading {
   //  Buying from where goods are abundant imposes a lower price.
   
   float scarcityMultiple(Base other, Good g) {
-    if (other != base.council().homeland()) return 1.0f;
+    if (other != base.federation().homeland()) return 1.0f;
     float mult = 1.0f;
     float needS = other.trading.needLevel(g);
     float prodS = other.trading.prodLevel(g);
@@ -225,9 +225,9 @@ public class BaseTrading {
       inventory.set(g, Nums.max(0, amount));
     }
     
-    Faction lord = base.faction();
-    Base capital = base.council().capital();
-    boolean tribute = base.relations.isLoyalVassalOf(lord);
+    Faction belongs = base.faction();
+    Base capital = base.federation().capital();
+    boolean tribute = base.relations.isLoyalVassalOf(belongs);
     
     if (tribute && capital != null && capital.isOffmap()) {
       Tally <Good> due = base.relations.suppliesDue;

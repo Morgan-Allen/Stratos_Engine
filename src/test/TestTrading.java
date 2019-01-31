@@ -29,8 +29,8 @@ public class TestTrading extends LogicTest {
     world.addBases(baseC, awayC);
     world.setPlayerFaction(FACTION_SETTLERS_A);
     
-    awayC.council().setTypeAI(BaseCouncil.AI_OFF);
-    awayC.council().assignCapital(baseC);
+    awayC.federation().setTypeAI(Federation.AI_OFF);
+    awayC.federation().assignCapital(baseC);
     baseC.setName("(Home City)");
     awayC.setName("(Away City)");
     World.setupRoute(baseC.locale, awayC.locale, 1, Type.MOVE_LAND);

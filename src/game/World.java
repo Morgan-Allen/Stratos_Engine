@@ -60,7 +60,7 @@ public class World implements Session.Saveable {
   final public WorldCalendar calendar = new WorldCalendar(this);
   final List <WorldScenario> scenarios = new List();
   
-  Table <Faction, BaseCouncil> councils = new Table();
+  Table <Faction, Federation> councils = new Table();
   Faction playerFaction = null;
   
   List <WorldLocale> locales  = new List();
@@ -123,7 +123,7 @@ public class World implements Session.Saveable {
     
     for (int n = s.loadInt(); n-- > 0;) {
       Faction f = (Faction) s.loadObject();
-      BaseCouncil c = new BaseCouncil(f, this);
+      Federation c = new Federation(f, this);
       c.loadState(s);
       councils.put(f, c);
     }
@@ -297,9 +297,9 @@ public class World implements Session.Saveable {
   }
   
   
-  public BaseCouncil factionCouncil(Faction f) {
-    BaseCouncil match = councils.get(f);
-    if (match == null) councils.put(f, match = new BaseCouncil(f, this));
+  public Federation factionCouncil(Faction f) {
+    Federation match = councils.get(f);
+    if (match == null) councils.put(f, match = new Federation(f, this));
     return match;
   }
   
@@ -497,9 +497,9 @@ public class World implements Session.Saveable {
     }
     
     for (Faction f : councils.keySet()) {
-      BaseCouncil c = councils.get(f);
+      Federation c = councils.get(f);
       boolean played = playerFaction == f;
-      c.updateCouncil(played);
+      c.update(played);
     }
   }
   

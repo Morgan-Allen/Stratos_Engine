@@ -61,7 +61,7 @@ public class TestLifeCycle extends LogicTest {
     placeStructure(WALKWAY, base, true, 0, 9, 16, 1);
     
     Building palace = (Building) BASTION.generate();
-    BaseCouncil council = base.council();
+    BaseCouncil council = base.council;
     
     ActorAsPerson oldKing = (ActorAsPerson) Nobles.NOBLE  .generate();
     ActorAsPerson consort = (ActorAsPerson) Nobles.CONSORT.generate();

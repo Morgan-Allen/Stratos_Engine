@@ -54,7 +54,6 @@ public class TestVesselTrade extends LogicTest {
   }
   
   
-  
   boolean vesselTest(
     boolean fromLocal, boolean goesDock, boolean createShip,
     String title, boolean graphics
@@ -69,17 +68,17 @@ public class TestVesselTrade extends LogicTest {
     world.addBases(homeC, awayC);
     world.setPlayerFaction(FACTION_SETTLERS_A);
     
-    awayC.council().setTypeAI(BaseCouncil.AI_OFF);
-    awayC.council().assignCapital(homeC);
+    awayC.federation().setTypeAI(Federation.AI_OFF);
+    awayC.federation().assignCapital(homeC);
     homeC.setName("(Home City)");
     awayC.setName("(Away City)");
     
     World.setupRoute(homeC.locale, awayC.locale, 10, Type.MOVE_AIR);
-    FactionRelations.setPosture(
+    Federation.setPosture(
       homeC.faction(), awayC.faction(),
       RelationSet.BOND_TRADING, world
     );
-    homeC.council().assignHomeland(awayC);
+    homeC.federation().assignHomeland(awayC);
     
     Tally <Good> supplies = new Tally().setWith(GREENS, 10, PSALT, 5);
     //BaseTrading.setSuppliesDue(awayC, homeC, supplies);

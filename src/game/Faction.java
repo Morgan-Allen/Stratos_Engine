@@ -6,6 +6,8 @@ import graphics.common.*;
 
 
 
+
+
 public class Faction extends Type implements RelationSet.Focus {
   
   
