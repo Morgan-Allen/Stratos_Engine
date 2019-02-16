@@ -4,14 +4,11 @@ package game;
 import static game.GameConstants.*;
 import static game.World.*;
 import static game.RelationSet.*;
-import static game.BaseRelations.*;
 import util.*;
 
 
 
-public class Base implements
-  Session.Saveable, Trader, BaseEvents.Trouble, RelationSet.Focus
-{
+public class Base implements Session.Saveable, Trader, RelationSet.Focus {
   
   
   /**  Data fields, construction and save/load methods-
@@ -169,7 +166,7 @@ public class Base implements
   
   public Federation federation() {
     if (factionCouncil != null) return factionCouncil;
-    factionCouncil = world.factionCouncil(faction);
+    factionCouncil = world.federation(faction);
     return factionCouncil;
   }
   
@@ -207,6 +204,13 @@ public class Base implements
     return missions;
   }
   
+  public void addMission(Mission mission) {
+    missions.include(mission);
+  }
+  
+  public void removeMission(Mission mission) {
+    missions.remove(mission);
+  }
   
   public Mission matchingMission(int objective, Object focus) {
     for (Mission m : missions) {
@@ -512,14 +516,16 @@ public class Base implements
   }
   
   
+  /*
   public float troublePower() {
     return armyPower;
   }
   
   
   public void generateTrouble(Area activeMap, float factionPower) {
-    //  TODO:  Fill this in!
+    BaseCouncilUtils.generateTrouble(this, activeMap);
   }
+  //*/
   
   
   public Type type() {

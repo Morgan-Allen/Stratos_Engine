@@ -30,13 +30,6 @@ public class World implements Session.Saveable {
     public Series <Journeys> going() { return going; }
   }
   
-  public static class Event {
-    
-    String label;
-    int time;
-    Object[] involved;
-  }
-  
   final public static String
     KEY_ATTACK_FLAG  = "attack_flag" ,
     KEY_DEFEND_FLAG  = "defend_flag" ,
@@ -57,16 +50,16 @@ public class World implements Session.Saveable {
   ActorType nobleTypes  [] = {};
   
   int time = 0;
+  final public WorldEvents   events   = new WorldEvents  (this);
   final public WorldCalendar calendar = new WorldCalendar(this);
   final List <WorldScenario> scenarios = new List();
   
-  Table <Faction, Federation> councils = new Table();
+  Table <Faction, Federation> federations = new Table();
   Faction playerFaction = null;
   
   List <WorldLocale> locales  = new List();
   List <Base       > bases    = new List();
   List <Journey    > journeys = new List();
-  List <Event      > history  = new List();
   
   //  Only used for graphical reference...
   int mapWide = 10, mapHigh = 10;
@@ -118,6 +111,7 @@ public class World implements Session.Saveable {
     
     time = s.loadInt();
     calendar.loadState(s);
+    events  .loadState(s);
     
     s.loadObjects(scenarios);
     
@@ -125,7 +119,7 @@ public class World implements Session.Saveable {
       Faction f = (Faction) s.loadObject();
       Federation c = new Federation(f, this);
       c.loadState(s);
-      councils.put(f, c);
+      federations.put(f, c);
     }
     playerFaction = (Faction) s.loadObject();
     
@@ -141,14 +135,6 @@ public class World implements Session.Saveable {
       j.moveMode   = s.loadInt();
       s.loadObjects(j.going);
       journeys.add(j);
-    }
-
-    for (int n = s.loadInt(); n-- > 0;) {
-      Event e = new Event();
-      e.time     = s.loadInt();
-      e.label    = s.loadString();
-      e.involved = s.loadObjectArray(Object.class);
-      history.add(e);
     }
     
     mapWide = s.loadInt();
@@ -176,13 +162,14 @@ public class World implements Session.Saveable {
     
     s.saveInt(time);
     calendar.saveState(s);
+    events  .saveState(s);
     
     s.saveObjects(scenarios);
     
-    s.saveInt(councils.size());
-    for (Faction f : councils.keySet()) {
+    s.saveInt(federations.size());
+    for (Faction f : federations.keySet()) {
       s.saveObject(f);
-      councils.get(f).saveState(s);
+      federations.get(f).saveState(s);
     }
     s.saveObject(playerFaction);
     
@@ -197,13 +184,6 @@ public class World implements Session.Saveable {
       s.saveInt(j.arriveTime);
       s.saveInt(j.moveMode  );
       s.saveObjects(j.going);
-    }
-    
-    s.saveInt(history.size());
-    for (Event e : history) {
-      s.saveString(e.label);
-      s.saveInt(e.time);
-      s.saveObjectArray(e.involved);
     }
     
     s.saveInt(mapWide);
@@ -297,10 +277,15 @@ public class World implements Session.Saveable {
   }
   
   
-  public Federation factionCouncil(Faction f) {
-    Federation match = councils.get(f);
-    if (match == null) councils.put(f, match = new Federation(f, this));
+  public Federation federation(Faction f) {
+    Federation match = federations.get(f);
+    if (match == null) federations.put(f, match = new Federation(f, this));
     return match;
+  }
+  
+  
+  public Iterable <Federation> federations() {
+    return federations.values();
   }
   
   
@@ -448,35 +433,6 @@ public class World implements Session.Saveable {
   
   
   
-  /**  Recording events:
-    */
-  public void recordEvent(String label, Object... involved) {
-    Event e = new Event();
-    e.label    = label;
-    e.time     = time;
-    e.involved = involved;
-    history.add(e);
-  }
-  
-  
-  public void clearHistory() {
-    history.clear();
-  }
-  
-  
-  public Batch <Event> eventsWithLabel(String label) {
-    Batch <Event> matches = new Batch();
-    for (Event e : history) if (e.label.equals(label)) matches.add(e);
-    return matches;
-  }
-  
-  
-  public Series <Event> history() {
-    return history;
-  }
-  
-  
-  
   /**  Regular updates-
     */
   public void updateWithTime(int time) {
@@ -496,11 +452,13 @@ public class World implements Session.Saveable {
       }
     }
     
-    for (Faction f : councils.keySet()) {
-      Federation c = councils.get(f);
+    for (Faction f : federations.keySet()) {
+      Federation c = federations.get(f);
       boolean played = playerFaction == f;
       c.update(played);
     }
+    
+    events.updateEvents(time);
   }
   
   
@@ -531,11 +489,6 @@ public class World implements Session.Saveable {
     c.x = (destX * a) + (initX * i);
     c.y = (destY * a) + (initY * i);
     return c;
-  }
-  
-  
-  String descFor(Event e) {
-    return e.label+" at time "+e.time+": "+I.list(e.involved);
   }
   
   

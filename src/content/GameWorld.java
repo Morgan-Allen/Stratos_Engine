@@ -18,15 +18,15 @@ public class GameWorld {
   
   final public static Faction
     FACTION_SETTLERS_A = new Faction(
-      GameWorld.class, "faction_settlers_A" , "Settlers C",
+      GameWorld.class, "faction_altair" , "House Altair",
       GameContent.RULER_BUILT
     ),
     FACTION_SETTLERS_B = new Faction(
-      GameWorld.class, "faction_settlers_B" , "Settlers B",
+      GameWorld.class, "faction_suhail" , "House Suhail",
       GameContent.RULER_BUILT
     ),
     FACTION_SETTLERS_C = new Faction(
-      GameWorld.class, "faction_settlers_C" , "Settlers A",
+      GameWorld.class, "faction_taygeta" , "House Taygeta",
       GameContent.RULER_BUILT
     ),
     FACTION_ANIMALS   = new Faction(

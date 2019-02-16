@@ -46,7 +46,7 @@ public class Faction extends Type implements RelationSet.Focus {
   }
   
   public RelationSet relations(World world) {
-    return world.factionCouncil(this).relations;
+    return world.federation(this).relations;
   }
   
   

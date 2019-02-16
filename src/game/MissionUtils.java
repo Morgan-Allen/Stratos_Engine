@@ -44,35 +44,31 @@ public class MissionUtils {
     //
     //  We use the same math that estimates the appeal of invasion to play out
     //  the real event, and report accordingly:
-    BaseCouncil.MissionAssessment IA = new BaseCouncil.MissionAssessment();
-    IA.fromC     = from;
-    IA.goesC     = goes;
-    IA.rulesC    = from;
-    IA.fromPower = MissionForStrike.powerSum(mission) / POP_PER_CITIZEN;
-    IA.goesPower = goes.armyPower() / POP_PER_CITIZEN;
-    from.council.calculateChances(IA, true);
-    
-    float chance = IA.winChance, fromLost = 0, goesLost = 0;
-    boolean victory = false;
+    float   chance    = BaseCouncilUtils.strikeChance(mission);
+    float   fromPower = MissionForStrike.powerSum(mission) / POP_PER_CITIZEN;
+    float   goesPower = goes.armyPower() / POP_PER_CITIZEN;
+    float   fromLost  = 0;
+    float   goesLost  = 0;
+    boolean victory   = false;
     
     if (Rand.num() < chance) {
-      fromLost = IA.winKillsA;
-      goesLost = IA.winKillsD;
+      fromLost = fromPower * Nums.clamp((Rand.num() + chance + 0.5f) / 2, 0, 1);
+      goesLost = goesPower * Nums.clamp((Rand.num() + 0.5f - chance) / 2, 0, 1);
       victory  = true;
     }
     else {
-      fromLost = IA.lossKillsA;
-      goesLost = IA.lossKillsD;
+      fromLost = fromPower * Nums.clamp((Rand.num() + chance - 0.5f) / 2, 0, 1);
+      goesLost = goesPower * Nums.clamp((Rand.num() + 1.5f - chance) / 2, 0, 1);
       victory  = false;
     }
     
     if (report) {
       I.say("\n"+mission+" CONDUCTED ACTION AGAINST "+goes+", time "+time);
-      I.say("  Victorious:    "+victory );
-      I.say("  Attack power:  "+IA.fromPower);
-      I.say("  Defend power:  "+IA.goesPower);
-      I.say("  Taken losses:  "+fromLost);
-      I.say("  Dealt losses:  "+goesLost);
+      I.say("  Victorious:    "+victory  );
+      I.say("  Attack power:  "+fromPower);
+      I.say("  Defend power:  "+goesPower);
+      I.say("  Taken losses:  "+fromLost );
+      I.say("  Dealt losses:  "+goesLost );
     }
     //
     //  We inflict the estimated casualties upon each party, and adjust posture
@@ -81,7 +77,7 @@ public class MissionUtils {
     //  TODO:  Handle recall of forces in a separate decision-pass?
     fromLost = inflictCasualties(mission, fromLost);
     goesLost = inflictCasualties(goes   , goesLost);
-    world.recordEvent("attacked", from, goes);
+    //world.recordEvent("attacked", from, goes);
     enterHostility(goes, from, victory, 1);
     
     if (victory && from.federation().government != GOVERNMENT.BARBARIAN) {
@@ -96,7 +92,7 @@ public class MissionUtils {
     //
     //  Either way, report the final outcome:
     if (report) {
-      RelationSet r = world.factionCouncil(goes.faction()).relations;
+      RelationSet r = world.federation(goes.faction()).relations;
       I.say("  Adjusted loss: "+fromLost+"/"+goesLost);
       I.say("  "+from+" now: "+r.bondProperties(from.faction())+" of "+goes);
     }

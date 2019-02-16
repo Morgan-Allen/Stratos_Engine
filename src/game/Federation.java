@@ -179,16 +179,27 @@ public class Federation {
       if (posture == BOND_LORD   ) reverse = BOND_VASSAL ;
       if (posture == BOND_ALLY   ) reverse = BOND_ALLY   ;
       if (posture == BOND_ENEMY  ) reverse = BOND_ENEMY  ;
-      setPosture(w.factionCouncil(f).relations, (Faction) a.focus, reverse, false, w);
+      setPosture(w.federation(f).relations, (Faction) a.focus, reverse, false, w);
     }
   }
-
-
+  
+  
   public static void setPosture(Faction a, Faction b, int posture, World w) {
-    Federation.setPosture(w.factionCouncil(a).relations, b, posture, true, w);
+    Federation.setPosture(w.federation(a).relations, b, posture, true, w);
   }
   
+  
+  
+  /**  Graphical, interface and debug methods-
+    */
+  public String toString() {
+    return "Federation: "+faction.name;
+  }
 }
+
+
+
+
 
 
 

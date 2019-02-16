@@ -50,7 +50,7 @@ public class AreaDanger {
     
     final float FUZZ_RANGE = AVG_SIGHT * 2;
     maxValue = 0.1f;
-    RelationSet relations = map.world.factionCouncil(faction).relations;
+    RelationSet relations = map.world.federation(faction).relations;
     
     for (Coord c : Visit.grid(0, 0, map.size(), map.size(), Area.FLAG_RES)) {
       Series <Active> at = map.gridActive(map.tileAt(c));

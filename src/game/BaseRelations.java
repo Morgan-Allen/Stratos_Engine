@@ -1,12 +1,7 @@
 
 
 package game;
-import static game.BaseRelations.LOY_CIVIL;
-import static game.BaseRelations.LOY_FADEOUT_TIME;
-import static game.BaseRelations.LOY_TRIBUTE_BONUS;
 import static game.GameConstants.*;
-
-import game.GameConstants.Good;
 import util.*;
 
 
@@ -102,8 +97,8 @@ public class BaseRelations extends RelationSet {
   }
   
   
-  public float suppliesDue(Base capital, Good g) {
-    if (capital != base.federation().capital) return 0;
+  public float suppliesDue(Base other, Good g) {
+    if (other != base.federation().capital) return 0;
     return suppliesDue.valueFor(g);
   }
   
@@ -156,11 +151,15 @@ public class BaseRelations extends RelationSet {
       if (failedSupply) {
         toggleRebellion(base.faction(), true);
       }
-      else {
+      else if (capital != null) {
         capital.relations.incBond(base, LOY_TRIBUTE_BONUS);
       }
     }
   }
+  
 }
+
+
+
 
 

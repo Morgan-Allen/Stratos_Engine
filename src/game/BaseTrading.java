@@ -287,7 +287,9 @@ public class BaseTrading {
           trading.beginFromOffmap(base);
         }
         else {
-          I.say(trader+" could not find trading behaviour!");
+          if (base.world.settings.reportTrading) {
+            I.say(trader+" could not find trading behaviour!");
+          }
         }
       }
     }

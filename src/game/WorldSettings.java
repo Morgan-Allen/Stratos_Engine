@@ -46,6 +46,7 @@ public class WorldSettings {
     worldView         = false,
     
     reportBattle      = false,
+    reportTrading     = false,
     reportPathCache   = false;
   
   

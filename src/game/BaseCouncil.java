@@ -149,6 +149,7 @@ public class BaseCouncil {
   
   /**  Regular updates-
     */
+  /*
   public static class MissionAssessment {
     
     Base rulesC;
@@ -178,6 +179,7 @@ public class BaseCouncil {
     public Base goes() { return goesC; }
     public float appeal() { return evaluatedAppeal; }
   }
+  //*/
   
   
   void updateCouncil(boolean playerOwned) {
@@ -287,7 +289,7 @@ public class BaseCouncil {
   
   /**  Evaluating the appeal and probability of invading other cities:
     */
-  //*
+  /*
   float casualtyValue(Base city) {
     //
     //  For now, we'll assume that the value of lives is calculated on an
@@ -650,6 +652,7 @@ public class BaseCouncil {
   //*/
   
   
+  /*
   public Mission spawnFormation(MissionAssessment IA, Base base) {
     
     Mission force = null;
@@ -713,7 +716,16 @@ public class BaseCouncil {
   }
   //*/
   
+
+  
+  //  TODO:  Restore this...
+  
+  boolean considerRevolt(Faction faction, int period, Base base) {
+    return false;
+  }
+  
 }
+
 
 
 

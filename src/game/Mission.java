@@ -35,6 +35,11 @@ public abstract class Mission implements
   final public int objective;
   final Base homeBase;
   
+  float evalPriority = -1;
+  float evalChance   = -1;
+  float evalForce    = -1;
+  boolean active = false;
+  
   private Base worldFocus;
   private Target localFocus;
   private int stage = STAGE_INIT;
@@ -74,6 +79,11 @@ public abstract class Mission implements
     objective = s.loadInt();
     homeBase = (Base) s.loadObject();
     
+    evalPriority = s.loadFloat();
+    evalChance   = s.loadFloat();
+    evalForce    = s.loadFloat();
+    active       = s.loadBool();
+    
     Area map = (Area) s.loadObject();
     worldFocus = (Base) s.loadObject();
     localFocus = Area.loadTarget(map, s);
@@ -98,6 +108,11 @@ public abstract class Mission implements
     
     s.saveInt(objective);
     s.saveObject(homeBase);
+    
+    s.saveFloat(evalPriority);
+    s.saveFloat(evalChance  );
+    s.saveFloat(evalForce   );
+    s.saveBool (active      );
     
     Area map = localMap();
     s.saveObject(map);
@@ -160,18 +175,18 @@ public abstract class Mission implements
   
   /**  Regular updates and internal events-
     */
-  //  TODO:  The local-base has to be assigned along with the focus, I think-
-  //  because actors might be assessing the mission before it's begun.
-  
   public void beginMission(Base localBase) {
     homeBase.missions.toggleMember(this, true);
-    this.stage = STAGE_BEGUN;
-    //this.active    = true;
+    this.stage     = STAGE_BEGUN;
+    this.active    = true;
     this.localBase = localBase;
+    homeBase.world.events.recordEvent("Began mission: ", this);
   }
   
   
   void update() {
+    if (! active) return;
+    
     Area    map      = localMap();
     Base    offmap   = offmapBase();
     boolean valid    = recruits.size() > 0 && active();
@@ -461,11 +476,9 @@ public abstract class Mission implements
     return;
   }
   
-  
   public void actorPasses(Actor actor, Building other) {
     return;
   }
-  
   
   public void actorVisits(Actor actor, Pathing visits) {
     return;
@@ -481,6 +494,31 @@ public abstract class Mission implements
   
   abstract void handleOffmapArrival  (Base goes, World.Journey journey);
   abstract void handleOffmapDeparture(Base from, World.Journey journey);
+  
+  
+  
+  /**  Priority-evaluation-
+    */
+  public float evalPriority() {
+    return evalPriority;
+  }
+  
+  public float evalChance() {
+    return evalChance;
+  }
+  
+  public void setEvalParams(float priority, float chance) {
+    this.evalPriority = priority;
+    this.evalChance   = chance;
+  }
+  
+  public void setEvalForce(float force) {
+    this.evalForce = force;
+  }
+  
+  public float evalForce() {
+    return evalForce;
+  }
   
   
   
