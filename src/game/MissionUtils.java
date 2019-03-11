@@ -1,12 +1,11 @@
 
 
 package game;
-import util.*;
 import static game.ActorBonds.*;
 import static game.BaseRelations.*;
-import static game.FederationRelations.*;
 import static game.Federation.*;
 import static game.GameConstants.*;
+import util.*;
 
 
 
@@ -17,7 +16,7 @@ public class MissionUtils {
     */
   static boolean reportEvents(Area map) {
     if (map == null) return false;
-    return map.world.settings.reportBattle;
+    return map.world.settings.reportMissions;
   }
   
   
@@ -44,22 +43,28 @@ public class MissionUtils {
     //
     //  We use the same math that estimates the appeal of invasion to play out
     //  the real event, and report accordingly:
-    float   chance    = BaseCouncilUtils.strikeChance(mission);
     float   fromPower = MissionForStrike.powerSum(mission) / POP_PER_CITIZEN;
     float   goesPower = goes.armyPower() / POP_PER_CITIZEN;
     float   fromLost  = 0;
     float   goesLost  = 0;
     boolean victory   = false;
     
+    for (Mission m : goes.guarding) {
+      goesPower += MissionForStrike.powerSum(m) / POP_PER_CITIZEN;
+    }
+    
+    float chance = fromPower / (goesPower + fromPower);
+    chance = Nums.clamp((chance - 0.25f) * 2, 0, 1);
+    
     if (Rand.num() < chance) {
-      fromLost = fromPower * Nums.clamp((Rand.num() + chance + 0.5f) / 2, 0, 1);
-      goesLost = goesPower * Nums.clamp((Rand.num() + 0.5f - chance) / 2, 0, 1);
       victory  = true;
+      fromLost = fromPower * Nums.clamp((Rand.num() + 0.5f - chance) / 2, 0, 1);
+      goesLost = goesPower * Nums.clamp((Rand.num() + chance + 0.5f) / 2, 0, 1);
     }
     else {
-      fromLost = fromPower * Nums.clamp((Rand.num() + chance - 0.5f) / 2, 0, 1);
-      goesLost = goesPower * Nums.clamp((Rand.num() + 1.5f - chance) / 2, 0, 1);
       victory  = false;
+      fromLost = fromPower * Nums.clamp((Rand.num() + 1.5f - chance) / 2, 0, 1);
+      goesLost = goesPower * Nums.clamp((Rand.num() + chance - 0.5f) / 2, 0, 1);
     }
     
     if (report) {
@@ -74,10 +79,8 @@ public class MissionUtils {
     //  We inflict the estimated casualties upon each party, and adjust posture
     //  and relations.  (We assume/pretend that 'barbarian' factions won't set
     //  up political ties.
-    //  TODO:  Handle recall of forces in a separate decision-pass?
     fromLost = inflictCasualties(mission, fromLost);
     goesLost = inflictCasualties(goes   , goesLost);
-    //world.recordEvent("attacked", from, goes);
     enterHostility(goes, from, victory, 1);
     
     if (victory && from.federation().government != GOVERNMENT.BARBARIAN) {
@@ -134,17 +137,24 @@ public class MissionUtils {
   }
   
   
-  static void handleGarrison(
+  static void handleGarrisonArrive(
     Mission mission, Base goes, World.Journey journey
   ) {
-    //  TODO:  Implement this
-    return;
+    goes.toggleGuarding(mission, true);
+  }
+  
+  
+  static void handleGarrisonDepart(
+    Mission mission, Base from, World.Journey journey
+  ) {
+    from.toggleGuarding(mission, false);
   }
   
   
   static void handleDialog(
     Mission mission, Base goes, World.Journey journey
   ) {
+    //I.say("DELIVERING TERMS: "+mission);
     mission.terms.sendTerms(goes);
   }
   
@@ -166,8 +176,18 @@ public class MissionUtils {
   ) {
     if (upon == null || from == null || mission == null) return;
     
-    int p = mission.terms.postureDemand;
-    upon.relations.setBondType(from.faction(), p);
+    World wworld = from.world;
+    int posture = mission.terms.postureDemand;
+    
+    if (posture == BOND_LORD) {
+      upon.assignFaction(from.faction());
+    }
+    else if (posture == BOND_VASSAL) {
+      from.assignFaction(upon.faction());
+    }
+    else {
+      Federation.setPosture(upon.faction(), from.faction(), posture, wworld);
+    }
     
     upon.relations.setSuppliesDue(from.faction(), mission.terms.tributeDemand);
     arrangeMarriage(upon, from, mission.terms.marriageDemand);

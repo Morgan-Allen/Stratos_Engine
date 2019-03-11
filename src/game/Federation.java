@@ -38,6 +38,8 @@ public class Federation {
   GOVERNMENT government = GOVERNMENT.FEUDAL;
   int typeAI = AI_NORMAL;
   
+  Tally <WorldLocale> exploreLevels = new Tally();
+  
   
   
   Federation(Faction faction, World world) {
@@ -55,6 +57,8 @@ public class Federation {
     relations.loadState(s);
     government = GOVERNMENT.values()[s.loadInt()];
     typeAI = s.loadInt();
+    
+    s.loadTally(exploreLevels);
   }
   
   
@@ -66,6 +70,8 @@ public class Federation {
     relations.saveState(s);
     s.saveInt(government.ordinal());
     s.saveInt(typeAI);
+    
+    s.saveTally(exploreLevels);
   }
   
   
@@ -79,30 +85,30 @@ public class Federation {
       presDiff = presDrift * (presDiff > 0 ? 1 : -1);
     }
     relations.incPrestige(presDiff);
-
     
-    //  TODO:  Revisit this!!!
-
     /*
     //
     //  And, finally, lose prestige based on any vassals in recent revolt-
     //  and if the time gone exceeds a certain threshold, end vassal status.
-    Federation FC = base.federation();
-    if (base.world.time % YEAR_LENGTH == 0) {
+    if (world.time % YEAR_LENGTH == 0) {
       
-      for (Base revolts : base.relations.vassalsInRevolt(world)) {
-        float years = revolts.relations.yearsSinceRevolt(faction);
+      for (Base base : world.bases) {
+        if (base.federation() != this) continue;
+        if (! base.isLoyalVassalOf(capital)) continue;
+        
+        float years = base.relations.yearsSinceRevolt(faction);
         float maxT = AVG_TRIBUTE_YEARS, timeMult = (maxT - years) / maxT;
+        
         if (years < AVG_TRIBUTE_YEARS) {
           relations.initPrestige(PRES_REBEL_LOSS * timeMult);
-          relations.incBond(revolts, LOY_REBEL_PENALTY * 0.5f * timeMult);
+          relations.incBond(base, LOY_REBEL_PENALTY * 0.5f * timeMult);
         }
         else {
-          relations.setBondType(revolts, BOND_ENEMY);
+          relations.setBondType(base, BOND_ENEMY);
         }
       }
     }
-      //*/
+    //*/
   }
   
   
@@ -155,6 +161,10 @@ public class Federation {
   
   /**  Setting up initial postures between bases/federations-
     */
+  //  TODO:  You have 2 cases here- setting relations between factions, and
+  //  assigning base-ownership in the case of lord/vassal proposals.  Okay.
+  
+  /*
   static void setPosture(RelationSet a, Faction f, int posture, boolean symmetric, World w) {
     if (posture <= 0) posture = BOND_NEUTRAL;
     //
@@ -182,10 +192,32 @@ public class Federation {
       setPosture(w.federation(f).relations, (Faction) a.focus, reverse, false, w);
     }
   }
-  
+  //*/
   
   public static void setPosture(Faction a, Faction b, int posture, World w) {
-    Federation.setPosture(w.federation(a).relations, b, posture, true, w);
+    if (posture <= 0) posture = BOND_NEUTRAL;
+
+    int reverse = BOND_NEUTRAL;
+    if (posture == BOND_TRADING) reverse = BOND_TRADING;
+    if (posture == BOND_VASSAL ) reverse = BOND_LORD   ;
+    if (posture == BOND_LORD   ) reverse = BOND_VASSAL ;
+    if (posture == BOND_ALLY   ) reverse = BOND_ALLY   ;
+    if (posture == BOND_ENEMY  ) reverse = BOND_ENEMY  ;
+    
+    a.relations(w).setBondType(b, posture);
+    b.relations(w).setBondType(a, reverse);
+  }
+  
+  
+  
+  /**  Levels of exploration-
+    */
+  public float exploreLevel(WorldLocale l) {
+    return exploreLevels.valueFor(l);
+  }
+  
+  public void setExploreLevel(WorldLocale l, float value) {
+    exploreLevels.set(l, value);
   }
   
   

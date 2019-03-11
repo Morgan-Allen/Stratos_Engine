@@ -93,7 +93,7 @@ public class MissionForStrike extends Mission {
     
     boolean  haveTerms = terms.hasTerms() && ! envoys.empty();
     boolean  isEnvoy   = isEnvoy(actor);
-    Pathing  camp      = transitPoint(actor);
+    Pathing  camp      = transitTile();
     AreaTile stands    = MissionForSecure.standingPointRanks(actor, this, camp);
     
     if (haveTerms && isEnvoy && ! terms.sent()) {
@@ -216,9 +216,8 @@ public class MissionForStrike extends Mission {
   Object updateTacticalTarget(Target current) {
     //
     //  Basic sanity checks first-
-    Base    home   = base();
     Area    map    = localMap();
-    Pathing from   = transitTile;
+    Pathing from   = transitTile();
     Base    sieges = worldFocus();
     if (sieges == null || from == null || map == null) return null;
     //

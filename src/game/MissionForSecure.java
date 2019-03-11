@@ -13,7 +13,9 @@ public class MissionForSecure extends Mission {
   
   
   final static int
-    DEFAULT_GUARD_PERIOD = DAY_LENGTH * 1
+    DEFAULT_GUARD_PERIOD = DAY_LENGTH * 1,
+    FOCUS_CHECK_PERIOD = 10,
+    GUARD_CHECK_PERIOD = 10
   ;
   
   int guardPeriod = DEFAULT_GUARD_PERIOD;
@@ -21,7 +23,9 @@ public class MissionForSecure extends Mission {
   int beginTime = -1;
   
   List <AreaTile> guardPoints = new List();
-  int lastUpdateTime = -1;
+  int lastFocusEvalTime = -1;
+  float lastFocusRating = -1;
+  int lastGuardEvalTime = -1;
   
   
   
@@ -43,7 +47,8 @@ public class MissionForSecure extends Mission {
       AreaTile point = Area.loadTile(map, s);
       guardPoints.add(point);
     }
-    lastUpdateTime = s.loadInt();
+    lastFocusEvalTime = s.loadInt();
+    lastGuardEvalTime = s.loadInt();
   }
   
   
@@ -58,7 +63,8 @@ public class MissionForSecure extends Mission {
     s.saveObject(map);
     s.saveInt(guardPoints.size());
     for (AreaTile t : guardPoints) Area.saveTile(t, map, s);
-    s.saveInt(lastUpdateTime);
+    s.saveInt(lastFocusEvalTime);
+    s.saveInt(lastGuardEvalTime);
   }
   
 
@@ -93,7 +99,7 @@ public class MissionForSecure extends Mission {
   void beginJourney(Base from, Base goes) {
     super.beginJourney(from, goes);
     guardPoints.clear();
-    lastUpdateTime = -1;
+    lastGuardEvalTime = -1;
   }
 
 
@@ -101,9 +107,44 @@ public class MissionForSecure extends Mission {
     super.update();
     
     if (! complete()) {
+      //
+      //  Iterate across all structures on the map belonging to the world-focus,
+      //  and pick whichever seems to be in most danger (especially if it's a
+      //  wall/tower or other defensible or essential structure.)
       if (worldFocus() != null && ! onWrongMap()) {
-        //  TODO:  Renew your target here, and check for completion-criteria...
+        
+        int currentTime = this.homeBase().world.time();
+        int updateTime  = this.lastFocusEvalTime;
+        int nextUpdate  = updateTime >= 0 ? (updateTime + FOCUS_CHECK_PERIOD) : 0;
+
+        if (currentTime >= nextUpdate) {
+          this.lastFocusEvalTime = currentTime;
+          
+          Pick <Building> pickDefend = new Pick();
+          Base client = worldFocus();
+          Area map = localMap();
+          Target lastFocus = localFocus();
+          AreaDanger danger = map.dangerMap(client.faction(), true);
+          
+          for (Building b : map.buildings()) if (b.base() == client) {
+            float rating = 1.0f;
+            AreaTile at = b.centre();
+            
+            rating *= danger.fuzzyLevel(at.x, at.y);
+            if (b.type().isWall) rating *= 1.5f;
+            if (b == client.headquarters()) rating *= 1.5f;
+            
+            if (b == lastFocus) rating *= 1.25f;
+            else if (lastFocus != null) rating *= Area.distancePenalty(lastFocus, b);
+            
+            pickDefend.compare(b, rating);
+          }
+          
+          setLocalFocus(pickDefend.result());
+        }
       }
+      //
+      //  
       else if (localFocus() != null) {
         int time = localMap().time();
         boolean isElement = localFocus() instanceof Element;
@@ -153,12 +194,12 @@ public class MissionForSecure extends Mission {
   
   
   void handleOffmapArrival(Base goes, World.Journey journey) {
-    MissionUtils.handleGarrison(this, goes, journey);
+    MissionUtils.handleGarrisonArrive(this, goes, journey);
   }
   
   
   void handleOffmapDeparture(Base from, Journey journey) {
-    return;
+    MissionUtils.handleGarrisonDepart(this, from, journey);
   }
   
   
@@ -203,7 +244,7 @@ public class MissionForSecure extends Mission {
     if (t == null || parent == null) return -1;
     
     Area map = parent.localBase.activeMap();
-    Pathing from = parent.transitTile;
+    Pathing from = parent.transitTile();
     float rating = 0;
     boolean blocked = false;
     
@@ -234,7 +275,7 @@ public class MissionForSecure extends Mission {
     if (parent == null) return null;
     
     final Area map = parent.localBase.activeMap();
-    final AreaTile init = AreaTile.nearestOpenTile(parent.transitTile, map);
+    final AreaTile init = AreaTile.nearestOpenTile(parent.transitTile(), map);
     if (init == null) return null;
     
     final AreaTile temp[] = new AreaTile[9];
@@ -263,8 +304,8 @@ public class MissionForSecure extends Mission {
     //  First, check to see if an update is due:
     final Target focus = parent.localFocus();
     final Area map = parent.localBase.activeMap();
-    final int updateTime = parent.lastUpdateTime;
-    int nextUpdate = updateTime >= 0 ? (updateTime + 10) : 0;
+    final int updateTime = parent.lastGuardEvalTime;
+    int nextUpdate = updateTime >= 0 ? (updateTime + GUARD_CHECK_PERIOD) : 0;
     
     if (focus == null || map == null) {
       parent.guardPoints.clear();
@@ -274,7 +315,7 @@ public class MissionForSecure extends Mission {
       return;
     }
     
-    parent.lastUpdateTime = map.time;
+    parent.lastGuardEvalTime = map.time;
     Type type = focus.type();
     
     //

@@ -3,6 +3,7 @@
 package game;
 import static game.GameConstants.*;
 import game.World.Journey;
+import util.I;
 
 
 
@@ -66,8 +67,12 @@ public class MissionForRecon extends Mission {
   
   
   public Task nextLocalMapBehaviour(Actor actor) {
+    
+    Target from = localFocus();
+    if (from == null) from = transitTile();
+    
     TaskExplore recon = TaskExplore.configExploration(
-      actor, localFocus(), exploreRange
+      actor, from, exploreRange
     );
     if (recon != null) return recon;
     return null;
@@ -82,18 +87,18 @@ public class MissionForRecon extends Mission {
   
   
   void handleOffmapArrival(Base goes, World.Journey journey) {
-    //  TODO:  Fill this in...
+    Federation from = homeBase().federation();
+    from.setExploreLevel(goes.locale, 1);
     return;
   }
   
   
   void handleOffmapDeparture(Base from, Journey journey) {
-    //  TODO:  Fill this in...
+    //  TODO:  Fill this in?
     return;
   }
   
 }
-
 
 
 

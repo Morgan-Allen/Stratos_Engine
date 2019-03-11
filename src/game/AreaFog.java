@@ -98,10 +98,14 @@ public class AreaFog {
       return;
     }
     
+    int sumFog = 0;
+    Federation fed = map.world.federation(base);
+    
     for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
       byte oldMax = maxVals[c.x][c.y];
       byte val = oldVals[c.x][c.y] = fogVals[c.x][c.y];
       fogVals[c.x][c.y] = 0;
+      sumFog += val;
       
       if (val > oldMax) {
         maxVals[c.x][c.y] = val;
@@ -110,6 +114,9 @@ public class AreaFog {
       
       viewVals[c.x][c.y] = ((val * 2f) + (oldMax * 1f)) / (3 * MAX_FOG);
     }
+    
+    float avgFog = sumFog / (MAX_FOG * map.size * map.size);
+    fed.setExploreLevel(map.locale, avgFog);
   }
   
   

@@ -19,11 +19,11 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
   final public WorldLocale locale;
   
   private Faction faction;
-  private Federation factionCouncil = null;
+  private Federation federation = null;
   
-  final public BaseCouncil council = new BaseCouncil(this);
+  final public BaseCouncil   council   = new BaseCouncil  (this);
   final public BaseRelations relations = new BaseRelations(this);
-  final public BaseTrading trading = new BaseTrading(this);
+  final public BaseTrading   trading   = new BaseTrading  (this);
   
   Building headquarters = null;
   private int   currentFunds = 0;
@@ -36,6 +36,7 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
   //
   //  These are specific to off-map bases...
   List <Actor> visitors = new List();
+  List <Mission> guarding = new List();
   
   List <BuildType> buildTypes = new List();
   
@@ -84,6 +85,7 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
     
     s.loadObjects(missions);
     s.loadObjects(visitors);
+    s.loadObjects(guarding);
     
     active = s.loadBool();
     map    = (Area) s.loadObject();
@@ -113,6 +115,7 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
     
     s.saveObjects(missions);
     s.saveObjects(visitors);
+    s.saveObjects(guarding);
     
     s.saveBool(active);
     s.saveObject(map);
@@ -160,14 +163,15 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
   
   
   void assignFaction(Faction faction) {
+    if (faction != this.faction) federation = null;
     this.faction = faction;
   }
   
   
   public Federation federation() {
-    if (factionCouncil != null) return factionCouncil;
-    factionCouncil = world.federation(faction);
-    return factionCouncil;
+    if (federation != null) return federation;
+    federation = world.federation(faction);
+    return federation;
   }
   
   
@@ -219,6 +223,12 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
       if (m.worldFocus() == focus) return m;
     }
     return null;
+  }
+  
+  void toggleGuarding(Mission m, boolean is) {
+    //if (is) I.say("ADDING GUARD: "+this);
+    //else    I.say("LOSING GUARD: "+this);
+    guarding.toggleMember(m, is);
   }
   
   
@@ -379,6 +389,10 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
       for (Mission f : missions) {
         idealArmy -= MissionForStrike.powerSum(f.recruits(), null);
       }
+      for (Mission g : guarding) {
+        if (g.worldFocus() != this || g.complete()) toggleGuarding(g, false);
+      }
+      
       if (idealArmy < 0) {
         idealArmy = 0;
       }
@@ -488,6 +502,9 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
   /**  Generating trouble...
     */
   public int posture(Base other) {
+    if (other == null) {
+      return BOND_NEUTRAL;
+    }
     if (other == this) {
       return BOND_ALLY;
     }
@@ -501,7 +518,8 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
   }
   
   public int posture(Faction other) {
-    return relations.bondProperties(other);
+    return federation().relations.bondProperties(other);
+    //return relations.bondProperties(other);
     //return council().relations.bondProperties(other);
   }
   
@@ -514,18 +532,6 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
   public boolean isLoyalVassalOf(Base o) {
     return (posture(o) == BOND_LORD) && relations.isLoyalVassal();
   }
-  
-  
-  /*
-  public float troublePower() {
-    return armyPower;
-  }
-  
-  
-  public void generateTrouble(Area activeMap, float factionPower) {
-    BaseCouncilUtils.generateTrouble(this, activeMap);
-  }
-  //*/
   
   
   public Type type() {

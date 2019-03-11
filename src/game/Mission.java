@@ -28,6 +28,7 @@ public abstract class Mission implements
     STAGE_INIT     = -1,
     STAGE_BEGUN    =  0,
     STAGE_DEPARTED =  1,
+    STAGE_ARRIVED  =  2,
     STAGE_RETURNED =  4,
     STAGE_DISBAND  =  5
   ;
@@ -187,22 +188,20 @@ public abstract class Mission implements
   void update() {
     if (! active) return;
     
-    Area    map      = localMap();
-    Base    offmap   = offmapBase();
-    boolean valid    = recruits.size() > 0 && active();
-    boolean complete = valid && complete();
-    boolean moveSelf = transport == null || ! transport.onMap();
+    transitPoint();
     
-    if (transitTile == null && map != null && offmap != null) {
-      transitTile = findTransitPoint(map, localBase, offmap, Type.MOVE_LAND, 1);
-    }
-    if ((! complete) && moveSelf && readyToDepart()) {
+    boolean valid     = recruits.size() > 0 && active();
+    boolean departing = valid && ! departed();
+    boolean returning = valid && complete();
+    boolean moveSelf  = transport == null || ! transport.onMap();
+    
+    if (departing && moveSelf && readyToDepart()) {
       beginJourney(localBase, worldFocus());
     }
-    if (complete && moveSelf && readyToReturn()) {
+    if (returning && moveSelf && readyToReturn()) {
       beginJourney(localBase, homeBase());
     }
-    if (complete && recruitsAllHome()) {
+    if (returning && recruitsAllHome()) {
       disbandMission();
     }
   }
@@ -280,6 +279,9 @@ public abstract class Mission implements
     this.localBase  = goes;
     this.arriveTime = goes.world.time();
     
+    if (goes == worldFocus()) {
+      stage = STAGE_ARRIVED;
+    }
     if (goes.isOffmap()) {
       handleOffmapArrival(goes, journey);
       if (goes == homeBase) MissionUtils.handleReturn(this, goes, journey);
@@ -298,7 +300,7 @@ public abstract class Mission implements
       return TaskTransport.nextTransport(transport, this);
     }
     
-    Pathing exits = transitPoint(actor);
+    Pathing exits = transitPoint();
     
     if (complete()) {
       if (exits != null && ! onHomeMap()) {
@@ -398,10 +400,25 @@ public abstract class Mission implements
   }
   
   
-  public Pathing transitPoint(Actor actor) {
+  public Pathing transitPoint() {
+    
+    if (transitTile == null) {
+      Area map    = localMap();
+      Base offmap = offmapBase();
+      if (map != null && offmap != null) {
+        transitTile = findTransitPoint(map, localBase, offmap, Type.MOVE_LAND, 1);
+      }
+    }
+    
     if (transport != null) return transport;
     if (transitTile != null) return transitTile;
     return null;
+  }
+  
+  
+  public AreaTile transitTile() {
+    transitPoint();
+    return transitTile;
   }
   
   
@@ -449,6 +466,11 @@ public abstract class Mission implements
   }
   
   
+  public boolean arrived() {
+    return stage >= STAGE_ARRIVED;
+  }
+  
+  
   public boolean returned() {
     return stage >= STAGE_RETURNED;
   }
@@ -456,6 +478,11 @@ public abstract class Mission implements
   
   public boolean complete() {
     return complete;
+  }
+  
+  
+  public boolean success() {
+    return success;
   }
   
   
