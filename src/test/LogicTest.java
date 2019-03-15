@@ -308,7 +308,10 @@ public class LogicTest {
     
     for (Base city : world.bases()) {
       int x = (int) city.locale.mapX() * 2, y = (int) city.locale.mapY() * 2;
-      for (Coord c : Visit.grid(x, y, 2, 2, 1)) graphic[c.x][c.y] = city.tint();
+      for (Coord c : Visit.grid(x, y, 2, 2, 1)) {
+        graphic[c.x][c.y] = city.tint();
+        if (hover.matches(c)) above = city;
+      }
       graphic[x + 1][y] = city.faction().tint();
     }
     

@@ -181,16 +181,17 @@ public abstract class Mission implements
     this.stage     = STAGE_BEGUN;
     this.active    = true;
     this.localBase = localBase;
-    homeBase.world.events.recordEvent("Began mission: ", this);
+    homeBase.world.events.recordEvent("Began mission", this);
   }
   
   
   void update() {
-    if (! active) return;
+    if (! active()) return;
     
-    transitPoint();
+    this.transitPoint();
+    //I.say("");
     
-    boolean valid     = recruits.size() > 0 && active();
+    boolean valid     = recruits.size() > 0;
     boolean departing = valid && ! departed();
     boolean returning = valid && complete();
     boolean moveSelf  = transport == null || ! transport.onMap();
@@ -202,6 +203,9 @@ public abstract class Mission implements
       beginJourney(localBase, homeBase());
     }
     if (returning && recruitsAllHome()) {
+      disbandMission();
+    }
+    if (! valid) {
       disbandMission();
     }
   }
@@ -227,9 +231,21 @@ public abstract class Mission implements
   
   boolean recruitsAllHome() {
     for (Actor a : recruits) {
+      
+      boolean isHome = false;
+      if (homeBase.activeMap() != null) {
+        isHome = a.map() == homeBase.activeMap();
+      }
+      else {
+        isHome = a.offmapBase() == homeBase;
+      }
+      if (! isHome) return false;
+      
+      /*
       if (a.map() != homeBase.activeMap() && a.offmapBase() != homeBase) {
         return false;
       }
+      //*/
     }
     return true;
   }
@@ -269,12 +285,17 @@ public abstract class Mission implements
   }
   
   
-  public void onDeparture(Base goes, World.Journey journey) {
+  public void onDeparture(Base from, World.Journey journey) {
+    
+    ///homeBase.world.events.recordEvent("  Departed", this, from);
+    
     return;
   }
   
   
   public void onArrival(Base goes, World.Journey journey) {
+    
+    ///homeBase.world.events.recordEvent("  Arrived", this, goes);
     
     this.localBase  = goes;
     this.arriveTime = goes.world.time();
@@ -343,17 +364,27 @@ public abstract class Mission implements
   
   
   public void setMissionComplete(boolean success) {
+    
     this.complete = true;
-    if (success) this.success = true;
-    else this.failure = true;
+    if (success) {
+      this.success = true;
+      homeBase.world.events.recordEvent("  Succeeded", this);
+    }
+    else {
+      this.failure = true;
+      homeBase.world.events.recordEvent("  Failed", this);
+    }
   }
   
   
   public void disbandMission() {
+    
     rewards.dispenseRewards();
     homeBase.missions.toggleMember(this, false);
     this.stage = STAGE_DISBAND;
     for (Actor r : recruits) toggleRecruit(r, false);
+    
+    homeBase.world.events.recordEvent("  Disbanded", this);
   }
   
   
@@ -476,6 +507,11 @@ public abstract class Mission implements
   }
   
   
+  public boolean disbanded() {
+    return stage >= STAGE_DISBAND;
+  }
+  
+  
   public boolean complete() {
     return complete;
   }
@@ -588,7 +624,7 @@ public abstract class Mission implements
   
   public String fullName() {
     Object focus = localFocus == null ? worldFocus : localFocus;
-    return "Mission: "+OBJECTIVE_NAMES[objective]+": "+focus;
+    return OBJECTIVE_NAMES[objective]+" -> "+focus;
   }
   
   

@@ -2,10 +2,11 @@
 
 package content;
 import static game.GameConstants.*;
+import static content.GameContent.*;
 import static game.Type.*;
 import game.*;
-import static content.GameContent.*;
 import util.*;
+import graphics.common.Colour;
 
 
 
@@ -36,6 +37,12 @@ public class GameWorld {
       GameWorld.class, "faction_artilects", "Artilects"
     )
   ;
+  
+  static {
+    FACTION_SETTLERS_A.assignColor(Colour.LITE_BLUE);
+    FACTION_SETTLERS_B.assignColor(Colour.YELLOW);
+    FACTION_SETTLERS_C.assignColor(Colour.CYAN);
+  }
   
   /*
     PLANET_ASRA_NOVI = new Sector(

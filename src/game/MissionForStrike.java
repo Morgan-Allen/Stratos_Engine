@@ -54,13 +54,13 @@ public class MissionForStrike extends Mission {
         if (update == LOSS) {
           MissionUtils.enterHostility(sieges, home, false, 1);
           MissionUtils.signalVictory(sieges, home, this);
-          setMissionComplete(false);
+          ///setMissionComplete(false);
         }
         else if (update == VICTORY) {
           MissionUtils.enterHostility(sieges, home, true, 1);
           MissionUtils.imposeTerms(sieges, home, this);
           MissionUtils.signalVictory(home, sieges, this);
-          setMissionComplete(true);
+          ///setMissionComplete(true);
         }
         else {
           setLocalFocus((Target) update);

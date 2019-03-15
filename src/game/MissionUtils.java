@@ -141,6 +141,9 @@ public class MissionUtils {
     Mission mission, Base goes, World.Journey journey
   ) {
     goes.toggleGuarding(mission, true);
+    Faction with = mission.homeBase().faction();
+    goes.relations.incBond(with, LOY_DEFEND_BOOST);
+    goes.federation().relations.incBond(with, LOY_DEFEND_BOOST / 2);
   }
   
   
@@ -156,6 +159,18 @@ public class MissionUtils {
   ) {
     //I.say("DELIVERING TERMS: "+mission);
     mission.terms.sendTerms(goes);
+    Faction with = mission.homeBase().faction();
+    goes.relations.incBond(with, LOY_DIALOG_BOOST);
+    goes.federation().relations.incBond(with, LOY_DIALOG_BOOST / 2);
+  }
+  
+  
+  static void handleRecon(
+    Mission mission, Base goes, World.Journey journey
+  ) {
+    Federation from = mission.homeBase().federation();
+    from.setExploreLevel(goes.locale, 1);
+    mission.setMissionComplete(true);
   }
   
   
@@ -242,12 +257,12 @@ public class MissionUtils {
     if (defends == null) return;
     World world = defends.world;
     
-    //  TODO:  It should ideally take time for the news of a given assault to
-    //  reach more distant cities...
-    
     Federation.setPosture(attacks.faction(), defends.faction(), BOND_ENEMY, world);
+    
+    Faction with = attacks.faction();
     float hate = (victory ? LOY_CONQUER_PENALTY : LOY_ATTACK_PENALTY) * weight;
-    defends.relations.incBond(attacks.faction(), hate);
+    defends.relations.incBond(with, hate);
+    defends.federation().relations.incBond(with, hate / 2);
   }
   
 }

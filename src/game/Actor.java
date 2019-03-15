@@ -612,9 +612,9 @@ public class Actor extends Element implements
   }
   
   
-  public void onDeparture(Base goes, World.Journey journey) {
-    if (goes.activeMap() == null) {
-      goes.toggleVisitor(this, false);
+  public void onDeparture(Base from, World.Journey journey) {
+    if (from.activeMap() == null) {
+      from.toggleVisitor(this, false);
     }
     return;
   }

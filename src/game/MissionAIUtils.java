@@ -64,21 +64,54 @@ public class MissionAIUtils {
   }
   
   static void generateRecruits(Mission mission, float maxArmy, Type... types) {
-    //  TODO:  You are going to have to select troops locally if the mission is
-    //  generated locally (and possibly from off-map visitors otherwise.)
-    
-    while (MissionForStrike.powerSum(mission) < maxArmy) {
-      Type soldier = (Type) Rand.pickFrom(types);
-      Actor fights = (Actor) soldier.generate();
-      fights.assignBase(mission.homeBase);
-      mission.toggleRecruit(fights, true);
+    //
+    //  For off-map bases, we can generate troops dynamically-
+    if (mission.homeBase().isOffmap()) {
+      while (MissionForStrike.powerSum(mission) < maxArmy) {
+        Type soldier = (Type) Rand.pickFrom(types);
+        Actor fights = (Actor) soldier.generate();
+        fights.assignBase(mission.homeBase);
+        mission.toggleRecruit(fights, true);
+      }
+    }
+    //
+    //  If this is a base on a local map, we need to assign applicants from
+    //  among the local population.
+    else {
+      Area localMap = mission.homeBase().activeMap();
+      
+      class Entry { Actor actor; float rating; }
+      List <Entry> canApply = new List <Entry> () {
+        protected float queuePriority(Entry r) {
+          return r.rating;
+        }
+      };
+      
+      for (Actor a : localMap.actors) {
+        if (a.base() != mission.homeBase()) continue;
+        if ((! Visit.empty(types)) && ! Visit.arrayIncludes(types, a.type())) continue;
+        
+        Entry e = new Entry();
+        e.actor = a;
+        e.rating = mission.evalPriority * (0.5f + Rand.num());
+        canApply.add(e);
+      }
+      canApply.queueSort();
+      
+      for (Entry e : canApply) {
+        Actor fights = e.actor;
+        mission.toggleRecruit(fights, true);
+        if (MissionForStrike.powerSum(mission) >= maxArmy) break;
+      }
     }
   }
   
   static boolean hasCompetition(Mission mission) {
     for (Mission m : mission.homeBase().missions()) {
-      if (m != mission && m.active()) return true;
-    }    
+      if (m != mission && m.active()) {
+        return true;
+      }
+    }
     for (Mission m : federationMissions(mission.homeBase().federation())) {
       if (m == mission || ! m.active()          ) continue;
       if (m.objective != mission.objective      ) continue;
@@ -106,8 +139,8 @@ public class MissionAIUtils {
   
   
   static float strikeAppeal(Base goes, Base from) {
-    ///if (exploreLevel(goes.locale, from.federation()) < 1) return -1;
     if (from.federation().hasTypeAI(Federation.AI_PACIFIST)) return -1;
+    if (goes.faction() == from.faction()) return -1;
     
     float value = owningValue(goes.locale, from.federation());
     float enmity = 0 - from.relations.bondLevel(goes.faction());
@@ -141,11 +174,10 @@ public class MissionAIUtils {
   }
   
   
-  public static void launchStrikeMission(Mission mission, World world) {
+  public static void recruitStrikeMission(Mission mission, World world) {
     float maxArmy = mission.evalForce();
     Type  soldier = (Type) Visit.first(world.soldierTypes);
     generateRecruits(mission, maxArmy, soldier);
-    mission.beginMission(mission.homeBase());
   }
   
   
@@ -205,11 +237,10 @@ public class MissionAIUtils {
   }
   
   
-  public static void launchDefendMission(Mission mission, World world) {
+  public static void recruitDefendMission(Mission mission, World world) {
     float maxArmy = mission.evalForce();
     Type  soldier = (Type) Visit.first(world.soldierTypes);
     generateRecruits(mission, maxArmy, soldier);
-    mission.beginMission(mission.homeBase());
   }
   
   
@@ -240,6 +271,7 @@ public class MissionAIUtils {
   static float dialogAppeal(Base goes, Base from) {
     ///if (exploreLevel(goes.locale, from.federation()) < 1) return -1;
     if (from.federation().hasTypeAI(Federation.AI_WARLIKE)) return -1;
+    if (from.federation() == goes.federation()) return -1;
     
     float goesPower = goes.armyPower() + federationPower(goes.federation());
     float fromPower = from.armyPower() + federationPower(from.federation());
@@ -277,7 +309,7 @@ public class MissionAIUtils {
   }
   
   
-  public static void launchDialogMission(Mission mission, World world) {
+  public static void recruitDialogMission(Mission mission, World world) {
     float maxArmy = mission.evalForce();
     Type  soldier = (Type) Visit.first(world.soldierTypes);
     Type  noble   = (Type) Visit.first(world.nobleTypes  );
@@ -291,8 +323,6 @@ public class MissionAIUtils {
     }
     
     //  TODO:  You also need to include tribute and marriage arrangements!
-    
-    mission.beginMission(mission.homeBase());
   }
   
   
@@ -345,18 +375,17 @@ public class MissionAIUtils {
   }
   
   
-  public static void launchExploreMission(Mission mission, World world) {
+  public static void recruitExploreMission(Mission mission, World world) {
     float maxArmy = mission.evalForce();
     Type  soldier = (Type) Visit.first(world.soldierTypes);
     generateRecruits(mission, maxArmy, soldier);
-    mission.beginMission(mission.homeBase());
   }
   
   
   
   /**  Updating internal politics...
     */
-  static void updateCapital(Federation federation, World world) {
+  public static void updateCapital(Federation federation, World world) {
     Base capital = federation.capital();
     
     if (capital == null || capital.federation() != federation) {
@@ -364,6 +393,7 @@ public class MissionAIUtils {
       
       for (Base base : world.bases) if (base.federation() == federation) {
         float rating = base.armyPower() + base.population();
+        rating *= 1 + (Rand.num() * 0.33f);
         pick.compare(base, rating);
       }
       
@@ -376,26 +406,33 @@ public class MissionAIUtils {
   
   /**  Generating trouble...
     */
-  static Mission generateTrouble(Federation federation, Base from, float forceCap, Series <Base> allGoes) {
+  static Mission generateTrouble(
+    Federation federation, Base from, float forceCap, Series <Base> allGoes,
+    boolean launch
+  ) {
     
     if (federation == null || from == null || forceCap <= 0) return null;
     if (allGoes == null || allGoes.empty()) return null;
-    if (federation.hasTypeAI(Federation.AI_OFF)) return null;
     
+    if (federation.hasTypeAI(Federation.AI_OFF)) return null;
+    if (federation.faction == from.world.playerFaction) return null;
     
     final boolean report = from.world.settings.reportMissionEval;
-    if (report) I.say("  Base From: "+from+" ("+from.faction()+")");
+    if (report) {
+      I.say("\n  Evaluating Missions From: "+from+" ("+from.faction()+")");
+      I.say("  Force Cap: "+forceCap);
+    }
     
     Pick <Mission> selection = new Pick <Mission> (0) {
       public void compare(Mission next, float rating) {
         
-        if (report) {
-          I.say("    "+I.padToLength(next.toString(), 25));
-          I.add("    Appeal: "+next.evalPriority()+" Chance: "+next.evalChance());
-        }
-        
         rating = next.evalPriority();
         if (rating < 0) return;
+        
+        if (report) {
+          I.say("    "+I.padToLength(next.toString(), 30));
+          I.add("    Appeal: "+I.shorten(next.evalPriority(), 2)+" Chance: "+next.evalChance());
+        }
         
         //rating *= 1 + next.evalChance();
         rating += Rand.num() * 0.5f;
@@ -433,10 +470,14 @@ public class MissionAIUtils {
     World w = federation.world;
     
     if (m != null) {
-      if (m.objective == Mission.OBJECTIVE_STRIKE ) launchStrikeMission (m, w);
-      if (m.objective == Mission.OBJECTIVE_SECURE ) launchDefendMission (m, w);
-      if (m.objective == Mission.OBJECTIVE_CONTACT) launchDialogMission (m, w);
-      if (m.objective == Mission.OBJECTIVE_RECON  ) launchExploreMission(m, w);
+      if (m.objective == Mission.OBJECTIVE_STRIKE ) recruitStrikeMission (m, w);
+      if (m.objective == Mission.OBJECTIVE_SECURE ) recruitDefendMission (m, w);
+      if (m.objective == Mission.OBJECTIVE_CONTACT) recruitDialogMission (m, w);
+      if (m.objective == Mission.OBJECTIVE_RECON  ) recruitExploreMission(m, w);
+      
+      if (report) I.say("  Selected: "+m);
+      
+      if (launch) m.beginMission(m.homeBase());
       return m;
     }
     else {
@@ -445,17 +486,17 @@ public class MissionAIUtils {
   }
   
   
-  public static Mission generateLocalTrouble(Federation federation, Area activeMap) {
+  public static Mission generateLocalTrouble(Federation federation, Area activeMap, boolean launch) {
     if (federation == null || activeMap == null) return null;
     
     Base from = federation.capital();
     float forceCap = federationPower(federation);
     
-    return generateTrouble(federation, from, forceCap, activeMap.bases());
+    return generateTrouble(federation, from, forceCap, activeMap.bases(), launch);
   }
   
   
-  public static Mission generateOffmapTrouble(Federation federation, World world) {
+  public static Mission generateOffmapTrouble(Federation federation, World world, boolean launch) {
     if (federation == null || world == null) return null;
 
     Base from = federation.capital();
@@ -467,17 +508,17 @@ public class MissionAIUtils {
       if (map == null || b.locale != map.locale) offmap.add(b);
     }
     
-    return generateTrouble(federation, from, forceCap, offmap);
+    return generateTrouble(federation, from, forceCap, offmap, launch);
   }
   
   
-  public static Mission generateLocalBaseTrouble(Base from) {
+  public static Mission generateLocalBaseTrouble(Base from, boolean launch) {
     if (from == null) return null;
     
     float forceCap = from.armyPower();
     Area map = from.activeMap();
     
-    return generateTrouble(from.federation(), from, forceCap, map.bases());
+    return generateTrouble(from.federation(), from, forceCap, map.bases(), launch);
   }
 
   

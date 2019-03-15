@@ -126,7 +126,7 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
   /**  Supplemental setup/query methods for economy, trade and geography-
     */
   public void attachMap(Area map) {
-    this.map    = map ;
+    this.map    = map;
     this.active = map == null ? false : true;
   }
   
@@ -519,8 +519,6 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
   
   public int posture(Faction other) {
     return federation().relations.bondProperties(other);
-    //return relations.bondProperties(other);
-    //return council().relations.bondProperties(other);
   }
   
   public boolean isVassalOf(Base o) { return posture(o) == BOND_LORD  ; }

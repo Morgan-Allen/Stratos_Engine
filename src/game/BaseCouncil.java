@@ -198,9 +198,7 @@ public class BaseCouncil {
     }
     //
     //  Once per month, otherwise, evaluate any major independent decisions-
-    if ((! base.federation().hasTypeAI(AI_OFF)) && ! playerOwned) {
-      //
-      //  See if any of the current petitions are worth responding to-
+    if (! playerOwned) {
       for (Mission petition : petitions) {
         float appeal = MissionAIUtils.appealOfTerms(base, petition);
         if (Rand.num() < appeal) {

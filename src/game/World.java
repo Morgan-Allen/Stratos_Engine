@@ -343,7 +343,7 @@ public class World implements Session.Saveable {
     journeys.add(j);
     
     for (Journeys g : going) {
-      g.onDeparture(goes, j);
+      g.onDeparture(from, j);
     }
     
     if (reports(j)) {

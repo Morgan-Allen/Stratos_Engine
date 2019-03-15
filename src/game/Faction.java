@@ -28,6 +28,11 @@ public class Faction extends Type implements RelationSet.Focus {
     this.buildTypes = buildTypes;
   }
   
+  public void assignColor(Colour colour) {
+    this.colour = colour;
+    this.tint = colour.getRGBA();
+  }
+  
   
   public WorldLocale homeland() {
     return homeland;

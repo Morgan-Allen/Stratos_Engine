@@ -26,6 +26,8 @@ public class BaseRelations extends RelationSet {
   final public static float
     LOY_ATTACK_PENALTY  = -0.25f,
     LOY_CONQUER_PENALTY = -0.50f,
+    LOY_DIALOG_BOOST    =  0.10f,
+    LOY_DEFEND_BOOST    =  0.25f,
     LOY_REBEL_PENALTY   = -0.25f,
     LOY_TRIBUTE_BONUS   =  0.05f,
     LOY_FADEOUT_TIME    =  AVG_TRIBUTE_YEARS * YEAR_LENGTH * 2,

@@ -105,6 +105,7 @@ public class AreaFog {
       byte oldMax = maxVals[c.x][c.y];
       byte val = oldVals[c.x][c.y] = fogVals[c.x][c.y];
       fogVals[c.x][c.y] = 0;
+      
       sumFog += val;
       
       if (val > oldMax) {
@@ -115,8 +116,8 @@ public class AreaFog {
       viewVals[c.x][c.y] = ((val * 2f) + (oldMax * 1f)) / (3 * MAX_FOG);
     }
     
-    float avgFog = sumFog / (MAX_FOG * map.size * map.size);
-    fed.setExploreLevel(map.locale, avgFog);
+    float avgFog = sumFog * 1f / (MAX_FOG * map.size * map.size);
+    fed.setMaxExploreLevel(map.locale, avgFog);
   }
   
   

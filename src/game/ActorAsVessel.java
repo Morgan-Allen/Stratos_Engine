@@ -355,7 +355,7 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   }
   
   
-  public void onDeparture(Base goes, World.Journey journey) {
+  public void onDeparture(Base from, World.Journey journey) {
     //
     //  If you're departing from a foreign base, scoop up your crew and any
     //  passengers or mission teammates-
@@ -372,7 +372,7 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
         offmap.toggleVisitor(a, false);
       }
     }
-    super.onDeparture(goes, journey);
+    super.onDeparture(from, journey);
     //
     //  If you're departing from an active map, ensure that any passengers
     //  exit as well.  NOTE:  Actors exiting the map remove themselves from the

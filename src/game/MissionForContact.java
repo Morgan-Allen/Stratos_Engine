@@ -31,34 +31,36 @@ public class MissionForContact extends Mission {
     //
     //  If you're delivering terms, just check for either acceptance or
     //  rejection-
-    if (terms.hasTerms()) {
-      if (terms.accepted()) {
-        setMissionComplete(true);
+    if (! complete()) {
+      if (terms.hasTerms()) {
+        if (terms.accepted()) {
+          setMissionComplete(true);
+        }
+        if (terms.rejected()) {
+          setMissionComplete(false);
+        }
       }
-      if (terms.rejected()) {
-        setMissionComplete(false);
+      //
+      //  If your focus is an actor, check whether they're converted-
+      if (localFocus() instanceof Actor) {
+        Actor focus = (Actor) localFocus();
+        if (focus.bonds.baseLoyal() == homeBase()) {
+          setMissionComplete(true);
+        }
+        if (focus.health.dead()) {
+          setMissionComplete(false);
+        }
       }
-    }
-    //
-    //  If your focus is an actor, check whether they're converted-
-    if (localFocus() instanceof Actor) {
-      Actor focus = (Actor) localFocus();
-      if (focus.bonds.baseLoyal() == homeBase()) {
-        setMissionComplete(true);
-      }
-      if (focus.health.dead()) {
-        setMissionComplete(false);
-      }
-    }
-    //
-    //  And if your focus is a building, check whether that's switched-
-    if (localFocus() instanceof Building) {
-      Building focus = (Building) localFocus();
-      if (focus.base() == homeBase()) {
-        setMissionComplete(true);
-      }
-      if (focus.destroyed()) {
-        setMissionComplete(false);
+      //
+      //  And if your focus is a building, check whether that's switched-
+      if (localFocus() instanceof Building) {
+        Building focus = (Building) localFocus();
+        if (focus.base() == homeBase()) {
+          setMissionComplete(true);
+        }
+        if (focus.destroyed()) {
+          setMissionComplete(false);
+        }
       }
     }
   }

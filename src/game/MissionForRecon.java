@@ -2,8 +2,8 @@
 
 package game;
 import static game.GameConstants.*;
-import game.World.Journey;
-import util.I;
+import static game.World.*;
+import util.*;
 
 
 
@@ -43,7 +43,16 @@ public class MissionForRecon extends Mission {
       //
       //  In the case of exploring an entire foreign base...
       if (worldFocus() != null && ! onWrongMap()) {
-        //  TODO:  ...Fill this in.
+        Area     map   = localBase.activeMap();
+        AreaFog  fog   = map.fogMap(homeBase().faction(), true);
+        AreaTile looks = (AreaTile) localFocus();
+        
+        if (looks == null || fog.maxSightLevel(looks) >= 1) {
+          looks = fog.pickRandomFogPoint(transitTile(), -1);
+          setLocalFocus(looks);
+        }
+        
+        if (looks == null) setMissionComplete(true);
       }
       //
       //  In the case of local exploration, check for fulfillment:
@@ -51,6 +60,7 @@ public class MissionForRecon extends Mission {
         Area     map   = localBase.activeMap();
         AreaFog  fog   = map.fogMap(homeBase().faction(), true);
         AreaTile looks = (AreaTile) localFocus();
+        
         int r = (int) exploreRange;
         boolean allSeen = true;
         
@@ -69,12 +79,9 @@ public class MissionForRecon extends Mission {
   public Task nextLocalMapBehaviour(Actor actor) {
     
     Target from = localFocus();
-    if (from == null) from = transitTile();
-    
-    TaskExplore recon = TaskExplore.configExploration(
-      actor, from, exploreRange
-    );
+    TaskExplore recon = TaskExplore.configExploration(actor, from, exploreRange);
     if (recon != null) return recon;
+    
     return null;
   }
   
@@ -85,25 +92,23 @@ public class MissionForRecon extends Mission {
   }
   
   
-  
+  public void beginMission(Base localBase) {
+    super.beginMission(localBase);
+  }
+
+
   void handleOffmapArrival(Base goes, World.Journey journey) {
-    Federation from = homeBase().federation();
-    from.setExploreLevel(goes.locale, 1);
+    if (goes == worldFocus()) {
+      MissionUtils.handleRecon(this, goes, journey);
+    }
     return;
   }
   
   
   void handleOffmapDeparture(Base from, Journey journey) {
-    //  TODO:  Fill this in?
     return;
   }
   
 }
-
-
-
-
-
-
 
 

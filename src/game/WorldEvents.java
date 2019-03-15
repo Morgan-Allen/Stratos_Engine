@@ -79,8 +79,8 @@ public class WorldEvents {
     }
     
     for (Federation federation : world.federations()) {
-      MissionAIUtils.generateLocalTrouble(federation, activeMap);
-      MissionAIUtils.generateOffmapTrouble(federation, world);
+      MissionAIUtils.generateLocalTrouble(federation, activeMap, true);
+      MissionAIUtils.generateOffmapTrouble(federation, world, true);
     }
   }
   

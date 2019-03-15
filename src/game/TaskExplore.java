@@ -48,6 +48,8 @@ public class TaskExplore extends Task {
   
   
   static TaskExplore configExploration(Actor actor, Target from, int range) {
+    if (actor == null || from == null) return null;
+    
     Area     map  = actor.map;
     AreaFog  fog  = map.fogMap(actor);
     AreaTile goes = fog.pickRandomFogPoint(from, range);
