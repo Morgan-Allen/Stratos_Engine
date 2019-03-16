@@ -9,6 +9,9 @@ import util.*;
 
 
 
+//  TODO:  Merge this with the MissionForColony class?
+
+
 public class Expedition implements Session.Saveable {
   
 
@@ -16,7 +19,7 @@ public class Expedition implements Session.Saveable {
     */
   Faction faction;
   Base homeland = null;
-  WorldLocale landing = null;
+  Area landing = null;
   
   int funds = 0;
   BuildType built[] = {};
@@ -37,7 +40,7 @@ public class Expedition implements Session.Saveable {
     
     faction  = (Faction) s.loadObject();
     homeland = (Base) s.loadObject();
-    landing   = (WorldLocale) s.loadObject();
+    landing   = (Area) s.loadObject();
     
     funds    = s.loadInt();
     built    = (BuildType[]) s.loadObjectArray(BuildType.class);
@@ -70,13 +73,13 @@ public class Expedition implements Session.Saveable {
   public Series <Actor> staff() { return staff; }
   
   public Base homeland() { return homeland; }
-  public WorldLocale landing() { return landing; }
+  public Area landing() { return landing; }
   
   
   
   /**  Configuration utilities for external use-
     */
-  public void configTravel(Base homeland, WorldLocale landing) {
+  public void configTravel(Base homeland, Area landing) {
     setHomeland(homeland);
     setLanding(landing);
   }
@@ -86,7 +89,7 @@ public class Expedition implements Session.Saveable {
     this.homeland = homeland;
   }
   
-  public void setLanding(WorldLocale landing) {
+  public void setLanding(Area landing) {
     this.landing = landing;
   }
   

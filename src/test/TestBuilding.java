@@ -22,7 +22,7 @@ public class TestBuilding extends LogicTest {
     LogicTest test = new TestBuilding();
     
     Base base = setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, 16, false);
-    Area map = base.activeMap();
+    AreaMap map = base.activeMap();
     World world = map.world;
     world.settings.toggleFog         = false;
     world.settings.toggleFatigue     = false;
@@ -208,7 +208,7 @@ public class TestBuilding extends LogicTest {
   
   
   static Tally <Good> totalMaterials(
-    Area map, boolean report, Good[] compared
+    AreaMap map, boolean report, Good[] compared
   ) {
     if (report) I.say("\nReporting material presences...");
     

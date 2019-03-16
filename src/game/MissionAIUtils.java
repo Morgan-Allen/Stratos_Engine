@@ -13,7 +13,7 @@ public class MissionAIUtils {
   
   /**  General-purpose utilities-
     */
-  static float owningValue(WorldLocale locale, Federation from) {
+  static float owningValue(Area locale, Federation from) {
     return 1;
   }
   
@@ -23,7 +23,7 @@ public class MissionAIUtils {
     return power * (1 + prestige);
   }
   
-  static float exploreLevel(WorldLocale locale, Federation from) {
+  static float exploreLevel(Area locale, Federation from) {
     return from.exploreLevel(locale);
   }
   
@@ -66,7 +66,7 @@ public class MissionAIUtils {
   static void generateRecruits(Mission mission, float maxArmy, Type... types) {
     //
     //  For off-map bases, we can generate troops dynamically-
-    if (mission.homeBase().locale.isOffmap()) {
+    if (mission.homeBase().area.isOffmap()) {
       while (MissionForStrike.powerSum(mission) < maxArmy) {
         Type soldier = (Type) Rand.pickFrom(types);
         Actor fights = (Actor) soldier.generate();
@@ -78,7 +78,7 @@ public class MissionAIUtils {
     //  If this is a base on a local map, we need to assign applicants from
     //  among the local population.
     else {
-      Area localMap = mission.homeBase().activeMap();
+      AreaMap localMap = mission.homeBase().activeMap();
       
       class Entry { Actor actor; float rating; }
       List <Entry> canApply = new List <Entry> () {
@@ -142,7 +142,7 @@ public class MissionAIUtils {
     if (from.federation().hasTypeAI(Federation.AI_PACIFIST)) return -1;
     if (goes.faction() == from.faction()) return -1;
     
-    float value = owningValue(goes.locale, from.federation());
+    float value = owningValue(goes.area, from.federation());
     float enmity = 0 - from.relations.bondLevel(goes.faction());
     
     if (goes.isAllyOf (from)) enmity -= 0.5f;
@@ -358,7 +358,7 @@ public class MissionAIUtils {
   }
   
   
-  static float exploreAppeal(WorldLocale goes, Base from) {
+  static float exploreAppeal(Area goes, Base from) {
     float exploreLevel = exploreLevel(goes, from.federation());
     return (1 - exploreLevel) * 0.5f;
   }
@@ -442,7 +442,7 @@ public class MissionAIUtils {
     };
     
     for (Base goes : allGoes) {
-      boolean explored = exploreLevel(goes.locale, federation) > 0;
+      boolean explored = exploreLevel(goes.area, federation) > 0;
       
       //  TODO:  Use proper OOP for this, including a separate targetValid() 
       //  method.  (Explore-missions need to be assignable to locales in any 
@@ -486,7 +486,7 @@ public class MissionAIUtils {
   }
   
   
-  public static Mission generateLocalTrouble(Federation federation, Area activeMap, boolean launch) {
+  public static Mission generateLocalTrouble(Federation federation, AreaMap activeMap, boolean launch) {
     if (federation == null || activeMap == null) return null;
     
     Base from = federation.capital();
@@ -501,11 +501,11 @@ public class MissionAIUtils {
 
     Base from = federation.capital();
     float forceCap = federationPower(federation);
-    Area map = world.activeBaseMap();
+    AreaMap map = world.activeBaseMap();
     
     Batch <Base> offmap = new Batch();
     for (Base b : world.bases) {
-      if (map == null || b.locale != map.locale) offmap.add(b);
+      if (map == null || b.area != map.locale) offmap.add(b);
     }
     
     return generateTrouble(federation, from, forceCap, offmap, launch);
@@ -516,7 +516,7 @@ public class MissionAIUtils {
     if (from == null) return null;
     
     float forceCap = from.armyPower();
-    Area map = from.activeMap();
+    AreaMap map = from.activeMap();
     
     return generateTrouble(from.federation(), from, forceCap, map.bases(), launch);
   }

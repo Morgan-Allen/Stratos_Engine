@@ -126,7 +126,7 @@ public class ActorAsAnimal extends Actor {
   AreaTile findGrazePoint() {
     
     Pick <AreaTile> pick = new Pick();
-    for (AreaTile t : Area.adjacent(at(), null, map)) {
+    for (AreaTile t : AreaMap.adjacent(at(), null, map)) {
       if (t == null || map.blocked(t)) continue;
       if (! Visit.arrayIncludes(type().habitats, t.terrain)) continue;
       pick.compare(t, Rand.num());
@@ -156,8 +156,8 @@ public class ActorAsAnimal extends Actor {
       if (a.type().predator) continue;
       if (a.health.pregnancy != 0) continue;
       
-      float dist   = Area.distance(a.at(), at());
-      float rating = Area.distancePenalty(dist);
+      float dist   = AreaMap.distance(a.at(), at());
+      float rating = AreaMap.distancePenalty(dist);
       if (category != Type.IS_ANIMAL_ACT) rating /= 2;
       
       pick.compare(a, rating);
@@ -214,7 +214,7 @@ public class ActorAsAnimal extends Actor {
   
   ActorHealth initHealth() {
     return new ActorHealth(this) {
-      void updateLifeCycle(WorldLocale locale, boolean onMap) {
+      void updateLifeCycle(Area locale, boolean onMap) {
         super.updateLifeCycle(locale, onMap);
         //
         //  Once per month, check to see if breeding conditions are correct.  (In

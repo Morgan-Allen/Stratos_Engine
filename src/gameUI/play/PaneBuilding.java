@@ -86,7 +86,7 @@ public class PaneBuilding extends DetailPane {
           d.appendAll("\n  ", a, "\n    ", a.jobDesc());
         }
         else {
-          WorldLocale offmap = a.offmap();
+          Area offmap = a.offmap();
           int ETA = world.arriveTime(a, base);
           if (ETA < 0) {
             d.appendAll("\n  ", a, "\n    (On "+offmap+")");
@@ -105,7 +105,7 @@ public class PaneBuilding extends DetailPane {
           d.appendAll("\n  ", a, "\n    ", a.jobDesc());
         }
         else {
-          WorldLocale offmap = a.offmap();
+          Area offmap = a.offmap();
           int ETA = world.arriveTime(a, base);
           if (ETA < 0) {
             d.appendAll("\n  ", a, "\n    (On "+offmap+")");
@@ -238,7 +238,7 @@ public class PaneBuilding extends DetailPane {
       d.append("\n\n");
       d.append(new Description.Link("DEMOLISH") {
         public void whenClicked(Object context) {
-          Area map = built.map();
+          AreaMap map = built.map();
           if (map == null) return;
           map.planning.unplaceObject(built);
           built.exitMap(built.map());

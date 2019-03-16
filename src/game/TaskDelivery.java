@@ -2,7 +2,7 @@
 
 package game;
 import static game.GameConstants.*;
-import static game.Area.*;
+import static game.AreaMap.*;
 import util.*;
 
 
@@ -152,7 +152,7 @@ public class TaskDelivery extends Task {
       amount = Nums.min(amount, demand);
       if (amount <= 0) continue;
       
-      float penalty = Area.distancePenalty(
+      float penalty = AreaMap.distancePenalty(
         from.mainEntrance(), goes.mainEntrance()
       );
       Order o = new Order();
@@ -200,7 +200,7 @@ public class TaskDelivery extends Task {
     Good needed, int maxDist,
     Pathing from, boolean excludeFrom
   ) {
-    Area map = ((Element) from).map();
+    AreaMap map = ((Element) from).map();
     Pick <Building> pick = new Pick();
     boolean trades = from.type().isTradeBuilding();
     
@@ -222,7 +222,7 @@ public class TaskDelivery extends Task {
       //  those that are-
       AreaTile fromT = from.complete() ? from.mainEntrance() : from.at();
       AreaTile goesT = b   .complete() ? b   .mainEntrance() : b   .at();
-      float dist = Area.distance(fromT, goesT);
+      float dist = AreaMap.distance(fromT, goesT);
       if (maxDist > 0 && dist > maxDist) continue;
       
       float rating = 1;
@@ -235,7 +235,7 @@ public class TaskDelivery extends Task {
         rating *= demand / maxStock;
       }
       
-      rating *= Area.distancePenalty(dist);
+      rating *= AreaMap.distancePenalty(dist);
       
       pick.compare(b, rating);
     }

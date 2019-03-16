@@ -2,7 +2,7 @@
 
 package game;
 import util.*;
-import static game.Area.*;
+import static game.AreaMap.*;
 import static game.Task.*;
 import static game.GameConstants.*;
 import static game.TaskDelivery.*;
@@ -52,7 +52,7 @@ public class BuildingForHome extends Building {
       for (Building b : map.buildings) {
         if (! Visit.arrayIncludes(b.type().features, service)) continue;
         
-        float dist = Area.distance(b.mainEntrance(), entrance);
+        float dist = AreaMap.distance(b.mainEntrance(), entrance);
         if (dist > maxRange) continue;
         
         if (! map.pathCache.pathConnects(entrance, b.mainEntrance())) {

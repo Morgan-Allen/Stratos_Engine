@@ -34,7 +34,7 @@ public class TestPowers extends LogicTest {
     
     Base base = LogicTest.setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, 32, false);
     base.setName("Client Base");
-    Area map = base.activeMap();
+    AreaMap map = base.activeMap();
     
     Building guild   = createGuild(map, base);
     Actor    caster  = guild.workers().first();
@@ -67,12 +67,12 @@ public class TestPowers extends LogicTest {
   }
   
   
-  Building createGuild(Area map, Base base) {
+  Building createGuild(AreaMap map, Base base) {
     return null;
   }
   
   
-  Target createSubject(Area map, Building guild) {
+  Target createSubject(AreaMap map, Building guild) {
     return null;
   }
   
@@ -90,7 +90,7 @@ public class TestPowers extends LogicTest {
   
   /**  Other utility methods for common test-cases:
     */
-  static Building createGuild(Area map, Base base, BuildType guildType) {
+  static Building createGuild(AreaMap map, Base base, BuildType guildType) {
     Building guild = (Building) guildType.generate();
     guild.enterMap(map, 2, 2, 1, base);
     for (ActorType t : guildType.workerTypes.keys()) {
@@ -101,7 +101,7 @@ public class TestPowers extends LogicTest {
   
   
   static Actor createSubject(
-    Area map, Building guild, ActorType subjectType, boolean hostile
+    AreaMap map, Building guild, ActorType subjectType, boolean hostile
   ) {
     Actor subject = (Actor) subjectType.generate();
     if (subjectType.isPerson()) {
@@ -134,11 +134,11 @@ public class TestPowers extends LogicTest {
       this.toCheck     = toCheck;
     }
     
-    Building createGuild(Area map, Base base) {
+    Building createGuild(AreaMap map, Base base) {
       return createGuild(map, base, guildType);
     }
     
-    Target createSubject(Area map, Building guild) {
+    Target createSubject(AreaMap map, Building guild) {
       Actor subject = createSubject(map, guild, subjectType, false);
       for (Trait t : toCheck.keys()) {
         initStats.set(t, subject.traits.levelOf(t));

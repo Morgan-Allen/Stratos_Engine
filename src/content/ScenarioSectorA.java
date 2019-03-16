@@ -39,7 +39,7 @@ public class ScenarioSectorA extends WorldScenario {
   
   
   
-  protected ScenarioSectorA(World world, WorldLocale locale) {
+  protected ScenarioSectorA(World world, Area locale) {
     super(AREA_A, world, locale);
     assignObjectives(MAIN_OBJECTIVE);
   }

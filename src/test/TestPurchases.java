@@ -23,7 +23,7 @@ public class TestPurchases extends LogicTest {
     TestPurchases test = new TestPurchases();
     
     Base base = LogicTest.setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, 16, false);
-    Area map = base.activeMap();
+    AreaMap map = base.activeMap();
     World world = map.world;
     
     world.settings.toggleFog     = false;
@@ -102,7 +102,7 @@ public class TestPurchases extends LogicTest {
       
       if (
         potionOkay && (! usageOkay) &&
-        Area.timeSince(map.time(), injureTime) < 10
+        AreaMap.timeSince(map.time(), injureTime) < 10
       ) {
         float healAmount = StockExGoods.MEDIKIT_HEAL_AMOUNT;
         usageOkay = buys.health.injury() <= initInjury + 1 - healAmount;

@@ -24,7 +24,7 @@ public class WorldEvents {
   public static interface Trouble {
     Faction faction();
     float troublePower();
-    void generateTrouble(Area activeMap, float factionPower);
+    void generateTrouble(AreaMap activeMap, float factionPower);
   }
   
   
@@ -71,7 +71,7 @@ public class WorldEvents {
       return;
     }
     
-    Area activeMap = world.activeBaseMap();
+    AreaMap activeMap = world.activeBaseMap();
     
     for (Federation federation : world.federations()) {
       MissionAIUtils.updateCapital(federation, world);

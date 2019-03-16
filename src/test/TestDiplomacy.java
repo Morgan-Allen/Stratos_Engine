@@ -28,10 +28,14 @@ public class TestDiplomacy extends LogicTest {
     //  Set up the structure of the world-
     
     World world = new World(ALL_GOODS);
-    Base  baseC = new Base(world, world.addLocale(2, 2), FACTION_SETTLERS_A);
-    Base  awayC = new Base(world, world.addLocale(2, 3), FACTION_SETTLERS_B);
-    Base  neutC = new Base(world, world.addLocale(3, 2), FACTION_SETTLERS_C);
-    Area  map   = AreaTerrain.generateTerrain(
+    Base  baseC = new Base(world, addArea(world, 2, 2, 0), FACTION_SETTLERS_A);
+    Base  awayC = new Base(world, addArea(world, 2, 3, 1), FACTION_SETTLERS_B);
+    Base  neutC = new Base(world, addArea(world, 3, 2, 2), FACTION_SETTLERS_C);
+    
+    AreaType.setupRoute(baseC.area.type, awayC.area.type, 1, Type.MOVE_LAND);
+    AreaType.setupRoute(baseC.area.type, neutC.area.type, 1, Type.MOVE_LAND);
+    
+    AreaMap  map   = AreaTerrain.generateTerrain(
       baseC, 32, 0, MEADOW, JUNGLE
     );
     world.assignTypes(
@@ -44,9 +48,6 @@ public class TestDiplomacy extends LogicTest {
     neutC.setName("Neutral City");
     awayC.federation().setTypeAI(AI_OFF);
     neutC.federation().setTypeAI(AI_OFF);
-    
-    World.setupRoute(baseC.locale, awayC.locale, 1, Type.MOVE_LAND);
-    World.setupRoute(baseC.locale, neutC.locale, 1, Type.MOVE_LAND);
     
     world.settings.toggleFog     = false;
     world.settings.toggleMigrate = false;
@@ -97,12 +98,12 @@ public class TestDiplomacy extends LogicTest {
     ActorAsPerson awayBoss = (ActorAsPerson) Nobles.NOBLE.generate();
     awayBoss.assignBase(awayC);
     awayC.council.toggleMember(awayBoss, Role.MONARCH, true);
-    awayC.locale.toggleVisitor(awayBoss, true);
+    awayC.area.toggleVisitor(awayBoss, true);
     
     ActorAsPerson neutBoss = (ActorAsPerson) Nobles.NOBLE.generate();
     neutBoss.assignBase(neutC);
     neutC.council.toggleMember(neutBoss, Role.MONARCH, true);
-    neutC.locale.toggleVisitor(neutBoss, true);
+    neutC.area.toggleVisitor(neutBoss, true);
     
     //
     //  Begin the mission from the foreign base-

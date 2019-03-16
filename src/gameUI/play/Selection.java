@@ -46,7 +46,7 @@ public class Selection {
   }
   
   
-  void updateSelection(Area stage, Base base) {
+  void updateSelection(AreaMap stage, Base base) {
     if (UI.selected() != null) {
       hovered    = null;
       hoverTile  = null;

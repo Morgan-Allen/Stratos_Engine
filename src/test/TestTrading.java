@@ -24,8 +24,11 @@ public class TestTrading extends LogicTest {
     LogicTest test = new TestTrading();
     
     World world = new World(ALL_GOODS);
-    Base  baseC = new Base(world, world.addLocale(2, 2), FACTION_SETTLERS_A);
-    Base  awayC = new Base(world, world.addLocale(3, 3), FACTION_SETTLERS_A);
+    Base  baseC = new Base(world, addArea(world, 2, 2, 0), FACTION_SETTLERS_A);
+    Base  awayC = new Base(world, addArea(world, 3, 3, 1), FACTION_SETTLERS_A);
+    
+    AreaType.setupRoute(baseC.area.type, awayC.area.type, 1, Type.MOVE_LAND);
+    
     world.addBases(baseC, awayC);
     world.setPlayerFaction(FACTION_SETTLERS_A);
     
@@ -33,7 +36,6 @@ public class TestTrading extends LogicTest {
     awayC.federation().assignCapital(baseC);
     baseC.setName("(Home City)");
     awayC.setName("(Away City)");
-    World.setupRoute(baseC.locale, awayC.locale, 1, Type.MOVE_LAND);
     
     //  Send parts and medicine.
     //  Get psalt and greens.
@@ -51,7 +53,7 @@ public class TestTrading extends LogicTest {
       PSALT     ,  10
     );
     
-    Area map = new Area(world, baseC.locale, baseC);
+    AreaMap map = new AreaMap(world, baseC.area, baseC);
     map.performSetup(10, new Terrain[0]);
     world.settings.toggleFog       = false;
     world.settings.toggleHunger    = false;

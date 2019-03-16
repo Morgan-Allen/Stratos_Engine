@@ -2,7 +2,7 @@
 
 package game;
 import util.*;
-import static game.Area.*;
+import static game.AreaMap.*;
 import static game.GameConstants.*;
 
 
@@ -11,14 +11,14 @@ import static game.GameConstants.*;
 public class AreaPlanning {
   
   
-  final Area map;
+  final AreaMap map;
   List <Element> toBuild = new List();
   Element grid[][];
   byte reserveCounter[][];
   
   
   
-  AreaPlanning(Area map) {
+  AreaPlanning(AreaMap map) {
     this.map  = map;
   }
   
@@ -182,7 +182,7 @@ public class AreaPlanning {
     Type s, Base city, boolean built, int x, int y, int w, int h
   ) {
     Batch <Element> placed = new Batch();
-    Area map = city.activeMap();
+    AreaMap map = city.activeMap();
     for (Coord c : Visit.grid(x, y, w, h, 1)) {
       AreaTile t = map.tileAt(c.x, c.y);
       if (t == null) continue;
@@ -200,7 +200,7 @@ public class AreaPlanning {
   
   
   public static void markDemolish(
-    Area map, boolean now, Box2D area
+    AreaMap map, boolean now, Box2D area
   ) {
     markDemolish(
       map, now,
@@ -211,7 +211,7 @@ public class AreaPlanning {
   
   
   public static void markDemolish(
-    Area map, boolean now, int x, int y, int w, int h
+    AreaMap map, boolean now, int x, int y, int w, int h
   ) {
     for (AreaTile t : map.tilesUnder(x, y, w, h)) if (t != null) {
       Element plans = map.planning.objectAt(t);

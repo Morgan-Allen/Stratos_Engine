@@ -4,7 +4,7 @@ package game;
 import graphics.common.*;
 import graphics.terrain.*;
 import util.*;
-import static game.Area.*;
+import static game.AreaMap.*;
 import static game.GameConstants.*;
 
 
@@ -19,7 +19,7 @@ public class AreaTerrain implements TileConstants {
     int densities[][];
   }
   
-  final Area map;
+  final AreaMap map;
 
   private byte
     heightVals[][],
@@ -34,7 +34,7 @@ public class AreaTerrain implements TileConstants {
   private TerrainSet meshSet;
   
   
-  AreaTerrain(Area map) {
+  AreaTerrain(AreaMap map) {
     this.map = map;
   }
   
@@ -168,27 +168,27 @@ public class AreaTerrain implements TileConstants {
   
   /**  Initial terrain setup-
     */
-  public static Area generateTerrain(
-    World world, WorldLocale locale, int size, int maxHigh, Terrain... gradient
+  public static AreaMap generateTerrain(
+    World world, Area locale, int size, int maxHigh, Terrain... gradient
   ) {
-    Area map = new Area(world, locale);
+    AreaMap map = new AreaMap(world, locale);
     map.performSetup(size, gradient);
     populateTerrain(map, maxHigh, gradient);
     return map;
   }
   
   
-  public static Area generateTerrain(
+  public static AreaMap generateTerrain(
     Base city, int size, int maxHigh, Terrain... gradient
   ) {
-    Area map = generateTerrain(city.world, city.locale, size, maxHigh, gradient);
+    AreaMap map = generateTerrain(city.world, city.area, size, maxHigh, gradient);
     map.addBase(city);
     return map;
   }
   
   
   public static void populateTerrain(
-    Area map, int maxHigh, Terrain... gradient
+    AreaMap map, int maxHigh, Terrain... gradient
   ) {
     HeightMap mapH = new HeightMap(map.size, 1, 0.5f);
     int numG = gradient.length;
@@ -205,7 +205,7 @@ public class AreaTerrain implements TileConstants {
   
   /**  Adding fixtures-
     */
-  public static void populateFixtures(Area map) {
+  public static void populateFixtures(AreaMap map) {
     for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
       AreaTile    tile = map.tileAt(c.x, c.y);
       Terrain terr = tile.terrain;
@@ -228,13 +228,13 @@ public class AreaTerrain implements TileConstants {
   }
   
   
-  public static void populateFixture(Type t, int x, int y, Area map) {
+  public static void populateFixture(Type t, int x, int y, AreaMap map) {
     Element f = (Element) t.generate();
     f.enterMap(map, x, y, 1, map.locals);
   }
   
   
-  static boolean checkPlacingOkay(AreaTile at, Type t, Area map) {
+  static boolean checkPlacingOkay(AreaTile at, Type t, AreaMap map) {
     
     for (Coord c : Visit.grid(at.x, at.y, t.wide, t.high, 1)) {
       AreaTile u = map.tileAt(c.x, c.y);
@@ -274,7 +274,7 @@ public class AreaTerrain implements TileConstants {
   
   /**  Adding predators and prey:
     */
-  public static void populateAnimals(Area map, ActorType... species) {
+  public static void populateAnimals(AreaMap map, ActorType... species) {
     
     for (Coord c : Visit.grid(0, 0, map.size, map.size, 1)) {
       map.terrain.scanHabitat(map.grid[c.x][c.y]);
@@ -295,7 +295,7 @@ public class AreaTerrain implements TileConstants {
   }
   
   
-  public static float habitatDensity(AreaTile tile, Terrain t, Area map) {
+  public static float habitatDensity(AreaTile tile, Terrain t, AreaMap map) {
     HabitatScan scan = map.terrain.scanFor(t);
     if (scan == null) return 0;
     float d = scan.densities[tile.x / SCAN_RES][tile.y / SCAN_RES];
@@ -303,7 +303,7 @@ public class AreaTerrain implements TileConstants {
   }
   
   
-  public static float idealPopulation(ActorType species, Area map) {
+  public static float idealPopulation(ActorType species, AreaMap map) {
     float numTiles = 0;
     for (Terrain h : species.habitats) {
       HabitatScan scan = map.terrain.scanFor(h);
@@ -318,7 +318,7 @@ public class AreaTerrain implements TileConstants {
   }
   
   
-  public static AreaTile findGrazePoint(ActorType species, Area map) {
+  public static AreaTile findGrazePoint(ActorType species, AreaMap map) {
     int x = SCAN_RES / 2, y = SCAN_RES / 2, QR = SCAN_RES / 4;
     
     Batch <AreaTile > points  = new Batch();

@@ -2,7 +2,7 @@
 
 package game;
 import util.*;
-import static game.Area.*;
+import static game.AreaMap.*;
 import static game.GameConstants.*;
 import static game.TaskDelivery.*;
 
@@ -14,7 +14,7 @@ public class ActorUtils {
   /**  General migration utilities-
     */
   static AreaTile findTransitPoint(
-    Area map, WorldLocale from, WorldLocale goes, Actor client
+    AreaMap map, Area from, Area goes, Actor client
   ) {
     ActorType type = client.type();
     int moveMode = type.moveMode;
@@ -24,7 +24,7 @@ public class ActorUtils {
   
   
   static AreaTile findTransitPoint(
-    Area map, WorldLocale from, WorldLocale goes, int moveMode, int clientSize
+    AreaMap map, Area from, Area goes, int moveMode, int clientSize
   ) {
     if (map == null || from == null || goes == null) return null;
     
@@ -40,8 +40,8 @@ public class ActorUtils {
     
     Pick <AreaTile> pick = new Pick();
     Vec2D cityDir = new Vec2D(
-      goes.mapX - from.mapX,
-      goes.mapY - from.mapY
+      goes.type.mapX - from.type.mapX,
+      goes.type.mapY - from.type.mapY
     ).normalise(), temp = new Vec2D();
     
     //  Larger actors will need to start out further from the map edge...
@@ -64,7 +64,7 @@ public class ActorUtils {
   }
   
   
-  static float distanceRating(WorldLocale from, WorldLocale goes) {
+  static float distanceRating(Area from, Area goes) {
     return AVG_CITY_DIST / (AVG_CITY_DIST + World.distance(from, goes, Type.MOVE_AIR));
   }
   
@@ -107,8 +107,8 @@ public class ActorUtils {
       else if (world.settings.toggleEasyMigrate) {
         if (checkOnly) return MIGRATE.OKAY;
         
-        Area map = employs.map();
-        map.world.beginJourney(map.locale, goes.locale, Type.MOVE_AIR, migrant);
+        AreaMap map = employs.map();
+        map.world.beginJourney(map.locale, goes.area, Type.MOVE_AIR, migrant);
       }
       else {
         return MIGRATE.NO_SHIPPING;
@@ -144,7 +144,7 @@ public class ActorUtils {
   }
   
   
-  public static void findWork(Area map, Actor migrant) {
+  public static void findWork(AreaMap map, Actor migrant) {
     
     class Opening { Building b; ActorType position; }
     AreaTile from = migrant.at();
@@ -167,7 +167,7 @@ public class ActorUtils {
         fitness /= Nums.max(1, sumWeights);
         if (fitness <= 0.25f) continue;
         
-        float near = Area.distancePenalty(from, b);
+        float near = AreaMap.distancePenalty(from, b);
         Opening o = new Opening();
         o.b = b;
         o.position = t;
@@ -185,7 +185,7 @@ public class ActorUtils {
   }
   
   
-  public static void findHome(Area map, final Actor migrant) {
+  public static void findHome(AreaMap map, final Actor migrant) {
     
     //  Each citizen prompts the search based on proximity to their place of
     //  work, proximity to needed services, and safety of the location (they
@@ -234,7 +234,7 @@ public class ActorUtils {
         float numR = b.numResidents(migrant.type().socialClass);
         if (b == migrant.home()) numR = 0;
         
-        float near = 10 / (10f + Area.distance(from, b));
+        float near = 10 / (10f + AreaMap.distance(from, b));
         float comfort = b.type().homeComfortLevel * 1f / AVG_HOME_COMFORT;
         
         super.compare(b, rating * near * (1 + comfort) / (2 + numR));
@@ -274,7 +274,7 @@ public class ActorUtils {
   
   
   public static AreaTile findEntryPoint(
-    final Element enters, final Area map,
+    final Element enters, final AreaMap map,
     final Target from, final int maxRange
   ) {
     if (enters.onMap()) {
@@ -288,9 +288,9 @@ public class ActorUtils {
       protected void addSuccessors(AreaTile front) {
         if (result.value != null) return;
         
-        for (AreaTile n : Area.adjacent(front, temp, map)) {
+        for (AreaTile n : AreaMap.adjacent(front, temp, map)) {
           if (n == null || n.flaggedWith() != null) continue;
-          if (maxRange > 0 && Area.distance(from, n) > maxRange) continue;
+          if (maxRange > 0 && AreaMap.distance(from, n) > maxRange) continue;
           
           enters.setLocation(n, map);
           if (enters.canPlace(map)) {
@@ -310,7 +310,7 @@ public class ActorUtils {
   
   
   
-  public static AreaTile pickRandomTile(Target t, float range, Area map) {
+  public static AreaTile pickRandomTile(Target t, float range, AreaMap map) {
     final float angle = Rand.num() * Nums.PI * 2;
     final float dist = (Rand.num() * range) + 1, max = map.size - 1;
     final AreaTile at = t.at();
@@ -324,7 +324,7 @@ public class ActorUtils {
   
   /**  More utility methods for scenario setup-
     */
-  public static void fillAllWorkVacancies(Area map) {
+  public static void fillAllWorkVacancies(AreaMap map) {
     for (Building b : map.buildings) if (b.complete()) {
       fillWorkVacancies(b);
       for (Actor w : b.workers) ActorUtils.findHome(map, w);
@@ -372,7 +372,7 @@ public class ActorUtils {
   
   
   public static AreaTile randomTileNear(
-    AreaTile at, float range, Area map, boolean open
+    AreaTile at, float range, AreaMap map, boolean open
   ) {
     int x = (int) (at.x + (range * Rand.range(-1, 1)));
     int y = (int) (at.y + (range * Rand.range(-1, 1)));

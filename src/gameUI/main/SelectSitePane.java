@@ -36,9 +36,9 @@ public class SelectSitePane extends MenuPane {
     //  Pick a homeworld first.
     listing.add(createTextItem("Homeworld:", 1.2f, null, 1));
     
-    for (final WorldLocale homeworld : world.locales()) {
-      if (! homeworld.homeland()) continue;
-      listing.add(new TextButton(UI, "  "+homeworld.name(), 1) {
+    for (final Area homeworld : world.areas()) {
+      if (! homeworld.type.homeland()) continue;
+      listing.add(new TextButton(UI, "  "+homeworld.type.name(), 1) {
         protected void whenClicked() { selectHomeworld(homeworld); }
         protected boolean toggled() { return hasHomeworld(homeworld); }
       });
@@ -52,9 +52,9 @@ public class SelectSitePane extends MenuPane {
     //  Then pick a sector.
     listing.add(createTextItem("Landing Site:", 1.2f, null, 1));
     
-    for (final WorldLocale landing : world.locales()) {
-      if (landing.homeland()) continue;
-      listing.add(new TextButton(UI, "  "+landing.name(), 1) {
+    for (final Area landing : world.areas()) {
+      if (landing.type.homeland()) continue;
+      listing.add(new TextButton(UI, "  "+landing.type.name(), 1) {
         public void whenClicked() { selectLanding(landing); }
         protected boolean toggled() { return hasLanding(landing); }
       });
@@ -90,32 +90,32 @@ public class SelectSitePane extends MenuPane {
 
   /**  Handling homeworld selection-
     */
-  private void selectHomeworld(WorldLocale homeworld) {
+  private void selectHomeworld(Area homeworld) {
     final MainScreen screen = MainGame.mainScreen();
     screen.worldsDisplay.setSelection(homeworld);
-    expedition.setHomeland(world.baseAt(homeworld));
+    expedition.setHomeland(world.basesFor(homeworld).first());
     //homeworld.whenClicked(null);
   }
   
   
-  private boolean hasHomeworld(WorldLocale world) {
+  private boolean hasHomeworld(Area world) {
     if (expedition.homeland() == null) return false;
-    return expedition.homeland().locale == world;
+    return expedition.homeland().area == world;
   }
   
   
 
   /**  Handling landing selection-
     */
-  private void selectLanding(WorldLocale landing) {
+  private void selectLanding(Area landing) {
     final MainScreen screen = MainGame.mainScreen();
-    screen.display.setSelection(landing.name(), true);
+    screen.display.setSelection(landing.type.name(), true);
     expedition.setLanding(landing);
     //landing.whenClicked(null);
   }
   
   
-  private boolean hasLanding(WorldLocale landing) {
+  private boolean hasLanding(Area landing) {
     return expedition.landing() == landing;
   }
   

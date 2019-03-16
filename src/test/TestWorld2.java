@@ -31,19 +31,23 @@ public class TestWorld2 extends LogicTest {
     Base goes[] = new Base[4];
     
     for (int i = from.length; i-- > 0;) {
-      from[i] = new Base(world, world.addLocale(3, 2 + (i * 2)), FACTION_SETTLERS_A, "F_"+i);
+      AreaType type = new AreaType(TestWorld2.class, "F_"+i, "F_"+i);
+      type.initPosition(3, 2 + (i * 2), false);
+      from[i] = new Base(world, world.addArea(type), FACTION_SETTLERS_A, "F_"+i);
     }
     for (int i = goes.length; i-- > 0;) {
-      goes[i] = new Base(world, world.addLocale(7, 2 + (i * 2)), FACTION_SETTLERS_B, "G_"+i);
+      AreaType type = new AreaType(TestWorld2.class, "G_"+i, "G_"+i);
+      type.initPosition(7, 2 + (i * 2), false);
+      goes[i] = new Base(world, world.addArea(type), FACTION_SETTLERS_B, "G_"+i);
     }
     world.addBases(from);
     world.addBases(goes);
     
     for (Base c : world.bases()) {
-      c.federation().setExploreLevel(c.locale, 1);
+      c.federation().setExploreLevel(c.area, 1);
       c.initBuildLevels(HOLDING, 2f, TROOPER_LODGE, 2f);
       for (Base o : world.bases()) if (c != o) {
-        World.setupRoute(c.locale, o.locale, 1, Type.MOVE_LAND);
+        AreaType.setupRoute(c.area.type, o.area.type, 1, Type.MOVE_LAND);
       }
     }
     

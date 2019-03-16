@@ -8,14 +8,27 @@ import java.lang.reflect.*;
 
 
 
+//  TODO:  Instead of extending the scenario class, just allow a different area
+//  and player-base to be assigned?
+
+//  AreaSetup.
+
+//  Area.
+//  AreaMap.
+//  Expedition/MissionForColony.
+
+
+
 
 public class WorldScenario extends Scenario {
   
   
   /**  Data fields, construction and save/load methods-
     */
+  final static int MIN_LAIR_DIST = 32, MAX_PLACE_RANGE = 8;
+  
   World initWorld;
-  WorldLocale locale;
+  Area area;
   AreaConfig config;
   
   Expedition expedition = null;
@@ -24,10 +37,10 @@ public class WorldScenario extends Scenario {
   
   
   
-  public WorldScenario(AreaConfig config, World world, WorldLocale locale) {
+  public WorldScenario(AreaConfig config, World world, Area locale) {
     super();
     this.initWorld = world ;
-    this.locale    = locale;
+    this.area      = locale;
     this.config    = config;
   }
   
@@ -36,7 +49,7 @@ public class WorldScenario extends Scenario {
     super(s);
     
     initWorld = (World) s.loadObject();
-    locale    = (WorldLocale) s.loadObject();
+    area      = (Area) s.loadObject();
     config    = loadAreaConfig(s);
     
     expedition = (Expedition) s.loadObject();
@@ -49,7 +62,7 @@ public class WorldScenario extends Scenario {
     super.saveState(s);
     
     s.saveObject(initWorld);
-    s.saveObject(locale);
+    s.saveObject(area);
     saveAreaConfig(config, s);
     
     s.saveObject(expedition);
@@ -63,8 +76,65 @@ public class WorldScenario extends Scenario {
   }
   
   
-  public WorldLocale locale() {
-    return locale;
+  public Area locale() {
+    return area;
+  }
+  
+  
+  
+  /**  Defining and evaluating objectives-
+    */
+  final public static int
+    COMPLETE_NONE    = -1,
+    COMPLETE_FAILED  =  0,
+    COMPLETE_SUCCESS =  1
+  ;
+
+  public static class Objective extends Constant {
+    
+    String description;
+    
+    Class baseClass;
+    Method checkMethod;
+    
+    
+    public Objective(
+      Class baseClass, String ID, String description, String checkMethod
+    ) {
+      super(null, ID, IS_STORY);
+      
+      this.baseClass = baseClass;
+      try { this.checkMethod = baseClass.getDeclaredMethod(checkMethod); }
+      catch (Exception e) { this.checkMethod = null; }
+      
+      this.description = description;
+    }
+    
+    public int checkCompletion(Scenario scenario) {
+      if (checkMethod == null) return COMPLETE_NONE;
+      try { return (Integer) checkMethod.invoke(scenario); }
+      catch (Exception e) { return COMPLETE_NONE; }
+    }
+    
+    public String description() {
+      return description;
+    }
+  }
+  
+  
+  public void assignObjectives(Objective... objectives) {
+    this.objectives.clear();
+    Visit.appendTo(this.objectives, objectives);
+  }
+  
+  
+  public Series <Objective> objectives() {
+    return objectives;
+  }
+  
+  
+  public void assignExpedition(Expedition e) {
+    this.expedition = e;
   }
   
   
@@ -157,25 +227,6 @@ public class WorldScenario extends Scenario {
   
   
   
-  /**  Supplemental setup methods that allow for player-entry and objectives-
-    */
-  public void assignExpedition(Expedition e) {
-    this.expedition = e;
-  }
-  
-  
-  public void assignObjectives(Objective... objectives) {
-    this.objectives.clear();
-    Visit.appendTo(this.objectives, objectives);
-  }
-  
-  
-  public Series <Objective> objectives() {
-    return objectives;
-  }
-  
-  
-  
   /**  Internal setup methods for when the scenario is activated-
     */
   protected World createWorld() {
@@ -183,18 +234,18 @@ public class WorldScenario extends Scenario {
   }
   
   
-  protected Area createArea(World world) {
+  protected AreaMap createMap(World world) {
     
     int mapSize = config.mapSize;
     Terrain gradient[] = config.gradient;
-    Area map = AreaTerrain.generateTerrain(world, locale, mapSize, 0, gradient);
+    AreaMap map = AreaTerrain.generateTerrain(world, area, mapSize, 0, gradient);
     AreaTerrain.populateFixtures(map);
     
     return map;
   }
   
   
-  protected Base createBase(Area stage, World world) {
+  protected Base createBase(AreaMap stage, World world) {
     
     Base homeland = expedition.homeland;
     Base landing = new Base(world, stage.locale, expedition.faction);
@@ -208,15 +259,11 @@ public class WorldScenario extends Scenario {
     world.addBases(landing);
     
     homeland.trading.updateOffmapTraders();
-    
     return landing;
   }
   
-
-  final static int MIN_LAIR_DIST = 32, MAX_PLACE_RANGE = 8;
   
-  
-  protected void configScenario(World world, Area stage, Base base) {
+  protected void configScenario(World world, AreaMap stage, Base base) {
     
     Building bastion = null;
     AreaTile ideal = stage.tileAt(16, 16);
@@ -229,7 +276,7 @@ public class WorldScenario extends Scenario {
     //  Look for a suitable entry-point within the world...
     for (AreaTile t : stage.allTiles()) {
       AreaTile sited = stage.tileAt(t.x, t.y);
-      float dist = Area.distance(sited, ideal);
+      float dist = AreaMap.distance(sited, ideal);
       pickLanding.compare(t, 0 - dist);
     }
     AreaTile landing = pickLanding.result();
@@ -279,7 +326,7 @@ public class WorldScenario extends Scenario {
     };
     for (Coord c : Visit.grid(0, 0, stage.size(), stage.size(), 8)) {
       AreaTile at = stage.tileAt(c);
-      float dist = Area.distance(bastion, at);
+      float dist = AreaMap.distance(bastion, at);
       if (dist <= MIN_LAIR_DIST) continue;
       
       float rating = 16f * Rand.num() * dist;
@@ -307,7 +354,7 @@ public class WorldScenario extends Scenario {
   
   
   protected Building placeSite(
-    SiteConfig site, Area stage, AreaTile at, Building parent, Base base
+    SiteConfig site, AreaMap stage, AreaTile at, Building parent, Base base
   ) {
     int numB = Rand.range(site.minCount, site.maxCount);
     Building placed = null, firstKid = null;

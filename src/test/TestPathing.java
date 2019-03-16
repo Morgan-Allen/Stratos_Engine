@@ -25,7 +25,7 @@ public class TestPathing extends LogicTest {
     boolean testOkay = true;
     
     Base base = setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, 32, false);
-    Area map = base.activeMap();
+    AreaMap map = base.activeMap();
     World world = map.world;
     world.settings.toggleFog     = false;
     world.settings.toggleHunger  = false;
@@ -166,9 +166,9 @@ public class TestPathing extends LogicTest {
         }
       }
       
-      int gridS = map.size() / Area.FLAG_RES;
+      int gridS = map.size() / AreaMap.FLAG_RES;
       for (Coord c : Visit.grid(0, 0, gridS, gridS, 1)) {
-        AreaTile t = map.tileAt(c.x * Area.FLAG_RES, c.y * Area.FLAG_RES);
+        AreaTile t = map.tileAt(c.x * AreaMap.FLAG_RES, c.y * AreaMap.FLAG_RES);
         Series <Active> inBigGrid = map.gridActive(t);
         for (Active a : inBigGrid) {
           AreaTile at = a.at();
@@ -249,7 +249,7 @@ public class TestPathing extends LogicTest {
   
   
   private static Pathing[] checkPathingOkay(
-    Pathing from, Pathing goes, Area map
+    Pathing from, Pathing goes, AreaMap map
   ) {
     ActorPathSearch search = new ActorPathSearch(map, from, goes, -1);
     search.doSearch();

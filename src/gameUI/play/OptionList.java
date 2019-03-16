@@ -56,7 +56,7 @@ public class OptionList extends UIGroup implements UIConstants {
   }
   
   
-  protected void setupFrom(Area area, Base base) {
+  protected void setupFrom(AreaMap area, Base base) {
     
     for (UINode option : options) {
       option.detach();

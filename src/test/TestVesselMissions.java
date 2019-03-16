@@ -88,21 +88,20 @@ public class TestVesselMissions extends LogicTest {
     boolean fromLocal, String title, boolean graphics
   ) {
     
-    Base  base  = LogicTest.setupTestBase(
+    Base base = LogicTest.setupTestBase(
       FACTION_SETTLERS_A, ALL_GOODS, 32, false, ALL_TERRAINS
     );
     World world = base.world;
-    Area  map   = base.activeMap();
+    AreaMap map = base.activeMap();
     
     world.settings.toggleFog     = false;
     world.settings.toggleMigrate = false;
     
     
-    WorldLocale rivalAt = world.addLocale(4, 4);
+    Area rivalAt = addArea(world, 4, 4, 0);
     Base rival = new Base(world, rivalAt, FACTION_SETTLERS_B, "Rival Base");
     world.addBases(rival);
-    World.setupRoute(rival.locale, base.locale, 1, Type.MOVE_AIR);
-    
+    AreaType.setupRoute(rival.area.type, base.area.type, 1, Type.MOVE_AIR);
     
     
     Building centre = (Building) BASTION.generate();
@@ -197,9 +196,9 @@ public class TestVesselMissions extends LogicTest {
         if (missionDone && ! crewReturn) {
           boolean allBack = true;
           for (Actor a : mission.recruits()) {
-            if (a.offmap() != rival.locale) allBack = false;
+            if (a.offmap() != rival.area) allBack = false;
           }
-          if (ship.offmap() != rival.locale) allBack = false;
+          if (ship.offmap() != rival.area) allBack = false;
           if (allBack) {
             crewReturn = true;
           }

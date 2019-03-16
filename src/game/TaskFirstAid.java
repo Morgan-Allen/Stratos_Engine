@@ -58,7 +58,7 @@ public class TaskFirstAid extends Task {
   
   private static TaskFirstAid configFirstAid(Actor actor, Building refuge) {
     
-    Area map = actor.map();
+    AreaMap map = actor.map();
     Pick <Actor> pick = new Pick(0);
     
     for (Actor other : actor.considered()) {
@@ -85,7 +85,7 @@ public class TaskFirstAid extends Task {
   //  TODO:  This could be cached for efficiency?
   
   static Building findRefuge(
-    Area map, Building old, Actor actor, Actor patient
+    AreaMap map, Building old, Actor actor, Actor patient
   ) {
     Pick <Building> pick = new Pick();
     
@@ -98,7 +98,7 @@ public class TaskFirstAid extends Task {
       if (b.type().hasFeature(IS_SICKBAY)) rating += 1.0f;
       if (rating == 0) continue;
       
-      rating *= Area.distancePenalty(b, patient);
+      rating *= AreaMap.distancePenalty(b, patient);
       pick.compare(b, rating);
     }
     
@@ -121,7 +121,7 @@ public class TaskFirstAid extends Task {
     
     float injury   = other.health.injury() / other.health.maxHealth();
     float relation = 0.5f + (actor.traits.levelOf(TRAIT_EMPATHY) / 2);
-    float distMult = Area.distancePenalty(actor, other);
+    float distMult = AreaMap.distancePenalty(actor, other);
     
     if (TaskCombat.allied (actor, other)) relation += 0.5f;
     if (TaskCombat.hostile(actor, other)) relation -= 0.5f;

@@ -1,7 +1,7 @@
 
 
 package game;
-import static game.Area.*;
+import static game.AreaMap.*;
 import static game.GameConstants.*;
 import game.World.Journey;
 import util.*;
@@ -42,9 +42,9 @@ public class MissionForSecure extends Mission {
     autoRenew   = s.loadBool();
     beginTime   = s.loadInt();
     
-    Area map = (Area) s.loadObject();
+    AreaMap map = (AreaMap) s.loadObject();
     for (int n = s.loadInt(); n-- > 0;) {
-      AreaTile point = Area.loadTile(map, s);
+      AreaTile point = AreaMap.loadTile(map, s);
       guardPoints.add(point);
     }
     lastFocusEvalTime = s.loadInt();
@@ -59,10 +59,10 @@ public class MissionForSecure extends Mission {
     s.saveBool(autoRenew);
     s.saveInt(beginTime);
     
-    Area map = localMap();
+    AreaMap map = localMap();
     s.saveObject(map);
     s.saveInt(guardPoints.size());
-    for (AreaTile t : guardPoints) Area.saveTile(t, map, s);
+    for (AreaTile t : guardPoints) AreaMap.saveTile(t, map, s);
     s.saveInt(lastFocusEvalTime);
     s.saveInt(lastGuardEvalTime);
   }
@@ -82,7 +82,7 @@ public class MissionForSecure extends Mission {
   
   
   
-  public void beginMission(WorldLocale locale) {
+  public void beginMission(Area locale) {
     super.beginMission(locale);
     beginTime = homeBase().world.time();
     Base goes = (Base) worldFocus();
@@ -96,7 +96,7 @@ public class MissionForSecure extends Mission {
   }
   
 
-  void beginJourney(WorldLocale from, WorldLocale goes) {
+  void beginJourney(Area from, Area goes) {
     super.beginJourney(from, goes);
     guardPoints.clear();
     lastGuardEvalTime = -1;
@@ -122,7 +122,7 @@ public class MissionForSecure extends Mission {
           
           Pick <Building> pickDefend = new Pick();
           Base client = (Base) worldFocus();
-          Area map = localMap();
+          AreaMap map = localMap();
           Target lastFocus = localFocus();
           AreaDanger danger = map.dangerMap(client.faction(), true);
           
@@ -135,7 +135,7 @@ public class MissionForSecure extends Mission {
             if (b == client.headquarters()) rating *= 1.5f;
             
             if (b == lastFocus) rating *= 1.25f;
-            else if (lastFocus != null) rating *= Area.distancePenalty(lastFocus, b);
+            else if (lastFocus != null) rating *= AreaMap.distancePenalty(lastFocus, b);
             
             pickDefend.compare(b, rating);
           }
@@ -193,13 +193,13 @@ public class MissionForSecure extends Mission {
   }
   
   
-  void handleOffmapArrival(WorldLocale goes, World.Journey journey) {
+  void handleOffmapArrival(Area goes, World.Journey journey) {
     Base focus = worldFocusBase();
     MissionUtils.handleGarrisonArrive(this, focus, journey);
   }
   
   
-  void handleOffmapDeparture(WorldLocale from, Journey journey) {
+  void handleOffmapDeparture(Area from, Journey journey) {
     Base focus = worldFocusBase();
     MissionUtils.handleGarrisonDepart(this, focus, journey);
   }
@@ -245,7 +245,7 @@ public class MissionForSecure extends Mission {
   static float rateCampingPoint(AreaTile t, Mission parent) {
     if (t == null || parent == null) return -1;
     
-    Area map = parent.localMap();
+    AreaMap map = parent.localMap();
     Pathing from = parent.transitTile();
     float rating = 0;
     boolean blocked = false;
@@ -276,7 +276,7 @@ public class MissionForSecure extends Mission {
   static AreaTile findCampingPoint(final Mission parent) {
     if (parent == null) return null;
     
-    final Area map = parent.localMap();
+    final AreaMap map = parent.localMap();
     final AreaTile init = AreaTile.nearestOpenTile(parent.transitTile(), map);
     if (init == null) return null;
     
@@ -285,7 +285,7 @@ public class MissionForSecure extends Mission {
     
     Flood <AreaTile> flood = new Flood <AreaTile> () {
       protected void addSuccessors(AreaTile front) {
-        for (AreaTile n : Area.adjacent(front, temp, map)) {
+        for (AreaTile n : AreaMap.adjacent(front, temp, map)) {
           if (map.blocked(n) || n.flaggedWith() != null) continue;
           tryAdding(n);
           
@@ -305,7 +305,7 @@ public class MissionForSecure extends Mission {
     //
     //  First, check to see if an update is due:
     final Target focus = parent.localFocus();
-    final Area map = parent.localMap();
+    final AreaMap map = parent.localMap();
     final int updateTime = parent.lastGuardEvalTime;
     int nextUpdate = updateTime >= 0 ? (updateTime + GUARD_CHECK_PERIOD) : 0;
     
@@ -330,7 +330,7 @@ public class MissionForSecure extends Mission {
       Flood <Pathing> flood = new Flood <Pathing> () {
         
         protected void addSuccessors(Pathing front) {
-          if (Area.distance(front, focus) > MAX_DIST) return;
+          if (AreaMap.distance(front, focus) > MAX_DIST) return;
           
           for (Pathing p : front.adjacent(temp, map)) {
             if (p == null || p.pathType() != Type.PATH_WALLS) continue;
@@ -372,7 +372,7 @@ public class MissionForSecure extends Mission {
   ) {
     if (fromFocus == null) return null;
     
-    Area map = parent.localMap();
+    AreaMap map = parent.localMap();
     AreaTile goes = fromFocus.at();
     if (goes == null || map == null) return null;
     

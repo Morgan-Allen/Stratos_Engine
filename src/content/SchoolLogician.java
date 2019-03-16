@@ -54,7 +54,7 @@ public class SchoolLogician {
     }
     
     protected void passiveEffect(Actor actor) {
-      Area map = actor.map();
+      AreaMap map = actor.map();
       
       float tire = CONC_TIRE;
       tire *= 1f / (map.ticksPerSecond() * CONC_DURATION);
@@ -138,7 +138,7 @@ public class SchoolLogician {
         null, INTEGRITY_CONDITION, INTEG_DURATION
       );
       
-      Area map = affects.map();
+      AreaMap map = affects.map();
       map.ephemera.addGhostFromModel(subject, FX_MODEL, 1, 0.5f, 1);
     }
     
@@ -157,7 +157,7 @@ public class SchoolLogician {
         null, INTEGRITY_CONDITION, INTEG_DURATION
       );
       
-      Area map = affects.map();
+      AreaMap map = affects.map();
       map.ephemera.addGhostFromModel(subject, FX_MODEL, 1, 0.5f, 1);
     }
   };
@@ -200,7 +200,7 @@ public class SchoolLogician {
     public void applyFromActor(Actor using, Target subject) {
       super.applyFromActor(using, subject);
       
-      Area map = using.map();
+      AreaMap map = using.map();
       Actor struck = (Actor) subject;
       
       float resist = struck.traits.levelOf(SKILL_MELEE) / MAX_SKILL_LEVEL;

@@ -159,10 +159,10 @@ public class BuildingForDock extends Building {
       for (Building b : map.buildings) {
         if (b.base() != base() || ! b.type().isTradeBuilding()) continue;
         
-        float dist = Area.distance(b, this);
+        float dist = AreaMap.distance(b, this);
         if (dist > MAX_TRADER_RANGE - radius()) continue;
         
-        float weight = Area.distancePenalty(dist);
+        float weight = AreaMap.distancePenalty(dist);
         Trader trader = (Trader) b;
         
         for (Good g : trader.prodLevels().keys()) {
@@ -271,7 +271,7 @@ public class BuildingForDock extends Building {
   }
   
   
-  public Pathing[] adjacent(Pathing[] temp, Area map) {
+  public Pathing[] adjacent(Pathing[] temp, AreaMap map) {
     
     int numE = entrances() == null ? 0 : entrances().length;
     int numP = numE + docking.length;

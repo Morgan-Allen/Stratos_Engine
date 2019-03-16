@@ -25,11 +25,11 @@ public class TestRetreat extends LogicTest {
     TestRetreat test = new TestRetreat();
     
     Base base = LogicTest.setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, 32, false);
-    Area map = base.activeMap();
+    AreaMap map = base.activeMap();
     World world = base.world;
     
     Base enemyBase = new Base(world, map.locale, FACTION_SETTLERS_B, "Enemy Base");
-    enemyBase.locale.attachMap(map);
+    enemyBase.area.attachMap(map);
     map.addBase(enemyBase);
     Federation.setPosture(
       base.faction(), enemyBase.faction(),

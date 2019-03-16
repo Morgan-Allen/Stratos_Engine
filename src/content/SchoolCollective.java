@@ -72,7 +72,7 @@ public class SchoolCollective {
       super.applyFromActor(using, subject);
       
       final Actor healed = (Actor) subject;
-      Area map = healed.map();
+      AreaMap map = healed.map();
       
       healed.health.liftDamage(PSY_HEAL_AMOUNT);
       healed.health.incBleed(-1000);
@@ -90,7 +90,7 @@ public class SchoolCollective {
       super.applyFromRuler(ruler, subject);
       
       final Actor healed = (Actor) subject;
-      Area map = healed.map();
+      AreaMap map = healed.map();
       
       healed.health.liftDamage(PSY_HEAL_AMOUNT);
       healed.health.incBleed(-1000);
@@ -123,7 +123,7 @@ public class SchoolCollective {
     }
     
     protected void passiveEffect(Actor actor) {
-      Area map = actor.map();
+      AreaMap map = actor.map();
       map.ephemera.updateGhost(actor, 1, FX_MODEL, 0.5f);
     }
   };

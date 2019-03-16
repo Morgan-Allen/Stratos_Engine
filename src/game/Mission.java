@@ -22,7 +22,8 @@ public abstract class Mission implements
     OBJECTIVE_STRIKE  = 1,
     OBJECTIVE_SECURE  = 2,
     OBJECTIVE_RECON   = 3,
-    OBJECTIVE_CONTACT = 4
+    OBJECTIVE_CONTACT = 4,
+    OBJECTIVE_COLONY  = 5
   ;
   final static int
     STAGE_INIT     = -1,
@@ -55,7 +56,7 @@ public abstract class Mission implements
   final public MissionTerms   terms   = new MissionTerms  (this);
   
   //Base localBase;
-  WorldLocale localLocale;
+  Area localLocale;
   AreaTile transitTile;
   ActorAsVessel transport;
   int arriveTime = -1;
@@ -87,9 +88,9 @@ public abstract class Mission implements
     evalForce    = s.loadFloat();
     active       = s.loadBool();
     
-    Area map = (Area) s.loadObject();
+    AreaMap map = (AreaMap) s.loadObject();
     worldFocus = s.loadObject();
-    localFocus = Area.loadTarget(map, s);
+    localFocus = AreaMap.loadTarget(map, s);
     stage    = s.loadInt();
     complete = s.loadBool();
     success  = s.loadBool();
@@ -100,8 +101,8 @@ public abstract class Mission implements
     rewards.loadState(s);
     terms.loadState(s);
     
-    localLocale = (WorldLocale) s.loadObject();
-    transitTile = Area.loadTile(map, s);
+    localLocale = (Area) s.loadObject();
+    transitTile = AreaMap.loadTile(map, s);
     transport   = (ActorAsVessel) s.loadObject();
     arriveTime  = s.loadInt();
   }
@@ -117,10 +118,10 @@ public abstract class Mission implements
     s.saveFloat(evalForce   );
     s.saveBool (active      );
     
-    Area map = localMap();
+    AreaMap map = localMap();
     s.saveObject(map);
     s.saveObject(worldFocus);
-    Area.saveTarget(localFocus, map, s);
+    AreaMap.saveTarget(localFocus, map, s);
     s.saveInt(stage);
     s.saveBool(complete);
     s.saveBool(success);
@@ -132,7 +133,7 @@ public abstract class Mission implements
     terms.saveState(s);
     
     s.saveObject(localLocale);
-    Area.saveTile(transitTile, map, s);
+    AreaMap.saveTile(transitTile, map, s);
     s.saveObject(transport);
     s.saveInt(arriveTime);
   }
@@ -179,11 +180,11 @@ public abstract class Mission implements
   /**  Regular updates and internal events-
     */
   public void beginMission() {
-    beginMission(homeBase.locale);
+    beginMission(homeBase.area);
   }
   
   
-  public void beginMission(WorldLocale locale) {
+  public void beginMission(Area locale) {
     homeBase.missions.toggleMember(this, true);
     this.stage      = STAGE_BEGUN;
     this.active     = true;
@@ -207,7 +208,7 @@ public abstract class Mission implements
       beginJourney(localLocale, worldFocusLocale());
     }
     if (returning && moveSelf && readyToReturn()) {
-      beginJourney(localLocale, homeBase().locale);
+      beginJourney(localLocale, homeBase().area);
     }
     if (returning && recruitsAllHome()) {
       disbandMission();
@@ -244,7 +245,7 @@ public abstract class Mission implements
         isHome = a.map() == homeBase.activeMap();
       }
       else {
-        isHome = a.offmap() == homeBase.locale;
+        isHome = a.offmap() == homeBase.area;
       }
       if (! isHome) return false;
       
@@ -258,7 +259,7 @@ public abstract class Mission implements
   }
   
   
-  void beginJourney(WorldLocale from, WorldLocale goes) {
+  void beginJourney(Area from, Area goes) {
     
     World world = homeBase.world;
     List <Journeys> going = new List();
@@ -278,11 +279,11 @@ public abstract class Mission implements
     //I.say(this+" beginning journey from "+from+" to "+goes);
     //I.say("  ETA: "+world.arriveTime(this));
     
-    if (from == homeBase.locale) stage = STAGE_DEPARTED;
-    if (goes == homeBase.locale) stage = STAGE_RETURNED;
+    if (from == homeBase.area) stage = STAGE_DEPARTED;
+    if (goes == homeBase.area) stage = STAGE_RETURNED;
     
     if (from.isOffmap()) {
-      if (from == homeBase.locale) MissionUtils.handleDeparture(this, homeBase, goes);
+      if (from == homeBase.area) MissionUtils.handleDeparture(this, homeBase, goes);
       handleOffmapDeparture(from, journey);
     }
     
@@ -292,7 +293,7 @@ public abstract class Mission implements
   }
   
   
-  public void onDeparture(WorldLocale from, World.Journey journey) {
+  public void onDeparture(Area from, World.Journey journey) {
     
     ///homeBase.world.events.recordEvent("  Departed", this, from);
     
@@ -300,7 +301,7 @@ public abstract class Mission implements
   }
   
   
-  public void onArrival(WorldLocale goes, World.Journey journey) {
+  public void onArrival(Area goes, World.Journey journey) {
     
     ///homeBase.world.events.recordEvent("  Arrived", this, goes);
     
@@ -312,7 +313,7 @@ public abstract class Mission implements
     }
     if (goes.isOffmap()) {
       handleOffmapArrival(goes, journey);
-      if (goes == homeBase.locale) MissionUtils.handleReturn(this, homeBase, journey);
+      if (goes == homeBase.area) MissionUtils.handleReturn(this, homeBase, journey);
     }
   }
   
@@ -399,7 +400,7 @@ public abstract class Mission implements
   /**  Internal utility methods-
     */
   public boolean onWrongMap() {
-    WorldLocale locale = worldFocusLocale();
+    Area locale = worldFocusLocale();
     if (locale == null) return false;
     if (locale.isOffmap()) return true;
     return locale.activeMap() == localLocale.activeMap();
@@ -417,12 +418,12 @@ public abstract class Mission implements
   }
   
   
-  public WorldLocale worldFocusLocale() {
+  public Area worldFocusLocale() {
     if (worldFocus instanceof Base) {
-      return ((Base) worldFocus).locale;
+      return ((Base) worldFocus).area;
     }
-    if (worldFocus instanceof WorldLocale) {
-      return (WorldLocale) worldFocus;
+    if (worldFocus instanceof Area) {
+      return (Area) worldFocus;
     }
     return null;
   }
@@ -436,12 +437,12 @@ public abstract class Mission implements
   }
   
   
-  public WorldLocale offmapLocale() {
-    return onWrongMap() ? worldFocusLocale() : homeBase.locale;
+  public Area offmapLocale() {
+    return onWrongMap() ? worldFocusLocale() : homeBase.area;
   }
   
   
-  public Area localMap() {
+  public AreaMap localMap() {
     if (localLocale == null) return null;
     return localLocale.activeMap();
   }
@@ -460,8 +461,8 @@ public abstract class Mission implements
   public Pathing transitPoint() {
     
     if (transitTile == null) {
-      Area map = localMap();
-      WorldLocale offmap = offmapLocale();
+      AreaMap map = localMap();
+      Area offmap = offmapLocale();
       if (map != null && offmap != null) {
         transitTile = findTransitPoint(map, localLocale, offmap, Type.MOVE_LAND, 1);
       }
@@ -554,7 +555,7 @@ public abstract class Mission implements
   
   
   public boolean goesOffmap() {
-    WorldLocale focus = worldFocusLocale();
+    Area focus = worldFocusLocale();
     return focus != null && focus.isOffmap();
   }
   
@@ -582,8 +583,8 @@ public abstract class Mission implements
   
   abstract Task nextLocalMapBehaviour(Actor actor);
   
-  abstract void handleOffmapArrival  (WorldLocale goes, World.Journey journey);
-  abstract void handleOffmapDeparture(WorldLocale from, World.Journey journey);
+  abstract void handleOffmapArrival  (Area goes, World.Journey journey);
+  abstract void handleOffmapDeparture(Area from, World.Journey journey);
   
   
   

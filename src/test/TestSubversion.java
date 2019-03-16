@@ -24,7 +24,7 @@ public class TestSubversion extends LogicTest {
     LogicTest test = new TestSubversion();
     
     Base base = setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, 32, false);
-    Area map = base.activeMap();
+    AreaMap map = base.activeMap();
     World world = map.world;
     world.settings.toggleFog     = false;
     world.settings.toggleHunger  = false;

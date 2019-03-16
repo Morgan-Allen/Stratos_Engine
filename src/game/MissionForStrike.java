@@ -76,7 +76,7 @@ public class MissionForStrike extends Mission {
   }
   
   
-  void handleOffmapArrival(WorldLocale goes, World.Journey journey) {
+  void handleOffmapArrival(Area goes, World.Journey journey) {
     if (goes == worldFocusLocale()) {
       Base focus = worldFocusBase();
       MissionUtils.handleInvasion(this, focus, journey);
@@ -84,7 +84,7 @@ public class MissionForStrike extends Mission {
   }
   
   
-  void handleOffmapDeparture(WorldLocale from, Journey journey) {
+  void handleOffmapDeparture(Area from, Journey journey) {
     return;
   }
   
@@ -132,7 +132,7 @@ public class MissionForStrike extends Mission {
   }
   
   
-  public static int powerSum(Series <Actor> recruits, Area mapOnly) {
+  public static int powerSum(Series <Actor> recruits, AreaMap mapOnly) {
     float sumStats = 0;
     for (Actor a : recruits) {
       if (mapOnly != null && a.map != mapOnly) continue;
@@ -152,12 +152,12 @@ public class MissionForStrike extends Mission {
     
     AreaTile tempT[] = new AreaTile[9];
     
-    public SiegeSearch(Area map, AreaTile init, AreaTile dest) {
+    public SiegeSearch(AreaMap map, AreaTile init, AreaTile dest) {
       super(map, init, dest, -1);
     }
     
     protected Pathing[] adjacent(Pathing spot) {
-      Area.adjacent((AreaTile) spot, tempT, map);
+      AreaMap.adjacent((AreaTile) spot, tempT, map);
       return tempT;
     }
     
@@ -179,7 +179,7 @@ public class MissionForStrike extends Mission {
   static class Option { Target target; AreaTile secures; float rating; }
   
   Option tacticalOptionFor(
-    Target focus, Area map, Pathing pathFrom, boolean checkPathing
+    Target focus, AreaMap map, Pathing pathFrom, boolean checkPathing
   ) {
     
     if (focus instanceof Element) {
@@ -200,8 +200,8 @@ public class MissionForStrike extends Mission {
       }
       
       AreaTile secures = e.centre();
-      float dist = Area.distance(secures, pathFrom);
-      float rating = Area.distancePenalty(dist);
+      float dist = AreaMap.distance(secures, pathFrom);
+      float rating = AreaMap.distancePenalty(dist);
       
       Option o = new Option();
       o.target  = focus;
@@ -217,7 +217,7 @@ public class MissionForStrike extends Mission {
   Object updateTacticalTarget(Target current) {
     //
     //  Basic sanity checks first-
-    Area    map    = localMap();
+    AreaMap    map    = localMap();
     Pathing from   = transitTile();
     Base    sieges = (Base) worldFocus();
     if (sieges == null || from == null || map == null) return null;

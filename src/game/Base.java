@@ -16,7 +16,7 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
   String name = "City";
   
   final public World world;
-  final public WorldLocale locale;
+  final public Area area;
   
   private Faction faction;
   private Federation federation = null;
@@ -41,17 +41,17 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
   
   
   
-  public Base(World world, WorldLocale locale, Faction faction) {
+  public Base(World world, Area locale, Faction faction) {
     this(world, locale, faction, "Base???");
   }
   
   
-  public Base(World world, WorldLocale locale, Faction faction, String name) {
+  public Base(World world, Area locale, Faction faction, String name) {
     if (world  == null) I.complain("CANNOT PASS NULL WORLD:  "+name);
     if (locale == null) I.complain("CANNOT PASS NULL LOCALE: "+name);
     
     this.world   = world  ;
-    this.locale  = locale ;
+    this.area  = locale ;
     this.faction = faction;
     
     this.name = name;
@@ -63,9 +63,9 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
     
     name = s.loadString();
     
-    world   = (World      ) s.loadObject();
-    locale  = (WorldLocale) s.loadObject();
-    faction = (Faction    ) s.loadObject();
+    world   = (World  ) s.loadObject();
+    area    = (Area   ) s.loadObject();
+    faction = (Faction) s.loadObject();
     
     s.loadObjects(buildTypes);
     
@@ -89,7 +89,7 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
     s.saveString(name);
     
     s.saveObject(world);
-    s.saveObject(locale);
+    s.saveObject(area);
     s.saveObject(faction);
     
     s.saveObjects(buildTypes);
@@ -136,8 +136,8 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
   }
   
   
-  public Area activeMap() {
-    return locale.activeMap();
+  public AreaMap activeMap() {
+    return area.activeMap();
   }
   
   
@@ -310,7 +310,7 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
   /**  Regular updates-
     */
   void updateBase() {
-    final Area map = locale.activeMap();
+    final AreaMap map = area.activeMap();
     final int UPDATE_GAP = map == null ? DAY_LENGTH : 10;
     boolean updateStats = world.time % UPDATE_GAP == 0;
     boolean activeMap   = map != null;

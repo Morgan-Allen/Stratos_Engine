@@ -38,7 +38,7 @@ public class Federation {
   GOVERNMENT government = GOVERNMENT.FEUDAL;
   int typeAI = AI_NORMAL;
   
-  Tally <WorldLocale> exploreLevels = new Tally();
+  Tally <Area> exploreLevels = new Tally();
   
   
   
@@ -179,15 +179,15 @@ public class Federation {
   
   /**  Levels of exploration-
     */
-  public float exploreLevel(WorldLocale l) {
+  public float exploreLevel(Area l) {
     return exploreLevels.valueFor(l);
   }
   
-  public void setExploreLevel(WorldLocale l, float value) {
+  public void setExploreLevel(Area l, float value) {
     exploreLevels.set(l, value);
   }
   
-  public void setMaxExploreLevel(WorldLocale l, float value) {
+  public void setMaxExploreLevel(Area l, float value) {
     float oldL = exploreLevel(l);
     if (value > oldL) setExploreLevel(l, value);
   }

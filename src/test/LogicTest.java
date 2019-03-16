@@ -19,13 +19,16 @@ public class LogicTest {
     Faction faction, Good goods[],
     int size, boolean genTerrain, Terrain... gradient
   ) {
-    World       world  = new World(goods);
-    WorldLocale locale = world.addLocale(5, 5);
-    Base        base   = new Base(world, locale, faction, "Test Base");
-    Area        map    = null;
+    AreaType typeA = new AreaType(LogicTest.class, "test_area", "Test Area");
+    typeA.initPosition(5, 5, false);
+    
+    World   world = new World(goods);
+    Area    area  = world.addArea(typeA);
+    Base    base  = new Base(world, area, faction, "Test Base");
+    AreaMap map   = null;
     
     if (! genTerrain) {
-      map = new Area(world, locale, base);
+      map = new AreaMap(world, area, base);
       map.performSetup(size, gradient);
     }
     else {
@@ -41,13 +44,19 @@ public class LogicTest {
   }
   
   
+  protected static Area addArea(World w, float mapX, float mapY, int ID) {
+    AreaType typeA = new AreaType(LogicTest.class, "TA_"+ID, "Test Area "+ID);
+    return w.addArea(typeA);
+  }
+  
+  
   protected static Base setupTestBase(
     Faction faction, Good goods[],
     byte layout[][], byte elevation[][], Terrain... gradient
   ) {
     int wide = layout.length, high = layout[0].length;
     Base base = setupTestBase(faction, goods, Nums.max(wide, high), false, gradient);
-    Area map = base.activeMap();
+    AreaMap map = base.activeMap();
     
     for (AreaTile t : map.allTiles()) {
       Terrain terr = gradient[layout[t.x][t.y]];
@@ -118,7 +127,7 @@ public class LogicTest {
   }
   
   
-  Box2D drawnBox(Area map) {
+  Box2D drawnBox(AreaMap map) {
     Box2D b = new Box2D(hover.x, hover.y, 0, 0);
     if (drawnTile != null) b.include(drawnTile.x, drawnTile.y, 0);
     b.incHigh(1);
@@ -129,7 +138,7 @@ public class LogicTest {
   }
   
   
-  void updateAreaView(Area map, Base base) {
+  void updateAreaView(AreaMap map, Base base) {
     configGraphic(map.size(), map.size());
     
     AreaDanger dangerMap = map.dangerMap(base.faction(), false);
@@ -229,7 +238,7 @@ public class LogicTest {
   }
   
   
-  void updatePathingView(Area map, Base base) {
+  void updatePathingView(AreaMap map, Base base) {
     configGraphic(map.size(), map.size());
     
     AreaTile hovered = map.tileAt(hover.x, hover.y);
@@ -272,7 +281,7 @@ public class LogicTest {
   }
   
   
-  private void updateCityFogLayer(Area map, Base base) {
+  private void updateCityFogLayer(AreaMap map, Base base) {
     AreaFog fogMap = map.fogMap(base.faction(), false);
     if (fogMap == null) return;
     
@@ -288,7 +297,7 @@ public class LogicTest {
   }
   
   
-  private void updateWorldMapView(Area map) {
+  private void updateWorldMapView(AreaMap map) {
     World world = map.world;
     int wide = world.mapWide() * 2, high = world.mapHigh() * 2;
     configGraphic(wide, high);
@@ -307,7 +316,8 @@ public class LogicTest {
     }
     
     for (Base city : world.bases()) {
-      int x = (int) city.locale.mapX() * 2, y = (int) city.locale.mapY() * 2;
+      int x = (int) city.area.type.mapX() * 2;
+      int y = (int) city.area.type.mapY() * 2;
       for (Coord c : Visit.grid(x, y, 2, 2, 1)) {
         graphic[c.x][c.y] = city.tint();
         if (hover.matches(c)) above = city;
@@ -339,7 +349,7 @@ public class LogicTest {
   public Base runLoop(
     Base base, int numUpdates, boolean graphics, String filename
   ) {
-    Area map = base.activeMap();
+    AreaMap map = base.activeMap();
     int skipUpdate = 0;
     boolean doQuit = false;
     this.filename = filename;
@@ -637,7 +647,7 @@ public class LogicTest {
   }
   
   
-  private String reportForBuildMenu(Area map, Base city) {
+  private String reportForBuildMenu(AreaMap map, Base city) {
     StringBuffer report = new StringBuffer("");
     
     /*
@@ -758,7 +768,7 @@ public class LogicTest {
   }
   
   
-  private String baseReport(Area map, Base base) {
+  private String baseReport(AreaMap map, Base base) {
     StringBuffer report = new StringBuffer("Home Base: "+base);
     WorldSettings settings = map.world.settings;
     

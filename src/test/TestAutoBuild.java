@@ -22,7 +22,7 @@ public class TestAutoBuild extends LogicTest {
     LogicTest test = new TestAutoBuild();
     
     Base base = setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, 16, false);
-    Area map = base.activeMap();
+    AreaMap map = base.activeMap();
     World world = map.world;
     world.settings.toggleFog         = false;
     world.settings.toggleFatigue     = false;

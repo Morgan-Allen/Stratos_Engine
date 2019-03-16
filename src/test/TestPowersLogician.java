@@ -35,7 +35,7 @@ public class TestPowersLogician {
       float initHP = -1;
       boolean boostHP = false;
       
-      Target createSubject(Area map, Building guild) {
+      Target createSubject(AreaMap map, Building guild) {
         Actor subject = (Actor) super.createSubject(map, guild);
         initHP = subject.health.maxHealth();
         return subject;
@@ -61,13 +61,13 @@ public class TestPowersLogician {
   static boolean testStrike(boolean graphics) {
     TestPowers test = new TestPowers() {
       
-      Building createGuild(Area map, Base base) {
+      Building createGuild(AreaMap map, Base base) {
         map.world.settings.toggleFog     = false;
         map.world.settings.toggleRetreat = false;
         return createGuild(map, base, SCHOOL_LOG);
       }
       
-      Target createSubject(Area map, Building guild) {
+      Target createSubject(AreaMap map, Building guild) {
         Actor subject = createSubject(map, guild, Trooper.TROOPER, true);
         //subject.health.takeDamage(subject.health.maxHealth() * 0.5f);
         //subject.health.incBleed(-1000);

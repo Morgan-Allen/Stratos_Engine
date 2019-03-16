@@ -47,7 +47,7 @@ public class TaskTransport extends Task {
   
   public void beginFromOffmap(Base from) {
     World world = mission.homeBase.world;
-    WorldLocale home = mission.homeBase().locale, away = mission.worldFocusLocale();
+    Area home = mission.homeBase().area, away = mission.worldFocusLocale();
     world.beginJourney(home, away, vessel.type().moveMode, vessel);
   }
   
@@ -55,27 +55,27 @@ public class TaskTransport extends Task {
   protected void onTarget(Target target) {
     
     Base home = mission.homeBase();
-    WorldLocale away = mission.worldFocusLocale();
+    Area away = mission.worldFocusLocale();
 
     if (mission.complete() && vessel.map() == home.activeMap()) {
       returned = true;
     }
     
     if (type == JOB.DEPARTING) {
-      mission.beginJourney(home.locale, away);
+      mission.beginJourney(home.area, away);
       vessel.exitMap(vessel.map());
       return;
     }
     
     if (type == JOB.RETURNING) {
-      mission.beginJourney(away, home.locale);
+      mission.beginJourney(away, home.area);
       vessel.exitMap(vessel.map());
       return;
     }
     
     if (mission.readyToDepart() && ! returned) {
       AreaTile transit = ActorUtils.findTransitPoint(
-        vessel.map(), home.locale, away, vessel
+        vessel.map(), home.area, away, vessel
       );
       configTask(origin, null, transit, JOB.DEPARTING, 0);
       vessel.doTakeoff(vessel.landsAt());
@@ -84,7 +84,7 @@ public class TaskTransport extends Task {
     
     if (mission.readyToReturn() && ! returned) {
       AreaTile transit = ActorUtils.findTransitPoint(
-        vessel.map(), away, home.locale, vessel
+        vessel.map(), away, home.area, vessel
       );
       configTask(origin, null, transit, JOB.RETURNING, 0);
       vessel.doTakeoff(vessel.landsAt());
@@ -103,12 +103,12 @@ public class TaskTransport extends Task {
   
 
   
-  boolean doingLanding(WorldLocale local) {
+  boolean doingLanding(Area local) {
     return local.activeMap() != null && active.type().isAirship();
   }
   
   
-  protected boolean updateOnArrival(WorldLocale goes, World.Journey journey) {
+  protected boolean updateOnArrival(Area goes, World.Journey journey) {
     //
     //  If we're arriving at a base with an active map, then we proceed to
     //  whatever landing-site the vessel was able to find...

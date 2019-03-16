@@ -27,7 +27,7 @@ public class TestFarming extends LogicTest {
     LogicTest test = new TestFarming();
     
     Base base = setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, 20, true, DESERT, MEADOW, JUNGLE);
-    Area map = base.activeMap();
+    AreaMap map = base.activeMap();
     World world = map.world;
     world.settings.toggleFog     = false;
     world.settings.toggleHunger  = false;

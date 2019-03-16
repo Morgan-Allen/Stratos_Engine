@@ -2,7 +2,7 @@
 
 package game;
 import util.*;
-import static game.Area.*;
+import static game.AreaMap.*;
 import static game.GameConstants.*;
 
 
@@ -13,14 +13,14 @@ public class AreaFlagging {
   
   /**  Data fields, construction and save/load methods-
     */
-  Area map;
+  AreaMap map;
   Object key;
   int range;
   
   Object flagLevels[];
   
   
-  AreaFlagging(Area map, Object key, int range) {
+  AreaFlagging(AreaMap map, Object key, int range) {
     this.map = map;
     this.key = key;
     this.range = range;
@@ -206,7 +206,7 @@ public class AreaFlagging {
       AreaTile t = map.tileAt(c.x, c.y);
       if (t == null || t.hasFocus()) continue;
       
-      float dist = Area.distance(from, t);
+      float dist = AreaMap.distance(from, t);
       if (dist > range || vals[t.x][t.y] == 0) continue;
       
       pick.compare(t, 0 - dist);

@@ -15,7 +15,7 @@ public class Faction extends Type implements RelationSet.Focus {
   Colour colour;
   int tint = CITY_COLOR;
   
-  WorldLocale homeland = null;
+  Area homeland = null;
   BuildType buildTypes[] = {};
   
   
@@ -34,7 +34,7 @@ public class Faction extends Type implements RelationSet.Focus {
   }
   
   
-  public WorldLocale homeland() {
+  public Area homeland() {
     return homeland;
   }
   

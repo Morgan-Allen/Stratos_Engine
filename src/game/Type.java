@@ -153,7 +153,7 @@ public class Type extends Constant {
   
   /**  Building-specific data fields and setup methods-
     */
-  public boolean rulerCanBuild(Base ruler, Area map) {
+  public boolean rulerCanBuild(Base ruler, AreaMap map) {
     if (! rulerBuilt) return false;
     if (uniqueBuilding) {
       for (Building b : map.buildings()) if (b.type() == this) return false;

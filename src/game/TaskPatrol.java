@@ -50,32 +50,32 @@ public class TaskPatrol extends Task implements TileConstants {
   
   public TaskPatrol(Session s) throws Exception {
     super(s);
-    Area map = active.map();
+    AreaMap map = active.map();
     
     type     = s.loadInt();
-    guarded  = Area.loadTarget(map, s);
+    guarded  = AreaMap.loadTarget(map, s);
     numStops = s.loadInt();
-    onPoint  = Area.loadTarget(map, s);
+    onPoint  = AreaMap.loadTarget(map, s);
     
     patrolled = new List();
     for (int n = s.loadInt(); n-- > 0;) {
-      patrolled.add(Area.loadTarget(map, s));
+      patrolled.add(AreaMap.loadTarget(map, s));
     }
   }
   
   
   public void saveState(Session s) throws Exception {
     super.saveState(s);
-    Area map = active.map();
+    AreaMap map = active.map();
     
     s.saveInt(type);
-    Area.saveTarget(guarded, map, s);
+    AreaMap.saveTarget(guarded, map, s);
     s.saveInt(numStops);
-    Area.saveTarget(onPoint, map, s);
+    AreaMap.saveTarget(onPoint, map, s);
     
     s.saveInt(patrolled.size());
     for (Target t : patrolled) {
-      Area.saveTarget(t, map, s);
+      AreaMap.saveTarget(t, map, s);
     }
   }
   
@@ -89,7 +89,7 @@ public class TaskPatrol extends Task implements TileConstants {
     final boolean report = evalVerbose && I.talkAbout == actor;
     if (report) I.say("\nGetting next perimeter patrol for "+actor);
     
-    final Area map = actor.map();
+    final AreaMap map = actor.map();
     final List <Target> patrolled = new List();
     
     if (! guarded.type().isBuilding()) {
@@ -142,13 +142,13 @@ public class TaskPatrol extends Task implements TileConstants {
     }
     
     //  Grab a random building nearby and patrol around it.
-    final Area map = actor.map();
+    final AreaMap map = actor.map();
     final Base base = origin.base();
     final float range = GameConstants.MAX_WANDER_RANGE;
     
     Pick <Building> pick = new Pick();
     for (Building b : map.buildings()) if (b.base() == base) {
-      float dist = Area.distance(origin, b);
+      float dist = AreaMap.distance(origin, b);
       if (dist > range) continue;
       if (Task.hasTaskFocus(b, JOB.PATROLLING)) continue;
       pick.compare(b, Rand.num());
@@ -200,7 +200,7 @@ public class TaskPatrol extends Task implements TileConstants {
       I.say("  All patrol points: "+patrolled);
     }
     
-    final Area map = actor.map();
+    final AreaMap map = actor.map();
     AreaTile stop = onPoint.at();
     
     if (onPoint.type().isActor()) {

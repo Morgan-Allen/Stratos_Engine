@@ -38,7 +38,7 @@ public class Actor extends Element implements
   private Employer work;
   private Building home;
   private Mission  mission;
-  private WorldLocale offmap;
+  private Area offmap;
   
   private Task task;
   private Task reaction;
@@ -85,7 +85,7 @@ public class Actor extends Element implements
     work      = (Employer) s.loadObject();
     home      = (Building) s.loadObject();
     mission   = (Mission ) s.loadObject();
-    offmap    = (WorldLocale) s.loadObject();
+    offmap    = (Area) s.loadObject();
     
     task      = (Task) s.loadObject();
     reaction  = (Task) s.loadObject();
@@ -160,7 +160,7 @@ public class Actor extends Element implements
   
   /**  World entry and exit-
     */
-  public void enterMap(Area map, int x, int y, float buildLevel, Base owns) {
+  public void enterMap(AreaMap map, int x, int y, float buildLevel, Base owns) {
     super.enterMap(map, x, y, buildLevel, owns);
     
     map.actors.add(this);
@@ -168,7 +168,7 @@ public class Actor extends Element implements
   }
   
   
-  public void exitMap(Area map) {
+  public void exitMap(AreaMap map) {
     if (inside != null) setInside(inside, false);
     
     map.actors.remove(this);
@@ -194,7 +194,7 @@ public class Actor extends Element implements
   }
   
   
-  public boolean onMap(Area map) {
+  public boolean onMap(AreaMap map) {
     return map != null && map == this.map;
   }
   
@@ -219,12 +219,12 @@ public class Actor extends Element implements
   }
   
   
-  void setOffmap(WorldLocale offmap) {
+  void setOffmap(Area offmap) {
     this.offmap = offmap;
   }
   
   
-  public WorldLocale offmap() {
+  public Area offmap() {
     return offmap;
   }
   
@@ -290,7 +290,7 @@ public class Actor extends Element implements
     if (onMap()) bonds.updateBonds();
     if (onMap()) health.updateHealth(map());
     if (onMap()) health.checkHealthState();
-    if (onMap() && health.alive()) health.updateLifeCycle(base().locale, true);
+    if (onMap() && health.alive()) health.updateLifeCycle(base().area, true);
   }
   
   
@@ -318,7 +318,7 @@ public class Actor extends Element implements
   }
   
   
-  void updateOffMap(WorldLocale locale) {
+  void updateOffMap(Area locale) {
     //  TODO:  Update traits as well.
     health.updateHealthOffmap(locale);
     health.updateLifeCycle(locale, false);
@@ -371,7 +371,7 @@ public class Actor extends Element implements
   }
   
   
-  public void setLocation(AreaTile at, Area map) {
+  public void setLocation(AreaTile at, AreaMap map) {
     if (! onMap()) {
       super.setLocation(at, map);
       return;
@@ -396,7 +396,7 @@ public class Actor extends Element implements
   }
   
   
-  public void setExactLocation(Vec3D location, Area map, boolean jump) {
+  public void setExactLocation(Vec3D location, AreaMap map, boolean jump) {
     
     AreaTile goes = map.tileAt(location.x, location.y);
     setLocation(goes, map);
@@ -593,7 +593,7 @@ public class Actor extends Element implements
   
   /**  Handling migration and off-map tasks-
     */
-  public void onArrival(WorldLocale goes, World.Journey journey) {
+  public void onArrival(Area goes, World.Journey journey) {
     
     if (goes.activeMap() != null && inside() == null) {
       AreaTile entry = ActorUtils.findTransitPoint(
@@ -612,7 +612,7 @@ public class Actor extends Element implements
   }
   
   
-  public void onDeparture(WorldLocale from, World.Journey journey) {
+  public void onDeparture(Area from, World.Journey journey) {
     if (from.activeMap() == null) {
       from.toggleVisitor(this, false);
     }
@@ -772,7 +772,7 @@ public class Actor extends Element implements
     
     for (Active a : around) {
       
-      float dist = Area.distance(this, a);
+      float dist = AreaMap.distance(this, a);
       float sight = 1, hide = 0;
       
       if (noticeRange > 0) {

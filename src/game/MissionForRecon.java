@@ -43,7 +43,7 @@ public class MissionForRecon extends Mission {
       //
       //  In the case of exploring an entire foreign base...
       if (worldFocus() != null && ! onWrongMap()) {
-        Area     map   = localMap();
+        AreaMap  map   = localMap();
         AreaFog  fog   = map.fogMap(homeBase().faction(), true);
         AreaTile looks = (AreaTile) localFocus();
         
@@ -57,7 +57,7 @@ public class MissionForRecon extends Mission {
       //
       //  In the case of local exploration, check for fulfillment:
       else if (localFocus() instanceof AreaTile) {
-        Area     map   = localMap();
+        AreaMap  map   = localMap();
         AreaFog  fog   = map.fogMap(homeBase().faction(), true);
         AreaTile looks = (AreaTile) localFocus();
         
@@ -65,7 +65,7 @@ public class MissionForRecon extends Mission {
         boolean allSeen = true;
         
         for (AreaTile t : map.tilesUnder(looks.x - r, looks.y - r, r * 2, r * 2)) {
-          float dist = Area.distance(looks, t);
+          float dist = AreaMap.distance(looks, t);
           if (dist > r) continue;
           if (fog.maxSightLevel(t) == 0) allSeen = false;
         }
@@ -92,7 +92,7 @@ public class MissionForRecon extends Mission {
   }
 
 
-  void handleOffmapArrival(WorldLocale goes, World.Journey journey) {
+  void handleOffmapArrival(Area goes, World.Journey journey) {
     if (goes == worldFocus()) {
       MissionUtils.handleRecon(this, goes, journey);
     }
@@ -100,7 +100,7 @@ public class MissionForRecon extends Mission {
   }
   
   
-  void handleOffmapDeparture(WorldLocale from, Journey journey) {
+  void handleOffmapDeparture(Area from, Journey journey) {
     return;
   }
   

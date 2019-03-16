@@ -102,7 +102,7 @@ public class BuildType extends Type {
   
   
 
-  public boolean rulerCanBuild(Base ruler, Area map) {
+  public boolean rulerCanBuild(Base ruler, AreaMap map) {
     if (! super.rulerCanBuild(ruler, map)) return false;
     
     //  TODO:  This will be too slow on large maps.  Use build-levels instead.

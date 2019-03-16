@@ -9,6 +9,7 @@ import graphics.widgets.*;
 import start.*;
 import game.*;
 import util.*;
+import static game.WorldScenario.*;
 
 
 
@@ -71,8 +72,8 @@ public class ReminderListing extends UIGroup {
     if (refers instanceof Mission) {
       entry = new MissionReminder(UI, (Mission) refers);
     }
-    if (refers instanceof Scenario.Objective) {
-      entry = new ObjectiveReminder(UI, (Scenario.Objective) refers);
+    if (refers instanceof Objective) {
+      entry = new ObjectiveReminder(UI, (Objective) refers);
     }
     /*
     if (refers instanceof MessagePane) {
@@ -116,7 +117,7 @@ public class ReminderListing extends UIGroup {
     Scenario scenario = MainGame.currentScenario();
     //final float currentTime = played.world.time();
     
-    for (Scenario.Objective objective : scenario.objectives()) {
+    for (Objective objective : scenario.objectives()) {
       needShow.add(objective);
     }
     for (final Mission mission : played.missions()) {

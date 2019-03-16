@@ -67,7 +67,7 @@ public class TaskTrading extends Task {
     Employer origin = null;
     if (from instanceof Employer) origin = (Employer) from;
     
-    if (task.doingLanding(from.base().locale)) {
+    if (task.doingLanding(from.base().area)) {
       ActorAsVessel ship = (ActorAsVessel) trading;
       AreaTile docks = ship.landsAt();
       task.configTask(origin, null, docks, JOB.DOCKING, 10);
@@ -90,17 +90,17 @@ public class TaskTrading extends Task {
   }
   
   
-  boolean doingLanding(WorldLocale local) {
+  boolean doingLanding(Area local) {
     return local.activeMap() != null && active.type().isAirship();
   }
   
   
-  boolean shouldTakeoff(Area map) {
+  boolean shouldTakeoff(AreaMap map) {
     return map.time() - waitInitTime > SHIP_WAIT_TIME;
   }
   
   
-  Area activeMap(Trader t) {
+  AreaMap activeMap(Trader t) {
     if (t instanceof Element) return ((Element) t).map();
     else return t.base().activeMap();
   }
@@ -113,7 +113,7 @@ public class TaskTrading extends Task {
     Trader from, Trader goes, Task.JOB jobType, Employer e, boolean duringTask
   ) {
     Actor actor = (Actor) active;
-    Area fromA = activeMap(from), goesA = activeMap(goes);
+    AreaMap fromA = activeMap(from), goesA = activeMap(goes);
     //
     //  If your're headed to a building on the same map, either proceed to the
     //  entrance or head to the corner tile.
@@ -131,19 +131,19 @@ public class TaskTrading extends Task {
     //  point or begin your journey directly.
     else {
       if (actor.onMap()) {
-        AreaTile exits = findTransitPoint(actor.map(), from.base().locale, goes.base().locale, actor);
+        AreaTile exits = findTransitPoint(actor.map(), from.base().area, goes.base().area, actor);
         configTask(origin, null, exits, Task.JOB.DEPARTING, 0);
       }
       else if (duringTask && goes != actor.offmap()) {
         World world = homeCity.world;
         int moveMode = actor.type().moveMode;
-        world.beginJourney(from.base().locale, goes.base().locale, moveMode, actor);
+        world.beginJourney(from.base().area, goes.base().area, moveMode, actor);
       }
     }
   }
   
   
-  protected boolean updateOnArrival(WorldLocale goes, World.Journey journey) {
+  protected boolean updateOnArrival(Area goes, World.Journey journey) {
     //
     //  If you're landing as a ship, proceed to whichever docking site is
     //  available-
@@ -156,13 +156,13 @@ public class TaskTrading extends Task {
     //
     //  If you've arrived at your destination city, offload your cargo, take on
     //  fresh goods, and record any profits in the process:
-    if (goes != homeCity.locale && ! didImport) {
+    if (goes != homeCity.area && ! didImport) {
       onVisit(tradeGoes);
       return true;
     }
     //
     //  If you've arrived back on your home map, return to your post-
-    else if (goes == homeCity.locale && goes.activeMap() != null) {
+    else if (goes == homeCity.area && goes.activeMap() != null) {
       configTravel(tradeFrom, tradeFrom, JOB.RETURNING, origin, true);
       return true;
     }
@@ -198,7 +198,7 @@ public class TaskTrading extends Task {
     //  If this is a place you're waiting for trade, stay there for a while.
     if (type == JOB.DOCKING) {
       ActorAsVessel ship = (ActorAsVessel) actor;
-      Area map = ship.map();
+      AreaMap map = ship.map();
       
       if (! ship.landed()) {
         ship.doLanding((AreaTile) target);
@@ -240,11 +240,11 @@ public class TaskTrading extends Task {
     //  But if you've arrived at the edge of the map, begin your journey to a
     //  foreign city:
     else if (type == JOB.DEPARTING && ! didImport) {
-      from.world.beginJourney(from.locale, goes.locale, moveMode, actor);
+      from.world.beginJourney(from.area, goes.area, moveMode, actor);
       actor.exitMap(actor.map());
     }
     else if (type == JOB.DEPARTING && didImport) {
-      from.world.beginJourney(goes.locale, from.locale, moveMode, actor);
+      from.world.beginJourney(goes.area, from.area, moveMode, actor);
       actor.exitMap(actor.map());
     }
   }
@@ -510,14 +510,14 @@ public class TaskTrading extends Task {
       goes instanceof Building &&
       fromB == goesB
     ) {
-      float mapDist = Area.distance(
+      float mapDist = AreaMap.distance(
         ((Building) from).mainEntrance(),
         ((Building) goes).mainEntrance()
       );
       return 1f / (1 + (mapDist / MAX_TRADER_RANGE));
     }
     else {
-      return ActorUtils.distanceRating(fromB.locale, goesB.locale);
+      return ActorUtils.distanceRating(fromB.area, goesB.area);
     }
   }
   

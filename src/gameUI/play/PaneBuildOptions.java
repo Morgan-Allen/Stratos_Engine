@@ -28,7 +28,7 @@ public class PaneBuildOptions extends DetailPane {
     text.setText("");
     final Description d = text;
     
-    final Area area = UI.area;
+    final AreaMap area = UI.area;
     final Base base = UI.base;
     
     d.append("\nBuilding Types: ");
@@ -62,7 +62,7 @@ public class PaneBuildOptions extends DetailPane {
   private void beginInstallTask(Type type) {
     
     placed = (Element) type.generate();
-    final Area area = UI.area;
+    final AreaMap area = UI.area;
     final Base base = UI.base;
     
     final PlayTask task = new PlayTask() {

@@ -2,7 +2,7 @@
 
 package game;
 import util.*;
-import static game.Area.*;
+import static game.AreaMap.*;
 import static game.GameConstants.*;
 
 
@@ -50,7 +50,7 @@ public class BuildingForGather extends Building {
   
   /**  Utility methods for filling up crop areas:
     */
-  public void enterMap(Area map, int x, int y, float buildLevel, Base owns) {
+  public void enterMap(AreaMap map, int x, int y, float buildLevel, Base owns) {
     super.enterMap(map, x, y, buildLevel, owns);
     
     if (isClaimant() && TaskGathering.canPlant(this)) {
@@ -70,7 +70,7 @@ public class BuildingForGather extends Building {
     if (at.terrain.pathing != Type.PATH_FREE) return false;
     if (at.above != null && ! at.above.type().isClearable()) return false;
     
-    for (AreaTile t : Area.adjacent(at, temp, map())) {
+    for (AreaTile t : AreaMap.adjacent(at, temp, map())) {
       if (t == null || t.above == null) continue;
       if (t.above.type().isClearable()) continue;
       if (t.above.type().pathing <= Type.PATH_FREE) continue;

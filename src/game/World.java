@@ -1,10 +1,8 @@
 
 
 package game;
-import util.*;
 import static game.GameConstants.*;
-
-import game.World.Route;
+import util.*;
 
 
 
@@ -18,17 +16,18 @@ public class World implements Session.Saveable {
     int moveMode;
   }
   
+  
   public static class Journey {
     
-    WorldLocale from;
-    WorldLocale goes;
+    Area from;
+    Area goes;
     int startTime;
     int arriveTime;
     int moveMode;
     Batch <Journeys> going = new Batch();
     
-    public WorldLocale from() { return from; }
-    public WorldLocale goes() { return goes; }
+    public Area from() { return from; }
+    public Area goes() { return goes; }
     public Series <Journeys> going() { return going; }
   }
   
@@ -59,9 +58,9 @@ public class World implements Session.Saveable {
   Table <Faction, Federation> federations = new Table();
   Faction playerFaction = null;
   
-  List <WorldLocale> locales  = new List();
-  List <Base       > bases    = new List();
-  List <Journey    > journeys = new List();
+  List <Area   > areas    = new List();
+  List <Base   > bases    = new List();
+  List <Journey> journeys = new List();
   
   //  Only used for graphical reference...
   int mapWide = 10, mapHigh = 10;
@@ -125,13 +124,13 @@ public class World implements Session.Saveable {
     }
     playerFaction = (Faction) s.loadObject();
     
-    s.loadObjects(locales);
+    s.loadObjects(areas);
     s.loadObjects(bases);
     
     for (int n = s.loadInt(); n-- > 0;) {
       Journey j = new Journey();
-      j.from       = (WorldLocale) s.loadObject();
-      j.goes       = (WorldLocale) s.loadObject();
+      j.from       = (Area) s.loadObject();
+      j.goes       = (Area) s.loadObject();
       j.startTime  = s.loadInt();
       j.arriveTime = s.loadInt();
       j.moveMode   = s.loadInt();
@@ -175,7 +174,7 @@ public class World implements Session.Saveable {
     }
     s.saveObject(playerFaction);
     
-    s.saveObjects(locales);
+    s.saveObjects(areas);
     s.saveObjects(bases);
     
     s.saveInt(journeys.size());
@@ -211,33 +210,15 @@ public class World implements Session.Saveable {
   
   /**  Managing Factions, Bases and Locales:
     */
-  public static void setupRoute(WorldLocale a, WorldLocale b, int distance, int moveMode) {
-    Route route = new Route();
-    route.distance = distance;
-    route.moveMode = moveMode;
-    a.routes.put(b, route);
-    b.routes.put(a, route);
-  }
-  
-  
-  public WorldLocale addLocale(float mapX, float mapY, String label, boolean homeland) {
-    WorldLocale l = new WorldLocale();
-    l.mapX  = mapX;
-    l.mapY  = mapY;
-    l.label = label;
-    l.homeland = homeland;
-    this.locales.add(l);
-    return l;
-  }
-  
-  
-  public WorldLocale addLocale(float mapX, float mapY) {
-    return addLocale(mapX, mapY, "Locale at "+mapX+"|"+mapY, false);
+  public Area addArea(AreaType type) {
+    Area area = new Area(type);
+    this.areas.add(area);
+    return area;
   }
   
   
   public static Vec2D mapCoords(Base b) {
-    return new Vec2D(b.locale.mapX, b.locale.mapY);
+    return new Vec2D(b.area.type.mapX, b.area.type.mapY);
   }
   
   
@@ -245,27 +226,28 @@ public class World implements Session.Saveable {
     Visit.appendTo(this.bases, bases);
   }
   
-  
+
   public Base baseNamed(String n) {
     for (Base b : bases) if (b.name.equals(n)) return b;
     return null;
   }
   
   
-  public Base baseAt(WorldLocale l) {
-    for (Base b : bases) if (b.locale == l) return b;
-    return null;
+  public Series <Base> basesFor(Area locale) {
+    Batch <Base> matches = new Batch();
+    for (Base b : bases) if (b.area == locale) matches.add(b);
+    return matches;
   }
   
   
-  public Area activeBaseMap() {
+  public AreaMap activeBaseMap() {
     for (Base c : bases) if (c.activeMap() != null) return c.activeMap();
     return null;
   }
   
   
-  public Series <WorldLocale> locales() {
-    return locales;
+  public Series <Area> areas() {
+    return areas;
   }
   
   
@@ -299,8 +281,8 @@ public class World implements Session.Saveable {
   }
   
   
-  public WorldScenario scenarioFor(WorldLocale locale) {
-    for (WorldScenario s : scenarios) if (s.locale == locale) return s;
+  public WorldScenario scenarioFor(Area area) {
+    for (WorldScenario s : scenarios) if (s.area == area) return s;
     return null;
   }
   
@@ -313,9 +295,9 @@ public class World implements Session.Saveable {
   
   /**  Registering and updating journeys:
     */
-  public static float distance(WorldLocale from, WorldLocale other, int moveMode) {
+  public static float distance(Area from, Area other, int moveMode) {
     if (other == from) return 0;
-    Route route = from.routes.get(other);
+    Route route = from.type.routes.get(other.type);
     
     if (route == null) return -100;
     if (moveMode != Type.MOVE_AIR && moveMode != route.moveMode) return -100;
@@ -324,7 +306,7 @@ public class World implements Session.Saveable {
   }
   
   
-  public float travelTime(WorldLocale from, WorldLocale goes, int moveMode) {
+  public float travelTime(Area from, Area goes, int moveMode) {
     float distance = distance(from, goes, moveMode);
     if (distance < 0) return -100;
     
@@ -339,7 +321,7 @@ public class World implements Session.Saveable {
   
   
   public Journey beginJourney(
-    WorldLocale from, WorldLocale goes, int moveMode, Journeys... going
+    Area from, Area goes, int moveMode, Journeys... going
   ) {
     if (from == null || goes == null) return null;
     
@@ -370,7 +352,7 @@ public class World implements Session.Saveable {
 
   
   public Journey beginJourney(
-    WorldLocale from, WorldLocale goes, int moveMode, Series <Journeys> going
+    Area from, Area goes, int moveMode, Series <Journeys> going
   ) {
     return beginJourney(from, goes, moveMode, going.toArray(Journeys.class));
   }
@@ -456,11 +438,11 @@ public class World implements Session.Saveable {
   public void updateWithTime(int time) {
     this.time = time;
     
-    for (WorldLocale locale : locales) {
+    for (Area locale : areas) {
       locale.updateLocale();
     }
     
-    Area active = activeBaseMap();
+    AreaMap active = activeBaseMap();
     if (active != null) {
       active.locals.updateBase();
     }
@@ -504,8 +486,8 @@ public class World implements Session.Saveable {
     float timeGone = time - j.startTime;
     float a = timeGone / (j.arriveTime - j.startTime), i = 1 - a;
     
-    float initX = j.from.mapX, initY = j.from.mapY;
-    float destX = j.goes.mapX, destY = j.goes.mapY;
+    float initX = j.from.type.mapX, initY = j.from.type.mapY;
+    float destX = j.goes.type.mapX, destY = j.goes.type.mapY;
     
     Vec2D c = new Vec2D();
     c.x = (destX * a) + (initX * i);
@@ -525,9 +507,9 @@ public class World implements Session.Saveable {
   
   
   public Base onMap(int mapX, int mapY) {
-    for (Base city : bases) {
-      int x = (int) city.locale.mapX, y = (int) city.locale.mapY;
-      if (x == mapX && y == mapY) return city;
+    for (Base b : bases) {
+      int x = (int) b.area.type.mapX, y = (int) b.area.type.mapY;
+      if (x == mapX && y == mapY) return b;
     }
     return null;
   }

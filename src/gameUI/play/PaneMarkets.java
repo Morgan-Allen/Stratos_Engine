@@ -24,7 +24,7 @@ public class PaneMarkets extends DetailPane {
     text.setText("");
     final Description d = text;
     
-    final Area  area  = UI.area;
+    final AreaMap area = UI.area;
     final World world = UI.base.world;
     final Base  base  = UI.base;
     final Base  home  = base.federation().homeland();
@@ -70,7 +70,7 @@ public class PaneMarkets extends DetailPane {
     
     ActorAsVessel trader = home == null ? null : home.trading.traderFor(base);
     if (trader != null) {
-      WorldLocale offmap = trader.offmap();
+      Area offmap = trader.offmap();
       int ETA = world.arriveTime(trader, base);
       World.Journey j = world.journeyFor(trader);
       

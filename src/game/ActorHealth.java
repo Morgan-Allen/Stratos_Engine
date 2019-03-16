@@ -119,7 +119,7 @@ public class ActorHealth {
   
   /**  Regular state updates-
     */
-  void updateHealth(Area map) {
+  void updateHealth(AreaMap map) {
     //
     //  Health-updates can occur a little more frequently on-map:
     float tick = 1f / map.ticksPS;
@@ -132,7 +132,7 @@ public class ActorHealth {
   }
   
   
-  void updateHealthOffmap(WorldLocale locale) {
+  void updateHealthOffmap(Area locale) {
     //
     //  We're assuming the actor can always eat/rest off-map:
     if (organic()) {
@@ -202,7 +202,7 @@ public class ActorHealth {
   
   /**  Stub methods for handling growth and life-cycle:
     */
-  void updateLifeCycle(WorldLocale locale, boolean onMap) {
+  void updateLifeCycle(Area locale, boolean onMap) {
     ageSeconds += 1;
   }
   
@@ -272,7 +272,7 @@ public class ActorHealth {
   
   
   public void addCondition(Active source, Trait trait, float duration) {
-    Area map = actor.map();
+    AreaMap map = actor.map();
     float time = map.time() + map.timeInUpdate();
     
     Condition c = conditionFor(trait);
@@ -341,7 +341,7 @@ public class ActorHealth {
   
   
   public void takeDamage(float damage) {
-    Area map = actor.map();
+    AreaMap map = actor.map();
     if (map == null || ! map.world.settings.toggleInjury) return;
     injury = Nums.clamp(injury + damage, 0, maxHealth() + 1);
     if (damage > 0) incBleed(damage * BLEEDING_PERCENT / 100f);
@@ -357,7 +357,7 @@ public class ActorHealth {
   
   
   public void takeFatigue(float tire) {
-    Area map = actor.map();
+    AreaMap map = actor.map();
     if (map == null || ! map.world.settings.toggleFatigue) return;
     fatigue = Nums.clamp(tire + tire, 0, maxHealth() + 1);
     checkHealthState();

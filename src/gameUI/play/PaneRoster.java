@@ -24,7 +24,7 @@ public class PaneRoster extends DetailPane {
     text.setText("");
     final Description d = text;
     
-    final Area area = UI.area;
+    final AreaMap area = UI.area;
     final Base base = UI.base;
     
     d.append("\nPersonnel Roster: ");

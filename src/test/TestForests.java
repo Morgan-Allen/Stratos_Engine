@@ -21,7 +21,7 @@ public class TestForests extends LogicTest {
     LogicTest test = new TestForests();
     
     Base base = setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, 32, true, JUNGLE, MEADOW);
-    Area map = base.activeMap();
+    AreaMap map = base.activeMap();
     World world = map.world;
     world.settings.toggleFog = false;
     

@@ -63,8 +63,10 @@ public class TestVesselTrade extends LogicTest {
     world.assignTypes(
       ALL_BUILDINGS, ALL_SHIPS(), ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES()
     );
-    Base  homeC = new Base(world, world.addLocale(2, 2), FACTION_SETTLERS_A);
-    Base  awayC = new Base(world, world.addLocale(3, 3), FACTION_SETTLERS_A);
+    Base homeC = new Base(world, addArea(world, 2, 2, 0), FACTION_SETTLERS_A);
+    Base awayC = new Base(world, addArea(world, 3, 3, 1), FACTION_SETTLERS_A);
+    AreaType.setupRoute(homeC.area.type, awayC.area.type, 10, Type.MOVE_AIR);
+    
     world.addBases(homeC, awayC);
     world.setPlayerFaction(FACTION_SETTLERS_A);
     
@@ -73,7 +75,6 @@ public class TestVesselTrade extends LogicTest {
     homeC.setName("(Home City)");
     awayC.setName("(Away City)");
     
-    World.setupRoute(homeC.locale, awayC.locale, 10, Type.MOVE_AIR);
     Federation.setPosture(
       homeC.faction(), awayC.faction(),
       RelationSet.BOND_TRADING, world
@@ -89,7 +90,7 @@ public class TestVesselTrade extends LogicTest {
     awayC.trading.setTradeLevel(ORES    , 30,  0);
     awayC.trading.initInventory(GREENS, 100, MEDICINE, 40);
     
-    Area map = new Area(world, homeC.locale, homeC);
+    AreaMap map = new AreaMap(world, homeC.area, homeC);
     map.performSetup(10, new Terrain[0]);
     
     world.settings.toggleFog       = false;
@@ -162,9 +163,9 @@ public class TestVesselTrade extends LogicTest {
       }
       
       else {
-        awayC.locale.toggleVisitor(ship, true);
+        awayC.area.toggleVisitor(ship, true);
         for (Actor a : ship.crew()) {
-          awayC.locale.toggleVisitor(a, true);
+          awayC.area.toggleVisitor(a, true);
           a.health.setHungerLevel(0.5f);
         }
         for (int n = HUNGER_REGEN; n-- > 0;) {
@@ -239,7 +240,7 @@ public class TestVesselTrade extends LogicTest {
       if (spawnDone && ! shipComing) {
         for (Journey j : world.journeys()) {
           for (Journeys g : j.going()) {
-            if (j.goes() != homeC.locale || ! g.isActor()) continue;
+            if (j.goes() != homeC.area || ! g.isActor()) continue;
             Element e = (Element) g;
             if (e.type().isAirship()) {
               ship = (ActorAsVessel) e;

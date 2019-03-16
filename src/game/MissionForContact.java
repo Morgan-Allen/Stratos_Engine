@@ -66,7 +66,7 @@ public class MissionForContact extends Mission {
   }
   
   
-  public void beginMission(WorldLocale locale) {
+  public void beginMission(Area locale) {
     super.beginMission(locale);
     Base goes = (Base) worldFocus();
     for (Actor a : recruits()) a.bonds.assignGuestBase(goes);
@@ -171,7 +171,7 @@ public class MissionForContact extends Mission {
     if (official && parent.worldFocus() != null) {
       Base focus = (Base) parent.worldFocus();
       BaseCouncil council = focus.council;
-      Area area = focus.activeMap();
+      AreaMap area = focus.activeMap();
       
       Actor monarch = council.memberWithRole(Role.MONARCH);
       pick.compare(monarch, 3);
@@ -198,7 +198,7 @@ public class MissionForContact extends Mission {
     
     if (looksAt != null) for (Actor a : looksAt) {
       if (a.base() != focusBase) continue;
-      float rating = Area.distancePenalty(parent.transitPoint(), a);
+      float rating = AreaMap.distancePenalty(parent.transitPoint(), a);
       pick.compare(a, rating);
     }
     
@@ -209,17 +209,17 @@ public class MissionForContact extends Mission {
   
   /**  Utility methods for faction-level decision-making-
     */
-  void handleOffmapDeparture(WorldLocale from, Journey journey) {
+  void handleOffmapDeparture(Area from, Journey journey) {
     
     ///I.say("Contact departing: "+this.hashCode()+", from: "+from);
     
-    if (from == homeBase().locale) {
+    if (from == homeBase().area) {
       TaskGifting.performMissionPickup(this);
     }
   }
   
   
-  void handleOffmapArrival(WorldLocale goes, World.Journey journey) {
+  void handleOffmapArrival(Area goes, World.Journey journey) {
     
     ///I.say("Contact arriving: "+this.hashCode()+", goes: "+goes);
     

@@ -28,7 +28,7 @@ public class AreaTile implements Pathing, Selection.Focus {
   }
   
   
-  void loadState(Session s, Area map) throws Exception {
+  void loadState(Session s, AreaMap map) throws Exception {
     elevation = s.loadInt();
     int terrID = s.loadInt();
     terrain = terrID == -1 ? EMPTY : map.terrainTypes[terrID];
@@ -39,7 +39,7 @@ public class AreaTile implements Pathing, Selection.Focus {
   }
   
   
-  void saveState(Session s, Area map) throws Exception {
+  void saveState(Session s, AreaMap map) throws Exception {
     s.saveInt(elevation);
     s.saveInt(Visit.indexOf(terrain, map.terrainTypes));
     s.saveObject(above);
@@ -131,7 +131,7 @@ public class AreaTile implements Pathing, Selection.Focus {
   }
   
   
-  public Pathing[] adjacent(Pathing[] temp, Area map) {
+  public Pathing[] adjacent(Pathing[] temp, AreaMap map) {
     if (temp == null) temp = new Pathing[9];
     //
     //  Determine whether this tile is blocked-
@@ -237,17 +237,17 @@ public class AreaTile implements Pathing, Selection.Focus {
   
   /**  Various utility and convenience methods-
     */
-  public static AreaTile nearestOpenTile(AreaTile from, Area map) {
+  public static AreaTile nearestOpenTile(AreaTile from, AreaMap map) {
     return nearestOpenTile(from, map, 1);
   }
   
 
-  public static AreaTile nearestOpenTile(AreaTile from, Area map, int maxRange) {
+  public static AreaTile nearestOpenTile(AreaTile from, AreaMap map, int maxRange) {
     
     if (from == null || ! map.blocked(from)) return from;
     if (maxRange <= 0) return null;
 
-    for (AreaTile t : Area.adjacent(from, null, map)) {
+    for (AreaTile t : AreaMap.adjacent(from, null, map)) {
       if (t == null || map.blocked(t)) continue;
       return t;
     }

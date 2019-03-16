@@ -31,11 +31,11 @@ public abstract class ViewTest extends Scenario {
     return initBase.world;
   }
   
-  protected Area createArea(World world) {
+  protected AreaMap createMap(World world) {
     return initBase.activeMap();
   }
   
-  protected Base createBase(Area map, World world) {
+  protected Base createBase(AreaMap map, World world) {
     return initBase;
   }
   

@@ -6,7 +6,6 @@ import game.*;
 import gameUI.play.*;
 import graphics.common.*;
 import util.*;
-import java.lang.reflect.Method;
 
 
 
@@ -17,7 +16,7 @@ public abstract class Scenario implements Session.Saveable {
   boolean setupDone = false;
   
   World world = null;
-  Area  area  = null;
+  AreaMap  area  = null;
   Base  base  = null;
   
   private PlayUI UI;
@@ -31,7 +30,7 @@ public abstract class Scenario implements Session.Saveable {
   public Scenario(Session s) throws Exception {
     s.cacheInstance(this);
     world = (World) s.loadObject();
-    area  = (Area ) s.loadObject();
+    area  = (AreaMap ) s.loadObject();
     base  = (Base ) s.loadObject();
     //UI = new PlayUI(PlayLoop.rendering());
     //UI.loadState(s);
@@ -58,7 +57,7 @@ public abstract class Scenario implements Session.Saveable {
     base  = null;
     UI    = null;
     world = createWorld();
-    area  = createArea(world);
+    area  = createMap(world);
     base  = createBase(area, world);
     configScenario(world, area, base);
     
@@ -73,9 +72,9 @@ public abstract class Scenario implements Session.Saveable {
   
   
   protected abstract World createWorld();
-  protected abstract Area createArea(World world);
-  protected abstract Base createBase(Area map, World world);
-  protected abstract void configScenario(World world, Area map, Base base);
+  protected abstract AreaMap createMap(World world);
+  protected abstract Base createBase(AreaMap map, World world);
+  protected abstract void configScenario(World world, AreaMap map, Base base);
   
   
   public float loadProgress() {
@@ -92,52 +91,11 @@ public abstract class Scenario implements Session.Saveable {
   
   
   public Base  base () { return base ; }
-  public Area  area () { return area ; }
+  public AreaMap  area () { return area ; }
   public World world() { return world; }
   
   
-  
-  /**  Defining and evaluating objectives-
-    */
-  final public static int
-    COMPLETE_NONE    = -1,
-    COMPLETE_FAILED  =  0,
-    COMPLETE_SUCCESS =  1
-  ;
-
-  public static class Objective extends Constant {
-    
-    String description;
-    
-    Class baseClass;
-    Method checkMethod;
-    
-    
-    public Objective(
-      Class baseClass, String ID, String description, String checkMethod
-    ) {
-      super(null, ID, IS_STORY);
-      
-      this.baseClass = baseClass;
-      try { this.checkMethod = baseClass.getDeclaredMethod(checkMethod); }
-      catch (Exception e) { this.checkMethod = null; }
-      
-      this.description = description;
-    }
-    
-    public int checkCompletion(Scenario scenario) {
-      if (checkMethod == null) return COMPLETE_NONE;
-      try { return (Integer) checkMethod.invoke(scenario); }
-      catch (Exception e) { return COMPLETE_NONE; }
-    }
-    
-    public String description() {
-      return description;
-    }
-  }
-  
-  
-  public Series <Objective> objectives() {
+  public Series <WorldScenario.Objective> objectives() {
     return new Batch();
   }
   

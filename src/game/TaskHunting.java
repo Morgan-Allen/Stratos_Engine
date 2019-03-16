@@ -60,7 +60,7 @@ public class TaskHunting extends Task {
     boolean forMeat = store != null && ! Visit.empty(meatTypes);
     
     for (Actor a : actor.considered()) {
-      float dist = Area.distance(actor, a);
+      float dist = AreaMap.distance(actor, a);
       if (dist > MAX_EXPLORE_DIST) continue;
       
       if (forMeat) {
@@ -73,7 +73,7 @@ public class TaskHunting extends Task {
         if (store.inventory(meat) >= store.type().maxStock) continue;
       }
       
-      forHunt.compare(a, Area.distancePenalty(dist));
+      forHunt.compare(a, AreaMap.distancePenalty(dist));
     }
     
     if (forHunt.empty()) return null;
@@ -111,7 +111,7 @@ public class TaskHunting extends Task {
   public boolean emergency() {
     if (type != JOB.HUNTING) return false;
     Actor actor = (Actor) this.active;
-    if (Area.distance(active, prey) > actor.sightRange()) return false;
+    if (AreaMap.distance(active, prey) > actor.sightRange()) return false;
     return true;
   }
 

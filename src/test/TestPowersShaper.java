@@ -24,13 +24,13 @@ public class TestPowersShaper {
       
       Actor toCharm = null;
       
-      Building createGuild(Area map, Base base) {
+      Building createGuild(AreaMap map, Base base) {
         map.world.settings.toggleInjury = false;
         map.world.settings.toggleFog    = false;
         return createGuild(map, base, SCHOOL_SHA);
       }
       
-      Target createSubject(Area map, Building guild) {
+      Target createSubject(AreaMap map, Building guild) {
         Actor subject = (Actor) MICOVORE.generate();
         subject.enterMap(map, 20, 20, 1, map.locals);
         return toCharm = subject;
@@ -65,7 +65,7 @@ public class TestPowersShaper {
       SCHOOL_SHA, ECOLOGIST, Tally.with()
     ) {
       
-      Target createSubject(Area map, Building guild) {
+      Target createSubject(AreaMap map, Building guild) {
         map.world.settings.toggleFog = false;
         Actor affects = (Actor) super.createSubject(map, guild);
         affects.health.takeDamage(1000);

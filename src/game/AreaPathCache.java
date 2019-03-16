@@ -72,7 +72,7 @@ public class AreaPathCache {
   }
   
   
-  final Area map;
+  final AreaMap map;
   Zone zoneLookup[][];
   boolean flagDirty[][];
   
@@ -93,7 +93,7 @@ public class AreaPathCache {
   Table <String, Object> tempCache;
   
   
-  AreaPathCache(Area map) {
+  AreaPathCache(AreaMap map) {
     this.map = map;
   }
   
@@ -221,7 +221,7 @@ public class AreaPathCache {
         return temp;
       }
       else {
-        Area.adjacent(at, temp, map);
+        AreaMap.adjacent(at, temp, map);
         temp[8] = at;
         return temp;
       }
@@ -236,7 +236,7 @@ public class AreaPathCache {
   
   public AreaTile mostOpenNeighbour(AreaTile at) {
     Pick <AreaTile> pick = new Pick();
-    for (AreaTile t : Area.adjacent(at, null, map)) {
+    for (AreaTile t : AreaMap.adjacent(at, null, map)) {
       ZoneGroup group = groupFor(zoneFor(t), false);
       if (group != null) pick.compare(t, group.totalTiles);
     }

@@ -55,7 +55,7 @@ public class TaskGathering extends Task {
     if (! canPlant(store)) return null;
     
     Pick <AreaTile> pick = new Pick();
-    Area map = store.map();
+    AreaMap map = store.map();
     Pathing from = Task.pathOrigin(actor);
     
     for (Plot p : store.plots()) {
@@ -69,7 +69,7 @@ public class TaskGathering extends Task {
         Element e = map.above(t);
         if (e != null && e.type() == g && e.growLevel() >= 0) continue;
         
-        float rating = Area.distancePenalty(actor, t);
+        float rating = AreaMap.distancePenalty(actor, t);
         pick.compare(t, rating);
       }
     }
@@ -93,7 +93,7 @@ public class TaskGathering extends Task {
   ) {
     if (Visit.empty(cropTypes)) return null;
 
-    Area map = store.map();
+    AreaMap map = store.map();
     int spaceTaken = 0;
     Pathing from = Task.pathOrigin(actor);
     
@@ -114,7 +114,7 @@ public class TaskGathering extends Task {
           if (above == null || above.growLevel() <= 0) continue;
           if (! Visit.arrayIncludes(cropTypes, above.type().yields)) continue;
           
-          float rating = Area.distancePenalty(actor, t);
+          float rating = AreaMap.distancePenalty(actor, t);
           rating *= above.growLevel();
           pick.compare(t, rating);
         }
@@ -172,7 +172,7 @@ public class TaskGathering extends Task {
     
     Actor    actor = (Actor) this.active;
     AreaTile at    = other.at();
-    Area     map   = actor.map();
+    AreaMap     map   = actor.map();
     
     if (actor.jobType() == JOB.RETURNING && store.actorIsHere(actor)) {
       onVisit(store);

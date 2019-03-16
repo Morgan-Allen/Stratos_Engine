@@ -26,7 +26,7 @@ public class TaskExplore extends Task {
   public TaskExplore(Session s) throws Exception {
     super(s);
     totalDist += s.loadInt();
-    from = Area.loadTarget(active.map(), s);
+    from = AreaMap.loadTarget(active.map(), s);
     maxRange = s.loadInt();
   }
   
@@ -34,7 +34,7 @@ public class TaskExplore extends Task {
   public void saveState(Session s) throws Exception {
     super.saveState(s);
     s.saveInt(totalDist);
-    Area.saveTarget(from, active.map(), s);
+    AreaMap.saveTarget(from, active.map(), s);
     s.saveInt(maxRange);
   }
   
@@ -50,7 +50,7 @@ public class TaskExplore extends Task {
   static TaskExplore configExploration(Actor actor, Target from, int range) {
     if (actor == null || from == null) return null;
     
-    Area     map  = actor.map;
+    AreaMap  map  = actor.map;
     AreaFog  fog  = map.fogMap(actor);
     AreaTile goes = fog.pickRandomFogPoint(from, range);
     if (goes == null) return null;
@@ -58,7 +58,7 @@ public class TaskExplore extends Task {
     if (goes == null) return null;
     
     TaskExplore task = new TaskExplore(actor);
-    task.totalDist = (int) Area.distance(actor.at(), goes);
+    task.totalDist = (int) AreaMap.distance(actor.at(), goes);
     task.from      = from;
     task.maxRange  = range;
     
@@ -108,7 +108,7 @@ public class TaskExplore extends Task {
     danger /= danger + power;
     
     if (haven != null && target != null) {
-      float dist = Area.distance(target, haven);
+      float dist = AreaMap.distance(target, haven);
       danger += dist / MAX_EXPLORE_DIST;
     }
     
@@ -129,7 +129,7 @@ public class TaskExplore extends Task {
 
   protected void onTarget(Target target) {
     Actor   actor = (Actor) this.active;
-    Area    map   = actor.map();
+    AreaMap map   = actor.map();
     AreaFog fog   = map.fogMap(actor);
     
     fog.liftFog(target.at(), actor.sightRange() * 2);
@@ -142,7 +142,7 @@ public class TaskExplore extends Task {
     if (goes == null) return;
     
     if (goes != null && totalDist < MAX_EXPLORE_DIST) {
-      totalDist += Area.distance(actor.at(), goes);
+      totalDist += AreaMap.distance(actor.at(), goes);
       configTask(null, null, goes, JOB.EXPLORING, 0);
     }
   }

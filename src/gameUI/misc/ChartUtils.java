@@ -32,17 +32,17 @@ public class ChartUtils {
   ) {
     carousel.clearEntries();
     
-    for (final WorldLocale locale : world.locales()) {
-      if (! locale.homeland()) continue;
+    for (final Area area : world.areas()) {
+      if (! area.type.homeland()) continue;
       
       final UIGroup worldInfo = new UIGroup(UI);
       worldInfo.stretch = false;
       
-      final Image b = new Image(UI, locale.planetImage());
+      final Image b = new Image(UI, area.type.planetImage());
       b.alignAcross(-0.5f, 1.5f);
       b.alignVertical(0, 0);
       b.attachTo(worldInfo);
-      carousel.addEntryFor(locale, worldInfo);
+      carousel.addEntryFor(area, worldInfo);
     }
   }
   

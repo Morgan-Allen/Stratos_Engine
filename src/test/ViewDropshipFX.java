@@ -22,7 +22,7 @@ public class ViewDropshipFX extends ViewTest {
   int index = 1;
   
   
-  protected void configScenario(World world, Area map, Base base) {
+  protected void configScenario(World world, AreaMap map, Base base) {
     
     world.settings.toggleFog = false;
     

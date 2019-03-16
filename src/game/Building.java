@@ -1,7 +1,7 @@
 
 
 package game;
-import static game.Area.*;
+import static game.AreaMap.*;
 import static game.GameConstants.*;
 import gameUI.play.*;
 import graphics.common.*;
@@ -108,7 +108,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   }
   
   
-  public boolean canPlace(Area map) {
+  public boolean canPlace(AreaMap map) {
     if (! super.canPlace(map)) return false;
     //
     //  TODO:  The efficiency of this might be improved on larger maps.
@@ -134,14 +134,14 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   }
   
   
-  public void enterMap(Area map, int x, int y, float buildLevel, Base owns) {
+  public void enterMap(AreaMap map, int x, int y, float buildLevel, Base owns) {
     super.enterMap(map, x, y, buildLevel, owns);
     if (isClaimant()) map.claimants.add(this);
     map.buildings.add(this);
   }
   
   
-  public void exitMap(Area map) {
+  public void exitMap(AreaMap map) {
     
     //I.say("EXITING MAP: "+this);
     //I.reportStackTrace();
@@ -172,7 +172,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   
   /**  Auxiliary pathing-assist methods:
     */
-  public Pathing[] adjacent(Pathing[] temp, Area map) {
+  public Pathing[] adjacent(Pathing[] temp, AreaMap map) {
     
     int numE = entrances == null ? 0 : entrances.length;
     if (temp == null || temp.length < numE) temp = new Pathing[numE];
@@ -715,7 +715,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
       return actor.inside() == this;
     }
     else {
-      return Area.adjacent(this, actor);
+      return AreaMap.adjacent(this, actor);
     }
   }
   

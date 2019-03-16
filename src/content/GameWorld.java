@@ -70,6 +70,19 @@ public class GameWorld {
       "rampant smuggling and black-market tech research.",
   //*/
   
+  final static AreaType
+    HOMEWORLD_A = new AreaType(GameWorld.class, "homeworld_a", "Homeworld"),
+    
+    ELYSIUM_SECTOR = new AreaType(GameWorld.class, "s_elysium", "Elysium Sector");
+  
+  static {
+    HOMEWORLD_A.initPosition(1, 1, true);
+    
+    ELYSIUM_SECTOR.initPosition(5, 5, false);
+    
+    AreaType.setupRoute(HOMEWORLD_A, ELYSIUM_SECTOR, AVG_CITY_DIST / 2, MOVE_AIR);
+  }
+  
   
   /**  Default geography:
     */
@@ -92,9 +105,8 @@ public class GameWorld {
     
     world.setPlayerFaction(FACTION_SETTLERS_A);
     
-    //  TODO:  Replace these with the named homeworlds!
     
-    WorldLocale home = world.addLocale(1, 1, "Homeworld", true);
+    Area home = world.addArea(HOMEWORLD_A);
     Base homeBase = new Base(world, home, FACTION_SETTLERS_A);
     
     homeBase.setName("Homeworld Base");
@@ -113,19 +125,12 @@ public class GameWorld {
     world.addBases(homeBase);
     
     
-    WorldLocale sectorA = world.addLocale(5, 5, "Elysium Sector", false);
-    World.setupRoute(home, sectorA, AVG_CITY_DIST / 2, MOVE_AIR);
-    
-    
+    Area sectorA = world.addArea(ELYSIUM_SECTOR);
     world.addScenario(new ScenarioSectorA(world, sectorA));
     
     return world;
   }
   
 }
-
-
-
-
 
 

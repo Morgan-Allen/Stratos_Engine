@@ -6,7 +6,7 @@ import graphics.common.*;
 import graphics.cutout.*;
 import graphics.solids.*;
 import util.*;
-import static game.Area.*;
+import static game.AreaMap.*;
 import static game.GameConstants.*;
 import static game.Type.*;
 

@@ -8,6 +8,7 @@ import gameUI.misc.*;
 import graphics.widgets.*;
 import start.*;
 import game.*;
+import static game.WorldScenario.*;
 import util.*;
 
 
@@ -15,11 +16,11 @@ import util.*;
 public class ObjectiveReminder extends ReminderListing.Entry {
   
   
-  final Scenario.Objective m;
+  final Objective m;
   final BorderedLabel label;
   
   
-  ObjectiveReminder(final PlayUI BUI, final Scenario.Objective m) {
+  ObjectiveReminder(final PlayUI BUI, final Objective m) {
     super(BUI, m, 40, 20);
     this.m = m;
     

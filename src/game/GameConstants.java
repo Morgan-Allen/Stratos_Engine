@@ -564,7 +564,7 @@ public class GameConstants {
     */
   public static interface Active extends Target {
     
-    Area map();
+    AreaMap map();
     boolean mobile();
     Base base();
     
@@ -604,7 +604,7 @@ public class GameConstants {
   public static interface Pathing extends Target {
     
     int pathType();
-    Pathing[] adjacent(Pathing temp[], Area map);
+    Pathing[] adjacent(Pathing temp[], AreaMap map);
     boolean allowsEntryFrom(Pathing p);
     
     boolean complete();
@@ -634,8 +634,8 @@ public class GameConstants {
   
   
   public static interface Journeys {
-    void onArrival  (WorldLocale goes, World.Journey journey);
-    void onDeparture(WorldLocale from, World.Journey journey);
+    void onArrival  (Area goes, World.Journey journey);
+    void onDeparture(Area from, World.Journey journey);
     Base base();
     boolean isActor();
   }

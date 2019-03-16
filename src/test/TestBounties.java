@@ -34,7 +34,7 @@ public class TestBounties extends LogicTest {
   static boolean testAttackBuildingMission(boolean graphics) {
     TestBounties test = new TestBounties() {
       
-      Mission setupMission(Area map, Base base) {
+      Mission setupMission(AreaMap map, Base base) {
         BuildingForNest nest = (BuildingForNest) RUINS_LAIR.generate();
         nest.enterMap(map, 20, 20, 1, map.locals);
         
@@ -44,7 +44,7 @@ public class TestBounties extends LogicTest {
         return mission;
       }
       
-      boolean checkVictory(Area map, Base base, Object focus) {
+      boolean checkVictory(AreaMap map, Base base, Object focus) {
         Building nest = (Building) focus;
         return TaskCombat.beaten(nest);
       }
@@ -56,7 +56,7 @@ public class TestBounties extends LogicTest {
   static boolean testAttackActorMission(boolean graphics) {
     TestBounties test = new TestBounties() {
       
-      Mission setupMission(Area map, Base base) {
+      Mission setupMission(AreaMap map, Base base) {
         Actor creature = (Actor) MICOVORE.generate();
         creature.enterMap(map, 20, 20, 1, map.locals);
         creature.takeDamage(creature.health.maxHealth() * 0.7f);
@@ -67,7 +67,7 @@ public class TestBounties extends LogicTest {
         return mission;
       }
       
-      boolean checkVictory(Area map, Base base, Object focus) {
+      boolean checkVictory(AreaMap map, Base base, Object focus) {
         Actor creature = (Actor) focus;
         return TaskCombat.beaten(creature);
       }
@@ -80,7 +80,7 @@ public class TestBounties extends LogicTest {
     TestBounties test = new TestBounties() {
       int RANGE = 8;
       
-      Mission setupMission(Area map, Base base) {
+      Mission setupMission(AreaMap map, Base base) {
         AreaTile looks = map.tileAt(20, 20);
         
         MissionForRecon mission = new MissionForRecon(base);
@@ -89,14 +89,14 @@ public class TestBounties extends LogicTest {
         return mission;
       }
       
-      boolean checkVictory(Area map, Base base, Object focus) {
+      boolean checkVictory(AreaMap map, Base base, Object focus) {
         AreaTile looks = (AreaTile) focus;
         AreaFog fog = map.fogMap(base.faction(), true);
         int r = RANGE;
         boolean allSeen = true;
         
         for (AreaTile t : map.tilesUnder(looks.x - r, looks.y - r, r * 2, r * 2)) {
-          float dist = Area.distance(looks, t);
+          float dist = AreaMap.distance(looks, t);
           if (dist > r) continue;
           if (fog.maxSightLevel(t) == 0) allSeen = false;
         }
@@ -118,7 +118,7 @@ public class TestBounties extends LogicTest {
       boolean didRespond;
       
       
-      Mission setupMission(Area map, Base base) {
+      Mission setupMission(AreaMap map, Base base) {
         
         map.world.settings.toggleFog = false;
         
@@ -134,14 +134,14 @@ public class TestBounties extends LogicTest {
         return mission;
       }
       
-      void onMapUpdate(Area map, Base base) {
+      void onMapUpdate(AreaMap map, Base base) {
         if (threat.jobType() != JOB.COMBAT) {
           TaskCombat siege = TaskCombat.configCombat(threat, guarded);
           threat.assignTask(siege, threat);
         }
       }
       
-      boolean checkVictory(Area map, Base base, Object focus) {
+      boolean checkVictory(AreaMap map, Base base, Object focus) {
         if (TaskCombat.killed((Building) focus)) return false;
         
         if (! triedAttack) {
@@ -170,7 +170,7 @@ public class TestBounties extends LogicTest {
     
     Base base = LogicTest.setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, 32, false);
     base.setName("Client Base");
-    Area map = base.activeMap();
+    AreaMap map = base.activeMap();
     
     int initFunds = 1000, reward = 500;
     base.initFunds(initFunds);
@@ -202,7 +202,7 @@ public class TestBounties extends LogicTest {
     try {
       Session.saveSession("saves/test_save.tlt", map);
       Session session = Session.loadSession("saves/test_save.tlt", true);
-      Area loaded = (Area) session.loaded()[0];
+      AreaMap loaded = (AreaMap) session.loaded()[0];
       
       Mission m = loaded.world.baseNamed("Client Base").missions().first();
       if (m.localFocus() == null) I.say("LOADED MISSION HAS NO FOCUS!");
@@ -270,17 +270,17 @@ public class TestBounties extends LogicTest {
   }
   
   
-  Mission setupMission(Area map, Base base) {
+  Mission setupMission(AreaMap map, Base base) {
     return null;
   }
   
   
-  void onMapUpdate(Area map, Base base) {
+  void onMapUpdate(AreaMap map, Base base) {
     return;
   }
   
 
-  boolean checkVictory(Area map, Base base, Object focus) {
+  boolean checkVictory(AreaMap map, Base base, Object focus) {
     return false;
   }
   

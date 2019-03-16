@@ -1,7 +1,7 @@
 
 
 package game;
-import static game.Area.*;
+import static game.AreaMap.*;
 import static game.GameConstants.*;
 import util.*;
 
@@ -45,13 +45,13 @@ public class BuildingForWalls extends Building implements Active {
   
   /**  Entering and exiting the world-
     */
-  public void enterMap(Area map, int x, int y, float buildLevel, Base owns) {
+  public void enterMap(AreaMap map, int x, int y, float buildLevel, Base owns) {
     super.enterMap(map, x, y, buildLevel, owns);
     map.flagActive(this, centre(), true);
   }
   
   
-  public void exitMap(Area map) {
+  public void exitMap(AreaMap map) {
     map.flagActive(this, centre(), false);
     super.exitMap(map);
   }

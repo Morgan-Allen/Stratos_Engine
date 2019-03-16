@@ -2,14 +2,14 @@
 
 package game;
 import util.*;
-import static game.Area.*;
+import static game.AreaMap.*;
 import static game.GameConstants.*;
 
 
 
 public class ActorPathSearch extends Search <Pathing> {
   
-  Area map;
+  AreaMap map;
   AreaFog fog;
   AreaDanger danger;
   Pathing dest;
@@ -36,7 +36,7 @@ public class ActorPathSearch extends Search <Pathing> {
   
   
   public ActorPathSearch(
-    Area map, Pathing init, Pathing dest, int maxDist
+    AreaMap map, Pathing init, Pathing dest, int maxDist
   ) {
     super(init, -1);
     this.map     = map;
@@ -64,7 +64,7 @@ public class ActorPathSearch extends Search <Pathing> {
   
   protected Pathing[] adjacent(Pathing spot) {
     if (flight && spot.isTile()) {
-      return Area.adjacent((AreaTile) spot, tempT, map);
+      return AreaMap.adjacent((AreaTile) spot, tempT, map);
     }
     return spot.adjacent(temp, map);
   }
@@ -122,7 +122,7 @@ public class ActorPathSearch extends Search <Pathing> {
     //*/
     if (danger != null) {
       AreaTile at = spot.at();
-      dist += danger.fuzzyLevel(at.x, at.y) / Area.FLAG_AREA;
+      dist += danger.fuzzyLevel(at.x, at.y) / AreaMap.FLAG_AREA;
     }
     return dist;
   }

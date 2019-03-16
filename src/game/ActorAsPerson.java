@@ -251,7 +251,7 @@ public class ActorAsPerson extends Actor {
     */
   ActorHealth initHealth() {
     return new ActorHealth(this) {
-      void updateLifeCycle(WorldLocale locale, boolean onMap) {
+      void updateLifeCycle(Area locale, boolean onMap) {
         super.updateLifeCycle(locale, onMap);
         
         WorldSettings settings = base().world.settings;

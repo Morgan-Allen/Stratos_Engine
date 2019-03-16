@@ -121,7 +121,7 @@ public class SchoolShaper {
       
       dispenseXP(using, 1, SKILL_PRAY);
       
-      Area map = using.map();
+      AreaMap map = using.map();
       map.ephemera.addGhostFromModel(subject, FX_MODEL, 1, 0.5f, 1);
     }
   };
@@ -155,7 +155,7 @@ public class SchoolShaper {
         actor.health.clearConditions(this);
         return;
       }
-      Area map = actor.map();
+      AreaMap map = actor.map();
       map.ephemera.updateGhost(actor, 1, FX_MODEL, 0.5f);
     }
   };
@@ -226,7 +226,7 @@ public class SchoolShaper {
     }
     
     protected void passiveEffect(Actor actor) {
-      Area map = actor.map();
+      AreaMap map = actor.map();
       
       float lift = actor.health.maxHealth();
       float wake = actor.health.maxHealth() / 2;

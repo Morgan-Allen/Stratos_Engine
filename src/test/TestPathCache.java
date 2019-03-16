@@ -52,7 +52,7 @@ public class TestPathCache extends LogicTest {
     };
     int miniSize = 8;
     Base miniBase = setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, miniSize, false, ALL_TERRAINS);
-    Area miniMap = miniBase.activeMap();
+    AreaMap miniMap = miniBase.activeMap();
     
     for (Coord c : Visit.grid(0, 0, miniSize, miniSize, 1)) {
       byte l = layout[c.x][c.y];
@@ -130,7 +130,7 @@ public class TestPathCache extends LogicTest {
     //  Now, set up a larger map for testing of connections between
     //  more distant zones:
     Base base = setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, 128, false, ALL_TERRAINS);
-    Area map = base.activeMap();
+    AreaMap map = base.activeMap();
     World world = map.world;
     world.settings.toggleFog = false;
     test.viewPathMap = true;
@@ -278,7 +278,7 @@ public class TestPathCache extends LogicTest {
   }
   
   
-  static boolean verifyConnectionQueries(Area map) {
+  static boolean verifyConnectionQueries(AreaMap map) {
     for (Coord c : Visit.grid(0, 0, map.size(), map.size(), 1)) {
       if (map.blocked(c)) continue;
       
@@ -298,7 +298,7 @@ public class TestPathCache extends LogicTest {
   }
   
   
-  static boolean verifyConnection(AreaTile from, AreaTile goes, Area map) {
+  static boolean verifyConnection(AreaTile from, AreaTile goes, AreaMap map) {
     
     boolean connects = map.pathCache.pathConnects(from, goes);
     ActorPathSearch search;

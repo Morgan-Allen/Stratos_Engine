@@ -23,7 +23,7 @@ public class TestBridging extends LogicTest {
     
     Terrain terrTypes[] = { LAKE, MEADOW, JUNGLE };
     Base base = setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, 16, false, terrTypes);
-    Area map = base.activeMap();
+    AreaMap map = base.activeMap();
     World world = base.world;
     world.settings.toggleFog     = false;
     world.settings.toggleFatigue = false;
@@ -209,7 +209,7 @@ public class TestBridging extends LogicTest {
   
   
   private static boolean testPathing(
-    AreaTile t, Building base, Area map
+    AreaTile t, Building base, AreaMap map
   ) {
     ActorPathSearch s = new ActorPathSearch(map, t, base, -1);
     s.doSearch();

@@ -3,7 +3,7 @@
 package game;
 import graphics.common.*;
 import util.*;
-import static game.Area.*;
+import static game.AreaMap.*;
 import static game.GameConstants.*;
 
 
@@ -309,7 +309,7 @@ public class Task implements Session.Saveable {
       }
     }
     
-    Area    map     = active.map();
+    AreaMap map     = active.map();
     boolean mobile  = active.mobile();
     Actor   asActor = mobile ? (Actor) active : null;
     
@@ -450,7 +450,7 @@ public class Task implements Session.Saveable {
   }
   
   
-  protected boolean updateOnArrival(WorldLocale goes, World.Journey journey) {
+  protected boolean updateOnArrival(Area goes, World.Journey journey) {
     return false;
   }
   
@@ -541,7 +541,7 @@ public class Task implements Session.Saveable {
   
   
   private int checkActionProgress(float tickProgress) {
-    Area map = active.map();
+    AreaMap map = active.map();
     if (map == null) return PROG_CLOSING;
     
     final float oldProgress = ticksSpent;
@@ -569,7 +569,7 @@ public class Task implements Session.Saveable {
   boolean checkTargetContact(Target from) {
     Pathing last = (Pathing) Visit.last(path);
     if (from != last && active.at() == last) return true;
-    float dist = Area.distance(active, from), range = actionRange();
+    float dist = AreaMap.distance(active, from), range = actionRange();
     return dist < range;
   }
   
@@ -621,10 +621,10 @@ public class Task implements Session.Saveable {
     
     Pathing last = (Pathing) Visit.last(path);
     Actor actor = (Actor) this.active;
-    Area map = actor.map();
+    AreaMap map = actor.map();
     boolean flight = actor.type().moveMode == Type.MOVE_AIR;
     
-    if (Area.distance(last, target) > 1.5f) return false;
+    if (AreaMap.distance(last, target) > 1.5f) return false;
     
     int index = Nums.clamp(pathIndex, path.length);
     Pathing current = pathOrigin(actor), step = path[index];
@@ -660,7 +660,7 @@ public class Task implements Session.Saveable {
     boolean verbose = false;
     
     Actor   actor    = (Actor) active;
-    Area    map      = active.map();
+    AreaMap    map      = active.map();
     boolean visiting = visits != null;
     Pathing from     = pathOrigin(active);
     Pathing heads    = pathTarget();
@@ -699,7 +699,7 @@ public class Task implements Session.Saveable {
   
   
   public static boolean verifyPath(
-    Pathing path[], Pathing start, Pathing end, Area map
+    Pathing path[], Pathing start, Pathing end, AreaMap map
   ) {
     if (Visit.empty(path) || path[0] != start) {
       return false;
@@ -707,7 +707,7 @@ public class Task implements Session.Saveable {
     
     Pathing temp[] = new Pathing[9];
     Pathing last = (Pathing) Visit.last(path);
-    if (last != end && Area.distance(last, end) > 1.5f) {
+    if (last != end && AreaMap.distance(last, end) > 1.5f) {
       return false;
     }
     
@@ -734,7 +734,7 @@ public class Task implements Session.Saveable {
   
   
   float animProgress(float alpha) {
-    Area map = active.map();
+    AreaMap map = active.map();
     if (map == null) return -1;
     int maxTicks = map.ticksPS * Nums.max(1, maxTime);
     

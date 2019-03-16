@@ -2,7 +2,7 @@
 
 package game;
 import util.*;
-import static game.Area.*;
+import static game.AreaMap.*;
 import java.util.Iterator;
 
 
@@ -40,13 +40,13 @@ public class AreaDemands {
   }
   
   
-  final Area map;
+  final AreaMap map;
   final Object key;
   
   Node root;
   
   
-  public AreaDemands(Area map, Object key) {
+  public AreaDemands(AreaMap map, Object key) {
     this.map  = map;
     this.key  = key;
     root      = new Node();
@@ -264,11 +264,11 @@ public class AreaDemands {
           //Tile goes = map.tileAt(e.x, e.y);
           //if (! map.pathCache.pathConnects(from, goes)) return;
           
-          float dist = Area.distance(x, y, e.x, e.y);
+          float dist = AreaMap.distance(x, y, e.x, e.y);
           e.tempDist = dist - 0.5f;
         }
         else {
-          float dist = Area.distance(x, y, e.x, e.y);
+          float dist = AreaMap.distance(x, y, e.x, e.y);
           e.tempDist = dist - (((Node) e).size / 2f);
         }
         sorting.add(e);

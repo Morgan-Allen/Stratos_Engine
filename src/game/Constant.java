@@ -10,13 +10,17 @@ public class Constant extends Index.Entry implements Session.Saveable {
   
   
   final public static int
-    IS_STORY       = -300,
+    
+    IS_STORY       = -400,
+    IS_AREA        = -300,
     IS_MEDIA       = -200,
     IS_TRAIT       = -100,
+    
     IS_TERRAIN     =  0,
     IS_FIXTURE     =  1,
     IS_STRUCTURAL  =  2,
     IS_GOOD        =  3,
+    
     IS_BUILDING    =  4,
     IS_UPGRADE     =  5,
     IS_CRAFTS_BLD  =  6,
@@ -32,6 +36,7 @@ public class Constant extends Index.Entry implements Session.Saveable {
     IS_WALLS_BLD   =  16,
     IS_FAITH_BLD   =  17,
     IS_NEST_BLD    =  18,
+    
     IS_ACTOR       =  19,
     IS_PERSON_ACT  =  20,
     IS_ANIMAL_ACT  =  21,

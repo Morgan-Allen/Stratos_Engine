@@ -63,7 +63,7 @@ public class BuildingForNest extends Building {
 
 
   public Task selectActorBehaviour(Actor actor) {
-    if (Area.distance(actor, this) > MAX_WANDER_RANGE) {
+    if (AreaMap.distance(actor, this) > MAX_WANDER_RANGE) {
       Task waits = TaskWaiting.configWaiting(actor, this);
       return waits;
     }

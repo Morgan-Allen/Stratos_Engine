@@ -23,19 +23,18 @@ public class TestCity extends LogicTest {
     LogicTest test = new TestCity();
     
     Base base = setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, 32, false);
-    Area map = base.activeMap();
+    AreaMap map = base.activeMap();
     World world = map.world;
     world.assignTypes(
       ALL_BUILDINGS, ALL_SHIPS(), ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES()
     );
     
-    Base homeland = new Base(world, world.addLocale(8, 8), FACTION_SETTLERS_A);
+    Base homeland = new Base(world, addArea(world, 8, 8, 0), FACTION_SETTLERS_A);
     homeland.setName("Homeland");
     world.addBases(homeland);
     base.federation().assignHomeland(homeland);
     
-    World.setupRoute(base.locale, homeland.locale, 3, Type.MOVE_AIR);
-    //FactionRelations.setPosture(base, homeland, BaseRelations.POSTURE.VASSAL, true);
+    AreaType.setupRoute(base.area.type, homeland.area.type, 3, Type.MOVE_AIR);
     
     world.settings.toggleFog = false;
     
@@ -97,7 +96,7 @@ public class TestCity extends LogicTest {
     try {
       Session.saveSession("saves/test_save.tlt", map);
       Session session = Session.loadSession("saves/test_save.tlt", true);
-      Area loaded = (Area) session.loaded()[0];
+      AreaMap loaded = (AreaMap) session.loaded()[0];
       I.say("\nSuccessfully loaded map: "+loaded);
     }
     catch(Exception e) {
@@ -239,7 +238,7 @@ public class TestCity extends LogicTest {
   }
   
   
-  static void reportOnMap(Area map, Base base, boolean okay, Good... goods) {
+  static void reportOnMap(AreaMap map, Base base, boolean okay, Good... goods) {
     I.say("  Current time: "+map.time());
     if (! okay) for (Building b : map.buildings()) {
       if (b.type().isHomeBuilding()) {

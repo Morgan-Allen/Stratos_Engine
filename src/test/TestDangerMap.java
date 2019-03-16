@@ -3,7 +3,7 @@
 package test;
 import game.*;
 import static game.GameConstants.*;
-import static game.Area.*;
+import static game.AreaMap.*;
 import static content.GameContent.*;
 import static content.GameWorld.*;
 import util.*;
@@ -28,7 +28,7 @@ public class TestDangerMap extends LogicTest {
     final int gridRes = MAP_SIZE / FLAG_RES;
     
     Base base = setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, MAP_SIZE, false);
-    Area map = base.activeMap();
+    AreaMap map = base.activeMap();
     World world = base.world;
     
     world.settings.toggleFog = false;

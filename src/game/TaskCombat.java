@@ -3,7 +3,7 @@
 package game;
 import static game.GameConstants.*;
 import static game.RelationSet.*;
-import static game.Area.*;
+import static game.AreaMap.*;
 import graphics.common.*;
 import util.*;
 
@@ -253,7 +253,7 @@ public class TaskCombat extends Task {
     //
     //  Otherwise, try and ensure that it's possible to path toward some tile
     //  within range of the target-
-    final Area map = target.map();
+    final AreaMap map = target.map();
     AreaTile inRange[] = null;
     if (currentTask != null) {
       inRange = new AreaTile[] { active.at(), (AreaTile) currentTask.target };
@@ -289,7 +289,7 @@ public class TaskCombat extends Task {
         final Batch <AreaTile> accessT = new Batch();
         Flood <AreaTile> flood = new Flood <AreaTile> () {
           protected void addSuccessors(AreaTile front) {
-            for (AreaTile n : Area.adjacent(front, temp, map)) {
+            for (AreaTile n : AreaMap.adjacent(front, temp, map)) {
               if (n == null || n.flaggedWith() != null) continue;
               if (area.distance(n.x, n.y) > range     ) continue;
               
@@ -338,7 +338,7 @@ public class TaskCombat extends Task {
     for (AreaTile t : inRange) {
       if (Task.hasTaskFocus(t, jobType, active)) continue;
       
-      float distT = Area.distance(target, t);
+      float distT = AreaMap.distance(target, t);
       
       if (distT > maxRange) continue;
       
@@ -346,7 +346,7 @@ public class TaskCombat extends Task {
       if      (distT < RANGE_MELEE ) rating = Nums.max(rating, meleeDamage);
       else if (distT < rangeMissile) rating = Nums.max(rating, rangeDamage);
       
-      float distA = Area.distancePenalty(t, active);
+      float distA = AreaMap.distancePenalty(t, active);
       rating *= distA;
 
       if (report) I.say("  "+t+" distT: "+I.shorten(distT, 1)+", rating: "+rating);
@@ -365,14 +365,14 @@ public class TaskCombat extends Task {
     TaskCombat currentTask, JOB jobType
   ) {
     if (active == null || target == null || ! target.onMap()) return null;
-    final Area map = active.map();
+    final AreaMap map = active.map();
     if (map == null || ! map.world.settings.toggleCombat) return null;
     //
     //  In the case of immobile actives, such as turrets, you don't bother with
     //  the fancy pathing-connection tests.  You just check if the target is in
     //  range.
     if (! active.mobile()) {
-      float distance     = Area.distance(active.at(), target);
+      float distance     = AreaMap.distance(active.at(), target);
       float rangeMissile = active.type().rangeDist;
       float rateMelee    = active.type().meleeDamage;
       float rateRange    = active.type().rangeDamage;
@@ -410,7 +410,7 @@ public class TaskCombat extends Task {
     
     //  TODO:  Decide on a preferred attack-mode first...?
     
-    if (canTouch && Area.distance(target, t) < RANGE_MELEE) {
+    if (canTouch && AreaMap.distance(target, t) < RANGE_MELEE) {
       currentTask.attackMode = ATTACK_MELEE;
     }
     else {
@@ -489,12 +489,12 @@ public class TaskCombat extends Task {
     for (Active a : backup) if (a != actor) {
       float backPower = attackPower((Element) a);
       if (a.jobType() == JOB.COMBAT) {
-        backPower *= Area.distance(mainTaskFocus((Element) a), primary);
+        backPower *= AreaMap.distance(mainTaskFocus((Element) a), primary);
       }
       else {
         backPower /= 2;
       }
-      backPower *= Area.distancePenalty(actor, a);
+      backPower *= AreaMap.distancePenalty(actor, a);
       power += backPower;
     }
     
@@ -566,7 +566,7 @@ public class TaskCombat extends Task {
   
   
   boolean checkTargetContact(Target from) {
-    float range = Area.distance(active, primary);
+    float range = AreaMap.distance(active, primary);
     float maxRange = actionRange();
     return range < maxRange;
   }
@@ -635,7 +635,7 @@ public class TaskCombat extends Task {
       otherA.traits.gainXP(defendSkill, otherXP);
     }
     
-    Area map = attacks.map();
+    AreaMap map = attacks.map();
     Good weaponType = attacks.type().weaponType;
     Ephemera.applyCombatFX(weaponType, (Active) attacks, other, ! melee, hits, map);
   }

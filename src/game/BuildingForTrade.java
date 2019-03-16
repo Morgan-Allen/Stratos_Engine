@@ -121,7 +121,7 @@ public class BuildingForTrade extends Building implements Trader {
     for (Building b : map().buildings()) if (b.base() == base()) {
       if (b.type().isTradeBuilding()) continue;
       
-      float dist = Area.distance(this, b);
+      float dist = AreaMap.distance(this, b);
       if (dist > maxDist) continue;
       if (! map.pathCache.pathConnects(this, b, true, false)) continue;
       
@@ -213,7 +213,7 @@ public class BuildingForTrade extends Building implements Trader {
   
   public static TaskTrading selectTraderBehaviour(
     Trader from, Actor trading,
-    Base tradePartner, boolean cityBackOnly, Area map
+    Base tradePartner, boolean cityBackOnly, AreaMap map
   ) {
     boolean reports = trading.reports();
     
@@ -240,7 +240,7 @@ public class BuildingForTrade extends Building implements Trader {
       if (c.activeMap() == map ) continue;
       if (c == homeCity        ) continue;
       if (c.isEnemyOf(homeCity)) continue;
-      if (World.distance(c.locale, homeCity.locale, moveMode) < 0) continue;
+      if (World.distance(c.area, homeCity.area, moveMode) < 0) continue;
       targets.add(c);
     }
     

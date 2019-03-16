@@ -14,7 +14,7 @@ public class MissionUtils {
   
   /**  Rendering, debug and interface methods-
     */
-  static boolean reportEvents(Area map) {
+  static boolean reportEvents(AreaMap map) {
     if (map == null) return false;
     return map.world.settings.reportMissions;
   }
@@ -23,7 +23,7 @@ public class MissionUtils {
   /**  Handling end-stage events:
     */
   public static void handleDeparture(
-    Mission mission, Base from, WorldLocale goes
+    Mission mission, Base from, Area goes
   ) {
     Base belongs = mission.base();
     belongs.incArmyPower(0 - MissionForStrike.powerSum(mission.recruits(), null));
@@ -38,7 +38,7 @@ public class MissionUtils {
     Base    from   = mission.homeBase();
     World   world  = from.world;
     int     time   = world.time;
-    Area    map    = world.activeBaseMap();
+    AreaMap    map    = world.activeBaseMap();
     boolean report = reportEvents(map);
     //
     //  We use the same math that estimates the appeal of invasion to play out
@@ -166,7 +166,7 @@ public class MissionUtils {
   
   
   static void handleRecon(
-    Mission mission, WorldLocale goes, World.Journey journey
+    Mission mission, Area goes, World.Journey journey
   ) {
     Federation from = mission.homeBase().federation();
     from.setExploreLevel(goes, 1);

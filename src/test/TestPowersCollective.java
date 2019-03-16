@@ -22,11 +22,11 @@ public class TestPowersCollective {
   static boolean testHeal(boolean graphics) {
     TestPowers test = new TestPowers() {
       
-      Building createGuild(Area map, Base base) {
+      Building createGuild(AreaMap map, Base base) {
         return createGuild(map, base, SCHOOL_COL);
       }
       
-      Target createSubject(Area map, Building guild) {
+      Target createSubject(AreaMap map, Building guild) {
         Actor subject = (Actor) ECOLOGIST.generate();
         subject.enterMap(map, 20, 20, 1, guild.base());
         subject.takeDamage(subject.health.maxHealth() * 0.75f);
@@ -58,11 +58,11 @@ public class TestPowersCollective {
       
       float initSkill = -1;
       
-      Building createGuild(Area map, Base base) {
+      Building createGuild(AreaMap map, Base base) {
         return createGuild(map, base, SCHOOL_COL);
       }
       
-      Target createSubject(Area map, Building guild) {
+      Target createSubject(AreaMap map, Building guild) {
         Actor subject = guild.workers().first();
         subject.traits.setClassLevel(SYNERGY.minLevel);
         initSkill = subject.traits.levelOf(SKILL_SPEAK);

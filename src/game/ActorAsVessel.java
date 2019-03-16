@@ -55,8 +55,8 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
     flying    = s.loadBool();
     landed    = s.loadBool();
     flyHeight = s.loadFloat();
-    landsAt   = Area.loadTile(map, s);
-    entrance  = Area.loadTile(map, s);
+    landsAt   = AreaMap.loadTile(map, s);
+    entrance  = AreaMap.loadTile(map, s);
     boundTo   = (BuildingForDock) s.loadObject();
     dockedAt  = (BuildingForDock) s.loadObject();
   }
@@ -76,8 +76,8 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
     s.saveBool(flying);
     s.saveBool(landed);
     s.saveFloat(flyHeight);
-    Area.saveTile(landsAt , map, s);
-    Area.saveTile(entrance, map, s);
+    AreaMap.saveTile(landsAt , map, s);
+    AreaMap.saveTile(entrance, map, s);
     s.saveObject(boundTo );
     s.saveObject(dockedAt);
   }
@@ -143,7 +143,7 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
         }
         else {
           Base partner = trading.tradeGoes.base();
-          Area map = map();
+          AreaMap map = map();
           /*
           return TaskDelivery.pickNextDelivery(
             actor, this, this, MAX_TRADER_RANGE, 1, map().world.goodTypes()
@@ -180,7 +180,7 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   }
   
   
-  void updateOffMap(WorldLocale locale) {
+  void updateOffMap(Area locale) {
     super.updateOffMap(locale);
     updateWorkers(base().world.time());
   }
@@ -207,7 +207,7 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   
   /**  Implementing Pathing interface-
     */
-  public Pathing[] adjacent(Pathing[] temp, Area map) {
+  public Pathing[] adjacent(Pathing[] temp, AreaMap map) {
     if (dockedAt != null) {
       return new Pathing[] { dockedAt };
     }
@@ -263,7 +263,7 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   
   /**  General on-map life-cycle methods:
     */
-  public AreaTile findLandingPoint(Area map, Task task) {
+  public AreaTile findLandingPoint(AreaMap map, Task task) {
     
     //  TODO:  Use the cargo-profile for the trading-task to rate the viability
     //  of different landing-sites?
@@ -304,7 +304,7 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
       AreaTile docks = dock.nextFreeDockPoint();
       if (docks == null) continue;
       
-      float rating = Area.distancePenalty(from, b);
+      float rating = AreaMap.distancePenalty(from, b);
       pick.compare(docks, rating);
     }
     //
@@ -325,7 +325,7 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   }
   
   
-  public void onArrival(WorldLocale goes, Journey journey) {
+  public void onArrival(Area goes, Journey journey) {
     //
     //  PLEASE NOTE:  The super.onArrival call may itself trigger a new journey
     //  when visiting off-map bases, and most of the on-map calls require that
@@ -338,7 +338,7 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
         a.setInside(this, false);
         goes.toggleVisitor(a, true);
       }
-      if (base().locale == goes) {
+      if (base().area == goes) {
         transferCash(false, base());
       }
     }
@@ -360,11 +360,11 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   }
   
   
-  public void onDeparture(WorldLocale from, World.Journey journey) {
+  public void onDeparture(Area from, World.Journey journey) {
     //
     //  If you're departing from a foreign base, scoop up your crew and any
     //  passengers or mission teammates-
-    WorldLocale offmap = offmap();
+    Area offmap = offmap();
     Mission mission = mission();
     if (offmap != null && ! onMap()) {
       for (Actor a : crew) if (a.offmap() == offmap) {
@@ -556,7 +556,7 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   void updateFlight() {
     if (! type().isAirship()) return;
     
-    float landsDist = Area.distance(this, landsAt);
+    float landsDist = AreaMap.distance(this, landsAt);
     float targetHeight = MAX_HEIGHT;
     if (jobFocus() == landsAt && landsDist < DESCENT_RANGE) {
       targetHeight = 0;

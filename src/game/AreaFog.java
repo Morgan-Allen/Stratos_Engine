@@ -1,7 +1,7 @@
 
 
 package game;
-import static game.Area.*;
+import static game.AreaMap.*;
 import static game.GameConstants.*;
 import graphics.common.*;
 import graphics.terrain.*;
@@ -17,7 +17,7 @@ public class AreaFog {
   final static int MAX_FOG = 100;
   
   final Faction base;
-  final Area map;
+  final AreaMap map;
   
   byte fogVals[][];
   byte oldVals[][];
@@ -29,7 +29,7 @@ public class AreaFog {
   
   
   
-  AreaFog(Faction base, Area map) {
+  AreaFog(Faction base, AreaMap map) {
     this.base = base;
     this.map  = map;
   }

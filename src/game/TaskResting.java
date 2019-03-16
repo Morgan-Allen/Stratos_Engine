@@ -30,7 +30,7 @@ public class TaskResting extends Task {
   
   /**  Factory methods for outside access and other helper functions-
     */
-  public static Building findRestVenue(Actor actor, Area map) {
+  public static Building findRestVenue(Actor actor, AreaMap map) {
     Pick <Building> pick = new Pick();
     for (Building b : map.buildings()) {
       
@@ -38,7 +38,7 @@ public class TaskResting extends Task {
       if (b != actor.home() && ! b.type().hasFeature(IS_REFUGE)) continue;
       
       float rating = 1f;
-      rating *= Area.distancePenalty(actor, b);
+      rating *= AreaMap.distancePenalty(actor, b);
       rating *= restUrgency(actor, b);
       
       if (b == actor.home()) rating *= 3;
@@ -51,18 +51,18 @@ public class TaskResting extends Task {
   
   
   public static TaskResting nextRelaxing(Actor actor) {
-    Area map = actor.map();
+    AreaMap map = actor.map();
     Pick <Building> pickV = new Pick(0);
     
     for (Building b : map.buildings()) {
       if (! b.type().hasFeature(DIVERSION)) continue;
       if (TaskCombat.hostile(actor, b)) continue;
       
-      float dist = Area.distance(actor, b);
+      float dist = AreaMap.distance(actor, b);
       if (dist > MAX_WANDER_RANGE) continue;
       
       float rating = 1.0f;
-      rating *= Area.distancePenalty(dist);
+      rating *= AreaMap.distancePenalty(dist);
       rating *= b.type().featureAmount;
       ///rating *= (actor.base().relations.loyalty(b.base()) + 1) / 2;
       rating *= Rand.num();

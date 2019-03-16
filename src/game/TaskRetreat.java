@@ -90,7 +90,7 @@ public class TaskRetreat extends Task {
   /**  External factory methods-
     */
   static TaskRetreat configRetreat(Actor actor, Pathing hides, float priority) {
-    Area map = actor.map;
+    AreaMap map = actor.map;
     if (! map.world.settings.toggleRetreat) return null;
     
     TaskRetreat hiding = new TaskRetreat(actor, hides);
@@ -100,7 +100,7 @@ public class TaskRetreat extends Task {
   
   
   static TaskRetreat configRetreat(Actor actor) {
-    Area map = actor.map;
+    AreaMap map = actor.map;
     if (! map.world.settings.toggleRetreat) return null;
     
     Pathing home = actor.home();
@@ -113,7 +113,7 @@ public class TaskRetreat extends Task {
       if (! b.complete()) continue;
       
       float rating = 1.0f;
-      rating *= Area.distancePenalty(actor, b);
+      rating *= AreaMap.distancePenalty(actor, b);
       if (b == home) rating *= 2;
       
       pickHide.compare(b, rating);

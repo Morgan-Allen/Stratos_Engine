@@ -18,12 +18,12 @@ public class FederationRelations extends RelationSet {
   
   public void saveState(Session s) throws Exception {
     super.saveState(s);
-    prestige = s.loadFloat();
+    s.saveFloat(prestige);
   }
   
   public void loadState(Session s) throws Exception {
     super.loadState(s);
-    s.saveFloat(prestige);
+    prestige = s.loadFloat();
   }
   
   

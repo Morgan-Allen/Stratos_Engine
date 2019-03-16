@@ -4,7 +4,7 @@ package game;
 import gameUI.play.*;
 import graphics.common.*;
 import util.*;
-import static game.Area.*;
+import static game.AreaMap.*;
 import static game.GameConstants.*;
 
 
@@ -29,7 +29,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   private Type type;
   private int varID;
   
-  Area map;
+  AreaMap map;
   private AreaTile at;
   private float growLevel = 0;
   private int   buildBits = 0;
@@ -55,7 +55,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
     
     type   = (Type) s.loadObject();
     varID  = s.loadInt();
-    map    = (Area) s.loadObject();
+    map    = (AreaMap) s.loadObject();
     at     = loadTile(map, s);
     
     growLevel = s.loadFloat();
@@ -119,14 +119,14 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   ;
   
   
-  public Visit <AreaTile> footprint(Area map, boolean withClearance) {
+  public Visit <AreaTile> footprint(AreaMap map, boolean withClearance) {
     if (at == null) return map.tilesAround(0, 0, 0, 0);
     int m = withClearance ? type.clearMargin : 0, m2 = m * 2;
     return map.tilesUnder(at.x - m, at.y - m, type.wide + m2, type.high + m2);
   }
   
   
-  public Visit <AreaTile> perimeter(Area map) {
+  public Visit <AreaTile> perimeter(AreaMap map) {
     if (at == null) return map.tilesAround(0, 0, 0, 0);
     return map.tilesAround(at.x, at.y, type.wide, type.high);
   }
@@ -144,7 +144,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
-  public void setLocation(AreaTile at, Area map) {
+  public void setLocation(AreaTile at, AreaMap map) {
     this.at  = at;
     this.map = map;
     stateBits |= FLAG_SITED;
@@ -194,7 +194,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
-  boolean checkPlacingConflicts(Area map, Batch <Element> conflicts) {
+  boolean checkPlacingConflicts(AreaMap map, Batch <Element> conflicts) {
     
     if (! sited()) return false;
     boolean footprintOkay = true;
@@ -239,7 +239,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
-  public boolean canPlace(Area map) {
+  public boolean canPlace(AreaMap map) {
     return checkPlacingConflicts(map, null);
   }
   
@@ -247,7 +247,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   
   /**  Entering and exiting the map-
     */
-  public void enterMap(Area map, int x, int y, float buildLevel, Base owns) {
+  public void enterMap(AreaMap map, int x, int y, float buildLevel, Base owns) {
     if (onMap()) {
       I.complain("\nALREADY ON MAP: "+this);
       return;
@@ -300,7 +300,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
-  public void exitMap(Area map) {
+  public void exitMap(AreaMap map) {
     
     if (! type.mobile) {
       if (true       ) setFlagging(false, type.flagKey);
@@ -350,7 +350,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   }
   
   
-  public Area map() {
+  public AreaMap map() {
     return map;
   }
   

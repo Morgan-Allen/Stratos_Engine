@@ -11,7 +11,7 @@ import util.*;
 
 
 
-public class TestWorld3 {
+public class TestWorld3 extends LogicTest {
   
 
   
@@ -97,7 +97,7 @@ public class TestWorld3 {
       Base goes = pair[0], from = pair[1];
       runCompleteExploration(from, goes);
       
-      if (from.federation().exploreLevel(goes.locale) < 0.5f) {
+      if (from.federation().exploreLevel(goes.area) < 0.5f) {
         I.say("\nWORLD-EVENTS TESTING FAILED- Exploration did not reveal area!");
         return false;
       }
@@ -133,13 +133,13 @@ public class TestWorld3 {
 
     Base bases[] = new Base[belong.length];
     for (int i = 0; i < bases.length; i++) {
-      Base b = bases[i] = new Base(world, world.addLocale(0, i), belong[i]);
+      Base b = bases[i] = new Base(world, addArea(world, 0, i, i), belong[i]);
       b.setName("City No. "+i);
       b.federation().setTypeAI(Federation.AI_OFF);
       b.federation().relations.initPrestige(BaseRelations.PRESTIGE_MAX);
       
       for (int n = i; n-- > 0;) {
-        World.setupRoute(b.locale, bases[n].locale, 1, Type.MOVE_LAND);
+        AreaType.setupRoute(b.area.type, bases[n].area.type, 1, Type.MOVE_LAND);
       }
     }
     
