@@ -47,7 +47,7 @@ public class MissionForStrike extends Mission {
     if (! complete()) {
       
       if (worldFocus() != null && ! onWrongMap()) {
-        Base sieges = worldFocus(), home = homeBase();
+        Base sieges = (Base) worldFocus(), home = homeBase();
         final Target focus = localFocus();
         Object update = updateTacticalTarget(focus);
         
@@ -76,14 +76,15 @@ public class MissionForStrike extends Mission {
   }
   
   
-  void handleOffmapArrival(Base goes, World.Journey journey) {
-    if (goes == worldFocus()) {
-      MissionUtils.handleInvasion(this, goes, journey);
+  void handleOffmapArrival(WorldLocale goes, World.Journey journey) {
+    if (goes == worldFocusLocale()) {
+      Base focus = worldFocusBase();
+      MissionUtils.handleInvasion(this, focus, journey);
     }
   }
   
   
-  void handleOffmapDeparture(Base from, Journey journey) {
+  void handleOffmapDeparture(WorldLocale from, Journey journey) {
     return;
   }
   
@@ -218,7 +219,7 @@ public class MissionForStrike extends Mission {
     //  Basic sanity checks first-
     Area    map    = localMap();
     Pathing from   = transitTile();
-    Base    sieges = worldFocus();
+    Base    sieges = (Base) worldFocus();
     if (sieges == null || from == null || map == null) return null;
     //
     //  If your terms were delivered and accepted in a timely manner, win-

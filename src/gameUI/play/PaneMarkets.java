@@ -70,7 +70,7 @@ public class PaneMarkets extends DetailPane {
     
     ActorAsVessel trader = home == null ? null : home.trading.traderFor(base);
     if (trader != null) {
-      Base offmap = trader.offmapBase();
+      WorldLocale offmap = trader.offmap();
       int ETA = world.arriveTime(trader, base);
       World.Journey j = world.journeyFor(trader);
       

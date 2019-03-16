@@ -23,7 +23,7 @@ public class MissionUtils {
   /**  Handling end-stage events:
     */
   public static void handleDeparture(
-    Mission mission, Base from, Base goes
+    Mission mission, Base from, WorldLocale goes
   ) {
     Base belongs = mission.base();
     belongs.incArmyPower(0 - MissionForStrike.powerSum(mission.recruits(), null));
@@ -35,7 +35,7 @@ public class MissionUtils {
   ) {
     //
     //  Gather some details first:
-    Base    from   = journey.from;
+    Base    from   = mission.homeBase();
     World   world  = from.world;
     int     time   = world.time;
     Area    map    = world.activeBaseMap();
@@ -166,10 +166,10 @@ public class MissionUtils {
   
   
   static void handleRecon(
-    Mission mission, Base goes, World.Journey journey
+    Mission mission, WorldLocale goes, World.Journey journey
   ) {
     Federation from = mission.homeBase().federation();
-    from.setExploreLevel(goes.locale, 1);
+    from.setExploreLevel(goes, 1);
     mission.setMissionComplete(true);
   }
   

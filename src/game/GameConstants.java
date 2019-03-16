@@ -634,8 +634,8 @@ public class GameConstants {
   
   
   public static interface Journeys {
-    void onArrival  (Base goes, World.Journey journey);
-    void onDeparture(Base from, World.Journey journey);
+    void onArrival  (WorldLocale goes, World.Journey journey);
+    void onDeparture(WorldLocale from, World.Journey journey);
     Base base();
     boolean isActor();
   }

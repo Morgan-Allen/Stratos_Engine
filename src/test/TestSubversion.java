@@ -79,7 +79,7 @@ public class TestSubversion extends LogicTest {
           contact.toggleEnvoy(a, true);
         }
         contact.setLocalFocus(mainHut);
-        contact.beginMission(base);
+        contact.beginMission();
       }
       
       if (! madeContact) {

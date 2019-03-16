@@ -66,7 +66,7 @@ public class MissionAIUtils {
   static void generateRecruits(Mission mission, float maxArmy, Type... types) {
     //
     //  For off-map bases, we can generate troops dynamically-
-    if (mission.homeBase().isOffmap()) {
+    if (mission.homeBase().locale.isOffmap()) {
       while (MissionForStrike.powerSum(mission) < maxArmy) {
         Type soldier = (Type) Rand.pickFrom(types);
         Actor fights = (Actor) soldier.generate();
@@ -154,14 +154,14 @@ public class MissionAIUtils {
   
   
   static float strikeAppeal(Mission mission) {
-    float appeal = strikeAppeal(mission.worldFocus(), mission.homeBase);
+    float appeal = strikeAppeal(mission.worldFocusBase(), mission.homeBase);
     if (hasCompetition(mission)) appeal *= 1.25f;
     return appeal;
   }
   
   
   static float strikeChance(Mission mission) {
-    float defence = forceStrength(mission.worldFocus());
+    float defence = forceStrength(mission.worldFocusBase());
     float sumArmy = mission.evalForce() + 0;
     
     for (Mission m : federationMissions(mission.base().federation())) {
@@ -228,7 +228,7 @@ public class MissionAIUtils {
   
   
   static float defendAppeal(Mission mission) {
-    return defendAppeal(mission.worldFocus(), mission.homeBase);
+    return defendAppeal(mission.worldFocusBase(), mission.homeBase);
   }
   
   
@@ -300,7 +300,7 @@ public class MissionAIUtils {
   
   static float dialogAppeal(Mission mission) {
     if (hasCompetition(mission)) return -1;
-    return dialogAppeal(mission.worldFocus(), mission.homeBase);
+    return dialogAppeal(mission.worldFocusBase(), mission.homeBase);
   }
   
   
@@ -358,15 +358,15 @@ public class MissionAIUtils {
   }
   
   
-  static float exploreAppeal(Base goes, Base from) {
-    float exploreLevel = exploreLevel(goes.locale, from.federation());
+  static float exploreAppeal(WorldLocale goes, Base from) {
+    float exploreLevel = exploreLevel(goes, from.federation());
     return (1 - exploreLevel) * 0.5f;
   }
   
   
   static float exploreAppeal(Mission mission) {
     if (hasCompetition(mission)) return -1;
-    return exploreAppeal(mission.worldFocus(), mission.homeBase);
+    return exploreAppeal(mission.worldFocusLocale(), mission.homeBase);
   }
   
   
@@ -477,7 +477,7 @@ public class MissionAIUtils {
       
       if (report) I.say("  Selected: "+m);
       
-      if (launch) m.beginMission(m.homeBase());
+      if (launch) m.beginMission();
       return m;
     }
     else {

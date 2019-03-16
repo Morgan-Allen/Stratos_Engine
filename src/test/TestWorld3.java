@@ -153,7 +153,7 @@ public class TestWorld3 {
     
     Mission force = MissionAIUtils.setupStrikeMission(goes, from, from.armyPower(), false);
     MissionAIUtils.recruitStrikeMission(force, world);
-    force.beginMission(force.homeBase());
+    force.beginMission();
     
     int time = 0;
     while (time < YEAR_LENGTH && force.active() && ! force.complete()) {
@@ -168,7 +168,7 @@ public class TestWorld3 {
     
     Mission force = MissionAIUtils.setupDefendMission(goes, from, from.armyPower(), false);
     MissionAIUtils.recruitDefendMission(force, world);
-    force.beginMission(force.homeBase());
+    force.beginMission();
 
     int time = 0;
     while (time < YEAR_LENGTH && force.active() && ! force.arrived()) {
@@ -183,7 +183,7 @@ public class TestWorld3 {
     
     Mission force = MissionAIUtils.setupDialogMission(goes, from, from.armyPower(), true);
     MissionAIUtils.recruitDialogMission(force, world);
-    force.beginMission(force.homeBase());
+    force.beginMission();
     
     int time = 0;
     while (time < YEAR_LENGTH && force.active() && ! force.complete()) {
@@ -198,7 +198,7 @@ public class TestWorld3 {
     
     Mission force = MissionAIUtils.setupExploreMission(goes, from, from.armyPower(), true);
     MissionAIUtils.recruitExploreMission(force, world);
-    force.beginMission(force.homeBase());
+    force.beginMission();
     
     int time = 0;
     while (time < YEAR_LENGTH && force.active() && ! force.complete()) {

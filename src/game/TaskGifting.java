@@ -82,7 +82,7 @@ public class TaskGifting extends TaskDialog {
     
     Pick <Good> pickGift = new Pick();
     Building home = gets.home();
-    Base away = gets.offmapBase();
+    Base away = gets.base();
     float minAmount = store == gives ? 1 : 2;
     
     if (home != null) for (Good g : home.needed()) {

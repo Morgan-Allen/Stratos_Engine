@@ -132,13 +132,14 @@ public class ActorHealth {
   }
   
   
-  void updateHealthOffmap(Base base) {
+  void updateHealthOffmap(WorldLocale locale) {
     //
     //  We're assuming the actor can always eat/rest off-map:
     if (organic()) {
       hunger -= (maxHealth() + 1) / HUNGER_REGEN;
     }
-    updateHealth(1, base.world.time(), true, base.world);
+    World world = actor.base().world;
+    updateHealth(1, world.time(), true, world);
   }
   
   
@@ -201,7 +202,7 @@ public class ActorHealth {
   
   /**  Stub methods for handling growth and life-cycle:
     */
-  void updateLifeCycle(Base city, boolean onMap) {
+  void updateLifeCycle(WorldLocale locale, boolean onMap) {
     ageSeconds += 1;
   }
   

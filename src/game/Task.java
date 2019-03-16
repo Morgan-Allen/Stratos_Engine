@@ -450,7 +450,7 @@ public class Task implements Session.Saveable {
   }
   
   
-  protected boolean updateOnArrival(Base goes, World.Journey journey) {
+  protected boolean updateOnArrival(WorldLocale goes, World.Journey journey) {
     return false;
   }
   

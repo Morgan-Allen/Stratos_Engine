@@ -146,7 +146,7 @@ public class OptionList extends UIGroup implements UIConstants {
             if (UI.mouseClicked()) {
               mission.setLocalFocus((Target) hovered);
               mission.rewards.setAsBounty(0);
-              mission.beginMission(base);
+              mission.beginMission();
               PlayUI.pushSelection(mission);
               mission = null;
               UI.assignTask(null);

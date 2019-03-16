@@ -60,9 +60,6 @@ public class TestWorld2 extends LogicTest {
     
     //  Okay.  New items to implement-
     
-    //  Impact of contact, defend and strike missions on base and faction
-    //    relations.  (Check within singletons.)
-    
     //  Colony missions. (Base off exploration.)
     //    Colony growth over time.  Population, tech, resources.
     

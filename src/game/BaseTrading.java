@@ -229,7 +229,7 @@ public class BaseTrading {
     Base capital = base.federation().capital();
     boolean tribute = base.relations.isLoyalVassalOf(belongs);
     
-    if (tribute && capital != null && capital.isOffmap()) {
+    if (tribute && capital != null && capital.locale.isOffmap()) {
       Tally <Good> due = base.relations.suppliesDue;
       
       for (Good g : due.keys()) {
@@ -258,12 +258,12 @@ public class BaseTrading {
       ;
       
       ActorAsVessel trader = traderFor(b);
-      boolean isHome = trader != null && base.visitors.includes(trader);
+      boolean isHome = trader != null && base.locale.visitors.includes(trader);
       
       if (trader != null && isHome && ! shouldTrade) {
-        base.toggleVisitor(trader, false);
+        base.locale.toggleVisitor(trader, false);
         traders.remove(trader);
-        for (Actor a : trader.crew) base.toggleVisitor(a, false);
+        for (Actor a : trader.crew) base.locale.toggleVisitor(a, false);
         continue;
       }
       
@@ -274,7 +274,7 @@ public class BaseTrading {
         trader.bonds.assignGuestBase(b);
         trader.setBuildLevel(1);
         traders.add(trader);
-        base.toggleVisitor(trader, true);
+        base.locale.toggleVisitor(trader, true);
       }
       
       if (trader != null && shouldTrade && isHome && trader.readyForTakeoff()) {
@@ -314,13 +314,13 @@ public class BaseTrading {
   
   public void addMigrant(Actor migrant) {
     this.migrants.add(migrant);
-    base.toggleVisitor(migrant, true);
+    base.locale.toggleVisitor(migrant, true);
   }
   
   
   public void removeMigrant(Actor migrant) {
     this.migrants.remove(migrant);
-    base.toggleVisitor(migrant, false);
+    base.locale.toggleVisitor(migrant, false);
   }
   
   

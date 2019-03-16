@@ -216,7 +216,7 @@ public class Area implements Session.Saveable {
   
   public void addBase(Base base) {
     bases.include(base);
-    base.attachMap(this);
+    //base.attachMap(this);
   }
   
   

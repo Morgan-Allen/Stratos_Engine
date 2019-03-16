@@ -251,10 +251,10 @@ public class ActorAsPerson extends Actor {
     */
   ActorHealth initHealth() {
     return new ActorHealth(this) {
-      void updateLifeCycle(Base city, boolean onMap) {
-        super.updateLifeCycle(city, onMap);
+      void updateLifeCycle(WorldLocale locale, boolean onMap) {
+        super.updateLifeCycle(locale, onMap);
         
-        WorldSettings settings = city.world.settings;
+        WorldSettings settings = base().world.settings;
         
         if (pregnancy > 0) {
           boolean canBirth = (home() != null && inside() == home()) || ! onMap;

@@ -240,7 +240,7 @@ public class BuildingForTrade extends Building implements Trader {
       if (c.activeMap() == map ) continue;
       if (c == homeCity        ) continue;
       if (c.isEnemyOf(homeCity)) continue;
-      if (c.distance(homeCity, moveMode) < 0) continue;
+      if (World.distance(c.locale, homeCity.locale, moveMode) < 0) continue;
       targets.add(c);
     }
     

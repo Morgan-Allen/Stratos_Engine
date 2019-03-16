@@ -4,6 +4,8 @@ package game;
 import util.*;
 import static game.GameConstants.*;
 
+import game.World.Route;
+
 
 
 public class World implements Session.Saveable {
@@ -18,15 +20,15 @@ public class World implements Session.Saveable {
   
   public static class Journey {
     
-    Base from;
-    Base goes;
+    WorldLocale from;
+    WorldLocale goes;
     int startTime;
     int arriveTime;
     int moveMode;
     Batch <Journeys> going = new Batch();
     
-    public Base from() { return from; }
-    public Base goes() { return goes; }
+    public WorldLocale from() { return from; }
+    public WorldLocale goes() { return goes; }
     public Series <Journeys> going() { return going; }
   }
   
@@ -128,8 +130,8 @@ public class World implements Session.Saveable {
     
     for (int n = s.loadInt(); n-- > 0;) {
       Journey j = new Journey();
-      j.from       = (Base) s.loadObject();
-      j.goes       = (Base) s.loadObject();
+      j.from       = (WorldLocale) s.loadObject();
+      j.goes       = (WorldLocale) s.loadObject();
       j.startTime  = s.loadInt();
       j.arriveTime = s.loadInt();
       j.moveMode   = s.loadInt();
@@ -311,8 +313,19 @@ public class World implements Session.Saveable {
   
   /**  Registering and updating journeys:
     */
-  public float travelTime(Base from, Base goes, int moveMode) {
-    float distance = from.distance(goes, moveMode);
+  public static float distance(WorldLocale from, WorldLocale other, int moveMode) {
+    if (other == from) return 0;
+    Route route = from.routes.get(other);
+    
+    if (route == null) return -100;
+    if (moveMode != Type.MOVE_AIR && moveMode != route.moveMode) return -100;
+    
+    return route.distance;
+  }
+  
+  
+  public float travelTime(WorldLocale from, WorldLocale goes, int moveMode) {
+    float distance = distance(from, goes, moveMode);
     if (distance < 0) return -100;
     
     distance = Nums.max(1, distance);
@@ -326,7 +339,7 @@ public class World implements Session.Saveable {
   
   
   public Journey beginJourney(
-    Base from, Base goes, int moveMode, Journeys... going
+    WorldLocale from, WorldLocale goes, int moveMode, Journeys... going
   ) {
     if (from == null || goes == null) return null;
     
@@ -357,7 +370,7 @@ public class World implements Session.Saveable {
 
   
   public Journey beginJourney(
-    Base from, Base goes, int moveMode, Series <Journeys> going
+    WorldLocale from, WorldLocale goes, int moveMode, Series <Journeys> going
   ) {
     return beginJourney(from, goes, moveMode, going.toArray(Journeys.class));
   }
@@ -416,7 +429,11 @@ public class World implements Session.Saveable {
       if (j != null) return j.arriveTime;
     }
     
-    Base offmap = going.offmapBase();
+    /*
+    WorldLocale offmap = going.offmap();
+    //Base offmap = going.offmapBase();
+    
+    /*
     if (offmap != null && offmap.trading.migrants().includes(going)) {
       ActorAsVessel t = offmap.trading.traderFor(going.base());
       j = t == null ? null : journeyFor(t);
@@ -427,6 +444,7 @@ public class World implements Session.Saveable {
         return arriveTime;
       }
     }
+    //*/
     
     return -1;
   }
@@ -438,6 +456,10 @@ public class World implements Session.Saveable {
   public void updateWithTime(int time) {
     this.time = time;
     
+    for (WorldLocale locale : locales) {
+      locale.updateLocale();
+    }
+    
     Area active = activeBaseMap();
     if (active != null) {
       active.locals.updateBase();
@@ -446,16 +468,16 @@ public class World implements Session.Saveable {
       city.updateBase();
     }
     
-    for (Journey j : journeys) {
-      if (time >= j.arriveTime) {
-        completeJourney(j);
-      }
-    }
-    
     for (Faction f : federations.keySet()) {
       Federation c = federations.get(f);
       boolean played = playerFaction == f;
       c.update(played);
+    }
+    
+    for (Journey j : journeys) {
+      if (time >= j.arriveTime) {
+        completeJourney(j);
+      }
     }
     
     events.updateEvents(time);
@@ -482,8 +504,8 @@ public class World implements Session.Saveable {
     float timeGone = time - j.startTime;
     float a = timeGone / (j.arriveTime - j.startTime), i = 1 - a;
     
-    float initX = j.from.locale.mapX, initY = j.from.locale.mapY;
-    float destX = j.goes.locale.mapX, destY = j.goes.locale.mapY;
+    float initX = j.from.mapX, initY = j.from.mapY;
+    float destX = j.goes.mapX, destY = j.goes.mapY;
     
     Vec2D c = new Vec2D();
     c.x = (destX * a) + (initX * i);

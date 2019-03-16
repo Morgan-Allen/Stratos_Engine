@@ -4,8 +4,6 @@ package test;
 import game.*;
 import static game.GameConstants.*;
 import static game.BaseRelations.*;
-import static game.FederationRelations.*;
-import static game.RelationSet.*;
 import content.*;
 import static content.GameContent.*;
 import static content.GameWorld.*;
@@ -74,7 +72,7 @@ public class TestVesselMissions extends LogicTest {
       }
       
       boolean checkCompletion(Mission mission, Base base, Building centre) {
-        Base away = mission.worldFocus();
+        Base away = mission.worldFocusBase();
         if (away.faction() != base.faction()) return false;
         //if (! away.relations.isVassalOf(base)) return false;
         return true;
@@ -129,7 +127,7 @@ public class TestVesselMissions extends LogicTest {
       
       mission = generateMission(centre, barracks, rival);
       mission.assignTransport(ship);
-      mission.beginMission(base);
+      mission.beginMission();
     }
     else {
       mission = generateMission(base, rival);
@@ -137,7 +135,7 @@ public class TestVesselMissions extends LogicTest {
       ship.assignBase(rival);
       for (Actor a : mission.recruits()) a.setInside(ship, true);
       mission.assignTransport(ship);
-      mission.beginMission(rival);
+      mission.beginMission();
     }
     
     
@@ -186,7 +184,7 @@ public class TestVesselMissions extends LogicTest {
             shipArrive = true;
           }
           for (Actor a : mission.recruits()) {
-            if (a.offmapBase() != null) shipArrive = false;
+            if (a.offmap() != null) shipArrive = false;
           }
         }
         
@@ -199,9 +197,9 @@ public class TestVesselMissions extends LogicTest {
         if (missionDone && ! crewReturn) {
           boolean allBack = true;
           for (Actor a : mission.recruits()) {
-            if (a.offmapBase() != rival) allBack = false;
+            if (a.offmap() != rival.locale) allBack = false;
           }
-          if (ship.offmapBase() != rival) allBack = false;
+          if (ship.offmap() != rival.locale) allBack = false;
           if (allBack) {
             crewReturn = true;
           }

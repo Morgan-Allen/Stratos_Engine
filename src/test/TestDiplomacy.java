@@ -97,12 +97,12 @@ public class TestDiplomacy extends LogicTest {
     ActorAsPerson awayBoss = (ActorAsPerson) Nobles.NOBLE.generate();
     awayBoss.assignBase(awayC);
     awayC.council.toggleMember(awayBoss, Role.MONARCH, true);
-    awayC.toggleVisitor(awayBoss, true);
+    awayC.locale.toggleVisitor(awayBoss, true);
     
     ActorAsPerson neutBoss = (ActorAsPerson) Nobles.NOBLE.generate();
     neutBoss.assignBase(neutC);
     neutC.council.toggleMember(neutBoss, Role.MONARCH, true);
-    neutC.toggleVisitor(neutBoss, true);
+    neutC.locale.toggleVisitor(neutBoss, true);
     
     //
     //  Begin the mission from the foreign base-
@@ -125,7 +125,7 @@ public class TestDiplomacy extends LogicTest {
     
     escort.terms.assignTerms(BOND_ALLY, null, bride, null);
     escort.setWorldFocus(baseC);
-    escort.beginMission(awayC);
+    escort.beginMission();
     
     //
     //  Begin the simulation-
@@ -185,7 +185,7 @@ public class TestDiplomacy extends LogicTest {
         for (Actor w : garrison.workers()) escort.toggleRecruit(w, true);
         escort.toggleEnvoy(minister, true);
         escort.setWorldFocus(neutC);
-        escort.beginMission(baseC);
+        escort.beginMission();
         palace.setInventory(giftGood, 10);
         escortSent = true;
       }

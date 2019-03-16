@@ -14,19 +14,19 @@ public class ActorUtils {
   /**  General migration utilities-
     */
   static AreaTile findTransitPoint(
-    Area map, Base base, Base with, Actor client
+    Area map, WorldLocale from, WorldLocale goes, Actor client
   ) {
     ActorType type = client.type();
     int moveMode = type.moveMode;
     int size = Nums.max(type.wide, type.high);
-    return findTransitPoint(map, base, with, moveMode, size);
+    return findTransitPoint(map, from, goes, moveMode, size);
   }
   
   
   static AreaTile findTransitPoint(
-    Area map, Base base, Base with, int moveMode, int clientSize
+    Area map, WorldLocale from, WorldLocale goes, int moveMode, int clientSize
   ) {
-    if (map == null || base == null || with == null) return null;
+    if (map == null || from == null || goes == null) return null;
     
     //  TODO:  Make sure there's a pathing connection to the main settlement
     //  here!
@@ -34,14 +34,14 @@ public class ActorUtils {
     boolean land = moveMode == Type.MOVE_LAND;
     
     if (land) {
-      AreaTile current = map.transitPoints.get(with.locale);
+      AreaTile current = map.transitPoints.get(goes);
       if (current != null && ! map.blocked(current.x, current.y)) return current;
     }
     
     Pick <AreaTile> pick = new Pick();
     Vec2D cityDir = new Vec2D(
-      with.locale.mapX - base.locale.mapX,
-      with.locale.mapY - base.locale.mapY
+      goes.mapX - from.mapX,
+      goes.mapY - from.mapY
     ).normalise(), temp = new Vec2D();
     
     //  Larger actors will need to start out further from the map edge...
@@ -59,13 +59,13 @@ public class ActorUtils {
     }
     
     AreaTile point = pick.result();
-    map.transitPoints.put(with.locale, point);
+    map.transitPoints.put(goes, point);
     return point;
   }
   
   
-  static float distanceRating(Base from, Base goes) {
-    return AVG_CITY_DIST / (AVG_CITY_DIST + from.distance(goes, Type.MOVE_AIR));
+  static float distanceRating(WorldLocale from, WorldLocale goes) {
+    return AVG_CITY_DIST / (AVG_CITY_DIST + World.distance(from, goes, Type.MOVE_AIR));
   }
   
   
@@ -107,9 +107,8 @@ public class ActorUtils {
       else if (world.settings.toggleEasyMigrate) {
         if (checkOnly) return MIGRATE.OKAY;
         
-        Area map  = employs.map();
-        Base from = map.locals;
-        map.world.beginJourney(from, goes, Type.MOVE_AIR, migrant);
+        Area map = employs.map();
+        map.world.beginJourney(map.locale, goes.locale, Type.MOVE_AIR, migrant);
       }
       else {
         return MIGRATE.NO_SHIPPING;

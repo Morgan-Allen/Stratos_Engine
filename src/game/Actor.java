@@ -38,7 +38,7 @@ public class Actor extends Element implements
   private Employer work;
   private Building home;
   private Mission  mission;
-  private Base     offmap;
+  private WorldLocale offmap;
   
   private Task task;
   private Task reaction;
@@ -85,7 +85,7 @@ public class Actor extends Element implements
     work      = (Employer) s.loadObject();
     home      = (Building) s.loadObject();
     mission   = (Mission ) s.loadObject();
-    offmap    = (Base    ) s.loadObject();
+    offmap    = (WorldLocale) s.loadObject();
     
     task      = (Task) s.loadObject();
     reaction  = (Task) s.loadObject();
@@ -219,12 +219,12 @@ public class Actor extends Element implements
   }
   
   
-  void setOffmap(Base offmap) {
+  void setOffmap(WorldLocale offmap) {
     this.offmap = offmap;
   }
   
   
-  public Base offmapBase() {
+  public WorldLocale offmap() {
     return offmap;
   }
   
@@ -290,7 +290,7 @@ public class Actor extends Element implements
     if (onMap()) bonds.updateBonds();
     if (onMap()) health.updateHealth(map());
     if (onMap()) health.checkHealthState();
-    if (onMap() && health.alive()) health.updateLifeCycle(base(), true);
+    if (onMap() && health.alive()) health.updateLifeCycle(base().locale, true);
   }
   
   
@@ -318,10 +318,10 @@ public class Actor extends Element implements
   }
   
   
-  void updateOffMap(Base city) {
+  void updateOffMap(WorldLocale locale) {
     //  TODO:  Update traits as well.
-    health.updateHealthOffmap(city);
-    health.updateLifeCycle(city, false);
+    health.updateHealthOffmap(locale);
+    health.updateLifeCycle(locale, false);
   }
   
   
@@ -593,7 +593,7 @@ public class Actor extends Element implements
   
   /**  Handling migration and off-map tasks-
     */
-  public void onArrival(Base goes, World.Journey journey) {
+  public void onArrival(WorldLocale goes, World.Journey journey) {
     
     if (goes.activeMap() != null && inside() == null) {
       AreaTile entry = ActorUtils.findTransitPoint(
@@ -612,7 +612,7 @@ public class Actor extends Element implements
   }
   
   
-  public void onDeparture(Base from, World.Journey journey) {
+  public void onDeparture(WorldLocale from, World.Journey journey) {
     if (from.activeMap() == null) {
       from.toggleVisitor(this, false);
     }

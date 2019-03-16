@@ -66,9 +66,9 @@ public class MissionForContact extends Mission {
   }
   
   
-  public void beginMission(Base localBase) {
-    super.beginMission(localBase);
-    Base goes = worldFocus();
+  public void beginMission(WorldLocale locale) {
+    super.beginMission(locale);
+    Base goes = (Base) worldFocus();
     for (Actor a : recruits()) a.bonds.assignGuestBase(goes);
   }
   
@@ -169,7 +169,7 @@ public class MissionForContact extends Mission {
     Base focusBase = null;
     
     if (official && parent.worldFocus() != null) {
-      Base focus = parent.worldFocus();
+      Base focus = (Base) parent.worldFocus();
       BaseCouncil council = focus.council;
       Area area = focus.activeMap();
       
@@ -209,23 +209,24 @@ public class MissionForContact extends Mission {
   
   /**  Utility methods for faction-level decision-making-
     */
-  void handleOffmapDeparture(Base from, Journey journey) {
+  void handleOffmapDeparture(WorldLocale from, Journey journey) {
     
     ///I.say("Contact departing: "+this.hashCode()+", from: "+from);
     
-    if (from == homeBase()) {
+    if (from == homeBase().locale) {
       TaskGifting.performMissionPickup(this);
     }
   }
   
   
-  void handleOffmapArrival(Base goes, World.Journey journey) {
+  void handleOffmapArrival(WorldLocale goes, World.Journey journey) {
     
     ///I.say("Contact arriving: "+this.hashCode()+", goes: "+goes);
     
-    if (goes == worldFocus()) {
+    if (goes == worldFocusLocale()) {
       TaskGifting.performMisionDelivery(this);
-      MissionUtils.handleDialog(this, goes, journey);
+      Base focus = worldFocusBase();
+      MissionUtils.handleDialog(this, focus, journey);
     }
   }
   

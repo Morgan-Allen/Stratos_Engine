@@ -186,7 +186,7 @@ public class TestBounties extends LogicTest {
     
     Mission mission = setupMission(map, base);
     mission.rewards.setAsBounty(reward);
-    mission.beginMission(base);
+    mission.beginMission();
     
     Target focus = mission.localFocus();
     Actor sample = fort.workers().first();

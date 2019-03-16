@@ -162,9 +162,9 @@ public class TestVesselTrade extends LogicTest {
       }
       
       else {
-        awayC.toggleVisitor(ship, true);
+        awayC.locale.toggleVisitor(ship, true);
         for (Actor a : ship.crew()) {
-          awayC.toggleVisitor(a, true);
+          awayC.locale.toggleVisitor(a, true);
           a.health.setHungerLevel(0.5f);
         }
         for (int n = HUNGER_REGEN; n-- > 0;) {
@@ -239,7 +239,7 @@ public class TestVesselTrade extends LogicTest {
       if (spawnDone && ! shipComing) {
         for (Journey j : world.journeys()) {
           for (Journeys g : j.going()) {
-            if (j.goes() != homeC || ! g.isActor()) continue;
+            if (j.goes() != homeC.locale || ! g.isActor()) continue;
             Element e = (Element) g;
             if (e.type().isAirship()) {
               ship = (ActorAsVessel) e;

@@ -214,8 +214,8 @@ public class ActorAsAnimal extends Actor {
   
   ActorHealth initHealth() {
     return new ActorHealth(this) {
-      void updateLifeCycle(Base city, boolean onMap) {
-        super.updateLifeCycle(city, onMap);
+      void updateLifeCycle(WorldLocale locale, boolean onMap) {
+        super.updateLifeCycle(locale, onMap);
         //
         //  Once per month, check to see if breeding conditions are correct.  (In
         //  the event that your numbers are really low, pregnancy is set to -1 to
@@ -240,7 +240,7 @@ public class ActorAsAnimal extends Actor {
           }
           //
           //  But if you're too damned old, just die-
-          boolean canDie = city.world.settings.toggleAging;
+          boolean canDie = base().world.settings.toggleAging;
           if (canDie && ageSeconds > type().lifespan) {
             setAsKilled("Old age");
           }

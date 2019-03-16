@@ -41,7 +41,8 @@ public abstract class Mission implements
   float evalForce    = -1;
   boolean active = false;
   
-  private Base worldFocus;
+  //private Base worldFocus;
+  private Object worldFocus;
   private Target localFocus;
   private int stage = STAGE_INIT;
   boolean complete = false;
@@ -53,7 +54,8 @@ public abstract class Mission implements
   final public MissionRewards rewards = new MissionRewards(this);
   final public MissionTerms   terms   = new MissionTerms  (this);
   
-  Base localBase;
+  //Base localBase;
+  WorldLocale localLocale;
   AreaTile transitTile;
   ActorAsVessel transport;
   int arriveTime = -1;
@@ -86,7 +88,7 @@ public abstract class Mission implements
     active       = s.loadBool();
     
     Area map = (Area) s.loadObject();
-    worldFocus = (Base) s.loadObject();
+    worldFocus = s.loadObject();
     localFocus = Area.loadTarget(map, s);
     stage    = s.loadInt();
     complete = s.loadBool();
@@ -98,7 +100,7 @@ public abstract class Mission implements
     rewards.loadState(s);
     terms.loadState(s);
     
-    localBase   = (Base) s.loadObject();
+    localLocale = (WorldLocale) s.loadObject();
     transitTile = Area.loadTile(map, s);
     transport   = (ActorAsVessel) s.loadObject();
     arriveTime  = s.loadInt();
@@ -129,7 +131,7 @@ public abstract class Mission implements
     rewards.saveState(s);
     terms.saveState(s);
     
-    s.saveObject(localBase);
+    s.saveObject(localLocale);
     Area.saveTile(transitTile, map, s);
     s.saveObject(transport);
     s.saveInt(arriveTime);
@@ -176,11 +178,16 @@ public abstract class Mission implements
   
   /**  Regular updates and internal events-
     */
-  public void beginMission(Base localBase) {
+  public void beginMission() {
+    beginMission(homeBase.locale);
+  }
+  
+  
+  public void beginMission(WorldLocale locale) {
     homeBase.missions.toggleMember(this, true);
-    this.stage     = STAGE_BEGUN;
-    this.active    = true;
-    this.localBase = localBase;
+    this.stage      = STAGE_BEGUN;
+    this.active     = true;
+    this.localLocale = locale;
     homeBase.world.events.recordEvent("Began mission", this);
   }
   
@@ -197,10 +204,10 @@ public abstract class Mission implements
     boolean moveSelf  = transport == null || ! transport.onMap();
     
     if (departing && moveSelf && readyToDepart()) {
-      beginJourney(localBase, worldFocus());
+      beginJourney(localLocale, worldFocusLocale());
     }
     if (returning && moveSelf && readyToReturn()) {
-      beginJourney(localBase, homeBase());
+      beginJourney(localLocale, homeBase().locale);
     }
     if (returning && recruitsAllHome()) {
       disbandMission();
@@ -237,7 +244,7 @@ public abstract class Mission implements
         isHome = a.map() == homeBase.activeMap();
       }
       else {
-        isHome = a.offmapBase() == homeBase;
+        isHome = a.offmap() == homeBase.locale;
       }
       if (! isHome) return false;
       
@@ -251,7 +258,7 @@ public abstract class Mission implements
   }
   
   
-  void beginJourney(Base from, Base goes) {
+  void beginJourney(WorldLocale from, WorldLocale goes) {
     
     World world = homeBase.world;
     List <Journeys> going = new List();
@@ -271,21 +278,21 @@ public abstract class Mission implements
     //I.say(this+" beginning journey from "+from+" to "+goes);
     //I.say("  ETA: "+world.arriveTime(this));
     
-    if (from == homeBase) stage = STAGE_DEPARTED;
-    if (goes == homeBase) stage = STAGE_RETURNED;
+    if (from == homeBase.locale) stage = STAGE_DEPARTED;
+    if (goes == homeBase.locale) stage = STAGE_RETURNED;
     
     if (from.isOffmap()) {
-      if (from == homeBase) MissionUtils.handleDeparture(this, from, goes);
+      if (from == homeBase.locale) MissionUtils.handleDeparture(this, homeBase, goes);
       handleOffmapDeparture(from, journey);
     }
     
-    this.localBase   = null;
+    this.localLocale = null;
     this.localFocus  = null;
     this.transitTile = null;
   }
   
   
-  public void onDeparture(Base from, World.Journey journey) {
+  public void onDeparture(WorldLocale from, World.Journey journey) {
     
     ///homeBase.world.events.recordEvent("  Departed", this, from);
     
@@ -293,19 +300,19 @@ public abstract class Mission implements
   }
   
   
-  public void onArrival(Base goes, World.Journey journey) {
+  public void onArrival(WorldLocale goes, World.Journey journey) {
     
     ///homeBase.world.events.recordEvent("  Arrived", this, goes);
     
-    this.localBase  = goes;
-    this.arriveTime = goes.world.time();
+    this.localLocale = goes;
+    this.arriveTime  = homeBase().world.time;
     
     if (goes == worldFocus()) {
       stage = STAGE_ARRIVED;
     }
     if (goes.isOffmap()) {
       handleOffmapArrival(goes, journey);
-      if (goes == homeBase) MissionUtils.handleReturn(this, goes, journey);
+      if (goes == homeBase.locale) MissionUtils.handleReturn(this, homeBase, journey);
     }
   }
   
@@ -392,37 +399,56 @@ public abstract class Mission implements
   /**  Internal utility methods-
     */
   public boolean onWrongMap() {
-    if (worldFocus == null) return false;
-    if (localMap() == null) return true;
-    return worldFocus.activeMap() != localBase.activeMap();
+    WorldLocale locale = worldFocusLocale();
+    if (locale == null) return false;
+    if (locale.isOffmap()) return true;
+    return locale.activeMap() == localLocale.activeMap();
   }
   
   
   public boolean onHomeMap() {
-    if (localBase == null) return false;
-    return localBase.activeMap() == homeBase.activeMap();
+    if (localLocale == null) return false;
+    return localLocale.activeMap() == homeBase.activeMap();
   }
   
   
-  public Base offmapBase() {
-    if (worldFocus == null) return null;
-    return onWrongMap() ? worldFocus : homeBase;
+  public Object worldFocus() {
+    return worldFocus;
+  }
+  
+  
+  public WorldLocale worldFocusLocale() {
+    if (worldFocus instanceof Base) {
+      return ((Base) worldFocus).locale;
+    }
+    if (worldFocus instanceof WorldLocale) {
+      return (WorldLocale) worldFocus;
+    }
+    return null;
+  }
+  
+  
+  public Base worldFocusBase() {
+    if (worldFocus instanceof Base) {
+      return (Base) worldFocus;
+    }
+    return null;
+  }
+  
+  
+  public WorldLocale offmapLocale() {
+    return onWrongMap() ? worldFocusLocale() : homeBase.locale;
   }
   
   
   public Area localMap() {
-    if (localBase == null) return null;
-    return localBase.activeMap();
+    if (localLocale == null) return null;
+    return localLocale.activeMap();
   }
   
   
   public Base homeBase() {
     return homeBase;
-  }
-  
-  
-  public Base worldFocus() {
-    return worldFocus;
   }
   
   
@@ -434,10 +460,10 @@ public abstract class Mission implements
   public Pathing transitPoint() {
     
     if (transitTile == null) {
-      Area map    = localMap();
-      Base offmap = offmapBase();
+      Area map = localMap();
+      WorldLocale offmap = offmapLocale();
       if (map != null && offmap != null) {
-        transitTile = findTransitPoint(map, localBase, offmap, Type.MOVE_LAND, 1);
+        transitTile = findTransitPoint(map, localLocale, offmap, Type.MOVE_LAND, 1);
       }
     }
     
@@ -459,8 +485,8 @@ public abstract class Mission implements
   
   
   public boolean readyForTransit(Actor a, JOB type) {
-    if (localBase  == null) return false;
-    if (localMap() == null) return true;
+    if (localLocale == null) return false;
+    if (localMap()  == null) return true;
     if (a.jobType() != type) return false;
     if (haveTransport()) return a.inside() == transport;
     return ! a.onMap();
@@ -528,7 +554,8 @@ public abstract class Mission implements
   
   
   public boolean goesOffmap() {
-    return worldFocus != null && worldFocus.isOffmap();
+    WorldLocale focus = worldFocusLocale();
+    return focus != null && focus.isOffmap();
   }
   
   
@@ -555,8 +582,8 @@ public abstract class Mission implements
   
   abstract Task nextLocalMapBehaviour(Actor actor);
   
-  abstract void handleOffmapArrival  (Base goes, World.Journey journey);
-  abstract void handleOffmapDeparture(Base from, World.Journey journey);
+  abstract void handleOffmapArrival  (WorldLocale goes, World.Journey journey);
+  abstract void handleOffmapDeparture(WorldLocale from, World.Journey journey);
   
   
   

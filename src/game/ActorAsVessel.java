@@ -180,9 +180,9 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   }
   
   
-  void updateOffMap(Base city) {
-    super.updateOffMap(city);
-    updateWorkers(city.world.time());
+  void updateOffMap(WorldLocale locale) {
+    super.updateOffMap(locale);
+    updateWorkers(base().world.time());
   }
 
 
@@ -263,19 +263,21 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   
   /**  General on-map life-cycle methods:
     */
-  public AreaTile findLandingPoint(Area map, Base visits, Task task) {
+  public AreaTile findLandingPoint(Area map, Task task) {
     
     //  TODO:  Use the cargo-profile for the trading-task to rate the viability
     //  of different landing-sites?
     
     //
     //  First, see where we're supposed to be getting close to:
-    Target from = visits.headquarters();
+    Target from = null;
+    Base visits = null;
     
     if (task instanceof TaskTrading) {
       TaskTrading trading = (TaskTrading) task;
-      if (trading.tradeGoes instanceof Target) {
-        from = (Target) trading.tradeGoes;
+      if (trading.tradeGoes instanceof Building) {
+        from = (Building) trading.tradeGoes;
+        visits = ((Building) trading.tradeGoes).base();
       }
     }
     
@@ -283,6 +285,7 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
       TaskTransport transport = (TaskTransport) task;
       if (transport.mission.localFocus() != null) {
         from = transport.mission.localFocus();
+        visits = transport.mission.worldFocusBase();
       }
     }
     
@@ -294,7 +297,7 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
     Pick <AreaTile> pick = new Pick();
     for (Building b : map.buildings()) {
       
-      if (b.base() != visits) continue;
+      if (visits != null && b.base() != visits) continue;
       if (b.type().category != Type.IS_DOCK_BLD) continue;
       
       BuildingForDock dock = (BuildingForDock) b;
@@ -322,7 +325,7 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   }
   
   
-  public void onArrival(Base goes, Journey journey) {
+  public void onArrival(WorldLocale goes, Journey journey) {
     //
     //  PLEASE NOTE:  The super.onArrival call may itself trigger a new journey
     //  when visiting off-map bases, and most of the on-map calls require that
@@ -335,11 +338,13 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
         a.setInside(this, false);
         goes.toggleVisitor(a, true);
       }
-      transferCash(false, goes);
+      if (base().locale == goes) {
+        transferCash(false, base());
+      }
     }
     
     else if (type().isAirship()) {
-      setLandPoint(findLandingPoint(goes.activeMap(), goes, task()));
+      setLandPoint(findLandingPoint(goes.activeMap(), task()));
       this.flying    = true;
       this.flyHeight = MAX_HEIGHT;
     }
@@ -355,20 +360,20 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
   }
   
   
-  public void onDeparture(Base from, World.Journey journey) {
+  public void onDeparture(WorldLocale from, World.Journey journey) {
     //
     //  If you're departing from a foreign base, scoop up your crew and any
     //  passengers or mission teammates-
-    Base offmap = offmapBase();
+    WorldLocale offmap = offmap();
     Mission mission = mission();
     if (offmap != null && ! onMap()) {
-      for (Actor a : crew) if (a.offmapBase() == offmap) {
+      for (Actor a : crew) if (a.offmap() == offmap) {
         a.setInside(this, true);
       }
       if (mission != null) for (Actor a : mission.recruits()) {
         if (a != this) a.setInside(this, true);
       }
-      for (Actor a : allInside()) if (a.offmapBase() == offmap) {
+      for (Actor a : allInside()) if (a.offmap() == offmap) {
         offmap.toggleVisitor(a, false);
       }
     }

@@ -103,7 +103,7 @@ public class TestMilitary extends LogicTest {
         for (Actor w : fort1.workers()) defence.toggleRecruit(w, true);
         for (Actor w : fort2.workers()) defence.toggleRecruit(w, true);
         defence.setLocalFocus(map.tileAt(25, 25));
-        defence.beginMission(baseC);
+        defence.beginMission();
         
         Visit.appendTo(fromTroops, defence.recruits());
         initSkills = recordSkills(fromTroops, COMBAT_SKILLS);
@@ -112,7 +112,7 @@ public class TestMilitary extends LogicTest {
       
       if (defence != null && defence.assembled() && ! invaded) {
         enemies.setWorldFocus(baseC);
-        enemies.beginMission(awayC);
+        enemies.beginMission();
         map.update(1);
         
         World.Journey j = world.journeyFor(enemies);
@@ -139,7 +139,7 @@ public class TestMilitary extends LogicTest {
         for (Actor w : fort2.workers()) offence.toggleRecruit(w, true);
         offence.setWorldFocus(awayC);
         offence.terms.assignTerms(RelationSet.BOND_VASSAL, null, null, null);
-        offence.beginMission(baseC);
+        offence.beginMission();
         invading = true;
       }
       

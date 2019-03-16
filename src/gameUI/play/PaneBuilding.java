@@ -86,7 +86,7 @@ public class PaneBuilding extends DetailPane {
           d.appendAll("\n  ", a, "\n    ", a.jobDesc());
         }
         else {
-          Base offmap = a.offmapBase();
+          WorldLocale offmap = a.offmap();
           int ETA = world.arriveTime(a, base);
           if (ETA < 0) {
             d.appendAll("\n  ", a, "\n    (On "+offmap+")");
@@ -105,7 +105,7 @@ public class PaneBuilding extends DetailPane {
           d.appendAll("\n  ", a, "\n    ", a.jobDesc());
         }
         else {
-          Base offmap = a.offmapBase();
+          WorldLocale offmap = a.offmap();
           int ETA = world.arriveTime(a, base);
           if (ETA < 0) {
             d.appendAll("\n  ", a, "\n    (On "+offmap+")");

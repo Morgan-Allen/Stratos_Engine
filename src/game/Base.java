@@ -35,13 +35,9 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
   
   //
   //  These are specific to off-map bases...
-  List <Actor> visitors = new List();
   List <Mission> guarding = new List();
-  
   List <BuildType> buildTypes = new List();
   
-  private boolean active;
-  private Area map;
   
   
   
@@ -84,11 +80,7 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
     s.loadTally(buildLevel);
     
     s.loadObjects(missions);
-    s.loadObjects(visitors);
     s.loadObjects(guarding);
-    
-    active = s.loadBool();
-    map    = (Area) s.loadObject();
   }
   
   
@@ -114,44 +106,13 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
     s.saveTally(buildLevel);
     
     s.saveObjects(missions);
-    s.saveObjects(visitors);
     s.saveObjects(guarding);
-    
-    s.saveBool(active);
-    s.saveObject(map);
   }
   
   
   
   /**  Supplemental setup/query methods for economy, trade and geography-
     */
-  public void attachMap(Area map) {
-    this.map    = map;
-    this.active = map == null ? false : true;
-  }
-  
-  
-  public Area activeMap() {
-    return map;
-  }
-  
-  
-  public boolean isOffmap() {
-    return map == null;
-  }
-  
-  
-  public float distance(Base other, int moveMode) {
-    if (other.locale == this.locale) return 0;
-    Route route = locale.routes.get(other.locale);
-    
-    if (route == null) return -100;
-    if (moveMode != Type.MOVE_AIR && moveMode != route.moveMode) return -100;
-    
-    return route.distance;
-  }
-  
-  
   public Faction faction() {
     return faction;
   }
@@ -172,6 +133,11 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
     if (federation != null) return federation;
     federation = world.federation(faction);
     return federation;
+  }
+  
+  
+  public Area activeMap() {
+    return locale.activeMap();
   }
   
   
@@ -344,6 +310,7 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
   /**  Regular updates-
     */
   void updateBase() {
+    final Area map = locale.activeMap();
     final int UPDATE_GAP = map == null ? DAY_LENGTH : 10;
     boolean updateStats = world.time % UPDATE_GAP == 0;
     boolean activeMap   = map != null;
@@ -426,34 +393,11 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
     for (Mission f : missions) {
       f.update();
     }
-    for (Actor a : visitors) if (! a.onMap()) {
-      a.updateOffMap(this);
-    }
     //
     //  And update traders-
     if (updateStats && ! activeMap) {
       trading.updateOffmapTraders();
     }
-  }
-  
-  
-  
-  /**  Methods for handling traders and migrants-
-    */
-  public void toggleVisitor(Actor visitor, boolean is) {
-    
-    Base offmap = visitor.offmapBase();
-    if (offmap != this && ! is) return;
-    if (offmap == this &&   is) return;
-    if (offmap != null &&   is) offmap.toggleVisitor(visitor, false);
-    
-    visitors.toggleMember(visitor, is);
-    visitor.setOffmap(is ? this : null);
-  }
-  
-  
-  public Series <Actor> visitors() {
-    return visitors;
   }
   
   
@@ -465,7 +409,7 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
     if (activeMap() == null) {
       return all;
     }
-    for (Building b : map.buildings) if (b.base() == this) {
+    for (Building b : activeMap().buildings) if (b.base() == this) {
       for (ActorTechnique t : b.rulerPowers()) if (b.canUsePower(t)) {
         all.include(t);
       }

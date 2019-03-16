@@ -82,10 +82,10 @@ public class MissionForSecure extends Mission {
   
   
   
-  public void beginMission(Base localBase) {
-    super.beginMission(localBase);
-    beginTime = localBase.world.time();
-    Base goes = worldFocus();
+  public void beginMission(WorldLocale locale) {
+    super.beginMission(locale);
+    beginTime = homeBase().world.time();
+    Base goes = (Base) worldFocus();
     for (Actor a : recruits()) a.bonds.assignGuestBase(goes);
   }
   
@@ -96,7 +96,7 @@ public class MissionForSecure extends Mission {
   }
   
 
-  void beginJourney(Base from, Base goes) {
+  void beginJourney(WorldLocale from, WorldLocale goes) {
     super.beginJourney(from, goes);
     guardPoints.clear();
     lastGuardEvalTime = -1;
@@ -121,7 +121,7 @@ public class MissionForSecure extends Mission {
           this.lastFocusEvalTime = currentTime;
           
           Pick <Building> pickDefend = new Pick();
-          Base client = worldFocus();
+          Base client = (Base) worldFocus();
           Area map = localMap();
           Target lastFocus = localFocus();
           AreaDanger danger = map.dangerMap(client.faction(), true);
@@ -193,13 +193,15 @@ public class MissionForSecure extends Mission {
   }
   
   
-  void handleOffmapArrival(Base goes, World.Journey journey) {
-    MissionUtils.handleGarrisonArrive(this, goes, journey);
+  void handleOffmapArrival(WorldLocale goes, World.Journey journey) {
+    Base focus = worldFocusBase();
+    MissionUtils.handleGarrisonArrive(this, focus, journey);
   }
   
   
-  void handleOffmapDeparture(Base from, Journey journey) {
-    MissionUtils.handleGarrisonDepart(this, from, journey);
+  void handleOffmapDeparture(WorldLocale from, Journey journey) {
+    Base focus = worldFocusBase();
+    MissionUtils.handleGarrisonDepart(this, focus, journey);
   }
   
   
@@ -243,7 +245,7 @@ public class MissionForSecure extends Mission {
   static float rateCampingPoint(AreaTile t, Mission parent) {
     if (t == null || parent == null) return -1;
     
-    Area map = parent.localBase.activeMap();
+    Area map = parent.localMap();
     Pathing from = parent.transitTile();
     float rating = 0;
     boolean blocked = false;
@@ -274,7 +276,7 @@ public class MissionForSecure extends Mission {
   static AreaTile findCampingPoint(final Mission parent) {
     if (parent == null) return null;
     
-    final Area map = parent.localBase.activeMap();
+    final Area map = parent.localMap();
     final AreaTile init = AreaTile.nearestOpenTile(parent.transitTile(), map);
     if (init == null) return null;
     
@@ -303,7 +305,7 @@ public class MissionForSecure extends Mission {
     //
     //  First, check to see if an update is due:
     final Target focus = parent.localFocus();
-    final Area map = parent.localBase.activeMap();
+    final Area map = parent.localMap();
     final int updateTime = parent.lastGuardEvalTime;
     int nextUpdate = updateTime >= 0 ? (updateTime + GUARD_CHECK_PERIOD) : 0;
     
@@ -370,7 +372,7 @@ public class MissionForSecure extends Mission {
   ) {
     if (fromFocus == null) return null;
     
-    Area map = parent.localBase.activeMap();
+    Area map = parent.localMap();
     AreaTile goes = fromFocus.at();
     if (goes == null || map == null) return null;
     

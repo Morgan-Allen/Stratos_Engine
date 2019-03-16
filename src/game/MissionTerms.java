@@ -104,7 +104,7 @@ public class MissionTerms {
   public void setAccepted(boolean accepted) {
     if (accepted) {
       
-      Base focus = mission.worldFocus();
+      Base focus = mission.worldFocusBase();
       if (focus == null) focus = ((Element) mission.localFocus()).base();
       this.accepted = true;
       
