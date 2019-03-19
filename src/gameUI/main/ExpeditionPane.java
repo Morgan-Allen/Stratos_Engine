@@ -23,10 +23,10 @@ public class ExpeditionPane extends PaneMission {
     CATEGORIES[]  = {};
   
   
-  final Expedition expedition;
+  final MissionExpedition expedition;
   
   
-  public ExpeditionPane(HUD UI, Expedition expedition, Mission mission) {
+  public ExpeditionPane(HUD UI, MissionExpedition expedition, Mission mission) {
     //super(UI, null, null, true, CATEGORIES);
     super(UI, mission);
     this.expedition = expedition;
@@ -46,13 +46,13 @@ public class ExpeditionPane extends PaneMission {
     d.append("\n  Starting Capital: "+expedition.funding()+" Credits");
     d.append(new Description.Link(" (+)") {
       public void whenClicked(Object context) {
-        if (funding >= Expedition.MAX_FUNDING) return;
+        if (funding >= MissionExpedition.MAX_FUNDING) return;
         expedition.setFunding(funding + 1000, tribute);
       }
     });
     d.append(new Description.Link(" (-)") {
       public void whenClicked(Object context) {
-        if (funding <= Expedition.MIN_FUNDING) return;
+        if (funding <= MissionExpedition.MIN_FUNDING) return;
         expedition.setFunding(funding - 1000, tribute);
       }
     });
@@ -60,13 +60,13 @@ public class ExpeditionPane extends PaneMission {
     d.append("\n  Tribute Returned: "+expedition.tribute()+"%");
     d.append(new Description.Link(" (+)") {
       public void whenClicked(Object context) {
-        if (tribute >= Expedition.MAX_TRIBUTE) return;
+        if (tribute >= MissionExpedition.MAX_TRIBUTE) return;
         expedition.setFunding(funding, tribute + 5);
       }
     });
     d.append(new Description.Link(" (-)") {
       public void whenClicked(Object context) {
-        if (tribute <= Expedition.MIN_TRIBUTE) return;
+        if (tribute <= MissionExpedition.MIN_TRIBUTE) return;
         expedition.setFunding(funding, tribute - 5);
       }
     });

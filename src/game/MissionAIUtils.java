@@ -366,7 +366,7 @@ public class MissionAIUtils {
   
   static float exploreAppeal(Mission mission) {
     if (hasCompetition(mission)) return -1;
-    return exploreAppeal(mission.worldFocusLocale(), mission.homeBase);
+    return exploreAppeal(mission.worldFocusArea(), mission.homeBase);
   }
   
   

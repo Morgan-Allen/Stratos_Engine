@@ -24,12 +24,12 @@ public class LaunchWithMap {
       Base homeland = world.baseNamed("Homeworld Base");
       WorldScenario init = world.scenarios().first();
       
-      Expedition e = new Expedition();
+      MissionExpedition e = new MissionExpedition(homeland, true);
       Tally <Good> goods = Tally.with(PARTS, 20, PLASTICS, 20, CARBS, 20);
-      e.configAssets(GameWorld.FACTION_SETTLERS_A, 5000, goods, GameContent.BASTION);
-      e.configTravel(homeland, init.locale());
+      e.configAssets(5000, goods, GameContent.BASTION);
+      e.setWorldFocus(init.locale());
       
-      init.assignExpedition(e);
+      init.assignExpedition(e, world);
       init.initScenario(MainGame.mainGame());
       
       DesktopLauncher.launchScenario(init, world);

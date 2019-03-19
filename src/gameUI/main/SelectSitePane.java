@@ -16,8 +16,11 @@ import util.*;
 public class SelectSitePane extends MenuPane {
   
   
-  Expedition expedition;
   World world;
+  Base homeBase;
+  Area worldFocus;
+  MissionExpedition expedition;
+  
   
   
   public SelectSitePane(HUD UI) {
@@ -27,7 +30,6 @@ public class SelectSitePane extends MenuPane {
   
   public void assignWorld(World w) {
     this.world = w;
-    this.expedition = new Expedition();
   }
   
   
@@ -82,7 +84,7 @@ public class SelectSitePane extends MenuPane {
     screen.display.showWeather  = false;
     screen.worldsDisplay.hidden = false;
     screen.crewDisplay.hidden   = true ;
-    if (expedition.landing() == null) screen.display.spinAtRate(9, 0);
+    if (worldFocus == null) screen.display.spinAtRate(9, 0);
   }
   
   
@@ -93,14 +95,15 @@ public class SelectSitePane extends MenuPane {
   private void selectHomeworld(Area homeworld) {
     final MainScreen screen = MainGame.mainScreen();
     screen.worldsDisplay.setSelection(homeworld);
-    expedition.setHomeland(world.basesFor(homeworld).first());
+    this.homeBase = world.basesFor(homeworld).first();
+    expedition = new MissionExpedition(homeBase, true);
+    //expedition.setHomeBase(homeBase);
     //homeworld.whenClicked(null);
   }
   
   
   private boolean hasHomeworld(Area world) {
-    if (expedition.homeland() == null) return false;
-    return expedition.homeland().area == world;
+    return homeBase != null && homeBase.area == world;
   }
   
   
@@ -108,15 +111,18 @@ public class SelectSitePane extends MenuPane {
   /**  Handling landing selection-
     */
   private void selectLanding(Area landing) {
+    if (expedition == null) return;
     final MainScreen screen = MainGame.mainScreen();
     screen.display.setSelection(landing.type.name(), true);
-    expedition.setLanding(landing);
+    this.worldFocus = landing;
+    expedition.setWorldFocus(landing);
+    //expedition.setLanding(landing);
     //landing.whenClicked(null);
   }
   
   
   private boolean hasLanding(Area landing) {
-    return expedition.landing() == landing;
+    return worldFocus == landing;
   }
   
   
@@ -124,15 +130,15 @@ public class SelectSitePane extends MenuPane {
   /**  Other navigation tasks.
     */
   private boolean canProgress() {
-    if (expedition.homeland() == null) return false;
-    if (expedition.landing () == null) return false;
+    if (expedition == null) return false;
+    if (expedition.worldFocusArea() == null) return false;
     return true;
   }
   
   
   private void pushNextPane() {
+    if (expedition == null) return;
     //expedition.destination().whenClicked(null);
-    //expedition.backing().configStartingExpedition(expedition);
     navigateForward(new SelectCrewPane(UI, expedition), true);
   }
   

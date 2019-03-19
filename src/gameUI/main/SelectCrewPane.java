@@ -18,7 +18,7 @@ import util.*;
 
 public class SelectCrewPane extends MenuPane {
   
-  final Expedition expedition;
+  final MissionExpedition expedition;
   
   private UINode
     advisHeader,
@@ -28,7 +28,7 @@ public class SelectCrewPane extends MenuPane {
     colonLabels[];
   
   
-  public SelectCrewPane(HUD UI, Expedition expedition) {
+  public SelectCrewPane(HUD UI, MissionExpedition expedition) {
     super(UI, MainScreen.MENU_NEW_GAME_CREW);
     this.expedition = expedition;
   }
@@ -180,11 +180,11 @@ public class SelectCrewPane extends MenuPane {
     if (inc > 0) {
       Actor a = (Actor) b.generate();
       b.initAsMigrant(a);
-      expedition.toggleStaff(a, true);
+      expedition.toggleRecruit(a, true);
     }
     else {
-      for (Actor a : expedition.staff()) if (a.type() == b) {
-        expedition.toggleStaff(a, false);
+      for (Actor a : expedition.recruits()) if (a.type() == b) {
+        expedition.toggleRecruit(a, false);
         break;
       }
     }
@@ -200,13 +200,13 @@ public class SelectCrewPane extends MenuPane {
   
   private int numMigrants(Type b) {
     int c = 0;
-    for (Actor a : expedition.staff()) if (a.type() == b) c++;
+    for (Actor a : expedition.recruits()) if (a.type() == b) c++;
     return c;
   }
   
   
   private int numColonists() {
-    return expedition.staff().size();
+    return expedition.recruits().size();
   }
   
   
@@ -243,19 +243,16 @@ public class SelectCrewPane extends MenuPane {
     final World world = MainGame.currentWorld();
     world.assignSavePath(savePath);
     
-    WorldScenario hook = world.scenarioFor(expedition.landing());
+    WorldScenario hook = world.scenarioFor(expedition.worldFocusArea());
     if (hook == null) return;
     
     //  TODO:  You need a separate pane to specify these items!
     if (true) {
       Tally <Good> goods = Tally.with(PARTS, 20, PLASTICS, 20, CARBS, 20);
-      expedition.configAssets(
-        GameWorld.FACTION_SETTLERS_A,
-        5000, goods, GameContent.BASTION
-      );
+      expedition.configAssets(5000, goods, GameContent.BASTION);
     }
     
-    hook.assignExpedition(expedition);
+    hook.assignExpedition(expedition, world);
     hook.initScenario(MainGame.mainGame());
     
     MainGame.playScenario(hook, world);

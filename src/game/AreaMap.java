@@ -2,10 +2,10 @@
 
 package game;
 import graphics.common.*;
-import start.*;
-import util.*;
 import static game.GameConstants.*;
 import static util.TileConstants.*;
+import start.*;
+import util.*;
 
 
 

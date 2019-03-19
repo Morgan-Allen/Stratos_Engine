@@ -175,6 +175,10 @@ public abstract class Mission implements
     this.worldFocus = focus;
   }
   
+  public void setWorldFocus(Area focus) {
+    this.worldFocus = focus;
+  }
+  
   
   
   /**  Regular updates and internal events-
@@ -205,7 +209,7 @@ public abstract class Mission implements
     boolean moveSelf  = transport == null || ! transport.onMap();
     
     if (departing && moveSelf && readyToDepart()) {
-      beginJourney(localLocale, worldFocusLocale());
+      beginJourney(localLocale, worldFocusArea());
     }
     if (returning && moveSelf && readyToReturn()) {
       beginJourney(localLocale, homeBase().area);
@@ -400,7 +404,7 @@ public abstract class Mission implements
   /**  Internal utility methods-
     */
   public boolean onWrongMap() {
-    Area locale = worldFocusLocale();
+    Area locale = worldFocusArea();
     if (locale == null) return false;
     if (locale.isOffmap()) return true;
     return locale.activeMap() == localLocale.activeMap();
@@ -418,7 +422,7 @@ public abstract class Mission implements
   }
   
   
-  public Area worldFocusLocale() {
+  public Area worldFocusArea() {
     if (worldFocus instanceof Base) {
       return ((Base) worldFocus).area;
     }
@@ -438,7 +442,7 @@ public abstract class Mission implements
   
   
   public Area offmapLocale() {
-    return onWrongMap() ? worldFocusLocale() : homeBase.area;
+    return onWrongMap() ? worldFocusArea() : homeBase.area;
   }
   
   
@@ -555,7 +559,7 @@ public abstract class Mission implements
   
   
   public boolean goesOffmap() {
-    Area focus = worldFocusLocale();
+    Area focus = worldFocusArea();
     return focus != null && focus.isOffmap();
   }
   

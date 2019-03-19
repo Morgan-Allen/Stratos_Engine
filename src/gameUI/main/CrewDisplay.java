@@ -55,7 +55,7 @@ public class CrewDisplay extends UIGroup {
   }
   
   
-  protected void setupFrom(Expedition e, boolean showCrew) {
+  protected void setupFrom(MissionExpedition e, boolean showCrew) {
     
     final int HALF_B = BOX_HEIGHT / 2;
     int count;
@@ -73,7 +73,7 @@ public class CrewDisplay extends UIGroup {
     if (! showCrew) return;
     
     count = 0;
-    for (Actor a : e.staff()) {
+    for (Actor a : e.recruits()) {
       final Image pic = portraitFor(a);
       pic.alignTop (0               , HALF_B);
       pic.alignLeft(HALF_B * count++, HALF_B);

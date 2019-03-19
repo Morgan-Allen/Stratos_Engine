@@ -77,7 +77,7 @@ public class MissionForStrike extends Mission {
   
   
   void handleOffmapArrival(Area goes, World.Journey journey) {
-    if (goes == worldFocusLocale()) {
+    if (goes == worldFocusArea()) {
       Base focus = worldFocusBase();
       MissionUtils.handleInvasion(this, focus, journey);
     }

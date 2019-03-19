@@ -223,7 +223,7 @@ public class MissionForContact extends Mission {
     
     ///I.say("Contact arriving: "+this.hashCode()+", goes: "+goes);
     
-    if (goes == worldFocusLocale()) {
+    if (goes == worldFocusArea()) {
       TaskGifting.performMisionDelivery(this);
       Base focus = worldFocusBase();
       MissionUtils.handleDialog(this, focus, journey);

@@ -8,17 +8,6 @@ import java.lang.reflect.*;
 
 
 
-//  TODO:  Instead of extending the scenario class, just allow a different area
-//  and player-base to be assigned?
-
-//  AreaSetup.
-
-//  Area.
-//  AreaMap.
-//  Expedition/MissionForColony.
-
-
-
 
 public class WorldScenario extends Scenario {
   
@@ -31,7 +20,7 @@ public class WorldScenario extends Scenario {
   Area area;
   AreaConfig config;
   
-  Expedition expedition = null;
+  MissionExpedition expedition = null;
   List <Objective> objectives = new List();
   List <Building> nests = new List();
   
@@ -52,7 +41,7 @@ public class WorldScenario extends Scenario {
     area      = (Area) s.loadObject();
     config    = loadAreaConfig(s);
     
-    expedition = (Expedition) s.loadObject();
+    expedition = (MissionExpedition) s.loadObject();
     s.loadObjects(objectives);
     s.loadObjects(nests);
   }
@@ -133,8 +122,9 @@ public class WorldScenario extends Scenario {
   }
   
   
-  public void assignExpedition(Expedition e) {
+  public void assignExpedition(MissionExpedition e, World world) {
     this.expedition = e;
+    this.initWorld = world;
   }
   
   
@@ -247,13 +237,13 @@ public class WorldScenario extends Scenario {
   
   protected Base createBase(AreaMap stage, World world) {
     
-    Base homeland = expedition.homeland;
-    Base landing = new Base(world, stage.locale, expedition.faction);
+    Base homeland = expedition.homeBase();
+    Base landing = new Base(world, stage.locale, expedition.faction());
     
     landing.setName("Player Landing");
     landing.initFunds(expedition.funds);
     landing.federation().assignHomeland(homeland);
-    landing.assignBuildTypes(expedition.faction.buildTypes());
+    landing.assignBuildTypes(expedition.faction().buildTypes());
     
     stage.addBase(landing);
     world.addBases(landing);
@@ -282,7 +272,7 @@ public class WorldScenario extends Scenario {
     AreaTile landing = pickLanding.result();
     
     if (landing != null) {
-      SiteConfig landSite = siteConfig(expedition.faction, false, null, 0, 0);
+      SiteConfig landSite = siteConfig(expedition.faction(), false, null, 0, 0);
       for (BuildType b : expedition.built) siteConfig(landSite, b, 1, 1);
       bastion = placeSite(landSite, stage, landing, null, base);
     }
@@ -307,7 +297,7 @@ public class WorldScenario extends Scenario {
       
       ActorUtils.fillWorkVacancies(bastion);
       
-      for (Actor a : expedition.staff()) {
+      for (Actor a : expedition.recruits()) {
         a.enterMap(stage, goes.x, goes.y, 1, base);
         a.setInside(bastion, true);
         if (bastion.numWorkers(a.type()) < bastion.maxWorkers(a.type())) {

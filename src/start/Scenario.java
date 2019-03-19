@@ -52,16 +52,22 @@ public abstract class Scenario implements Session.Saveable {
     setupDone = false;
     this.game = game;
     
-    world = null;
-    area  = null;
-    base  = null;
-    UI    = null;
+    wipeScenario();
+    
     world = createWorld();
     area  = createMap(world);
     base  = createBase(area, world);
     configScenario(world, area, base);
     
     setupDone = true;
+  }
+  
+  
+  public void wipeScenario() {
+    world = null;
+    area  = null;
+    base  = null;
+    UI    = null;
   }
   
   

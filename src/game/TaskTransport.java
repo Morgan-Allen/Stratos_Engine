@@ -47,7 +47,7 @@ public class TaskTransport extends Task {
   
   public void beginFromOffmap(Base from) {
     World world = mission.homeBase.world;
-    Area home = mission.homeBase().area, away = mission.worldFocusLocale();
+    Area home = mission.homeBase().area, away = mission.worldFocusArea();
     world.beginJourney(home, away, vessel.type().moveMode, vessel);
   }
   
@@ -55,7 +55,7 @@ public class TaskTransport extends Task {
   protected void onTarget(Target target) {
     
     Base home = mission.homeBase();
-    Area away = mission.worldFocusLocale();
+    Area away = mission.worldFocusArea();
 
     if (mission.complete() && vessel.map() == home.activeMap()) {
       returned = true;
