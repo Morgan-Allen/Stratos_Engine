@@ -39,7 +39,7 @@ public class TestDemands extends LogicTest {
       
       if (map.above(i.x, i.y) != null) continue;
       Element e = new Element(JUNGLE_TREE1);
-      e.enterMap(map, i.x, i.y, 1, map.locals);
+      e.enterMap(map, i.x, i.y, 1, map.area.locals);
       
       i.amount = 1 + Rand.index(4);
       trueSum += i.amount;

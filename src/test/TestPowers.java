@@ -110,7 +110,7 @@ public class TestPowers extends LogicTest {
     if (subjectType.isAnimal()) {
       subjectType.initAsAnimal(subject);
     }
-    Base belongs = hostile ? map.locals : guild.base();
+    Base belongs = hostile ? map.area.locals : guild.base();
     subject.enterMap(map, 20, 20, 1, belongs);
     subject.traits.updateTraits();
     return subject;

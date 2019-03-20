@@ -182,7 +182,7 @@ public class AreaTerrain implements TileConstants {
     Base city, int size, int maxHigh, Terrain... gradient
   ) {
     AreaMap map = generateTerrain(city.world, city.area, size, maxHigh, gradient);
-    map.addBase(city);
+    map.area.addBase(city);
     return map;
   }
   
@@ -220,7 +220,7 @@ public class AreaTerrain implements TileConstants {
         if (Rand.num() < w && checkPlacingOkay(tile, t, map)) {
           Element f = (Element) t.generate();
           float level = t.growRate > 0 ? (Rand.num() + 0.5f) : 1;
-          f.enterMap(map, tile.x, tile.y, 1, map.locals);
+          f.enterMap(map, tile.x, tile.y, 1, map.area.locals);
           f.setGrowLevel(level);
         }
       }
@@ -230,7 +230,7 @@ public class AreaTerrain implements TileConstants {
   
   public static void populateFixture(Type t, int x, int y, AreaMap map) {
     Element f = (Element) t.generate();
-    f.enterMap(map, x, y, 1, map.locals);
+    f.enterMap(map, x, y, 1, map.area.locals);
   }
   
   
@@ -289,7 +289,7 @@ public class AreaTerrain implements TileConstants {
         
         ActorAsAnimal a = (ActorAsAnimal) s.generate();
         s.initAsAnimal(a);
-        a.enterMap(map, point.x, point.y, 1, map.locals);
+        a.enterMap(map, point.x, point.y, 1, map.area.locals);
       }
     }
   }

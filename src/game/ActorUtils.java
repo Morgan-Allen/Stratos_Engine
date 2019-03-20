@@ -108,7 +108,7 @@ public class ActorUtils {
         if (checkOnly) return MIGRATE.OKAY;
         
         AreaMap map = employs.map();
-        map.world.beginJourney(map.locale, goes.area, Type.MOVE_AIR, migrant);
+        map.world.beginJourney(map.area, goes.area, Type.MOVE_AIR, migrant);
       }
       else {
         return MIGRATE.NO_SHIPPING;

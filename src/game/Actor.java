@@ -738,13 +738,13 @@ public class Actor extends Element implements
     
     AreaTile from = centre();
     
-    if (base() != map.locals) {
+    if (base() != map.area.locals) {
       AreaFog fog = map.fogMap(this);
       float range = sightRange();
       if (fog != null) fog.liftFog(from, range);
     }
     
-    if (guestBase() != map.locals && guestBase() != base()) {
+    if (guestBase() != map.area.locals && guestBase() != base()) {
       AreaFog fog = map.fogMap(this);
       float range = sightRange();
       if (fog != null) fog.liftFog(from, range);

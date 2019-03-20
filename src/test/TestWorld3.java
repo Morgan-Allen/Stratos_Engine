@@ -95,7 +95,7 @@ public class TestWorld3 extends LogicTest {
     {
       Base pair[] = configWeakStrongBasePair();
       Base goes = pair[0], from = pair[1];
-      runCompleteExploration(from, goes);
+      runCompleteExploration(from, goes.area);
       
       if (from.federation().exploreLevel(goes.area) < 0.5f) {
         I.say("\nWORLD-EVENTS TESTING FAILED- Exploration did not reveal area!");
@@ -193,7 +193,7 @@ public class TestWorld3 extends LogicTest {
   }
   
   
-  static Mission runCompleteExploration(Base from, Base goes) {
+  static Mission runCompleteExploration(Base from, Area goes) {
     World world = from.world;
     
     Mission force = MissionAIUtils.setupExploreMission(goes, from, from.armyPower(), true);
@@ -206,4 +206,11 @@ public class TestWorld3 extends LogicTest {
     }
     return force;
   }
+  
 }
+
+
+
+
+
+

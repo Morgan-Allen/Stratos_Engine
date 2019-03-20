@@ -33,7 +33,7 @@ public class TestPowersTekPriest {
       
       Target createSubject(AreaMap map, Building guild) {
         Actor subject = (Actor) TRIPOD.generate();
-        subject.enterMap(map, 20, 20, 1, map.locals);
+        subject.enterMap(map, 20, 20, 1, map.area.locals);
         return toCharm = subject;
       }
       

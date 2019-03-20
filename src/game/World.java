@@ -58,8 +58,8 @@ public class World implements Session.Saveable {
   Table <Faction, Federation> federations = new Table();
   Faction playerFaction = null;
   
-  List <Area   > areas    = new List();
-  List <Base   > bases    = new List();
+  List <Area> areas = new List();
+  List <Base> bases = new List();
   List <Journey> journeys = new List();
   
   //  Only used for graphical reference...
@@ -211,9 +211,17 @@ public class World implements Session.Saveable {
   /**  Managing Factions, Bases and Locales:
     */
   public Area addArea(AreaType type) {
-    Area area = new Area(type);
+    Area area = new Area(this, type);
     this.areas.add(area);
     return area;
+  }
+  
+  
+  public void addBases(Base... bases) {
+    for (Base b : bases) {
+      this.bases.add(b);
+      b.area.addBase(b);
+    }
   }
   
   
@@ -221,27 +229,19 @@ public class World implements Session.Saveable {
     return new Vec2D(b.area.type.mapX, b.area.type.mapY);
   }
   
-  
-  public void addBases(Base... bases) {
-    Visit.appendTo(this.bases, bases);
-  }
-  
 
   public Base baseNamed(String n) {
-    for (Base b : bases) if (b.name.equals(n)) return b;
+    for (Area a : areas) for (Base b : a.bases) {
+      if (b.name.equals(n)) return b;
+    }
     return null;
   }
   
   
-  public Series <Base> basesFor(Area locale) {
-    Batch <Base> matches = new Batch();
-    for (Base b : bases) if (b.area == locale) matches.add(b);
-    return matches;
-  }
-  
-  
   public AreaMap activeBaseMap() {
-    for (Base c : bases) if (c.activeMap() != null) return c.activeMap();
+    for (Area a : areas) for (Base c : a.bases) {
+      if (c.activeMap() != null) return c.activeMap();
+    }
     return null;
   }
   
@@ -438,16 +438,12 @@ public class World implements Session.Saveable {
   public void updateWithTime(int time) {
     this.time = time;
     
-    for (Area locale : areas) {
-      locale.updateLocale();
+    for (Area area : areas) {
+      area.updateArea();
+      area.locals.updateBase();
     }
-    
-    AreaMap active = activeBaseMap();
-    if (active != null) {
-      active.locals.updateBase();
-    }
-    for (Base city : bases) {
-      city.updateBase();
+    for (Base b : bases) {
+      b.updateBase();
     }
     
     for (Faction f : federations.keySet()) {
@@ -507,7 +503,7 @@ public class World implements Session.Saveable {
   
   
   public Base onMap(int mapX, int mapY) {
-    for (Base b : bases) {
+    for (Area a : areas) for (Base b : a.bases) {
       int x = (int) b.area.type.mapX, y = (int) b.area.type.mapY;
       if (x == mapX && y == mapY) return b;
     }

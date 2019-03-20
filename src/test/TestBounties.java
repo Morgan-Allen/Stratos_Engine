@@ -36,7 +36,7 @@ public class TestBounties extends LogicTest {
       
       Mission setupMission(AreaMap map, Base base) {
         BuildingForNest nest = (BuildingForNest) RUINS_LAIR.generate();
-        nest.enterMap(map, 20, 20, 1, map.locals);
+        nest.enterMap(map, 20, 20, 1, map.area.locals);
         
         Mission mission;
         mission = new MissionForStrike(base);
@@ -58,7 +58,7 @@ public class TestBounties extends LogicTest {
       
       Mission setupMission(AreaMap map, Base base) {
         Actor creature = (Actor) MICOVORE.generate();
-        creature.enterMap(map, 20, 20, 1, map.locals);
+        creature.enterMap(map, 20, 20, 1, map.area.locals);
         creature.takeDamage(creature.health.maxHealth() * 0.7f);
         creature.health.incBleed(-1000);
         
@@ -126,7 +126,7 @@ public class TestBounties extends LogicTest {
         guarded.enterMap(map, 2, 10, 1, base);
         
         threat = (Actor) TRIPOD.generate();
-        threat.enterMap(map, 30, 30, 1, map.locals);
+        threat.enterMap(map, 30, 30, 1, map.area.locals);
         threat.takeDamage(threat.health.maxHealth() * 0.7f);
         
         mission = new MissionForSecure(base);

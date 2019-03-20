@@ -29,11 +29,11 @@ public class TestSubversion extends LogicTest {
     world.settings.toggleFog     = false;
     world.settings.toggleHunger  = false;
     world.settings.toggleFatigue = false;
-    map.locals.setName("Locals");
+    map.area.locals.setName("Locals");
     
     
     Building mainHut = (Building) FOREST_HUT.generate();
-    mainHut.enterMap(map, 27, 27, 1, map.locals);
+    mainHut.enterMap(map, 27, 27, 1, map.area.locals);
     ActorUtils.fillWorkVacancies(mainHut);
     
     Building centre = (Building) BASTION.generate();

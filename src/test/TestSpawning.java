@@ -31,7 +31,7 @@ public class TestSpawning extends LogicTest {
     Tally <ActorType> popCounts = new Tally();
     
     BuildingForNest nest = (BuildingForNest) RUINS_LAIR.generate();
-    nest.enterMap(map, 24, 24, 1, map.locals);
+    nest.enterMap(map, 24, 24, 1, map.area.locals);
     //  TODO:  You need to arrange for some other system here!
     //  nest.assignSpawnParameters(DAY_LENGTH, totalToSpawn, true, spawnArgs);
     
@@ -40,7 +40,7 @@ public class TestSpawning extends LogicTest {
     toRaze.enterMap(map, 6, 6, 1, base);
     
     Federation.setPosture(
-      base.faction(), map.locals.faction(),
+      base.faction(), map.area.locals.faction(),
       RelationSet.BOND_ENEMY, world
     );
     world.settings.toggleFog = false;
@@ -71,7 +71,7 @@ public class TestSpawning extends LogicTest {
       }
       
       if (spawnDone && ! missionInit) {
-        nestMission = map.locals.matchingMission(Mission.OBJECTIVE_STRIKE, toRaze);
+        nestMission = map.area.locals.matchingMission(Mission.OBJECTIVE_STRIKE, toRaze);
         missionInit = nestMission != null;
       }
       

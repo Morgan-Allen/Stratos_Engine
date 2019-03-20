@@ -238,14 +238,14 @@ public class WorldScenario extends Scenario {
   protected Base createBase(AreaMap stage, World world) {
     
     Base homeland = expedition.homeBase();
-    Base landing = new Base(world, stage.locale, expedition.faction());
+    Base landing = new Base(world, stage.area, expedition.faction());
     
     landing.setName("Player Landing");
     landing.initFunds(expedition.funds);
     landing.federation().assignHomeland(homeland);
     landing.assignBuildTypes(expedition.faction().buildTypes());
     
-    stage.addBase(landing);
+    stage.area.addBase(landing);
     world.addBases(landing);
     
     homeland.trading.updateOffmapTraders();
@@ -332,13 +332,13 @@ public class WorldScenario extends Scenario {
     for (SiteConfig site : config.sites) if (options.size() > 0) {
       SiteOption o = options.removeFirst();
       
-      Base siteBase = stage.firstBaseFor(site.belongs);
+      Base siteBase = stage.area.firstBaseFor(site.belongs);
       if (site.isBase || siteBase == null) {
-        siteBase = new Base(world, stage.locale, site.belongs);
-        stage.addBase(siteBase);
+        siteBase = new Base(world, stage.area, site.belongs);
+        stage.area.addBase(siteBase);
       }
       
-      placeSite(site, stage, o.at, null, stage.locals);
+      placeSite(site, stage, o.at, null, stage.area.locals);
     }
   }
   

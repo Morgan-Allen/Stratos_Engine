@@ -23,9 +23,7 @@ public class AreaMap implements Session.Saveable {
   Terrain terrainTypes[] = { EMPTY };
   
   final public World world;
-  final public Area locale;
-  final public Base locals;
-  List <Base> bases = new List();
+  final public Area area;
   
   int size, scanSize, flagSize;
   AreaTile grid[][];
@@ -59,14 +57,9 @@ public class AreaMap implements Session.Saveable {
   
   public AreaMap(World world, Area locale, Base... cities) {
     this.world = world;
-    this.locale = locale;
-    this.locals = new Base(world, locale, FACTION_NEUTRAL, "Locals: "+locale);
+    this.area = locale;
     
-    //locals.council().setGovernment(BaseCouncil.GOVERNMENT.BARBARIAN);
-    //locals.council().setTypeAI(BaseCouncil.AI_OFF);
-    addBase(locals);
-    
-    for (Base c : cities) addBase(c);
+    for (Base c : cities) locale.addBase(c);
   }
   
   
@@ -85,9 +78,7 @@ public class AreaMap implements Session.Saveable {
     }
     
     world = (World) s.loadObject();
-    locale = world.areas.atIndex(s.loadInt());
-    locals = (Base) s.loadObject();
-    s.loadObjects(bases);
+    area = world.areas.atIndex(s.loadInt());
     
     time       = s.loadInt();
     numUpdates = s.loadInt();
@@ -159,9 +150,7 @@ public class AreaMap implements Session.Saveable {
     }
     
     s.saveObject(world);
-    s.saveInt(world.areas.indexOf(locale));
-    s.saveObject(locals);
-    s.saveObjects(bases);
+    s.saveInt(world.areas.indexOf(area));
     
     s.saveInt(time);
     s.saveInt(numUpdates);
@@ -214,12 +203,6 @@ public class AreaMap implements Session.Saveable {
   }
   
   
-  public void addBase(Base base) {
-    bases.include(base);
-    //base.attachMap(this);
-  }
-  
-  
   public void performSetup(int size, Terrain terrainTypes[]) {
     
     this.terrainTypes = terrainTypes;
@@ -246,7 +229,7 @@ public class AreaMap implements Session.Saveable {
     planning .performSetup(size);
     pathCache.performSetup(size);
     
-    for (Base b : bases) {
+    for (Base b : area.bases) {
       fogMap   (b.faction(), true);
       dangerMap(b.faction(), true);
     }
@@ -273,18 +256,6 @@ public class AreaMap implements Session.Saveable {
   
   public Series <Actor> vessels() {
     return vessels;
-  }
-  
-  
-  public Series <Base> bases() {
-    return bases;
-  }
-  
-  
-  public Base firstBaseFor(Faction faction) {
-    if (faction == FACTION_NEUTRAL) return locals;
-    for (Base b : bases) if (b.faction() == faction) return b;
-    return null;
   }
   
   
@@ -706,7 +677,7 @@ public class AreaMap implements Session.Saveable {
   /**  Rendering, debug and interface methods-
     */
   public String toString() {
-    return "Map for "+locale;
+    return "Map for "+area;
   }
   
   
@@ -716,14 +687,14 @@ public class AreaMap implements Session.Saveable {
     float renderTime = (numUpdates + Rendering.frameAlpha()) / ticksPS;
     
     
-    Box2D area = new Box2D(0, 0, size, size);
+    Box2D mapArea = new Box2D(0, 0, size, size);
     terrain.readyAllMeshes();
     
     boolean report = false;
     int totalChunks = 0, chunksShown = 0;
     
     List <Box2D> descent = new List();
-    descent.add(area);
+    descent.add(mapArea);
     Vec3D centre = new Vec3D();
     
     while (descent.size() > 0) {
@@ -779,7 +750,7 @@ public class AreaMap implements Session.Saveable {
       actor.renderElement(rendering, playing);
     }
     
-    for (Base base : bases) {
+    for (Base base : playing.area.bases()) {
       //  TODO:  Reconsider this bit?
       if (base != playing) continue;
       

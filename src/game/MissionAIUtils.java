@@ -13,7 +13,7 @@ public class MissionAIUtils {
   
   /**  General-purpose utilities-
     */
-  static float owningValue(Area locale, Federation from) {
+  static float owningValue(Area area, Federation from) {
     return 1;
   }
   
@@ -23,8 +23,8 @@ public class MissionAIUtils {
     return power * (1 + prestige);
   }
   
-  static float exploreLevel(Area locale, Federation from) {
-    return from.exploreLevel(locale);
+  static float exploreLevel(Area area, Federation from) {
+    return from.exploreLevel(area);
   }
   
   static int preferredStance(Federation to, Federation from) {
@@ -47,13 +47,16 @@ public class MissionAIUtils {
     return all;
   }
   
+  
   static Series <Mission> allMissions(World world) {
     return allMissions(world, null);
   }
   
+  
   static Series <Mission> federationMissions(Federation f) {
     return allMissions(f.world, f.faction);
   }
+  
   
   static float federationPower(Federation f) {
     float power = 0;
@@ -62,6 +65,7 @@ public class MissionAIUtils {
     }
     return power;
   }
+  
   
   static void generateRecruits(Mission mission, float maxArmy, Type... types) {
     //
@@ -105,6 +109,7 @@ public class MissionAIUtils {
       }
     }
   }
+  
   
   static boolean hasCompetition(Mission mission) {
     for (Mission m : mission.homeBase().missions()) {
@@ -347,7 +352,7 @@ public class MissionAIUtils {
   //  TODO:  Ideally, these should really be keyed off WorldLocale, rather than
   //  a base.  ...Which is going to be needed for colonisation anyway.
   
-  public static Mission setupExploreMission(Base goes, Base from, float forceCap, boolean goesLimit) {
+  public static Mission setupExploreMission(Area goes, Base from, float forceCap, boolean goesLimit) {
     float maxTeam = AVG_ARMY_SIZE / 4;
     float maxArmy = goesLimit ? Nums.min(forceCap, maxTeam) : forceCap;
     
@@ -383,6 +388,44 @@ public class MissionAIUtils {
   
   
   
+  /**  Settler missions-
+    */
+  public static Mission setupSettlerMission(Area goes, Base from, float forceCap, boolean goesLimit) {
+    
+    MissionExpedition mission = new MissionExpedition(from, false);
+    mission.setWorldFocus(goes);
+    mission.setEvalForce(forceCap);
+    return mission;
+  }
+  
+  
+  static float settlerAppeal(Area goes, Base from) {
+    if (! goes.notSettled()) return -1;
+    return owningValue(goes, from.federation());
+  }
+  
+  
+  static float settlerAppeal(Mission mission) {
+    if (hasCompetition(mission)) return -1;
+    return exploreAppeal(mission.worldFocusArea(), mission.homeBase);
+  }
+  
+  
+  static float settlerChance(Mission mission) {
+    return 1;
+  }
+  
+  
+  public static void recruitSettlerMission(Mission mission, World world) {
+    float maxArmy = mission.evalForce();
+    Type  settler = (Type) Visit.first(world.citizenTypes);
+    generateRecruits(mission, maxArmy, settler);
+  }
+  
+  
+  
+  
+  
   /**  Updating internal politics...
     */
   public static void updateCapital(Federation federation, World world) {
@@ -407,7 +450,7 @@ public class MissionAIUtils {
   /**  Generating trouble...
     */
   static Mission generateTrouble(
-    Federation federation, Base from, float forceCap, Series <Base> allGoes,
+    Federation federation, Base from, float forceCap, Series <Area> allGoes,
     boolean launch
   ) {
     
@@ -441,28 +484,33 @@ public class MissionAIUtils {
       }
     };
     
-    for (Base goes : allGoes) {
-      boolean explored = exploreLevel(goes.area, federation) > 0;
+    for (Area area : allGoes) {
+      boolean explored = exploreLevel(area, federation) > 0;
       
-      //  TODO:  Use proper OOP for this, including a separate targetValid() 
-      //  method.  (Explore-missions need to be assignable to locales in any 
-      //  case.)
+      //  TODO:  Use proper OOP for this, including the separate allowsFocus()
+      //  method.
       
-      if (explored) {
-        Mission strike = setupStrikeMission(goes, from, forceCap, true);
-        Mission secure = setupDefendMission(goes, from, forceCap, true);
-        Mission dialog = setupDialogMission(goes, from, forceCap, true);
-        strike.setEvalParams(strikeAppeal(strike), strikeChance(strike));
-        secure.setEvalParams(defendAppeal(secure), defendChance(secure));
-        dialog.setEvalParams(dialogAppeal(dialog), dialogChance(dialog));
-        selection.compare(strike, 1);
-        selection.compare(secure, 1);
-        selection.compare(dialog, 1);
-      }
-      else {
-        Mission scouts = setupExploreMission(goes, from, forceCap, true);
+      if (! explored) {
+        Mission scouts = setupExploreMission(area, from, forceCap, true);
         scouts.setEvalParams(exploreAppeal(scouts), exploreChance(scouts));
         selection.compare(scouts, 1);
+      }
+      else {
+        Mission settle = setupSettlerMission(area, from, forceCap, true);
+        settle.setEvalParams(settlerAppeal(settle), settlerChance(settle));
+        selection.compare(settle, 1);
+        
+        for (Base goes : area.bases) {
+          Mission strike = setupStrikeMission(goes, from, forceCap, true);
+          Mission secure = setupDefendMission(goes, from, forceCap, true);
+          Mission dialog = setupDialogMission(goes, from, forceCap, true);
+          strike.setEvalParams(strikeAppeal(strike), strikeChance(strike));
+          secure.setEvalParams(defendAppeal(secure), defendChance(secure));
+          dialog.setEvalParams(dialogAppeal(dialog), dialogChance(dialog));
+          selection.compare(strike, 1);
+          selection.compare(secure, 1);
+          selection.compare(dialog, 1);
+        }
       }
     }
     
@@ -474,6 +522,7 @@ public class MissionAIUtils {
       if (m.objective == Mission.OBJECTIVE_SECURE ) recruitDefendMission (m, w);
       if (m.objective == Mission.OBJECTIVE_CONTACT) recruitDialogMission (m, w);
       if (m.objective == Mission.OBJECTIVE_RECON  ) recruitExploreMission(m, w);
+      if (m.objective == Mission.OBJECTIVE_COLONY ) recruitSettlerMission(m, w);
       
       if (report) I.say("  Selected: "+m);
       
@@ -491,8 +540,9 @@ public class MissionAIUtils {
     
     Base from = federation.capital();
     float forceCap = federationPower(federation);
+    Series <Area> allGoes = new Batch(activeMap.area);
     
-    return generateTrouble(federation, from, forceCap, activeMap.bases(), launch);
+    return generateTrouble(federation, from, forceCap, allGoes, launch);
   }
   
   
@@ -503,12 +553,10 @@ public class MissionAIUtils {
     float forceCap = federationPower(federation);
     AreaMap map = world.activeBaseMap();
     
-    Batch <Base> offmap = new Batch();
-    for (Base b : world.bases) {
-      if (map == null || b.area != map.locale) offmap.add(b);
-    }
+    Batch <Area> allGoes = new Batch();
+    for (Area a : world.areas) if (map == null || a != map.area) allGoes.add(a);
     
-    return generateTrouble(federation, from, forceCap, offmap, launch);
+    return generateTrouble(federation, from, forceCap, allGoes, launch);
   }
   
   
@@ -517,8 +565,9 @@ public class MissionAIUtils {
     
     float forceCap = from.armyPower();
     AreaMap map = from.activeMap();
+    Series <Area> allGoes = new Batch(map.area);
     
-    return generateTrouble(from.federation(), from, forceCap, map.bases(), launch);
+    return generateTrouble(from.federation(), from, forceCap, allGoes, launch);
   }
 
   

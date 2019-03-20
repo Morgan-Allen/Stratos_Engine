@@ -287,7 +287,7 @@ public class Building extends Element implements Pathing, Employer, Carrier {
       lastUpdateTime = time;
     }
     
-    if (base() != map.locals) {
+    if (base() != map.area.locals) {
       AreaFog fog = map.fogMap(this);
       float fogLift = sightRange() + (radius() / 2);
       fog.liftFog(centre(), fogLift);

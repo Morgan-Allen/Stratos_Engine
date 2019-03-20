@@ -41,17 +41,17 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
   
   
   
-  public Base(World world, Area locale, Faction faction) {
-    this(world, locale, faction, "Base???");
+  public Base(World world, Area area, Faction faction) {
+    this(world, area, faction, "Base???");
   }
   
   
-  public Base(World world, Area locale, Faction faction, String name) {
-    if (world  == null) I.complain("CANNOT PASS NULL WORLD:  "+name);
-    if (locale == null) I.complain("CANNOT PASS NULL LOCALE: "+name);
+  public Base(World world, Area area, Faction faction, String name) {
+    if (world == null) I.complain("CANNOT PASS NULL WORLD:  "+name);
+    if (area  == null) I.complain("CANNOT PASS NULL LOCALE: "+name);
     
     this.world   = world  ;
-    this.area  = locale ;
+    this.area  = area ;
     this.faction = faction;
     
     this.name = name;

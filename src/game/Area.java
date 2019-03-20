@@ -1,13 +1,19 @@
 
 
 package game;
+import static game.GameConstants.*;
 import util.*;
+
 
 
 public class Area implements Session.Saveable {
   
   
   final public AreaType type;
+  final World world;
+  
+  List <Base> bases = new List();
+  final public Base locals;
   
   List <Actor> visitors = new List();
   private boolean active;
@@ -15,8 +21,15 @@ public class Area implements Session.Saveable {
   
   
   
-  Area(AreaType type) {
+  Area(World world, AreaType type) {
+    this.world = world;
     this.type = type;
+    
+    this.locals = new Base(world, this, FACTION_NEUTRAL, "Locals: "+this);
+    addBase(locals);
+    
+    //locals.council().setGovernment(BaseCouncil.GOVERNMENT.BARBARIAN);
+    //locals.council().setTypeAI(BaseCouncil.AI_OFF);
   }
   
   
@@ -24,6 +37,10 @@ public class Area implements Session.Saveable {
     s.cacheInstance(this);
     
     type = (AreaType) s.loadObject();
+    world = (World) s.loadObject();
+    
+    s.loadObjects(bases);
+    locals = (Base) s.loadObject();
     
     s.loadObjects(visitors);
     active = s.loadBool();
@@ -34,6 +51,10 @@ public class Area implements Session.Saveable {
   public void saveState(Session s) throws Exception {
     
     s.saveObject(type);
+    s.saveObject(world);
+    
+    s.saveObjects(bases);
+    s.saveObject(locals);
     
     s.saveObjects(visitors);
     s.saveBool(active);
@@ -59,10 +80,32 @@ public class Area implements Session.Saveable {
   }
   
   
+  public void addBase(Base base) {
+    bases.include(base);
+  }
+  
+  
+  public Series <Base> bases() {
+    return bases;
+  }
+  
+  
+  public boolean notSettled() {
+    return bases.size() == 1 && bases.first() == locals;
+  }
+  
+  
+  public Base firstBaseFor(Faction faction) {
+    if (faction == FACTION_NEUTRAL) return locals;
+    for (Base b : bases) if (b.faction() == faction) return b;
+    return null;
+  }
+  
+  
   
   /**  Methods for handling traders and migrants-
     */
-  void updateLocale() {
+  void updateArea() {
     for (Actor a : visitors) if (! a.onMap()) {
       a.updateOffMap(this);
     }

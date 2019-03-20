@@ -36,7 +36,7 @@ public class TestDangerMap extends LogicTest {
     
     AreaTile centre = map.tileAt(map.size() / 2, map.size() / 2);
     Federation.setPosture(
-      base.faction(), map.locals.faction(),
+      base.faction(), map.area.locals.faction(),
       RelationSet.BOND_ENEMY, world
     );
     
@@ -44,7 +44,7 @@ public class TestDangerMap extends LogicTest {
       Type type = Rand.yes() ? TRIPOD : DRONE;
       Actor threat = (Actor) type.generate();
       AreaTile pos = ActorUtils.pickRandomTile(centre, 48, map);
-      threat.enterMap(map, pos.x, pos.y, 1, map.locals);
+      threat.enterMap(map, pos.x, pos.y, 1, map.area.locals);
     }
     
     

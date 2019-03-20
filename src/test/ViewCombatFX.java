@@ -41,7 +41,7 @@ public class ViewCombatFX extends ViewTest {
     enemy .type().initAsAnimal ((ActorAsAnimal) enemy );
     
     fights.enterMap(map, 5, 5, 1, base);
-    enemy.enterMap(map, 9, 9, 1, map.locals);
+    enemy.enterMap(map, 9, 9, 1, map.area.locals);
     
     TaskCombat combatF = TaskCombat.configCombat(fights, enemy);
     fights.assignTask(combatF, fights);

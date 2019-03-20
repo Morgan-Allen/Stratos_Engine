@@ -117,7 +117,7 @@ public class AreaFog {
     }
     
     float avgFog = sumFog * 1f / (MAX_FOG * map.size * map.size);
-    fed.setMaxExploreLevel(map.locale, avgFog);
+    fed.setMaxExploreLevel(map.area, avgFog);
   }
   
   

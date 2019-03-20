@@ -95,7 +95,7 @@ public class SelectSitePane extends MenuPane {
   private void selectHomeworld(Area homeworld) {
     final MainScreen screen = MainGame.mainScreen();
     screen.worldsDisplay.setSelection(homeworld);
-    this.homeBase = world.basesFor(homeworld).first();
+    this.homeBase = homeworld.bases().first();
     expedition = new MissionExpedition(homeBase, true);
     //expedition.setHomeBase(homeBase);
     //homeworld.whenClicked(null);

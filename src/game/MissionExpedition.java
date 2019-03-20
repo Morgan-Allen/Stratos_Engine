@@ -55,6 +55,11 @@ public class MissionExpedition extends Mission {
   
   /**  Basic no-brainer access methods-
     */
+  public void setPlaying(boolean playing) {
+    this.withPlayer = playing;
+  }
+  
+  
   public Actor leader() {
     return leader;
   }
@@ -89,9 +94,8 @@ public class MissionExpedition extends Mission {
     */
   
   public boolean allowsFocus(Object focus) {
-    World world = homeBase().world;
-    Area l = (Area) I.cast(focus, Area.class);
-    return world.basesFor(l).empty();
+    Area a = (Area) I.cast(focus, Area.class);
+    return a != null && a.notSettled();
   }
   
   
@@ -125,12 +129,16 @@ public class MissionExpedition extends Mission {
       scenario.assignExpedition(this, world);
       scenario.initScenario(MainGame.mainGame());
       MainGame.playScenario(scenario, world);
+      
+      disbandMission();
     }
     
     else {
       Base landing = new Base(world, goes, faction());
       world.addBases(landing);
+      disbandMission();
     }
+    
   }
   
   
