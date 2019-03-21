@@ -11,6 +11,7 @@ import util.*;
 public class Base implements Session.Saveable, Trader, RelationSet.Focus {
   
   
+  
   /**  Data fields, construction and save/load methods-
     */
   String name = "City";
@@ -138,7 +139,7 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
   }
   
   
-  public Series <BuildType> buildTypes() {
+  public Series <BuildType> techTypes() {
     return techTypes;
   }
   

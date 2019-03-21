@@ -313,7 +313,7 @@ public class TaskBuilding extends Task {
     Trait skill      = SKILL_BUILD;
     float oldM       = b.materialLevel(material);
     float skillBonus = actor.traits.levelOf(skill) / MAX_SKILL_LEVEL;
-    float putLimit   = 0.1f * (1 + skillBonus);
+    float putLimit   = (1f * (1 + skillBonus)) / BUILD_UNIT_TIME;
     float puts       = Nums.clamp(amountGap, -putLimit, putLimit);
     
     actor.traits.gainXP(skill, 1 * BUILD_XP_PERCENT / 100f);

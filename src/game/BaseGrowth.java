@@ -9,10 +9,15 @@ import util.*;
 public class BaseGrowth {
   
   
+  /**  Data fields and save/load methods-
+    */
   final Base base;
   
-  private float population = 0;
-  private float armyPower  = 0;
+  private float maxPopulation = 0;
+  private float maxArmyPower  = 0;
+  private float population    = 0;
+  private float employment    = 0;
+  private float armyPower     = 0;
   
   Tally <BuildType> buildLevel = new Tally();
   
@@ -22,59 +27,49 @@ public class BaseGrowth {
   }
   
   void loadState(Session s) throws Exception {
-    population   = s.loadFloat();
-    armyPower    = s.loadFloat();
+    maxPopulation = s.loadFloat();
+    maxArmyPower  = s.loadFloat();
+    population    = s.loadFloat();
+    employment    = s.loadFloat();
+    armyPower     = s.loadFloat();
     s.loadTally(buildLevel);
   }
   
   void saveState(Session s) throws Exception {
-    s.saveFloat(population);
-    s.saveFloat(armyPower );
+    s.saveFloat(maxPopulation);
+    s.saveFloat(maxArmyPower );
+    s.saveFloat(population   );
+    s.saveFloat(employment   );
+    s.saveFloat(armyPower    );
     s.saveTally(buildLevel);
   }
-  
-  
-  public void initBuildLevels(Object... buildLevelArgs) {
-    this.buildLevel.setWith(buildLevelArgs);
-    this.population = idealPopulation();
-    this.armyPower  = idealArmyPower ();
-  }
-  
-  
-  public Tally <BuildType> buildLevel() {
-    return buildLevel;
-  }
-  
 
   
   
   /**  Handling army strength and population (for off-map cities-)
     */
-  public float idealPopulation() {
-    //  TODO:  Cache this?
-    float sum = 0;
-    for (BuildType t : buildLevel.keys()) {
-      float l = buildLevel.valueFor(t);
-      sum += l * t.maxResidents;
-    }
-    return sum * POP_PER_CITIZEN;
+  public void initBuildLevels(Tally <BuildType> buildLevels) {
+    this.buildLevel.setWith(buildLevels);
+    updateOffmapGrowth(0);
+    this.population = maxPopulation;
+    this.armyPower  = maxArmyPower;
   }
   
   
-  public float idealArmyPower() {
-    //  TODO:  Cache this?
-    float sum = 0;
-    for (BuildType t : buildLevel.keys()) {
-      if (t.isMilitaryBuilding()) {
-        float l = buildLevel.valueFor(t);
-        for (ActorType w : t.workerTypes.keys()) {
-          float maxW = t.workerTypes.valueFor(w);
-          sum += l * TaskCombat.attackPower(w) * maxW;
-        }
-      }
-    }
-    
-    return sum * POP_PER_CITIZEN;
+  public void initBuildLevels(Object... buildLevelArgs) {
+    Tally <BuildType> t = new Tally();
+    t.setWith(buildLevelArgs);
+    initBuildLevels(t);
+  }
+  
+  
+  public float maxPopulation() {
+    return maxPopulation;
+  }
+  
+  
+  public float maxArmyPower() {
+    return maxArmyPower;
   }
   
   
@@ -85,6 +80,11 @@ public class BaseGrowth {
   
   public float armyPower() {
     return armyPower;
+  }
+  
+  
+  public Tally <BuildType> buildLevel() {
+    return buildLevel;
   }
   
   
@@ -148,31 +148,91 @@ public class BaseGrowth {
   
   void updateOffmapGrowth(int updateGap) {
     
-    float popRegen  = updateGap * 1f / (LIFESPAN_LENGTH / 2);
-    float idealPop  = idealPopulation();
-    float idealArmy = idealArmyPower();
+    //
+    //  Okay.  First thing's first.  Establish broad rates of population growth
+    //  and build structures to satisfy it.
     
-    if (population < idealPop) {
-      population = Nums.min(idealPop, population + popRegen);
+    class Rating { BuildType type; float rating; }
+    List <Rating> ratings = new List <Rating> () {
+      protected float queuePriority(Rating r) {
+        return r.rating;
+      }
+    };
+    
+    float absMaxPopulation = MAX_POPULATION;
+    float popGrowth = absMaxPopulation / POP_MAX_YEARS;
+    popGrowth *= 1 - (population / absMaxPopulation);
+    popGrowth *= updateGap * 1f / YEAR_LENGTH;
+    
+    population += popGrowth;
+    
+    for (BuildType type : base.techTypes()) {
+      if (type.isUpgrade || ! type.hasPrerequisites(base)) continue;
+      if (type.uniqueBuilding && buildLevel.valueFor(type) > 0) continue;
+
+      float numGuilds = buildLevel.valueFor(type);
+      Rating r = new Rating();
+      r.type = type;
+      ratings.add(r);
+      
+      if (type.maxResidents > 0) {
+        r.rating += type.maxResidents * (population - maxPopulation);
+      }
+      if (! type.workerTypes.empty()) {
+        r.rating = type.workerTypes.total() * (population - employment);
+      }
+      r.rating /= (3 + numGuilds) / 3f;
+      r.rating /= 10 + type.buildCostEstimate();
     }
+    
+    ratings.queueSort();
+    for (Rating r : ratings) if (r.rating > 0) {
+      buildLevel.add(1, r.type);
+      break;
+    }
+    
+    //
+    //  Then, determine what your ideal population and army-power would be-
+    float sumPop = 0;
+    float sumJobs = 0;
+    float sumArmy = 0;
+    
+    for (BuildType t : buildLevel.keys()) {
+      float l = buildLevel.valueFor(t);
+      
+      sumPop += l * t.maxResidents;
+      
+      for (ActorType w : t.workerTypes.keys()) {
+        float maxW = t.workerTypes.valueFor(w);
+        sumArmy += l * TaskCombat.attackPower(w) * maxW;
+        sumJobs += 1;
+      }
+    }
+    employment    = sumJobs * POP_PER_CITIZEN;
+    maxPopulation = sumPop  * POP_PER_CITIZEN;
+    maxArmyPower  = sumArmy * POP_PER_CITIZEN;
+    
+    //
+    //  Then increment total population and army-power-
+    float popRegen = updateGap * maxPopulation * 1f / (LIFESPAN_LENGTH / 2);
+    float armyCap = maxArmyPower;
+    
+    if (population < maxPopulation) {
+      population = Nums.min(maxPopulation, population + popRegen);
+    }
+    
     for (Mission f : base.missions()) {
-      idealArmy -= MissionForStrike.powerSum(f.recruits(), null);
+      armyCap -= MissionForStrike.powerSum(f.recruits(), null);
     }
-    
-    if (idealArmy < 0) {
-      idealArmy = 0;
+    if (armyCap < 0) {
+      armyCap = 0;
     }
-    if (armyPower < idealArmy) {
-      armyPower = Nums.min(idealArmy, armyPower + popRegen);
+    if (armyPower < armyCap) {
+      armyPower = Nums.min(armyCap, armyPower + popRegen);
     }
   }
   
+  
 }
-
-
-
-
-
-
 
 

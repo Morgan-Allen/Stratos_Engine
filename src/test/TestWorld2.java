@@ -18,6 +18,12 @@ public class TestWorld2 extends LogicTest {
     testWorld(false);
   }
   
+
+  //  TODO-
+  //  ...You'll need to have blank spaces on the map for this.  A square map
+  //  in grid-format, 4x4.  Plonk down some starting locations and have the
+  //  colonies grow over time.
+  
   
   //
   //  Set up the geographical parameters of the world first-
@@ -76,16 +82,8 @@ public class TestWorld2 extends LogicTest {
     
     //  Okay.  New items to implement-
     
-    //  Colony growth over time.  Population, tech, resources.
-    
-    //  ...You'll need to have blank spaces on the map for this.  A square map
-    //  in grid-format, 4x4.  Plonk down some starting locations and have the
-    //  colonies grow over time.
-    
-    
     //  Gradual contact effects (hostile/neutral/trading/allied.)
     //  Boost fondness, chance to defect based on intimidation.
-    
     
     
 
@@ -184,8 +182,8 @@ public class TestWorld2 extends LogicTest {
     for (Base c : world.bases()) {
       BaseGrowth g = c.growth;
       I.say("  "+c+":");
-      I.say("    Pop:    "+g.population()+" / "+g.idealPopulation());
-      I.say("    Arm:    "+g.armyPower ()+" / "+g.idealArmyPower ());
+      I.say("    Pop:    "+g.population()+" / "+g.maxPopulation());
+      I.say("    Arm:    "+g.armyPower ()+" / "+g.maxArmyPower ());
       I.say("    Prs:    "+c.federation().relations.prestige());
       I.say("    Need:   "+c.needLevels());
       I.say("    Accept: "+c.prodLevels());

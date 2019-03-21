@@ -42,6 +42,10 @@ public class GameWorld {
     FACTION_SETTLERS_A.assignColor(Colour.LITE_BLUE);
     FACTION_SETTLERS_B.assignColor(Colour.YELLOW);
     FACTION_SETTLERS_C.assignColor(Colour.CYAN);
+    
+    FACTION_SETTLERS_A.setBuildTypes(BASTION, HOLDING, TROOPER_LODGE, PHYSICIAN_STATION);
+    FACTION_SETTLERS_B.setBuildTypes(BASTION, HOLDING, TROOPER_LODGE, ECOLOGIST_STATION);
+    FACTION_SETTLERS_C.setBuildTypes(BASTION, HOLDING, TROOPER_LODGE, ENGINEER_STATION );
   }
   
   /*
@@ -105,7 +109,6 @@ public class GameWorld {
     
     world.setPlayerFaction(FACTION_SETTLERS_A);
     
-    
     Area home = world.addArea(HOMEWORLD_A);
     Base homeBase = new Base(world, home, FACTION_SETTLERS_A);
     
@@ -117,6 +120,7 @@ public class GameWorld {
       TROOPER_LODGE, 2f ,
       HOLDING      , 10f
     );
+    homeBase.assignTechTypes(FACTION_SETTLERS_A.buildTypes());
     world.addBases(homeBase);
     
     

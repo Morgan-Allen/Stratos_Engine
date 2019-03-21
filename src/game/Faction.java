@@ -34,6 +34,10 @@ public class Faction extends Type implements RelationSet.Focus {
   }
   
   
+  public void setBuildTypes(BuildType... types) {
+    this.buildTypes = types;
+  }
+  
   public Area homeland() {
     return homeland;
   }

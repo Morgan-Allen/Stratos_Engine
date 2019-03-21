@@ -33,7 +33,7 @@ public class PaneBuildOptions extends DetailPane {
     
     d.append("\nBuilding Types: ");
     
-    for (final Type type : UI.base.buildTypes()) {
+    for (final Type type : UI.base.techTypes()) {
       if (! type.rulerCanBuild(base, area)) continue;
       d.append("\n  ");
       d.append(type.name, new Description.Link() {
@@ -46,13 +46,12 @@ public class PaneBuildOptions extends DetailPane {
     if (placed != null) {
       Type type = placed.type();
       
-      int cashCost = 0;
       d.append("\n  (");
       for (Good g : type.builtFrom) if (g != VOID) {
         int amount = (int) type.buildNeed(g);
         Text.appendColour(amount+" "+g+" ", Colour.LITE_GREY, d);
-        cashCost += g.price * amount;
       }
+      int cashCost = (int) type.buildCostEstimate();
       d.append(cashCost+" credits");
       d.append(")");
     }

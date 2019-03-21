@@ -73,9 +73,8 @@ public class MissionExpedition extends Mission {
   public void configAssets(
     int funds, Tally <Good> goods, BuildType... buildings
   ) {
-    //this.faction = faction;
-    this.funds   = funds;
-    this.built   = buildings;
+    this.funds = funds;
+    this.built = buildings;
     this.goods.clear();
     this.goods.add(goods);
   }
@@ -136,6 +135,12 @@ public class MissionExpedition extends Mission {
     else {
       Base landing = new Base(world, goes, faction());
       world.addBases(landing);
+      landing.assignTechTypes(homeBase().techTypes().toArray(BuildType.class));
+      
+      Tally <BuildType> buildLevels = new Tally();
+      for (BuildType t : built) buildLevels.add(1, t);
+      landing.growth.initBuildLevels(buildLevels);
+      
       disbandMission();
     }
     

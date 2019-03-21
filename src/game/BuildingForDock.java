@@ -12,6 +12,10 @@ public class BuildingForDock extends Building {
   
   /**  Data-fields, construction, and save/load methods-
     */
+  
+  //
+  //  Trade-proxies are used to sample supply/demand profiles for particular
+  //  ships from different destinations (see below.)
   public static class TradeProxy implements Trader {
     
     final Trader trader;

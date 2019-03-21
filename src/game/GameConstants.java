@@ -149,6 +149,7 @@ public class GameConstants {
     //
     //  Building-update, commerce and manufacture-
     AVG_UPDATE_GAP   = 60  ,  //  seconds between updates
+    BUILD_UNIT_TIME  = 10  ,  //  seconds to build up 1 unit of raw material
     GOOD_CRAFT_TIME  = YEAR_LENGTH / 6,
     GEAR_CRAFT_TIME  = DAY_LENGTH / 2,
     AVG_MAX_STOCK    = 10  ,
@@ -234,6 +235,8 @@ public class GameConstants {
     AVG_CITY_DIST   = 5,
     POP_PER_CITIZEN = 25,
     AVG_POPULATION  = 1000,
+    MAX_POPULATION  = 1500,
+    POP_MAX_YEARS   = 10,
     AVG_HOUSE_POP   = 4 * POP_PER_CITIZEN,
     AVG_ARMY_POWER  = AVG_ARMY_SIZE * POP_PER_CITIZEN,
     //

@@ -105,7 +105,7 @@ public class BuildType extends Type {
   public boolean rulerCanBuild(Base ruler, AreaMap map) {
     if (! super.rulerCanBuild(ruler, map)) return false;
     
-    //  TODO:  This will be too slow on large maps.  Use build-levels instead.
+    //  TODO:  This will be too slow on large maps.  Use build-levels instead?
     
     boolean hasNeeds[] = new boolean[needsToBuild.length];
     boolean hasOpp = false;
@@ -125,6 +125,11 @@ public class BuildType extends Type {
     for (boolean b : hasNeeds) if (! b) return false;
     if (hasOpp) return false;
     
+    return true;
+  }
+  
+  
+  public boolean hasPrerequisites(Base base) {
     return true;
   }
   

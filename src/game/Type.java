@@ -2,6 +2,7 @@
 
 package game;
 import graphics.common.*;
+import graphics.widgets.Text;
 import util.*;
 import static game.GameConstants.*;
 import java.lang.reflect.*;
@@ -147,6 +148,16 @@ public class Type extends Constant {
     int index = Visit.indexOf(g, builtFrom);
     if (index != -1) return builtAmount[index];
     return 0;
+  }
+  
+  
+  public float buildCostEstimate() {
+    float sum = 0;
+    for (Good g : builtFrom) if (g != VOID) {
+      int amount = (int) buildNeed(g);
+      sum += g.price * amount;
+    }
+    return sum;
   }
   
   
