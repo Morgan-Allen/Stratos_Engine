@@ -18,7 +18,7 @@ public class MissionAIUtils {
   }
   
   static float forceStrength(Base base) {
-    float power = (POP_PER_CITIZEN + base.armyPower()) / 2f;
+    float power = (POP_PER_CITIZEN + base.growth.armyPower()) / 2f;
     float prestige = base.federation().relations.prestige() / PRESTIGE_MAX;
     return power * (1 + prestige);
   }
@@ -61,7 +61,7 @@ public class MissionAIUtils {
   static float federationPower(Federation f) {
     float power = 0;
     for (Base b : f.world.bases) {
-      if (b.federation() == f) power += b.armyPower();
+      if (b.federation() == f) power += b.growth.armyPower();
     }
     return power;
   }
@@ -202,10 +202,10 @@ public class MissionAIUtils {
   
   
   static float defenceDeficit(Base base) {
-    float sumDefence = base.armyPower();
+    float sumDefence = base.growth.armyPower();
     float sumDanger  = (AVG_ARMY_SIZE * POP_PER_CITIZEN) / 2f;
     
-    sumDanger *= base.population() / AVG_POPULATION;
+    sumDanger *= base.growth.population() / AVG_POPULATION;
     
     for (Mission m : allMissions(base.world)) {
       if (m.worldFocus() == base) {
@@ -278,8 +278,8 @@ public class MissionAIUtils {
     if (from.federation().hasTypeAI(Federation.AI_WARLIKE)) return -1;
     if (from.federation() == goes.federation()) return -1;
     
-    float goesPower = goes.armyPower() + federationPower(goes.federation());
-    float fromPower = from.armyPower() + federationPower(from.federation());
+    float goesPower = goes.growth.armyPower() + federationPower(goes.federation());
+    float fromPower = from.growth.armyPower() + federationPower(from.federation());
     float synergyVal = 0, dot = 0, count = 0;
     
     //  Appeal of alliance depends on whether you have a good existing
@@ -435,7 +435,7 @@ public class MissionAIUtils {
       Pick <Base> pick = new Pick(0);
       
       for (Base base : world.bases) if (base.federation() == federation) {
-        float rating = base.armyPower() + base.population();
+        float rating = base.growth.armyPower() + base.growth.population();
         rating *= 1 + (Rand.num() * 0.33f);
         pick.compare(base, rating);
       }
@@ -563,7 +563,7 @@ public class MissionAIUtils {
   public static Mission generateLocalBaseTrouble(Base from, boolean launch) {
     if (from == null) return null;
     
-    float forceCap = from.armyPower();
+    float forceCap = from.growth.armyPower();
     AreaMap map = from.activeMap();
     Series <Area> allGoes = new Batch(map.area);
     

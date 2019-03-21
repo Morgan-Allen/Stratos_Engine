@@ -60,7 +60,7 @@ public class TestWorld2 extends LogicTest {
     
     for (Base c : world.bases()) {
       c.federation().setExploreLevel(c.area, 1);
-      c.initBuildLevels(HOLDING, 2f, TROOPER_LODGE, 2f);
+      c.growth.initBuildLevels(HOLDING, 2f, TROOPER_LODGE, 2f);
     }
     
     
@@ -78,8 +78,14 @@ public class TestWorld2 extends LogicTest {
     
     //  Colony growth over time.  Population, tech, resources.
     
+    //  ...You'll need to have blank spaces on the map for this.  A square map
+    //  in grid-format, 4x4.  Plonk down some starting locations and have the
+    //  colonies grow over time.
+    
+    
     //  Gradual contact effects (hostile/neutral/trading/allied.)
     //  Boost fondness, chance to defect based on intimidation.
+    
     
     
 
@@ -176,13 +182,14 @@ public class TestWorld2 extends LogicTest {
   static void reportOnWorld(World world) {
     I.say("\nReporting world state:");
     for (Base c : world.bases()) {
+      BaseGrowth g = c.growth;
       I.say("  "+c+":");
-      I.say("    Pop:    "+c.population()+" / "+c.idealPopulation());
-      I.say("    Arm:    "+c.armyPower ()+" / "+c.idealArmyPower ());
+      I.say("    Pop:    "+g.population()+" / "+g.idealPopulation());
+      I.say("    Arm:    "+g.armyPower ()+" / "+g.idealArmyPower ());
       I.say("    Prs:    "+c.federation().relations.prestige());
       I.say("    Need:   "+c.needLevels());
       I.say("    Accept: "+c.prodLevels());
-      I.say("    Bld:    "+c.buildLevel());
+      I.say("    Bld:    "+g.buildLevel());
       I.say("    Inv:    "+c.inventory());
       I.say("    Relations-");
       for (Focus o : c.relations.allBondedWith(0)) {

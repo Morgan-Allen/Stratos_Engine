@@ -475,8 +475,8 @@ public class LogicTest {
   private String reportFor(Base c) {
     StringBuffer report = new StringBuffer(""+c);
     
-    report.append("\n  Population: "+c.population());
-    report.append("\n  Military: "+c.armyPower());
+    report.append("\n  Population: "+c.growth.population());
+    report.append("\n  Military: "+c.growth.armyPower());
     report.append("\n  Prestige: "+c.federation().relations.prestige());
     
     List <String> borderRep = new List();
@@ -510,10 +510,11 @@ public class LogicTest {
       for (String s : goodRep) report.append(s);
     }
     
-    if (! c.buildLevel().empty()) {
+    Tally <BuildType> levels = c.growth.buildLevel();
+    if (! levels.empty()) {
       report.append("\n\nBuilt:");
-      for (BuildType t : c.buildLevel().keys()) {
-        int level = (int) c.buildLevel().valueFor(t);
+      for (BuildType t : levels.keys()) {
+        int level = (int) levels.valueFor(t);
         report.append("\n  "+level+"x "+t);
       }
     }

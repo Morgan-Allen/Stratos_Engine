@@ -113,12 +113,7 @@ public class GameWorld {
     homeBase.trading.setTradeLevel(PARTS   , 0, 5 );
     homeBase.trading.setTradeLevel(MEDICINE, 0, 10);
     
-    //cityA.initTradeLevels(
-    //  PARTS   , 5f ,
-    //  MEDICINE, 10f
-    //);
-    
-    homeBase.initBuildLevels(
+    homeBase.growth.initBuildLevels(
       TROOPER_LODGE, 2f ,
       HOLDING      , 10f
     );
@@ -132,5 +127,6 @@ public class GameWorld {
   }
   
 }
+
 
 

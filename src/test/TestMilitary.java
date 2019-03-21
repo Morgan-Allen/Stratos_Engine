@@ -42,7 +42,7 @@ public class TestMilitary extends LogicTest {
       baseC.faction(), awayC.faction(),
       RelationSet.BOND_ENEMY, world
     );
-    awayC.setArmyPower(0);
+    awayC.growth.setArmyPower(0);
     
     
     BuildingForArmy fort1 = (BuildingForArmy) TROOPER_LODGE.generate();

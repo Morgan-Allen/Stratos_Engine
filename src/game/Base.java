@@ -24,19 +24,14 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
   final public BaseCouncil   council   = new BaseCouncil  (this);
   final public BaseRelations relations = new BaseRelations(this);
   final public BaseTrading   trading   = new BaseTrading  (this);
+  final public BaseGrowth    growth    = new BaseGrowth   (this);
   
   Building headquarters = null;
-  private int   currentFunds = 0;
-  private float population   = 0;
-  private float armyPower    = 0;
+  private int currentFunds = 0;
+  List <BuildType> techTypes = new List();
   
-  Tally <BuildType> buildLevel = new Tally();
   List <Mission> missions = new List();
-  
-  //
-  //  These are specific to off-map bases...
   List <Mission> guarding = new List();
-  List <BuildType> buildTypes = new List();
   
   
   
@@ -67,17 +62,14 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
     area    = (Area   ) s.loadObject();
     faction = (Faction) s.loadObject();
     
-    s.loadObjects(buildTypes);
-    
     council  .loadState(s);
     relations.loadState(s);
     trading  .loadState(s);
+    growth   .loadState(s);
     
     headquarters = (Building) s.loadObject();
     currentFunds = s.loadInt();
-    population   = s.loadFloat();
-    armyPower    = s.loadFloat();
-    s.loadTally(buildLevel);
+    s.loadObjects(techTypes);
     
     s.loadObjects(missions);
     s.loadObjects(guarding);
@@ -92,18 +84,14 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
     s.saveObject(area);
     s.saveObject(faction);
     
-    s.saveObjects(buildTypes);
-    
     council  .saveState(s);
     relations.saveState(s);
     trading  .saveState(s);
+    growth   .saveState(s);
     
     s.saveObject(headquarters);
-    
     s.saveInt(currentFunds);
-    s.saveFloat(population);
-    s.saveFloat(armyPower );
-    s.saveTally(buildLevel);
+    s.saveObjects(techTypes);
     
     s.saveObjects(missions);
     s.saveObjects(guarding);
@@ -144,26 +132,14 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
   
   /**  Assigning build-levels:
     */
-  public void assignBuildTypes(BuildType... types) {
-    buildTypes.clear();
-    Visit.appendTo(buildTypes, types);
+  public void assignTechTypes(BuildType... types) {
+    techTypes.clear();
+    Visit.appendTo(techTypes, types);
   }
   
   
   public Series <BuildType> buildTypes() {
-    return buildTypes;
-  }
-  
-  
-  public void initBuildLevels(Object... buildLevelArgs) {
-    this.buildLevel.setWith(buildLevelArgs);
-    this.population = idealPopulation();
-    this.armyPower  = idealArmyPower ();
-  }
-  
-  
-  public Tally <BuildType> buildLevel() {
-    return buildLevel;
+    return techTypes;
   }
   
   
@@ -234,78 +210,6 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
   
   
   
-  /**  Handling army strength and population (for off-map cities-)
-    */
-  public float idealPopulation() {
-    //  TODO:  Cache this?
-    float sum = 0;
-    for (BuildType t : buildLevel.keys()) {
-      float l = buildLevel.valueFor(t);
-      sum += l * t.maxResidents;
-    }
-    return sum * POP_PER_CITIZEN;
-  }
-  
-  
-  public float idealArmyPower() {
-    //  TODO:  Cache this?
-    float sum = 0;
-    for (BuildType t : buildLevel.keys()) {
-      if (t.isMilitaryBuilding()) {
-        float l = buildLevel.valueFor(t);
-        for (ActorType w : t.workerTypes.keys()) {
-          float maxW = t.workerTypes.valueFor(w);
-          sum += l * TaskCombat.attackPower(w) * maxW;
-        }
-      }
-    }
-    
-    return sum * POP_PER_CITIZEN;
-  }
-  
-  
-  public float population() {
-    return population;
-  }
-  
-  
-  public float armyPower() {
-    return armyPower;
-  }
-  
-  
-  public void setPopulation(float pop) {
-    this.population = pop;
-  }
-  
-  
-  public void setArmyPower(float power) {
-    this.armyPower = power;
-  }
-  
-  
-  public void incPopulation(float inc) {
-    this.population = Nums.max(0, population + inc);
-  }
-  
-  
-  public void incArmyPower(float inc) {
-    this.armyPower = Nums.max(0, armyPower + inc);
-  }
-  
-  
-  float wallsLevel() {
-    float sum = 0;
-    for (BuildType t : buildLevel.keys()) {
-      if (t.category == Type.IS_WALLS_BLD) {
-        float l = buildLevel.valueFor(t);
-        sum += l * 1;
-      }
-    }
-    return sum;
-  }
-  
-  
   
   /**  Regular updates-
     */
@@ -319,52 +223,18 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
     //  Local player-owned cities (i.e, with their own map), must derive their
     //  vitual statistics from that small-scale city map:
     if (updateStats && activeMap) {
-      trading.updateLocalStocks();
-      
-      int citizens = 0;
-      for (Actor a : map.actors) if (a.base() == this) {
-        citizens += 1;
-      }
-      this.population = citizens * POP_PER_CITIZEN;
-      
-      float armyPower = 0;
-      for (Building b : map.buildings()) if (b.base() == this) {
-        if (b.type().category == Type.IS_ARMY_BLD) {
-          armyPower += MissionForStrike.powerSum(b.workers(), map);
-        }
-      }
-      this.armyPower = armyPower;
-      
-      buildLevel.clear();
-      for (Building b : map.buildings()) if (b.base() == this) {
-        buildLevel.add(1, b.type());
-      }
+      trading.updateLocalStocks(map);
+      growth .updateLocalGrowth(map);
     }
     //
     //  Foreign off-map cities must update their internal ratings somewhat
     //  differently-
     if (updateStats && ! activeMap) {
       trading.updateOffmapStocks(UPDATE_GAP);
+      growth .updateOffmapGrowth(UPDATE_GAP);
       
-      float popRegen  = UPDATE_GAP * 1f / (LIFESPAN_LENGTH / 2);
-      float idealPop  = idealPopulation();
-      float idealArmy = idealArmyPower();
-      
-      if (population < idealPop) {
-        population = Nums.min(idealPop, population + popRegen);
-      }
-      for (Mission f : missions) {
-        idealArmy -= MissionForStrike.powerSum(f.recruits(), null);
-      }
       for (Mission g : guarding) {
         if (g.worldFocus() != this || g.complete()) toggleGuarding(g, false);
-      }
-      
-      if (idealArmy < 0) {
-        idealArmy = 0;
-      }
-      if (armyPower < idealArmy) {
-        armyPower = Nums.min(idealArmy, armyPower + popRegen);
       }
       
       if (relations.isLoyalVassalOf(faction)) {

@@ -27,9 +27,9 @@ public class TestWorld3 extends LogicTest {
     {
       Base pair[] = configWeakStrongBasePair();
       Base goes = pair[0], from = pair[1];
-      float oldPower = goes.armyPower();
+      float oldPower = goes.growth.armyPower();
       Mission strike = runCompleteInvasion(from, goes);
-      float newPower = goes.armyPower();
+      float newPower = goes.growth.armyPower();
       
       if (newPower >= oldPower) {
         I.say("\nWORLD-EVENTS TESTING FAILED- Invasion inflicted no casualties!");
@@ -58,9 +58,9 @@ public class TestWorld3 extends LogicTest {
       );
       Base a = triple[0], b = triple[1], c = triple[2];
       
-      a.initBuildLevels(HOLDING, 9f, TROOPER_LODGE, 6f);
-      b.initBuildLevels(HOLDING, 1f, TROOPER_LODGE, 0f);
-      c.initBuildLevels(HOLDING, 4f, TROOPER_LODGE, 1f);
+      a.growth.initBuildLevels(HOLDING, 9f, TROOPER_LODGE, 6f);
+      b.growth.initBuildLevels(HOLDING, 1f, TROOPER_LODGE, 0f);
+      c.growth.initBuildLevels(HOLDING, 4f, TROOPER_LODGE, 1f);
       a.setName("Ally Base");
       b.setName("Victim Base");
       c.setName("Invading Base");
@@ -126,8 +126,8 @@ public class TestWorld3 extends LogicTest {
     a.setName("Victim Base");
     b.setName("Invader Base");
     b.federation().assignCapital(b);
-    a.initBuildLevels(HOLDING, 3f, TROOPER_LODGE, 1f);
-    b.initBuildLevels(HOLDING, 9f, TROOPER_LODGE, 6f);
+    a.growth.initBuildLevels(HOLDING, 3f, TROOPER_LODGE, 1f);
+    b.growth.initBuildLevels(HOLDING, 9f, TROOPER_LODGE, 6f);
     return bases;
   }
   
@@ -158,7 +158,7 @@ public class TestWorld3 extends LogicTest {
   static Mission runCompleteInvasion(Base from, Base goes) {
     World world = from.world;
     
-    Mission force = MissionAIUtils.setupStrikeMission(goes, from, from.armyPower(), false);
+    Mission force = MissionAIUtils.setupStrikeMission(goes, from, from.growth.armyPower(), false);
     MissionAIUtils.recruitStrikeMission(force, world);
     force.beginMission();
     
@@ -173,7 +173,7 @@ public class TestWorld3 extends LogicTest {
   static Mission dispatchDefence(Base from, Base goes) {
     World world = from.world;
     
-    Mission force = MissionAIUtils.setupDefendMission(goes, from, from.armyPower(), false);
+    Mission force = MissionAIUtils.setupDefendMission(goes, from, from.growth.armyPower(), false);
     MissionAIUtils.recruitDefendMission(force, world);
     force.beginMission();
 
@@ -188,7 +188,7 @@ public class TestWorld3 extends LogicTest {
   static Mission runCompleteDialog(Base from, Base goes) {
     World world = from.world;
     
-    Mission force = MissionAIUtils.setupDialogMission(goes, from, from.armyPower(), true);
+    Mission force = MissionAIUtils.setupDialogMission(goes, from, from.growth.armyPower(), true);
     MissionAIUtils.recruitDialogMission(force, world);
     force.beginMission();
     
@@ -203,7 +203,7 @@ public class TestWorld3 extends LogicTest {
   static Mission runCompleteExploration(Base from, Area goes) {
     World world = from.world;
     
-    Mission force = MissionAIUtils.setupExploreMission(goes, from, from.armyPower(), true);
+    Mission force = MissionAIUtils.setupExploreMission(goes, from, from.growth.armyPower(), true);
     MissionAIUtils.recruitExploreMission(force, world);
     force.beginMission();
     

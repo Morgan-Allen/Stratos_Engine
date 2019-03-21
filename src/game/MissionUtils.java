@@ -26,7 +26,7 @@ public class MissionUtils {
     Mission mission, Base from, Area goes
   ) {
     Base belongs = mission.base();
-    belongs.incArmyPower(0 - MissionForStrike.powerSum(mission.recruits(), null));
+    belongs.growth.addArmyPower(0 - MissionForStrike.powerSum(mission.recruits(), null));
   }
   
   
@@ -44,7 +44,7 @@ public class MissionUtils {
     //  We use the same math that estimates the appeal of invasion to play out
     //  the real event, and report accordingly:
     float   fromPower = MissionForStrike.powerSum(mission) / POP_PER_CITIZEN;
-    float   goesPower = goes.armyPower() / POP_PER_CITIZEN;
+    float   goesPower = goes.growth.armyPower() / POP_PER_CITIZEN;
     float   fromLost  = 0;
     float   goesLost  = 0;
     boolean victory   = false;
@@ -130,9 +130,9 @@ public class MissionUtils {
   
   
   static int inflictCasualties(Base defends, float casualties) {
-    casualties = Nums.min(casualties, defends.armyPower());
-    defends.incArmyPower (0 - casualties * POP_PER_CITIZEN);
-    defends.incPopulation(0 - casualties * POP_PER_CITIZEN);
+    casualties = Nums.min(casualties, defends.growth.armyPower());
+    defends.growth.addArmyPower (0 - casualties * POP_PER_CITIZEN);
+    defends.growth.addPopulation(0 - casualties * POP_PER_CITIZEN);
     return (int) casualties;
   }
   
@@ -177,7 +177,7 @@ public class MissionUtils {
   static void handleReturn(
     Mission mission, Base goes, World.Journey journey
   ) {
-    goes.incArmyPower(MissionForStrike.powerSum(mission.recruits(), null));
+    goes.growth.addArmyPower(MissionForStrike.powerSum(mission.recruits(), null));
     mission.disbandMission();
   }
   

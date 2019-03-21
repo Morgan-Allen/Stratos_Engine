@@ -43,7 +43,7 @@ public class TestSieging extends LogicTest {
     world.settings.toggleHunger  = false;
     
     
-    awayC.initBuildLevels(TROOPER_LODGE, 9, HOLDING, 1);
+    awayC.growth.initBuildLevels(TROOPER_LODGE, 9, HOLDING, 1);
     awayC.federation().setTypeAI(Federation.AI_OFF);
     
     Federation.setPosture(

@@ -191,12 +191,12 @@ public class BaseTrading {
   
   
   
-  public void updateLocalStocks() {
+  public void updateLocalStocks(AreaMap activeMap) {
     inventory.clear();
     needLevel.clear();
     prodLevel.clear();
     
-    for (Building b : base.activeMap().buildings()) if (b.base() == base) {
+    for (Building b : activeMap.buildings()) if (b.base() == base) {
       for (Good g : base.world.goodTypes()) {
         inventory.add(b.inventory(g), g);
       }
