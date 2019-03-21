@@ -19,7 +19,7 @@ public class TestDemands extends LogicTest {
   
   static boolean testDemands(boolean graphics) {
     
-    Base base = setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, 32, false);
+    Base base = setupTestBase(BASE, FACTION_SETTLERS_A, ALL_GOODS, 32, false);
     AreaMap map = base.activeMap();
     World world = map.world;
     AreaDemands demands = new AreaDemands(map, "AAA");

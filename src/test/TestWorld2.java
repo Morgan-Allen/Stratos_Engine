@@ -19,6 +19,27 @@ public class TestWorld2 extends LogicTest {
   }
   
   
+  //
+  //  Set up the geographical parameters of the world first-
+  final static AreaType
+    AREAS_A[] = new AreaType[4],
+    AREAS_B[] = new AreaType[4]
+  ;
+  static {
+    for (int i = 4; i-- > 0;) {
+      AREAS_A[i] = areaType(3, 2 + (i * 2), false, "F_"+i);
+      AREAS_B[i] = areaType(7, 2 + (i * 2), false, "F_"+i);
+    }
+    
+    Batch <AreaType> areas = new Batch();
+    Visit.appendTo(areas, AREAS_A);
+    Visit.appendTo(areas, AREAS_B);
+    for (AreaType a : areas) for (AreaType b : areas) if (a != b) {
+      AreaType.setupRoute(a, b, 1, Type.MOVE_LAND);
+    }
+  }
+  
+  
   static boolean testWorld(boolean graphics) {
     
     //LogicTest test = new TestWorld2();
@@ -27,18 +48,12 @@ public class TestWorld2 extends LogicTest {
     world.assignTypes(
       ALL_BUILDINGS, ALL_SHIPS(), ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES()
     );
+    
     Base from[] = new Base[4];
     Base goes[] = new Base[4];
-    
-    for (int i = from.length; i-- > 0;) {
-      AreaType type = new AreaType(TestWorld2.class, "F_"+i, "F_"+i);
-      type.initPosition(3, 2 + (i * 2), false);
-      from[i] = new Base(world, world.addArea(type), FACTION_SETTLERS_A, "F_"+i);
-    }
-    for (int i = goes.length; i-- > 0;) {
-      AreaType type = new AreaType(TestWorld2.class, "G_"+i, "G_"+i);
-      type.initPosition(7, 2 + (i * 2), false);
-      goes[i] = new Base(world, world.addArea(type), FACTION_SETTLERS_B, "G_"+i);
+    for (int i = 4; i-- > 0;) {
+      from[i] = new Base(world, world.addArea(AREAS_A[i]), FACTION_SETTLERS_A, "F_"+i);
+      goes[i] = new Base(world, world.addArea(AREAS_B[i]), FACTION_SETTLERS_B, "G_"+i);
     }
     world.addBases(from);
     world.addBases(goes);
@@ -46,9 +61,6 @@ public class TestWorld2 extends LogicTest {
     for (Base c : world.bases()) {
       c.federation().setExploreLevel(c.area, 1);
       c.initBuildLevels(HOLDING, 2f, TROOPER_LODGE, 2f);
-      for (Base o : world.bases()) if (c != o) {
-        AreaType.setupRoute(c.area.type, o.area.type, 1, Type.MOVE_LAND);
-      }
     }
     
     
@@ -64,11 +76,10 @@ public class TestWorld2 extends LogicTest {
     
     //  Okay.  New items to implement-
     
-    //  Colony missions.
-    //    Colony growth over time.  Population, tech, resources.
+    //  Colony growth over time.  Population, tech, resources.
     
     //  Gradual contact effects (hostile/neutral/trading/allied.)
-    //    Boost fondness, chance to defect based on intimidation.
+    //  Boost fondness, chance to defect based on intimidation.
     
     
 

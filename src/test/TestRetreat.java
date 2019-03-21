@@ -24,7 +24,7 @@ public class TestRetreat extends LogicTest {
   static boolean testRetreat(boolean graphics) {
     TestRetreat test = new TestRetreat();
     
-    Base base = LogicTest.setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, 32, false);
+    Base base = LogicTest.setupTestBase(BASE, FACTION_SETTLERS_A, ALL_GOODS, 32, false);
     AreaMap map = base.activeMap();
     World world = base.world;
     

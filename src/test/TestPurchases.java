@@ -22,7 +22,7 @@ public class TestPurchases extends LogicTest {
   static boolean testPurchases(boolean graphics) {
     TestPurchases test = new TestPurchases();
     
-    Base base = LogicTest.setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, 16, false);
+    Base base = LogicTest.setupTestBase(BASE, FACTION_SETTLERS_A, ALL_GOODS, 16, false);
     AreaMap map = base.activeMap();
     World world = map.world;
     

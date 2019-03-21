@@ -27,7 +27,7 @@ public class TestDangerMap extends LogicTest {
     final int MAP_SIZE = 32;
     final int gridRes = MAP_SIZE / FLAG_RES;
     
-    Base base = setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, MAP_SIZE, false);
+    Base base = setupTestBase(BASE, FACTION_SETTLERS_A, ALL_GOODS, MAP_SIZE, false);
     AreaMap map = base.activeMap();
     World world = base.world;
     

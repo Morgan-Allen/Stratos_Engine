@@ -15,12 +15,31 @@ public class LogicTest {
   
   /**  Initial setup utilities:
     */
+  final public static AreaType
+    BASE = areaType(2, 2, false, "base"),
+    AWAY = areaType(3, 2, false, "away"),
+    NEUT = areaType(2, 3, false, "neut"),
+    DISTANT = areaType(5, 5, true, "distant")
+  ;
+  static {
+    AreaType.setupRoute(BASE, AWAY, 1, Type.MOVE_LAND);
+    AreaType.setupRoute(BASE, NEUT, 1, Type.MOVE_LAND);
+    AreaType.setupRoute(NEUT, AWAY, 1, Type.MOVE_LAND);
+    AreaType.setupRoute(BASE, DISTANT, 3, Type.MOVE_AIR);
+  }
+  
+  
+  static AreaType areaType(int x, int y, boolean homeland, String ID) {
+    AreaType t = new AreaType(LogicTest.class, "TA_"+ID, "Test Area "+ID);
+    t.initPosition(x, y, homeland);
+    return t;
+  }
+  
+  
   protected static Base setupTestBase(
-    Faction faction, Good goods[],
+    AreaType typeA, Faction faction, Good goods[],
     int size, boolean genTerrain, Terrain... gradient
   ) {
-    AreaType typeA = new AreaType(LogicTest.class, "test_area", "Test Area");
-    typeA.initPosition(5, 5, false);
     
     World   world = new World(goods);
     Area    area  = world.addArea(typeA);
@@ -44,18 +63,12 @@ public class LogicTest {
   }
   
   
-  protected static Area addArea(World w, float mapX, float mapY, int ID) {
-    AreaType typeA = new AreaType(LogicTest.class, "TA_"+ID, "Test Area "+ID);
-    return w.addArea(typeA);
-  }
-  
-  
   protected static Base setupTestBase(
-    Faction faction, Good goods[],
+    AreaType typeA, Faction faction, Good goods[],
     byte layout[][], byte elevation[][], Terrain... gradient
   ) {
     int wide = layout.length, high = layout[0].length;
-    Base base = setupTestBase(faction, goods, Nums.max(wide, high), false, gradient);
+    Base base = setupTestBase(typeA, faction, goods, Nums.max(wide, high), false, gradient);
     AreaMap map = base.activeMap();
     
     for (AreaTile t : map.allTiles()) {

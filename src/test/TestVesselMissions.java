@@ -89,7 +89,7 @@ public class TestVesselMissions extends LogicTest {
   ) {
     
     Base base = LogicTest.setupTestBase(
-      FACTION_SETTLERS_A, ALL_GOODS, 32, false, ALL_TERRAINS
+      BASE, FACTION_SETTLERS_A, ALL_GOODS, 32, false, ALL_TERRAINS
     );
     World world = base.world;
     AreaMap map = base.activeMap();
@@ -97,12 +97,9 @@ public class TestVesselMissions extends LogicTest {
     world.settings.toggleFog     = false;
     world.settings.toggleMigrate = false;
     
-    
-    Area rivalAt = addArea(world, 4, 4, 0);
+    Area rivalAt = world.addArea(DISTANT);
     Base rival = new Base(world, rivalAt, FACTION_SETTLERS_B, "Rival Base");
     world.addBases(rival);
-    AreaType.setupRoute(rival.area.type, base.area.type, 1, Type.MOVE_AIR);
-    
     
     Building centre = (Building) BASTION.generate();
     centre.enterMap(map, 10, 10, 1, base);

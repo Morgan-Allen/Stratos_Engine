@@ -168,7 +168,7 @@ public class TestBounties extends LogicTest {
   
   boolean bountyTest(boolean graphics, String title) {
     
-    Base base = LogicTest.setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, 32, false);
+    Base base = LogicTest.setupTestBase(BASE, FACTION_SETTLERS_A, ALL_GOODS, 32, false);
     base.setName("Client Base");
     AreaMap map = base.activeMap();
     

@@ -22,7 +22,7 @@ public class TestBridging extends LogicTest {
     LogicTest test = new TestBridging();
     
     Terrain terrTypes[] = { LAKE, MEADOW, JUNGLE };
-    Base base = setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, 16, false, terrTypes);
+    Base base = setupTestBase(BASE, FACTION_SETTLERS_A, ALL_GOODS, 16, false, terrTypes);
     AreaMap map = base.activeMap();
     World world = base.world;
     world.settings.toggleFog     = false;

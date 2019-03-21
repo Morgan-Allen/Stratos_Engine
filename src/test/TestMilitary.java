@@ -22,8 +22,8 @@ public class TestMilitary extends LogicTest {
     LogicTest test = new TestMilitary();
     
     World world = new World(ALL_GOODS);
-    Base  baseC = new Base(world, addArea(world, 2, 2, 0), FACTION_SETTLERS_A);
-    Base  awayC = new Base(world, addArea(world, 3, 3, 1), FACTION_SETTLERS_B);
+    Base  baseC = new Base(world, world.addArea(BASE), FACTION_SETTLERS_A);
+    Base  awayC = new Base(world, world.addArea(AWAY), FACTION_SETTLERS_B);
     AreaMap map = AreaTerrain.generateTerrain(
       baseC, 32, 0, MEADOW, JUNGLE
     );
@@ -38,7 +38,6 @@ public class TestMilitary extends LogicTest {
     
     world.settings.toggleFog = false;
     
-    AreaType.setupRoute(baseC.area.type, awayC.area.type, 1, Type.MOVE_LAND);
     Federation.setPosture(
       baseC.faction(), awayC.faction(),
       RelationSet.BOND_ENEMY, world

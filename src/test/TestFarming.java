@@ -26,7 +26,7 @@ public class TestFarming extends LogicTest {
   static boolean testFarming(boolean graphics) {
     LogicTest test = new TestFarming();
     
-    Base base = setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, 20, true, DESERT, MEADOW, JUNGLE);
+    Base base = setupTestBase(BASE, FACTION_SETTLERS_A, ALL_GOODS, 20, true, DESERT, MEADOW, JUNGLE);
     AreaMap map = base.activeMap();
     World world = map.world;
     world.settings.toggleFog     = false;

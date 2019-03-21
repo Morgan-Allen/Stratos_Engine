@@ -59,12 +59,14 @@ public class TestVesselTrade extends LogicTest {
     String title, boolean graphics
   ) {
     
+    //  TODO:  Can't reassign distances!
+    
     World world = new World(ALL_GOODS);
     world.assignTypes(
       ALL_BUILDINGS, ALL_SHIPS(), ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES()
     );
-    Base homeC = new Base(world, addArea(world, 2, 2, 0), FACTION_SETTLERS_A);
-    Base awayC = new Base(world, addArea(world, 3, 3, 1), FACTION_SETTLERS_A);
+    Base homeC = new Base(world, world.addArea(BASE), FACTION_SETTLERS_A);
+    Base awayC = new Base(world, world.addArea(AWAY), FACTION_SETTLERS_A);
     AreaType.setupRoute(homeC.area.type, awayC.area.type, 10, Type.MOVE_AIR);
     
     world.addBases(homeC, awayC);

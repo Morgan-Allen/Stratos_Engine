@@ -51,7 +51,7 @@ public class TestPathCache extends LogicTest {
       { 1, 1, 1, 1, 1, 1, 1, 1 },
     };
     int miniSize = 8;
-    Base miniBase = setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, miniSize, false, ALL_TERRAINS);
+    Base miniBase = setupTestBase(BASE, FACTION_SETTLERS_A, ALL_GOODS, miniSize, false, ALL_TERRAINS);
     AreaMap miniMap = miniBase.activeMap();
     
     for (Coord c : Visit.grid(0, 0, miniSize, miniSize, 1)) {
@@ -129,7 +129,7 @@ public class TestPathCache extends LogicTest {
     //
     //  Now, set up a larger map for testing of connections between
     //  more distant zones:
-    Base base = setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, 128, false, ALL_TERRAINS);
+    Base base = setupTestBase(BASE, FACTION_SETTLERS_A, ALL_GOODS, 128, false, ALL_TERRAINS);
     AreaMap map = base.activeMap();
     World world = map.world;
     world.settings.toggleFog = false;

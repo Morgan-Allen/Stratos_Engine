@@ -22,14 +22,14 @@ public class TestCity extends LogicTest {
   static boolean testCity(boolean graphics) {
     LogicTest test = new TestCity();
     
-    Base base = setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, 32, false);
+    Base base = setupTestBase(BASE, FACTION_SETTLERS_A, ALL_GOODS, 32, false);
     AreaMap map = base.activeMap();
     World world = map.world;
     world.assignTypes(
       ALL_BUILDINGS, ALL_SHIPS(), ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES()
     );
     
-    Base homeland = new Base(world, addArea(world, 8, 8, 0), FACTION_SETTLERS_A);
+    Base homeland = new Base(world, world.addArea(DISTANT), FACTION_SETTLERS_A);
     homeland.setName("Homeland");
     world.addBases(homeland);
     base.federation().assignHomeland(homeland);

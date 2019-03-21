@@ -26,7 +26,7 @@ public abstract class ViewTest extends Scenario {
   protected World createWorld() {
     Terrain gradient[] = new Terrain[] { MEADOW };
     initBase = LogicTest.setupTestBase(
-      FACTION_NEUTRAL, new Good[0], mapSize, true, gradient
+      LogicTest.BASE, FACTION_NEUTRAL, new Good[0], mapSize, true, gradient
     );
     return initBase.world;
   }

@@ -26,14 +26,10 @@ public class TestDiplomacy extends LogicTest {
     
     //
     //  Set up the structure of the world-
-    
     World world = new World(ALL_GOODS);
-    Base  baseC = new Base(world, addArea(world, 2, 2, 0), FACTION_SETTLERS_A);
-    Base  awayC = new Base(world, addArea(world, 2, 3, 1), FACTION_SETTLERS_B);
-    Base  neutC = new Base(world, addArea(world, 3, 2, 2), FACTION_SETTLERS_C);
-    
-    AreaType.setupRoute(baseC.area.type, awayC.area.type, 1, Type.MOVE_LAND);
-    AreaType.setupRoute(baseC.area.type, neutC.area.type, 1, Type.MOVE_LAND);
+    Base  baseC = new Base(world, world.addArea(BASE), FACTION_SETTLERS_A);
+    Base  awayC = new Base(world, world.addArea(AWAY), FACTION_SETTLERS_B);
+    Base  neutC = new Base(world, world.addArea(NEUT), FACTION_SETTLERS_C);
     
     AreaMap  map   = AreaTerrain.generateTerrain(
       baseC, 32, 0, MEADOW, JUNGLE

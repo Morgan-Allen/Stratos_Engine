@@ -21,7 +21,7 @@ public class TestExploring extends LogicTest {
   static boolean testExploring(boolean graphics) {
     LogicTest test = new TestExploring();
     
-    Base base = setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, 32, true, JUNGLE, MEADOW);
+    Base base = setupTestBase(BASE, FACTION_SETTLERS_A, ALL_GOODS, 32, true, JUNGLE, MEADOW);
     AreaMap map = base.activeMap();
     World world = map.world;
     

@@ -24,10 +24,8 @@ public class TestTrading extends LogicTest {
     LogicTest test = new TestTrading();
     
     World world = new World(ALL_GOODS);
-    Base  baseC = new Base(world, addArea(world, 2, 2, 0), FACTION_SETTLERS_A);
-    Base  awayC = new Base(world, addArea(world, 3, 3, 1), FACTION_SETTLERS_A);
-    
-    AreaType.setupRoute(baseC.area.type, awayC.area.type, 1, Type.MOVE_LAND);
+    Base  baseC = new Base(world, world.addArea(BASE), FACTION_SETTLERS_A);
+    Base  awayC = new Base(world, world.addArea(AWAY), FACTION_SETTLERS_A);
     
     world.addBases(baseC, awayC);
     world.setPlayerFaction(FACTION_SETTLERS_A);

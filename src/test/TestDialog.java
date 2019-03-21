@@ -22,7 +22,7 @@ public class TestDialog extends LogicTest {
   static boolean testDialog(boolean graphics) {
     LogicTest test = new TestDialog();
     
-    Base base = setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, 16, false);
+    Base base = setupTestBase(BASE, FACTION_SETTLERS_A, ALL_GOODS, 16, false);
     AreaMap map = base.activeMap();
     World world = map.world;
     world.settings.toggleFog     = false;

@@ -32,7 +32,7 @@ public class TestPowers extends LogicTest {
     boolean graphics, String title, ActorTechnique power, boolean guildCasts
   ) {
     
-    Base base = LogicTest.setupTestBase(FACTION_SETTLERS_A, ALL_GOODS, 32, false);
+    Base base = LogicTest.setupTestBase(BASE, FACTION_SETTLERS_A, ALL_GOODS, 32, false);
     base.setName("Client Base");
     AreaMap map = base.activeMap();
     

@@ -51,7 +51,11 @@ public class TestWorld3 extends LogicTest {
     
     //  This tests for the outcome of a security mission-
     {
-      Base triple[] = configBases(FACTION_SETTLERS_A, FACTION_SETTLERS_A, FACTION_SETTLERS_B);
+      Base triple[] = configBases(
+        BASE, FACTION_SETTLERS_A,
+        AWAY, FACTION_SETTLERS_A,
+        NEUT, FACTION_SETTLERS_B
+      );
       Base a = triple[0], b = triple[1], c = triple[2];
       
       a.initBuildLevels(HOLDING, 9f, TROOPER_LODGE, 6f);
@@ -114,7 +118,10 @@ public class TestWorld3 extends LogicTest {
   /**  Individual subtests-
     */
   static Base[] configWeakStrongBasePair() {
-    Base bases[] = configBases(FACTION_SETTLERS_A, FACTION_SETTLERS_B);
+    Base bases[] = configBases(
+      BASE, FACTION_SETTLERS_A,
+      AWAY, FACTION_SETTLERS_B
+    );
     Base a = bases[0], b = bases[1];
     a.setName("Victim Base");
     b.setName("Invader Base");
@@ -124,27 +131,27 @@ public class TestWorld3 extends LogicTest {
     return bases;
   }
   
-  static Base[] configBases(Faction... belong) {
+  
+  static Base[] configBases(Object... args) {
     
     World world = new World(ALL_GOODS);
     world.assignTypes(
       ALL_BUILDINGS, ALL_SHIPS(), ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES()
     );
-
-    Base bases[] = new Base[belong.length];
-    for (int i = 0; i < bases.length; i++) {
-      Base b = bases[i] = new Base(world, addArea(world, 0, i, i), belong[i]);
+    Batch <Base> bases = new Batch();
+    
+    for (int i = 0; i < args.length;) {
+      AreaType typeA = (AreaType) args[i++];
+      Faction belongs = (Faction) args[i++];
+      Base b = new Base(world, world.addArea(typeA), belongs);
       b.setName("City No. "+i);
       b.federation().setTypeAI(Federation.AI_OFF);
       b.federation().relations.initPrestige(BaseRelations.PRESTIGE_MAX);
-      
-      for (int n = i; n-- > 0;) {
-        AreaType.setupRoute(b.area.type, bases[n].area.type, 1, Type.MOVE_LAND);
-      }
+      world.addBases(b);
+      bases.add(b);
     }
     
-    world.addBases(bases);
-    return bases;
+    return bases.toArray(Base.class);
   }
   
   
