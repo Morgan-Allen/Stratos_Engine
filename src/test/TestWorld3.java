@@ -83,6 +83,7 @@ public class TestWorld3 extends LogicTest {
       Base pair[] = configWeakStrongBasePair();
       Base goes = pair[0], from = pair[1];
       goes.federation().setTypeAI(Federation.AI_PACIFIST);
+      goes.federation().assignCapital(goes);
       runCompleteDialog(from, goes);
       
       if (! from.isAllyOf(goes)) {
@@ -95,6 +96,20 @@ public class TestWorld3 extends LogicTest {
       }
     }
     
+    //  This tests for the outcome of a dialog attempt aimed at conversion:
+    {
+      Base pair[] = configWeakStrongBasePair();
+      Base goes = pair[0], from = pair[1];
+      goes.federation().setTypeAI(Federation.AI_PACIFIST);
+      goes.relations.incBond(from.faction(), 100);
+      runCompleteDialog(from, goes);
+      
+      if (from.faction() != goes.faction()) {
+        I.say("\nWORLD-EVENTS TESTING FAILED- Dialog did not create vassal!");
+        return false;
+      }
+    }
+    
     // This tests for the outcome of a basic exploration attempt-
     {
       Base pair[] = configWeakStrongBasePair();
@@ -103,6 +118,34 @@ public class TestWorld3 extends LogicTest {
       
       if (from.federation().exploreLevel(goes.area) < 0.5f) {
         I.say("\nWORLD-EVENTS TESTING FAILED- Exploration did not reveal area!");
+        return false;
+      }
+    }
+    
+    //  And this tests for the outcome of a colony-expedition-
+    {
+      Base home = configBases(BASE, FACTION_SETTLERS_A)[0];
+      Area away = home.world.addArea(AWAY);
+      home.growth.initBuildLevels(HOLDING, 3, TROOPER_LODGE, 1);
+      runCompleteExpedition(home, away);
+      
+      Base atAway = away.firstBaseFor(FACTION_SETTLERS_A);
+      if (atAway == null) {
+        I.say("\nWORLD-EVENTS TESTING FAILED- No base established by expedition!");
+        return false;
+      }
+      
+      int time = home.world.time();
+      while (time < (YEAR_LENGTH * POP_MAX_YEARS)) {
+        home.world.updateWithTime(time++);
+      }
+      
+      if (atAway.growth.population() < MAX_POPULATION / 2) {
+        I.say("\nWORLD-EVENTS TESTING FAILED- No long-term offmap base-growth!");
+        return false;
+      }
+      if (atAway.growth.employment() < MAX_POPULATION / 2) {
+        I.say("\nWORLD-EVENTS TESTING FAILED- No offmap employment growth!");
         return false;
       }
     }
@@ -145,6 +188,7 @@ public class TestWorld3 extends LogicTest {
       Faction belongs = (Faction) args[i++];
       Base b = new Base(world, world.addArea(typeA), belongs);
       b.setName("City No. "+i);
+      b.assignTechTypes(belongs.buildTypes());
       b.federation().setTypeAI(Federation.AI_OFF);
       b.federation().relations.initPrestige(BaseRelations.PRESTIGE_MAX);
       world.addBases(b);
@@ -214,7 +258,27 @@ public class TestWorld3 extends LogicTest {
     return force;
   }
   
+  
+  static Mission runCompleteExpedition(Base from, Area goes) {
+    World world = from.world;
+    
+    Mission force = MissionAIUtils.setupSettlerMission(goes, from, from.growth.armyPower(), false);
+    MissionAIUtils.recruitSettlerMission(force, world);
+    force.beginMission();
+    
+    int time = 0;
+    while (time < YEAR_LENGTH && force.active() && ! force.complete()) {
+      world.updateWithTime(time++);
+    }
+    return force;
+  }
+  
 }
+
+
+
+
+
 
 
 

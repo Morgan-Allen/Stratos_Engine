@@ -67,11 +67,21 @@ public class MissionAIUtils {
   }
   
   
-  static void generateRecruits(Mission mission, float maxArmy, Type... types) {
+  static void generateRecruits(
+    Mission mission, float maxArmy, boolean powerLimit,
+    Type... types
+  ) {
     //
     //  For off-map bases, we can generate troops dynamically-
     if (mission.homeBase().area.isOffmap()) {
-      while (MissionForStrike.powerSum(mission) < maxArmy) {
+      while (true) {
+        if (powerLimit) {
+          if (MissionForStrike.powerSum(mission) > maxArmy) break;
+        }
+        else {
+          if (mission.recruits().size() * POP_PER_CITIZEN > maxArmy) break;
+        }
+        
         Type soldier = (Type) Rand.pickFrom(types);
         Actor fights = (Actor) soldier.generate();
         fights.assignBase(mission.homeBase);
@@ -105,7 +115,13 @@ public class MissionAIUtils {
       for (Entry e : canApply) {
         Actor fights = e.actor;
         mission.toggleRecruit(fights, true);
-        if (MissionForStrike.powerSum(mission) >= maxArmy) break;
+        
+        if (powerLimit) {
+          if (MissionForStrike.powerSum(mission) > maxArmy) break;
+        }
+        else {
+          if (mission.recruits().size() * POP_PER_CITIZEN > maxArmy) break;
+        }
       }
     }
   }
@@ -182,7 +198,7 @@ public class MissionAIUtils {
   public static void recruitStrikeMission(Mission mission, World world) {
     float maxArmy = mission.evalForce();
     Type  soldier = (Type) Visit.first(world.soldierTypes);
-    generateRecruits(mission, maxArmy, soldier);
+    generateRecruits(mission, maxArmy, true, soldier);
   }
   
   
@@ -245,7 +261,7 @@ public class MissionAIUtils {
   public static void recruitDefendMission(Mission mission, World world) {
     float maxArmy = mission.evalForce();
     Type  soldier = (Type) Visit.first(world.soldierTypes);
-    generateRecruits(mission, maxArmy, soldier);
+    generateRecruits(mission, maxArmy, true, soldier);
   }
   
   
@@ -264,70 +280,61 @@ public class MissionAIUtils {
     mission.setWorldFocus(goes);
     mission.setEvalForce(maxArmy);
     
-    int posture = RelationSet.BOND_NEUTRAL;
-    if (! isEnemy) posture = RelationSet.BOND_TRADING;
-    if (! isAlly ) posture = RelationSet.BOND_ALLY;
-    mission.terms.assignTerms(posture, null, null, null);
+    if (goes == goes.federation().capital()) {
+      int posture = RelationSet.BOND_NEUTRAL;
+      if (! isEnemy) posture = RelationSet.BOND_TRADING;
+      if (! isAlly ) posture = RelationSet.BOND_ALLY;
+      mission.terms.assignTerms(posture, null, null, null);
+      
+      //  TODO:  You also need to include tribute and marriage arrangements!
+    }
+    else {
+      int posture = RelationSet.BOND_LORD;
+      mission.terms.assignTerms(posture, null, null, null);
+    }
     
     return mission;
   }
   
   
-  static float dialogAppeal(Base goes, Base from) {
-    ///if (exploreLevel(goes.locale, from.federation()) < 1) return -1;
+  static float dialogAppeal(Base goes, Base from, boolean baseOnly) {
     if (from.federation().hasTypeAI(Federation.AI_WARLIKE)) return -1;
-    if (from.federation() == goes.federation()) return -1;
     
-    float goesPower = goes.growth.armyPower() + federationPower(goes.federation());
-    float fromPower = from.growth.armyPower() + federationPower(from.federation());
-    float synergyVal = 0, dot = 0, count = 0;
+    //  TODO:  Rule out dialog-missions that won't improve current posture (i.e,
+    //  they're already an ally/vassal... unless the point is just to boost
+    //  relations?)
     
-    //  Appeal of alliance depends on whether you have a good existing
-    //  relationship and/or share similar enemies.
+    float goesPower   = goes.growth.armyPower() + federationPower(goes.federation());
+    float fromPower   = from.growth.armyPower() + federationPower(from.federation());
+    float synergyVal  = 0, dot = 0, count = 0;
+    float relationVal = 0;
+    boolean pacifist = from.federation().hasTypeAI(Federation.AI_PACIFIST);
     
-    for (RelationSet.Focus f : goes.relations.allBondedWith(0)) {
-      float valueF = from.relations.bondLevel(f);
-      float valueG = goes.relations.bondLevel(f);
-      if (valueF == -100 || valueG == -100) continue;
-      synergyVal += dot = valueF * valueG;
-      count += (Nums.abs(dot) + 1) / 2;
+    if (baseOnly) {
+      relationVal = from.relations.bondLevel(goes.faction());
     }
-    synergyVal /= Nums.max(1, count);
+    else {
+      FederationRelations goesR = goes.federation().relations;
+      FederationRelations fromR = from.federation().relations;
+      
+      for (RelationSet.Focus f : goesR.allBondedWith(0)) {
+        float valueF = fromR.bondLevel(f);
+        float valueG = goesR.bondLevel(f);
+        if (valueF == -100 || valueG == -100) continue;
+        synergyVal += dot = valueF * valueG;
+        count += Nums.abs(dot);
+      }
+      synergyVal /= Nums.max(1, count);
+      relationVal = fromR.bondLevel(goes.faction());
+    }
     
-    float peaceDesire = 1;
-    peaceDesire *= goesPower / (goesPower + fromPower);
-    peaceDesire *= 1 + synergyVal;
-    if (from.federation().hasTypeAI(Federation.AI_PACIFIST)) peaceDesire += 1;
+    float peaceDesire = 0;
+    peaceDesire += (goesPower / (goesPower + fromPower)) - 0.5f;
+    peaceDesire += synergyVal;
+    peaceDesire += relationVal;
+    peaceDesire += pacifist ? 1 : 0;
     
     return peaceDesire;
-  }
-  
-  
-  static float dialogAppeal(Mission mission) {
-    if (hasCompetition(mission)) return -1;
-    return dialogAppeal(mission.worldFocusBase(), mission.homeBase);
-  }
-  
-  
-  static float dialogChance(Mission mission) {
-    return 1;
-  }
-  
-  
-  public static void recruitDialogMission(Mission mission, World world) {
-    float maxArmy = mission.evalForce();
-    Type  soldier = (Type) Visit.first(world.soldierTypes);
-    Type  noble   = (Type) Visit.first(world.nobleTypes  );
-    
-    generateRecruits(mission, maxArmy, soldier);
-    
-    while (mission.envoys.size() < 2) {
-      Actor talks = (Actor) noble.generate();
-      talks.assignBase(mission.homeBase());
-      mission.toggleEnvoy(talks, true);
-    }
-    
-    //  TODO:  You also need to include tribute and marriage arrangements!
   }
   
   
@@ -341,17 +348,56 @@ public class MissionAIUtils {
         petition.terms.tributeDemand
     //*/
     
-    float talkDesire = dialogAppeal(petition.homeBase(), eval);
+    int posture = petition.terms.postureDemand();
+    float postureMod = 0;
+    
+    if (posture == BOND_VASSAL ) postureMod =  0.50f;
+    if (posture == BOND_NEUTRAL) postureMod =  0.25f;
+    if (posture == BOND_TRADING) postureMod =  0.00f;
+    if (posture == BOND_ALLY   ) postureMod = -0.25f;
+    if (posture == BOND_LORD   ) postureMod = -0.50f;
+    
+    boolean baseOnly = posture == BOND_LORD || posture == BOND_VASSAL;
+    float talkDesire = dialogAppeal(petition.homeBase(), eval, baseOnly);
+    
+    talkDesire += postureMod;
+    
     return talkDesire;
+  }
+  
+  
+  static float dialogAppeal(Mission mission) {
+    if (hasCompetition(mission)) return -1;
+    
+    int posture = mission.terms.postureDemand();
+    boolean baseOnly = posture == BOND_LORD || posture == BOND_VASSAL;
+    return dialogAppeal(mission.worldFocusBase(), mission.homeBase, baseOnly);
+  }
+  
+  
+  static float dialogChance(Mission mission) {
+    return 1;
+  }
+  
+  
+  public static void recruitDialogMission(Mission mission, World world) {
+    float maxArmy = mission.evalForce();
+    Type  soldier = (Type) Visit.first(world.soldierTypes);
+    Type  noble   = (Type) Visit.first(world.nobleTypes  );
+    
+    generateRecruits(mission, maxArmy, true, soldier);
+    
+    while (mission.envoys.size() < 2) {
+      Actor talks = (Actor) noble.generate();
+      talks.assignBase(mission.homeBase());
+      mission.toggleEnvoy(talks, true);
+    }
   }
   
   
   
   /**  Explore-mission-
     */
-  //  TODO:  Ideally, these should really be keyed off WorldLocale, rather than
-  //  a base.  ...Which is going to be needed for colonisation anyway.
-  
   public static Mission setupExploreMission(Area goes, Base from, float forceCap, boolean goesLimit) {
     float maxTeam = AVG_ARMY_SIZE / 4;
     float maxArmy = goesLimit ? Nums.min(forceCap, maxTeam) : forceCap;
@@ -383,7 +429,7 @@ public class MissionAIUtils {
   public static void recruitExploreMission(Mission mission, World world) {
     float maxArmy = mission.evalForce();
     Type  soldier = (Type) Visit.first(world.soldierTypes);
-    generateRecruits(mission, maxArmy, soldier);
+    generateRecruits(mission, maxArmy, true, soldier);
   }
   
   
@@ -395,6 +441,7 @@ public class MissionAIUtils {
     MissionExpedition mission = new MissionExpedition(from, false);
     mission.setWorldFocus(goes);
     mission.setEvalForce(forceCap);
+    
     return mission;
   }
   
@@ -417,9 +464,14 @@ public class MissionAIUtils {
   
   
   public static void recruitSettlerMission(Mission mission, World world) {
+    
+    MissionExpedition expedition = (MissionExpedition) mission;
+    Base home = mission.homeBase();
+    expedition.configAssets(2000, Tally.with(), home.techTypes().first());
+    
     float maxArmy = mission.evalForce();
     Type  settler = (Type) Visit.first(world.citizenTypes);
-    generateRecruits(mission, maxArmy, settler);
+    generateRecruits(mission, maxArmy, false, settler);
   }
   
   

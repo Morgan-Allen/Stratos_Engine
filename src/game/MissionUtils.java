@@ -38,7 +38,7 @@ public class MissionUtils {
     Base    from   = mission.homeBase();
     World   world  = from.world;
     int     time   = world.time;
-    AreaMap    map    = world.activeBaseMap();
+    AreaMap map    = world.activeBaseMap();
     boolean report = reportEvents(map);
     //
     //  We use the same math that estimates the appeal of invasion to play out
@@ -191,7 +191,7 @@ public class MissionUtils {
   ) {
     if (upon == null || from == null || mission == null) return;
     
-    World wworld = from.world;
+    World world = from.world;
     int posture = mission.terms.postureDemand;
     
     if (posture == BOND_LORD) {
@@ -201,7 +201,7 @@ public class MissionUtils {
       from.assignFaction(upon.faction());
     }
     else {
-      Federation.setPosture(upon.faction(), from.faction(), posture, wworld);
+      Federation.setPosture(upon.faction(), from.faction(), posture, world);
     }
     
     upon.relations.setSuppliesDue(from.faction(), mission.terms.tributeDemand);

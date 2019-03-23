@@ -18,55 +18,45 @@ public class TestWorld2 extends LogicTest {
     testWorld(false);
   }
   
-
-  //  TODO-
-  //  ...You'll need to have blank spaces on the map for this.  A square map
-  //  in grid-format, 4x4.  Plonk down some starting locations and have the
-  //  colonies grow over time.
   
+  final static AreaType AREA_GRID[][] = new AreaType[4][4];
   
-  //
-  //  Set up the geographical parameters of the world first-
-  final static AreaType
-    AREAS_A[] = new AreaType[4],
-    AREAS_B[] = new AreaType[4]
-  ;
   static {
-    for (int i = 4; i-- > 0;) {
-      AREAS_A[i] = areaType(3, 2 + (i * 2), false, "F_"+i);
-      AREAS_B[i] = areaType(7, 2 + (i * 2), false, "F_"+i);
+    for (Coord c : Visit.grid(0, 0, 4, 4, 1)) {
+      AreaType a = areaType(c.x, c.y, false, "A_"+c);
+      AREA_GRID[c.x][c.y] = a;
     }
-    
-    Batch <AreaType> areas = new Batch();
-    Visit.appendTo(areas, AREAS_A);
-    Visit.appendTo(areas, AREAS_B);
-    for (AreaType a : areas) for (AreaType b : areas) if (a != b) {
-      AreaType.setupRoute(a, b, 1, Type.MOVE_LAND);
+    for (Coord c : Visit.grid(0, 0, 4, 3, 1)) {
+      AreaType a1 = AREA_GRID[c.x][c.y];
+      AreaType a2 = AREA_GRID[c.x][c.y + 1];
+      AreaType a3 = AREA_GRID[c.y][c.x];
+      AreaType a4 = AREA_GRID[c.y + 1][c.x];
+      
+      AreaType.setupRoute(a1, a2, 1, Type.MOVE_LAND);
+      AreaType.setupRoute(a3, a4, 1, Type.MOVE_LAND);
     }
   }
   
   
   static boolean testWorld(boolean graphics) {
     
-    //LogicTest test = new TestWorld2();
-    
     World world = new World(ALL_GOODS);
     world.assignTypes(
       ALL_BUILDINGS, ALL_SHIPS(), ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES()
     );
-    
-    Base from[] = new Base[4];
-    Base goes[] = new Base[4];
-    for (int i = 4; i-- > 0;) {
-      from[i] = new Base(world, world.addArea(AREAS_A[i]), FACTION_SETTLERS_A, "F_"+i);
-      goes[i] = new Base(world, world.addArea(AREAS_B[i]), FACTION_SETTLERS_B, "G_"+i);
+    for (Coord c : Visit.grid(0, 0, 4, 4, 1)) {
+      world.addArea(AREA_GRID[c.x][c.y]);
     }
-    world.addBases(from);
-    world.addBases(goes);
+    
+    Area landsA = world.areas().atIndex(2  + Rand.index(4));
+    Area landsB = world.areas().atIndex(10 + Rand.index(4));
+    Base baseA = new Base(world, landsA, FACTION_SETTLERS_A);
+    Base baseB = new Base(world, landsB, FACTION_SETTLERS_B);
+    world.addBases(baseA, baseB);
     
     for (Base c : world.bases()) {
       c.federation().setExploreLevel(c.area, 1);
-      c.growth.initBuildLevels(HOLDING, 2f, TROOPER_LODGE, 2f);
+      c.growth.initBuildLevels(BASTION, 1F, HOLDING, 2f, TROOPER_LODGE, 2f);
     }
     
     
@@ -78,13 +68,6 @@ public class TestWorld2 extends LogicTest {
     boolean testOkay = true;
     
     world.settings.reportMissionEval = true;
-    
-    
-    //  Okay.  New items to implement-
-    
-    //  Gradual contact effects (hostile/neutral/trading/allied.)
-    //  Boost fondness, chance to defect based on intimidation.
-    
     
 
     while (world.time() < MAX_TIME) {

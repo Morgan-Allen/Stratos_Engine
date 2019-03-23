@@ -49,7 +49,8 @@ public class BaseGrowth {
   /**  Handling army strength and population (for off-map cities-)
     */
   public void initBuildLevels(Tally <BuildType> buildLevels) {
-    this.buildLevel.setWith(buildLevels);
+    this.buildLevel.clear();
+    this.buildLevel.add(buildLevels);
     updateOffmapGrowth(0);
     this.population = maxPopulation;
     this.armyPower  = maxArmyPower;
@@ -75,6 +76,11 @@ public class BaseGrowth {
   
   public float population() {
     return population;
+  }
+  
+  
+  public float employment() {
+    return employment;
   }
   
   
@@ -188,12 +194,13 @@ public class BaseGrowth {
     ratings.queueSort();
     for (Rating r : ratings) if (r.rating > 0) {
       buildLevel.add(1, r.type);
+      ///I.say("\nAdded "+r.type+" to "+base+", build-levels: "+buildLevel);
       break;
     }
     
     //
     //  Then, determine what your ideal population and army-power would be-
-    float sumPop = 0;
+    float sumPop  = 0;
     float sumJobs = 0;
     float sumArmy = 0;
     
@@ -205,7 +212,7 @@ public class BaseGrowth {
       for (ActorType w : t.workerTypes.keys()) {
         float maxW = t.workerTypes.valueFor(w);
         sumArmy += l * TaskCombat.attackPower(w) * maxW;
-        sumJobs += 1;
+        sumJobs += l * maxW;
       }
     }
     employment    = sumJobs * POP_PER_CITIZEN;

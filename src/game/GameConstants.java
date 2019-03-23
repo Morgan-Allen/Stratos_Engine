@@ -234,8 +234,8 @@ public class GameConstants {
     //  City constants-
     AVG_CITY_DIST   = 5,
     POP_PER_CITIZEN = 25,
-    AVG_POPULATION  = 1000,
-    MAX_POPULATION  = 1500,
+    AVG_POPULATION  = 500,
+    MAX_POPULATION  = 850,
     POP_MAX_YEARS   = 10,
     AVG_HOUSE_POP   = 4 * POP_PER_CITIZEN,
     AVG_ARMY_POWER  = AVG_ARMY_SIZE * POP_PER_CITIZEN,
