@@ -10,7 +10,7 @@ import util.*;
 
 
 
-public class TestWorld2 extends LogicTest {
+public class TestOffmapWorld extends LogicTest {
   
   
   
@@ -48,8 +48,8 @@ public class TestWorld2 extends LogicTest {
       world.addArea(AREA_GRID[c.x][c.y]);
     }
     
-    Area landsA = world.areas().atIndex(2  + Rand.index(4));
-    Area landsB = world.areas().atIndex(10 + Rand.index(4));
+    Area landsA = world.areaAt(AREA_GRID[0][Rand.index(4)]);
+    Area landsB = world.areaAt(AREA_GRID[3][Rand.index(4)]);
     Base baseA = new Base(world, landsA, FACTION_SETTLERS_A);
     Base baseB = new Base(world, landsB, FACTION_SETTLERS_B);
     world.addBases(baseA, baseB);

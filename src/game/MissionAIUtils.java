@@ -499,18 +499,62 @@ public class MissionAIUtils {
   
   
   
+  /**  Checking accessibility...
+    */
+  static Tally <Area> accessibleAreas(Base from, int moveMode) {
+    
+    Tally <Area> reachSet = new Tally();
+    List <Area> fringe = new List();
+    
+    World world = from.world;
+    Federation federation = from.federation();
+    
+    fringe.add(from.area);
+    
+    loop: while (fringe.size() > 0) {
+      Area area = fringe.removeFirst();
+      reachSet.set(area, 1);
+      //
+      //  Make sure this area can be traversed (is explored, and not occupied
+      //  by a non-ally,) before adding adjacent areas.
+      for (Base b : area.bases) if (b != area.locals) {
+        if (! b.isAllyOf(from)) {
+          continue loop;
+        }
+      }
+      if (federation.exploreLevel(area) <= 0) {
+        continue loop;
+      }
+      for (AreaType t : area.type.routes.keySet()) {
+        World.Route r = area.type.routes.get(t);
+        if (r.moveMode != moveMode) continue;
+        if (reachSet.valueFor(area) > 0) continue;
+        
+        Area other = world.areaAt(t);
+        fringe.add(other);
+      }
+    }
+    
+    return reachSet;
+  }
+  
+  
+  
   /**  Generating trouble...
     */
   static Mission generateTrouble(
     Federation federation, Base from, float forceCap, Series <Area> allGoes,
     boolean launch
   ) {
-    
     if (federation == null || from == null || forceCap <= 0) return null;
     if (allGoes == null || allGoes.empty()) return null;
     
     if (federation.hasTypeAI(Federation.AI_OFF)) return null;
     if (federation.faction == from.world.playerFaction) return null;
+    
+    
+    //  TODO:  Vary the motion-type if airships are available?
+    Tally <Area> accessible = accessibleAreas(from, Type.MOVE_LAND);
     
     final boolean report = from.world.settings.reportMissionEval;
     if (report) {
@@ -529,14 +573,13 @@ public class MissionAIUtils {
           I.add("    Appeal: "+I.shorten(next.evalPriority(), 2)+" Chance: "+next.evalChance());
         }
         
-        //rating *= 1 + next.evalChance();
         rating += Rand.num() * 0.5f;
-        
         super.compare(next, rating);
       }
     };
     
     for (Area area : allGoes) {
+      if (accessible.valueFor(area) <= 0) continue;
       boolean explored = exploreLevel(area, federation) > 0;
       
       //  TODO:  Use proper OOP for this, including the separate allowsFocus()
@@ -552,7 +595,7 @@ public class MissionAIUtils {
         settle.setEvalParams(settlerAppeal(settle), settlerChance(settle));
         selection.compare(settle, 1);
         
-        for (Base goes : area.bases) {
+        for (Base goes : area.bases) if (goes != area.locals) {
           Mission strike = setupStrikeMission(goes, from, forceCap, true);
           Mission secure = setupDefendMission(goes, from, forceCap, true);
           Mission dialog = setupDialogMission(goes, from, forceCap, true);
@@ -606,7 +649,7 @@ public class MissionAIUtils {
     AreaMap map = world.activeBaseMap();
     
     Batch <Area> allGoes = new Batch();
-    for (Area a : world.areas) if (map == null || a != map.area) allGoes.add(a);
+    for (Area a : world.areas()) if (map == null || a != map.area) allGoes.add(a);
     
     return generateTrouble(federation, from, forceCap, allGoes, launch);
   }

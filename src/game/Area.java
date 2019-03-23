@@ -127,6 +127,14 @@ public class Area implements Session.Saveable {
   public Series <Actor> visitors() {
     return visitors;
   }
+  
+  
+  
+  /**  Graphical, debug and interface methods-
+    */
+  public String toString() {
+    return type.name();
+  }
 }
 
 

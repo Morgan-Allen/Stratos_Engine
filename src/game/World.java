@@ -58,7 +58,8 @@ public class World implements Session.Saveable {
   Table <Faction, Federation> federations = new Table();
   Faction playerFaction = null;
   
-  List <Area> areas = new List();
+  //List <Area> areas = new List();
+  Table <AreaType, Area> areas = new Table();
   List <Base> bases = new List();
   List <Journey> journeys = new List();
   
@@ -124,7 +125,7 @@ public class World implements Session.Saveable {
     }
     playerFaction = (Faction) s.loadObject();
     
-    s.loadObjects(areas);
+    s.loadTable(areas);
     s.loadObjects(bases);
     
     for (int n = s.loadInt(); n-- > 0;) {
@@ -174,7 +175,7 @@ public class World implements Session.Saveable {
     }
     s.saveObject(playerFaction);
     
-    s.saveObjects(areas);
+    s.saveTable(areas);
     s.saveObjects(bases);
     
     s.saveInt(journeys.size());
@@ -212,7 +213,7 @@ public class World implements Session.Saveable {
     */
   public Area addArea(AreaType type) {
     Area area = new Area(this, type);
-    this.areas.add(area);
+    areas.put(type, area);
     return area;
   }
   
@@ -231,7 +232,7 @@ public class World implements Session.Saveable {
   
 
   public Base baseNamed(String n) {
-    for (Area a : areas) for (Base b : a.bases) {
+    for (Base b : bases) {
       if (b.name.equals(n)) return b;
     }
     return null;
@@ -239,15 +240,20 @@ public class World implements Session.Saveable {
   
   
   public AreaMap activeBaseMap() {
-    for (Area a : areas) for (Base c : a.bases) {
+    for (Base c : bases) {
       if (c.activeMap() != null) return c.activeMap();
     }
     return null;
   }
   
   
-  public Series <Area> areas() {
-    return areas;
+  public Area areaAt(AreaType t) {
+    return areas.get(t);
+  }
+  
+  
+  public Iterable <Area> areas() {
+    return areas.values();
   }
   
   
@@ -438,7 +444,7 @@ public class World implements Session.Saveable {
   public void updateWithTime(int time) {
     this.time = time;
     
-    for (Area area : areas) {
+    for (Area area : areas.values()) {
       area.updateArea();
       area.locals.updateBase();
     }
@@ -503,7 +509,7 @@ public class World implements Session.Saveable {
   
   
   public Base onMap(int mapX, int mapY) {
-    for (Area a : areas) for (Base b : a.bases) {
+    for (Base b : bases) {
       int x = (int) b.area.type.mapX, y = (int) b.area.type.mapY;
       if (x == mapX && y == mapY) return b;
     }

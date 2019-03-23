@@ -78,7 +78,7 @@ public class AreaMap implements Session.Saveable {
     }
     
     world = (World) s.loadObject();
-    area = world.areas.atIndex(s.loadInt());
+    area = (Area) s.loadObject();
     
     time       = s.loadInt();
     numUpdates = s.loadInt();
@@ -150,7 +150,7 @@ public class AreaMap implements Session.Saveable {
     }
     
     s.saveObject(world);
-    s.saveInt(world.areas.indexOf(area));
+    s.saveObject(area);
     
     s.saveInt(time);
     s.saveInt(numUpdates);

@@ -70,9 +70,6 @@ public class AreaType extends Constant {
   
   
   
-  
-  
-  
   /**  Graphical, debug and interface methods-
     */
   public String name() {

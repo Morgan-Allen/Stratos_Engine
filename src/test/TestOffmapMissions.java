@@ -11,7 +11,7 @@ import util.*;
 
 
 
-public class TestWorld3 extends LogicTest {
+public class TestOffmapMissions extends LogicTest {
   
 
   

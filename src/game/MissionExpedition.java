@@ -115,6 +115,9 @@ public class MissionExpedition extends Mission {
     World world = homeBase().world;
     WorldScenario scenario = world.scenarioFor(goes);
     
+    //  TODO:  This might be assigned during configuration?
+    String baseName = "Base no. "+(world.bases().size() + 1);
+    
     //  TODO:  Scrub any connection that party-members have with the previous
     //  area and/or actors therein.
     
@@ -140,7 +143,7 @@ public class MissionExpedition extends Mission {
       for (BuildType t : built) buildLevels.add(1, t);
       BuildType techTypes[] = homeBase().techTypes().toArray(BuildType.class);
       
-      Base landing = new Base(world, goes, faction());
+      Base landing = new Base(world, goes, faction(), baseName);
       world.addBases(landing);
       landing.assignTechTypes(techTypes);
       

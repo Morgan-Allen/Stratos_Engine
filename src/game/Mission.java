@@ -25,6 +25,10 @@ public abstract class Mission implements
     OBJECTIVE_CONTACT = 4,
     OBJECTIVE_COLONY  = 5
   ;
+  final static String OBJECTIVE_NAMES[] = {
+    "Standby", "Strike", "Secure", "Recon", "Contact", "Colonise"
+  };
+  
   final static int
     STAGE_INIT     = -1,
     STAGE_BEGUN    =  0,
@@ -60,11 +64,6 @@ public abstract class Mission implements
   AreaTile transitTile;
   ActorAsVessel transport;
   int arriveTime = -1;
-  
-  
-  final static String OBJECTIVE_NAMES[] = {
-    "Standby", "Strike", "Secure", "Recon", "Contact"
-  };
   
   Sprite flag;
   boolean noFlag = false;
