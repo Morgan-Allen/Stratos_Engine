@@ -26,7 +26,37 @@ public class FederationRelations extends RelationSet {
     prestige = s.loadFloat();
   }
   
+
   
+  
+  
+  
+  /*
+  public void setBond(Focus with, float level, int... props) {
+    // TODO Auto-generated method stub
+    
+    Faction belongs = (Faction) focus;
+    
+    if (level < 0 && with == belongs) {
+      I.say("???");
+    }
+    
+    super.setBond(with, level, props);
+  }
+  
+  
+  public void incBond(Focus with, float inc, float maxRange) {
+    // TODO Auto-generated method stub
+    
+    Faction belongs = (Faction) focus;
+    
+    if (inc < 0 && with == belongs) {
+      I.say("???");
+    }
+    
+    super.incBond(with, inc, maxRange);
+  }
+  //*/
   
 
   

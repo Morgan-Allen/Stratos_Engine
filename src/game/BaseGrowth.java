@@ -157,45 +157,52 @@ public class BaseGrowth {
     //
     //  Okay.  First thing's first.  Establish broad rates of population growth
     //  and build structures to satisfy it.
-    
-    class Rating { BuildType type; float rating; }
-    List <Rating> ratings = new List <Rating> () {
-      protected float queuePriority(Rating r) {
-        return r.rating;
-      }
-    };
-    
     float absMaxPopulation = MAX_POPULATION;
-    float popGrowth = absMaxPopulation / POP_MAX_YEARS;
-    popGrowth *= 1 - (population / absMaxPopulation);
-    popGrowth *= updateGap * 1f / YEAR_LENGTH;
+    float popGrowth = 0;
     
-    population += popGrowth;
-    
-    for (BuildType type : base.techTypes()) {
-      if (type.isUpgrade || ! type.hasPrerequisites(base)) continue;
-      if (type.uniqueBuilding && buildLevel.valueFor(type) > 0) continue;
-
-      float numGuilds = buildLevel.valueFor(type);
-      Rating r = new Rating();
-      r.type = type;
-      ratings.add(r);
+    if (updateGap > 0 && base.techTypes().size() > 0) {
       
-      if (type.maxResidents > 0) {
-        r.rating += type.maxResidents * (population - maxPopulation);
+      class Rating {
+        BuildType type;
+        float rating;
+        public String toString() { return type+": "+rating; }
       }
-      if (! type.workerTypes.empty()) {
-        r.rating = type.workerTypes.total() * (population - employment);
+      
+      List <Rating> ratings = new List <Rating> () {
+        protected float queuePriority(Rating r) {
+          return r.rating;
+        }
+      };
+      
+      popGrowth = absMaxPopulation / POP_MAX_YEARS;
+      popGrowth *= 1 - (population / absMaxPopulation);
+      popGrowth *= updateGap * 1f / YEAR_LENGTH;
+      
+      for (BuildType type : base.techTypes()) {
+        if (type.isUpgrade || ! type.hasPrerequisites(base)) continue;
+        if (type.uniqueBuilding && buildLevel.valueFor(type) > 0) continue;
+
+        float numGuilds = buildLevel.valueFor(type);
+        Rating r = new Rating();
+        r.type = type;
+        ratings.add(r);
+        
+        if (type.maxResidents > 0) {
+          r.rating += type.maxResidents * (population - maxPopulation);
+        }
+        if (! type.workerTypes.empty()) {
+          r.rating = type.workerTypes.total() * (population - employment);
+        }
+        r.rating /= (3 + numGuilds) / 3f;
+        r.rating /= 10 + type.buildCostEstimate();
       }
-      r.rating /= (3 + numGuilds) / 3f;
-      r.rating /= 10 + type.buildCostEstimate();
-    }
-    
-    ratings.queueSort();
-    for (Rating r : ratings) if (r.rating > 0) {
-      buildLevel.add(1, r.type);
-      ///I.say("\nAdded "+r.type+" to "+base+", build-levels: "+buildLevel);
-      break;
+      
+      ratings.queueSort();
+      for (Rating r : ratings) if (r.rating > 0) {
+        buildLevel.add(1, r.type);
+        ///I.say("\nAdded "+r.type+" to "+base+", build-levels: "+buildLevel);
+        break;
+      }
     }
     
     //
@@ -221,12 +228,10 @@ public class BaseGrowth {
     
     //
     //  Then increment total population and army-power-
-    float popRegen = updateGap * maxPopulation * 1f / (LIFESPAN_LENGTH / 2);
-    float armyCap = maxArmyPower;
+    if (population < maxPopulation) popGrowth *= 2;
+    population = Nums.clamp(population + popGrowth, 0, absMaxPopulation);
     
-    if (population < maxPopulation) {
-      population = Nums.min(maxPopulation, population + popRegen);
-    }
+    float armyCap = maxArmyPower;
     
     for (Mission f : base.missions()) {
       armyCap -= MissionForStrike.powerSum(f.recruits(), null);
@@ -235,11 +240,14 @@ public class BaseGrowth {
       armyCap = 0;
     }
     if (armyPower < armyCap) {
-      armyPower = Nums.min(armyCap, armyPower + popRegen);
+      armyPower = Nums.min(armyCap, armyPower + popGrowth);
     }
   }
   
   
 }
+
+
+
 
 

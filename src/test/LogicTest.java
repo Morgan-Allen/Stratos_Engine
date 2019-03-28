@@ -30,7 +30,7 @@ public class LogicTest {
   
   
   static AreaType areaType(int x, int y, boolean homeland, String ID) {
-    AreaType t = new AreaType(LogicTest.class, "TA_"+ID, "Test Area "+ID);
+    AreaType t = new AreaType(LogicTest.class, "TA_"+ID, ID);
     t.initPosition(x, y, homeland);
     return t;
   }

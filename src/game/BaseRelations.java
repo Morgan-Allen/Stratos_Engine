@@ -6,9 +6,6 @@ import util.*;
 
 
 
-//  TODO:  Move prestige in here, maybe?
-
-
 public class BaseRelations extends RelationSet {
   
   
@@ -76,6 +73,12 @@ public class BaseRelations extends RelationSet {
   }
   
   
+  
+  
+  
+  
+
+
   public void toggleRebellion(Faction lord, boolean is) {
     if (lord != base.faction()) return;
     

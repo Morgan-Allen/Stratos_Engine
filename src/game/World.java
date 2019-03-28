@@ -448,6 +448,7 @@ public class World implements Session.Saveable {
       area.updateArea();
       area.locals.updateBase();
     }
+    
     for (Base b : bases) {
       b.updateBase();
     }

@@ -454,7 +454,7 @@ public class MissionAIUtils {
   
   static float settlerAppeal(Mission mission) {
     if (hasCompetition(mission)) return -1;
-    return exploreAppeal(mission.worldFocusArea(), mission.homeBase);
+    return settlerAppeal(mission.worldFocusArea(), mission.homeBase);
   }
   
   
@@ -476,14 +476,15 @@ public class MissionAIUtils {
   
   
   
-  
-  
   /**  Updating internal politics...
     */
   public static void updateCapital(Federation federation, World world) {
     Base capital = federation.capital();
     
-    if (capital == null || capital.federation() != federation) {
+    if (
+      capital == null || capital.federation() != federation ||
+      capital.growth.population() == 0
+    ) {
       Pick <Base> pick = new Pick(0);
       
       for (Base base : world.bases) if (base.federation() == federation) {
@@ -518,7 +519,7 @@ public class MissionAIUtils {
       //  Make sure this area can be traversed (is explored, and not occupied
       //  by a non-ally,) before adding adjacent areas.
       for (Base b : area.bases) if (b != area.locals) {
-        if (! b.isAllyOf(from)) {
+        if (! b.isAllyOrFaction(from)) {
           continue loop;
         }
       }
@@ -526,11 +527,13 @@ public class MissionAIUtils {
         continue loop;
       }
       for (AreaType t : area.type.routes.keySet()) {
+        
         World.Route r = area.type.routes.get(t);
         if (r.moveMode != moveMode) continue;
-        if (reachSet.valueFor(area) > 0) continue;
         
         Area other = world.areaAt(t);
+        if (reachSet.valueFor(other) > 0) continue;
+        
         fringe.add(other);
       }
     }

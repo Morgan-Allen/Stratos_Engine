@@ -89,6 +89,13 @@ public class MissionExpedition extends Mission {
   }
   
   
+  String baseName() {
+    //  TODO:  This should be assigned during configuration!
+    World world = homeBase().world;
+    return "Base no. "+world.bases.size();
+  }
+  
+  
   
   
   /**  Mission-configuration-
@@ -106,20 +113,14 @@ public class MissionExpedition extends Mission {
   
   
   void handleOffmapDeparture(Area from, Journey journey) {
-    return;
-  }
-  
-  
-  void handleOffmapArrival(Area goes, Journey journey) {
-    
+
     World world = homeBase().world;
+    Area goes = worldFocusArea();
     WorldScenario scenario = world.scenarioFor(goes);
     
-    //  TODO:  This might be assigned during configuration?
-    String baseName = "Base no. "+(world.bases().size() + 1);
-    
     //  TODO:  Scrub any connection that party-members have with the previous
-    //  area and/or actors therein.
+    //  area and/or actors therein, and accelerate time to the point where the
+    //  journey is completed...
     
     if (scenario != null && withPlayer) {
       Scenario old = MainGame.currentScenario();
@@ -130,34 +131,61 @@ public class MissionExpedition extends Mission {
         //a.detachFromMap();
       }
       
+      setMissionComplete(true);
+      disbandMission();
+      
       scenario.assignExpedition(this, world);
       scenario.initScenario(MainGame.mainGame());
-      MainGame.playScenario(scenario, world);
       
-      disbandMission();
+      Base founded = scenario.base();
+      founded.setName(baseName());
+      
+      MainGame.playScenario(scenario, world);
     }
     
-    else {
-      
+    return;
+  }
+  
+  
+  void handleOffmapArrival(Area goes, Journey journey) {
+    //
+    //  If the area is already colonised, you'll have to turn around and go
+    //  home...
+    if (! allowsFocus(goes)) {
+      setMissionComplete(false);
+      return;
+    }
+    //
+    //  Otherwise, you need to initialise a new base-
+    World world = homeBase().world;
+    WorldScenario scenario = world.scenarioFor(goes);
+    
+    if (scenario == null || ! withPlayer) {
       Tally <BuildType> buildLevels = new Tally();
       for (BuildType t : built) buildLevels.add(1, t);
       BuildType techTypes[] = homeBase().techTypes().toArray(BuildType.class);
       
-      Base landing = new Base(world, goes, faction(), baseName);
+      Base landing = new Base(world, goes, faction(), baseName());
       world.addBases(landing);
-      landing.assignTechTypes(techTypes);
       
+      landing.assignTechTypes(techTypes);
       landing.initFunds(funds);
       landing.trading.inventory().add(goods);
       landing.growth.initBuildLevels(buildLevels);
+      landing.relations.setBond(faction(), 0.5f);
       
+      setMissionComplete(true);
       disbandMission();
     }
-    
   }
   
   
 }
+
+
+
+
+
 
 
 

@@ -215,6 +215,10 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
   /**  Regular updates-
     */
   void updateBase() {
+    
+    //  TODO:  The updateStats flag may never be true if the world is being
+    //  updated in time-increments greater than 1!
+    
     final AreaMap map = area.activeMap();
     final int UPDATE_GAP = map == null ? DAY_LENGTH : 10;
     boolean updateStats = world.time % UPDATE_GAP == 0;
@@ -341,6 +345,10 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
   public boolean isEnemyOf (Base o) { return posture(o) == BOND_ENEMY ; }
   public boolean isAllyOf  (Base o) { return posture(o) == BOND_ALLY  ; }
   
+  
+  public boolean isAllyOrFaction(Base o) {
+    return o.faction() == this.faction() || isAllyOf(o);
+  }
   
   public boolean isLoyalVassalOf(Base o) {
     return (posture(o) == BOND_LORD) && relations.isLoyalVassal();

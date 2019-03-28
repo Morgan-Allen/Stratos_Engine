@@ -15,18 +15,18 @@ public class TestOffmapWorld extends LogicTest {
   
   
   public static void main(String args[]) {
-    testWorld(false);
+    testWorld(true);
   }
   
   
-  final static AreaType AREA_GRID[][] = new AreaType[4][4];
+  final static AreaType AREA_GRID[][] = new AreaType[3][3];
   
   static {
-    for (Coord c : Visit.grid(0, 0, 4, 4, 1)) {
+    for (Coord c : Visit.grid(0, 0, 3, 3, 1)) {
       AreaType a = areaType(c.x, c.y, false, "A_"+c);
       AREA_GRID[c.x][c.y] = a;
     }
-    for (Coord c : Visit.grid(0, 0, 4, 3, 1)) {
+    for (Coord c : Visit.grid(0, 0, 3, 2, 1)) {
       AreaType a1 = AREA_GRID[c.x][c.y];
       AreaType a2 = AREA_GRID[c.x][c.y + 1];
       AreaType a3 = AREA_GRID[c.y][c.x];
@@ -44,27 +44,33 @@ public class TestOffmapWorld extends LogicTest {
     world.assignTypes(
       ALL_BUILDINGS, ALL_SHIPS(), ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES()
     );
-    for (Coord c : Visit.grid(0, 0, 4, 4, 1)) {
+    for (Coord c : Visit.grid(0, 0, 3, 3, 1)) {
       world.addArea(AREA_GRID[c.x][c.y]);
     }
     
-    Area landsA = world.areaAt(AREA_GRID[0][Rand.index(4)]);
-    Area landsB = world.areaAt(AREA_GRID[3][Rand.index(4)]);
-    Base baseA = new Base(world, landsA, FACTION_SETTLERS_A);
-    Base baseB = new Base(world, landsB, FACTION_SETTLERS_B);
+    Area landsA = world.areaAt(AREA_GRID[0][Rand.index(3)]);
+    Area landsB = world.areaAt(AREA_GRID[2][Rand.index(3)]);
+    Base baseA = new Base(world, landsA, FACTION_SETTLERS_A, "Landing A");
+    Base baseB = new Base(world, landsB, FACTION_SETTLERS_B, "Landing B");
+    
     world.addBases(baseA, baseB);
+    baseA.federation().assignCapital(baseA);
+    baseB.federation().assignCapital(baseB);
     
     for (Base c : world.bases()) {
       c.federation().setExploreLevel(c.area, 1);
+      c.assignTechTypes(c.faction().buildTypes());
       c.growth.initBuildLevels(BASTION, 1F, HOLDING, 2f, TROOPER_LODGE, 2f);
+      c.relations.setBond(c.faction(), 0.5f);
     }
     
-    
-    final int MAX_TIME  = LIFESPAN_LENGTH / 10;
-    final int NUM_YEARS = MAX_TIME / YEAR_LENGTH;
+    final int MAX_TIME = LIFESPAN_LENGTH;
+    final Faction ACTIVE[] = { FACTION_SETTLERS_A, FACTION_SETTLERS_B };
+    final int MAX_EPOCHS = 10;
     
     Base withEmpire = null, withAllies = null;
     int time = 0, epoch = 0;
+    boolean missionsActive = false;
     boolean testOkay = true;
     
     world.settings.reportMissionEval = true;
@@ -77,7 +83,8 @@ public class TestOffmapWorld extends LogicTest {
       
       //
       //  Report any events that occurred-
-      for (WorldEvents.Event e : world.events.history()) {
+      
+      if (graphics) for (WorldEvents.Event e : world.events.history()) {
         I.say(world.events.descFor(e));
       }
       world.events.clearHistory();
@@ -85,41 +92,57 @@ public class TestOffmapWorld extends LogicTest {
       //  Check to see if every federation has completed their missions (in
       //  which case enable their AI), or has at least one mission active (in
       //  which case, disable their AI.)
-      boolean allDone = true;
       
-      for (Federation fed : world.federations()) {
-        boolean launched = false;
+      if (! missionsActive) {
+        boolean allLaunched = true;
         
-        for (Base b : world.bases()) if (b.federation() == fed) {
-          if (b.missions().size() > 0) launched = true;
-          for (Mission m : b.missions()) allDone &= m.disbanded();
+        for (Faction f : ACTIVE) {
+          boolean launched = false;
+          
+          for (Base b : world.bases()) if (b.faction() == f) {
+            if (b.missions().size() > 0) {
+              launched = true;
+            }
+          }
+          
+          if (launched) world.federation(f).setTypeAI(Federation.AI_OFF);
+          allLaunched &= launched;
         }
         
-        if (launched) fed.setTypeAI(Federation.AI_OFF);
+        if (allLaunched) {
+          missionsActive = true;
+        }
       }
-      //
-      //  If a given epoch is complete, also give a report on the state of the
-      //  world.
-      if (allDone) {
-        for (Federation fed : world.federations()) {
-          fed.setTypeAI(Federation.AI_NORMAL);
-        }
-        epoch += 1;
-        I.say("\n\nNEXT MISSION CYCLE, EPOCH "+epoch+" TIME "+time);
+      else {
+        boolean allDone = true;
         
-        /*
-        I.say("\nBASES ARE: ");
-        for (Base base : world.bases()) {
-          float e1 = world.federation(FACTION_SETTLERS_A).exploreLevel(base.locale);
-          float e2 = world.federation(FACTION_SETTLERS_B).exploreLevel(base.locale);
-          I.say("  "+base+", offmap: "+base.isOffmap()+" | "+e1+" "+e2);
+        for (Faction f : ACTIVE) {
+          int numActive = 0;
+          
+          for (Base b : world.bases()) if (b.faction() == f) {
+            for (Mission m : b.missions()) if (m.active()) numActive += 1;
+          }
+          if (numActive > 0) allDone = false;
         }
-        //*/
+        
+        if (allDone) {
+          for (Federation fed : world.federations()) {
+            fed.setTypeAI(Federation.AI_NORMAL);
+          }
+          epoch += 1;
+          missionsActive = false;
+          
+          if (graphics) {
+            I.say("\n\nNEXT MISSION CYCLE, EPOCH "+epoch+" TIME "+time+"/"+MAX_TIME);
+            reportOnWorld(world, ACTIVE);
+          }
+          
+          if (MAX_EPOCHS > 0 && epoch >= MAX_EPOCHS) break;
+        }
       }
       
       //
       //  Finally, check to see whether game victory conditions are met-
-      
       for (Base c : world.bases()) {
         boolean hasEmpire = true;
         boolean hasAllied = true;
@@ -128,7 +151,7 @@ public class TestOffmapWorld extends LogicTest {
           if (! o.isLoyalVassalOf(c)) {
             hasEmpire = false;
           }
-          if (! (o.isAllyOf(c) || o.isLoyalVassalOf(c))) {
+          if (! o.isAllyOrFaction(c)) {
             hasAllied = false;
           }
         }
@@ -139,6 +162,7 @@ public class TestOffmapWorld extends LogicTest {
       
       if (withEmpire != null || withAllies != null) {
         I.say("Found empire or alliance...");
+        //  TODO:  Report which!
         break;
       }
     }
@@ -150,9 +174,9 @@ public class TestOffmapWorld extends LogicTest {
       I.say("\nWORLD-EVENTS TESTING FAILED.");
     }
     
-    I.say("  Total years simulated: "+NUM_YEARS);
+    I.say("  Total years simulated: "+(world.time() / YEAR_LENGTH));
     
-    if (graphics) reportOnWorld(world);
+    ///if (graphics) reportOnWorld(world);
     return testOkay;
   }
   
@@ -160,7 +184,46 @@ public class TestOffmapWorld extends LogicTest {
   
   /**  Reporting on overall state of the world-
     */
-  static void reportOnWorld(World world) {
+  static void reportOnWorld(World world, Faction factions[]) {
+
+    I.say("\n  WORLD STATE:");
+    
+    int colours[][] = new int[3][3];
+    
+    for (Coord c : Visit.grid(0, 0, 3, 3, 1)) {
+      Area a = world.areaAt(AREA_GRID[c.x][c.y]);
+      colours[c.x][c.y] = BLANK_COLOR;
+      
+      I.say("    "+a);
+      for (Base b : a.bases()) if (b != a.locals) {
+        I.say("      "+b+" ("+b.faction()+")");
+        I.add(" (pop "+b.growth.population()+") (pwr "+b.growth.armyPower()+")");
+
+        I.say("      Bld: "+b.growth.buildLevel());
+        I.say("      Rel:");
+        for (RelationSet.Focus f : b.relations.allBondedWith(0)) {
+          if (! (f instanceof Faction)) continue;
+          I.add(" "+f+": "+b.relations.bondLevel(f));
+        }
+        
+        colours[c.x][c.y] = b.faction().tint();
+      }
+    }
+    
+    I.say("\n  FACTIONS:");
+    for (Faction a : factions) {
+      I.say("    "+a);
+      I.say("      Rel:");
+      Federation r = world.federation(a);
+      for (RelationSet.Focus f : r.relations.allBondedWith(0)) {
+        if (! (f instanceof Faction)) continue;
+        I.add(" "+f+": "+r.relations.bondLevel(f));
+      }
+    }
+    
+    I.present("WORLD_MAP", 300, 300, colours);
+    
+    /*
     I.say("\nReporting world state:");
     for (Base c : world.bases()) {
       BaseGrowth g = c.growth;
@@ -177,10 +240,9 @@ public class TestOffmapWorld extends LogicTest {
         I.add(" "+o+": "+c.relations.bondProperties(o)+" "+c.relations.bondLevel(o));
       }
     }
+    //*/
   }
 }
-
-
 
 
 
