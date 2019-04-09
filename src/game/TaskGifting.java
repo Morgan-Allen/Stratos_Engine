@@ -85,10 +85,19 @@ public class TaskGifting extends TaskDialog {
     Base away = gets.base();
     float minAmount = store == gives ? 1 : 2;
     
-    if (home != null) for (Good g : home.needed()) {
-      if (store.inventory().valueFor(g) < minAmount) continue;
-      float rating = home.demandFor(g) * g.price;
-      pickGift.compare(g, rating);
+    if (home != null && home.type().isGovernBuilding()) {
+      for (Good g : home.produced()) {
+        if (store.inventory().valueFor(g) < minAmount) continue;
+        float rating = home.stockDeficit(g) * g.price;
+        pickGift.compare(g, rating);
+      }
+    }
+    else if (home != null) {
+      for (Good g : home.needed()) {
+        if (store.inventory().valueFor(g) < minAmount) continue;
+        float rating = home.demandFor(g) * g.price;
+        pickGift.compare(g, rating);
+      }
     }
     
     if (away != null) for (Good g : away.needLevels().keys()) {

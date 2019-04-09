@@ -101,8 +101,8 @@ public class MissionForSecure extends Mission {
     guardPoints.clear();
     lastGuardEvalTime = -1;
   }
-
-
+  
+  
   void update() {
     super.update();
     

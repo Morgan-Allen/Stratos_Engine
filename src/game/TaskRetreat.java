@@ -41,8 +41,10 @@ public class TaskRetreat extends Task {
   /**  Utility method for calculating fear-levels...
     */
   static float fearLevel(Actor actor, List <Active> storeBackup) {
+    
     float dangerSum = 0, allySum = 0;
     Batch <Active> aware = new Batch();
+    boolean report = false;
     
     for (Active other : actor.seen()) {
       aware.add(other);
@@ -51,6 +53,11 @@ public class TaskRetreat extends Task {
       if (Task.inCombat((Element) other) && other.task().inContact()) {
         aware.include(other);
       }
+    }
+    
+    if (report) {
+      I.say("\nComputing fear-level for "+actor);
+      I.say("  Aware of (host/ally/powr)");
     }
     
     for (Active other : aware) {
@@ -65,22 +72,43 @@ public class TaskRetreat extends Task {
       
       float hostility = Nums.max(hostile ? 0.5f : 0, focusAllied  ? harmLevel : 0);
       float alliance  = Nums.max(allied  ? 0.5f : 0, focusHostile ? harmLevel : 0);
+      float power     = TaskCombat.attackPower((Element) other);
       
-      float power = TaskCombat.attackPower((Element) other);
       if (hostility > 0) dangerSum += power * hostility;
       if (alliance  > 0) allySum   += power * alliance ;
       
       if (power > 0 && allied && other.mobile()) {
         storeBackup.add((Actor) other);
       }
+      
+      if (report) {
+        I.say("    "+other+" ("+hostility+"/"+alliance+"/"+power+")");
+        I.add(" "+other.jobType()+" -> "+otherFocus+"\\"+harmLevel);
+      }
     }
     
-    if (dangerSum <= 0) return 0;
+    if (dangerSum <= 0) {
+      if (report) I.say("No danger!");
+      return 0;
+    }
     
     float lossChance = 0, sumFactors = dangerSum + allySum;
     if (sumFactors > 0) lossChance = dangerSum / sumFactors;
-    lossChance += actor.health.injury () * 1.0f / actor.health.maxHealth();
-    lossChance += actor.health.fatigue() * 0.5f / actor.health.maxHealth();
+    
+    float maxHealth = actor.health.maxHealth();
+    float injury    = actor.health.injury () * 1f / maxHealth;
+    float fatigue   = actor.health.fatigue() * 1f / maxHealth;
+    
+    lossChance += injury  * injury  * 1.5f;
+    lossChance += fatigue * fatigue * 0.5f;
+    
+    if (report) {
+      I.say("  Overall factors:");
+      I.say("    Ally/danger ratio: "+allySum+"/"+dangerSum);
+      I.say("    Injury:  "+actor.health.injury() +"/"+maxHealth);
+      I.say("    Fatigue: "+actor.health.fatigue()+"/"+maxHealth);
+      I.say("    Loss chance: "+lossChance);
+    }
     
     return lossChance;
   }
@@ -135,7 +163,7 @@ public class TaskRetreat extends Task {
     */
   protected float successChance() {
     //  TODO:  Rate your chance of escape based on speed relative to other
-    //  actors.
+    //  actors?
     return 1.0f;
   }
   
@@ -143,7 +171,15 @@ public class TaskRetreat extends Task {
   protected float successPriority() {
     Actor actor = (Actor) this.active;
     float bravery = (actor.traits.levelOf(TRAIT_BRAVERY) + 1) / 2;
-    return (actor.fearLevel() * PARAMOUNT) + priorityBonus * (1.5f - bravery);
+    float fearLevel = actor.fearLevel();
+    //
+    //  Retreat priority stays pretty low as long as the odds are even or
+    //  better, then spikes toward being paramount-
+    float priority = fearLevel * (1.5f - bravery);
+    if (priority < 0.5f) priority *= IDLE;
+    if (priority > 0.5f) priority = IDLE + ((priority - 0.5f) * PARAMOUNT * 2);
+    priority += priorityBonus;
+    return priority;
   }
   
   

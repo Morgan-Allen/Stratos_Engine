@@ -34,7 +34,7 @@ public class TestAll {
     record(TestTrading  .testTrading  (false));
     record(TestBuilding .testBuilding (false));
     record(TestBridging .testBridging (false));
-    record(TestAutoBuild.testAutoBuild(false));
+    //record(TestAutoBuild.testAutoBuild(false));
     record(TestExploring.testExploring(false));
     record(TestHunting  .testHunting  (false));
     record(TestRetreat  .testRetreat  (false));

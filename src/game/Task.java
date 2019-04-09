@@ -580,7 +580,7 @@ public class Task implements Session.Saveable {
   
   
   boolean inContact() {
-    return contactState != PROG_CLOSING && contactState != PROG_COMPLETE;
+    return contactState > PROG_CLOSING && contactState < PROG_COMPLETE;
   }
   
   

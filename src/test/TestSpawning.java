@@ -13,7 +13,7 @@ public class TestSpawning extends LogicTest {
   
   
   public static void main(String args[]) {
-    testSpawning(true);
+    testSpawning(false);
   }
   
   
@@ -24,16 +24,14 @@ public class TestSpawning extends LogicTest {
     AreaMap map = base.activeMap();
     World world = map.world;
     
-    
-    ActorType species[] = { DRONE, TRIPOD };
-    Object spawnArgs[] = { TRIPOD, 0.50f, DRONE, 0.50f };
-    int totalToSpawn = 4, minPop = 2;
-    Tally <ActorType> popCounts = new Tally();
+    Base hostile = new Base(world, map.area, FACTION_ARTILECTS, "Enemies");
+    hostile.federation().setTypeAI(Federation.AI_WARLIKE);
+    world.addBases(hostile);
     
     BuildingForNest nest = (BuildingForNest) RUINS_LAIR.generate();
-    nest.enterMap(map, 24, 24, 1, map.area.locals);
-    //  TODO:  You need to arrange for some other system here!
-    //  nest.assignSpawnParameters(DAY_LENGTH, totalToSpawn, true, spawnArgs);
+    nest.enterMap(map, 24, 24, 1, hostile);
+    Tally <ActorType> spawns = Tally.with(TRIPOD, 1, DRONE, 2);
+    nest.assignCustomSpawnParameters(DAY_LENGTH, spawns);
     
     
     Building toRaze = (Building) ENFORCER_BLOC.generate();
@@ -43,8 +41,11 @@ public class TestSpawning extends LogicTest {
       base.faction(), map.area.locals.faction(),
       RelationSet.BOND_ENEMY, world
     );
+    
     world.settings.toggleFog = false;
     
+    
+    Tally <ActorType> popCounts = new Tally();
     boolean spawnDone   = false;
     boolean missionInit = false;
     boolean razingDone  = false;
@@ -55,7 +56,7 @@ public class TestSpawning extends LogicTest {
     final int RUN_TIME = YEAR_LENGTH;
     
     while(map.time() < RUN_TIME || graphics) {
-      test.runLoop(base, 10, graphics, "saves/test_animals.tlt");
+      test.runLoop(base, 10, graphics, "saves/test_spawning.tlt");
       
       popCounts.clear();
       for (Actor a : map.actors()) if (a.base() == nest.base()) {
@@ -64,14 +65,14 @@ public class TestSpawning extends LogicTest {
       
       if (! spawnDone) {
         boolean done = true;
-        for (ActorType s : species) {
-          if (popCounts.valueFor(s) < minPop) done = false;
+        for (ActorType s : spawns.keys()) {
+          if (popCounts.valueFor(s) < spawns.valueFor(s)) done = false;
         }
         spawnDone = done;
       }
       
       if (spawnDone && ! missionInit) {
-        nestMission = map.area.locals.matchingMission(Mission.OBJECTIVE_STRIKE, toRaze);
+        nestMission = hostile.matchingMission(Mission.OBJECTIVE_STRIKE, toRaze);
         missionInit = nestMission != null;
       }
       
@@ -108,5 +109,11 @@ public class TestSpawning extends LogicTest {
   }
   
 }
+
+
+
+
+
+
 
 

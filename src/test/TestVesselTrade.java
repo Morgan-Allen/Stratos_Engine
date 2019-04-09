@@ -26,31 +26,31 @@ public class TestVesselTrade extends LogicTest {
   
   static boolean testForeignToLand(boolean graphics) {
     TestVesselTrade test = new TestVesselTrade();
-    return test.vesselTest(false, false, true, "FOREIGN TO LAND VESSEL", graphics);
+    return test.vesselTest(false, false, true, "FOREIGN TO LAND VESSEL TRADE", graphics);
   }
   
   
   static boolean testForeignToDock(boolean graphics) {
     TestVesselTrade test = new TestVesselTrade();
-    return test.vesselTest(false, true, true, "FOREIGN TO DOCK VESSEL", graphics);
+    return test.vesselTest(false, true, true, "FOREIGN TO DOCK VESSEL TRADE", graphics);
   }
   
   
   static boolean testDockToForeign(boolean graphics) {
     TestVesselTrade test = new TestVesselTrade();
-    return test.vesselTest(true, false, true, "DOCK TO FOREIGN VESSEL", graphics);
+    return test.vesselTest(true, false, true, "DOCK TO FOREIGN VESSEL TRADE", graphics);
   }
   
   
   static boolean testForeignSpawn(boolean graphics) {
     TestVesselTrade test = new TestVesselTrade();
-    return test.vesselTest(false, false, false, "FOREIGN VESSEL SPAWN", graphics);
+    return test.vesselTest(false, false, false, "FOREIGN TRADE VESSEL SPAWN", graphics);
   }
   
   
   static boolean testLocalSpawn(boolean graphics) {
     TestVesselTrade test = new TestVesselTrade();
-    return test.vesselTest(true, false, false, "LOCAL VESSEL SPAWN", graphics);
+    return test.vesselTest(true, false, false, "LOCAL TRADE VESSEL SPAWN", graphics);
   }
   
   
@@ -58,8 +58,6 @@ public class TestVesselTrade extends LogicTest {
     boolean fromLocal, boolean goesDock, boolean createShip,
     String title, boolean graphics
   ) {
-    
-    //  TODO:  Can't reassign distances!
     
     World world = new World(ALL_GOODS);
     world.assignTypes(
@@ -94,6 +92,7 @@ public class TestVesselTrade extends LogicTest {
     
     AreaMap map = new AreaMap(world, homeC.area, homeC);
     map.performSetup(10, new Terrain[0]);
+    homeC.area.attachMap(map);
     
     world.settings.toggleFog       = false;
     world.settings.toggleHunger    = false;
@@ -109,6 +108,9 @@ public class TestVesselTrade extends LogicTest {
     post.setNeedLevels(false, GREENS, 30, MEDICINE, 10);
     ActorUtils.fillWorkVacancies(post);
     
+    
+    final Good ALL_GOODS[] = { MEDICINE, ORES, GREENS, PSALT };
+    
     int cashEstimate = 0, totalCash = -1;
     for (Good g : post.prodLevels().keys()) {
       float prod = post.prodLevels().valueFor(g);
@@ -116,6 +118,7 @@ public class TestVesselTrade extends LogicTest {
     }
     for (Good g : post.needLevels().keys()) {
       float need = post.needLevels().valueFor(g);
+      need -= awayC.relations.suppliesDue(homeC, g);
       cashEstimate -= need * homeC.importPrice(g, awayC);
     }
     
@@ -192,7 +195,7 @@ public class TestVesselTrade extends LogicTest {
     }
     
     
-    final int RUN_TIME = YEAR_LENGTH;
+    final int RUN_TIME = YEAR_LENGTH / 2;
     boolean spawnDone   = false;
     boolean shipComing  = false;
     boolean shipArrive  = false;
@@ -330,10 +333,34 @@ public class TestVesselTrade extends LogicTest {
     I.say("  Cash okay:     "+cashOkay   );
     I.say("  Cash/estimate: "+totalCash+"/"+cashEstimate);
     
+    I.say("Trade totals:");
+    for (Good g : ALL_GOODS) {
+      float got  = BaseTrading.goodsSent(awayC, homeC, g);
+      float sent = BaseTrading.goodsSent(homeC, awayC, g);
+      I.say("  "+g+" -> +"+got+" -"+sent);
+    }
+    
     return false;
   }
   
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

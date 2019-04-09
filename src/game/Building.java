@@ -443,6 +443,11 @@ public class Building extends Element implements Pathing, Employer, Carrier {
   }
   
   
+  public float stockDeficit(Good g) {
+    return stockLimit(g) - inventory.valueFor(g);
+  }
+  
+  
   public float materialNeed(Good g) {
     return materialNeed(g, null);
   }

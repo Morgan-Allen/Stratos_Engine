@@ -180,10 +180,12 @@ public class Federation {
   /**  Levels of exploration-
     */
   public float exploreLevel(Area l) {
+    if (! world.settings.toggleFog) return 1;
     return exploreLevels.valueFor(l);
   }
   
   public void setExploreLevel(Area l, float value) {
+    if (! world.settings.toggleFog) return;
     exploreLevels.set(l, value);
   }
   
@@ -200,6 +202,9 @@ public class Federation {
     return "Federation: "+faction.name;
   }
 }
+
+
+
 
 
 

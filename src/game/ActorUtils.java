@@ -158,6 +158,10 @@ public class ActorUtils {
         int space = b.maxWorkers(t) - b.numWorkers(t);
         if (space <= 0) continue;
         
+        //  TODO:  Reconsider this later...
+        if (t != migrant.type()) continue;
+        //if (t.socialClass <= migrant.type().socialClass) continue;
+        
         float fitness = 0, sumWeights = 0;
         for (Trait skill : t.coreSkills.keys()) {
           float level = t.coreSkills.valueFor(skill);
@@ -258,6 +262,9 @@ public class ActorUtils {
     if (home != null) {
       home.setResident(migrant, true);
     }
+    
+    //  TODO:  Consider restoring this later.
+    /*
     else if (map.world.settings.toggleAutoBuild) {
       Type baseHomeType = migrant.type().nestType();
       home = (Building) baseHomeType.generate();
@@ -270,6 +277,7 @@ public class ActorUtils {
         home.setResident(migrant, true);
       }
     }
+    //*/
   }
   
   

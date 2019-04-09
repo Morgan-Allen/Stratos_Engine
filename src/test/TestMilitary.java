@@ -10,6 +10,7 @@ import static game.GameConstants.*;
 
 
 
+
 public class TestMilitary extends LogicTest {
   
   
@@ -22,27 +23,28 @@ public class TestMilitary extends LogicTest {
     LogicTest test = new TestMilitary();
     
     World world = new World(ALL_GOODS);
-    Base  baseC = new Base(world, world.addArea(BASE), FACTION_SETTLERS_A);
-    Base  awayC = new Base(world, world.addArea(AWAY), FACTION_SETTLERS_B);
-    AreaMap map = AreaTerrain.generateTerrain(
-      baseC, 32, 0, MEADOW, JUNGLE
-    );
     world.assignTypes(
       ALL_BUILDINGS, ALL_SHIPS(), ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES()
     );
+    
+    Base baseC = new Base(world, world.addArea(BASE), FACTION_SETTLERS_A);
+    Base awayC = new Base(world, world.addArea(AWAY), FACTION_SETTLERS_B);
     world.addBases(baseC, awayC);
     world.setPlayerFaction(FACTION_SETTLERS_A);
     baseC.setName("Home City");
     awayC.setName("Away City");
     awayC.federation().setTypeAI(Federation.AI_OFF);
-    
-    world.settings.toggleFog = false;
-    
     Federation.setPosture(
       baseC.faction(), awayC.faction(),
       RelationSet.BOND_ENEMY, world
     );
     awayC.growth.setArmyPower(0);
+    
+    AreaMap map = AreaTerrain.generateTerrain(
+      baseC, 32, 0, MEADOW, JUNGLE
+    );
+    baseC.area.attachMap(map);
+    world.settings.toggleFog = false;
     
     
     BuildingForArmy fort1 = (BuildingForArmy) TROOPER_LODGE.generate();
@@ -137,7 +139,7 @@ public class TestMilitary extends LogicTest {
         for (Actor w : fort1.workers()) offence.toggleRecruit(w, true);
         for (Actor w : fort2.workers()) offence.toggleRecruit(w, true);
         offence.setWorldFocus(awayC);
-        offence.terms.assignTerms(RelationSet.BOND_VASSAL, null, null, null);
+        offence.terms.assignTerms(RelationSet.BOND_LORD, null, null, null);
         offence.beginMission();
         invading = true;
       }
@@ -207,7 +209,7 @@ public class TestMilitary extends LogicTest {
     
     I.say("\nReporting experience gained.");
     for (Actor a : actors) {
-
+      
       String keyC = a.ID()+"_"+a.type()+"_L";
       int oldCL = (int) (float) (Float) init.get(keyC);
       int newCL = a.traits.classLevel();

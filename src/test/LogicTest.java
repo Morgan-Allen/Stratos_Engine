@@ -55,6 +55,8 @@ public class LogicTest {
       AreaTerrain.populateFixtures(map);
     }
     
+    area.attachMap(map);
+    
     world.setMapSize(10, 10);
     world.addBases(base);
     world.setPlayerFaction(faction);

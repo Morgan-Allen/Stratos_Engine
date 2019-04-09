@@ -15,7 +15,7 @@ public class TestCity extends LogicTest {
   
   
   public static void main(String args[]) {
-    testCity(true);
+    testCity(false);
   }
   
   

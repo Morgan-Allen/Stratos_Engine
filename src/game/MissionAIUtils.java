@@ -18,9 +18,9 @@ public class MissionAIUtils {
   }
   
   static float forceStrength(Base base) {
-    float power = (POP_PER_CITIZEN + base.growth.armyPower()) / 2f;
+    float power = POP_PER_CITIZEN + base.growth.armyPower();
     float prestige = base.federation().relations.prestige() / PRESTIGE_MAX;
-    return power * (1 + prestige);
+    return power * prestige;
   }
   
   static float exploreLevel(Area area, Federation from) {
@@ -149,7 +149,7 @@ public class MissionAIUtils {
   public static Mission setupStrikeMission(Base goes, Base from, float forceCap, boolean goesLimit) {
     
     float defence = forceStrength(goes);
-    float maxArmy = goesLimit ? Nums.min(defence, forceCap) : forceCap;
+    float maxArmy = goesLimit ? Nums.min(defence * MAX_FORCE_MULTIPLE, forceCap) : forceCap;
     
     MissionForStrike mission = new MissionForStrike(from);
     mission.setWorldFocus(goes);
@@ -506,6 +506,7 @@ public class MissionAIUtils {
     
     Tally <Area> reachSet = new Tally();
     List <Area> fringe = new List();
+    boolean checkFog = from.world.settings.toggleFog;
     
     World world = from.world;
     Federation federation = from.federation();
@@ -523,7 +524,7 @@ public class MissionAIUtils {
           continue loop;
         }
       }
-      if (federation.exploreLevel(area) <= 0) {
+      if (checkFog && federation.exploreLevel(area) <= 0) {
         continue loop;
       }
       for (AreaType t : area.type.routes.keySet()) {
@@ -532,7 +533,7 @@ public class MissionAIUtils {
         if (r.moveMode != moveMode) continue;
         
         Area other = world.areaAt(t);
-        if (reachSet.valueFor(other) > 0) continue;
+        if (other == null || reachSet.valueFor(other) > 0) continue;
         
         fringe.add(other);
       }
@@ -598,7 +599,8 @@ public class MissionAIUtils {
         settle.setEvalParams(settlerAppeal(settle), settlerChance(settle));
         selection.compare(settle, 1);
         
-        for (Base goes : area.bases) if (goes != area.locals) {
+        for (Base goes : area.bases) {
+          if (goes == area.locals) continue;
           Mission strike = setupStrikeMission(goes, from, forceCap, true);
           Mission secure = setupDefendMission(goes, from, forceCap, true);
           Mission dialog = setupDialogMission(goes, from, forceCap, true);
@@ -646,7 +648,7 @@ public class MissionAIUtils {
   
   public static Mission generateOffmapTrouble(Federation federation, World world, boolean launch) {
     if (federation == null || world == null) return null;
-
+    
     Base from = federation.capital();
     float forceCap = federationPower(federation);
     AreaMap map = world.activeBaseMap();

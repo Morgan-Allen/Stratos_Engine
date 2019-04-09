@@ -268,6 +268,11 @@ public class Type extends Constant {
   }
   
   
+  public boolean isGovernBuilding() {
+    return category == IS_GOVERN_BLD;
+  }
+  
+  
   public boolean isNestBuilding() {
     return category == IS_NEST_BLD;
   }

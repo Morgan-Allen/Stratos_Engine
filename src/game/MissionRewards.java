@@ -39,7 +39,7 @@ public class MissionRewards {
     this.basePriority = priority;
   }
   
-
+  
   public void setAsBounty(int cashReward) {
     this.isBounty = true;
     this.cashReward = 0;

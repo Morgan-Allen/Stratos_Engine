@@ -63,7 +63,7 @@ public class FederationRelations extends RelationSet {
   /**  TODO:  This might be moved into the Federation class itself?
     */
   public void initPrestige(float level) {
-    this.prestige = level;
+    this.prestige = Nums.clamp(level, PRESTIGE_MIN, PRESTIGE_MAX);
   }
   
   
@@ -86,9 +86,6 @@ public class FederationRelations extends RelationSet {
   }
   
 }
-
-
-
 
 
 

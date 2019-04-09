@@ -113,7 +113,7 @@ public class TaskDialog extends Task {
     //  We then assess the busyness of the other actor.  NOTE- To avoid an
     //  infinite regression, we never directly assess the priority of another
     //  dialog- it's either an automatic pass if they're already talking to
-    //  use, or an automatic fail if they're talking to someone else.
+    //  us, or an automatic fail if they're talking to someone else.
     if (with.jobType() == JOB.DIALOG) {
       TaskDialog dialog = (TaskDialog) with.task();
       if (dialog.with != actor) return 0;

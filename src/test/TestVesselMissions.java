@@ -65,7 +65,7 @@ public class TestVesselMissions extends LogicTest {
         
         Mission raid = new MissionForStrike(base);
         raid.setWorldFocus(rival);
-        raid.terms.assignTerms(BOND_VASSAL, null, null, null);
+        raid.terms.assignTerms(BOND_LORD, null, null, null);
         for (Actor a : barracks.workers()) raid.toggleRecruit(a, true);
         
         return raid;

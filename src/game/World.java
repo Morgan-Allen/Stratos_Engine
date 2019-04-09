@@ -226,6 +226,12 @@ public class World implements Session.Saveable {
   }
   
   
+  public void removeBase(Base base) {
+    base.area.removeBase(base);
+    this.bases.remove(base);
+  }
+  
+  
   public static Vec2D mapCoords(Base b) {
     return new Vec2D(b.area.type.mapX, b.area.type.mapY);
   }

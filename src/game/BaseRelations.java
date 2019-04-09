@@ -32,6 +32,7 @@ public class BaseRelations extends RelationSet {
     PRESTIGE_MAX        =  100,
     PRESTIGE_AVG        =  50,
     PRESTIGE_MIN        =  0,
+    MAX_FORCE_MULTIPLE  =  4,  // How strong forces get at max. prestige
     
     PRES_VICTORY_GAIN   =  25,
     PRES_DEFEAT_LOSS    = -15,

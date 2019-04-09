@@ -85,6 +85,11 @@ public class Area implements Session.Saveable {
   }
   
   
+  public void removeBase(Base base) {
+    bases.remove(base);
+  }
+  
+  
   public Series <Base> bases() {
     return bases;
   }

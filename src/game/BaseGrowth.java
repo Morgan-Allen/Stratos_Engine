@@ -139,9 +139,7 @@ public class BaseGrowth {
     
     float armyPower = 0;
     for (Building b : activeMap.buildings()) if (b.base() == base) {
-      if (b.type().category == Type.IS_ARMY_BLD) {
-        armyPower += MissionForStrike.powerSum(b.workers(), activeMap);
-      }
+      armyPower += MissionForStrike.powerSum(b.workers(), activeMap);
     }
     this.armyPower = armyPower;
     

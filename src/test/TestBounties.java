@@ -185,6 +185,7 @@ public class TestBounties extends LogicTest {
     map.update(1);
     
     Mission mission = setupMission(map, base);
+    mission.setHireMode(Mission.MODE_OPEN);
     mission.rewards.setAsBounty(reward);
     mission.beginMission();
     
@@ -199,6 +200,8 @@ public class TestBounties extends LogicTest {
       return false;
     }
     
+    
+    /*
     try {
       Session.saveSession("saves/test_save.tlt", map);
       Session session = Session.loadSession("saves/test_save.tlt", true);
@@ -213,6 +216,7 @@ public class TestBounties extends LogicTest {
       I.report(e);
       return false;
     }
+    //*/
     
     
     boolean fundsTaken     = false;

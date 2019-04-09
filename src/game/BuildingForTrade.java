@@ -98,15 +98,18 @@ public class BuildingForTrade extends Building implements Trader {
   
   
   private void updateDemandTypes() {
-    Batch <Good> needB = new Batch(), prodB = new Batch();
+    Batch <Good> tradeNeed = new Batch(), tradeProd = new Batch();
     for (Good g : map.world.goodTypes) {
       float need   = needLevel.valueFor(g);
       float accept = prodLevel.valueFor(g);
-      if (need   > 0) needB.add(g);
-      if (accept > 0) prodB.add(g);
+      if (need   > 0) tradeNeed.add(g);
+      if (accept > 0) tradeProd.add(g);
     }
-    needed   = needB.toArray(Good.class);
-    produced = prodB.toArray(Good.class);
+    //
+    //  NOTE:  What's 'needed' for trade is what's 'produced' locally, and what
+    //  is 'produced' for trade is what's 'needed' locally.
+    needed   = tradeProd.toArray(Good.class);
+    produced = tradeNeed.toArray(Good.class);
   }
   
   
@@ -196,6 +199,7 @@ public class BuildingForTrade extends Building implements Trader {
       Task coming = returnActorHere(actor);
       if (coming != null) return coming;
     }
+    
     else {
       Task delivery = TaskDelivery.pickNextDelivery(actor, this, 0, produced());
       if (delivery != null) return delivery;

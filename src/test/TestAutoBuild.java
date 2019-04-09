@@ -10,6 +10,8 @@ import util.*;
 
 
 
+//  TODO:  Consider restoring this later...
+/*
 public class TestAutoBuild extends LogicTest {
   
   
@@ -102,4 +104,5 @@ public class TestAutoBuild extends LogicTest {
   }
   
 }
+//*/
 

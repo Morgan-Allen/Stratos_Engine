@@ -25,11 +25,10 @@ public class TestHunting extends LogicTest {
     AreaMap map = base.activeMap();
     World world = map.world;
     
-    world.settings.toggleFatigue   = false;
-    world.settings.toggleHunger    = false;
-    world.settings.toggleMigrate   = false;
-    world.settings.toggleAutoBuild = false;
-    world.settings.toggleFog       = false;
+    world.settings.toggleFatigue = false;
+    world.settings.toggleHunger  = false;
+    world.settings.toggleMigrate = false;
+    world.settings.toggleFog     = false;
     
     Building lodge = (Building) KOMMANDO_REDOUBT.generate();
     lodge.enterMap(map, 4, 4, 1, base);

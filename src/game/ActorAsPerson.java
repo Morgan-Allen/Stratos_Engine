@@ -63,7 +63,6 @@ public class ActorAsPerson extends Actor {
     if (idle() && needRest > Rand.num() + 0.5f) {
       assignTask(TaskResting.nextResting(this, haven), this);
     }
-    
     //
     //  See if there's a missions worth joining.  Or, if you have an active
     //  mission, undertake the next associated task-
@@ -71,8 +70,13 @@ public class ActorAsPerson extends Actor {
       Pick <Mission> pick = new Pick(Task.ROUTINE * Rand.num());
       
       //  TODO:  Use a Choice for this?
+      
+      //  TODO:  Also, you need to have mission-priorities quite separate from
+      //  immediate task priorities (because boarding a ship might be one of
+      //  the steps, rather than immediate combat, say.)
+      
       for (Mission f : base().missions) {
-        if (! f.rewards.isBounty()) continue;
+        if (! f.canRecruit(this)) continue;
         Task t = f.selectActorBehaviour(this);
         float priority = t == null ? 0 : t.priority();
         pick.compare(f, priority * (0.5f + Rand.num()));
@@ -134,6 +138,7 @@ public class ActorAsPerson extends Actor {
   void updateReactions() {
     if (! map.world.settings.toggleReacts) return;
     
+    
     //  TODO:  Missions should be given a chance to provide reactions as well.
     
     Task reaction = task() == null ? null : task().reaction();
@@ -148,6 +153,9 @@ public class ActorAsPerson extends Actor {
     
     TaskRetreat retreat = TaskRetreat.configRetreat(this);
     if (ActorChoice.wouldSwitch(this, task(), retreat, false, false)) {
+      //this.updateFearLevel();
+      //Task task = task();
+      //if (task != null) task.priority();
       assignTask(retreat, this);
     }
     

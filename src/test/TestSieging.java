@@ -24,32 +24,36 @@ public class TestSieging extends LogicTest {
     LogicTest test = new TestSieging();
     
     World world = new World(ALL_GOODS);
-    Base  baseC = new Base(world, world.addArea(BASE), FACTION_SETTLERS_A);
-    Base  awayC = new Base(world, world.addArea(AWAY), FACTION_SETTLERS_B);
-    
-    AreaMap map = AreaTerrain.generateTerrain(
-      baseC, 32, 0, MEADOW, JUNGLE
-    );
-    baseC.setName("Home City");
-    awayC.setName("Away City");
     world.assignTypes(
       ALL_BUILDINGS, ALL_SHIPS(), ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES()
     );
+    
+    Base baseC = new Base(world, world.addArea(BASE), FACTION_SETTLERS_A);
+    Base awayC = new Base(world, world.addArea(AWAY), FACTION_SETTLERS_B);
+    baseC.setName("Home City");
+    awayC.setName("Away City");
     world.addBases(baseC, awayC);
+    
     world.setPlayerFaction(FACTION_SETTLERS_A);
-    
-    world.settings.toggleFog     = false;
-    world.settings.toggleFatigue = false;
-    world.settings.toggleHunger  = false;
-    
-    
     awayC.growth.initBuildLevels(TROOPER_LODGE, 9, HOLDING, 1);
+    awayC.federation().setExploreLevel(awayC.area, 1);
     awayC.federation().setTypeAI(Federation.AI_OFF);
+    baseC.federation().relations.initPrestige(BaseRelations.PRESTIGE_MAX);
     
     Federation.setPosture(
       baseC.faction(), awayC.faction(),
       RelationSet.BOND_ENEMY, world
     );
+
+    AreaMap map = AreaTerrain.generateTerrain(
+      baseC, 32, 0, MEADOW, JUNGLE
+    );
+    baseC.area.attachMap(map);
+    
+    world.settings.toggleFog     = false;
+    world.settings.toggleFatigue = false;
+    world.settings.toggleHunger  = false;
+    
     
     AreaPlanning.placeStructure(SHIELD_WALL, baseC, true, 4, 4, 20, 20);
     AreaPlanning.markDemolish(map, true, 6, 6, 16, 16);
@@ -160,6 +164,7 @@ public class TestSieging extends LogicTest {
         }
         if (numMoved >= MIN_DEFENDERS) {
           patrolDone = true;
+          awayC.federation().setExploreLevel(baseC.area, 1);
           awayC.federation().setTypeAI(Federation.AI_WARLIKE);
         }
       }
@@ -180,7 +185,7 @@ public class TestSieging extends LogicTest {
           }
         }
         if (siegeComing && enemy.objective != Mission.OBJECTIVE_STRIKE) {
-          I.say("\nEnemies should be here to conquer!");
+          I.say("\nEnemies should be here to conquer: "+enemy);
           break;
         }
       }
@@ -218,7 +223,7 @@ public class TestSieging extends LogicTest {
           }
         }
         
-        if (standing.size() > MIN_INVADERS && ! standWrong) {
+        if (standing.size() > MIN_DEFENDERS && ! standWrong) {
           standsOkay = true;
         }
         

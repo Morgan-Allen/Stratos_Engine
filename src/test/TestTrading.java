@@ -16,7 +16,7 @@ public class TestTrading extends LogicTest {
   
   
   public static void main(String args[]) {
-    testTrading(false);
+    testTrading(true);
   }
   
   
@@ -53,6 +53,8 @@ public class TestTrading extends LogicTest {
     
     AreaMap map = new AreaMap(world, baseC.area, baseC);
     map.performSetup(10, new Terrain[0]);
+    baseC.area.attachMap(map);
+    
     world.settings.toggleFog       = false;
     world.settings.toggleHunger    = false;
     world.settings.toggleFatigue   = false;
@@ -80,11 +82,11 @@ public class TestTrading extends LogicTest {
       PSALT     , 5
     );
     
-    Building kiln = (Building) ENGINEER_STATION.generate();
-    kiln.enterMap(map, 2, 2, 1, baseC);
+    Building makes1 = (Building) ENGINEER_STATION.generate();
+    makes1.enterMap(map, 2, 2, 1, baseC);
     
-    Building weaver = (Building) PHYSICIAN_STATION.generate();
-    weaver.enterMap(map, 6, 2, 1, baseC);
+    Building makes2 = (Building) PHYSICIAN_STATION.generate();
+    makes2.enterMap(map, 6, 2, 1, baseC);
     
     AreaPlanning.placeStructure(WALKWAY, baseC, true, 1, 5, 8, 1);
     
@@ -161,6 +163,7 @@ public class TestTrading extends LogicTest {
     I.say("\nTRADING TEST FAILED!");
     I.say("  Trade okay:  "+tradeOkay );
     I.say("  Supply okay: "+supplyOkay);
+    I.say("  Trade stop:  "+tradeStop );
     I.say("  Money okay:  "+moneyOkay );
     reportOnMap(baseC, awayC, false);
     return false;
@@ -176,8 +179,7 @@ public class TestTrading extends LogicTest {
     for (Good g : ALL_GOODS) {
       float sent = BaseTrading.goodsSent(cityA, cityB, g);
       float got  = BaseTrading.goodsSent(cityB, cityA, g);
-      float free = cityA.relations.suppliesDue(cityB, g);
-      //float free = BaseTrading.suppliesDue(cityB, cityA, g);
+      float free = cityB.relations.suppliesDue(cityA, g);
       if (sent == 0 && got == 0 && free == 0) continue;
       
       float priceSent = cityA.exportPrice(g, cityB);
@@ -211,9 +213,18 @@ public class TestTrading extends LogicTest {
       I.say("  Made "+g+": "+a.trading.totalMade(g));
       I.add("  Sent "+BaseTrading.goodsSent(a, b, g));
       I.add("  Got " +BaseTrading.goodsSent(b, a, g));
+      I.add("  Price: "+g.price);
     }
     I.say("  Current funds: "+a.funds());
     I.say("  Current time:  "+a.world.time());
   }
 
 }
+
+
+
+
+
+
+
+

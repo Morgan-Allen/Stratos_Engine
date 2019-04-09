@@ -25,6 +25,11 @@ public abstract class Mission implements
     OBJECTIVE_CONTACT = 4,
     OBJECTIVE_COLONY  = 5
   ;
+  final public static int
+    MODE_OPEN   =  0,
+    MODE_SCREEN =  1,
+    MODE_CLOSED =  2
+  ;
   final static String OBJECTIVE_NAMES[] = {
     "Standby", "Strike", "Secure", "Recon", "Contact", "Colonise"
   };
@@ -41,25 +46,27 @@ public abstract class Mission implements
   final public int objective;
   final Base homeBase;
   
+  int hireMode = MODE_CLOSED;
   float evalPriority = -1;
   float evalChance   = -1;
   float evalForce    = -1;
   boolean active = false;
   
-  //private Base worldFocus;
   private Object worldFocus;
   private Target localFocus;
+  
   private int stage = STAGE_INIT;
   boolean complete = false;
   boolean success  = false;
   boolean failure  = false;
   
   List <Actor> recruits = new List();
+  List <Actor> rejects  = new List();
+  List <Actor> captives = new List();
   List <Actor> envoys   = new List();
   final public MissionRewards rewards = new MissionRewards(this);
   final public MissionTerms   terms   = new MissionTerms  (this);
   
-  //Base localBase;
   Area localLocale;
   AreaTile transitTile;
   ActorAsVessel transport;
@@ -82,6 +89,7 @@ public abstract class Mission implements
     objective = s.loadInt();
     homeBase = (Base) s.loadObject();
     
+    hireMode     = s.loadInt();
     evalPriority = s.loadFloat();
     evalChance   = s.loadFloat();
     evalForce    = s.loadFloat();
@@ -96,7 +104,9 @@ public abstract class Mission implements
     failure  = s.loadBool();
     
     s.loadObjects(recruits);
-    s.loadObjects(envoys);
+    s.loadObjects(rejects );
+    s.loadObjects(captives);
+    s.loadObjects(envoys  );
     rewards.loadState(s);
     terms.loadState(s);
     
@@ -112,6 +122,7 @@ public abstract class Mission implements
     s.saveInt(objective);
     s.saveObject(homeBase);
     
+    s.saveInt  (hireMode    );
     s.saveFloat(evalPriority);
     s.saveFloat(evalChance  );
     s.saveFloat(evalForce   );
@@ -127,7 +138,9 @@ public abstract class Mission implements
     s.saveBool(failure);
     
     s.saveObjects(recruits);
-    s.saveObjects(envoys);
+    s.saveObjects(rejects );
+    s.saveObjects(captives);
+    s.saveObjects(envoys  );
     rewards.saveState(s);
     terms.saveState(s);
     
@@ -141,6 +154,29 @@ public abstract class Mission implements
   
   /**  Setting up recruits, envoys, transit and objectives (foci)-
     */
+  public void setHireMode(int mode) {
+    this.hireMode = mode;
+  }
+  
+  
+  public boolean canRecruit(Actor applies) {
+    if (! rewards.isBounty()) return false;
+    
+    if (hireMode == MODE_OPEN) {
+      return true;
+    }
+    if (hireMode == MODE_SCREEN) {
+      if (rejects.includes(applies)) return false;
+      if (active) return false;
+    }
+    if (hireMode == MODE_CLOSED) {
+      return false;
+    }
+    
+    return false;
+  }
+  
+  
   public void toggleRecruit(Actor a, boolean is) {
     this.recruits.toggleMember(a, is);
     a.setMission(is ? this : null);
@@ -189,8 +225,8 @@ public abstract class Mission implements
   
   public void beginMission(Area locale) {
     homeBase.missions.toggleMember(this, true);
-    this.stage      = STAGE_BEGUN;
-    this.active     = true;
+    this.stage       = STAGE_BEGUN;
+    this.active      = true;
     this.localLocale = locale;
     homeBase.world.events.recordEvent("Began mission", this);
   }
@@ -199,8 +235,12 @@ public abstract class Mission implements
   void update() {
     if (! active()) return;
     
-    this.transitPoint();
-    //I.say("");
+    if (hireMode == MODE_OPEN && worldFocus != null) {
+      I.complain("OFF-MAP MISSIONS MUST CONFIRM RECRUITS BEFORE STARTING!");
+      return;
+    }
+    
+    transitPoint();
     
     boolean valid     = recruits.size() > 0;
     boolean departing = valid && ! departed();
@@ -216,9 +256,20 @@ public abstract class Mission implements
     if (returning && recruitsAllHome()) {
       disbandMission();
     }
-    if (! valid) {
+    if (shouldDisband()) {
       disbandMission();
     }
+  }
+  
+  
+  boolean shouldDisband() {
+    if (hireMode == MODE_OPEN) {
+      return false;
+    }
+    if (hireMode == MODE_SCREEN || hireMode == MODE_CLOSED) {
+      return recruits.empty();
+    }
+    return false;
   }
   
   
@@ -334,6 +385,8 @@ public abstract class Mission implements
     
     Pathing exits = transitPoint();
     
+    //I.say("");
+    
     if (complete()) {
       if (exits != null && ! onHomeMap()) {
         if (exits == transport) {
@@ -404,9 +457,10 @@ public abstract class Mission implements
     */
   public boolean onWrongMap() {
     Area locale = worldFocusArea();
-    if (locale == null) return false;
-    if (locale.isOffmap()) return true;
-    return locale.activeMap() == localLocale.activeMap();
+    if (locale == null     ) return false;
+    if (locale.isOffmap()  ) return true;
+    if (localLocale == null) return true;
+    return locale.activeMap() != localLocale.activeMap();
   }
   
   

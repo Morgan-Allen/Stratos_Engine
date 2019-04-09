@@ -94,9 +94,7 @@ public class AreaFog {
   
   
   void updateFog() {
-    if (! isToggled()) {
-      return;
-    }
+    if (! isToggled()) return;
     
     int sumFog = 0;
     Federation fed = map.world.federation(base);

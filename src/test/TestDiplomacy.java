@@ -31,9 +31,11 @@ public class TestDiplomacy extends LogicTest {
     Base  awayC = new Base(world, world.addArea(AWAY), FACTION_SETTLERS_B);
     Base  neutC = new Base(world, world.addArea(NEUT), FACTION_SETTLERS_C);
     
-    AreaMap  map   = AreaTerrain.generateTerrain(
+    AreaMap map = AreaTerrain.generateTerrain(
       baseC, 32, 0, MEADOW, JUNGLE
     );
+    baseC.area.attachMap(map);
+    
     world.assignTypes(
       ALL_BUILDINGS, ALL_SHIPS(), ALL_CITIZENS(), ALL_SOLDIERS(), ALL_NOBLES()
     );
@@ -103,9 +105,7 @@ public class TestDiplomacy extends LogicTest {
     
     //
     //  Begin the mission from the foreign base-
-    
-    Mission escort;
-    escort = new MissionForContact(awayC);
+    Mission escort = new MissionForContact(awayC);
     
     for (int n = 4; n-- > 0;) {
       Actor s = (Actor) Trooper.TROOPER.generate();

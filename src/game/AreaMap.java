@@ -229,7 +229,8 @@ public class AreaMap implements Session.Saveable {
     planning .performSetup(size);
     pathCache.performSetup(size);
     
-    for (Base b : area.bases) {
+    //  Note:  Area might be null before loading.
+    if (area != null) for (Base b : area.bases) {
       fogMap   (b.faction(), true);
       dangerMap(b.faction(), true);
     }

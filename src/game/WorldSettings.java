@@ -33,7 +33,6 @@ public class WorldSettings {
     toggleBuilding    = true,
     toggleSalvage     = true,
     toggleBuildEvolve = true,
-    toggleAutoBuild   = true,
     
     toggleEasyMigrate = false,
     toggleEasyHunger  = false,

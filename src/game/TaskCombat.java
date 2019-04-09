@@ -62,7 +62,7 @@ public class TaskCombat extends Task {
     if (GA != null && GA == GB) return BOND_ALLY;
     if (GB != null && CA == GB) return BOND_ALLY;
     if (GA != null && GA == CB) return BOND_ALLY;
-    return CA.relations.bondProperties(CB);
+    return CA.posture(CB);
   }
   
   
@@ -75,24 +75,26 @@ public class TaskCombat extends Task {
   
   public static boolean allied(Target a, Target b) {
     //  TODO:  Replace?
-    return postureFor(a, b) == BOND_ALLY;
+    int p = postureFor(a, b);
+    return p == BOND_ALLY || p == BOND_VASSAL || p == BOND_LORD;
   }
   
   
   public static boolean hostile(Target a, Target b) {
     //  TODO:  Replace?
-    return postureFor(a, b) == BOND_ENEMY;
+    int p = postureFor(a, b);
+    return p == BOND_ENEMY;
   }
   
   
   public static float hostility(Target a, Target b) {
     int p = postureFor(a, b);
     switch(p) {
-      case BOND_ENEMY   : return 1;
-      case BOND_ALLY    : return -1;
-      case BOND_VASSAL  : return -0.5f;
-      case BOND_LORD    : return -1;
-      case BOND_NEUTRAL : return 0;
+      case BOND_ENEMY   : return  1.0f;
+      case BOND_ALLY    : return -1.0f;
+      case BOND_VASSAL  : return -1.0f;
+      case BOND_LORD    : return -1.0f;
+      case BOND_NEUTRAL : return  0.0f;
       case BOND_TRADING : return -0.5f;
     }
     return 0;
@@ -433,7 +435,6 @@ public class TaskCombat extends Task {
     Active actor, Element primary, boolean quick, boolean defends
   ) {
     if (beaten(primary) || primary.indoors()) return -1;
-    float targetPower = attackPower(primary);
     
     float priority = 0, empathy = 1, cruelty = 1;
     if (actor.mobile()) {
@@ -453,6 +454,8 @@ public class TaskCombat extends Task {
     if (priority <= 0) return -1;
     if (quick) return priority;
     
+    /*
+    float targetPower = attackPower(primary);
     float othersWinChance = 0;
     for (Active a : primary.focused()) if (a != actor) {
       if (a.jobType() == JOB.COMBAT && allied(a, actor)) {
@@ -463,6 +466,8 @@ public class TaskCombat extends Task {
     if (othersWinChance > 0 && othersWinChance < 1) {
       priority += (1 - othersWinChance) * PARAMOUNT * empathy;
     }
+    //*/
+    
     priority += CASUAL * cruelty;
     
     if (priority <= 0) return -1;
@@ -476,32 +481,34 @@ public class TaskCombat extends Task {
   
   
   static float attackChance(Actor actor, Element primary) {
-    float power = attackPower(actor);
-    float fear  = actor.fearLevel();
-    Series <Active> backup = actor.backup();
-    
-    AreaDanger dangerMap = actor.map().dangerMap(actor);
+    //
+    //  Firstly, compute fear-levels in the immediate vicinity.
+    float selfPower  = attackPower(actor);
+    float otherPower = attackPower(primary);
+    float localFear  = actor.fearLevel();
+    //
+    //  Then, compute an estimate of what you might expect fear-levels to be
+    //  at the target point, based on general danger in the area and any backup
+    //  you can rely on.
+    Mission mission = actor.mission();
     AreaTile around = actor.at();
+    AreaDanger dangerMap = actor.map().dangerMap(actor);
     
-    float danger = dangerMap.fuzzyLevel(around.x, around.y);
-    danger = Nums.max(danger, attackPower(primary));
-    
-    for (Active a : backup) if (a != actor) {
-      float backPower = attackPower((Element) a);
-      if (a.jobType() == JOB.COMBAT) {
-        backPower *= AreaMap.distance(mainTaskFocus((Element) a), primary);
-      }
-      else {
-        backPower /= 2;
-      }
-      backPower *= AreaMap.distancePenalty(actor, a);
-      power += backPower;
+    float backupPower = 0;
+    if (mission != null && mission.localFocus() == primary) {
+      backupPower += MissionForStrike.powerSum(mission);
     }
+    backupPower = Nums.max(backupPower, selfPower);
     
-    float chance = power / (danger + power);
-    chance = (chance + 1 - fear) / 2;
-    
-    return chance;
+    float farDanger = dangerMap.fuzzyLevel(around.x, around.y);
+    farDanger = Nums.max(farDanger, otherPower);
+    float farFear = farDanger / (farDanger + backupPower);
+    //
+    //  Then blend the two estimates depending on how close the primary target
+    //  is-
+    float proximity = AreaMap.distancePenalty(actor, primary);
+    float fearAvg = (localFear * proximity) + (farFear * (1 - proximity));
+    return Nums.clamp(1 - fearAvg, 0, 1);
   }
   
   
@@ -522,6 +529,7 @@ public class TaskCombat extends Task {
   
   
   public boolean emergency() {
+    //  TODO:  This should only be true if the target is currently visible.  
     return true;
   }
   
@@ -543,8 +551,8 @@ public class TaskCombat extends Task {
   
   
   void toggleFocus(boolean activeNow) {
-    target .setFocused(active, activeNow);
-    primary.setFocused(active, activeNow);
+    if (target  != null) target .setFocused(active, activeNow);
+    if (primary != null) primary.setFocused(active, activeNow);
   }
   
   

@@ -345,9 +345,6 @@ public class TaskTrading extends Task {
     boolean tributeDue = fromB.isLoyalVassalOf(goesB);
     boolean fromFlex   = flexibleGoods(from, tradeFrom, tradeGoes);
     
-    //  TODO:  Yeah, it's not clear how this is supposed to work.
-    //Relation relation  = fromB.relations.relationWith(goesB);
-    
     Tally <Good> stock = from.inventory();
     float totalGets = 0, totalPays = 0;
     

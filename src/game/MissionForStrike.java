@@ -184,8 +184,10 @@ public class MissionForStrike extends Mission {
     
     if (focus instanceof Element) {
       Element e = (Element) focus;
+      Base baseAttacked = worldFocusBase();
+      
       if (TaskCombat.beaten(e)) return null;
-      if (! homeBase().isEnemyOf(e.base())) return null;
+      if (e.base() != baseAttacked) return null;
       
       if (e.type().isActor()) {
         if (TaskCombat.attackPower((Actor) e) <= 0) return null;
@@ -217,7 +219,7 @@ public class MissionForStrike extends Mission {
   Object updateTacticalTarget(Target current) {
     //
     //  Basic sanity checks first-
-    AreaMap    map    = localMap();
+    AreaMap map    = localMap();
     Pathing from   = transitTile();
     Base    sieges = (Base) worldFocus();
     if (sieges == null || from == null || map == null) return null;

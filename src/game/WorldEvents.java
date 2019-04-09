@@ -71,9 +71,7 @@ public class WorldEvents {
       return;
     }
     
-    
     //  TODO:  Just have the Federations themselves handle this...?
-    
     AreaMap activeMap = world.activeBaseMap();
     
     for (Federation federation : world.federations()) {
@@ -84,6 +82,12 @@ public class WorldEvents {
     for (Federation federation : world.federations()) {
       MissionAIUtils.generateLocalTrouble(federation, activeMap, true);
       MissionAIUtils.generateOffmapTrouble(federation, world, true);
+    }
+    
+    if (activeMap != null) {
+      for (Base base : activeMap.area.bases()) {
+        MissionAIUtils.generateLocalBaseTrouble(base, true);
+      }
     }
   }
   
