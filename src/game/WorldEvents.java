@@ -5,8 +5,6 @@ import util.*;
 
 
 
-//  TODO:  Move the event-history in here!
-
 public class WorldEvents {
   
   
@@ -42,8 +40,8 @@ public class WorldEvents {
 
     for (int n = s.loadInt(); n-- > 0;) {
       Event e = new Event();
-      e.time     = s.loadInt();
       e.label    = s.loadString();
+      e.time     = s.loadInt();
       e.involved = s.loadObjectArray(Object.class);
       history.add(e);
     }

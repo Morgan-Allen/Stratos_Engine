@@ -200,24 +200,7 @@ public class TestBounties extends LogicTest {
       return false;
     }
     
-    
-    /*
-    try {
-      Session.saveSession("saves/test_save.tlt", map);
-      Session session = Session.loadSession("saves/test_save.tlt", true);
-      AreaMap loaded = (AreaMap) session.loaded()[0];
-      
-      Mission m = loaded.world.baseNamed("Client Base").missions().first();
-      if (m.localFocus() == null) I.say("LOADED MISSION HAS NO FOCUS!");
-      
-      I.say("\nSuccessfully loaded map: "+loaded);
-    }
-    catch(Exception e) {
-      I.report(e);
-      return false;
-    }
-    //*/
-    
+    TestSession.testSession(map);
     
     boolean fundsTaken     = false;
     boolean missionTaken   = false;

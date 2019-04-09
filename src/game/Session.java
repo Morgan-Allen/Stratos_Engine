@@ -27,7 +27,8 @@ public final class Session {
   
   public static boolean
     verbose    = false,
-    saveCounts = false;
+    saveCounts = false,
+    checkType  = false;
   
   final static int
     CLASS_CAPACITY  = 200,
@@ -226,156 +227,6 @@ public final class Session {
   
   
   
-  /**  Saving and Loading series of objects-
-    */
-  public void saveObjects(Series objects) throws Exception {
-    if (objects == null) { saveInt(-1); return; }
-    saveInt(objects.size());
-    for (Object o : objects) saveObject((Saveable) o);
-  }
-  
-  
-  public void saveObjects(Saveable... objects) throws Exception {
-    for (Saveable o : objects) saveObject(o);
-  }
-  
-  
-  public Series loadObjects(Series objects) throws Exception {
-    final int count = loadInt();
-    if (count == -1) return null;
-    for (int n = count; n-- > 0;) objects.add(loadObject());
-    return objects;
-  }
-  
-  
-  public void saveObjectArray(Object objects[]) throws Exception {
-    if (objects == null) { saveInt(-1); return; }
-    saveInt(objects.length);
-    for (Object o : objects) saveObject((Saveable) o);
-  }
-  
-  
-  public Object[] loadObjectArray(Class typeClass) throws Exception {
-    final int count = loadInt();
-    if (count == -1) return null;
-    final Object objects[] = (Object[]) Array.newInstance(typeClass, count);
-    for (int n = 0; n < count; n++) objects[n] = loadObject();
-    return objects;
-  }
-  
-  
-  public void saveTally(Tally t) throws Exception {
-    saveInt(t.size());
-    for (Object o : t.keys()) {
-      saveObject((Saveable) o);
-      saveFloat(t.valueFor(o));
-    }
-  }
-  
-  
-  public Tally loadTally(Tally t) throws Exception {
-    for (int n = loadInt(); n-- > 0;) {
-      final Object o = loadObject();
-      final float val = loadFloat();
-      t.set(o, val);
-    }
-    return t;
-  }
-  
-  
-  public void saveTable(Table t) throws Exception {
-    saveInt(t.size());
-    for (Object o : t.entrySet()) {
-      java.util.Map.Entry entry = (java.util.Map.Entry) o;
-      saveObject(entry.getKey  ());
-      saveObject(entry.getValue());
-    }
-  }
-  
-  
-  public Table loadTable(Table t) throws Exception {
-    for (int n = loadInt(); n-- > 0;) {
-      final Object key = loadObject();
-      final Object val = loadObject();
-      t.put(key, val);
-    }
-    return t;
-  }
-  
-  
-  
-  /**  Utility methods for handling enums and common table keys-
-    */
-  public void saveEnum(Enum e) throws Exception {
-    if (e == null) saveInt(-1);
-    else saveInt(e.ordinal());
-  }
-  
-  
-  public Enum loadEnum(Enum from[]) throws Exception {
-    final int ID = loadInt();
-    return (ID == -1) ? null : from[ID];
-  }
-  
-  
-  public void saveEnums(Series enums) throws Exception {
-    if (enums == null) {saveInt(-1); return; }
-    saveInt(enums.size());
-    for (Object o : enums) saveEnum((Enum) o);
-  }
-  
-  
-  public Series loadEnums(Series enums, Enum from[]) throws Exception {
-    final int numE = loadInt();
-    if (numE == -1) return null;
-    for (int i = numE; i-- > 0;) enums.add(loadEnum(from));
-    return enums;
-  }
-  
-  
-  public void saveKey(Object key) throws Exception {
-    if (key instanceof Class) {
-      saveInt(0);
-      saveClass((Class) key);
-    }
-    else if (key instanceof String) {
-      saveInt(1);
-      saveString((String) key);
-    }
-    else if (key instanceof Saveable) {
-      saveInt(2);
-      saveObject((Session.Saveable) key);
-    }
-    else I.complain("KEYS MUST BE CLASSES, STRINGS, OR SAVEABLE!");
-  }
-  
-  
-  public Object loadkey() throws Exception {
-    final Object key;
-    final int keyType = loadInt();
-    
-    if (keyType == 0) {
-      key = loadClass();
-    }
-    else if (keyType == 1) {
-      key = loadString();
-    }
-    else {
-      key = loadObject();
-    }
-    return key;
-  }
-  
-  
-  public static boolean isValidKey(Object o) {
-    if (o instanceof Class) return true;
-    if (o instanceof String) return true;
-    if (o instanceof Saveable) return true;
-    return false;
-  }
-  
-  
-  
   /**  Saving and Loading of classes themselves-
     */
   public void saveClass(Class c) throws Exception {
@@ -420,6 +271,8 @@ public final class Session {
   
   
   public void saveObject(Object o) throws Exception {
+    writeType(TYPE_OBJECT);
+    
     if (! (o instanceof Saveable)) {
       if (o != null) {
         I.say("\nWARNING: OBJECT NOT SAVEABLE: "+o);
@@ -481,6 +334,8 @@ public final class Session {
   
   
   public Saveable loadObject() throws Exception {
+    checkType(TYPE_OBJECT);
+    
     //I.say("Loading object...");
     final int loadID = in.readInt();
     if (loadID == -1) return null;
@@ -504,7 +359,7 @@ public final class Session {
     //  Saveable is being referred to before it can be cached, indicating a
     //  self-referential loop condition.
     loadIDs.put(lastObjectID = loadID, MARK_LOCK);
-    final Object loadMethod = loadMethod(loadInt());
+    final Object loadMethod = loadMethod(in.readInt());
     Class loadClass = null;
     final int initBytes = bytesIn;
     try {
@@ -556,6 +411,58 @@ public final class Session {
     *  data, and permit direct access to the data input/output streams if
     *  required.
     */
+  final static int
+    //
+    //  Primitive types first-
+    TYPE_BYTEA1 = 0,
+    TYPE_BYTEA2 = 1,
+    TYPE_FLOATA = 2,
+    TYPE_FLOAT  = 3,
+    TYPE_INT    = 4,
+    TYPE_BOOL   = 5,
+    TYPE_STRING = 6,
+    //
+    //  Then saveable objects-
+    TYPE_OBJECT  = 7,
+    TYPE_OBJECTS = 8,
+    TYPE_OBJECTA = 9,
+    TYPE_TALLY   = 10,
+    TYPE_TABLE   = 11,
+    TYPE_ENUM    = 12,
+    TYPE_ENUMS   = 13,
+    TYPE_KEY     = 14
+  ;
+  final static String TYPE_DESC[] = {
+    "1D Byte Array", "2D Byte Array", "Float Array",
+    "Float", "Int", "Bool", "String",
+    "Object", "Object Series", "Object Array",
+    "Tally", "Table", "Enum", "Enum Series", "Key"
+  };
+  
+  private void checkType(int type) throws Exception {
+    if (! checkType) return;
+    
+    int read = in.readInt();
+    if (read != type) {
+      String readDesc = ""+read;
+      if (read == Nums.clamp(read, TYPE_DESC.length)) {
+        readDesc = TYPE_DESC[read];
+      }
+      I.complain("EXPECTED TO READ: "+TYPE_DESC[type]+", FOUND: "+readDesc);
+    }
+    else {
+      //I.say("READING "+TYPE_DESC[type]);
+    }
+  }
+  
+  private void writeType(int type) throws Exception {
+    if (! checkType) return;
+    
+    out.writeInt(type);
+    //I.say("WRITING "+TYPE_DESC[type]);
+  }
+  
+  
   public DataOutputStream output() { return out; }
   public DataInputStream  input () { return in ; }
   
@@ -565,28 +472,33 @@ public final class Session {
   
   
   public void loadByteArray(byte array[]) throws Exception {
+    checkType(TYPE_BYTEA1);
     bytesIn += array.length;
     in.read(array);
   }
   
   
   public void saveByteArray(byte array[]) throws Exception {
+    writeType(TYPE_BYTEA1);
     out.write(array);
     bytesOut += array.length;
   }
   
   
   public void loadByteArray(byte array[][]) throws Exception {
+    checkType(TYPE_BYTEA2);
     for (byte a[] : array) loadByteArray(a);
   }
   
   
   public void saveByteArray(byte array[][]) throws Exception {
+    writeType(TYPE_BYTEA2);
     for (byte a[] : array) saveByteArray(a);
   }
   
   
   public float[] loadFloatArray(float array[]) throws Exception {
+    checkType(TYPE_FLOATA);
     final int s = loadInt();
     if (s == -1) return null;
     if (array == null || array.length != s) array = new float[s];
@@ -596,6 +508,7 @@ public final class Session {
   
   
   public void saveFloatArray(float array[]) throws Exception {
+    writeType(TYPE_FLOATA);
     if (array == null) { saveInt(-1); return; }
     saveInt(array.length);
     for (float f : array) saveFloat(f);
@@ -603,42 +516,49 @@ public final class Session {
   
   
   public float loadFloat() throws Exception {
+    checkType(TYPE_FLOAT);
     bytesIn += 4;
     return in.readFloat();
   }
   
   
   public void saveFloat(float f) throws Exception {
+    writeType(TYPE_FLOAT);
     out.writeFloat(f);
     bytesOut += 4;
   }
   
   
   public int loadInt() throws Exception {
+    checkType(TYPE_INT);
     bytesIn += 4;
     return in.readInt();
   }
   
 
   public void saveInt(int i) throws Exception {
+    writeType(TYPE_INT);
     out.writeInt(i);
     bytesOut += 4;
   }
   
   
   public boolean loadBool() throws Exception {
+    checkType(TYPE_BOOL);
     bytesIn += 1;
     return in.readBoolean();
   }
   
   
   public void saveBool(boolean b) throws Exception {
+    writeType(TYPE_BOOL);
     out.writeBoolean(b);
     bytesOut += 1;
   }
   
   
   public String loadString() throws Exception {
+    checkType(TYPE_STRING);
     final int len = in.readInt();
     if (len == -1) return null;
     final byte chars[] = new byte[len];
@@ -649,14 +569,173 @@ public final class Session {
   
   
   public void saveString(String s) throws Exception {
+    writeType(TYPE_STRING);
     if (s == null) { out.writeInt(-1); return; }
     final byte chars[] = s.getBytes();
     out.writeInt(chars.length);
     out.write(chars);
     bytesOut += chars.length + 4;
   }
+  
+  
+  
+  /**  Saving and Loading series of objects-
+    */
+  public void saveObjects(Series objects) throws Exception {
+    writeType(TYPE_OBJECTS);
+    if (objects == null) { saveInt(-1); return; }
+    saveInt(objects.size());
+    for (Object o : objects) saveObject((Saveable) o);
+  }
+  
+  
+  public Series loadObjects(Series objects) throws Exception {
+    checkType(TYPE_OBJECTS);
+    final int count = loadInt();
+    if (count == -1) return null;
+    for (int n = count; n-- > 0;) objects.add(loadObject());
+    return objects;
+  }
+  
+  
+  public void saveObjectArray(Object objects[]) throws Exception {
+    writeType(TYPE_OBJECTA);
+    if (objects == null) { saveInt(-1); return; }
+    saveInt(objects.length);
+    for (Object o : objects) saveObject((Saveable) o);
+  }
+  
+  
+  public Object[] loadObjectArray(Class typeClass) throws Exception {
+    checkType(TYPE_OBJECTA);
+    final int count = loadInt();
+    if (count == -1) return null;
+    final Object objects[] = (Object[]) Array.newInstance(typeClass, count);
+    for (int n = 0; n < count; n++) objects[n] = loadObject();
+    return objects;
+  }
+  
+  
+  public void saveTally(Tally t) throws Exception {
+    writeType(TYPE_TALLY);
+    saveInt(t.size());
+    for (Object o : t.keys()) {
+      saveObject((Saveable) o);
+      saveFloat(t.valueFor(o));
+    }
+  }
+  
+  
+  public Tally loadTally(Tally t) throws Exception {
+    checkType(TYPE_TALLY);
+    for (int n = loadInt(); n-- > 0;) {
+      final Object o = loadObject();
+      final float val = loadFloat();
+      t.set(o, val);
+    }
+    return t;
+  }
+  
+  
+  public void saveTable(Table t) throws Exception {
+    writeType(TYPE_TABLE);
+    saveInt(t.size());
+    for (Object o : t.entrySet()) {
+      java.util.Map.Entry entry = (java.util.Map.Entry) o;
+      saveObject(entry.getKey  ());
+      saveObject(entry.getValue());
+    }
+  }
+  
+  
+  public Table loadTable(Table t) throws Exception {
+    checkType(TYPE_TABLE);
+    for (int n = loadInt(); n-- > 0;) {
+      final Object key = loadObject();
+      final Object val = loadObject();
+      t.put(key, val);
+    }
+    return t;
+  }
+  
+  
+  
+  /**  Utility methods for handling enums and common table keys-
+    */
+  public void saveEnum(Enum e) throws Exception {
+    writeType(TYPE_ENUM);
+    if (e == null) saveInt(-1);
+    else saveInt(e.ordinal());
+  }
+  
+  
+  public Enum loadEnum(Enum from[]) throws Exception {
+    checkType(TYPE_ENUM);
+    final int ID = loadInt();
+    return (ID == -1) ? null : from[ID];
+  }
+  
+  
+  public void saveEnums(Series enums) throws Exception {
+    writeType(TYPE_ENUMS);
+    if (enums == null) {saveInt(-1); return; }
+    saveInt(enums.size());
+    for (Object o : enums) saveEnum((Enum) o);
+  }
+  
+  
+  public Series loadEnums(Series enums, Enum from[]) throws Exception {
+    checkType(TYPE_ENUMS);
+    final int numE = loadInt();
+    if (numE == -1) return null;
+    for (int i = numE; i-- > 0;) enums.add(loadEnum(from));
+    return enums;
+  }
+  
+  
+  public void saveKey(Object key) throws Exception {
+    writeType(TYPE_KEY);
+    if (key instanceof Class) {
+      saveInt(0);
+      saveClass((Class) key);
+    }
+    else if (key instanceof String) {
+      saveInt(1);
+      saveString((String) key);
+    }
+    else if (key instanceof Saveable) {
+      saveInt(2);
+      saveObject((Session.Saveable) key);
+    }
+    else I.complain("KEYS MUST BE CLASSES, STRINGS, OR SAVEABLE!");
+  }
+  
+  
+  public Object loadkey() throws Exception {
+    checkType(TYPE_KEY);
+    final Object key;
+    final int keyType = loadInt();
+    
+    if (keyType == 0) {
+      key = loadClass();
+    }
+    else if (keyType == 1) {
+      key = loadString();
+    }
+    else {
+      key = loadObject();
+    }
+    return key;
+  }
+  
+  
+  public static boolean isValidKey(Object o) {
+    if (o instanceof Class) return true;
+    if (o instanceof String) return true;
+    if (o instanceof Saveable) return true;
+    return false;
+  }
+  
 }
-
-
 
 
