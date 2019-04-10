@@ -2,7 +2,6 @@
 
 package test;
 import game.*;
-import game.Task.JOB;
 import util.*;
 import static content.GameContent.*;
 import static content.GameWorld.*;
@@ -24,10 +23,10 @@ public class TestBounties extends LogicTest {
   //  TODO:
   //  What are the cases I need to cover here?
   
-  //  Defend  bounty on actor.
-  //  Explore bounty on actor.
   //  Contact bounty on actor.
   //  Contact bounty on building.
+  //  Defend  bounty on actor.
+  //  Explore bounty on actor.
   
   
   
@@ -135,7 +134,7 @@ public class TestBounties extends LogicTest {
       }
       
       void onMapUpdate(AreaMap map, Base base) {
-        if (threat.jobType() != JOB.COMBAT) {
+        if (threat.jobType() != Task.JOB.COMBAT) {
           TaskCombat siege = TaskCombat.configCombat(threat, guarded);
           threat.assignTask(siege, threat);
         }
@@ -145,14 +144,14 @@ public class TestBounties extends LogicTest {
         if (TaskCombat.killed((Building) focus)) return false;
         
         if (! triedAttack) {
-          if (threat.jobType() == JOB.COMBAT) {
+          if (threat.jobType() == Task.JOB.COMBAT) {
             TaskCombat task = (TaskCombat) threat.task();
             if (task.primary == guarded) triedAttack = true;
           }
         }
         
         if (! didRespond) for (Actor a : mission.recruits()) {
-          if (a.jobType() == JOB.COMBAT) {
+          if (a.jobType() == Task.JOB.COMBAT) {
             TaskCombat task = (TaskCombat) a.task();
             if (task.primary == threat) didRespond = true;
           }
@@ -181,18 +180,17 @@ public class TestBounties extends LogicTest {
     
     float initActorFunds = 0;
     for (Actor a : fort.workers()) initActorFunds += a.outfit.carried(CASH);
-
-    map.update(1);
     
     Mission mission = setupMission(map, base);
     mission.setHireMode(Mission.MODE_OPEN);
     mission.rewards.setAsBounty(reward);
     mission.beginMission();
+
+    map.update(1);
     
     Target focus = mission.localFocus();
     Actor sample = fort.workers().first();
     Task given = mission.selectActorBehaviour(sample);
-    
     
     if (given == null) {
       I.say("\n"+title+" TEST FAILED!");

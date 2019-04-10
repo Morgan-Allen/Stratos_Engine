@@ -9,7 +9,7 @@ import util.*;
 
 
 
-//  TODO:  Include effects of fog...
+//  TODO:  Include effects of fog?
 
 //  And you have to hook this up to the flagging-maps.  That will
 //  let you ensure that only accessible sources are visited, on a
@@ -67,12 +67,10 @@ public class TestPathCache extends LogicTest {
     if (zone == null) {
       I.say("\nArea was not generated!");
       allOkay = false;
-      if (! graphics) return false;
     }
     if (zone.numTiles() != numT) {
       I.say("\nArea has "+zone.numTiles()+" tiles, expected "+numT);
       allOkay = false;
-      if (! graphics) return false;
     }
     for (int i = 0; i < coords.length;) {
       AreaTile t = miniMap.tileAt(coords[i++], coords[i++]);
@@ -80,7 +78,6 @@ public class TestPathCache extends LogicTest {
         I.say("\nExpected zone to include "+t);
         I.say("  Tiles were: "+I.list(zone.tiles()));
         allOkay = false;
-        if (! graphics) return false;
       }
     }
     //
@@ -88,42 +85,47 @@ public class TestPathCache extends LogicTest {
     //  accurately reflect ability to path between points:
     if (! verifyConnectionQueries(miniMap)) {
       allOkay = false;
-      if (! graphics) return false;
     }
     //
     //  Connect a few old zones and partition others:
     byte newLayout[][] = {
-      { 0, 1, 0, 0, 1, 1, 0, 1 },
-      { 1, 1, 0, 0, 1, 1, 0, 1 },
-      { 1, 1, 1, 1, 1, 1, 0, 1 },
-      { 0, 0, 0, 0, 0, 0, 0, 1 },
-      { 0, 0, 0, 1, 1, 1, 0, 1 },
+      { 1, 0, 0, 1, 1, 0, 0, 0 },
+      { 0, 0, 0, 1, 1, 0, 0, 0 },
       { 1, 1, 0, 1, 1, 1, 1, 1 },
-      { 1, 1, 0, 0, 1, 1, 1, 1 },
-      { 1, 1, 0, 1, 1, 1, 1, 1 },
+      { 1, 1, 0, 1, 0, 0, 1, 0 },
+      { 0, 0, 0, 1, 0, 0, 0, 0 },
+      { 0, 0, 0, 1, 0, 0, 0, 0 },
+      { 1, 1, 1, 1, 1, 0, 0, 0 },
+      { 0, 0, 0, 0, 0, 0, 0, 0 },
     };
     for (Coord c : Visit.grid(0, 0, miniSize, miniSize, 1)) {
-      byte l = newLayout[c.x][c.y];
+      byte l = newLayout[miniSize - (c.y + 1)][c.x];
       AreaTile t = miniMap.tileAt(c);
       miniMap.setTerrain(t, l == 0 ? LAKE : MEADOW, (byte) 0, 0);
     }
     miniMap.pathCache.updatePathCache();
     if (! verifyConnectionQueries(miniMap)) {
       allOkay = false;
-      if (! graphics) return false;
     }
-    //
-    //  And finally, try modifying the map at random to see if the
-    //  queries hold:
+    
     for (AreaTile t : miniMap.allTiles()) {
       if (Rand.yes()) {
         miniMap.setTerrain(t, miniMap.blocked(t) ? MEADOW : LAKE, (byte) 0, 0);
       }
     }
+    
     miniMap.pathCache.updatePathCache();
     if (! verifyConnectionQueries(miniMap)) {
       allOkay = false;
-      if (! graphics) return false;
+
+      I.say("\nLayout is:");
+      for (int y = miniSize; y-- > 0;) {
+        I.say("  ");
+        for (int x = 0; x < miniSize; x++) {
+          boolean b = miniMap.blocked(x, y);
+          I.add((b ? 0 : 1)+" ");
+        }
+      }
     }
     
     //
@@ -170,14 +172,12 @@ public class TestPathCache extends LogicTest {
         }
       }
       allOkay = false;
-      if (! graphics) return false;
     }
     
     boolean islandLinked = map.pathCache.pathConnects(land1, island0);
     if (islandLinked) {
       I.say("\nSeparated regions should not be linked!");
       allOkay = false;
-      if (! graphics) return false;
     }
     
     AreaPlanning.placeStructure(SHIELD_WALL, base, true, 88, 20, 48, 8);
@@ -186,7 +186,6 @@ public class TestPathCache extends LogicTest {
     if (landLinked) {
       I.say("\nWall should have partitioned mainland!");
       allOkay = false;
-      if (! graphics) return false;
     }
     
     AreaPlanning.placeStructure(WALKWAY, base, true, 20, 24, 8, 48);
@@ -195,7 +194,6 @@ public class TestPathCache extends LogicTest {
     if (! islandLinked) {
       I.say("\nRoad should have connected island to mainland!");
       allOkay = false;
-      if (! graphics) return false;
     }
     
     AreaPlanning.markDemolish(map, true, 120, 20, 2, 8);
@@ -207,14 +205,12 @@ public class TestPathCache extends LogicTest {
     if (! landLinked) {
       I.say("\nGate should have bridged partition!");
       allOkay = false;
-      if (! graphics) return false;
     }
     
     landLinked = map.pathCache.openPathConnects(land1, land2);
     if (landLinked) {
       I.say("\nGate should not allow open path!");
       allOkay = false;
-      if (! graphics) return false;
     }
     
     Building tower = (Building) TURRET.generate();
@@ -228,7 +224,6 @@ public class TestPathCache extends LogicTest {
     if (! landLinked) {
       I.say("\nTower should have allowed pathing onto wall!");
       allOkay = false;
-      if (! graphics) return false;
     }
     
     tower.exitMap(map);
@@ -237,14 +232,12 @@ public class TestPathCache extends LogicTest {
     if (landLinked) {
       I.say("\nTower's demolition should have destroyed path!");
       allOkay = false;
-      if (! graphics) return false;
     }
     
     for (AreaTile t : map.allTiles()) {
       if (map.pathCache.rawZone(t) == null && ! map.blocked(t)) {
         I.say("\nUnblocked tile has no zone: "+t);
         allOkay = false;
-        if (! graphics) return false;
       }
     }
     
@@ -258,7 +251,6 @@ public class TestPathCache extends LogicTest {
       if (from == null || goes == null || from == goes) continue;
       if (! verifyConnection(from, goes, map)) {
         allOkay = false;
-        if (! graphics) return false;
       }
     }
     
@@ -267,14 +259,26 @@ public class TestPathCache extends LogicTest {
     }
     else {
       I.say("\nPATH_CACHE TESTS FAILED!");
+      if (! graphics) return false;
     }
     
     if (graphics) world.settings.paused = true;
     while (map.time() < 10 || graphics) {
       test.runLoop(base, 1, graphics, "saves/test_path_cache.tlt");
+      test.querySandbox(map);
     }
     
     return allOkay;
+  }
+  
+  
+  void querySandbox(AreaMap map) {
+    
+    //AreaTile a = map.tileAt(0, 6), b = map.tileAt(2, 6);
+    
+    //verifyConnection(a, b, map);
+    
+    return;
   }
   
   
@@ -319,6 +323,10 @@ public class TestPathCache extends LogicTest {
   }
   
 }
+
+
+
+
 
 
 

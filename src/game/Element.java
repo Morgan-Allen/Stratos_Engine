@@ -362,7 +362,15 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   
   public Vec3D exactPosition(Vec3D store) {
     if (at == null) return null;
-    return at.exactPosition(store);
+    if (type.wide > 1 || type.high > 1) {
+      store = at.exactPosition(store);
+      store.x += (type.wide - 1) / 2f;
+      store.y += (type.high = 1) / 2f;
+      return store;
+    }
+    else {
+      return at.exactPosition(store);
+    }
   }
   
   

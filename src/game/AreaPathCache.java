@@ -264,29 +264,46 @@ public class AreaPathCache {
   void checkPathingChanged(AreaTile at) {
     
     //  First, make sure there's some change to merit an update:
-    Zone core = zoneLookup[at.x][at.y];
+    Zone coreZ = zoneLookup[at.x][at.y];
     boolean blocked = map.blocked(at.x, at.y);
     //if (blocked == (core == null)) return;
     
     //  Then set up some tracking variables-
     final int aX = at.x / AREA_SIZE;
     final int aY = at.y / AREA_SIZE;
-    Zone tail = null, head = null, edge = core;
+    Zone nearZ = null, initZ = null, lastZ = null, edgeZ = coreZ;
     int numGaps = 0, gapFlag = -1;
     boolean multiArea = false, didRefresh = false;
+    
     
     //  The plan is to circle this tile, checking how many zones it
     //  impinges on and whether there are multiple 'gaps' in zone-
     //  adjacency- the latter might indicate a bottleneck in pathing
     //  that could potentially require a more comprehensive update (see
     //  below.)
-    for (Pathing p : at.adjacent(temp, map)) {
+    
+    //  NOTE:  The detection of bottlenecks requires iterating over a less
+    //  'filtered' set of neighbours for tiles that are being deleted.  Also,
+    //  the 9th entry in the buffer refers to the centre-tile itself, so we
+    //  only iterate over the first 8.
+    
+    //  TODO:  Might be a problem here for tiles that aren't blocked but do
+    //  change adjacency (i.e, towers/gates/walls.)
+    
+    Pathing adjacent[];
+    if (blocked) adjacent = at.rawAdjacent(temp, map);
+    else adjacent = at.adjacent(temp, map);
+    
+    for (int i = 0; i < 8; i++) {
+      Pathing p = adjacent[i];
 
       //  Note:  In the case that this tile is/was an entrance to a
-      //  building with other exists, we have to treat it as a potential
+      //  building with other exits, we have to treat it as a potential
       //  'border' to another zone:
       AreaTile n;
-      if (p == null) n = null;
+      if (p == null) {
+        n = null;
+      }
       else if (p.isTile()) {
         n = (AreaTile) p;
       }
@@ -299,78 +316,79 @@ public class AreaPathCache {
         n = null;
       }
       
-      tail = n == null ? null : zoneLookup[n.x][n.y];
+      nearZ = n == null ? null : zoneLookup[n.x][n.y];
       
       //  We don't merge with zones outside a given 16x16 unit:
-      if (tail != null && (tail.aX != aX || tail.aY != aY)) {
+      if (nearZ != null && (nearZ.aX != aX || nearZ.aY != aY)) {
         multiArea = true;
-        tail = null;
+        nearZ = null;
       }
-      //  Record the first zone on the perimeter, null or otherwise-
+      
+      //  Every time the zone changes (even if it's null) note the change.
       if (gapFlag == -1) {
-        head = tail;
-      }
-      //  And check whether more than one zone is bumped into, or any
-      //  gaps in adjacency-
-      if (tail != null && gapFlag != 1) {
-        if (edge == null) {
-          edge = tail;
-        }
-        else if (tail != edge) {
-          multiArea = true;
-          markForDeletion(tail);
-        }
-        gapFlag = 1;
-      }
-      if (tail == null && gapFlag != 0) {
+        initZ = nearZ;
         gapFlag = 0;
+      }
+      if (edgeZ == null && nearZ != null) {
+        edgeZ = nearZ;
+      }
+      if (edgeZ != null && nearZ != null && nearZ != edgeZ) {
+        multiArea = true;
+        markForDeletion(nearZ);
+      }
+      if (lastZ != nearZ) {
         numGaps += 1;
+        lastZ = nearZ;
       }
     }
-    //  Literal corner-case- if the perimeter starts and ends in a gap,
-    //  don't count it twice.
-    if (tail == head && head == null) {
+    //  Literal corner-case- if the perimeter starts and ends with the same
+    //  zone (or lack thereof), don't count it twice.
+    if (initZ == lastZ && numGaps > 0) {
       numGaps -= 1;
     }
+    /*
+    if (numGaps > 1) {
+      multiArea = true;
+    }
+    //*/
     
     //  If possible, don't flag the zone for deletion- just add or
-    //  remove a single tile.  (Note that in the case of deleting a
-    //  tile, there must not be a potential bottleneck.)
-    if (edge != null && ! (multiArea || edge.flagDeletion)) {
-      ZoneGroup openG   = groupFor(edge, true );
-      ZoneGroup closedG = groupFor(edge, false);
+    //  remove a single tile.
+    if (edgeZ != null && ! (multiArea || edgeZ.flagDeletion)) {
+      ZoneGroup openG   = groupFor(edgeZ, true );
+      ZoneGroup closedG = groupFor(edgeZ, false);
       
       if (blocked && numGaps < 2) {
         zoneLookup[at.x][at.y] = null;
-        edge.toRem.add(at);
-        edge   .numTiles   -= 1;
+        edgeZ.toRem.add(at);
+        edgeZ  .numTiles   -= 1;
         openG  .totalTiles -= 1;
         closedG.totalTiles -= 1;
-        markForRefresh(edge);
+        markForRefresh(edgeZ);
         didRefresh = true;
         if (report()) {
-          I.say("\nRemoved single tile: "+at+" from "+edge);
+          I.say("\nRemoved single tile: "+at+" from "+edgeZ);
         }
       }
       
-      if (core == null && ! blocked) {
-        zoneLookup[at.x][at.y] = edge;
-        edge.toAdd.add(at);
-        edge   .numTiles   += 1;
+      if (coreZ == null && ! blocked) {
+        zoneLookup[at.x][at.y] = edgeZ;
+        edgeZ.toAdd.add(at);
+        edgeZ  .numTiles   += 1;
         openG  .totalTiles += 1;
         closedG.totalTiles += 1;
-        markForRefresh(edge);
+        markForRefresh(edgeZ);
         didRefresh = true;
         if (report()) {
-          I.say("\nAdded single tile: "+at+" to "+edge);
+          I.say("\nAdded single tile: "+at+" to "+edgeZ);
         }
       }
     }
     
     //  If a simple merge/delete operation wasn't possible, tear down
     //  and start over-
-    if (edge != null && ! didRefresh) {
-      markForDeletion(edge);
+    if (edgeZ != null && ! didRefresh) {
+      markForDeletion(edgeZ);
     }
     if (! didRefresh) {
       flagDirty[aX][aY] = true;

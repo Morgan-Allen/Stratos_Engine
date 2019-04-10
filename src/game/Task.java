@@ -504,7 +504,11 @@ public class Task implements Session.Saveable {
   public static boolean inCombat(Element f, Target with) {
     if (f == null || ! (f instanceof Active)) return false;
     if (with != null && mainTaskFocus(f) != with) return false;
-    JOB type = ((Active) f).jobType();
+    
+    Task task = ((Active) f).task();
+    if (task == null || ! task.inContact()) return false;
+    
+    JOB type = task.type;
     return type == JOB.COMBAT || type == JOB.HUNTING;
   }
   
@@ -580,7 +584,8 @@ public class Task implements Session.Saveable {
   
   
   boolean inContact() {
-    return contactState > PROG_CLOSING && contactState < PROG_COMPLETE;
+    return checkTargetContact(target);
+    //return contactState > PROG_CLOSING && contactState < PROG_COMPLETE;
   }
   
   

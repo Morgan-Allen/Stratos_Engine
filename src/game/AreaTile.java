@@ -149,9 +149,11 @@ public class AreaTile implements Pathing, Selection.Focus {
     //  Visit each adjacent tile and see if they permit entry-
     for (int dir : T_INDEX) {
       AreaTile n = map.tileAt(x + T_X[dir], y + T_Y[dir]);
-      if (n == null || blocked) { temp[dir] = null; continue; }
-      
-      int pathN = n.pathType();
+      int pathN = n == null ? -1 : n.pathType();
+      if (n == null || blocked) {
+        temp[dir] = null;
+        continue;
+      }
       if (n.above != above && n.above != null && n.above.allowsEntryFrom(this)) {
         temp[dir] = (Pathing) n.above;
       }
@@ -175,6 +177,36 @@ public class AreaTile implements Pathing, Selection.Focus {
     }
     //
     //  And return-
+    return temp;
+  }
+  
+  
+  public Pathing[] rawAdjacent(Pathing[] temp, AreaMap map) {
+    //  TODO:  See if this can be folded into the method above?
+    
+    if (temp == null) temp = new Pathing[9];
+    
+    if (above != null && above.allowsEntryFrom(this)) {
+      temp[8] = (Pathing) above;
+    }
+    else {
+      temp[8] = null;
+    }
+
+    for (int dir : T_INDEX) {
+      AreaTile n = map.tileAt(x + T_X[dir], y + T_Y[dir]);
+      if (n == null) {
+        temp[dir] = null;
+        continue;
+      }
+      if (n.above != above && n.above != null && n.above.allowsEntryFrom(this)) {
+        temp[dir] = (Pathing) n.above;
+      }
+      else {
+        temp[dir] = n;
+      }
+    }
+    
     return temp;
   }
   

@@ -402,13 +402,13 @@ public class LogicTest {
           I.presentInfo(reportForBuildMenu(map, base), VIEW_NAME);
         }
         else if (above instanceof Base) {
-          I.presentInfo(reportFor((Base) above), VIEW_NAME);
+          I.presentInfo(reportFor((Base) above, world), VIEW_NAME);
         }
         else if (above instanceof Building) {
-          I.presentInfo(reportFor((Building) above), VIEW_NAME);
+          I.presentInfo(reportFor((Building) above, world), VIEW_NAME);
         }
         else if (above instanceof Element) {
-          I.presentInfo(reportFor((Element) above), VIEW_NAME);
+          I.presentInfo(reportFor((Element) above, world), VIEW_NAME);
         }
         else {
           I.presentInfo(baseReport(map, base), VIEW_NAME);
@@ -474,7 +474,7 @@ public class LogicTest {
   
   /**  UI outputs-
     */
-  private String reportFor(Base c) {
+  private String reportFor(Base c, World world) {
     StringBuffer report = new StringBuffer(""+c);
     
     report.append("\n  Population: "+c.growth.population());
@@ -525,7 +525,7 @@ public class LogicTest {
   }
   
   
-  private String reportFor(Element e) {
+  private String reportFor(Element e, World world) {
     StringBuffer report = new StringBuffer(""+e+"\n");
     
     if (e instanceof Actor) {
@@ -589,7 +589,7 @@ public class LogicTest {
   }
   
   
-  private String reportFor(Building b) {
+  private String reportFor(Building b, World world) {
     
     StringBuffer report = new StringBuffer(""+b+"\n");
     
@@ -628,7 +628,7 @@ public class LogicTest {
     Tally <Good> homeCons = b.homeUsed();
     List <String> goodRep = new List();
     
-    for (Good g : b.map().world.goodTypes()) {
+    for (Good g : world.goodTypes()) {
       float amount   = b.inventory(g);
       float demand   = b.stockLimit(g);
       float consumes = homeCons == null ? 0 : homeCons.valueFor(g);

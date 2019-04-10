@@ -329,7 +329,7 @@ public class TaskCombat extends Task {
     
     boolean report = false;
     if (report) {
-      I.say("\nChecking tiles-");
+      I.say("\nChecking tiles: ");
       I.say("  Melee range:   "+RANGE_MELEE );
       I.say("  Missile range: "+rangeMissile);
       I.say("  Max. range:    "+maxRange    );
@@ -341,7 +341,7 @@ public class TaskCombat extends Task {
       if (Task.hasTaskFocus(t, jobType, active)) continue;
       
       float distT = AreaMap.distance(target, t);
-      
+      ///I.say("    "+t+" : "+distT);
       if (distT > maxRange) continue;
       
       float rating = 0;

@@ -305,6 +305,7 @@ public class AreaMap implements Session.Saveable {
       int x = spot.x + T_X[dir], y = spot.y + T_Y[dir];
       temp[dir] = map.tileAt(x, y);
     }
+    temp[8] = null;
     return temp;
   }
   
@@ -504,7 +505,9 @@ public class AreaMap implements Session.Saveable {
     t.elevation = elevation;
     this.terrain.updateFrom(t);
     this.terrain.setVariant(t, var);
-    if (oldP != t.pathType()) pathCache.checkPathingChanged(t);
+    if (oldP != t.pathType()) {
+      pathCache.checkPathingChanged(t);
+    }
   }
   
   
@@ -521,7 +524,9 @@ public class AreaMap implements Session.Saveable {
   public void setAbove(AreaTile t, Element above) {
     int oldP = t.pathType();
     t.above = above;
-    if (oldP != t.pathType()) pathCache.checkPathingChanged(t);
+    if (oldP != t.pathType()) {
+      pathCache.checkPathingChanged(t);
+    }
   }
   
   

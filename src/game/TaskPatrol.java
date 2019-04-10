@@ -183,8 +183,17 @@ public class TaskPatrol extends Task implements TileConstants {
 
   protected Task reaction() {
     final Actor actor = (Actor) active;
+    Batch <Active> seen = new Batch();
+    Visit.appendTo(seen, actor.seen());
+    
+    for (Active a : guarded.focused()) {
+      if (Task.inCombat((Element) a, guarded)) {
+        seen.add(a);
+      }
+    }
+    
     return Task.inCombat(actor) ? null :
-      TaskCombat.nextReaction(actor, guarded, origin, true, actor.seen())
+      TaskCombat.nextReaction(actor, guarded, origin, true, seen)
     ;
   }
 
