@@ -23,6 +23,8 @@ public class ActorHealth {
     Active source;
     Trait basis;
     float expireTime;
+    
+    public String toString() { return basis.name; }
   }
   
   

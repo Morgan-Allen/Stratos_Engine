@@ -262,7 +262,7 @@ public abstract class ActorTechnique extends Trait {
     //  cetera.
     if (harmLevel != Task.HARM_NULL) {
       float hostility = TaskCombat.hostility(subject, using);
-      if (Task.inCombat(using, subject)) hostility += 0.5f;
+      if (Task.inCombat(using, subject, true)) hostility += 0.5f;
       if (harmLevel >  0 && hostility <= 0) return -5;
       if (harmLevel <= 0 && hostility >  0) return -5;
       rating /= 1 + Nums.abs(harmLevel - hostility);
@@ -293,6 +293,7 @@ public abstract class ActorTechnique extends Trait {
   
   
   public void applyFromActor(Actor using, Target subject) {
+    ///I.say("Applying "+this+" from "+using+" to "+subject);
     if (costAP   > 0) using.health.setCooldown(costAP  );
     if (costTire > 0) using.health.takeFatigue(costTire);
   }

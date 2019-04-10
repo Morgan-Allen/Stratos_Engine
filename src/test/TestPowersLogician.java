@@ -80,7 +80,11 @@ public class TestPowersLogician {
         caster.traits.setClassLevel(MAX_CLASS_LEVEL);
         int minTire = NERVE_DAMAGE - 1;
         
-        if (strikes.health.active() && ! Task.inCombat(caster)) {
+        //  We are testing here to ensure that (A) the caster inflicts a certain
+        //  level of nonlethal damage on the subject, and (B), casts a
+        //  protective buff on themselves.
+        
+        if (strikes.health.active() && ! Task.inCombat(caster, strikes, false)) {
           Task combat = TaskCombat.configHunting(caster, strikes);
           caster.assignTask(combat, caster);
         }

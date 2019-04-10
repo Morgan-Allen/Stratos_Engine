@@ -501,12 +501,12 @@ public class Task implements Session.Saveable {
   }
   
   
-  public static boolean inCombat(Element f, Target with) {
+  public static boolean inCombat(Element f, Target with, boolean checkContact) {
     if (f == null || ! (f instanceof Active)) return false;
     if (with != null && mainTaskFocus(f) != with) return false;
     
     Task task = ((Active) f).task();
-    if (task == null || ! task.inContact()) return false;
+    if (task == null || (checkContact && ! task.inContact())) return false;
     
     JOB type = task.type;
     return type == JOB.COMBAT || type == JOB.HUNTING;
@@ -514,7 +514,7 @@ public class Task implements Session.Saveable {
   
   
   public static boolean inCombat(Element f) {
-    return inCombat(f, null);
+    return inCombat(f, null, false);
   }
   
   

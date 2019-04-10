@@ -187,7 +187,7 @@ public class TaskPatrol extends Task implements TileConstants {
     Visit.appendTo(seen, actor.seen());
     
     for (Active a : guarded.focused()) {
-      if (Task.inCombat((Element) a, guarded)) {
+      if (Task.inCombat((Element) a, guarded, true)) {
         seen.add(a);
       }
     }

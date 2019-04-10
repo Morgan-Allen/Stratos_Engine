@@ -734,26 +734,39 @@ public class Actor extends Element implements
   
   
   void updateVision() {
-    if (indoors()) return;
     
-    AreaTile from = centre();
-    
-    if (base() != map.area.locals) {
-      AreaFog fog = map.fogMap(this);
-      float range = sightRange();
-      if (fog != null) fog.liftFog(from, range);
+    if (indoors()) {
+      Batch canSee = new Batch();
+      Visit.appendTo(canSee, inside.allInside());
+      seen = canSee;
     }
     
-    if (guestBase() != map.area.locals && guestBase() != base()) {
-      AreaFog fog = map.fogMap(this);
-      float range = sightRange();
-      if (fog != null) fog.liftFog(from, range);
+    else {
+      AreaTile from = centre();
+      
+      if (base() != map.area.locals) {
+        AreaFog fog = map.fogMap(this);
+        float range = sightRange();
+        if (fog != null) fog.liftFog(from, range);
+      }
+      
+      if (guestBase() != map.area.locals && guestBase() != base()) {
+        AreaFog fog = map.fogMap(this);
+        float range = sightRange();
+        if (fog != null) fog.liftFog(from, range);
+      }
+      
+      float noticeRange = sightRange();
+      if (mission != null && mission.active()) noticeRange += AVG_FILE;
+      seen = map.activeInRange(at(), noticeRange);
+      seen = filterToNotice(seen, noticeRange, -1);
     }
     
-    float noticeRange = sightRange();
-    if (mission != null && mission.active()) noticeRange += AVG_FILE;
-    seen = map.activeInRange(at(), noticeRange);
-    seen = filterToNotice(seen, noticeRange, -1);
+    /*
+    if (! seen.includes(this)) {
+      I.say("Warning: Actor not included in own awareness...");
+    }
+    //*/
   }
   
   
@@ -781,11 +794,11 @@ public class Actor extends Element implements
       else if (a.base() != base()) {
         sight = fog.sightLevel(a.at());
       }
-      if (a.mobile()) {
+      
+      if (a.mobile() && ! TaskCombat.allied(this, a)) {
         Actor m = (Actor) a;
         hide = m.hideLevel();
       }
-      
       if (sight - hide > 0) {
         filtered.add(a);
       }

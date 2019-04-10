@@ -176,9 +176,11 @@ public class ActorAsPerson extends Actor {
     class Reaction { ActorTechnique used; Target subject; float rating; }
     Pick <Reaction> pick = new Pick(0);
     
-    boolean talk = assessed.size() > 1 && false;
+    boolean talk = assessed.size() > 0 && traits.known().size() > 0 && false;
     if (talk) {
       I.say("\n"+this+" Assessing techniques to use.");
+      I.say("  Assessing:  "+assessed);
+      I.say("  Techniques: "+traits.known());
     }
     
     for (Active other : assessed) {
