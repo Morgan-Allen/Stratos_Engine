@@ -118,8 +118,13 @@ public class RelationSet {
   
   public void incBond(Focus with, float inc, float maxRange) {
     Bond b = bondWith(with, true);
-    if (b.level > maxRange || b.level < -maxRange) return;
     b.level = Nums.clamp(b.level + inc, -maxRange, maxRange);
+  }
+  
+  
+  public void incImpression(Focus with, float inc) {
+    Bond b = bondWith(with, true);
+    b.impression = Nums.clamp(b.impression + inc, -1, 1);
   }
   
   
@@ -155,7 +160,7 @@ public class RelationSet {
   
   public float bondLevel(Focus with) {
     Bond b = bondWith(with, false);
-    return b == null ? (INIT_BONDING / 100f) : b.level;
+    return b == null ? (INIT_BONDING / 100f) : (b.level + b.impression);
   }
   
   

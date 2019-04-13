@@ -46,9 +46,15 @@ public class ActorBonds extends RelationSet {
     int updateLimit = BOND_UPDATE_TIME * actor.map().ticksPerSecond();
     if (updateCounter++ >= updateLimit) {
       updateCounter = 0;
+      float novelInc = BOND_UPDATE_TIME * 1f / BOND_NOVEL_TIME;
       for (Bond b : bonds) {
-        b.novelty += BOND_UPDATE_TIME * 1f / BOND_NOVEL_TIME;
-        b.novelty = Nums.clamp(b.novelty, 0, 1);
+        if (b.impression > 0) {
+          b.impression = Nums.clamp(b.impression - novelInc, 0, 1);
+        }
+        else {
+          b.impression = Nums.clamp(b.impression + novelInc, -1, 0);
+        }
+        b.novelty = Nums.clamp(b.novelty + novelInc, 0, 1);
       }
       makeLoyaltyCheck();
     }

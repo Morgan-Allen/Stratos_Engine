@@ -171,6 +171,16 @@ public class TaskDialog extends Task {
   }
   
   
+  protected float successChance() {
+    Actor actor = (Actor) active;
+    
+    //  TODO:  Having the right language-skill is useful here- build that in to
+    //  the evaluation!
+    
+    return super.successChance();
+  }
+  
+  
   static Actor talksWith(Actor other) {
     if (other.jobType() != JOB.DIALOG) return null;
     return ((TaskDialog) other.task()).with;
@@ -182,6 +192,12 @@ public class TaskDialog extends Task {
     */
   protected void onTarget(Target target) {
     Actor actor = (Actor) active;
+    
+    //  TODO:  Generate some actual conversation-topics here, based on mutual
+    //  relations, traits, background, anecdotes/rumour/gossip, et cetera.
+    
+    //  TODO:  Having the right language-skill is useful here- build that in to
+    //  the evaluation!
     
     if (type == JOB.DIALOG) {
       Mission mission = mode == MODE_CONTACT ? (Mission) origin : null;
@@ -213,8 +229,52 @@ public class TaskDialog extends Task {
 
 
   float actionRange() {
+    if (mode == MODE_PLEAD) return AVG_SIGHT;
     if (talksWith(with) != active) return AVG_SIGHT;
     return 2;
+  }
+  
+  
+  /*
+  static float talkChance(Actor talks, Actor with) {
+    return 1.0f;
+  }
+  //*/
+  
+  
+  void pleadForDialog(Actor pleads) {
+    
+    //  TODO:  This will have to be built into the priority-method as well.
+    
+    //  plead-chance
+    //  plead-priority
+    
+    float range = AVG_SIGHT;
+    
+    for (Active a : pleads.map.activeInRange(pleads.at(), range)) {
+      if (! a.type().isPerson()) continue;
+      
+      Actor affects = (Actor) a;
+      Task t = a.task();
+      
+      if (t != null && t.harmLevel() > 0 && ! TaskCombat.hostile(pleads, t.target())) {
+        
+        //  TODO:  This should only work so long as novelty is positive...
+        
+        float pleadChance = 0.5f;
+        pleadChance += pleads .traits.levelOf(SKILL_SPEAK) / 10f;
+        pleadChance -= affects.traits.levelOf(SKILL_SPEAK) / 10f;
+        pleadChance += affects.bonds.bondLevel(pleads) / 2;
+        pleadChance -= t.priority() / 10f;
+        
+        if (Rand.num() < pleadChance) {
+          Task stun = affects.targetTask(affects, 1, JOB.FLINCH, null);
+          affects.assignReaction(stun);
+          affects.bonds.incImpression(pleads, 0.5f);
+          affects.bonds.incImpression(pleads.base().faction(), 0.5f);
+        }
+      }
+    }
   }
   
   
@@ -227,14 +287,21 @@ public class TaskDialog extends Task {
     Building home = suggests.home();
     Employer work = suggests.work();
     Series <Active> friendly = (Series) suggests.bonds.friendly();
+    float baseRating = Rand.num() * ROUTINE;
     
     if (report) {
       I.say("\nAssessing joint activities for "+suggests+" and "+other);
       I.say("  Home: "+home);
       I.say("  Work: "+work);
+      I.say("  Switch threshold: "+baseRating);
     }
     
     for (Actor a : new Actor[] { suggests, other }) {
+      
+      //  TODO:  Include Patrolling, Wandering, Defending, Shopping, etc.?
+      //  Anything included in the ActorAsPerson.beginNextBehaviour sequence,
+      //  really.
+      
       Task explore = TaskExplore.configExploration(a);
       Task hunting = TaskHunting.nextHunting(a);
       Task dialog  = TaskDialog.nextDialog(a, friendly, MODE_CONTACT, null);
@@ -245,7 +312,6 @@ public class TaskDialog extends Task {
       aID++;
     }
     
-    float baseRating = Rand.num() * ROUTINE;
     class InviteOption {
       Task forSuggests, forOther;
       float rating = 0;
@@ -268,7 +334,7 @@ public class TaskDialog extends Task {
       
       if (FS == null || FS.priority() <= 0) continue;
       if (FO == null || FO.priority() <= 0) continue;
-      o.rating = (FS.priority() + FO.priority()) * Rand.num();
+      o.rating = (FS.priority() + FO.priority()) * Rand.num() / 2;
       
       if (report) {
         I.add(" -> "+o.rating);
