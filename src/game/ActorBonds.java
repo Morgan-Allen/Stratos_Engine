@@ -175,7 +175,20 @@ public class ActorBonds extends RelationSet {
   }
   
   
+  public Series <Actor> friendly() {
+    return (Series) allBondedWith(0.25f, 100, BOND_ANY, true);
+  }
+  
+  
+  public Series <Actor> unfriendly() {
+    return (Series) allBondedWith(0, -0.25f, BOND_ANY, true);
+  }
+  
+  
 }
+
+
+
 
 
 

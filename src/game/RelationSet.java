@@ -95,7 +95,7 @@ public class RelationSet {
       Bond b = new Bond();
       b.with    = with;
       b.novelty = INIT_NOVELTY / 100f;
-      b.level   = INIT_BONDING;
+      b.level   = INIT_BONDING / 100f;
       bonds.add(b);
       return b;
     }
@@ -155,7 +155,7 @@ public class RelationSet {
   
   public float bondLevel(Focus with) {
     Bond b = bondWith(with, false);
-    return b == null ? INIT_BONDING : b.level;
+    return b == null ? (INIT_BONDING / 100f) : b.level;
   }
   
   
@@ -177,15 +177,29 @@ public class RelationSet {
   
   
   public Series <Focus> allBondedWith(int type) {
+    return allBondedWith(-100, 100, type, false);
+  }
+  
+  
+  public Series <Focus> allBondedWith(
+    float minVal, float maxVal,
+    int type, boolean personOnly
+  ) {
     Batch <Focus> all = new Batch();
     for (Bond b : bonds) {
+      if (b.level < minVal || b.level > maxVal) continue;
       if (type != BOND_ANY && (b.properties & type) == 0) continue;
+      if (personOnly && ! b.with.type().isPerson()) continue;
       all.add(b.with);
     }
     return all;
   }
   
 }
+
+
+
+
 
 
 

@@ -76,6 +76,7 @@ public class Task implements Session.Saveable {
   
   final Active active;
   Employer origin;
+  Actor company;
   
   JOB   type       = JOB.NONE;
   float lastTicks  = 0;
@@ -103,6 +104,7 @@ public class Task implements Session.Saveable {
     
     active     = (Actor   ) s.loadObject();
     origin     = (Employer) s.loadObject();
+    company    = (Actor   ) s.loadObject();
     type       = JOB.values()[s.loadInt()];
     ticksSpent = s.loadFloat();
     maxTime    = s.loadInt();
@@ -132,6 +134,7 @@ public class Task implements Session.Saveable {
     
     s.saveObject(active);
     s.saveObject(origin);
+    s.saveObject(company);
     s.saveInt(type.ordinal());
     s.saveFloat(ticksSpent);
     s.saveInt(maxTime);
@@ -518,6 +521,11 @@ public class Task implements Session.Saveable {
   }
   
   
+  public JOB type() {
+    return type;
+  }
+  
+  
   public Target target() {
     return target;
   }
@@ -525,6 +533,16 @@ public class Task implements Session.Saveable {
   
   public Pathing visits() {
     return visits;
+  }
+  
+  
+  public Employer origin() {
+    return origin;
+  }
+  
+  
+  public Actor company() {
+    return company;
   }
   
   

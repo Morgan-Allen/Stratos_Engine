@@ -12,7 +12,7 @@ public class TaskDialog extends Task {
   
   /**  Data-fields, construction and save/load methods-
     */
-  Actor with;
+  final Actor with;
   boolean began;
   boolean casual;
   boolean contact;
@@ -20,7 +20,7 @@ public class TaskDialog extends Task {
   
   TaskDialog(Actor actor, Actor with, boolean began) {
     super(actor);
-    this.with = with;
+    this.with  = with;
     this.began = began;
   }
   
@@ -200,6 +200,7 @@ public class TaskDialog extends Task {
       }
       else {
         actor.bonds.incNovelty(with, -1);
+        suggestJointActivity(actor, with);
       }
     }
   }
@@ -211,12 +212,49 @@ public class TaskDialog extends Task {
   }
   
   
-  /*
-  void inviteToActivity(Actor suggests, Actor other) {
-    //
-    //  TODO:  Work this out...
+  void suggestJointActivity(Actor suggests, Actor other) {
+    
+    Task tasks[][] = new Task[2][];
+    int aID = 0;
+    Building home = suggests.home();
+    Employer work = suggests.work();
+    Series <Active> friendly = (Series) suggests.bonds.friendly();
+    
+    for (Actor a : new Actor[] { suggests, other }) {
+      Task explore = TaskExplore.configExploration(a);
+      Task hunting = TaskHunting.nextHunting(a);
+      Task dialog  = TaskDialog.nextDialog(a, friendly, true, null);
+      Task resting = TaskResting.nextResting(a, home);
+      Task keeping = home == null ? null : home.selectActorBehaviour(a);
+      Task working = work == null ? null : work.selectActorBehaviour(a);
+      tasks[aID] = new Task[] { explore, hunting, dialog, resting, keeping, working };
+      aID++;
+    }
+    
+    class InviteOption {
+      Task forSuggests, forOther;
+      float rating = 0;
+    };
+    Pick <InviteOption> pick = new Pick(0);
+    
+    for (int i = tasks[0].length; i-- > 0;) {
+      InviteOption o = new InviteOption();
+      o.forSuggests = tasks[0][i];
+      o.forOther    = tasks[1][i];
+      if (o.forSuggests == null || o.forSuggests.priority() <= 0) continue;
+      if (o.forOther    == null || o.forOther   .priority() <= 0) continue;
+      o.rating = o.forSuggests.priority() + o.forOther.priority();
+      pick.compare(o, o.rating);
+    }
+    
+    InviteOption picked = pick.result();
+    if (picked != null) {
+      picked.forSuggests.company = other;
+      picked.forOther.company = suggests;
+      suggests.assignTask(picked.forSuggests, other);
+      other   .assignTask(picked.forOther, suggests);
+    }
   }
-  //*/
   
   
   
@@ -226,13 +264,7 @@ public class TaskDialog extends Task {
     return AnimNames.TALK;
   }
   
-  
 }
-
-
-
-
-
 
 
 
