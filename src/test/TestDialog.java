@@ -15,7 +15,7 @@ public class TestDialog extends LogicTest {
   
 
   public static void main(String args[]) {
-    testDialog(true);
+    testDialog(false);
   }
   
   
@@ -37,7 +37,7 @@ public class TestDialog extends LogicTest {
     home.enterMap(map, 7 , 7 , 1, base);
     work.enterMap(map, 11, 11, 1, base);
     home.setResident(sideA, true);
-    work.setResident(sideA, true);
+    work.setWorker  (sideA, true);
     
     sideA.enterMap(map, 2, 2, 1, base);
     sideB.enterMap(map, 5, 5, 1, base);
@@ -49,6 +49,7 @@ public class TestDialog extends LogicTest {
     boolean testOkay    = false;
     
     final int RUN_TIME = DAY_LENGTH;
+    Task.JOB joinedTask = null;
     
     
     //  TODO:  Test gift-giving too?
@@ -85,13 +86,15 @@ public class TestDialog extends LogicTest {
           boolean joint = taskA.company() == sideB && taskB.company() == sideA;
           if (sameType && joint) {
             joiningOkay = true;
+            joinedTask = taskA.type();
           }
         }
       }
       
-      if (talkOkay && talkEnds && noveltyOkay && joiningOkay && ! testOkay) {
+      if (talkOkay && talkEnds && noveltyOkay && ! testOkay) {
         testOkay = true;
         I.say("\nDIALOG TEST CONCLUDED SUCCESSFULLY!");
+        I.say("  Joint task: "+joinedTask);
         if (! graphics) return true;
       }
     }
@@ -101,6 +104,7 @@ public class TestDialog extends LogicTest {
     I.say("  Talk ends:    "+talkEnds   );
     I.say("  Novelty okay: "+noveltyOkay);
     I.say("  Joining okay: "+joiningOkay);
+    I.say("  Joint task:   "+joinedTask );
     
     return false;
   }

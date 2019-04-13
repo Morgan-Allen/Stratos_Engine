@@ -12,34 +12,39 @@ public class TaskDialog extends Task {
   
   /**  Data-fields, construction and save/load methods-
     */
+  final static int
+    MODE_INIT    = -1,
+    MODE_CASUAL  =  0,
+    MODE_CONTACT =  1,
+    MODE_PLEAD   =  2
+  ;
+  
   final Actor with;
   boolean began;
-  boolean casual;
-  boolean contact;
+  int mode = MODE_INIT;
   
   
-  TaskDialog(Actor actor, Actor with, boolean began) {
+  TaskDialog(Actor actor, Actor with, boolean began, int mode) {
     super(actor);
     this.with  = with;
     this.began = began;
+    this.mode  = mode;
   }
   
   
   public TaskDialog(Session s) throws Exception {
     super(s);
-    this.with    = (Actor) s.loadObject();
-    this.began   = s.loadBool();
-    this.casual  = s.loadBool();
-    this.contact = s.loadBool();
+    this.with  = (Actor) s.loadObject();
+    this.began = s.loadBool();
+    this.mode  = s.loadInt();
   }
   
   
   public void saveState(Session s) throws Exception {
     super.saveState(s);
     s.saveObject(with);
-    s.saveBool(began  );
-    s.saveBool(casual );
-    s.saveBool(contact);
+    s.saveBool(began);
+    s.saveInt(mode);
   }
   
   
@@ -48,19 +53,19 @@ public class TaskDialog extends Task {
     */
   static TaskDialog nextContactDialog(Actor actor) {
     Series <Active> others = (Series) actor.considered();
-    return nextDialog(actor, others, false, null);
+    return nextDialog(actor, others, MODE_CONTACT, null);
   }
   
   
   static TaskDialog nextCasualDialog(Actor actor) {
     Series <Active> others = (Series) actor.seen();
-    return nextDialog(actor, others, true, null);
+    return nextDialog(actor, others, MODE_CASUAL, null);
   }
   
   
   static TaskDialog nextDialog(
     Actor actor, Series <Active> assessed,
-    boolean casual, Mission mission
+    int mode, Mission mission
   ) {
     if (! actor.map().world.settings.toggleDialog) return null;
     //
@@ -71,14 +76,13 @@ public class TaskDialog extends Task {
     Pick <Active> pick = new Pick(0);
     for (Active a : assessed) {
       if (! a.mobile()) continue;
-      pick.compare(a, dialogRating(actor, (Actor) a, casual, false));
+      pick.compare(a, dialogRating(actor, (Actor) a, mode, false));
     }
     if (pick.empty()) return null;
     Actor with = (Actor) pick.result();
     //
     //  Then configure and return...
-    TaskDialog dialog = new TaskDialog(actor, with, true);
-    dialog.casual = casual;
+    TaskDialog dialog = new TaskDialog(actor, with, true, MODE_CASUAL);
     dialog.configTask(mission, null, with, JOB.DIALOG, 1);
     if (! dialog.pathValid()) return null;
     return dialog;
@@ -88,9 +92,8 @@ public class TaskDialog extends Task {
   static TaskDialog contactDialogFor(Actor actor, Actor with, Mission mission) {
     if (! actor.map().world.settings.toggleDialog) return null;
     
-    TaskDialog dialog = new TaskDialog(actor, with, true);
+    TaskDialog dialog = new TaskDialog(actor, with, true, MODE_CONTACT);
     dialog.configTask(mission, null, with, JOB.DIALOG, 1);
-    dialog.contact = true;
     
     return dialog.pathValid() ? dialog : null;
   }
@@ -100,7 +103,7 @@ public class TaskDialog extends Task {
   /**  Priority-evaluation-
     */
   static float dialogRating(
-    Actor actor, Actor with, boolean casual, boolean begun
+    Actor actor, Actor with, int mode, boolean begun
   ) {
     //
     //  Basic sanity-checks first-
@@ -143,7 +146,7 @@ public class TaskDialog extends Task {
   protected float successPriority() {
     Actor actor = (Actor) active;
     
-    float rating = dialogRating(actor, with, casual, false) / ROUTINE;
+    float rating = dialogRating(actor, with, mode, false) / ROUTINE;
     if (rating <= 0) return -1;
     
     //  TODO:  Include effects of curiosity if this is a brand new actor and/or
@@ -152,12 +155,15 @@ public class TaskDialog extends Task {
     //  TODO:  And include effects of ambient danger...
     
     float empathy = actor.traits.levelOf(TRAIT_EMPATHY);
-    float priority = contact ? ROUTINE : CASUAL;
+    float priority = 0;
+    if (mode == MODE_CASUAL ) priority = CASUAL;
+    if (mode == MODE_CONTACT) priority = ROUTINE;
+    if (mode == MODE_PLEAD  ) priority = PARAMOUNT;
     
     if (actor.bonds.hasBond(with)) {
       priority *= 1 + (actor.bonds.bondLevel(with) / 2);
     }
-    else if (! contact) {
+    else if (mode == MODE_CASUAL) {
       priority *= actor.bonds.solitude();
     }
     
@@ -178,11 +184,11 @@ public class TaskDialog extends Task {
     Actor actor = (Actor) active;
     
     if (type == JOB.DIALOG) {
-      Mission mission = contact ? (Mission) origin : null;
-      float rating = dialogRating(actor, with, casual, true);
+      Mission mission = mode == MODE_CONTACT ? (Mission) origin : null;
+      float rating = dialogRating(actor, with, mode, true);
       
       if (began && rating > 0 && talksWith(with) != actor) {
-        TaskDialog response = new TaskDialog(with, actor, false);
+        TaskDialog response = new TaskDialog(with, actor, false, mode);
         response.configTask(null, visits, actor, JOB.DIALOG, 1);
         if (response.pathValid()) with.assignTask(response, this);
       }
@@ -192,7 +198,7 @@ public class TaskDialog extends Task {
       with.bonds.incBond(actor, talkInc * CHAT_BOND / 100f, maxBond);
       with.bonds.incNovelty(actor, 0 - talkInc);
       
-      if (contact && ! mission.terms.sent()) {
+      if (mission != null && mission.terms.hasTerms() && ! mission.terms.sent()) {
         mission.terms.sendTerms(with.base());
       }
       if (rating > 0 && talksWith(with) == actor) {
@@ -214,16 +220,24 @@ public class TaskDialog extends Task {
   
   void suggestJointActivity(Actor suggests, Actor other) {
     
+    boolean report = true;
+    
     Task tasks[][] = new Task[2][];
     int aID = 0;
     Building home = suggests.home();
     Employer work = suggests.work();
     Series <Active> friendly = (Series) suggests.bonds.friendly();
     
+    if (report) {
+      I.say("\nAssessing joint activities for "+suggests+" and "+other);
+      I.say("  Home: "+home);
+      I.say("  Work: "+work);
+    }
+    
     for (Actor a : new Actor[] { suggests, other }) {
       Task explore = TaskExplore.configExploration(a);
       Task hunting = TaskHunting.nextHunting(a);
-      Task dialog  = TaskDialog.nextDialog(a, friendly, true, null);
+      Task dialog  = TaskDialog.nextDialog(a, friendly, MODE_CONTACT, null);
       Task resting = TaskResting.nextResting(a, home);
       Task keeping = home == null ? null : home.selectActorBehaviour(a);
       Task working = work == null ? null : work.selectActorBehaviour(a);
@@ -231,26 +245,42 @@ public class TaskDialog extends Task {
       aID++;
     }
     
+    float baseRating = Rand.num() * ROUTINE;
     class InviteOption {
       Task forSuggests, forOther;
       float rating = 0;
     };
-    Pick <InviteOption> pick = new Pick(0);
+    Pick <InviteOption> pick = new Pick(baseRating);
     
-    for (int i = tasks[0].length; i-- > 0;) {
+    for (int i = 0; i < tasks[0].length; i++) {
       InviteOption o = new InviteOption();
-      o.forSuggests = tasks[0][i];
-      o.forOther    = tasks[1][i];
-      if (o.forSuggests == null || o.forSuggests.priority() <= 0) continue;
-      if (o.forOther    == null || o.forOther   .priority() <= 0) continue;
-      o.rating = o.forSuggests.priority() + o.forOther.priority();
+      Task FS = o.forSuggests = tasks[0][i];
+      Task FO = o.forOther    = tasks[1][i];
+      
+      if (report) {
+        I.say("  ");
+        if (FS == null) I.add("none");
+        else I.add(FS.type()+" ("+FS.priority()+")");
+        I.add(" | ");
+        if (FO == null) I.add("none");
+        else I.add(FO.type()+" ("+FO.priority()+")");
+      }
+      
+      if (FS == null || FS.priority() <= 0) continue;
+      if (FO == null || FO.priority() <= 0) continue;
+      o.rating = (FS.priority() + FO.priority()) * Rand.num();
+      
+      if (report) {
+        I.add(" -> "+o.rating);
+      }
+      
       pick.compare(o, o.rating);
     }
     
     InviteOption picked = pick.result();
     if (picked != null) {
-      picked.forSuggests.company = other;
-      picked.forOther.company = suggests;
+      picked.forSuggests.assignCompany(other);
+      picked.forOther.assignCompany(suggests);
       suggests.assignTask(picked.forSuggests, other);
       other   .assignTask(picked.forOther, suggests);
     }
@@ -265,6 +295,5 @@ public class TaskDialog extends Task {
   }
   
 }
-
 
 

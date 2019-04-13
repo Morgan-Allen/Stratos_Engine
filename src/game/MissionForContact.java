@@ -160,7 +160,8 @@ public class MissionForContact extends Mission {
         if (a.map() != parent.localMap() && localOnly) return;
         if (a.type().socialClass == CLASS_COMMON) rating /= 2;
         rating *= 0.5f + Rand.num();
-        rating *= TaskDialog.dialogRating(a, talks, false, false) / Task.ROUTINE;
+        rating *= TaskDialog.dialogRating(a, talks, TaskDialog.MODE_CONTACT, false);
+        rating /= Task.ROUTINE;
         super.compare(a, rating);
       }
     };

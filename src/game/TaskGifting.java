@@ -15,8 +15,8 @@ public class TaskGifting extends TaskDialog {
   Carrier store;
   
 
-  TaskGifting(Actor actor, Actor with, boolean began) {
-    super(actor, with, began);
+  TaskGifting(Actor actor, Actor with, boolean began, int mode) {
+    super(actor, with, began, mode);
   }
   
   
@@ -61,7 +61,7 @@ public class TaskGifting extends TaskDialog {
     Good gifted = nextGiftPickup(actor, with, store);
     if (gifted == null) return null;
     
-    TaskGifting task = new TaskGifting(actor, with, true);
+    TaskGifting task = new TaskGifting(actor, with, true, MODE_CONTACT);
     task.gifted = gifted;
     task.store  = store;
     

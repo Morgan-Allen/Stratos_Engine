@@ -68,7 +68,9 @@ public class Task implements Session.Saveable {
     PROG_CLOSING   = -1,
     PROG_CONTACT   =  0,
     PROG_ACTION    =  1,
-    PROG_COMPLETE  =  2,
+    PROG_COMPLETE  =  2
+  ;
+  final static int
     RESUME_NO      = -1,
     RESUME_WAIT    =  0,
     RESUME_YES     =  1
@@ -218,6 +220,11 @@ public class Task implements Session.Saveable {
   void toggleFocus(boolean activeNow) {
     Target t = mainFocus();
     if (t != null) t.setFocused(active, activeNow);
+  }
+  
+  
+  void assignCompany(Actor company) {
+    this.company = company;
   }
   
   
