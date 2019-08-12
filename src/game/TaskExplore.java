@@ -2,6 +2,10 @@
 
 package game;
 import static game.GameConstants.*;
+
+import game.GameConstants.Employer;
+import game.GameConstants.Target;
+import game.Task.JOB;
 import graphics.common.*;
 import util.*;
 
@@ -43,11 +47,11 @@ public class TaskExplore extends Task {
   /**  Configuration and behavioural updates-
     */
   static TaskExplore configExploration(Actor actor) {
-    return configExploration(actor, actor, -1);
+    return configExploration(actor, actor, -1, null);
   }
   
   
-  static TaskExplore configExploration(Actor actor, Target from, int range) {
+  static TaskExplore configExploration(Actor actor, Target from, int range, Employer e) {
     if (actor == null || from == null) return null;
     
     AreaMap  map  = actor.map;
@@ -62,7 +66,7 @@ public class TaskExplore extends Task {
     task.from      = from;
     task.maxRange  = range;
     
-    return (TaskExplore) task.configTask(null, null, goes, JOB.EXPLORING, 0);
+    return (TaskExplore) task.configTask(e, null, goes, JOB.EXPLORING, 0);
   }
   
   
@@ -105,7 +109,7 @@ public class TaskExplore extends Task {
     
     AreaDanger dangerMap = actor.map().dangerMap(actor);
     float danger = dangerMap.fuzzyLevel(around.x, around.y);
-    danger /= danger + power;
+    danger /= Nums.max(1, danger + power);
     
     if (haven != null && target != null) {
       float dist = AreaMap.distance(target, haven);

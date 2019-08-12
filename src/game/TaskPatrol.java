@@ -107,7 +107,8 @@ public class TaskPatrol extends Task implements TileConstants {
         around.include(t);
       }
       
-      int divS = around.size() / 4;
+      //  NOTE:  This is needed to avoid an infinite loop!  Doh.
+      int divS = Nums.max(1, around.size() / 4);
       for (int n = 0; n < around.size();) {
         AreaTile adds = around.atIndex(n);
         patrolled.add(adds);
@@ -202,7 +203,7 @@ public class TaskPatrol extends Task implements TileConstants {
     final Actor actor = (Actor) active;
     if (onPoint == null) return;
     
-    final boolean report = I.talkAbout == actor;
+    final boolean report = I.talkAbout == actor && stepsVerbose;
     if (report) {
       I.say("\nGetting next patrol step for "+actor);
       I.say("  Going to: "+onPoint+", num stops: "+numStops);

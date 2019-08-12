@@ -150,16 +150,20 @@ public class ActorHealth {
   ) {
     boolean canHunger = world.settings.toggleHunger;
     boolean canTire   = world.settings.toggleFatigue;
+    float   maxHealth = maxHealth();
     //
     //  Adjust health-parameters accordingly-
     if (! alive()) {
-      float decay = tick * maxHealth() * 1f / DECOMP_TIME;
+      float decay = tick * maxHealth * 1f / DECOMP_TIME;
       decay *= (DECOMP_PERCENT - KNOCKOUT_PERCENT) / 100f;
       bleed = 0;
       injury += decay;
+      if (injury >= maxHealth * DECOMP_PERCENT / 100f) {
+        actor.exitMap(actor.map());
+      }
     }
     else if (organic()) {
-      float maxHurt = maxHealth() + 1;
+      float maxHurt = maxHealth + 1;
       {
         cooldown = Nums.max(0, cooldown - tick);
       }

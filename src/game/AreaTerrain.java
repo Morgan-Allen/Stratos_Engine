@@ -128,11 +128,12 @@ public class AreaTerrain implements TileConstants {
     int targetIndex = (totalTiles * (map.time % SCAN_PERIOD)) / SCAN_PERIOD;
     if (targetIndex < growScanIndex) targetIndex = totalTiles;
     
-    while (++growScanIndex < targetIndex) {
+    while (growScanIndex < targetIndex) {
       int x = growScanIndex / size, y = growScanIndex % size;
       Element above = map.grid[x][y].above;
       if (above != null) above.updateGrowth();
       scanHabitat(map.grid[x][y]);
+      growScanIndex += 1;
     }
     
     if (targetIndex == totalTiles) {

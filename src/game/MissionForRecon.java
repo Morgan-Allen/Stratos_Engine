@@ -79,7 +79,7 @@ public class MissionForRecon extends Mission {
   public Task nextLocalMapBehaviour(Actor actor) {
     
     Target from = localFocus();
-    TaskExplore recon = TaskExplore.configExploration(actor, from, exploreRange);
+    TaskExplore recon = TaskExplore.configExploration(actor, from, exploreRange, this);
     if (recon != null) return recon;
     
     return null;

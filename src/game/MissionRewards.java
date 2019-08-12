@@ -53,7 +53,7 @@ public class MissionRewards {
     if (inc > mission.homeBase.funds()) return false;
     if (inc < 0 - cashReward) inc = 0 - cashReward;
     
-    mission.homeBase.incFunds(0 - inc);
+    mission.homeBase.incFunds(0 - inc, Base.CashSource.WAGES);
     this.cashReward += inc;
     return true;
   }

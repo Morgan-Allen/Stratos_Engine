@@ -262,6 +262,7 @@ public class AreaPathCache {
   /**  Methods for flagging changes and regular updates:
     */
   void checkPathingChanged(AreaTile at) {
+    if (at == null) return;
     
     //  First, make sure there's some change to merit an update:
     Zone coreZ = zoneLookup[at.x][at.y];

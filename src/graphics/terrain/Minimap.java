@@ -127,7 +127,8 @@ public class Minimap extends Assets.Loadable {
       origX = bound.xpos(),
       origY = bound.ypos() + (bound.ydim() * 0.5f),
       cX = (pos.x - origX) / bound.xdim(),
-      cY = (origY - pos.y) / bound.ydim();
+      cY = (origY - pos.y) / bound.ydim()
+    ;
     return new Coord(
       (int) ((cX - cY) * mapSize),
       (int) ((cY + cX) * mapSize)

@@ -235,19 +235,10 @@ public class TaskDialog extends Task {
   }
   
   
-  /*
-  static float talkChance(Actor talks, Actor with) {
-    return 1.0f;
-  }
-  //*/
-  
-  
   void pleadForDialog(Actor pleads) {
     
-    //  TODO:  This will have to be built into the priority-method as well.
     
-    //  plead-chance
-    //  plead-priority
+    //  TODO:  This will have to be built into the priority-method as well.
     
     float range = AVG_SIGHT;
     
@@ -334,7 +325,7 @@ public class TaskDialog extends Task {
       
       if (FS == null || FS.priority() <= 0) continue;
       if (FO == null || FO.priority() <= 0) continue;
-      o.rating = (FS.priority() + FO.priority()) * Rand.num() / 2;
+      o.rating = (FS.priority() + FO.priority()) * Rand.num();
       
       if (report) {
         I.add(" -> "+o.rating);

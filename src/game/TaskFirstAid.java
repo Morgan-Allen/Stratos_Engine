@@ -117,7 +117,7 @@ public class TaskFirstAid extends Task {
     //  injuries/disease at a sickbay?
     
     float bandageLevel = other.outfit.carried(BANDAGES);
-    if (bandageLevel >= (midTask ? 1 : 0.5f)) return -1;
+    if (bandageLevel >= (midTask ? 2 : 0.5f)) return -1;
     
     float injury   = other.health.injury() / other.health.maxHealth();
     float relation = 0.5f + (actor.traits.levelOf(TRAIT_EMPATHY) / 2);

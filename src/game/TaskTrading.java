@@ -404,7 +404,7 @@ public class TaskTrading extends Task {
   
   void incFunds(Carrier gets, float payment) {
     if (gets.base() == gets) {
-      gets.base().incFunds((int) payment);
+      gets.base().incFundsFromTrade((int) payment);
     }
     else {
       gets.inventory().add(payment, CASH);

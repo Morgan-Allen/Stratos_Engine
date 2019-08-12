@@ -123,7 +123,7 @@ public class ActorUtils {
     migrant.assignBase(goes);
     ((Employer) employs).setWorker(migrant, true);
     if (jobType.isPerson()) jobType.initAsMigrant((ActorAsPerson) migrant);
-    goes.incFunds(0 - cost);
+    goes.incFunds(0 - cost, Base.CashSource.WAGES);
     return migrant;
   }
   

@@ -82,6 +82,11 @@ public abstract class Visit <T> implements Iterable <T>, Iterator <T> {
   }
   
   
+  public static Visit <Coord> perimeter(Box2D b) {
+    return perimeter((int) b.xpos(), (int) b.ypos(), (int) b.xdim(), (int) b.ydim());
+  }
+  
+  
   public static Visit <Coord> coordsOnLine(
     final Vec2D orig, final Vec2D dest
   ) {

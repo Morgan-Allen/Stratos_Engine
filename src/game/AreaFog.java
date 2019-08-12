@@ -86,7 +86,8 @@ public class AreaFog {
       float distance = distance(t, around);
       if (distance > range) continue;
       if (distance < 0) distance = 0;
-      byte newVal = (byte) (MAX_FOG * (1f - (distance / range)));
+      float liftVal = Nums.min(1, (1f - (distance / range)) * 2);
+      byte newVal = (byte) (MAX_FOG * liftVal);
       byte oldVal = fogVals[c.x][c.y];
       if (newVal > oldVal) fogVals[c.x][c.y] = newVal;
     }

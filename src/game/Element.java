@@ -309,6 +309,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
       removeFootprint();
       
       map.planning.unplaceObject(this);
+      setBuildLevel(0);
       setDestroyed();
     }
     
@@ -365,7 +366,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
     if (type.wide > 1 || type.high > 1) {
       store = at.exactPosition(store);
       store.x += (type.wide - 1) / 2f;
-      store.y += (type.high = 1) / 2f;
+      store.y += (type.high - 1) / 2f;
       return store;
     }
     else {
@@ -758,7 +759,7 @@ public class Element implements Session.Saveable, Target, Selection.Focus {
   
   
   protected float renderedFog(Base views) {
-    if (views == this.base) return 1;
+    if (views == this.base && ! type.isFixture()) return 1;
     AreaFog fog = map.fogMap(views.faction(), false);
     if (fog == null) return 0;
     return fog.displayedFog(at.x + 0.5f, at.y + 0.5f, this);

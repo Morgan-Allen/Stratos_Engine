@@ -288,7 +288,7 @@ public abstract class ActorTechnique extends Trait {
   
   
   public void applyFromRuler(Base ruler, Target subject) {
-    ruler.incFunds(0 - costCash);
+    ruler.incFunds(0 - costCash, Base.CashSource.MISC);
   }
   
   

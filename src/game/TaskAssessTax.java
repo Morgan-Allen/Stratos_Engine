@@ -107,7 +107,7 @@ public class TaskAssessTax extends Task {
     if (actor.jobType() == JOB.RETURNING && visits == store) {
       float cash = actor.outfit.carried(CASH);
       actor.outfit.setCarried(CASH, 0);
-      store.base().incFunds((int) cash);
+      store.base().incFunds((int) cash, Base.CashSource.TAXES);
     }
   }
 }

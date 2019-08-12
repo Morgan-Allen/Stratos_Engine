@@ -28,11 +28,25 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
   final public BaseGrowth    growth    = new BaseGrowth   (this);
   
   Building headquarters = null;
-  private int currentFunds = 0;
   List <BuildType> techTypes = new List();
   
   List <Mission> missions = new List();
   List <Mission> guarding = new List();
+  
+  
+  public static enum CashSource {
+    WAGES, IMPORTS, TRIBUTE,
+    FESTIVAL, BRIBES, MISC,
+    TAXES, EXPORTS, PLUNDER
+  }
+  
+  private int currentFunds = 0;
+  
+  static class CashRecord {
+    int yearEnd;
+    Tally <CashSource> records = new Tally();
+  }
+  final List <CashRecord> accounts = new List();
   
   
   
@@ -69,11 +83,21 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
     growth   .loadState(s);
     
     headquarters = (Building) s.loadObject();
-    currentFunds = s.loadInt();
     s.loadObjects(techTypes);
     
     s.loadObjects(missions);
     s.loadObjects(guarding);
+    
+    currentFunds = s.loadInt();
+    for (int n = s.loadInt(); n-- > 0;) {
+      CashRecord r = new CashRecord();
+      for (CashSource source : CashSource.values()) {
+        float amount = s.loadFloat();
+        r.records.set(source, amount);
+      }
+      r.yearEnd = s.loadInt();
+      accounts.add(r);
+    }
   }
   
   
@@ -91,11 +115,19 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
     growth   .saveState(s);
     
     s.saveObject(headquarters);
-    s.saveInt(currentFunds);
     s.saveObjects(techTypes);
     
     s.saveObjects(missions);
     s.saveObjects(guarding);
+    
+    s.saveInt(currentFunds);
+    s.saveInt(accounts.size());
+    for (CashRecord r : accounts) {
+      for (CashSource source : CashSource.values()) {
+        s.saveFloat(r.records.valueFor(source));
+      }
+      s.saveInt(r.yearEnd);
+    }
   }
   
   
@@ -201,13 +233,38 @@ public class Base implements Session.Saveable, Trader, RelationSet.Focus {
   }
   
   
-  public int incFunds(int inc) {
+  public int incFundsFromTrade(int inc) {
+    if (inc >= 0) return incFunds(inc, CashSource.EXPORTS);
+    else          return incFunds(inc, CashSource.IMPORTS);
+  }
+  
+  
+  public int incFunds(int inc, CashSource source) {
     currentFunds += inc;
+    
+    CashRecord account = accounts.last();
+    if (account == null || account.yearEnd < world.time()) {
+      account = new CashRecord();
+      account.yearEnd = Nums.ceil(world.time() * 1f / YEAR_LENGTH) * YEAR_LENGTH;
+      accounts.addLast(account);
+    }
+    account.records.add(inc, source);
+    
     return currentFunds;
   }
   
   
-  public Base base() { return this; }
+  public int fundsSpent(CashSource source, int yearOffset) {
+    int index = accounts.size() - (1 + yearOffset);
+    if (index < 0) return 0;
+    CashRecord account = accounts.atIndex(index);
+    return (int) account.records.valueFor(source);
+  }
+  
+  
+  public Base base() {
+    return this;
+  }
   
   
   

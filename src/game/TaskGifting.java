@@ -2,6 +2,8 @@
 
 package game;
 import static game.GameConstants.*;
+
+import game.GameConstants.Carrier;
 import util.*;
 
 
@@ -53,6 +55,9 @@ public class TaskGifting extends TaskDialog {
     }
     if (store == null) {
       store = actor.home();
+    }
+    if (store == null && actor.work() instanceof Carrier) {
+      store = (Carrier) actor.work();
     }
     if (store == null || store.base().activeMap() != actor.map()) {
       store = actor;

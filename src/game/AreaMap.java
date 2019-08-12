@@ -4,6 +4,8 @@ package game;
 import graphics.common.*;
 import static game.GameConstants.*;
 import static util.TileConstants.*;
+
+import game.GameConstants.Target;
 import start.*;
 import util.*;
 
@@ -324,6 +326,13 @@ public class AreaMap implements Session.Saveable {
     b.exactPosition(v2);
     v1.z = v2.z = 0;
     return v1.distance(v2);
+  }
+  
+  
+  public static float distanceSubRadius(Target a, Target b) {
+    float dist = distance(a, b);
+    dist -= (a.radius() + b.radius());
+    return dist > 0 ? dist : 0;
   }
   
   

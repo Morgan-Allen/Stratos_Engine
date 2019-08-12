@@ -340,7 +340,7 @@ public class TaskCombat extends Task {
     for (AreaTile t : inRange) {
       if (Task.hasTaskFocus(t, jobType, active)) continue;
       
-      float distT = AreaMap.distance(target, t);
+      float distT = AreaMap.distanceSubRadius(target, t);
       ///I.say("    "+t+" : "+distT);
       if (distT > maxRange) continue;
       
@@ -374,7 +374,7 @@ public class TaskCombat extends Task {
     //  the fancy pathing-connection tests.  You just check if the target is in
     //  range.
     if (! active.mobile()) {
-      float distance     = AreaMap.distance(active.at(), target);
+      float distance     = AreaMap.distanceSubRadius(active.at(), target);
       float rangeMissile = active.type().rangeDist;
       float rateMelee    = active.type().meleeDamage;
       float rateRange    = active.type().rangeDamage;
@@ -412,7 +412,7 @@ public class TaskCombat extends Task {
     
     //  TODO:  Decide on a preferred attack-mode first...?
     
-    if (canTouch && AreaMap.distance(target, t) < RANGE_MELEE) {
+    if (canTouch && AreaMap.distanceSubRadius(target, t) < RANGE_MELEE) {
       currentTask.attackMode = ATTACK_MELEE;
     }
     else {
@@ -574,7 +574,7 @@ public class TaskCombat extends Task {
   
   
   boolean checkTargetContact(Target from) {
-    float range = AreaMap.distance(active, primary);
+    float range = AreaMap.distanceSubRadius(active, primary);
     float maxRange = actionRange();
     return range < maxRange;
   }

@@ -597,7 +597,11 @@ public class Task implements Session.Saveable {
   
   boolean checkTargetContact(Target from) {
     Pathing last = (Pathing) Visit.last(path);
-    if (from != last && active.at() == last) return true;
+    if (active.mobile() && last != null) {
+      final Actor asActor = (Actor) active;
+      if (from != last && asActor.inside() == last) return true;
+      if (from != last && asActor.at()     == last) return true;
+    }
     float dist = AreaMap.distance(active, from), range = actionRange();
     return dist < range;
   }
@@ -609,8 +613,10 @@ public class Task implements Session.Saveable {
   
   
   boolean inContact() {
+    if (visits != null && active.type().isActor()) {
+      return ((Actor) active).inside() == visits;
+    }
     return checkTargetContact(target);
-    //return contactState > PROG_CLOSING && contactState < PROG_COMPLETE;
   }
   
   
@@ -690,7 +696,7 @@ public class Task implements Session.Saveable {
     boolean verbose = false;
     
     Actor   actor    = (Actor) active;
-    AreaMap    map      = active.map();
+    AreaMap map      = active.map();
     boolean visiting = visits != null;
     Pathing from     = pathOrigin(active);
     Pathing heads    = pathTarget();
@@ -698,23 +704,19 @@ public class Task implements Session.Saveable {
     if (report && verbose) {
       I.say(this+" pathing toward "+(visiting ? visits : target));
     }
+    
     if (from == null || heads == null) {
       if (report) I.say("  Bad endpoints: "+from+" -> "+heads);
       return false;
     }
     
-    //  TODO:  You should have map-settings that toggle whether the
-    //  path-cache is used at all.  Default to simpler checks in that
-    //  case.
+    if (! map.pathCache.pathConnects(from, heads, true, false)) {
+      return false;
+    }
     
     ActorPathSearch search = new ActorPathSearch(actor, from, heads);
-    if (
-      (! visiting) && (! search.flight) &&
-      ! map.pathCache.pathConnects(from, heads, false, false)
-    ) {
-      search.setProximate(true);
-    }
     search.doSearch();
+    
     this.path = search.fullPath(Pathing.class);
     this.pathIndex = 0;
     

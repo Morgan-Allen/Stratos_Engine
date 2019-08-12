@@ -488,7 +488,7 @@ public class ActorAsVessel extends Actor implements Trader, Employer, Pathing {
     if (visits == base() && ! onMap) {
       float cash = outfit.carried(CASH);
       outfit.setCarried(CASH, 0);
-      visits.incFunds((int) cash);
+      visits.incFundsFromTrade((int) cash);
     }
   }
   

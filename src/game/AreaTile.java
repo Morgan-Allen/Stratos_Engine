@@ -173,7 +173,8 @@ public class AreaTile implements Pathing, Selection.Focus {
     for (int dir : T_DIAGONAL) {
       Pathing bef = temp[(dir + 1) % 8];
       Pathing aft = temp[(dir + 7) % 8];
-      if (bef == null || aft == null) temp[dir] = null;
+      if (bef == null || ! bef.isTile()) temp[dir] = null;
+      if (aft == null || ! aft.isTile()) temp[dir] = null;
     }
     //
     //  And return-

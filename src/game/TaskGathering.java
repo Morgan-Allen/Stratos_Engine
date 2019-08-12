@@ -41,9 +41,8 @@ public class TaskGathering extends Task {
   /**  External factory methods-
     */
   static boolean canPlant(BuildingForGather store) {
-    boolean canPlant = false;
-    for (Good g : store.type().produced) if (g.isCrop) canPlant = true;
-    return canPlant;
+    final BuildType stores = store.type();
+    return stores.gatherFlag == IS_CROP;
   }
   
   
