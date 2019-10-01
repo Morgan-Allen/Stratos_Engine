@@ -8,12 +8,12 @@ package graphics.sfx;
 import graphics.common.*;
 import graphics.widgets.*;
 import util.*;
-import com.badlogic.gdx.graphics.*;
+
 import java.io.*;
 
 
 
-public class TalkFX extends SFX {
+public class TalkFXOld extends SFX {
   
   
   /**  Field definitions, constants and constructors-
@@ -21,15 +21,19 @@ public class TalkFX extends SFX {
   public static class TalkModel extends ModelAsset {
     
     final ImageAsset bubbleTex;
+    final Alphabet font;
     
     
     public TalkModel(
       String modelName, Class sourceClass,
-      String assetsDir, String bubbleFile
+      String assetsDir, String fontFile, String bubbleFile
     ) {
       super(sourceClass, modelName);
       this.bubbleTex = ImageAsset.fromImage(
         sourceClass, modelName+"_bubble_tex", assetsDir+bubbleFile
+      );
+      this.font = Alphabet.loadAlphabet(
+        sourceClass, modelName+"_font_asset", assetsDir, fontFile
       );
     }
 
@@ -40,13 +44,14 @@ public class TalkFX extends SFX {
     
     
     public Sprite makeSprite() {
-      return new TalkFX(this);
+      return new TalkFXOld(this);
     }
     
     
     protected State loadAsset() {
       Assets.loadNow(bubbleTex);
-      if (bubbleTex.stateLoaded()) {
+      Assets.loadNow(font     );
+      if (bubbleTex.stateLoaded() && font.stateLoaded()) {
         return state = State.LOADED;
       }
       else return state = State.ERROR;
@@ -55,7 +60,8 @@ public class TalkFX extends SFX {
     
     protected State disposeAsset() {
       Assets.disposeOf(bubbleTex);
-      if (bubbleTex.stateDisposed()) {
+      Assets.disposeOf(font     );
+      if (bubbleTex.stateDisposed() && font.stateDisposed()) {
         return state = State.DISPOSED;
       }
       else return state = State.ERROR;
@@ -73,15 +79,17 @@ public class TalkFX extends SFX {
     FADE_TIME  = 0.5f;
   
   final TalkModel model;
-  public int lineHigh = 30;
   public float fadeRate = 1.0f;
+  final float LINE_HIGH, LINE_SPACE;
   final Stack <Bubble> toShow  = new Stack <Bubble> ();
   final Stack <Bubble> showing = new Stack <Bubble> ();
   
   
-  TalkFX(TalkModel model) {
+  TalkFXOld(TalkModel model) {
     super(PRIORITY_FIRST);
     this.model = model;
+    LINE_HIGH  = model.font.letterFor(' ').height;
+    LINE_SPACE = LINE_HIGH + 10;
   }
   
   
@@ -92,15 +100,13 @@ public class TalkFX extends SFX {
   
   public void saveTo(DataOutputStream out) throws Exception {
     super.saveTo(out);
-    out.writeInt(lineHigh);
-    out.writeFloat(fadeRate);
     out.writeInt(toShow .size());
     out.writeInt(showing.size());
     final Batch <Bubble> all = new Batch <Bubble> ();
     for (Bubble b : toShow ) all.add(b);
     for (Bubble b : showing) all.add(b);
     for (Bubble b : all) {
-      Assets.saveReference(b.icon, out);
+      Assets.writeString(out, b.phrase);
       out.writeInt  (b.type   );
       out.writeFloat(b.width  );
       out.writeFloat(b.xoff   );
@@ -112,12 +118,10 @@ public class TalkFX extends SFX {
   
   public void loadFrom(DataInputStream in) throws Exception {
     super.loadFrom(in);
-    lineHigh = in.readInt();
-    fadeRate = in.readFloat();
     final int numT = in.readInt(), numS = in.readInt();
     for (int n = 0; n < numT + numS; n++) {
       final Bubble b = new Bubble();
-      b.icon    = (ImageAsset) Assets.loadReference(in);
+      b.phrase  = Assets.readString(in);
       b.type    = in.readInt();
       b.width   = in.readFloat();
       b.xoff    = in.readFloat();
@@ -134,7 +138,7 @@ public class TalkFX extends SFX {
     */
   static class Bubble {
     
-    ImageAsset icon;
+    String phrase;
     int type;
     
     float width;
@@ -149,19 +153,19 @@ public class TalkFX extends SFX {
   }
   
   
-  public void addIcon(ImageAsset icon, int bubbleType) {
-    final Bubble b = new Bubble();
-    
-    if (icon == null) I.complain("\nCANNOT ADD NULL ICON!");
-    b.icon = icon;
-    b.type = bubbleType;
-    toShow.add(b);
-    updateShowList();
+  public void addPhrase(String phrase) {
+    addPhrase(phrase, NOT_SPOKEN);
   }
   
   
-  public void addIcon(ImageAsset icon) {
-    addIcon(icon, NOT_SPOKEN);
+  public void addPhrase(String phrase, int bubbleType) {
+    final Bubble b = new Bubble();
+    
+    if (phrase == null) I.complain("\nCANNOT ADD NULL STRING AS PHRASE!");
+    b.phrase  = phrase;
+    b.type    = bubbleType;
+    toShow.add(b);
+    updateShowList();
   }
   
   
@@ -183,14 +187,14 @@ public class TalkFX extends SFX {
       final boolean
         shouldMove = toShow.size() > 0,
         canMove    = showing.size() == 0 || first.alpha() <= 1,
-        isSpace    = showing.size() == 0 || first.yoff >= lineHigh;
+        isSpace    = showing.size() == 0 || first.yoff >= LINE_SPACE;
       
       if (shouldMove && canMove) {
         if (isSpace) {
           showBubble(toShow.removeFirst());
         }
         else for (Bubble b : showing) {
-          b.yoff = 5 + ((1 - b.alpha()) * lineHigh);
+          b.yoff = 5 + ((1 - b.alpha()) * LINE_SPACE);
         }
       }
       else break;
@@ -199,8 +203,8 @@ public class TalkFX extends SFX {
   
   
   private void showBubble(Bubble b) {
-    //final float fontScale = 1;
-    float width = b.icon.asTexture().getWidth();// Label.phraseWidth(b.phrase, model.font, fontScale);
+    final float fontScale = 1;
+    float width = Label.phraseWidth(b.phrase, model.font, fontScale);
     //
     //  You also need to either left or right justify, depending on the bubble
     //  type.
@@ -227,7 +231,7 @@ public class TalkFX extends SFX {
     
     final Vec3D flatPoint = new Vec3D(position);
     pass.rendering.view.translateToScreen(flatPoint);
-    ///final float fontScale = LINE_HIGH / model.font.letterFor(' ').height;
+    final float fontScale = LINE_HIGH / model.font.letterFor(' ').height;
     
     for (Bubble bubble : showing) if (bubble.type != NOT_SPOKEN) {
       renderBubble(pass, bubble, flatPoint, bubble.type == FROM_RIGHT);
@@ -236,7 +240,6 @@ public class TalkFX extends SFX {
     for (Bubble bubble : showing) {
       final boolean speaks = bubble.type != NOT_SPOKEN;
       final Colour c = new Colour(Colour.WHITE);
-      final Texture t = bubble.icon.asTexture();
       float alpha = bubble.alpha();
       if (this.colour != null) alpha *= this.colour.a;
       
@@ -244,14 +247,12 @@ public class TalkFX extends SFX {
       c.blend(Colour.BLACK, fog);
       c.a = alpha;
       
-      pass.compileQuad(
-        t, c, true,
+      Label.renderPhrase(
+        bubble.phrase, model.font, fontScale, c,
         flatPoint.x + bubble.xoff,
         flatPoint.y + bubble.yoff,
-        t.getWidth() * scale,
-        t.getHeight() * scale,
-        0, 0, 1, 1,
-        flatPoint.z + 0.05f, true
+        flatPoint.z + 0.05f,
+        pass, true
       );
     }
   }
@@ -277,7 +278,7 @@ public class TalkFX extends SFX {
       TOP_V = 1,//BUBBLE_TEX.maxV(),
       
       //pad = 5,
-      texHigh = (lineHigh + 10) * 1.5f,
+      texHigh = (LINE_HIGH + 10) * 1.5f,
       minY = y - (5 + (texHigh / 3)),
       maxY = minY + texHigh,
       

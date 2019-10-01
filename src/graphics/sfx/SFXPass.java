@@ -1,18 +1,16 @@
 
 
 package graphics.sfx;
-import util.*;
-
 //import static graphics.common.GL.*;
-import static graphics.cutout.CutoutModel.VERT_INDICES;
+//import static graphics.cutout.CutoutModel.VERT_INDICES;
+import graphics.cutout.*;
+import graphics.common.*;
+import util.*;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.*;
-
-import graphics.common.*;
-
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.glutils.*;
 
@@ -80,7 +78,7 @@ public class SFXPass {
     compIndex = new short[MAX_QUADS * 6];
 
     for (int i = 0; i < compIndex.length; i++) {
-      compIndex[i] = (short) (((i / 6) * 4) + VERT_INDICES[i % 6]);
+      compIndex[i] = (short) (((i / 6) * 4) + CutoutModel.VERT_INDICES[i % 6]);
     }
     compiled.setIndices(compIndex);
     

@@ -630,7 +630,9 @@ public class AreaMap implements Session.Saveable {
     area.expandBy(Nums.round(range / FLAG_RES, 1, true));
     
     Batch <Active> all = new Batch();
-    for (Coord c : Visit.grid(area)) try {
+    for (Coord c : Visit.grid(area)) {
+      if (c.x < 0 || c.x >= flagSize || c.y < 0 || c.y >= flagSize) continue;
+      
       List <Active> inBigGrid = actorGrid[c.x][c.y];
       
       for (Active a : inBigGrid) {
@@ -639,7 +641,6 @@ public class AreaMap implements Session.Saveable {
         all.add(a);
       }
     }
-    catch (ArrayIndexOutOfBoundsException e) {}
     
     return all;
   }
