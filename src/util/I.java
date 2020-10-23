@@ -4,7 +4,6 @@
   *  for now, feel free to poke around for non-commercial purposes.
   */
 package util;
-
 import java.awt.*;
 import java.awt.image.*;
 import javax.swing.*;
@@ -177,11 +176,17 @@ public class I {
   public static String list(Object array[]) {
     if (array == null) return "NULL";
     final StringBuffer s = new StringBuffer();
-    for (Object o : array) {
-      final String pads = o == Visit.last(array) ? "" : ", ";
+    for (int i = 0; i < array.length; i++) {
+      Object o = array[i];
+      final String pads = (i == (array.length - 1)) ? "" : ", ";
       s.append(o+pads);
     }
     return s.toString();
+  }
+  
+  
+  public static String list(Series array) {
+    return list(array.toArray());
   }
   
   
@@ -216,15 +221,23 @@ public class I {
 
     I.say(header);
     for (int i = 0; i < numRows; i++) {
-      I.say(lineFeed+""+padToLength(labels[i], maxLen)+": "+refers[i]);
+      I.say(lineFeed+""+pad(labels[i], maxLen)+": "+refers[i]);
     }
   }
   
   
-  public static String padToLength(String s, int toLength) {
+  public static String pad(String s, int toLength) {
     final StringBuffer b = new StringBuffer(s);
     for(int n = toLength; n-- > s.length();) b.append(' ');
     return b.toString();
+  }
+  
+  public static String pad(int n, int toLength) {
+    return pad(""+n, toLength);
+  }
+  
+  public static String pad(float n, int toLength) {
+    return pad(""+n, toLength);
   }
   
   
@@ -290,7 +303,7 @@ public class I {
     
     private JPanel pane;
     private JTextPane info;
-    private Object data;
+    private Object data[];
     private int dataWide, dataHigh;
     private float min, max;
     
@@ -298,7 +311,7 @@ public class I {
     private Table <Character, Boolean> keysPressed = new Table();
     
     
-    Presentation(String name, Object data, final int mode) {
+    Presentation(String name, Object data[], final int mode) {
       super(name);
       
       this.data = data;
@@ -319,14 +332,17 @@ public class I {
       
       this.info = new JTextPane();
       this.info.setEditable(false);
+      this.info.setFont(new Font("Monaco", Font.PLAIN, 9));
       this.add(info);
       
       pane.addKeyListener(this);
       info.addKeyListener(this);
+      
+      setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
     
     
-    public void mouseClicked(MouseEvent arg0) {
+    public void mouseClicked(MouseEvent e) {
       this.isClicked = true;
     }
     
@@ -334,42 +350,46 @@ public class I {
       keysPressed.put(e.getKeyChar(), true);
     }
     
-    public void mouseEntered (MouseEvent arg0) {}
-    public void mouseExited  (MouseEvent arg0) {}
-    public void mousePressed (MouseEvent arg0) {}
-    public void mouseReleased(MouseEvent arg0) {}
+    public void mouseEntered (MouseEvent e) {}
+    public void mouseExited  (MouseEvent e) {}
+    public void mousePressed (MouseEvent e) {}
+    public void mouseReleased(MouseEvent e) {}
     
     public void keyPressed (KeyEvent e) {}
     public void keyReleased(KeyEvent e) {}
-
-
+    
+    
     private void paintGrey(Graphics g) {
       final byte scale[] = new byte[256];
       for (int s = 256; s-- > 0;) {
         scale[s] = (byte) s;
       }
-      float vals[][] = (float[][]) data;
-      final int w = dataWide = vals.length, h = dataHigh = vals[0].length;
-      
-      final byte byteData[] = new byte[w * h];
-      for (Coord c : Visit.grid(0, 0, w, h, 1)) {
-        final float pushed = (vals[c.x][c.y] - min) / (max - min);
-        final int grey = (int) Nums.clamp(pushed * 255, 0, 255);
-        byteData[imgIndex(c.x, c.y, w, h)] = scale[grey];
+      for (Object layer : data) if (layer != null) {
+        float vals[][] = (float[][]) layer;
+        final int w = dataWide = vals.length, h = dataHigh = vals[0].length;
+        
+        final byte byteData[] = new byte[w * h];
+        for (Coord c : Visit.grid(0, 0, w, h, 1)) {
+          final float pushed = (vals[c.x][c.y] - min) / (max - min);
+          final int grey = (int) Nums.clamp(pushed * 255, 0, 255);
+          byteData[imgIndex(c.x, c.y, w, h)] = scale[grey];
+        }
+        presentImage(g, byteData, BufferedImage.TYPE_BYTE_GRAY, w, h);
       }
-      presentImage(g, byteData, BufferedImage.TYPE_BYTE_GRAY, w, h);
     }
     
     
     private void paintColour(Graphics g) {
-      final int vals[][] = (int[][]) data;
-      final int w = dataWide = vals.length, h = dataHigh = vals[0].length;
-      
-      final int intData[] = new int[w * h];
-      for (Coord c : Visit.grid(0, 0, w, h, 1)) {
-        intData[imgIndex(c.x, c.y, w, h)] = vals[c.x][c.y];
+      for (Object layer : data) if (layer != null) {
+        final int vals[][] = (int[][]) layer;
+        final int w = dataWide = vals.length, h = dataHigh = vals[0].length;
+        
+        final int intData[] = new int[w * h];
+        for (Coord c : Visit.grid(0, 0, w, h, 1)) {
+          intData[imgIndex(c.x, c.y, w, h)] = vals[c.x][c.y];
+        }
+        presentImage(g, intData, BufferedImage.TYPE_INT_ARGB, w, h);
       }
-      presentImage(g, intData, BufferedImage.TYPE_INT_ARGB, w, h);
     }
     
     
@@ -394,8 +414,8 @@ public class I {
   
   
   public static void present(
-    float greyVals[][],
-    String name, int w, int h, float min, float max
+    String name, int w, int h, float min, float max,
+    float[][]... greyVals
   ) {
     final Presentation p = present(greyVals, MODE_GREY, name, w, h);
     p.min = min;
@@ -404,15 +424,15 @@ public class I {
   
   
   public static void present(
-    int colourVals[][],
-    String name, int w, int h
+    String name, int w, int h,
+    int[][]... colourVals
   ) {
     final Presentation p = present(colourVals, MODE_COLOUR, name, w, h);
   }
   
   
   private static Presentation present(
-    Object vals, int mode,
+    Object vals[], int mode,
     String name, int w, int h
   ) {
     Presentation window = windows.get(name);

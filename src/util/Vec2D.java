@@ -239,6 +239,11 @@ public class Vec2D {
     *  negative degree values once you go past 180.
     */
   public float toAngle() {
+    return toAngle(x, y);
+  }
+  
+  
+  public static float toAngle(float x, float y) {
     return Nums.atan2(y, x) * 180 / Nums.PI;
   }
   

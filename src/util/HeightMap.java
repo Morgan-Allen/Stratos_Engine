@@ -32,19 +32,27 @@ public class HeightMap {
     *  (The seed, like the size, should equal in dimension (2^n)+1 for some
     *  value of n, and it's overall height should be proportionate to maxHigh.)
     */
-  public HeightMap(int size, float seed[][], float maxHigh, float stepRatio) {
-    this.size    = size;
+  public HeightMap(int minSize, float seed[][], float maxHigh, float stepRatio) {
+    //
+    //  size must be a power of 2, + 1:
+    size = 1; while (size + 1 < minSize) size *= 2; size++;
     this.maxHigh = maxHigh;
     this.mapHigh = new float[size][size];
-    final int step = (size - 1) / (seed.length - 1);
     //
     //  We need to insert the seed values provided at appropriate intervals
     //  within the height map (to serve as a basis for subsequent fractal
     //  descent.)
-    for (int x = 0; x * step < size; x++)
-      for (int y = 0; y * step < size; y++)
-        mapHigh[x * step][y * step] = seed[x][y];
-    fractalGen(step, maxHigh, stepRatio);
+    if (seed.length > 1) {
+      final int step = (size - 1) / (seed.length - 1);
+      for (int x = 0; x * step < size; x++)
+        for (int y = 0; y * step < size; y++)
+          mapHigh[x * step][y * step] = seed[x][y];
+      fractalGen(step, maxHigh, stepRatio);
+    }
+    else {
+      final int step = size - 1;
+      fractalGen(step, maxHigh, stepRatio);
+    }
   }
   
   

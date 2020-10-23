@@ -159,7 +159,7 @@ public class GameConstants {
     Float weights [] = new Float[0];
     
     Terrain(String name, int index) {
-      super("terrain_"+index, IS_TERRAIN);
+      super(GameConstants.class, "terrain_"+index, IS_TERRAIN);
       this.name         = name ;
       this.terrainIndex = index;
       this.blocks       = false;
@@ -182,14 +182,14 @@ public class GameConstants {
     NO_HABITAT  [] = {}
   ;
   final static Type
-    JUNGLE_TREE1 = new Type("fixture_j_tree1", IS_FIXTURE),
-    DESERT_ROCK1 = new Type("fixture_d_rock1", IS_FIXTURE),
-    DESERT_ROCK2 = new Type("fixture_d_rock2", IS_FIXTURE)
+    JUNGLE_TREE1 = new Type(GameConstants.class, "fixture_j_tree1", IS_FIXTURE),
+    DESERT_ROCK1 = new Type(GameConstants.class, "fixture_d_rock1", IS_FIXTURE),
+    DESERT_ROCK2 = new Type(GameConstants.class, "fixture_d_rock2", IS_FIXTURE)
   ;
   final static Type
-    TAPIR   = new Type("animal_tapir" , IS_ANIMAL_WLK),
-    QUAIL   = new Type("animal_quail" , IS_ANIMAL_WLK),
-    JAGUAR  = new Type("animal_jaguar", IS_ANIMAL_WLK),
+    TAPIR   = new Type(GameConstants.class, "animal_tapir" , IS_ANIMAL_ACT),
+    QUAIL   = new Type(GameConstants.class, "animal_quail" , IS_ANIMAL_ACT),
+    JAGUAR  = new Type(GameConstants.class, "animal_jaguar", IS_ANIMAL_ACT),
     ALL_ANIMALS[] = { TAPIR, QUAIL, JAGUAR }
   ;
   static {
@@ -237,7 +237,7 @@ public class GameConstants {
     int price;
     
     Good(String name, int price, int ID) {
-      super("good_"+ID, IS_GOOD);
+      super(GameConstants.class, "good_"+ID, IS_GOOD);
       
       GOODS_LIST.add(this);
       this.name   = name ;
@@ -301,7 +301,7 @@ public class GameConstants {
     */
   static class WalkerType extends Type {
     WalkerType(String ID, int category, int socialClass) {
-      super(ID, category);
+      super(GameConstants.class, ID, category);
       this.socialClass = socialClass;
     }
   }
@@ -316,16 +316,16 @@ public class GameConstants {
   final static WalkerType
     NO_WALKERS[] = new WalkerType[0],
     
-    VAGRANT  = new WalkerType("type_vagrant" , IS_PERSON_WLK, CLASS_COMMON),
-    CHILD    = new WalkerType("type_child"   , IS_PERSON_WLK, CLASS_COMMON),
-    CITIZEN  = new WalkerType("type_citizen" , IS_PERSON_WLK, CLASS_COMMON),
-    SERVANT  = new WalkerType("type_servant" , IS_PERSON_WLK, CLASS_SLAVE ),
-    NOBLE    = new WalkerType("type_noble"   , IS_PERSON_WLK, CLASS_NOBLE ),
-    WORKER   = new WalkerType("type_worker"  , IS_PERSON_WLK, CLASS_COMMON),
-    MERCHANT = new WalkerType("type_merchant", IS_PERSON_WLK, CLASS_TRADER),
-    PORTERS  = new WalkerType("type_porters" , IS_PERSON_WLK, CLASS_SLAVE ),
-    SOLDIER  = new WalkerType("type_soldier" , IS_PERSON_WLK, CLASS_NOBLE ),
-    PRIEST   = new WalkerType("type_priest"  , IS_PERSON_WLK, CLASS_NOBLE )
+    VAGRANT  = new WalkerType("type_vagrant" , IS_PERSON_ACT, CLASS_COMMON),
+    CHILD    = new WalkerType("type_child"   , IS_PERSON_ACT, CLASS_COMMON),
+    CITIZEN  = new WalkerType("type_citizen" , IS_PERSON_ACT, CLASS_COMMON),
+    SERVANT  = new WalkerType("type_servant" , IS_PERSON_ACT, CLASS_SLAVE ),
+    NOBLE    = new WalkerType("type_noble"   , IS_PERSON_ACT, CLASS_NOBLE ),
+    WORKER   = new WalkerType("type_worker"  , IS_PERSON_ACT, CLASS_COMMON),
+    MERCHANT = new WalkerType("type_merchant", IS_PERSON_ACT, CLASS_TRADER),
+    PORTERS  = new WalkerType("type_porters" , IS_PERSON_ACT, CLASS_SLAVE ),
+    SOLDIER  = new WalkerType("type_soldier" , IS_PERSON_ACT, CLASS_NOBLE ),
+    PRIEST   = new WalkerType("type_priest"  , IS_PERSON_ACT, CLASS_NOBLE )
   ;
   static {
     VAGRANT .name = "Vagrant" ;
@@ -348,7 +348,7 @@ public class GameConstants {
     */
   static class BuildType extends Type {
     BuildType(String ID, int category) {
-      super(ID, category);
+      super(GameConstants.class, ID, category);
     }
   }
   final static int
@@ -368,7 +368,7 @@ public class GameConstants {
     HOUSE         = new BuildType("type_house"        , IS_HOME_BLD   ),
     HOUSE_T1      = new BuildType("type_house_tier1"  , IS_UPGRADE    ),
     HOUSE_T2      = new BuildType("type_house_tier2"  , IS_UPGRADE    ),
-    SWEEPER       = new BuildType("type_sweeper"      , IS_COLLECT_BLD),
+    SWEEPER       = new BuildType("type_sweeper"      , IS_AMENITY_BLD),
     BASIN         = new BuildType("type_basin"        , IS_WATER_BLD  ),
     SCHOOL        = new BuildType("type_public_school", IS_AMENITY_BLD),
     BALL_COURT    = new BuildType("type_ball_court"   , IS_AMENITY_BLD),
@@ -383,7 +383,7 @@ public class GameConstants {
     
     MARKET        = new BuildType("type_market"       , IS_CRAFTS_BLD ),
     PORTER_HOUSE  = new BuildType("type_porter_house" , IS_TRADE_BLD  ),
-    COLLECTOR     = new BuildType("type_collector"    , IS_COLLECT_BLD),
+    COLLECTOR     = new BuildType("type_collector"    , IS_AMENITY_BLD),
     ECONOMIC_BUILDINGS[] = { MARKET, PORTER_HOUSE, COLLECTOR },
     
     GARRISON      = new BuildType("type_garrison"     , IS_ARMY_BLD   ),

@@ -48,7 +48,10 @@ public class CityMap implements Session.Saveable {
   
   
   public CityMap(Session s) throws Exception {
-    s.cacheInstance(this);
+    return;
+  }
+  
+  public void loadState(Session s) throws Exception {
     
     city = (City) s.loadObject();
     performSetup(s.loadInt());

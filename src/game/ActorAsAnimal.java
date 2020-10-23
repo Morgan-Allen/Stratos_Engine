@@ -104,7 +104,7 @@ public class ActorAsAnimal extends Actor {
       
       float dist   = CityMap.distance(a.at(), at());
       float rating = CityMap.distancePenalty(dist);
-      if (category != Type.IS_ANIMAL_WLK) rating /= 2;
+      if (category != Type.IS_ANIMAL_ACT) rating /= 2;
       
       pick.compare(a, rating);
     }

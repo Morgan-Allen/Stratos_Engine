@@ -171,7 +171,7 @@ public class Box2D {
   
   /**  Other utility methods-
     */
-  public Box2D expandBy(int e) {
+  public Box2D expandBy(float e) {
     return set(xpos - e, ypos - e, xdim + (e * 2), ydim + (e * 2));
   }
   
@@ -204,6 +204,20 @@ public class Box2D {
     ymax = unit * Nums.ceil (ymax / unit);
     xdim = xmax - xpos;
     ydim = ymax - ypos;
+  }
+  
+  
+  public void scaleX(float s) {
+    xpos *= s;
+    xdim *= s;
+    xmax *= s;
+  }
+  
+  
+  public void scaleY(float s) {
+    ypos *= s;
+    ydim *= s;
+    ymax *= s;
   }
   
   

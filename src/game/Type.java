@@ -8,68 +8,13 @@ import java.lang.reflect.Array;
 
 
 
-public class Type extends Index.Entry implements Session.Saveable {
+public class Type extends Constant {
   
   
   /**  Indexing, categorisation, spawning and save/load methods-
     */
-  final static int
-    IS_TERRAIN     = 0,
-    IS_FIXTURE     = 1,
-    IS_GOOD        = 2,
-    IS_BUILDING    = 3,
-    IS_UPGRADE     = 4,
-    IS_CRAFTS_BLD  = 5,
-    IS_GATHER_BLD  = 6,
-    IS_WATER_BLD   = 7,
-    IS_TRADE_BLD   = 8,
-    IS_HOME_BLD    = 9,
-    IS_AMENITY_BLD = 10,
-    IS_COLLECT_BLD = 11,
-    IS_ARMY_BLD    = 12,
-    IS_FAITH_BLD   = 13,
-    IS_WALKER      = 14,
-    IS_PERSON_WLK  = 15,
-    IS_ANIMAL_WLK  = 16
-  ;
-  
-  final static Index <Type> INDEX = new Index();
-  
-  
-  Type(String ID, int category) {
-    super(INDEX, ID);
-    this.category = category;
-  }
-  
-  
-  public static Type loadConstant(Session s) throws Exception {
-    return INDEX.loadEntry(s.input());
-  }
-  
-  
-  public void saveState(Session s) throws Exception {
-    INDEX.saveEntry(this, s.output());
-  }
-  
-  
-  Object generate() {
-    switch (category) {
-      case(IS_FIXTURE    ): return new Element(this);
-      case(IS_BUILDING   ): return new Building          (this);
-      case(IS_CRAFTS_BLD ): return new BuildingForCrafts (this);
-      case(IS_GATHER_BLD ): return new BuildingForGather (this);
-      case(IS_WATER_BLD  ): return new BuildingForWater  (this);
-      case(IS_TRADE_BLD  ): return new BuildingForTrade  (this);
-      case(IS_HOME_BLD   ): return new BuildingForHome   (this);
-      case(IS_AMENITY_BLD): return new BuildingForAmenity(this);
-      case(IS_COLLECT_BLD): return new BuildingForCollect(this);
-      case(IS_ARMY_BLD   ): return new BuildingForArmy   (this);
-      case(IS_FAITH_BLD  ): return new BuildingForFaith  (this);
-      case(IS_WALKER     ): return new Actor        (this);
-      case(IS_PERSON_WLK ): return new ActorAsPerson(this);
-      case(IS_ANIMAL_WLK ): return new ActorAsAnimal(this);
-    }
-    return null;
+  Type(Class baseClass, String ID, int category) {
+    super(baseClass, ID, category);
   }
   
   

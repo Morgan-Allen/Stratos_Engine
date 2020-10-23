@@ -56,6 +56,11 @@ public abstract class Search <T> {
   }
   
   
+  public void addToAgenda(T entry, float cost) {
+    tryEntry(entry, null, cost);
+  }
+  
+  
   
   /**  Performs the actual search algorithm.
     */

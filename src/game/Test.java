@@ -207,7 +207,7 @@ public class Test {
       if (graphics) {
         if (cityView) updateCityMapView (map);
         else          updateWorldMapView(map);
-        I.present(graphic, VIEW_NAME, 400, 400);
+        I.present(VIEW_NAME, 400, 400, graphic);
         hover   = I.getDataCursor(VIEW_NAME, false);
         pressed = I.getKeysPressed(VIEW_NAME);
         
@@ -273,7 +273,7 @@ public class Test {
   
   
   static CityMap loadMap(CityMap oldMap, String filename) {
-    if (! Session.fileExists(filename)) {
+    if (! Assets.exists(filename)) {
       return oldMap;
     }
     try {

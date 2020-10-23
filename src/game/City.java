@@ -43,7 +43,10 @@ public class City implements Session.Saveable, Trader {
   
   
   public City(Session s) throws Exception {
-    s.cacheInstance(this);
+    return;
+  }
+  
+  public void loadState(Session s) throws Exception {
     
     name = s.loadString();
     
@@ -69,7 +72,6 @@ public class City implements Session.Saveable, Trader {
     active = s.loadBool();
     map    = (CityMap) s.loadObject();
   }
-  
   
   public void saveState(Session s) throws Exception {
     

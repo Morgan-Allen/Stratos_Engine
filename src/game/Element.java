@@ -31,7 +31,10 @@ public class Element implements Session.Saveable, Target {
   
   
   public Element(Session s) throws Exception {
-    s.cacheInstance(this);
+    return;
+  }
+  
+  public void loadState(Session s) throws Exception {
     
     type   = (Type) s.loadObject();
     map    = (CityMap) s.loadObject();

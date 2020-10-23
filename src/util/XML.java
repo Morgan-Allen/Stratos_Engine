@@ -78,26 +78,112 @@ public class XML {
     *  otherwise.)
     */
   public String value(String label) {
-    for (int n = values.length; n-- > 0;)
+    for (int n = values.length; n-- > 0;) {
       if (attributes[n].equals(label)) return values[n];
-    return null;
+    }
+    return "";
   }
   
   
   public boolean getBool(String label) {
-    final String val = value(label);
-    return (val == null) ? false : Boolean.parseBoolean(val);
+    try { return Boolean.parseBoolean(value(label)); }
+    catch (Exception e) { return false; }
   }
   
   
   public float getFloat(String label) {
-    final String val = value(label);
-    return (val == null) ? 1 : Float.parseFloat(val);
+    try { return Float.parseFloat(value(label)); }
+    catch (Exception e) { return 0; }
   }
   
   
   public int getInt(String label) {
     return (int) getFloat(label);
+  }
+  
+  
+  
+  /**  Construction methods-
+    */
+  public static XML node(String tag, Object... args) {
+    XML node = new XML();
+    node.tag = tag;
+    
+    for (int i = 0; i < args.length;) {
+      String att = args[i++].toString();
+      String val = args[i++].toString();
+      node.set(att, val);
+    }
+    return node;
+  }
+  
+  public void setTag(String tag) {
+    this.tag = tag;
+  }
+  
+  public void setContent(String content) {
+    this.content = content;
+  }
+  
+  public void set(String att, String value) {
+    attributeList.add(att  );
+    valueList    .add(value);
+  }
+  
+  public void addChild(XML node) {
+    childList.add(node);
+  }
+  
+  
+  public static void writeXML(XML root, String outFile) {
+    root.compile(0);
+    try {
+      final File baseFile = new File(outFile);
+      final FileWriter FW = new FileWriter(baseFile);
+      root.writeToFile(FW, "");
+      FW.flush();
+      FW.close();
+    }
+    catch (Exception e) {}
+  }
+  
+  
+  public void writeToFile(FileWriter writer, String indent) throws Exception {
+    compile(0);
+    
+    StringBuffer out = new StringBuffer();
+    out.append("\n"+indent+"<"+tag);
+    
+    int maxAttLen = -1;
+    for (String att : attributes) {
+      if (att.length() > maxAttLen) maxAttLen = att.length();
+    }
+    for (int i = 0; i < attributes.length; i++) {
+      String att = attributes[i], val = values[i];
+      out.append("\n"+indent+"  "+att);
+      int pad = 1 + maxAttLen - att.length();
+      while (pad-- > 0) out.append(' ');
+      out.append("= \""+val+"\"");
+    }
+    
+    out.append("\n"+indent+">\n");
+    
+    if (content != null) {
+      out.append(indent+"  ");
+      out.append(content);
+    }
+    writer.write(out.toString());
+    
+    for (XML child : children) {
+      child.writeToFile(writer, indent+"  ");
+    }
+    
+    out.delete(0, out.length());
+    boolean anyKids = content != null || children.length > 0;
+    if (anyKids) out.append("\n");
+    out.append(indent+"</"+tag+">");
+    writer.write(out.toString());
+    
   }
   
   

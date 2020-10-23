@@ -22,7 +22,7 @@ public interface Description {
   
   public static interface Clickable {
     String fullName();
-    void whenClicked(Object context);
+    void whenLinkClicked(Object context);
   }
   
   

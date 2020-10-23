@@ -37,7 +37,10 @@ public class Formation implements
   
   
   public Formation(Session s) throws Exception {
-    s.cacheInstance(this);
+    return;
+  }
+  
+  public void loadState(Session s) throws Exception {
     
     type = (Type) s.loadObject();
     s.loadObjects(recruits);

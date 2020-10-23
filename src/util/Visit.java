@@ -173,6 +173,12 @@ public abstract class Visit <T> implements Iterable <T>, Iterator <T> {
   }
   
   
+  public static Object first(Object o[]) {
+    if (o == null || o.length == 0) return null;
+    return o[0];
+  }
+  
+  
   public static Object last(Object o[]) {
     if (o == null || o.length == 0) return null;
     return o[o.length - 1];
@@ -227,6 +233,13 @@ public abstract class Visit <T> implements Iterable <T>, Iterator <T> {
     if (a == null || e == null) return false;
     for (Object o : a) if (o == e) return true;
     return false;
+  }
+  
+  
+  public static boolean arrayEquals(Object a[], Object o[]) {
+    if (a.length != o.length) return false;
+    for (int i = a.length; i-- > 0;) if (a[i] != o[i]) return false;
+    return true;
   }
   
   

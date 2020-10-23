@@ -37,7 +37,10 @@ public class World implements Session.Saveable {
   
   
   public World(Session s) throws Exception {
-    s.cacheInstance(this);
+    return;
+  }
+  
+  public void loadState(Session s) throws Exception {
     
     time = s.loadInt();
     s.loadObjects(cities);
