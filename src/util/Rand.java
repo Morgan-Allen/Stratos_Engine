@@ -20,17 +20,31 @@ public class Rand {
     return PREVIEW.nextFloat();
   }
   
-  final public static float num() { return GEN.nextFloat(); }
-  final public static boolean yes() { return GEN.nextBoolean(); }
-  final public static int index(int s) { return GEN.nextInt(s); }
+  final public static float num() {
+    return GEN.nextFloat();
+  }
   
+  final public static boolean yes() {
+    return GEN.nextBoolean();
+  }
+  
+  final public static int index(int s) {
+    if (s <= 0) return 0;
+    return GEN.nextInt(s);
+  }
   
   final public static float saltFrom(Object o) {
     return (((o.hashCode() % 13) / 13f) + 1) % 1;
   }
   
   final public static float range(float min, float max) {
+    if (max <= min) return min;
     return min + ((max - min) * GEN.nextFloat());
+  }
+  
+  final public static int range(int min, int max) {
+    if (max <= min) return min;
+    return min + GEN.nextInt(max + 1 - min);
   }
   
   final public static float rangeAvg(float min, float max, int n) {

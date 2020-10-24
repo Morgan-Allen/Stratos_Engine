@@ -22,6 +22,9 @@ public class BuildingForHunt extends Building {
     super(s);
   }
   
+  public void loadState(Session s) throws Exception {
+    super.loadState(s);
+  }
   
   public void saveState(Session s) throws Exception {
     super.saveState(s);
@@ -56,9 +59,6 @@ public class BuildingForHunt extends Building {
   }
   
 }
-
-
-
 
 
 

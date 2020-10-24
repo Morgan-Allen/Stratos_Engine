@@ -417,7 +417,7 @@ public class Test {
   
   
   static CityMap loadMap(CityMap oldMap, String filename) {
-    if (! Session.fileExists(filename)) {
+    if (! Assets.exists(filename)) {
       return oldMap;
     }
     try {

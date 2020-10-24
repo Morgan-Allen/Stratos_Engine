@@ -155,7 +155,7 @@ public class Building extends Element implements Pathing, Employer {
   
   
   boolean accessible() {
-    return complete() || type.worksBeforeBuilt;
+    return complete();
   }
   
   

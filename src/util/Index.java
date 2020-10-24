@@ -71,6 +71,7 @@ public class Index <T extends Index.Entry> implements Iterable <T> {
     */
   private void addEntry(T entry, String key) {
     if (asArray != null) {
+      I.reportStackTrace();
       I.complain(
         "ENTRIES CANNOT BE ADDED TO INDEX AFTER UNIQUE IDS HAVE BEEN ASSIGNED!"
       );

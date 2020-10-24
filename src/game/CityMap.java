@@ -53,7 +53,10 @@ public class CityMap implements Session.Saveable {
   
   
   public CityMap(Session s) throws Exception {
-    s.cacheInstance(this);
+    return;
+  }
+  
+  public void loadState(Session s) throws Exception {
     
     performSetup(s.loadInt());
     for (Coord c : Visit.grid(0, 0, size, size, 1)) {

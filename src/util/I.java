@@ -4,7 +4,6 @@
   *  for now, feel free to poke around for non-commercial purposes.
   */
 package util;
-
 import java.awt.*;
 import java.awt.image.*;
 import javax.swing.*;
@@ -186,6 +185,11 @@ public class I {
   }
   
   
+  public static String list(Series array) {
+    return list(array.toArray());
+  }
+  
+  
   
   /**  This one could use a little explanation.  Basically, the header gets
     *  printed first, the lineFeed gets stuck on the front of every subsequent
@@ -217,15 +221,23 @@ public class I {
 
     I.say(header);
     for (int i = 0; i < numRows; i++) {
-      I.say(lineFeed+""+padToLength(labels[i], maxLen)+": "+refers[i]);
+      I.say(lineFeed+""+pad(labels[i], maxLen)+": "+refers[i]);
     }
   }
   
   
-  public static String padToLength(String s, int toLength) {
+  public static String pad(String s, int toLength) {
     final StringBuffer b = new StringBuffer(s);
     for(int n = toLength; n-- > s.length();) b.append(' ');
     return b.toString();
+  }
+  
+  public static String pad(int n, int toLength) {
+    return pad(""+n, toLength);
+  }
+  
+  public static String pad(float n, int toLength) {
+    return pad(""+n, toLength);
   }
   
   
@@ -330,7 +342,7 @@ public class I {
     }
     
     
-    public void mouseClicked(MouseEvent arg0) {
+    public void mouseClicked(MouseEvent e) {
       this.isClicked = true;
     }
     
@@ -338,10 +350,10 @@ public class I {
       keysPressed.put(e.getKeyChar(), true);
     }
     
-    public void mouseEntered (MouseEvent arg0) {}
-    public void mouseExited  (MouseEvent arg0) {}
-    public void mousePressed (MouseEvent arg0) {}
-    public void mouseReleased(MouseEvent arg0) {}
+    public void mouseEntered (MouseEvent e) {}
+    public void mouseExited  (MouseEvent e) {}
+    public void mousePressed (MouseEvent e) {}
+    public void mouseReleased(MouseEvent e) {}
     
     public void keyPressed (KeyEvent e) {}
     public void keyReleased(KeyEvent e) {}

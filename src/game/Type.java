@@ -8,78 +8,13 @@ import java.lang.reflect.*;
 
 
 
-public class Type extends Index.Entry implements Session.Saveable {
+public class Type extends Constant {
   
   
   /**  Indexing, categorisation, spawning and save/load methods-
     */
-  final static int
-    IS_TRAIT       = -100,
-    IS_TERRAIN     = 0,
-    IS_FIXTURE     = 1,
-    IS_STRUCTURAL  = 2,
-    IS_GOOD        = 3,
-    IS_BUILDING    = 4,
-    IS_UPGRADE     = 5,
-    IS_CRAFTS_BLD  = 6,
-    IS_GATHER_BLD  = 7,
-    IS_WATER_BLD   = 8,
-    IS_TRADE_BLD   = 9,
-    IS_HOME_BLD    = 10,
-    IS_AMENITY_BLD = 11,
-    IS_COLLECT_BLD = 12,
-    IS_HUNTS_BLD   = 13,
-    IS_ARMY_BLD    = 14,
-    IS_WALLS_BLD   = 15,
-    IS_FAITH_BLD   = 16,
-    IS_ACTOR       = 17,
-    IS_PERSON_ACT  = 18,
-    IS_ANIMAL_ACT  = 19
-  ;
-  
-  final static Index <Type> INDEX = new Index();
-  
-  
   Type(Class baseClass, String ID, int category) {
-    super(INDEX, ID);
-    this.baseClass = baseClass;
-    this.category  = category ;
-  }
-  
-  
-  public static Type loadConstant(Session s) throws Exception {
-    return INDEX.loadEntry(s.input());
-  }
-  
-  
-  public void saveState(Session s) throws Exception {
-    INDEX.saveEntry(this, s.output());
-  }
-  
-  
-  Object generate() {
-    if (baseClass == null) {
-      return null;
-    }
-    try {
-      if (! Element.class.isAssignableFrom(baseClass)) return null;
-      final Constructor c = baseClass.getConstructor(Type.class);
-      return c.newInstance(this);
-    }
-    catch (NoSuchMethodException e) {
-      I.say(
-        "\n  WARNING: NO TYPE CONSTRUCTOR FOR: "+baseClass.getName()+
-        "\n  All Elements should implement a public constructor taking a Type "+
-        "\n  as the sole argument, or else their Type should override the "+
-        "\n  generate() method.  Thank you.\n"
-      );
-      return null;
-    }
-    catch (Exception e) {
-      I.say("ERROR INSTANCING "+baseClass.getSimpleName()+": "+e);
-      e.printStackTrace();
-      return null;
-    }
+    super(baseClass, ID, category);
   }
   
   

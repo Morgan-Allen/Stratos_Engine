@@ -35,6 +35,25 @@ public interface TileConstants {
     UNUSED = -1;
   
   final public static int
+    MASK_N    = 1 << N,
+    MASK_S    = 1 << S,
+    MASK_E    = 1 << E,
+    MASK_W    = 1 << W,
+    MASK_NE   = MASK_N  | MASK_E,
+    MASK_NW   = MASK_N  | MASK_W,
+    MASK_SE   = MASK_S  | MASK_E,
+    MASK_SW   = MASK_S  | MASK_W,
+    MASK_NS   = MASK_S  | MASK_N,
+    MASK_EW   = MASK_E  | MASK_W,
+    MASK_NSW  = MASK_NS | MASK_W,
+    MASK_NSE  = MASK_NS | MASK_E,
+    MASK_NEW  = MASK_N  | MASK_EW,
+    MASK_SEW  = MASK_S  | MASK_EW,
+    MASK_NSEW = MASK_NS | MASK_EW,
+    MASK_NONE = 0
+  ;
+  
+  final public static int
     PERIM_2_OFF_X[] = {
       -2, -1,  0,  1,
        2,  2 , 2,  2,
@@ -62,7 +81,6 @@ public interface TileConstants {
     "South", "Southwest", "West", "Northwest",
     "Centre"
   };
-  
 }
 
 

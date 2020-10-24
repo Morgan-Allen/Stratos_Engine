@@ -58,7 +58,10 @@ public class Task implements Session.Saveable {
   
   
   public Task(Session s) throws Exception {
-    s.cacheInstance(this);
+    return;
+  }
+  
+  public void loadState(Session s) throws Exception {
     
     actor     = (Actor   ) s.loadObject();
     origin    = (Employer) s.loadObject();

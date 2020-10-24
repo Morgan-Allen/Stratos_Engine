@@ -15,6 +15,13 @@ public class Tally <K> {
   final Table <K, Float> store = new Table <K, Float> ();
   
   
+  public static Tally with(Object... args) {
+    Tally t = new Tally();
+    t.setWith(args);
+    return t;
+  }
+  
+  
   public Tally setWith(Object... args) {
     Object split[][] = Visit.splitByModulus(args, 2);
     for (int i = split[0].length; i-- > 0;) {
@@ -75,6 +82,26 @@ public class Tally <K> {
   public K[] keysToArray(Class keyClass) {
     final K array[] = (K[]) Array.newInstance(keyClass, store.size());
     return store.keySet().toArray(array);
+  }
+  
+  
+  public K[] positiveKeys(Class keyClass) {
+    Batch <K> pos = new Batch();
+    for (K k : keys()) {
+      float v = valueFor(k);
+      if (v > 0) pos.add(k);
+    }
+    return pos.toArray(keyClass);
+  }
+  
+  
+  public K[] negativeKeys(Class keyClass) {
+    Batch <K> neg = new Batch();
+    for (K k : keys()) {
+      float v = valueFor(k);
+      if (v < 0) neg.add(k);
+    }
+    return neg.toArray(keyClass);
   }
   
   

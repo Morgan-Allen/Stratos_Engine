@@ -207,6 +207,20 @@ public class Box2D {
   }
   
   
+  public void scaleX(float s) {
+    xpos *= s;
+    xdim *= s;
+    xmax *= s;
+  }
+  
+  
+  public void scaleY(float s) {
+    ypos *= s;
+    ydim *= s;
+    ymax *= s;
+  }
+  
+  
   public Vec2D centre() {
     return new Vec2D().set((xpos + xmax) / 2, (ypos + ymax) / 2);
   }

@@ -575,7 +575,7 @@ public class GameConstants {
     HOUSE         = new BuildType(BuildingForHome.class   , "type_house"        , IS_HOME_BLD   ),
     HOUSE_T1      = new BuildType(BuildingForHome.class   , "type_house_tier1"  , IS_UPGRADE    ),
     HOUSE_T2      = new BuildType(BuildingForHome.class   , "type_house_tier2"  , IS_UPGRADE    ),
-    SWEEPER       = new BuildType(BuildingForCollect.class, "type_sweeper"      , IS_COLLECT_BLD),
+    SWEEPER       = new BuildType(BuildingForCollect.class, "type_sweeper"      , IS_AMENITY_BLD),
     BASIN         = new BuildType(BuildingForWater.class  , "type_basin"        , IS_WATER_BLD  ),
     SCHOOL        = new BuildType(BuildingForAmenity.class, "type_public_school", IS_AMENITY_BLD),
     BALL_COURT    = new BuildType(BuildingForAmenity.class, "type_ball_court"   , IS_AMENITY_BLD),
@@ -591,7 +591,7 @@ public class GameConstants {
     
     MARKET        = new BuildType(BuildingForCrafts.class , "type_market"       , IS_CRAFTS_BLD ),
     PORTER_POST   = new BuildType(BuildingForTrade.class  , "type_porter_post"  , IS_TRADE_BLD  ),
-    COLLECTOR     = new BuildType(BuildingForCollect.class, "type_collector"    , IS_COLLECT_BLD),
+    COLLECTOR     = new BuildType(BuildingForCollect.class, "type_collector"    , IS_AMENITY_BLD),
     ECONOMIC_BUILDINGS[] = { MARKET, PORTER_POST, COLLECTOR },
     
     HUNTER_LODGE  = new BuildType(BuildingForHunt.class   , "type_hunter_lodge" , IS_HUNTS_BLD  ),

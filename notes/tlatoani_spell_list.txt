@@ -1,0 +1,253 @@
+
+
+
+
+QUETZALCOATL:
+
+Favoured Ethics:   Knowledge & Mercy, Animal Offerings
+Associates:        Yacetecuhtli, Patecatl, Xochiquetzal, Ehecatl
+
+Sorcery Effects:
+  White Wound:     Transforms allies' injuries to fatigue.
+  Far Seeing:      Illuminates distant terrain or far-away cities.
+  Long Sleep:      Extends your lifespan by entering a dormant state.
+  Serpent Nagual:  A guardian spirit defends your city.
+
+Passive Bonuses:
+  Master of Lore:  Improves skill of doctors, scholars and priests.
+  Find Chosen:     Improves chance of hiring skilled workers and advisors.
+  Guiding Star:    Improves astrology and divination outcomes.
+  Swift Wind:      Improves speed of long-distance travel and sailing.
+  
+  Aspect of Knowledge
+  Aspect of Winds
+  Aspect of Mercy
+  Aspect of Light
+
+
+
+TLALOC:
+
+Favoured Ethics:   Nature & Growth, Child Offerings
+Associates:        Chalchiutlecue, Xochiquetzal, Chicomecoatl
+
+Sorcery Effects:
+  Green Flood:     Downpour irrigates crops, risks flooding.
+  Plague:          Inflicts a sickness that can spread indefinitely.
+  Call Lightning:  Inflicts high damage on enemies, bonus if raining.
+  Caiman Nagual:   A guardian spirit defends your city.
+
+Passive Effects:
+  Clouds' Bounty:  Improves yield from fisheries, crops and forestry.
+  Eternal Life:    Jade & gems have added value & improve health.
+  Cleansing:       Improves sanitation and reduces child mortality.
+  Clear Running:   Hastens travel by lakes, canals or seas.
+  
+  Aspect of Fertility
+  Aspect of Jade
+  Aspect of Clarity
+  Aspect of Disease
+
+
+
+XIPE TOTEC:
+
+Favoured Ethics:   Wealth & Growth, Mutilation & Warfare
+Associates:        Coatlicue, Centeotl, Chicomecoatl, Tlazolteotl
+
+Sorcery Effects:
+  Red Rust:        Destroys bronze & iron armaments.
+  Hand of Decay:   Inflicts disease and aging on enemies.
+  Renewal:         Returns the recently slain from death.
+  Golem Nagual:    A guardian spirit defends your city.
+
+Passive Bonuses:
+  Telluric Arts:   Improves skill of potters, smiths and goldsmiths.
+  Ripening:        Hastens maturation of crops, especially maize.
+  Lead to Gold:    Converts a % of all non-precious metals to gold.
+  Earth to Earth:  Soil fertility improves after battles.
+  
+  Aspect of Growth
+  Aspect of Crafts
+  Aspect of Earth
+  Aspect of Gold
+
+
+
+TEZCATLIPOCA:
+
+Favoured Ethics:   Power & Freedom, Volunteer Sacrifice
+Associates:        Tlazolteotl, Itztli, Coyolxauhqui, Mixcoatl
+
+Sorcery Effects:
+  Smoke & Mirrors: Allows troops to move undetected, bonus by night.
+  Reflection:      Creates a doppelganger envoy as a spy.
+  Seed of Enmity:  Increase chance of revolt & mutiny among foes.
+  Jaguar Nagual:   A guardian spirit defends your city.
+
+Passive Bonuses:
+  Glamour & Charm: Bonus to festivals and entertainment venues.
+  Black Fang:      Bonus to mining, crafting and use of obsidian.
+  Gift of Chance:  Improves random outcomes, especially for the poor.
+  Seal the Pact:   Bonus to all Sorcery effects after sacrifice.
+  
+  Aspect of Obsidian
+  Aspect of Chance
+  Aspect of Sorcery
+  Aspect of Beauty
+
+
+
+MICTECACEHUATL:
+
+Favoured Ethics:   Ancestry, Grave Goods & Cannibalism
+Associates:        Coatlicue, Xolotl, Coyolxauhqui, Itzapapalotl
+
+Sorcery Effects:
+  Vengeful Soul:   Summon fallen as avenging spirits.
+  Gate of Mictlan: Underworld passage allows quest to retrieve dead.
+  Swallow Sun:     Turns day into night, inflicts fear.
+  Spider Nagual:   A guardian spirit defends your city.
+
+Passive Bonuses:
+  Consumption:     All meat in diet counts toward sacrifice.
+  Grave Goods:     Boost morale from tombs/memorials & Day of Dead.
+  Ancestral Voice: Gain a skilled family advisor.
+  Transmigration:  Animal growth improved by mortality.
+  
+  Aspect of Consumption
+  Aspect of Ancestry
+  Aspect of Burial
+  Aspect of Return
+
+
+
+HUITZILIPOCHTLI:
+
+Favoured Ethics:   Bravery, Warfare & Captive Sacrifice
+Associates:        Tonatiuh, Xiutecuhtli, Toci Quilaztli
+
+Sorcery Effects:
+  Blue Serpent:    Consuming flame jumps between nearby enemies.
+  Rising Sun:      Clears up rainfall or darkness, stuns foes.
+  Drought:         Inflicts famine and thirst on a rival city.
+  Eagle Nagual:    A guardian spirit defends your city.
+
+Passive Bonuses:
+  Hearth Flower:   Bonus to cottage industries, including child-rearing.
+  Air of Command:  Raises loyalty of allies and vassals, especially Mexica.
+  Fire of Wrath:   Boosts morale & skill of allies when attacked.
+  March of Days:   Sacrifices marking solar calendar stave off End Times.
+  
+  Aspect of Birth
+  Aspect of Command
+  Aspect of Wrath
+  Aspect of Time
+
+
+
+RATINGS SYSTEM
+  
+  Major Ethics:
+  Power   vs. Mercy      Victory in battle   vs.  Minimising casualties
+  Freedom vs. Order      Independence        vs.  Obedience & structure
+  Nature  vs. Man        Untamed wilderness  vs.  Large urban populations
+  
+  Enviromental Traits:
+  Water   vs. Fire       Lakes & rivers vs. Desert
+  Earth   vs. Air        High places vs. Low places
+  Day     vs. Night      Day vs. Night months, Fog-of-war
+  
+  TZ:  Power, Freedom, Air, Night
+  QZ:  Order, Mercy, Air, Day
+  TL:  Nature, Water, Freedom
+  XT:  Nature, Earth, Building
+  HZ:  Power, Fire
+  MC:  Earth, Dark
+
+
+
+Minor Deities/Associates/Aspects
+
+Big ones are
+  Night (Coyolxauhqui, Itzapapalotl) and Day (Tonatiuh & Xiutecuhtli)
+  Death (Xolotl) and Life (Xochiquetzal & Chicomecoatl)
+  Elements (Chalchiutlicue & Ehacatl)
+  Nature & Hunting (Mixcoatl & Tepeyollotl, the 400 Rabbits)
+  Purity (Patecatl) and Filth (Tlazolteotl)
+  Ometecuhtli and Omecihuatl (Creation)
+
+
+
+Tonatiuh-        the older sun god
+Xiutecuhtli-     fire, the solar calendar & new century ceremonies
+Zacatzontli-     patron of day travel/eagles
+Piltzintecuhtli- patron of the day and healing
+Chantico-        goddess of the hearth, rel Toci/Quilaztli?
+Nanahuatzin-     sacrificed self to become son, aspect of Xolotl?
+
+Yacetecuhtli-    writing & accounting, trade & merchants
+Patecatl-        healing, drugs & remedies, physicians & scholars
+Ixtlilton-       another god of healing, related to night, friend of Xochipilli
+Chimalma-        mother of Quetzalcoatl, catches arrows.
+
+Mixcoatl-        hunter, warrior & animal shapeshifter
+Opochtli-        possible alias for Mixcoatl
+Mayahuel-        maguey plants, mother of the 400 rabbits, rel Xochiquetzal?
+Tepoztecatl-     one of the 400.  Tlilhua & Toltecatl are others.
+The 400 Rabbits- intoxication and excess.
+Huehuecoyotl-    old coyote, tricker god, friend of Xolotl
+
+Tepeyollotl-     jaguar incarnation of Tz, mountain heart
+Huexolotl-       turkey incarnation of Tz, aka Chalchiuhtotolin
+Itztli-          sacrifice & obsidian, war, hard justice
+Itztlacoliuhqui- winter, frost, killing
+
+Xochiquetzal-    beauty, sensation & luxury crafts, homosexuality
+Xochipilli-      male version of Xochiquetzal
+Chicomecoatl-    maize, agriculture & rebirth
+Chalchiutlicue-  lakes, rivers & fishing, birth & chastity
+Centeotl-        maize god
+
+Itzapapalotl-    'obsidian butterfly'- also eclipses
+Coyolxauhqui-    the moon & eclipses, stars & milky way
+Citlalicue-      another creator of stars
+Xolotl-          misfortune and deformity, protecting the dead
+Metztli-         moon goddess, possibly same as Coyolxauhqui
+Tecciztecatl-    male moongod
+
+The Earth Goddesses:
+Coatlicue-       the consuming earth, caves & quakes, death & decay
+Toci Quilaztli-  hearth & home, pregnancy & female bravery
+Tlaltecuhtli-    earth god/dess
+Tlazolteotl-     filth & purity, sin & confession, saunas & whoring
+
+The Creator Gods:
+Ometecuhtli and Omecihuatl
+
+
+Lords of the Night
+  Centeotl Chalchiuhtlicue
+  Mictlantecuhtli Piltzintecuhtli
+  Tepeyollotl Tezcatlipoca
+  Tlaloc Tlazolteotl Xiuhtecuhtli
+
+Lords of the Day
+  Centeotl Chalchiuhtlicue
+  Citlalicue Mictecacihuatl
+  Mictlantecuhtli Quetzalcoatl
+  Tezcatlipoca Tlahuizcalpantecuhtli
+  Tlaloc Tlaltecuhtli Tlazolteotl
+  Tonatiuh Xiuhtecuhtli
+
+
+Creatures & Beings:
+Cipactli-        the dragon of chaos.
+Chaneque-        quite similar to faeries.
+Ahuizotl-        aquatic monster.
+Quinametzin-     similar to nephilim.
+Cihuateteo-      vengeful ghosts of women.
+Tzitzimime-      female star demons.
+
+
+

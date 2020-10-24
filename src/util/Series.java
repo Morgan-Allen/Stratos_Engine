@@ -17,5 +17,8 @@ public interface Series <T> extends Iterable <T> {
   
   Object[] toArray();
   T[] toArray(Class typeClass);
+  
   T atIndex(int index);
+  int indexOf(T t);
+  
 }

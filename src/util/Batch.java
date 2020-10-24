@@ -67,7 +67,7 @@ public class Batch <K> implements Series <K> {
     while (true) {
       if (i < sectorSize) return (K) sector[i];
       i -= sectorSize;
-      sector = (Object[]) sector[i];
+      sector = (Object[]) sector[sectorSize];
     }
   }
   

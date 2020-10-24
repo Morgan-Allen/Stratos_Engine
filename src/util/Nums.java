@@ -152,16 +152,23 @@ public final class Nums {
     if (value < 0) return 0 - round(0 - value, unit, false);
     else return round(value, unit, false);
   }
+
+  
+  public static int[] range(int min, int maxInclusive) {
+    int span = maxInclusive + 1 - min, result[] = new int[span];
+    for (int i = 0; i < span; i++) result[i] = i + min;
+    return result;
+  }
   
   
   
   /**  Sampling methods for within 2D arrays of data-
     */
   public static float sampleMap(
-    int mapSize, byte vals[][], float mX, float mY
+    int sizeX, int sizeY, byte vals[][], float mX, float mY
   ) {
-    mX *= (vals.length - 1) * 1f / mapSize;
-    mY *= (vals.length - 1) * 1f / mapSize;
+    mX *= (vals.length - 1) * 1f / sizeX;
+    mY *= (vals.length - 1) * 1f / sizeY;
     final int vX = (int) mX, vY = (int) mY;
     final float rX = mX % 1, rY = mY % 1;
     return
@@ -173,10 +180,10 @@ public final class Nums {
   
   
   public static float sampleMap(
-    int mapSize, float vals[][], float mX, float mY
+    int sizeX, int sizeY, float vals[][], float mX, float mY
   ) {
-    mX *= (vals.length - 1) * 1f / mapSize;
-    mY *= (vals.length - 1) * 1f / mapSize;
+    mX *= (vals.length - 1) * 1f / sizeX;
+    mY *= (vals.length - 1) * 1f / sizeY;
     final int vX = (int) mX, vY = (int) mY;
     final float rX = mX % 1, rY = mY % 1;
     return

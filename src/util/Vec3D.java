@@ -13,8 +13,14 @@ import java.io.*;
   */
 public class Vec3D {
   
-	private static Vec3D temp = new Vec3D();
-	
+  private static Vec3D temp = new Vec3D();
+  
+  final public static Vec3D
+    temp0 = new Vec3D(),
+    temp1 = new Vec3D(),
+    temp2 = new Vec3D()
+  ;
+  
   public float x, y, z;
   
   

@@ -30,8 +30,22 @@ public abstract class Flood <T extends Flood.Fill> {
   }
   
   
+  public T[] covered(Class typeClass) {
+    return covered.toArray(typeClass);
+  }
+  
+  
+  protected int numCovered() {
+    return covered.size();
+  }
+  
+  
   protected void tryAdding(T item) {
-    if (item == null || item.flaggedWith() != null) return;
+    if (item == null) return;
+    
+    final Object flag = item.flaggedWith();
+    if (flag == this) return;
+    
     covered.add(item);
     frontier.add(item);
     item.flagWith(this);

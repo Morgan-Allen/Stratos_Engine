@@ -1,0 +1,157 @@
+
+
+TLATOANI DESIGN NOTES
+  
+  INDUSTRIAL
+    Chinampas:    Maize/Beans/Squash, Tomatoes/Chili, Fruit (Dozens), Turkey.
+    Plantations:  Maguey, Cotton, Cocoa, Rubber.
+    Wilderness:   Timber, Reeds, Fish/Game, Feathers.
+    Quarries:     Clay, Lime, Adobe, Obsidian, Copper/Tin/Lead/Gold, Jade.
+    Weaver, Amate Press, Wood Carver, Pulque Brewer.
+    Kiln, Goldsmith, Obsidian Cleaver, Jade Dresser.
+  
+  INFRASTRUCTURE
+    Marketplace, Porter House, Granary.
+    Slave Pen (Tlacotin), Collector (Calpixque), Mason (Tetzotzonque?)
+    Latrines, Basins, Cisterns & Aqueducts.
+    Roads, Canals & Causeways.
+  
+  RESIDENTIAL
+    Common housing x3.   (Macehualtin)
+    Merchant housing x3. (Pochteca)
+    Noble housing x3.    (Pipiltin)
+    Sauna, Ball Court, Public Square, Plaza.
+    Public School (Telpochcalli), Academy (Calmecac).
+  
+  PALACE
+    Walls & Platforms.
+    House of Healing, House of Song, Library, Kitchens.
+    Menagerie, Gardens, Pools & Fountains, Sculpture & Friezes.
+    Women's Quarters, Calpulli, Inner Palace.
+  
+  MILITARY
+    Warrior Barracks.
+    Spy Quarters.
+    Hunter Lodge.
+    Sorceror Circle.
+    Jaguar Knight Command.
+    Eagle Knight Command.
+    Fortifications.
+  
+  RELIGIOUS
+    Temple to Quetzalcoatl.
+    Temple to Huitzilipochtli.
+    Temple to Tlaloc.
+    Temple to Xipe Totec.
+    Temple to Tezcatlipoca.
+    Temple to Mictlantecuhtli.
+    Aspect Shrines.
+  
+  
+  
+  Other features:
+    More testing for gradual city-construction while turning a profit.
+    More tests for fog, hunger, and night-day fx.
+    More realistic mining/quarrying.
+    A distinct 'planning mode' for construction projects.
+    
+    Exploring & hunting.
+    Temples & Temple Spells, Calendar & Festivals.
+    Trials- offering 'prizes' to complete a task.
+    Socialising & negotiation- including within council or abroad.
+    
+    Civic ratings- conquest, wealth, nature, knowledge, etc.
+    Roads & Bridges, Irrigation & Aqueducts, Walls & Gates.
+    Family household and advisors.  Gaining XP/skills over time.
+    Unhappy citizens- petty crime, theft, revolts.
+    
+    Better tech for pathfinding & demand queries.
+  
+  
+  Hunting, Trials, Warfare and Promotion
+    
+    4 basic stats:
+      combat-skills for each weapon type    [fitness]
+      scholar-skills for each god or art    [intellect]
+      craft-skills for each item-type       [diligence]
+      dialog-skills for each tribe or class [charm]
+      ranged vs. melee, evasion & resistance
+      damage vs. armour, speed & sight-range
+      male vs. female, age & race, orientation & presentation
+    
+    * Hunting is undertaken spontaneously by off-duty nobles (including
+      knights,) to hunt beasts or explore forest.
+    * Trials are used to offer a prize for completing a specific task, such as
+      exploration, single combat, etc.  Not something you'd use ane entire army
+      for- more like a sporting event to deal with a local nuisance, boost
+      morale, and single out champions for recruitment.  Like a tourney.
+    * Finally warfare (and variations like garrisoning, escort and patrol duty,
+      or even diplomatic envoys,) is used for other cities or civil defence.
+    
+    6 martial classes- Knight, Spy, Hunter, Sorcerer, Eagle K, Jaguar K.
+    6 priest classes-  Tlaloc, Quetzal, Tezcat, Mictec, Huitzil, Totec.
+    6 'races'-         Aztlan, Chichimec, Maya, Toltec, Olmec, Inca.
+  
+  
+  The Calpulli:
+    Huey Tlatoani- Emperor or High King
+    Your Senate or Advisors.  Altepetl is the state.
+      First Wife & Heirs-    argue for your dynasty
+      Physicians & Scholars- argue for health, science & building
+      Commanders & Spies-    argue for the state's security & prestige
+      Priests & Sorcerors-   argue for:
+        [Order, Chaos, Life, Death][Earth, Air, Water, Fire]
+  
+  
+  Wildlife and Naguals:
+    Tezcatlipoca:     Jaguar, Turkeys, Tapir
+    Tlaloc:           Crocodiles, Turtles & Fish, Arrow Frogs
+    Mictecacehuatl:   Spiders & Worms, Axolotl
+    Quetzalcoatl:     Snakes, Quetzal & Quail
+    Huitzilipochtli:  Eagles, Dogs & Coyote
+    Xipe Totec:       Armadillo, Peccaries, Deer & Rabbits.
+  
+  
+  Calendar:
+    18 months of 20 'Days' per year 
+    Have 'night' synchronise with the lunar calendar- 14 days of light and dark
+    in alternation.  That gives you a plausible time-scale for sleeping, chats,
+    et cetera.  And then the sequences of festivals can punctuate these
+    environmental differences.
+
+
+
+
+GET IN TOUCH WITH:
+  http://www.paquiliztli.com/contact
+  http://tecpaocelotl.webs.com
+  http://www.zoesaadia.com/never-leave-in-hunger/
+  http://americanhistory.si.edu/collections/search/object/nmah_835166
+  http://ask.metafilter.com/23323/What-is-Cortes-reputation-in-modern-Mexico
+  http://wideurbanworld.blogspot.ie/2013/03/teotihuacan-ancient-mesoamerican.html
+  http://tarlton.law.utexas.edu/aztec-and-maya-law/texcocan-law
+  https://www.jstor.org/stable/43857654?seq=1#page_scan_tab_contents
+  
+  Georgeous art references here:
+  https://www.pinterest.ie/pin/468304061236843164/?lp=true
+  
+  Rather fascinating article here:
+  www.scielo.org.mx/scielo.php?script=sci_arttext&pid=S0071-16752012000100005
+  
+  Used cocoa beans as small change, cotton sheets (quachtli) == 300 beans,
+  and axe-shaped copper tokens known as hoe money or tajaderos in spanish.
+  (Don't know what the nahuatl name is- find out?)
+  
+  Masonic order named after Quetzalcoatl!  Ha!
+  https://en.wikipedia.org/wiki/Order_of_Quetzalcoatl
+
+
+C++/DIRECTX PROGRAMMING REFS:
+  https://docs.microsoft.com/en-us/windows/uwp/gaming/setting-up-directx-resources
+
+
+
+
+
+
+

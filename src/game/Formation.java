@@ -67,7 +67,10 @@ public class Formation implements
   
   
   public Formation(Session s) throws Exception {
-    s.cacheInstance(this);
+    return;
+  }
+  
+  public void loadState(Session s) throws Exception {
     
     objective     = s.loadInt ();
     timeTermsSent = s.loadInt ();

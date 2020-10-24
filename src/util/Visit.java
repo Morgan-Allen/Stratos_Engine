@@ -173,6 +173,12 @@ public abstract class Visit <T> implements Iterable <T>, Iterator <T> {
   }
   
   
+  public static Object first(Object o[]) {
+    if (o == null || o.length == 0) return null;
+    return o[0];
+  }
+  
+  
   public static Object last(Object o[]) {
     if (o == null || o.length == 0) return null;
     return o[o.length - 1];
